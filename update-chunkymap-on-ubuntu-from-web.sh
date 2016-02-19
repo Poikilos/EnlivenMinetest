@@ -2,8 +2,8 @@
 cd ~
 rm -Rf ~/minetest-stuff/minetest-chunkymap
 CHUNKYMAP_INSTALLER_DIR=~/Downloads/minetest-chunkymap
-if [ ! -d "~/Downloads" ]; then
-	mkdir "~/Downloads"
+if [ ! -d "$HOME/Downloads" ]; then
+	mkdir "$HOME/Downloads"
 fi
 
 #cd $CHUNKYMAP_INSTALLER_DIR

@@ -2,8 +2,8 @@
 cd ~
 rm -Rf ~/minetest-stuff/minetest-chunkymap
 CHUNKYMAP_INSTALLER_DIR=~/Downloads/minetest-chunkymap
-if [ ! -d "~/Downloads" ]; then
-	mkdir "~/Downloads"
+if [ ! -d "$HOME/Downloads" ]; then
+	mkdir "$HOME/Downloads"
 fi
 
 cd ~/Downloads
@@ -22,5 +22,5 @@ chmod +x "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-on-ubuntu-from-web.sh"
 
 #mv -f "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh" "~/Downloads/"
-mv -f "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-on-ubuntu-from-web.sh" "~/Downloads/"
+mv -f "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-on-ubuntu-from-web.sh" "~/"
 
