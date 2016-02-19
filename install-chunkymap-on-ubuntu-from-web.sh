@@ -6,7 +6,7 @@ if [ ! -d "$HOME/Downloads" ]; then
 	mkdir "$HOME/Downloads"
 fi
 
-chmod +x update-chunkymap-installer-only.sh
+#chmod +x update-chunkymap-installer-only.sh
 
 #./update-chunkymap-installer-only.sh:
 cd ~/Downloads
@@ -23,9 +23,11 @@ mv minetest-chunkymap-master "$CHUNKYMAP_INSTALLER_DIR"
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh"
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-on-ubuntu-from-web.sh"
+chmod +x "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu-from-web.sh"
 
 #mv -f "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh" "~/Downloads/"
-mv -f "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-on-ubuntu-from-web.sh" "~/Downloads/"
+mv -f "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-on-ubuntu-from-web.sh" "$HOME/Downloads/"
+mv -f "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu-from-web.sh" "$HOME/Downloads/"
 
 
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh"
