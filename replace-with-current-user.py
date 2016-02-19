@@ -24,7 +24,7 @@ if "\\" not in home_minetest_chunkymap_path:
                     line = ins.readline()
                     if line:
                         line = line.replace("/home/owner", home_path)
-                        outs.write(line, "\n")
+                        outs.write(line+"\n")
                 outs.close()
                 os.remove(temp_path)
                 ins.close()

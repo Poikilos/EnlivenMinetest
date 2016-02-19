@@ -6,6 +6,7 @@ rm master.zip
 wget https://github.com/expertmm/minetest-chunkymap/archive/master.zip
 rm -f minetest-chunkymap.zip
 mv master.zip minetest-chunkymap.zip
+rm -Rf minetest-chunkymap-master
 unzip minetest-chunkymap.zip
 #mv minetest-chunkymap-master minetest-chunkymap
 rm -Rf "$CHUNKYMAP_INSTALLER_DIR"
