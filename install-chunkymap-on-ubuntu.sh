@@ -1,10 +1,15 @@
 #!/bin/sh
-CHUNKYMAP_INSTALLER_DIR=~/minetest-stuff/minetest-chunkymap
+cd ~
+rm -Rf ~/minetest-stuff/minetest-chunkymap
+CHUNKYMAP_INSTALLER_DIR=~/Downloads/minetest-chunkymap
+if [ ! -d "~/Downloads" ]; then
+	mkdir "~/Downloads"
+fi
 
 MINETEST_UTIL=$HOME/minetest/util
 CHUNKYMAP_DEST=$MINETEST_UTIL
 
-#cd ~
+#cd ~/Downloads
 #rm -f ~/minetestmapper-numpy.py
 #wget https://github.com/spillz/minetest/raw/master/util/minetestmapper-numpy.py
 #since colors.txt is in ~/minetest/util:
@@ -22,7 +27,7 @@ chmod +x "$CHUNKYMAP_DEST/chunkymap-cronjob"
 cp -f "$CHUNKYMAP_INSTALLER_DIR/set-minutely-crontab-job.sh" "$CHUNKYMAP_DEST/"
 chmod +x "$CHUNKYMAP_DEST/set-minutely-crontab-job.sh"
 cd "$CHUNKYMAP_INSTALLER_DIR"
-python replace-with-current-user.py
+python replace-with-current-user.py  # the py file only manipulates the minetest/util folder
 
 sudo apt-get install python-numpy python-pil
 
