@@ -1,11 +1,9 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-# This program is free software. It comes without any warranty, to
+# minetestmapper-numpy.py is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
-# and/or modify it under the terms of the Do What The Fuck You Want
-# To Public License, Version 2, as published by Sam Hocevar. See
-# COPYING for more details.
+# and/or modify it under the terms of minetestmapper-numpy LICENSE available here: https://github.com/spillz/minetest/blob/master/util/minetestmapper-numpy.py
 
 # Made by Jogge, modified by celeron55
 # 2011-05-29: j0gge: initial release
