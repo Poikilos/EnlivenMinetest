@@ -33,7 +33,7 @@ This program comes without any warranty, to the extent permitted by applicable l
 	http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy  
 	then:  
 	cd to the folder where you downloaded the whl file  
-	C:\python27\python -m pip install "numpy-1.10.4+mkl-cp27-cp27m-win32.whl"  
+		`C:\python27\python -m pip install "numpy-1.10.4+mkl-cp27-cp27m-win32.whl"`  
 	(but put your specific downloaded whl file instead)  
 	* Pillow (instead of PIL (Python Imaging Library) which is a pain on Windows): there is a PIL installer wheel for Python such as 2.7 here:  
 	http://www.lfd.uci.edu/~gohlke/pythonlibs/  
