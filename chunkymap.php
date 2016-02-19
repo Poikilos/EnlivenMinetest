@@ -50,6 +50,19 @@ function endsWith($haystack, $needle) {
     return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);
 }
 
+function is_int($val) {
+	$result = true;
+	$int_chars="0123456789-";
+	for ($i=0; $i<strlen($val); $i++) {
+		$digit_index = strpos($int_chars, substr($val, $i, 1));
+		if ($digit_index===false) {
+			$result = false;
+			break;
+		}
+	}
+	return $result;
+}
+
 function echo_chunkymap_table($center_x, $center_z, $zoom_min_1_max_100) {
 	global $chunkymapdata_path;
 	global $map_dict;
@@ -61,14 +74,64 @@ function echo_chunkymap_table($center_x, $center_z, $zoom_min_1_max_100) {
 	$x_opener="chunk_x";
 	$z_opener="z";
 	$dot_and_ext = ".png";
-	$x = $map_dict["chunkx_min"];
-	$z = $map_dict["chunkz_min"];
-	$x_count = $map_dict["chunkx_max"] - $map_dict["chunkx_min"]
-	$z_count = $map_dict["chunkz_max"] - $map_dict["chunkz_min"]
+	$chunkx_min = 0;
+	$chunkz_min = 0;
+	$chunkx_max = 0;
+	$chunkz_max = 0;
+	if ($map_dict != null) {
+		$chunkx_min = $map_dict["chunkx_min"];
+		$chunkz_min = $map_dict["chunkz_min"];
+		$chunkx_max = $map_dict["chunkx_max"];
+		$chunkz_max = $map_dict["chunkz_max"];
+	}
+	else {
+		//NOTE: no need to detect range if using $map_dict
+		$chunkz_max = 0;
+		$x_min = 0;
+		$z_min = 0;
+		$z_max = 0;
+		if ($handle = opendir($chunkymapdata_path)) {
+			while (false !== ($file = readdir($handle))) {
+				if (substr($file, 0, 1) != ".") {
+					$file_lower = strtolower($file);
+					if (endsWith($file_lower, $dot_and_ext) and startsWith($file_lower, $x_opener)) {
+						$z_opener_index = strpos($file_lower, $z_opener, strlen($x_opener));
+						if ($z_opener_index !== false) {
+							$x_len = $z_opener_index - strlen($x_opener);
+							$z_len = strlen($file_lower) - strlen($x_opener) - $x_len - strlen($z_opener) - $dot_and_ext;
+							$x = substr($file_lower, strlen($x_opener), $x_len);
+							$z = substr($file_lower, $z_opener_index + strlen($z_opener), $z_len);
+							if (is_int($x) and is_int($z)) {
+								if ($x<$chunkx_min) {
+									$chunkx_min=(int)$x;
+								}
+								if ($x>$chunkx_max) {
+									$chunkx_max=(int)$x;
+								}
+								if ($z<$chunkz_min) {
+									$chunkz_min=(int)$z;
+								}
+								if ($z>$chunkz_max) {
+									$chunkz_max=(int)$z;
+								}
+							}
+							else {
+								echo "misnamed chunk tile image '$file' had coordinates ".$x.",".$z." for x,z.";
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	$x = $chunkx_min;
+	$z = $chunkz_min;
+	$x_count = $chunkx_max - $chunkx_min;
+	$z_count = $chunkz_max - $chunkz_min;
 	echo "<table border=\"0\">";
-	while ($z <= $map_dict["chunkz_max"]) {
+	while ($z <= $chunkz_max) {
 		echo "  <tr>";
-		while ($x <= $map_dict["chunkx_max"]) {
+		while ($x <= $chunkx_max) {
 			echo "    <td>";
 			$chunk_luid = "x".$x."z".$z;
 			$chunk_img_name = $x_opener.$x.$z_opener.$z."$dot_and_ext";
@@ -84,28 +147,5 @@ function echo_chunkymap_table($center_x, $center_z, $zoom_min_1_max_100) {
 		$z++;
 	}
 	echo "</table>";
-	//NOTE: no need to detect range since using $map_dict
-	/*
-	$x_max = 0;
-	$x_min = 0;
-	$z_min = 0;
-	$z_max = 0;
-	if ($handle = opendir($chunkymapdata_path)) {
-		while (false !== ($file = readdir($handle))) {
-			if (substr($file, 0, 1) != ".") {
-				$file_lower = strtolower($file);
-				if (endsWith($file_lower, $dot_and_ext) and startsWith($file_lower, $x_opener)) {
-					$z_opener_index = strpos($file_lower, $z_opener, strlen($x_opener));
-					if ($z_opener_index !== false) {
-						$x_len = $z_opener_index - strlen($x_opener);
-						$z_len = strlen($file_lower) - strlen($x_opener) - $x_len - strlen($z_opener) - $dot_and_ext;
-						$x = substr($file_lower, strlen($x_opener), $x_len);
-						$z = substr($file_lower, $z_opener_index + strlen($z_opener), $z_len);
-					}
-				}
-			}
-		}
-	}
-	*/
 }
 ?>

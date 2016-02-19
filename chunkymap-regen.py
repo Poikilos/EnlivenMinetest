@@ -114,8 +114,26 @@ def get_dict_from_conf_file(path,assignment_operator="="):
         ins.close()
     return results
 
-if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
 
+def deny_http_access(dir_path):
+    htaccess_name = ".htaccess"
+    htaccess_path = os.path.join(dir_path, htaccess_name)
+    outs = open(htaccess_path)
+    outs.write("IndexIgnore *"+"\n")
+    outs.write("<Files .htaccess>"+"\n")
+    outs.write("order allow,deny"+"\n")
+    outs.write("deny from all"+"\n")
+    outs.write("</Files>"+"\n")
+    outs.write("<Files *.php>"+"\n")
+    outs.write("order allow,deny"+"\n")
+    outs.write("deny from all"+"\n")
+    outs.write("</Files>"+"\n")
+    outs.close()
+    
+
+if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
+    
+    
     chunkymap_data_path=os.path.join(website_root,"chunkymapdata")
     yaml_name = "generated.yml"
     yaml_path = os.path.join(chunkymap_data_path, yaml_name)
@@ -123,6 +141,14 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
         os.mkdir(chunkymap_data_path)
     chunkymap_players_name = "players"
     chunkymap_players_path = os.path.join(chunkymap_data_path, chunkymap_players_name)
+    
+    htaccess_path = os.path.join(chunkymap_data_path,".htaccess")
+    if not os.path.isfile(htaccess_path):
+        deny_http_access(chunkymap_data_path)
+    htaccess_path = os.path.join(chunkymap_players_path,".htaccess")
+    if not os.path.isfile(htaccess_path):
+        deny_http_access(chunkymap_players_path)
+    
     if not os.path.isdir(chunkymap_players_path):
         os.mkdir(chunkymap_players_path)
     players_path = os.path.join(world_path, "players")
@@ -263,6 +289,7 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
                                 print "Could not finish deleting '"+dest_png_path+"'"
                             try:
                                 os.rename(png_path, dest_png_path)
+                                print("(moved to '"+dest_png_path+"')")
                             except:
                                 print "Could not finish moving '"+png_path+"' to '"+dest_png_path+"'"
                         try:
@@ -270,6 +297,7 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
                                 os.remove(dest_mapper_out_path)
                             if is_save_output_ok:
                                 os.rename(mapper_out_path, dest_mapper_out_path)
+                                print("(moved to '"+dest_mapper_out_path+"')")
                             else:
                                 if os.path.isfile(mapper_out_path):
                                     os.remove(mapper_out_path)
@@ -305,6 +333,5 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
     outs.write("total_generated_count:"+str(total_generated_count) + "\n")
 
     outs.close()
-
 else:
     print "failed since this folder must contain colors.txt and minetestmapper-numpy.py"
