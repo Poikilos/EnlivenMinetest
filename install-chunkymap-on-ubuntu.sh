@@ -9,7 +9,10 @@ CHUNKYMAP_DEST=$MINETEST_UTIL
 #wget https://github.com/spillz/minetest/raw/master/util/minetestmapper-numpy.py
 #since colors.txt is in ~/minetest/util:
 cp -f "$CHUNKYMAP_INSTALLER_DIR/minetestmapper-numpy.py" "$HOME/minetest/util/minetestmapper-numpy.py"
-mkdir "$CHUNKYMAP_DEST"
+if [ ! -d "$CHUNKYMAP_DEST" ]; then
+  # Control will enter here if $DIRECTORY doesn't exist.
+  mkdir "$CHUNKYMAP_DEST"
+fi
 cp -f "$CHUNKYMAP_INSTALLER_DIR/chunkymap-regen.py" "$CHUNKYMAP_DEST/"
 #chmod +x "$CHUNKYMAP_DEST/chunkymap-regen.py"
 cp -f "$CHUNKYMAP_INSTALLER_DIR/chunkymap-regen.sh" "$CHUNKYMAP_DEST/"
