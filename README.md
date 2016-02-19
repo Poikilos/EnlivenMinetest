@@ -43,6 +43,7 @@ This program comes without any warranty, to the extent permitted by applicable l
 	(but put your specific downloaded whl file instead, such as Pillow-3.1.1-cp27-none-win_amd64.whl)
 	* edit chunkymap_regen.py and uncomment website_root="/var/www/html/minetest" then change the value in quotes to your web server's htdocs folder such as, if you are using Apache, can be found as the value of the DocumentRoot variable in httpd.conf in the Apache folder in Program Files
 	* edit chunkymap_regen.py and change world_name to your world name
+
 ## Known Issues
 * Make a php file that shows the map on an html5 canvas (refresh players every 10 seconds, check for new map chunks every minute)
 * Make players invisible if they stay in one spot too long (consider them logged out by that method alone since not requiring mods)
