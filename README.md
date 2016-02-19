@@ -3,7 +3,7 @@ A Minetest online web live map generator not requiring mods, with emphasis on co
 
 Compatible with GNU/Linux systems, Windows, or possibly other systems (but on Windows, chunkymap-regen.py must be scheduled by hand with Scheduled Tasks)
 
-License: GPLv3 (see LICENSE.txt and always include it and way to access your source code when copying your program)
+License: (see LICENSE in notepad or your favorite text editor)
 This program comes without any warranty, to the extent permitted by applicable law.
 
 ## Requirements:
