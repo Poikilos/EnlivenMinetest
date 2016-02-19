@@ -13,4 +13,5 @@ rm -Rf "$CHUNKYMAP_INSTALLER_DIR"
 mv minetest-chunkymap-master "$CHUNKYMAP_INSTALLER_DIR"
 #cd minetest-chunkymap
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh"
+chmod +x "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-on-ubuntu-from-web.sh"
