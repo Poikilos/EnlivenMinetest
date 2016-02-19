@@ -9,15 +9,20 @@ This program comes without any warranty, to the extent permitted by applicable l
 ## Requirements:
 * A minetest version compatible with minetestmapper-numpy.py Made by Jogge, modified by celeron55
 * Python 2.7 (any 2.7.x)
-* Other requirements for Windows are below; other requirements for Ubuntu are installed by install-chunkymap-on-ubuntu.sh (for other distros, modify it and send me a copy as a GitHub issue as described below in the Installation section)
+* Other requirements for Windows are below; other requirements for GNU/Linux are flock command (only if you schedule the chunkymap-cronjob script), and anything installed by install-chunkymap-on-ubuntu.sh (for other distros, modify it and send me a copy as a GitHub issue as described below in the Installation section)
 
 ## Installation
 (NOTE: map refresh skips existing tiles unless you delete the related png and text files in your chunkymapdata folder)
-* change set-minutely-crontab-job.sh to replace "owner" with the user that has the minetest folder (with util folder under it, not .minetest)
-* Install the git version of minetest (or otherwise install 0.4.13 or other version compatible with the map generators used by chunkymap)
-* IF you are using Ubuntu go to a terminal, cd to this folder, then run  
+* If you are not using Ubuntu, first edit the installer for your distro (and please send the modified file to me [submit as new issue named such as: DISTRONAME installer except instead of DISTRONAME put the distro you made work])
+* If you are using Ubuntu
+	* Install the git version of minetest (or otherwise install 0.4.13 or other version compatible with the map generators used by chunkymap)
+	OPTION 2: IF you are using Ubuntu go to a terminal, cd to this folder,  
+	then switch user to the one that will run minetestserver
+	(since install-chunkymap-on-ubuntu.sh DOES replace "/home/owner" with current user's home in all chunkymap scripts in destination folder)  
+	then go to Terminal and run:  
+	`minetestserver`  
+	then when it is finished loading, press Ctrl C then run:  
     `chmod +x install-chunkymap-on-ubuntu.sh && ./install-chunkymap-on-ubuntu.sh`  
-	otherwise first edit the file for your distro (and please send the modified file to me [submit as new issue named such as: DISTRONAME installer except instead of DISTRONAME put the distro you made work])
 * IF you are using a distro such as Ubuntu 14.04 where first line of /etc/crontab is "m h dom mon dow user command" then if you want regular refresh of map then run
 	(otherwise first edit the script to fit your crontab then)  
     `chmod +x set-minutely-crontab-job.sh && ./set-minutely-crontab-job.sh`
@@ -25,7 +30,7 @@ This program comes without any warranty, to the extent permitted by applicable l
 	* put these files anywhere
 	* manually schedule a task in Task Scheduler to run C:\Python27\python chunkymap-regen.py every minute
 	* python 2.7.x such as from python.org
-	* run mapper-pyarch.py to make sure you know whether to download the following in 32-bit or 64-bit  
+	* run get_python_architecture.py to make sure you know whether to download the following in 32-bit or 64-bit  
 	Administrator Command Prompt (to find it in Win 10, right-click windows menu)
 	* update python package system:  
 		`C:\python27\python -m pip install --upgrade pip wheel setuptools`
