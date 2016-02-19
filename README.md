@@ -18,7 +18,7 @@ This program comes without any warranty, to the extent permitted by applicable l
 	* Install the git version of minetest (or otherwise install 0.4.13 or other version compatible with the map generators used by chunkymap)
 	OPTION 2: IF you are using Ubuntu go to a terminal, cd to this folder,  
 	then switch user to the one that will run minetestserver
-	(since install-chunkymap-on-ubuntu.sh DOES replace "/home/owner" with current user's home in all chunkymap scripts in destination folder)  
+	(since install-chunkymap-on-ubuntu.sh DOES replace "/home/owner" with current user's home [replace-with-current-user.py, which is automatically called by install, will change /home/owner to current user's folder in each script that install copies to $HOME/minetest/util])  
 	then go to Terminal and run:  
 	`minetestserver`  
 	then when it is finished loading, press Ctrl C then run:  

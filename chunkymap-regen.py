@@ -93,11 +93,11 @@ is_save_output_ok = True
 
 def get_dict_from_conf_file(path,assignment_operator="="):
     results = None
+    print "Checking "+str(path)+" for settings..."
     if os.path.isfile(path):
         results = {}
-        ins = open(yaml_path, 'r')
+        ins = open(path, 'r')
         line = True
-        operator = ":"
         while line:
             line = ins.readline()
             if line and len(line)>0:
@@ -109,7 +109,7 @@ def get_dict_from_conf_file(path,assignment_operator="="):
                             if ao_index<len(line_strip)-1:  # skip yaml implicit nulls or yaml objects
                                 result_name = line_strip[:ao_index]
                                 result_value = line_strip[ao_index+1:]
-                                print "   CHECKING MAP..."+result_name+":"+result_value
+                                print "   CHECKING... "+result_name+":"+result_value
                                 results[result_name]=result_value
         ins.close()
     return results
@@ -117,7 +117,7 @@ def get_dict_from_conf_file(path,assignment_operator="="):
 if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
 
     chunkymap_data_path=os.path.join(website_root,"chunkymapdata")
-    yaml_name = "metadata.yml"
+    yaml_name = "generated.yml"
     yaml_path = os.path.join(chunkymap_data_path, yaml_name)
     if not os.path.isdir(chunkymap_data_path):
         os.mkdir(chunkymap_data_path)
@@ -142,12 +142,12 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
                     if line:
                         ao_index = line.find("=")
                         if ao_index > 0:
-                            ini_name = line[:ao_index].strip()
-                            ini_value = line[ao_index+1:].strip()
-                            if ini_name=="name":
-                                player_name = ini_value
-                            elif ini_name=="position":
-                                player_position = ini_value
+                            found_name = line[:ao_index].strip()
+                            found_value = line[ao_index+1:].strip()
+                            if found_name=="name":
+                                player_name = found_value
+                            elif found_name=="position":
+                                player_position = found_value
                             if (player_name is not None) and (player_position is not None):
                                 has_enough_data = True
                                 break
@@ -155,10 +155,12 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
                 player_dest_path = os.path.join(chunkymap_players_path,filename+".yml")
                 if has_enough_data:
                     #if player_name!="singleplayer":
-                    outs = open(player_dest_path, 'w')
-                    outs.write("name:"+player_name+"\n")  # python automatically uses correct newline for your os when you put "\n"
-                    outs.write("position:"+player_position+"\n")
-                    outs.close()
+                    map_player_dict = get_dict_from_conf_file(player_dest_path,":")
+                    if (map_player_dict is None) or (map_player_dict["position"]!=player_position):
+                        outs = open(player_dest_path, 'w')
+                        outs.write("name:"+player_name+"\n")  # python automatically uses correct newline for your os when you put "\n"
+                        outs.write("position:"+player_position+"\n")
+                        outs.close()
 
     mapvars = get_dict_from_conf_file(yaml_path,":")
     #is_testonly == (os_name=="windows")
@@ -196,8 +198,8 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
     total_generated_count = 0
 
     #values for command arguments:
-    maxheight = 100
-    minheight = -50
+    maxheight = 50
+    minheight = -25
     pixelspernode = 1
     #ALSO save to YAML:
     #world_name
@@ -233,6 +235,9 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
                     dest_png_path = os.path.join(chunkymap_data_path, png_name)
                     dest_mapper_out_path = os.path.join(chunkymap_data_path, mapper_out_name)
                     is_empty_chunk = False
+                    if os.path.isfile(dest_mapper_out_path):
+                        if os.path.isfile(dest_png_path):
+                            os.remove(dest_mapper_out_path)
                     if os.path.isfile(dest_mapper_out_path):
                         ins = open(dest_mapper_out_path)
                         line = True
@@ -274,7 +279,7 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
                         if os.path.isfile(dest_png_path):
                             total_generated_count += 1
                             square_generates_count += 1
-                            print("Skipping existing map tile " + png_name + " since not full_render")
+                            print("Skipping existing map tile file " + png_name + " (delete it to re-render)")
                         elif is_empty_chunk:
                             print("Skipping empty chunk " + chunk_luid + " since not full_render")
             print ""  # blank line before next z so output is human readable
