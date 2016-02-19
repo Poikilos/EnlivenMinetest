@@ -118,7 +118,7 @@ def get_dict_from_conf_file(path,assignment_operator="="):
 def deny_http_access(dir_path):
     htaccess_name = ".htaccess"
     htaccess_path = os.path.join(dir_path, htaccess_name)
-    outs = open(htaccess_path)
+    outs = open(htaccess_path, 'w')
     outs.write("IndexIgnore *"+"\n")
     outs.write("<Files .htaccess>"+"\n")
     outs.write("order allow,deny"+"\n")
