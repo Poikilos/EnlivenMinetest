@@ -6,7 +6,7 @@
 
 cd ~
 MT_CHUNKYMAP_CRON_TMP=mts_cron.tmp
-if [! -f "crontab.1st"];
+if [ ! -f "crontab.1st" ];
 then
 sudo cp /etc/crontab "crontab.1st"
 fi
