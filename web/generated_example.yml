@@ -1,0 +1,13 @@
+#to generate this, run chunkymap-regen.py with permission to create and write to /var/www/html/minetest/chunkymapdata (or use shell script)
+world_name:FCAGameAWorld
+chunk_size:80
+pixelspernode:1
+chunkx_min:-22
+chunkz_min:-22
+chunkx_max:22
+chunkz_max:22
+maxheight:50
+minheight:-25
+world_path:/home/owner/.minetest/worlds/FCAGameAWorld
+chunkymap_data_path:/var/www/html/minetest/chunkymapdata
+total_generated_count:288
