@@ -203,8 +203,8 @@ function echo_chunkymap_controls($callback_php_path) {
 	}
 	if (!$found) $in_zoom=$chunkymap_view_zoom_max;
 	
-	$in_html="<img src=\"images/$in_img_name\">";
-	$out_html="<img src=\"images/$out_img_name\">";
+	$in_html="<img src=\"images/$in_img_name\" style=\"width:16pt; height:16pt\" />";
+	$out_html="<img src=\"images/$out_img_name\" style=\"width:16pt; height:16pt\" />";
 	if ($is_in) $in_html="<a href=\"?chunkymap_view_zoom_multiplier=$in_zoom#$chunkymap_anchor_name\">$in_html</a>";
 	if ($is_out) $out_html="<a href=\"?chunkymap_view_zoom_multiplier=$out_zoom#$chunkymap_anchor_name\">$out_html</a>";
 	echo $in_html;
