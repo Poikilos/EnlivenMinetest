@@ -9,6 +9,7 @@ if (is_file('browser.php')) {
 else {
 	echo "<!--missing browser.php...-->";
 }
+$chunkymap_anchor_name="chunkymap_top";
 $is_verbose = false;
 if ($is_verbose) echo "REQUEST...";
 foreach($_REQUEST as $key => $value) {
@@ -120,12 +121,17 @@ function set_chunkymap_view($set_chunkymap_view_x, $set_chunkymap_view_z, $set_c
 	$chunkymap_view_z = $set_chunkymap_view_z;
 	$chunkymap_view_zoom_multiplier = $set_chunkymap_view_zoom_multiplier;
 }
+function echo_chunkymap_anchor() {
+	global $chunkymap_anchor_name;
+	echo "<a name=\"$chunkymap_anchor_name\"></a>";
+}
 function echo_chunkymap_controls($callback_php_path) {
 	global $chunkymap_view_x;
 	global $chunkymap_view_z;
 	global $chunkymap_view_zoom_multiplier;
 	global $chunkymap_view_zoom_max;
 	global $chunkymap_view_zoom_min;
+	global $chunkymap_anchor_name;
 	$is_in=false;
 	$is_out=false;
 	$in_img_name = "chunkymap_zoom-in.png";
@@ -199,8 +205,8 @@ function echo_chunkymap_controls($callback_php_path) {
 	
 	$in_html="<img src=\"images/$in_img_name\">";
 	$out_html="<img src=\"images/$out_img_name\">";
-	if ($is_in) $in_html="<a href=\"?chunkymap_view_zoom_multiplier=$in_zoom\">$in_html</a>";
-	if ($is_out) $out_html="<a href=\"?chunkymap_view_zoom_multiplier=$out_zoom\">$out_html</a>";
+	if ($is_in) $in_html="<a href=\"?chunkymap_view_zoom_multiplier=$in_zoom#$chunkymap_anchor_name\">$in_html</a>";
+	if ($is_out) $out_html="<a href=\"?chunkymap_view_zoom_multiplier=$out_zoom#$chunkymap_anchor_name\">$out_html</a>";
 	echo $in_html;
 	echo $out_html;
 }
