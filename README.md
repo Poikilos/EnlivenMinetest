@@ -6,6 +6,12 @@ Compatible with GNU/Linux systems, Windows, or possibly other systems (but on Wi
 License: (see LICENSE in notepad or your favorite text editor)
 This program comes without any warranty, to the extent permitted by applicable law.
 
+## Features:
+* Has static html version of map (echo_chunkymap_table() php function)
+	* Zoom in and out
+	* optionally echo name of world that was detected by the scheduled py file
+* Has optional script to add crontab entry (to schedule update script every minute that runs the py file unless the py file is not complete [took longer than 1 minute])
+
 ## Requirements:
 * A minetest version compatible with minetestmapper-numpy.py Made by Jogge, modified by celeron55
 * Python 2.7 (any 2.7.x)
@@ -50,6 +56,7 @@ This program comes without any warranty, to the extent permitted by applicable l
 	* edit chunkymap_regen.py and change world_name to your world name
 
 ## Known Issues
+* Show player location (and optionally turn off)
 * Make a php file that shows the map on an html5 canvas (refresh players every 10 seconds, check for new map chunks every minute)
 * Make players invisible if they stay in one spot too long (consider them logged out by that method alone since not requiring mods)
-* Detect failure of minetestmapper-numpy.py and instead use minetest-mapper if on linux, otherwise show error (since Windows has no minetest-mapper at least on client 0.4.13)
+* Detect failure of minetestmapper-numpy.py and instead use minetest-mapper if on linux, otherwise show error if neither are present (Windows has no minetest-mapper at least on client 0.4.13)
