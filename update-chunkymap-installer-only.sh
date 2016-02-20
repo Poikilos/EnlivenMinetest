@@ -1,12 +1,12 @@
 #!/bin/sh
-cd ~
-rm -Rf ~/minetest-stuff/minetest-chunkymap
-CHUNKYMAP_INSTALLER_DIR=~/Downloads/minetest-chunkymap
+cd $HOME
+rm -Rf $HOME/minetest-stuff/minetest-chunkymap
+CHUNKYMAP_INSTALLER_DIR=$HOME/Downloads/minetest-chunkymap
 if [ ! -d "$HOME/Downloads" ]; then
 	mkdir "$HOME/Downloads"
 fi
 
-cd ~/Downloads
+cd $HOME/Downloads
 rm master.zip
 wget https://github.com/expertmm/minetest-chunkymap/archive/master.zip
 rm -f minetest-chunkymap.zip
@@ -21,6 +21,5 @@ chmod +x "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh"
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-on-ubuntu-from-web.sh"
 
-#mv -f "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh" "~/Downloads/"
-mv -f "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-on-ubuntu-from-web.sh" "~/"
-
+#mv -f "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh" "$HOME/Downloads/"
+mv -f "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-on-ubuntu-from-web.sh" "$HOME/"

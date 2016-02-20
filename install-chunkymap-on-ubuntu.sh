@@ -1,7 +1,7 @@
 #!/bin/sh
-cd ~
-rm -Rf ~/minetest-stuff/minetest-chunkymap
-CHUNKYMAP_INSTALLER_DIR=~/Downloads/minetest-chunkymap
+cd $HOME
+rm -Rf $HOME/minetest-stuff/minetest-chunkymap
+CHUNKYMAP_INSTALLER_DIR=$HOME/Downloads/minetest-chunkymap
 if [ ! -d "$HOME/Downloads" ]; then
 	mkdir "$HOME/Downloads"
 fi
@@ -9,10 +9,10 @@ fi
 MINETEST_UTIL=$HOME/minetest/util
 CHUNKYMAP_DEST=$MINETEST_UTIL
 
-#cd ~/Downloads
-#rm -f ~/minetestmapper-numpy.py
+#cd $HOME/Downloads
+#rm -f $HOME/minetestmapper-numpy.py
 #wget https://github.com/spillz/minetest/raw/master/util/minetestmapper-numpy.py
-#since colors.txt is in ~/minetest/util:
+#since colors.txt is in $HOME/minetest/util:
 cp -f "$CHUNKYMAP_INSTALLER_DIR/minetestmapper-numpy.py" "$HOME/minetest/util/minetestmapper-numpy.py"
 if [ ! -d "$CHUNKYMAP_DEST" ]; then
   # Control will enter here if $DIRECTORY doesn't exist.
@@ -34,4 +34,4 @@ sudo apt-get install python-numpy python-pil
 
 echo "To check out chunkymap, run:"
 echo "cd $CHUNKYMAP_DEST"
-# NOTE: colors.txt should ALREADY be in ~/minetest/util
+# NOTE: colors.txt should ALREADY be in $HOME/minetest/util
