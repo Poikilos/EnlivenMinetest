@@ -31,7 +31,8 @@ chmod +x "$CHUNKYMAP_DEST/chunkymap-cronjob"
 chmod +x "$CHUNKYMAP_DEST/set-minutely-crontab-job.sh"
 
 sudo apt-get install python-numpy python-pil
-
-echo "To check out chunkymap, run:"
+echo ""
+echo "To learn about chunkymap:"
 echo "cd $CHUNKYMAP_DEST"
+echo ""
 # NOTE: colors.txt should ALREADY be in $HOME/minetest/util
