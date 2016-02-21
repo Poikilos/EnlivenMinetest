@@ -45,20 +45,20 @@ world_path = os.path.join(worlds_path, world_name)
 auto_chosen_world = False
 if not os.path.isdir(world_path):
     #for item in os.walk(worlds_path):
-    print "LOOKING FOR WORLDS IN " + worlds_path
+    print ("LOOKING FOR WORLDS IN " + worlds_path)
     for dirname, dirnames, filenames in os.walk(worlds_path):
         index = 0
         for j in range(0,len(dirnames)):
             i = len(dirnames) - 0 - 1
             if dirnames[i][0] == ".":
-                print "  SKIPPING "+dirnames[i]
+                print ("  SKIPPING "+dirnames[i])
                 dirnames.remove_at(i)
         for subdirname in dirnames:
-            print "  EXAMINING "+subdirname
+            print ("  EXAMINING "+subdirname)
             if (index == len(dirnames)-1):  # skip first one because the one on my computer is big
                 world_name = subdirname
                 world_path = os.path.join(dirname, subdirname) #  os.path.join(worlds_path, "try7amber")
-                print "  CHOSE "+world_path
+                print ("  CHOSE "+world_path)
                 auto_chosen_world = True
                 break
             index += 1
@@ -93,7 +93,7 @@ is_save_output_ok = True
 
 def get_dict_from_conf_file(path,assignment_operator="="):
     results = None
-    print "Checking "+str(path)+" for settings..."
+    print ("Checking "+str(path)+" for settings...")
     if os.path.isfile(path):
         results = {}
         ins = open(path, 'r')
@@ -109,7 +109,7 @@ def get_dict_from_conf_file(path,assignment_operator="="):
                             if ao_index<len(line_strip)-1:  # skip yaml implicit nulls or yaml objects
                                 result_name = line_strip[:ao_index]
                                 result_value = line_strip[ao_index+1:]
-                                print "   CHECKING... "+result_name+":"+result_value
+                                print ("   CHECKING... "+result_name+":"+result_value)
                                 results[result_name]=result_value
         ins.close()
     return results
@@ -155,7 +155,7 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
     for dirname, dirnames, filenames in os.walk(players_path):
         for filename in filenames:
             file_fullname = os.path.join(players_path,filename)
-            #print "  EXAMINING "+filename
+            #print ("  EXAMINING "+filename)
             badstart_string = "."
             player_name = None
             player_position = None
@@ -192,7 +192,7 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
     #is_testonly == (os_name=="windows")
 
     if mapvars is not None and set(['world_name']).issubset(mapvars):
-        #print "  (FOUND world_name)"
+        #print ("  (FOUND world_name)")
         if mapvars["world_name"] != world_name:
             print ("REMOVING data since from different world (map '"+str(mapvars["world_name"])+"' is not '"+str(world_name)+"')...")
             for dirname, dirnames, filenames in os.walk(chunkymap_data_path):
@@ -200,11 +200,11 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
                 for j in range(0,len(filenames)):
                     i = len(filenames) - 0 - 1
                     if filenames[i][0] == ".":
-                        print "  SKIPPING "+filenames[i]
+                        print ("  SKIPPING "+filenames[i])
                         filenames.remove_at(i)
                 for filename in filenames:
                     file_fullname = os.path.join(chunkymap_data_path,filename)
-                    print "  EXAMINING "+filename
+                    print ("  EXAMINING "+filename)
                     badstart_string = "chunk"
                     if (len(filename) >= len(badstart_string)) and (filename[:len(badstart_string)]==badstart_string):
                         os.remove(file_fullname)
@@ -256,7 +256,7 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
                     mapper_out_path = os.path.join(os.path.dirname(__file__), mapper_out_name)
                     if is_save_output_ok:
                         cmd_suffix = " > \""+mapper_out_path+"\""
-                    #print "generating x = " + str(x_min) + " to " + str(x_max) + " ,  z = " + str(z_min) + " to " + str(z_max)
+                    #print ("generating x = " + str(x_min) + " to " + str(x_max) + " ,  z = " + str(z_min) + " to " + str(z_max))
                     cmd_string = python_exe_path + " \""+mtmn_path + "\" --region " + str(x_min) + " " + str(x_max) + " " + str(z_min) + " " + str(z_max) + " --maxheight "+str(maxheight)+" --minheight "+str(minheight)+" --pixelspernode "+str(pixelspernode)+" \""+world_path+"\" \""+png_path+"\"" + cmd_suffix
                     dest_png_path = os.path.join(chunkymap_data_path, png_name)
                     dest_mapper_out_path = os.path.join(chunkymap_data_path, mapper_out_name)
@@ -276,7 +276,7 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
                                     break
                         ins.close()
                     if full_render or ((not os.path.isfile(dest_png_path)) and (not is_empty_chunk)):
-                        print cmd_string
+                        print (cmd_string)
                         subprocess.call(cmd_string, shell=True)  # TODO: remember not to allow arbitrary command execution, which could happen if input contains ';' when using shell=True
                         if os.path.isfile(png_path):
                             total_generated_count += 1
@@ -286,12 +286,12 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
                                 if (os.path.isfile(dest_png_path)):
                                     os.remove(dest_png_path)
                             except:
-                                print "Could not finish deleting '"+dest_png_path+"'"
+                                print ("Could not finish deleting '"+dest_png_path+"'")
                             try:
                                 os.rename(png_path, dest_png_path)
                                 print("(moved to '"+dest_png_path+"')")
                             except:
-                                print "Could not finish moving '"+png_path+"' to '"+dest_png_path+"'"
+                                print ("Could not finish moving '"+png_path+"' to '"+dest_png_path+"'")
                         try:
                             if (os.path.isfile(dest_mapper_out_path)):
                                 os.remove(dest_mapper_out_path)
@@ -302,7 +302,7 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
                                 if os.path.isfile(mapper_out_path):
                                     os.remove(mapper_out_path)
                         except:
-                            print "Could not finish deleting/moving output"
+                            print ("Could not finish deleting/moving output")
                     else:
                         if os.path.isfile(dest_png_path):
                             total_generated_count += 1
@@ -310,7 +310,7 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
                             print("Skipping existing map tile file " + png_name + " (delete it to re-render)")
                         elif is_empty_chunk:
                             print("Skipping empty chunk " + chunk_luid + " since not full_render")
-            print ""  # blank line before next z so output is human readable
+            print ("")  # blank line before next z so output is human readable
         chunkx_min -= 1
         chunkz_min -= 1
         chunkx_max += 1
@@ -331,28 +331,35 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
 	new_map_dict["total_generated_count"]=str(total_generated_count)
 	is_changed = False
 	if mapvars is None:
+		print ("SAVING '" + yaml_path + "' since nothing was loaded or it did not exist")
 		is_changed = True
 	else:
 		for this_key in new_map_dict.iterkeys():
-			if (this_key not in mapvars.keys()) or (str(mapvars[this_key]) != str(new_map_dict[this_key])):
+			if (this_key not in mapvars.keys()):
 				is_changed = True
+				print ("SAVING '" + yaml_path + "' since " + str(this_key) + " not in mapvars")
 				break
-    outs = open(yaml_path, 'w')
-    outs.write("world_name:"+str(world_name) + "\n")
-    outs.write("chunk_size:"+str(chunk_size) + "\n")
-    outs.write("pixelspernode:"+str(pixelspernode) + "\n")
-    outs.write("chunkx_min:"+str(chunkx_min) + "\n")
-    outs.write("chunkx_max:"+str(chunkx_max) + "\n")
-    outs.write("chunkz_min:"+str(chunkz_min) + "\n")
-    outs.write("chunkz_max:"+str(chunkz_max) + "\n")
-    #values for command arguments:
-    outs.write("maxheight:"+str(maxheight) + "\n")
-    outs.write("minheight:"+str(minheight) + "\n")
-    #ALSO save to YAML:
-    outs.write("world_path:"+str(world_path) + "\n")
-    outs.write("chunkymap_data_path:"+str(chunkymap_data_path) + "\n")
-    outs.write("total_generated_count:"+str(total_generated_count) + "\n")
+			elif (str(mapvars[this_key]) != str(new_map_dict[this_key])):
+				is_changed = True
+				print ("SAVING '" + yaml_path + "' since new " + this_key + " value " + str(mapvars[this_key]) + " not same as saved mapvars[" + str(mapvars[this_key]) + "]")
+				break
+	if is_changed:
+		outs = open(yaml_path, 'w')
+		outs.write("world_name:"+str(world_name) + "\n")
+		outs.write("chunk_size:"+str(chunk_size) + "\n")
+		outs.write("pixelspernode:"+str(pixelspernode) + "\n")
+		outs.write("chunkx_min:"+str(chunkx_min) + "\n")
+		outs.write("chunkx_max:"+str(chunkx_max) + "\n")
+		outs.write("chunkz_min:"+str(chunkz_min) + "\n")
+		outs.write("chunkz_max:"+str(chunkz_max) + "\n")
+		#values for command arguments:
+		outs.write("maxheight:"+str(maxheight) + "\n")
+		outs.write("minheight:"+str(minheight) + "\n")
+		#ALSO save to YAML:
+		outs.write("world_path:"+str(world_path) + "\n")
+		outs.write("chunkymap_data_path:"+str(chunkymap_data_path) + "\n")
+		outs.write("total_generated_count:"+str(total_generated_count) + "\n")
 
-    outs.close()
+		outs.close()
 else:
-    print "failed since this folder must contain colors.txt and minetestmapper-numpy.py"
+    print ("failed since this folder must contain colors.txt and minetestmapper-numpy.py")
