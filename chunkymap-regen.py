@@ -316,13 +316,34 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
         chunkx_max += 1
         chunkz_max += 1
     #end while square outline (1-chunk-thick outline) generated any png files
+	new_map_dict = {}
+	new_map_dict["world_name"]=str(world_name)
+	new_map_dict["chunk_size"]=str(chunk_size)
+	new_map_dict["pixelspernode"]=str(pixelspernode)
+	new_map_dict["chunkx_min"]=str(chunkx_min)
+	new_map_dict["chunkx_max"]=str(chunkx_max)
+	new_map_dict["chunkz_min"]=str(chunkz_min)
+	new_map_dict["chunkz_max"]=str(chunkz_max)
+	new_map_dict["maxheight"]=str(maxheight)
+	new_map_dict["minheight"]=str(minheight)
+	new_map_dict["world_path"]=str(world_path)
+	new_map_dict["chunkymap_data_path"]=str(chunkymap_data_path)
+	new_map_dict["total_generated_count"]=str(total_generated_count)
+	is_changed = False
+	if mapvars is None:
+		is_changed = True
+	else:
+		for this_key in new_map_dict.iterkeys():
+			if (this_key not in mapvars.keys()) or (str(mapvars[this_key]) != str(new_map_dict[this_key])):
+				is_changed = True
+				break
     outs = open(yaml_path, 'w')
     outs.write("world_name:"+str(world_name) + "\n")
     outs.write("chunk_size:"+str(chunk_size) + "\n")
     outs.write("pixelspernode:"+str(pixelspernode) + "\n")
     outs.write("chunkx_min:"+str(chunkx_min) + "\n")
-    outs.write("chunkz_min:"+str(chunkz_min) + "\n")
     outs.write("chunkx_max:"+str(chunkx_max) + "\n")
+    outs.write("chunkz_min:"+str(chunkz_min) + "\n")
     outs.write("chunkz_max:"+str(chunkz_max) + "\n")
     #values for command arguments:
     outs.write("maxheight:"+str(maxheight) + "\n")
