@@ -30,7 +30,8 @@ This program comes without any warranty, to the extent permitted by applicable l
 	then when it is finished loading, press Ctrl C then run:  
     `chmod +x install-chunkymap-on-ubuntu.sh && ./install-chunkymap-on-ubuntu.sh`  
 * IF you are using a distro such as Ubuntu 14.04 where first line of /etc/crontab is "m h dom mon dow user command" then if you want regular refresh of map then run
-	(otherwise first edit the script to fit your crontab then)  
+	(otherwise first edit the script to fit your crontab then)
+	(if you are not using /var/www/html/minetest/chunkymapdata, edit chunkymap-cronjob script to use the correct folder, then)
     `chmod +x set-minutely-crontab-job.sh && ./set-minutely-crontab-job.sh`
 * IF you are using Windows
 	* put these files anywhere
