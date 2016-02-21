@@ -129,11 +129,11 @@ def deny_http_access(dir_path):
     outs.write("deny from all"+"\n")
     outs.write("</Files>"+"\n")
     outs.close()
-    
+
 
 if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
-    
-    
+
+
     chunkymap_data_path=os.path.join(website_root,"chunkymapdata")
     yaml_name = "generated.yml"
     yaml_path = os.path.join(chunkymap_data_path, yaml_name)
@@ -141,14 +141,14 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
         os.mkdir(chunkymap_data_path)
     chunkymap_players_name = "players"
     chunkymap_players_path = os.path.join(chunkymap_data_path, chunkymap_players_name)
-    
+
     htaccess_path = os.path.join(chunkymap_data_path,".htaccess")
     if not os.path.isfile(htaccess_path):
         deny_http_access(chunkymap_data_path)
     htaccess_path = os.path.join(chunkymap_players_path,".htaccess")
     if not os.path.isfile(htaccess_path):
         deny_http_access(chunkymap_players_path)
-    
+
     if not os.path.isdir(chunkymap_players_path):
         os.mkdir(chunkymap_players_path)
     players_path = os.path.join(world_path, "players")
@@ -316,50 +316,52 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
         chunkx_max += 1
         chunkz_max += 1
     #end while square outline (1-chunk-thick outline) generated any png files
-	new_map_dict = {}
-	new_map_dict["world_name"]=str(world_name)
-	new_map_dict["chunk_size"]=str(chunk_size)
-	new_map_dict["pixelspernode"]=str(pixelspernode)
-	new_map_dict["chunkx_min"]=str(chunkx_min)
-	new_map_dict["chunkx_max"]=str(chunkx_max)
-	new_map_dict["chunkz_min"]=str(chunkz_min)
-	new_map_dict["chunkz_max"]=str(chunkz_max)
-	new_map_dict["maxheight"]=str(maxheight)
-	new_map_dict["minheight"]=str(minheight)
-	new_map_dict["world_path"]=str(world_path)
-	new_map_dict["chunkymap_data_path"]=str(chunkymap_data_path)
-	new_map_dict["total_generated_count"]=str(total_generated_count)
-	is_changed = False
-	if mapvars is None:
-		print ("SAVING '" + yaml_path + "' since nothing was loaded or it did not exist")
-		is_changed = True
-	else:
-		for this_key in new_map_dict.iterkeys():
-			if (this_key not in mapvars.keys()):
-				is_changed = True
-				print ("SAVING '" + yaml_path + "' since " + str(this_key) + " not in mapvars")
-				break
-			elif (str(mapvars[this_key]) != str(new_map_dict[this_key])):
-				is_changed = True
-				print ("SAVING '" + yaml_path + "' since new " + this_key + " value " + str(mapvars[this_key]) + " not same as saved value " + str(mapvars[this_key]) + "")
-				break
-	if is_changed:
-		outs = open(yaml_path, 'w')
-		outs.write("world_name:"+str(world_name) + "\n")
-		outs.write("chunk_size:"+str(chunk_size) + "\n")
-		outs.write("pixelspernode:"+str(pixelspernode) + "\n")
-		outs.write("chunkx_min:"+str(chunkx_min) + "\n")
-		outs.write("chunkx_max:"+str(chunkx_max) + "\n")
-		outs.write("chunkz_min:"+str(chunkz_min) + "\n")
-		outs.write("chunkz_max:"+str(chunkz_max) + "\n")
-		#values for command arguments:
-		outs.write("maxheight:"+str(maxheight) + "\n")
-		outs.write("minheight:"+str(minheight) + "\n")
-		#ALSO save to YAML:
-		outs.write("world_path:"+str(world_path) + "\n")
-		outs.write("chunkymap_data_path:"+str(chunkymap_data_path) + "\n")
-		outs.write("total_generated_count:"+str(total_generated_count) + "\n")
+    new_map_dict = {}
+    new_map_dict["world_name"]=str(world_name)
+    new_map_dict["chunk_size"]=str(chunk_size)
+    new_map_dict["pixelspernode"]=str(pixelspernode)
+    new_map_dict["chunkx_min"]=str(chunkx_min)
+    new_map_dict["chunkx_max"]=str(chunkx_max)
+    new_map_dict["chunkz_min"]=str(chunkz_min)
+    new_map_dict["chunkz_max"]=str(chunkz_max)
+    new_map_dict["maxheight"]=str(maxheight)
+    new_map_dict["minheight"]=str(minheight)
+    new_map_dict["world_path"]=str(world_path)
+    new_map_dict["chunkymap_data_path"]=str(chunkymap_data_path)
+    new_map_dict["total_generated_count"]=str(total_generated_count)
+    is_changed = False
+    if mapvars is None:
+        print ("SAVING '" + yaml_path + "' since nothing was loaded or it did not exist")
+        is_changed = True
+    else:
+        for this_key in new_map_dict.iterkeys():
+            if (this_key not in mapvars.keys()):
+                is_changed = True
+                print ("SAVING '" + yaml_path + "' since " + str(this_key) + " not in mapvars")
+                break
+            elif (str(mapvars[this_key]) != str(new_map_dict[this_key])):
+                is_changed = True
+                print ("SAVING '" + yaml_path + "' since new " + this_key + " value " + str(mapvars[this_key]) + " not same as saved value " + str(mapvars[this_key]) + "")
+                break
+    if is_changed:
+        outs = open(yaml_path, 'w')
+        outs.write("world_name:"+str(world_name) + "\n")
+        outs.write("chunk_size:"+str(chunk_size) + "\n")
+        outs.write("pixelspernode:"+str(pixelspernode) + "\n")
+        outs.write("chunkx_min:"+str(chunkx_min) + "\n")
+        outs.write("chunkx_max:"+str(chunkx_max) + "\n")
+        outs.write("chunkz_min:"+str(chunkz_min) + "\n")
+        outs.write("chunkz_max:"+str(chunkz_max) + "\n")
+        #values for command arguments:
+        outs.write("maxheight:"+str(maxheight) + "\n")
+        outs.write("minheight:"+str(minheight) + "\n")
+        #ALSO save to YAML:
+        outs.write("world_path:"+str(world_path) + "\n")
+        outs.write("chunkymap_data_path:"+str(chunkymap_data_path) + "\n")
+        outs.write("total_generated_count:"+str(total_generated_count) + "\n")
 
-		outs.close()
+        outs.close()
+    else:
+        print ("(Not saving '"+yaml_path+"' since same value of each current variable is already in file as loaded)")
 else:
     print ("failed since this folder must contain colors.txt and minetestmapper-numpy.py")
