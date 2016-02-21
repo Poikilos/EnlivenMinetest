@@ -107,8 +107,8 @@ def get_dict_from_conf_file(path,assignment_operator="="):
                         ao_index = line_strip.find(assignment_operator)
                         if ao_index>=1:  # intentionally skip zero-length variable names
                             if ao_index<len(line_strip)-1:  # skip yaml implicit nulls or yaml objects
-                                result_name = line_strip[:ao_index]
-                                result_value = line_strip[ao_index+1:]
+                                result_name = line_strip[:ao_index].strip()
+                                result_value = line_strip[ao_index+1:].strip()
                                 print ("   CHECKING... "+result_name+":"+result_value)
                                 results[result_name]=result_value
         ins.close()
@@ -341,7 +341,7 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
 				break
 			elif (str(mapvars[this_key]) != str(new_map_dict[this_key])):
 				is_changed = True
-				print ("SAVING '" + yaml_path + "' since new " + this_key + " value " + str(mapvars[this_key]) + " not same as saved mapvars[" + str(mapvars[this_key]) + "]")
+				print ("SAVING '" + yaml_path + "' since new " + this_key + " value " + str(mapvars[this_key]) + " not same as saved value " + str(mapvars[this_key]) + "")
 				break
 	if is_changed:
 		outs = open(yaml_path, 'w')
