@@ -222,6 +222,8 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
     chunkymap_players_path = os.path.join(chunkymap_data_path, chunkymap_players_name)
 
     htaccess_path = os.path.join(chunkymap_data_path,".htaccess")
+    if not os.path.isdir(chunkymap_players_path):
+        os.mkdirs(chunkymap_players_path)
     if not os.path.isfile(htaccess_path):
         deny_http_access(chunkymap_data_path)
     htaccess_path = os.path.join(chunkymap_players_path,".htaccess")
@@ -229,7 +231,7 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
         deny_http_access(chunkymap_players_path)
 
     if not os.path.isdir(chunkymap_players_path):
-        os.mkdir(chunkymap_players_path)
+        os.mkdirs(chunkymap_players_path)
     players_path = os.path.join(world_path, "players")
     for dirname, dirnames, filenames in os.walk(players_path):
         for filename in filenames:
