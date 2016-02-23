@@ -3,6 +3,7 @@ import os
 import subprocess
 
 # REQUIRES: see README.md
+# The way to do a full render is deleting all files from the folder chunkymap_data_path such as /var/www/html/minetest/chunkymapdata (or chunkymap in current directory on Windows)
 
 #minetestmapper-numpy.py calculates the region as follows:
 #(XMIN','XMAX','ZMIN','ZMAX'), default = (-2000,2000,-2000,2000)
@@ -11,7 +12,6 @@ import subprocess
 #sector_ymax = args.maxheight/16
 #region server-specific options
 
-full_render = False  # the preferred method of full render is deleting all files from the folder chunkymap_data_path such as /var/www/html/minetest/chunkymapdata (or chunkymap in current directory on Windows)
 
 input_string = ""
 username = "owner"
@@ -23,6 +23,7 @@ if (len(input_string)>0):
     username = input_string
 
 website_root="/var/www/html/minetest"
+chunkymap_data_path=os.path.join(website_root,"chunkymapdata")
 #input_string = input("What is the root folder of your minetest website ["+website_root+"]?")
 if (len(input_string)>0):
     website_root = input_string
@@ -131,6 +132,84 @@ def deny_http_access(dir_path):
     outs.close()
 
 
+#locally unique identifier (unique to world only)
+def get_chunk_luid(x,z):
+    return "x"+str(x)+"z"+str(z)
+    
+def get_chunk_image_name(chunk_luid):
+    return "chunk_"+chunk_luid+".png"
+
+def get_chunk_image_tmp_path(chunk_luid):
+    return os.path.join(os.path.dirname(__file__), get_chunk_image_name(chunk_luid))
+
+def get_chunk_image_path(chunk_luid):
+    return os.path.join(chunkymap_data_path, get_chunk_image_name(chunk_luid))
+
+def get_chunk_mapper_out_name(chunk_luid):
+    return "chunk_"+chunk_luid+"_mapper_result.txt"
+
+def get_chunk_mapper_out_tmp_path(chunk_luid):
+    return os.path.join(os.path.dirname(__file__), get_chunk_mapper_out_name(chunk_luid))
+
+def get_chunk_mapper_out_path(chunk_luid):
+    return os.path.join(chunkymap_data_path, get_chunk_mapper_out_name(chunk_luid))
+
+def remove_chunk(chunk_luid):
+    result = False
+    out_path = get_chunk_mapper_out_path(chunk_luid)
+    png_path = get_chunk_image_path(chunk_luid)
+    if os.path.isfile(out_path):
+        os.remove(out_path)
+        result = True
+    if os.path.isfile(png_path):
+        os.remove(png_path)
+        result = True
+    return result
+
+def is_mapper_out_marked(chunk_luid):
+    result = False
+    dest_mapper_out_path = get_chunk_mapper_out_path(chunk_luid)
+    #is_empty_chunk = False
+    if os.path.isfile(dest_mapper_out_path):
+        result = True
+    return result
+
+def is_mapper_out_marked_empty(chunk_luid):
+    dest_mapper_out_path = get_chunk_mapper_out_path(chunk_luid)
+    result = False
+    if os.path.isfile(dest_mapper_out_path):
+        ins = open(dest_mapper_out_path)
+        line = True
+        while line:
+            line = ins.readline()
+            if line:
+                line_strip = line.strip()
+                if "data does not exist" in line_strip:
+                    result = True
+                    break
+        ins.close()
+    return result
+
+def remove_mapper_out(chunk_luid):
+    dest_mapper_out_path = get_chunk_mapper_out_path(chunk_luid)
+    if os.path.isfile(dest_mapper_out_path):
+        os.remove(dest_mapper_out_path)
+
+def remove_chunk_image(chunk_luid):
+    png_path = get_chunk_image_path(chunk_luid)
+    if os.path.isfile(png_path):
+        os.remove(png_path)
+
+def is_chunk_rendered_on_dest(chunk_luid):  #formerly is_chunk_empty_on_dest (reversed)
+    is_rendered = False
+    #is_chunk_out_empty = is_mapper_out_marked_empty(chunk_luid)
+    #dest_mapper_out_path = get_chunk_mapper_out_path(chunk_luid)
+    dest_png_path = get_chunk_image_name(chunk_luid)
+    if os.path.isfile(dest_png_path):
+        #os.remove(dest_mapper_out_path)
+        is_rendered = True
+    return is_rendered
+
 if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
 
 
@@ -231,7 +310,7 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
     #world_name
     #world_path
     #endregion values to save to YAML
-
+    newchunk_luid_list = list()
     square_generates_count = 1
     while square_generates_count > 0:
         square_generates_count = 0
@@ -243,45 +322,30 @@ if os.path.isfile(mtmn_path) and os.path.isfile(colors_path):
                 #only generate the edges (since started with region 0 0 0 0) and expanding from there until no png is created:
                 is_outline = (x==chunkx_min) or (x==chunkx_max) or (z==chunkz_min) or (z==chunkz_max)
                 if is_outline:
-                    chunk_luid = "x"+str(x)+"z"+str(z)
-                    png_name = "chunk_"+chunk_luid+".png"
-                    png_path = os.path.join(os.path.dirname(__file__), png_name)
+                    chunk_luid = get_chunk_luid(x,z)
+                    png_name = get_chunk_image_name(chunk_luid)
+                    png_path = get_chunk_image_path(chunk_luid)
                     x_min = x * chunk_size
                     x_max = x * chunk_size + chunk_size - 1
                     z_min = z * chunk_size
                     z_max = z * chunk_size + chunk_size - 1
 
                     cmd_suffix = ""
-                    mapper_out_name = "chunk_"+chunk_luid+"_mapper_result.txt"
-                    mapper_out_path = os.path.join(os.path.dirname(__file__), mapper_out_name)
+                    mapper_out_name = get_chunk_mapper_out_name(chunk_luid)
+                    mapper_out_path = get_chunk_mapper_out_tmp_path(chunk_luid)
                     if is_save_output_ok:
                         cmd_suffix = " > \""+mapper_out_path+"\""
                     #print ("generating x = " + str(x_min) + " to " + str(x_max) + " ,  z = " + str(z_min) + " to " + str(z_max))
                     cmd_string = python_exe_path + " \""+mtmn_path + "\" --region " + str(x_min) + " " + str(x_max) + " " + str(z_min) + " " + str(z_max) + " --maxheight "+str(maxheight)+" --minheight "+str(minheight)+" --pixelspernode "+str(pixelspernode)+" \""+world_path+"\" \""+png_path+"\"" + cmd_suffix
-                    dest_png_path = os.path.join(chunkymap_data_path, png_name)
-                    dest_mapper_out_path = os.path.join(chunkymap_data_path, mapper_out_name)
-                    is_empty_chunk = False
-                    if os.path.isfile(dest_mapper_out_path):
-                        if os.path.isfile(dest_png_path):
-                            os.remove(dest_mapper_out_path)
-                    if os.path.isfile(dest_mapper_out_path):
-                        ins = open(dest_mapper_out_path)
-                        line = True
-                        while line:
-                            line = ins.readline()
-                            if line:
-                                line_strip = line.strip()
-                                if "data does not exist" in line_strip:
-                                    is_empty_chunk = True
-                                    break
-                        ins.close()
+                    dest_png_path = get_chunk_image_tmp_path(chunk_luid)
+                    dest_mapper_out_path = get_chunk_mapper_out_path(chunk_luid)
+                    is_empty_chunk = is_chunk_empty_on_dest(chunk_luid)
                     if full_render or ((not os.path.isfile(dest_png_path)) and (not is_empty_chunk)):
                         print (cmd_string)
                         subprocess.call(cmd_string, shell=True)  # TODO: remember not to allow arbitrary command execution, which could happen if input contains ';' when using shell=True
                         if os.path.isfile(png_path):
                             total_generated_count += 1
                             square_generates_count += 1
-
                             try:
                                 if (os.path.isfile(dest_png_path)):
                                     os.remove(dest_png_path)
