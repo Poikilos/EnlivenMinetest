@@ -11,8 +11,8 @@ This program comes without any warranty, to the extent permitted by applicable l
 	* Zoom in and out
 	* optionally echo name of world that was detected by the scheduled py file
 	* shows player location (and only first 2 characters of name, for privacy; there is no saved setting yet, so to adjust, you must change the value of $nonprivate_name_beginning_char_count in chunkymap.php)	
-	* Ghost players if they stay in one spot 2 minutes (consider them logged out by that method alone since not requiring mods; see $player_file_age_idle_max_seconds in chunkymap.php)
-	* Hide players if they stay in one spot 5 minutes (consider them logged out by that method alone since not requiring mods; see $player_file_age_expired_max_seconds in chunkymap.php)
+	* Ghost players if they stay in one spot long enough (see $player_file_age_idle_max_seconds in chunkymap.php)
+	* Hide players if they stay in one spot long enough (see $player_file_age_expired_max_seconds in chunkymap.php) avoiding logout detection, and not requiring mods
     
 * Has optional script to add crontab entry (to schedule update script every minute that runs the py file unless the py file is not complete [took longer than 1 minute])
 
