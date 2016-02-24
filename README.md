@@ -38,11 +38,11 @@ This program comes without any warranty, to the extent permitted by applicable l
 	(if you are not using /var/www/html/minetest/chunkymapdata, edit chunkymap-cronjob script to use the correct folder, then)
     `chmod +x set-minutely-crontab-job.sh && ./set-minutely-crontab-job.sh`
 * IF you are using Linux
-	* Either copy your code to index-example.php and use it, or just rename it to map.php (or anything you want) then link to it.
+	* Either copy your code to example.php and use it, or just rename it to map.php (or anything you want) then link to it.
 	# The commands below will work if you are using the web installer, or have done mv minetest-chunkymap-master "$HOME/Downloads/minetest-chunkymap" (and if you are using /var/www/html/minetest -- otherwise change that)
 	MT_MY_WEBSITE_PATH=/var/www/html/minetest
 	sudo cp -f "$HOME/Downloads/minetest-chunkymap/web/chunkymap.php" "$MT_MY_WEBSITE_PATH/chunkymap.php"
-	sudo cp --no-clobber "$HOME/Downloads/minetest-chunkymap/web/index_example.php" "$MT_MY_WEBSITE_PATH/viewchunkymap.php"
+	sudo cp --no-clobber "$HOME/Downloads/minetest-chunkymap/web/example.php" "$MT_MY_WEBSITE_PATH/viewchunkymap.php"
 	sudo cp -R --no-clobber "$HOME/Downloads/minetest-chunkymap/web/images/*" "$MT_MY_WEBSITE_PATH/images/"
 	#--no-clobber: do not overwrite existing
 	# after you do this, the update script will do it for you if you are using /var/www/html/minetest, otherwise edit the update script before using it to get these things updated
@@ -70,7 +70,7 @@ This program comes without any warranty, to the extent permitted by applicable l
 	* edit chunkymap_regen.py and change world_name to your world name
 
 ## Known Issues
-* index-example.php should read the size of the chunks -- see near is_file($chunk_genresult_path) in chunkymap.php
+* chunkymap.php should read the size of the chunks -- see near is_file($chunk_genresult_path) in chunkymap.php
 * optionally hide player location
 * Make a method (in chunkymap.php) to echo the map as an html5 canvas (refresh players every 10 seconds, check for new map chunks every minute)
 * Detect failure of minetestmapper-numpy.py and instead use minetest-mapper if on linux, otherwise show error if neither are present (Windows has no minetest-mapper at least on client 0.4.13)
