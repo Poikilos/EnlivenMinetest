@@ -33,10 +33,19 @@ This program comes without any warranty, to the extent permitted by applicable l
 	`minetestserver`  
 	then when it is finished loading, press Ctrl C then run:  
     `chmod +x install-chunkymap-on-ubuntu.sh && ./install-chunkymap-on-ubuntu.sh`  
-* IF you are using a distro such as Ubuntu 14.04 where first line of /etc/crontab is "m h dom mon dow user command" then if you want regular refresh of map then run
+	* IF you are using a distro such as Ubuntu 14.04 where first line of /etc/crontab is "m h dom mon dow user command" then if you want regular refresh of map then run
 	(otherwise first edit the script to fit your crontab then)
 	(if you are not using /var/www/html/minetest/chunkymapdata, edit chunkymap-cronjob script to use the correct folder, then)
     `chmod +x set-minutely-crontab-job.sh && ./set-minutely-crontab-job.sh`
+* IF you are using Linux
+	* Either copy your code to index-example.php and use it, or just rename it to map.php (or anything you want) then link to it.
+	# The commands below will work if you are using the web installer, or have done mv minetest-chunkymap-master "$HOME/Downloads/minetest-chunkymap" (and if you are using /var/www/html/minetest -- otherwise change that)
+	MT_MY_WEBSITE_PATH=/var/www/html/minetest
+	sudo cp -f "$HOME/Downloads/minetest-chunkymap/web/chunkymap.php" "$MT_MY_WEBSITE_PATH/chunkymap.php"
+	sudo cp --no-clobber "$HOME/Downloads/minetest-chunkymap/web/index_example.php" "$MT_MY_WEBSITE_PATH/viewchunkymap.php"
+	sudo cp -R --no-clobber "$HOME/Downloads/minetest-chunkymap/web/images/*" "$MT_MY_WEBSITE_PATH/images/"
+	#--no-clobber: do not overwrite existing
+	# after you do this, the update script will do it for you if you are using /var/www/html/minetest, otherwise edit the update script before using it to get these things updated
 * IF you are using Windows
 	* put these files anywhere
 	* manually schedule a task in Task Scheduler to run C:\Python27\python chunkymap-regen.py every minute
