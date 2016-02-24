@@ -16,7 +16,7 @@ import argparse
 
 def get_dict_from_conf_file(path,assignment_operator="="):
     results = None
-    print ("Checking "+str(path)+" for settings...")
+    #print ("Checking "+str(path)+" for settings...")
     if os.path.isfile(path):
         results = {}
         ins = open(path, 'r')
@@ -32,7 +32,7 @@ def get_dict_from_conf_file(path,assignment_operator="="):
                             if ao_index<len(line_strip)-1:  # skip yaml implicit nulls or yaml objects
                                 result_name = line_strip[:ao_index].strip()
                                 result_value = line_strip[ao_index+1:].strip()
-                                print ("   CHECKING... "+result_name+":"+result_value)
+                                #print ("   CHECKING... "+result_name+":"+result_value)
                                 results[result_name]=result_value
         ins.close()
     return results
