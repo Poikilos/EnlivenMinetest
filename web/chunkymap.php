@@ -552,7 +552,7 @@ function echo_chunkymap_table() {
 						if ($is_idle==true) {
 							$img_style.="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
 						}
-						echo_hold( "<div style=\"position:absolute; z-index:999; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; border: 1px solid white\"><img src=\"images/chunkymap_character-face.png\" style=\"$img_style\"/>$player_name</div>" );
+						echo_hold( "<div style=\"position:absolute; z-index:999; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; border: 1px solid white\"><img src=\"images/chunkymap_character-face.png\" style=\"$img_style\"/><span style=\"color:white;\">$player_name</span></div>" );
 					}
 					//$position_offset_x+=$character_icon_w;
 				}
