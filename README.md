@@ -10,6 +10,10 @@ This program comes without any warranty, to the extent permitted by applicable l
 * Has static html version of map (echo_chunkymap_table() php function)
 	* Zoom in and out
 	* optionally echo name of world that was detected by the scheduled py file
+	* shows player location (and only first 2 characters of name, for privacy; there is no saved setting yet, so to adjust, you must change the value of $nonprivate_name_beginning_char_count in chunkymap.php)	
+	* Ghost players if they stay in one spot 2 minutes (consider them logged out by that method alone since not requiring mods; see $player_file_age_idle_max_seconds in chunkymap.php)
+	* Hide players if they stay in one spot 5 minutes (consider them logged out by that method alone since not requiring mods; see $player_file_age_expired_max_seconds in chunkymap.php)
+    
 * Has optional script to add crontab entry (to schedule update script every minute that runs the py file unless the py file is not complete [took longer than 1 minute])
 
 ## Requirements:
@@ -58,7 +62,6 @@ This program comes without any warranty, to the extent permitted by applicable l
 
 ## Known Issues
 * index-example.php should read the size of the chunks -- see near is_file($chunk_genresult_path) in chunkymap.php
-* Show player location (and optionally turn off)
-* Make a php file that shows the map on an html5 canvas (refresh players every 10 seconds, check for new map chunks every minute)
-* Make players invisible if they stay in one spot too long (consider them logged out by that method alone since not requiring mods)
+* optionally hide player location
+* Make a method (in chunkymap.php) to echo the map as an html5 canvas (refresh players every 10 seconds, check for new map chunks every minute)
 * Detect failure of minetestmapper-numpy.py and instead use minetest-mapper if on linux, otherwise show error if neither are present (Windows has no minetest-mapper at least on client 0.4.13)

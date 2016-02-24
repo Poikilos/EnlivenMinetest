@@ -310,6 +310,7 @@ function echo_chunkymap_table() {
 							$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "z" ] = $player_dict["z"];
 							$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "rel_x" ] = $rel_x;
 							$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "rel_z" ] = $rel_z;
+							$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "file_path" ] = $file_path;
 							
 							if (isset($player_dict["name"])) {
 								$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "name" ] = $player_dict["name"];
@@ -389,13 +390,15 @@ function echo_chunkymap_table() {
 	$z_count = $chunkz_max - $chunkz_min;
 	echo "\r\n";
 	echo "<center>\r\n";
-	echo_hold( "  <table style=\"border-spacing: 0px; border-style:solid; border-color:gray;border-width:0px\">\r\n");
+	echo_hold( "  <table style=\"border-spacing: 0px; border-style:solid; border-color:gray; border-width:0px\">\r\n");
 	$z = (int)$chunkz_max;
 	$scale=(float)$chunkymap_view_zoom_multiplier; // no longer /100
 	$zoomed_w=(int)((float)$chunkymap_tile_original_w*$scale+.5);
 	$zoomed_h=(int)((float)$chunkymap_tile_original_h*$scale+.5);
 	$genresult_suffix_then_dot_then_ext="_mapper_result.txt";
 	$dot_yaml=".yml";
+	$player_file_age_expired_max_seconds=299;
+	$player_file_age_idle_max_seconds=119;
 	while ($z >= $chunkz_min) {
 		echo_hold( "    <tr>\r\n");
 		$x = (int)$chunkx_min;
@@ -448,14 +451,14 @@ function echo_chunkymap_table() {
 					if (isset($chunk_dict["image_right"])) {
 						if ( (int)$chunk_dict["image_left"] > $expected_left ) {
 							$td_style_suffix.="text-align:right;";
-							$alignment_comment.="<!-- image_left:".$chunk_dict["image_left"]." is greater than expected $expected_left-->";
+							//$alignment_comment.="<!-- image_left:".$chunk_dict["image_left"]." is greater than expected $expected_left-->";
 						}
 						//elseif ( (int)$chunk_dict["image_right"] < $expected_right ) {
 						//	$td_style_suffix.="text-align:left;";
 						//}
 						else {
 							$td_style_suffix.="text-align:left;";
-							$alignment_comment.="<!-- image_left:".$chunk_dict["image_left"]." was the expected $expected_left-->";
+							//$alignment_comment.="<!-- image_left:".$chunk_dict["image_left"]." was the expected $expected_left-->";
 						}
 					}
 				}
@@ -473,14 +476,14 @@ function echo_chunkymap_table() {
 					if (isset($chunk_dict["image_bottom"])) {
 						if ( (int)$chunk_dict["image_top"] > $expected_top) {
 							$element_align_style_suffix.="vertical-align:bottom;";
-							$alignment_comment.="<!-- image_top:".$chunk_dict["image_top"]." is greater than expected $expected_top-->";
+							//$alignment_comment.="<!-- image_top:".$chunk_dict["image_top"]." is greater than expected $expected_top-->";
 						}
 						//elseif ( (int)$chunk_dict["image_bottom"] < $expected_bottom) {
 						//	$element_align_style_suffix.="vertical-align:top;";
 						//}
 						else {
 							$element_align_style_suffix.="vertical-align:top;";
-							$alignment_comment.="<!-- image_top:".$chunk_dict["image_top"]." was the expected $expected_top-->";
+							//$alignment_comment.="<!-- image_top:".$chunk_dict["image_top"]." was the expected $expected_top-->";
 						}
 					}
 				}
@@ -518,6 +521,17 @@ function echo_chunkymap_table() {
 				for ($player_count=0; $player_count<$chunk_assoc[$chunk_luid]["players_count"]; $player_count++) {
 					$rel_x = $chunk_assoc[$chunk_luid][ "players" ][ $player_count ]["rel_x"];
 					$rel_z = $chunk_assoc[$chunk_luid][ "players" ][ $player_count ]["rel_z"];
+					$is_expired=false;
+					$is_idle=false;
+					if (isset($chunk_assoc[$chunk_luid][ "players" ][ $player_count ]["file_path"])) {
+						$last_player_update_time=filemtime($chunk_assoc[$chunk_luid][ "players" ][ $player_count ]["file_path"]);
+						if (time()-$last_player_update_time > $player_file_age_expired_max_seconds) {
+							$is_expired=true;
+						}
+						elseif (time()-$last_player_update_time > $player_file_age_idle_max_seconds) {
+							$is_idle=true;
+						}
+					}
 					$player_name = $chunk_assoc[$chunk_luid]["players"][$player_count]["name"];
 					if (strlen($chunk_assoc[$chunk_luid]["players"][$player_count]["name"])>$nonprivate_name_beginning_char_count) {
 						$player_name = substr($player_name, 0, $nonprivate_name_beginning_char_count)."*";
@@ -527,7 +541,13 @@ function echo_chunkymap_table() {
 					$zoomed_head_h=$character_icon_h;//(int)((float)$character_icon_h*$scale+.5);
 					$rel_x -= (int)($zoomed_head_w/2);
 					$rel_z -= (int)($zoomed_head_h/2);
-					echo_hold( "<div style=\"position:absolute; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; border: 1px solid white\"><img src=\"images/chunkymap_character-face.png\"/>$player_name</div>" );
+					$img_style="";
+					if (!$is_expired) {
+						if ($is_idle) {
+							$img_style="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
+						}
+						echo_hold( "<div style=\"position:absolute; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; border: 1px solid white\"><img src=\"images/chunkymap_character-face.png\" style=\"$img_style\"/>$player_name</div>" );
+					}
 					//$position_offset_x+=$character_icon_w;
 				}
 			}
