@@ -40,13 +40,13 @@ $chunkymapdata_path = "chunkymapdata";
 $showplayers=true;
 
 // NOT OPTIONAL:
-$chunkymap_tile_original_w=80;
-$chunkymap_tile_original_h=80;
+$chunkymap_tile_original_w=16;
+$chunkymap_tile_original_h=16;
 
 $chunk_dimension_min=$chunkymap_tile_original_w;
 if ($chunkymap_tile_original_h<$chunk_dimension_min) $chunk_dimension_min=$chunkymap_tile_original_h;
 
-$chunkymap_view_zoom_min=1.0/$chunk_dimension_min; //should be a number that would get to exactly 100 eventually if multiplied by 2 repeatedly (such as 0.09765625); 0.005 doesn't work since tiles are 80x80 pixels
+$chunkymap_view_zoom_min=1.0/$chunk_dimension_min; //should be a number that would get to exactly 100 eventually if multiplied by 2 repeatedly (such as 0.09765625); 0.005 was avoided since tiles used to be 80x80 pixels
 $chunkymap_view_zoom_max=13107200.0;
 
 function echo_error($val) {
@@ -263,7 +263,8 @@ function echo_chunkymap_table() {
 	global $showplayers;
 	$players = array();
 	$player_count = 0;
-	
+	$character_icon_w=8;
+	$character_icon_h=8;
 	if ($showplayers==true) {
 		$chunkymap_players_path = $chunkymapdata_path."/players";
 		if ($handle = opendir($chunkymap_players_path)) {
@@ -273,50 +274,58 @@ function echo_chunkymap_table() {
 					if (endsWith($file_lower, ".yml")) {
 						$player_id=substr($file,0,strlen($file)-4); //-4 for .yml
 						$file_path = $chunkymap_players_path."/".$file;
-						$player_dict = get_dict_from_conf($file_path);
+						$player_dict = get_dict_from_conf($file_path,":");
 						$player_dict["id"]=$player_id;
 						//$players[$player_count]=get_dict_from_conf($file_path);
 						//$players[$player_count]["id"]=$player_id;
-						if (isset($player_dict["position"])) {
-							$tuple_string=trim($player_dict["position"]);
-							if ( startsWith($tuple_string, "(") and endsWith($tuple_string, ")") ) {
-								$tuple_string=substr($tuple_string,1,strlen($tuple_string)-2);
+						//if (isset($player_dict["position"])) {
+						if (isset($player_dict["x"]) and isset($player_dict["z"])) {
+							//$tuple_string=trim($player_dict["position"]);
+							//if ( startsWith($tuple_string, "(") and endsWith($tuple_string, ")") ) {
+							//	$tuple_string=substr($tuple_string,1,strlen($tuple_string)-2);
+							//}
+							//$coordinates = explode(",", $tuple_string);
+							//if (count($coordinates)==3) {
+							//$smallx=(int)$coordinates[0];
+							//$smallz=(int)$coordinates[2];
+							$smallx=(int)$player_dict["x"];
+							$smallz=(int)$player_dict["z"];
+							$x = (int)( $smallx/$chunkymap_tile_original_w );
+							$z = (int)( $smallz/$chunkymap_tile_original_h );
+							$chunk_luid = "x".$x."z".$z;
+							$rel_x = $smallx - ($x*$chunkymap_tile_original_w);
+							$rel_z = $smallz - ($z*$chunkymap_tile_original_h);
+							if (!isset($chunk_assoc[$chunk_luid])) {
+								$chunk_assoc[$chunk_luid] = array();
 							}
-							$coordinates = explode(",", $tuple_string);
-							if (count($coordinates)==3) {
-								$chunk_luid = "x".$x."z".$z;
-								if (!isset($chunk_assoc[$chunk_luid])) {
-									$chunk_assoc[$chunk_luid] = array();
-								}
-								if (!isset($chunk_assoc[$chunk_luid]["players"])) {
-									$chunk_assoc[$chunk_luid]["players"] = array();
-								}
-								if (!isset($chunk_assoc[$chunk_luid]["players_count"])) {
-									$chunk_assoc[$chunk_luid]["players_count"] = 0;
-								}
-								if (isset($player_dict["name"])) {
-									$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "name" ] = $player_dict["name"]
-								}
-								else {
-									$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "name" ] = $player_dict["id"]
-								}
-								$chunk_assoc[$chunk_luid]["players_count"] += 1;
+							if (!isset($chunk_assoc[$chunk_luid]["players"])) {
+								$chunk_assoc[$chunk_luid]["players"] = array();
+							}
+							if (!isset($chunk_assoc[$chunk_luid]["players_count"])) {
+								$chunk_assoc[$chunk_luid]["players_count"] = 0;
+							}
+							//already checked for position in outer case
+							$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "position" ] = $player_dict["position"];
+							$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "rel_x" ] = $rel_x;
+							$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "rel_z" ] = $rel_z;
+							
+							if (isset($player_dict["name"])) {
+								$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "name" ] = $player_dict["name"];
 							}
 							else {
-								echo_error("Bad coordinates $tuple_string for player.");
+								$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "name" ] = $player_dict["id"];
 							}
+							$chunk_assoc[$chunk_luid]["players_count"] += 1;
+							//}
+							//else {
+							//	echo_error("Bad coordinates $tuple_string for player.");
+							//}
 						}
 
 						//$player_count++;
 					}
 				}
 			}
-		}
-	}
-	if (isset($chunk_assoc[$chunk_luid]["players_count"])) {
-		$nonprivate_name_beginning_char_count = 2;
-		for ($player_count=0; $player_count<$chunk_assoc[$chunk_luid]["players_count"]; $player_count++) {
-			//echo "<div >".substr($chunk_assoc[$chunk_luid]["players"][$player_count]["name"], 0, $nonprivate_name_beginning_char_count)."</div>";
 		}
 	}
 	//if ($map_dict != null) {
@@ -498,6 +507,27 @@ function echo_chunkymap_table() {
 			else {
 				//echo_hold( "<span style=\"font-size:1px\">&nbsp;</span>");
 			}
+			
+			if (isset($chunk_assoc[$chunk_luid]["players_count"])) {
+				$nonprivate_name_beginning_char_count = 2;
+				
+				for ($player_count=0; $player_count<$chunk_assoc[$chunk_luid]["players_count"]; $player_count++) {
+					$rel_x = $chunk_assoc[$chunk_luid][ "players" ][ $player_count ]["rel_x"];
+					$rel_z = $chunk_assoc[$chunk_luid][ "players" ][ $player_count ]["rel_z"];
+					$player_name = $chunk_assoc[$chunk_luid]["players"][$player_count]["name"];
+					if (strlen($chunk_assoc[$chunk_luid]["players"][$player_count]["name"])>$nonprivate_name_beginning_char_count) {
+						$player_name = substr($player_name, 0, $nonprivate_name_beginning_char_count)."*";
+					}
+					//show head full size (not zoomed):
+					$zoomed_head_w=$character_icon_w;//(int)((float)$character_icon_w*$scale+.5);
+					$zoomed_head_h=$character_icon_h;//(int)((float)$character_icon_h*$scale+.5);
+					$rel_x -= (int)($zoomed_head_w/2);
+					$rel_z -= (int)($zoomed_head_h/2);
+					echo_hold( "<div style=\"position:absolute; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; border: 1px solid #73AD21\"><img src=\"images/chunkymap_character-head.png\"/>$player_name</div>" );
+					//$position_offset_x+=$character_icon_w;
+				}
+			}
+			
 			//echo "        <br/>".$x.",0,".$z;
 			echo_hold($alignment_comment);
 			echo_hold( "</td>\r\n");

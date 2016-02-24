@@ -1016,6 +1016,8 @@ def draw_image(world,uid_to_color):
 
     print("Saving to: "+ args.output)
     print("PNG Region: ", pngregion)
+    print("pngMinX: ", str(pngminx))
+    print("pngMaxZ: ", str(pngmaxz))
     print("Pixels PerNode: ", args.pixelspernode)
     print("border: ", border)
 

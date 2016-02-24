@@ -13,6 +13,58 @@ import traceback
 #sector_ymax = args.self.maxheight/16
 #region server-specific options
 
+def get_dict_from_conf_file(path,assignment_operator="="):
+    results = None
+    print ("Checking "+str(path)+" for settings...")
+    if os.path.isfile(path):
+        results = {}
+        ins = open(path, 'r')
+        line = True
+        while line:
+            line = ins.readline()
+            if line and len(line)>0:
+                line_strip=line.strip()
+                if not line_strip[0]=="#":  # if not comment
+                    if not line_strip[0]=="-":  # ignore yaml arrays
+                        ao_index = line_strip.find(assignment_operator)
+                        if ao_index>=1:  # intentionally skip zero-length variable names
+                            if ao_index<len(line_strip)-1:  # skip yaml implicit nulls or yaml objects
+                                result_name = line_strip[:ao_index].strip()
+                                result_value = line_strip[ao_index+1:].strip()
+                                print ("   CHECKING... "+result_name+":"+result_value)
+                                results[result_name]=result_value
+        ins.close()
+    return results
+
+def get_tuple_from_notation(line, debug_src_name="<unknown object>"):
+    result = None
+    if line is not None:
+        # mark chunk
+        tuple_noparen_pos_string = line.strip("() \n\r")
+        pos_strings = tuple_noparen_pos_string.split(",")
+        if len(pos_strings) == 3:
+            try:
+                player_x = float(pos_strings[0])
+                player_y = float(pos_strings[1])
+                player_z = float(pos_strings[2])
+            except:
+                player_x = int(pos_strings[0])
+                player_y = int(pos_strings[1])
+                player_z = int(pos_strings[2])
+            result = player_x, player_y, player_z
+        else:
+            print("'"+debug_src_name+"' has bad position data--should be 3-length (x,y,z) in position value: "+str(pos_strings))
+    return result
+
+def is_same_fvec3(list_a, list_b):
+    result = False
+    if list_a is not None and list_b is not None:
+        if len(list_a)>=3 and len(list_b)>=3:
+            result = (float(list_a[0]) == float(list_b[0])) and (float(list_a[1]) == float(list_b[1])) and (float(list_a[2]) == float(list_b[2]))
+    return False
+
+
+
 class MTChunk:
     x = None
     z = None
@@ -252,28 +304,6 @@ class MTChunks:
             ins.close()
 
 
-    def get_dict_from_conf_file(self, path,assignment_operator="="):
-        results = None
-        print ("Checking "+str(path)+" for settings...")
-        if os.path.isfile(path):
-            results = {}
-            ins = open(path, 'r')
-            line = True
-            while line:
-                line = ins.readline()
-                if line and len(line)>0:
-                    line_strip=line.strip()
-                    if not line_strip[0]=="#":  # if not comment
-                        if not line_strip[0]=="-":  # ignore yaml arrays
-                            ao_index = line_strip.find(assignment_operator)
-                            if ao_index>=1:  # intentionally skip zero-length variable names
-                                if ao_index<len(line_strip)-1:  # skip yaml implicit nulls or yaml objects
-                                    result_name = line_strip[:ao_index].strip()
-                                    result_value = line_strip[ao_index+1:].strip()
-                                    print ("   CHECKING... "+result_name+":"+result_value)
-                                    results[result_name]=result_value
-            ins.close()
-        return results
 
 
     def deny_http_access(self, dir_path):
@@ -484,6 +514,7 @@ class MTChunks:
 
 
         return result
+                
 
     def check_players(self):
         self.chunkymap_data_path=os.path.join(self.website_root,"chunkymapdata")
@@ -526,45 +557,67 @@ class MTChunks:
                                     break
                     ins.close()
                     player_dest_path = os.path.join(chunkymap_players_path,filename+".yml")
-                    if player_position is not None:
-                        # mark chunk
-                        tuple_noparen_pos_string = player_position.strip("() \n\r")
-                        pos_strings = tuple_noparen_pos_string.split(",")
-                        if len(pos_strings) == 3:
-                            player_x = None
-                            player_y = None
-                            player_z = None
-                            try:
-                                player_x = float(pos_strings[0])
-                                player_y = float(pos_strings[1])
-                                player_z = float(pos_strings[2])
-                            except:
-                                player_x = int(pos_strings[0])
-                                player_y = int(pos_strings[1])
-                                player_z = int(pos_strings[2])
-                            chunk_x = int((float(player_x)/self.chunk_size))
-                            chunk_y = int((float(player_y)/self.chunk_size))
-                            chunk_z = int((float(player_z)/self.chunk_size))
-                            chunk_luid = self.get_chunk_luid(chunk_x, chunk_z)
-                            self.prepare_chunk_meta(chunk_luid)
-                            self.chunks[chunk_luid].is_player_in_this_chunk = True
-                        else:
-                            print("Player '"+filename+"' has bad position data--should be 3-length (x,y,z) in position value: "+str(pos_strings))
+                    player_x = None
+                    player_y = None
+                    player_z = None
+                    chunk_x = None
+                    chunk_y = None
+                    chunk_z = None
+                    
+                    player_position_tuple = get_tuple_from_notation(player_position, filename)
+                    if player_position_tuple is not None:
+                        player_x, player_y, player_z = player_position_tuple
+                        player_x = float(player_x)
+                        player_y = float(player_y)
+                        player_z = float(player_z)
+                        chunk_x = int((float(player_x)/self.chunk_size))
+                        chunk_y = int((float(player_y)/self.chunk_size))
+                        chunk_z = int((float(player_z)/self.chunk_size))
+                        chunk_luid = self.get_chunk_luid(chunk_x, chunk_z)
+                        self.prepare_chunk_meta(chunk_luid)
+                        self.chunks[chunk_luid].is_player_in_this_chunk = True
 
                     #if is_enough_data:
                     #if player_name!="singleplayer":
-                    map_player_dict = self.get_dict_from_conf_file(player_dest_path,":")
-                    if (map_player_dict is None) or (map_player_dict["position"]!=player_position):
+                    map_player_dict = get_dict_from_conf_file(player_dest_path,":")
+                    #map_player_position_tuple = None
+                    saved_player_x = None
+                    saved_player_y = None
+                    saved_player_y = None
+                    if map_player_dict is not None:
+                        #map_player_position_tuple = saved_player_x, saved_player_y, saved_player_z
+                        if "x" in map_player_dict.keys():
+                            saved_player_x = float(map_player_dict["x"])
+                        if "y" in map_player_dict.keys():
+                            saved_player_y = float(map_player_dict["y"])
+                        if "z" in map_player_dict.keys():
+                            saved_player_z = float(map_player_dict["z"])
+                        
+                    
+                    #if (map_player_dict is None) or not is_same_fvec3( map_player_position_tuple, player_position_tuple):
+                    if (map_player_dict is None) or (saved_player_x is None) or (saved_player_z is None) or (int(saved_player_x)!=int(player_x)) or (int(saved_player_z)!=int(player_z)):  
+                        # don't check y since y is elevation in minetest, don't use float since subblock position doesn't matter to map
+                        if map_player_dict is not None and saved_player_x is not None and saved_player_z is not None:
+                            #print("PLAYER MOVED: "+str(player_name)+" moved from "+str(map_player_position_tuple)+" to "+str(player_position_tuple))
+                            print("PLAYER MOVED: "+str(player_name)+" moved from "+str(saved_player_x)+","+str(saved_player_y)+","+str(saved_player_z)+" to "+str(player_x)+","+str(player_y)+","+str(player_z))
                         outs = open(player_dest_path, 'w')
                         if player_name is not None:
                             outs.write("name:"+player_name+"\n")  # python automatically uses correct newline for your os when you put "\n"
-                        if player_position is not None:
-                            outs.write("position:"+player_position+"\n")
+                        #if player_position is not None:
+                        #    outs.write("position:"+player_position+"\n")
+                        if player_x is not None:
+                            outs.write("x:"+str(player_x)+"\n")
+                        if player_y is not None:
+                            outs.write("y:"+str(player_y)+"\n")
+                        if player_z is not None:
+                            outs.write("z:"+str(player_z)+"\n")
                         outs.write("is_enough_data:"+str(is_enough_data))
                         outs.close()
                         player_written_count += 1
+                    else:
+                        print("DIDN'T MOVE: "+str(player_name))
                     player_count += 1
-
+                    
 
     def is_player_at_luid(self, chunk_luid):
         result = False
@@ -593,7 +646,7 @@ class MTChunks:
             if not os.path.isfile(htaccess_path):
                 self.deny_http_access(self.chunkymap_data_path)
 
-            mapvars = self.get_dict_from_conf_file(world_yaml_path,":")
+            mapvars = get_dict_from_conf_file(world_yaml_path,":")
             #is_testonly == (os_name=="windows")
 
             if mapvars is not None and set(['world_name']).issubset(mapvars):
