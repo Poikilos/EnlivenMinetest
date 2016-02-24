@@ -2,6 +2,7 @@
 import os
 import subprocess
 import traceback
+import argparse
 
 # REQUIRES: see README.md
 # The way to do a full render is deleting all files from the folder self.chunkymap_data_path such as /var/www/html/minetest/chunkymapdata (or chunkymap in current directory on Windows)
@@ -139,6 +140,8 @@ class MTChunks:
     maxheight = 50
     minheight = -25
     pixelspernode = 1
+    refresh_map_enable = None
+    refresh_players_enable = None
     #ALSO save to YAML:
     #total_generated_count = 0
     #endregion values to save to YAML
@@ -146,6 +149,8 @@ class MTChunks:
     world_blacklist = None
 
     def __init__(self):  #formerly checkpaths() in global scope
+        self.refresh_map_enable = True
+        self.refresh_players_enable = True
         self.chunks = {}
         self.username = "owner"
         self.website_root="/var/www/html/minetest"
@@ -517,6 +522,7 @@ class MTChunks:
                 
 
     def check_players(self):
+        # NOT NEEDED: if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
         self.chunkymap_data_path=os.path.join(self.website_root,"chunkymapdata")
         chunkymap_players_name = "players"
         chunkymap_players_path = os.path.join(self.chunkymap_data_path, chunkymap_players_name)
@@ -632,10 +638,10 @@ class MTChunks:
         if chunk_luid in self.chunks.keys():
             result = self.chunks[chunk_luid].is_fresh
         return result
-
-    def run(self):
+        
+    def check_map(self):
         if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
-            self.check_players()
+            
             self.chunkymap_data_path=os.path.join(self.website_root,"chunkymapdata")
             yaml_name = "generated.yml"
             world_yaml_path = os.path.join(self.chunkymap_data_path, yaml_name)
@@ -816,10 +822,35 @@ class MTChunks:
         else:
             print ("failed since this folder must contain colors.txt and minetestmapper-numpy.py")
 
-def main():
-    #args = parse_args()
-    mtchunks = MTChunks()
-    mtchunks.run()
+    def run(self):
+        if self.refresh_players_enable:
+            self.check_players()
+        if self.refresh_map_enable:
+            self.check_map()
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='A mapper for minetest')
+    parser.add_argument('--skip-map', type = bool, metavar = ('skip_map'), default = False, help = 'draw map tiles and save YAML files for chunkymap.php to use')
+    #parser.add_argument('--skip-map',action='store_const', const = True, default = False, help = 'Do not draw map tiles (which would save PNG and YAML files for chunkymap.php to use)')
+    parser.add_argument('--skip-players', type = bool, metavar = ('skip_players'), default = False, help = 'update player YAML files for chunkymap.php to use')
+    #parser.add_argument('--skip-players',action='store_const', const = True, default = False, help = 'Do not update players (which would save YAML files for chunkymap.php to use)')
+    #parser = argparse.ArgumentParser(description='Process some integers.')
+    args = parser.parse_args()
+    mtchunks = MTChunks()
+    if not args.skip_players:
+        if not args.skip_map:
+            mtchunks.refresh_players_enable = False
+            print("Drawing players and map")
+        else:
+            mtchunks.refresh_map_enable = False
+            print("Drawing players only")
+    else:
+        if not args.skip_map:
+            mtchunks.refresh_players_enable = False
+            print("Drawing map only")
+        else:
+            mtchunks.refresh_map_enable = False
+            print("Nothing to do since "+str(args))
+    
+    #input("press enter to exit...")
+    mtchunks.run()
