@@ -21,12 +21,14 @@ fi
 cp -f "$CHUNKYMAP_INSTALLER_DIR/chunkymap-regen.py" "$CHUNKYMAP_DEST/"
 #chmod +x "$CHUNKYMAP_DEST/chunkymap-regen.py"
 cp -f "$CHUNKYMAP_INSTALLER_DIR/chunkymap-regen.sh" "$CHUNKYMAP_DEST/"
+cp -f "$CHUNKYMAP_INSTALLER_DIR/chunkymap-regen-players.sh" "$CHUNKYMAP_DEST/"
 cp -f "$CHUNKYMAP_INSTALLER_DIR/chunkymap-cronjob" "$CHUNKYMAP_DEST/"
 cp -f "$CHUNKYMAP_INSTALLER_DIR/set-minutely-crontab-job.sh" "$CHUNKYMAP_DEST/"
 cd "$CHUNKYMAP_INSTALLER_DIR"
 python replace-with-current-user.py  # the py file only manipulates the minetest/util folder
 # so chmod those files AFTER running the py above:
 chmod +x "$CHUNKYMAP_DEST/chunkymap-regen.sh"
+chmod +x "$CHUNKYMAP_DEST/chunkymap-regen-players.sh"
 chmod +x "$CHUNKYMAP_DEST/chunkymap-cronjob"
 chmod +x "$CHUNKYMAP_DEST/set-minutely-crontab-job.sh"
 
