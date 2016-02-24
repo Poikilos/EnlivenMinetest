@@ -549,12 +549,14 @@ function echo_chunkymap_table() {
 					//$img_style="position:absolute; ";
 					$img_style="";
 					$img_border_style="border: 1px solid white;";
+					$text_style="color:white;";
 					if ($is_expired==false) {
 						if ($is_idle==true) {
 							$img_border_style="border: 1px solid gray;";
 							$img_style.="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
+							$text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
 						}
-						echo_hold( "<div style=\"position:absolute; z-index:999; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; $img_border_style\"><img src=\"images/chunkymap_character-face.png\" style=\"$img_style\"/><span style=\"color:white;\">$player_name</span></div>" );
+						echo_hold( "<div style=\"position:absolute; z-index:999; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; $img_border_style\"><img src=\"images/chunkymap_character-face.png\" style=\"$img_style\"/><span style=\"$text_style\">$player_name</span></div>" );
 					}
 					//$position_offset_x+=$character_icon_w;
 				}
