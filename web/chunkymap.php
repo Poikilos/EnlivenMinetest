@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 
 //NOTE: for parse errors, MUST add the following line to  php.ini (such as /etc/php5/apache2/php.ini): display_errors = on
@@ -236,6 +239,8 @@ function echo_chunkymap_table() {
 	ini_set('display_errors', 1);
 	ini_set('display_startup_errors', 1);
 	error_reporting(E_ALL);
+	//error_reporting(-1);
+
 	global $is_echo_never_held;
 	$is_echo_never_held=true;
 	global $chunkymap_view_x;
@@ -501,20 +506,16 @@ function echo_chunkymap_table() {
 			}
 
 			echo_hold( "      <td width=\"1\" style=\"padding:0px; background-color:lightgray; $td_style_suffix $element_align_style_suffix\">");
-			echo_hold("<div style=\"position: relative\">"); //causes absolute child position to be relative to this div's location, as per http://www.w3schools.com/css/tryit.asp?filename=trycss_position_absolute
+			echo_hold("<div style=\"position: relative\">"); //causes child's absolute position to be relative to this div's location, as per http://www.w3schools.com/css/tryit.asp?filename=trycss_position_absolute
 			$chunk_luid = "x".$x."z".$z;
 			$chunk_img_name = $x_opener.$x.$z_opener.$z."$dot_and_ext";
 			$chunk_img_path = $chunkymapdata_path.'/'.$chunk_img_name;
-
-			
-			
 			if (is_file($chunk_img_path)) {
 				echo_hold( "<img class=\"maptileimg\" style=\"width:$this_zoomed_w; height:$this_zoomed_h;\" src=\"$chunk_img_path\"/>");
 			}
 			else {
 				//echo_hold( "<span style=\"font-size:1px\">&nbsp;</span>");
 			}
-			
 			if (isset($chunk_assoc[$chunk_luid]["players_count"])) {
 				echo "<!--CHUNK $chunk_luid: players_count=".$chunk_assoc[$chunk_luid]["players_count"]."-->";
 				$nonprivate_name_beginning_char_count = 20;
@@ -543,7 +544,7 @@ function echo_chunkymap_table() {
 					$rel_x -= (int)($zoomed_head_w/2);
 					$rel_z -= (int)($zoomed_head_h/2);
 					//$img_style="position:absolute; ";
-					$img_style=""
+					$img_style="";
 					if (!$is_expired) {
 						if ($is_idle) {
 							$img_style.="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
