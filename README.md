@@ -57,6 +57,7 @@ This program comes without any warranty, to the extent permitted by applicable l
 	* edit chunkymap_regen.py and change world_name to your world name
 
 ## Known Issues
+* index-example.php should read the size of the chunks -- see near is_file($chunk_genresult_path) in chunkymap.php
 * Show player location (and optionally turn off)
 * Make a php file that shows the map on an html5 canvas (refresh players every 10 seconds, check for new map chunks every minute)
 * Make players invisible if they stay in one spot too long (consider them logged out by that method alone since not requiring mods)
