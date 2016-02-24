@@ -1,7 +1,5 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+
 
 //NOTE: for parse errors, MUST add the following line to  php.ini (such as /etc/php5/apache2/php.ini): display_errors = on
 if (is_file('browser.php')) {
@@ -235,6 +233,9 @@ function echo_worldname() {
 	else echo "<span style=\"color:red\">(missing world name)</span>";
 }
 function echo_chunkymap_table() {
+	ini_set('display_errors', 1);
+	ini_set('display_startup_errors', 1);
+	error_reporting(E_ALL);
 	global $is_echo_never_held;
 	$is_echo_never_held=true;
 	global $chunkymap_view_x;
