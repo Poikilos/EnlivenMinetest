@@ -406,7 +406,7 @@ function echo_chunkymap_table() {
 	$zoomed_h=(int)((float)$chunkymap_tile_original_h*$scale+.5);
 	$genresult_suffix_then_dot_then_ext="_mapper_result.txt";
 	$dot_yaml=".yml";
-	$player_file_age_expired_max_seconds=120*60-1;
+	$player_file_age_expired_max_seconds=20*60-1;
 	$player_file_age_idle_max_seconds=2*60-1;
 	while ($z >= $chunkz_min) {
 		echo_hold( "    <tr>\r\n");
