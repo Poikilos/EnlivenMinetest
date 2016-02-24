@@ -330,6 +330,9 @@ function echo_chunkymap_table() {
 							//	echo_error("Bad coordinates $tuple_string for player.");
 							//}
 						}
+						else {
+							echo_error("Missing player location in data: ".implode(" ",$player_dict))
+						}
 
 						//$player_count++;
 					}
