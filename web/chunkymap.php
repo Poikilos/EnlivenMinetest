@@ -305,7 +305,9 @@ function echo_chunkymap_table() {
 								$chunk_assoc[$chunk_luid]["players_count"] = 0;
 							}
 							//already checked for position in outer case
-							$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "position" ] = $player_dict["position"];
+							//DEPRECATED: $chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "position" ] = $player_dict["position"];
+							$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "x" ] = $player_dict["x"];
+							$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "z" ] = $player_dict["z"];
 							$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "rel_x" ] = $rel_x;
 							$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "rel_z" ] = $rel_z;
 							
@@ -495,6 +497,7 @@ function echo_chunkymap_table() {
 			}
 
 			echo_hold( "      <td width=\"1\" style=\"padding:0px; background-color:lightgray; $td_style_suffix $element_align_style_suffix\">");
+			echo_hold("<div style=\"position: relative\">"); //causes absolute child position to be relative to this div's location, as per http://www.w3schools.com/css/tryit.asp?filename=trycss_position_absolute
 			$chunk_luid = "x".$x."z".$z;
 			$chunk_img_name = $x_opener.$x.$z_opener.$z."$dot_and_ext";
 			$chunk_img_path = $chunkymapdata_path.'/'.$chunk_img_name;
@@ -509,6 +512,7 @@ function echo_chunkymap_table() {
 			}
 			
 			if (isset($chunk_assoc[$chunk_luid]["players_count"])) {
+				echo "<!--CHUNK $chunk_luid: players_count=".$chunk_assoc[$chunk_luid]["players_count"]."-->";
 				$nonprivate_name_beginning_char_count = 2;
 				
 				for ($player_count=0; $player_count<$chunk_assoc[$chunk_luid]["players_count"]; $player_count++) {
@@ -523,13 +527,15 @@ function echo_chunkymap_table() {
 					$zoomed_head_h=$character_icon_h;//(int)((float)$character_icon_h*$scale+.5);
 					$rel_x -= (int)($zoomed_head_w/2);
 					$rel_z -= (int)($zoomed_head_h/2);
-					echo_hold( "<div style=\"position:absolute; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; border: 1px solid #73AD21\"><img src=\"images/chunkymap_character-head.png\"/>$player_name</div>" );
+					echo_hold( "<div style=\"position:absolute; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; border: 1px solid white\"><img src=\"images/chunkymap_character-face.png\"/>$player_name</div>" );
 					//$position_offset_x+=$character_icon_w;
 				}
 			}
+			else echo "<!--CHUNK $chunk_luid: no player count-->";
 			
 			//echo "        <br/>".$x.",0,".$z;
 			echo_hold($alignment_comment);
+			echo_hold("</div>");
 			echo_hold( "</td>\r\n");
 			$x++;
 		}

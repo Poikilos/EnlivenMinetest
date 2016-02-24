@@ -238,7 +238,7 @@ class MTChunks:
         result = False
         if os.path.isfile(dest_genresult_path):
             #may have data such as:
-            #Result image (w=80 h=80) will be written to chunk_x0z0.png
+            #Result image (w=16 h=16) will be written to chunk_x0z0.png
             #Unknown node names: meze:meze default:stone_with_iron air default:dirt_with_snow default:stone_with_copper default:snow
             #Unknown node ids: 0x0 0x1 0x2 0x3 0x4 0x5 0x6 0x7
             #Drawing image
@@ -600,6 +600,8 @@ class MTChunks:
                         if map_player_dict is not None and saved_player_x is not None and saved_player_z is not None:
                             #print("PLAYER MOVED: "+str(player_name)+" moved from "+str(map_player_position_tuple)+" to "+str(player_position_tuple))
                             print("PLAYER MOVED: "+str(player_name)+" moved from "+str(saved_player_x)+","+str(saved_player_y)+","+str(saved_player_z)+" to "+str(player_x)+","+str(player_y)+","+str(player_z))
+                        else:
+                            print("SAVING YAML for player '"+str(player_name)+"'")
                         outs = open(player_dest_path, 'w')
                         if player_name is not None:
                             outs.write("name:"+player_name+"\n")  # python automatically uses correct newline for your os when you put "\n"
