@@ -541,7 +541,7 @@ function echo_chunkymap_table() {
 					$zoomed_head_h=$character_icon_h;//(int)((float)$character_icon_h*$scale+.5);
 					$rel_x -= (int)($zoomed_head_w/2);
 					$rel_z -= (int)($zoomed_head_h/2);
-					$img_style="position:absolute; ";
+					$img_style="position:absolute; z-index:999; ";
 					if (!$is_expired) {
 						if ($is_idle) {
 							$img_style.="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
