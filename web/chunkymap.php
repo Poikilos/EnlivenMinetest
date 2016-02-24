@@ -331,7 +331,7 @@ function echo_chunkymap_table() {
 							//}
 						}
 						else {
-							echo_error("Missing player location in data: ".implode(" ",$player_dict))
+							echo_error("Missing player location in data: ".implode(" ",$player_dict));
 						}
 
 						//$player_count++;
