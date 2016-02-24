@@ -7,3 +7,5 @@
 #if[ $MT_PLAYERS_ACTIVE_COUNT -gt 0 ]; then
 flock -n /var/run/chunkymap-regen.lockfile -c /home/owner/minetest/util/chunkymap-regen-players.sh
 #fi
+
+

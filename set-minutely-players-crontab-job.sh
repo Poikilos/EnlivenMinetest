@@ -14,3 +14,6 @@ crontab -l > "$MT_CHUNKYMAP_CRON_TMP"
 echo "* * * * * root /home/owner/minetest/util/chunkymap-players-cronjob" >> "$MT_CHUNKYMAP_CRON_TMP"
 crontab "$MT_CHUNKYMAP_CRON_TMP"
 rm "$MT_CHUNKYMAP_CRON_TMP"
+
+
+

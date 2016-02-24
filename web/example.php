@@ -37,3 +37,4 @@ else {
 <center><small>Powered by <a href="https://github.com/expertmm/minetest-chunkymap">Chunkymap</a></small></center>
 </body>
 </html>
+

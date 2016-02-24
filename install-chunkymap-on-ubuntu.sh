@@ -39,3 +39,6 @@ echo "To learn about chunkymap:"
 echo "cd $CHUNKYMAP_DEST"
 echo ""
 # NOTE: colors.txt should ALREADY be in $HOME/minetest/util
+
+
+
