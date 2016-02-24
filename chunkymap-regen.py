@@ -572,6 +572,8 @@ class MTChunks:
                     
                     player_position_tuple = get_tuple_from_notation(player_position, filename)
                     if player_position_tuple is not None:
+                        #Divide by 10 because I don't know why (minetest issue)
+                        player_position_tuple = player_position_tuple[0]/10.0, player_position_tuple[1]/10.0, player_position_tuple[2]/10.0
                         player_x, player_y, player_z = player_position_tuple
                         player_x = float(player_x)
                         player_y = float(player_y)
