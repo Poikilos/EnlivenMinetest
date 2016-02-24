@@ -406,7 +406,7 @@ function echo_chunkymap_table() {
 	$zoomed_h=(int)((float)$chunkymap_tile_original_h*$scale+.5);
 	$genresult_suffix_then_dot_then_ext="_mapper_result.txt";
 	$dot_yaml=".yml";
-	$player_file_age_expired_max_seconds=10*60-1;
+	$player_file_age_expired_max_seconds=120*60-1;
 	$player_file_age_idle_max_seconds=2*60-1;
 	while ($z >= $chunkz_min) {
 		echo_hold( "    <tr>\r\n");
@@ -548,8 +548,8 @@ function echo_chunkymap_table() {
 					$rel_z -= (int)($zoomed_head_h/2);
 					//$img_style="position:absolute; ";
 					$img_style="";
-					if (!$is_expired) {
-						if ($is_idle) {
+					if ($is_expired==false) {
+						if ($is_idle==true) {
 							$img_style.="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
 						}
 						echo_hold( "<div style=\"position:absolute; z-index:999; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; border: 1px solid white\"><img src=\"images/chunkymap_character-face.png\" style=\"$img_style\"/>$player_name</div>" );
