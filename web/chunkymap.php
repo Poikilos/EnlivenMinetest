@@ -407,7 +407,7 @@ function echo_chunkymap_table() {
 	$genresult_suffix_then_dot_then_ext="_mapper_result.txt";
 	$dot_yaml=".yml";
 	$player_file_age_expired_max_seconds=20*60-1;
-	$player_file_age_idle_max_seconds=2*60-1;
+	$player_file_age_idle_max_seconds=5*60-1;
 	while ($z >= $chunkz_min) {
 		echo_hold( "    <tr>\r\n");
 		$x = (int)$chunkx_min;
@@ -548,11 +548,13 @@ function echo_chunkymap_table() {
 					$rel_z -= (int)($zoomed_head_h/2);
 					//$img_style="position:absolute; ";
 					$img_style="";
+					$img_border_style="border: 1px solid white;";
 					if ($is_expired==false) {
 						if ($is_idle==true) {
+							$img_border_style="border: 1px solid gray;";
 							$img_style.="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
 						}
-						echo_hold( "<div style=\"position:absolute; z-index:999; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; border: 1px solid white\"><img src=\"images/chunkymap_character-face.png\" style=\"$img_style\"/><span style=\"color:white;\">$player_name</span></div>" );
+						echo_hold( "<div style=\"position:absolute; z-index:999; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; $img_border_style\"><img src=\"images/chunkymap_character-face.png\" style=\"$img_style\"/><span style=\"color:white;\">$player_name</span></div>" );
 					}
 					//$position_offset_x+=$character_icon_w;
 				}
