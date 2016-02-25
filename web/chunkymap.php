@@ -552,7 +552,7 @@ function echo_chunkymap_table() {
 					$text_style="color:white;";
 					if ($is_expired==false) {
 						if ($is_idle==true) {
-							$img_border_style="border: 1px solid gray;";
+							$img_border_style="border: 1px solid rgba(128,128,128,.5);";
 							$img_style.="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
 							$text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
 						}

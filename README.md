@@ -7,6 +7,9 @@ License: (see LICENSE in notepad or your favorite text editor)
 This program comes without any warranty, to the extent permitted by applicable law.
 
 ## Features:
+* To loop program (reduces disc reads since stores certain info) run like:
+    chunkymap-regen.py --loop true
+* Change program status while looping by placing chunkymap-signals.txt in the same folder as chunkymap-regen.py (see chunkymap-signals example.txt)
 * Has static html version of map (echo_chunkymap_table() php function)
 	* Zoom in and out
 	* optionally echo name of world that was detected by the scheduled py file
@@ -15,6 +18,9 @@ This program comes without any warranty, to the extent permitted by applicable l
 	* Hide players if they stay in one spot long enough (see $player_file_age_expired_max_seconds in chunkymap.php) avoiding logout detection, and not requiring mods
     
 * Has optional script to add crontab entry (to schedule update script every minute that runs the py file unless the py file is not complete [took longer than 1 minute])
+
+## Developer Notes:
+* the map update function is only able to detect new chunks, and only checks edge chunks if player is present in one
 
 ## Requirements:
 * A minetest version compatible with minetestmapper-numpy.py Made by Jogge, modified by celeron55

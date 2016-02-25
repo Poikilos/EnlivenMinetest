@@ -1,5 +1,8 @@
 <html>
+<head>
 <title>Chunkymap Example Page</title>
+<meta http-equiv="refresh" content="30">
+</head> 
 <body style="font-family:calibri,sans">
 <?php
 ini_set('display_errors', 1);
