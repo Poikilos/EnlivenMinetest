@@ -300,8 +300,10 @@ class MTChunks:
 
     world_blacklist = None
     run_count = None
+    todo_positions = None  # list of tuples (locations) to render next (for fake recursion)
 
     def __init__(self):  #formerly checkpaths() in global scope
+        self.todo_positions = list()
         self.run_count = 0
         self.is_verbose = True
         self.loop_enable = True
@@ -715,8 +717,95 @@ class MTChunks:
         if chunk_luid in self.chunks.keys():
             result = self.chunks[chunk_luid].is_fresh
         return result
+    
+    def check_chunk(self, x, z):
+        result = False
+        chunk_luid = self.get_chunk_luid(x,z)
 
-    def check_map(self):
+        #if (is_different_world):  #instead, see above where all chunk files and player files are deleted
+        #    self.remove_chunk(chunk_luid)
+
+        is_player_in_this_chunk = self.is_player_at_luid(chunk_luid)  #ok if stale, since is only used for whether empty chunk should be regenerated
+
+        is_render_needed = False
+
+        if not self.is_chunk_fresh(chunk_luid):
+            if is_player_in_this_chunk:
+                if self.is_chunk_yaml_marked(chunk_luid):
+                    if self.is_chunk_yaml_marked_empty(chunk_luid):
+                        is_render_needed = True
+                        if self.is_verbose:
+                            print (chunk_luid+": RENDERING nonfresh previously marked empty (player in it)")
+                        else:
+                            sys.stdout.write('.')
+                    else:
+                        if self.is_verbose:
+                            print (chunk_luid+": SKIPPING nonfresh previously marked (player in it)")
+                        #else:
+                            #sys.stdout.write('.')
+                else:
+                    is_render_needed = True
+                    if self.is_verbose:
+                        print (chunk_luid+": RENDERING nonfresh unmarked (player in it)")
+                    else:
+                        sys.stdout.write('.')
+            else:
+                if (not self.is_chunk_yaml_marked(chunk_luid)):
+                    is_render_needed = True
+                    if self.is_verbose:
+                        print (chunk_luid+": RENDERING nonfresh unmarked (simple check since has no player)")
+                    else:
+                        sys.stdout.write('.')
+                else:
+                    if self.is_verbose:
+                        print (chunk_luid+": SKIPPING nonfresh previously marked (simple check since has no player)")
+        else:
+            if self.is_verbose:
+                print (chunk_luid+": SKIPPING fresh chunk")
+            #if (not self.is_chunk_yaml_marked(chunk_luid)):
+                #is_render_needed = True
+
+        # This should never happen since keeping the output of minetestmapper-numpy.py (after analyzing that output) is deprecated:
+        #if self.is_genresult_marked(chunk_luid) and not self.is_chunk_yaml_present(chunk_luid):
+        #    tmp_chunk = MTChunk()
+        #    genresult_path = self.get_chunk_genresult_tmp_path(chunk_luid)
+        #    tmp_chunk.set_from_genresult(genresult_path)
+        #    chunk_yaml_path = self.get_chunk_yaml_path(chunk_luid)
+        #    tmp_chunk.save_yaml(chunk_yaml_path)
+        #    print("(saved yaml to '"+chunk_yaml_path+"')")
+
+
+        if is_render_needed:
+            rendered_count += 1
+            if (self.render_chunk(x,z)):
+                result = True
+        else:
+            if self.is_chunk_rendered_on_dest(chunk_luid):
+                result = True
+                tmp_png_path = self.get_chunk_image_path(chunk_luid)
+                if self.is_verbose:
+                    print(chunk_luid+": Skipping existing map tile file " + tmp_png_path + " (delete it to re-render)")
+            #elif is_empty_chunk:
+                #print("Skipping empty chunk " + chunk_luid)
+            #else:
+                #print(chunk_luid+": Not rendered on dest.")
+        return result
+        
+    def check_map_pseudorecursion(self):
+        if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
+            rendered_count = 0
+        self.todo_positions.clear()
+        self.todo_positions.append((0,0))
+        todo_index = 0
+        while (todo_index<len(self.todo_positions)):
+            this_pos = self.todo_positions[todo_index]
+            x,z = this_pos
+            chunk_luid = self.get_chunk_luid(x,z)
+            is_present = self.check_chunk(x,z)
+            #TODO: finish this asdf
+        
+
+    def check_map_inefficient_squarepattern(self):
         if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
             rendered_count = 0
             self.chunkymap_data_path=os.path.join(self.website_root,"chunkymapdata")
@@ -778,15 +867,15 @@ class MTChunks:
             total_generated_count = 0
 
             newchunk_luid_list = list()
-            outline_generates_count = 1
+            this_iteration_generates_count = 1
             is_changed = False
             is_different_world = False
             #if str(self.world_name) != str(mapvars["world_name"]):
             #    is_different_world = True
             #    print("FULL RENDER since chosen world name '"+self.world_name+"' does not match previously rendered world name '"+mapvars["world_name"]+"'")
             print("PROCESSING MAP DATA")
-            while outline_generates_count > 0:
-                outline_generates_count = 0
+            while this_iteration_generates_count > 0:
+                this_iteration_generates_count = 0
                 self.read_then_remove_signals()
                 if not self.refresh_map_enable:
                     break
@@ -804,77 +893,9 @@ class MTChunks:
                         #only generate the edges (since started with region 0 0 0 0) and expanding from there until no png is created:
                         is_outline = (x==self.chunkx_min) or (x==self.chunkx_max) or (z==self.chunkz_min) or (z==self.chunkz_max)
                         if is_outline:
-                            chunk_luid = self.get_chunk_luid(x,z)
-
-                            #if (is_different_world):  #instead, see above where all chunk files and player files are deleted
-                            #    self.remove_chunk(chunk_luid)
-
-                            is_player_in_this_chunk = self.is_player_at_luid(chunk_luid)
-
-                            is_render_needed = False
-
-                            if not self.is_chunk_fresh(chunk_luid):
-                                if is_player_in_this_chunk:
-                                    if self.is_chunk_yaml_marked(chunk_luid):
-                                        if self.is_chunk_yaml_marked_empty(chunk_luid):
-                                            is_render_needed = True
-                                            if self.is_verbose:
-                                                print (chunk_luid+": RENDERING nonfresh previously marked empty (player in it)")
-                                            else:
-                                                sys.stdout.write('.')
-                                        else:
-                                            if self.is_verbose:
-                                                print (chunk_luid+": SKIPPING nonfresh previously marked (player in it)")
-                                            #else:
-                                                #sys.stdout.write('.')
-                                    else:
-                                        is_render_needed = True
-                                        if self.is_verbose:
-                                            print (chunk_luid+": RENDERING nonfresh unmarked (player in it)")
-                                        else:
-                                            sys.stdout.write('.')
-                                else:
-                                    if (not self.is_chunk_yaml_marked(chunk_luid)):
-                                        is_render_needed = True
-                                        if self.is_verbose:
-                                            print (chunk_luid+": RENDERING nonfresh unmarked (simple check since has no player)")
-                                        else:
-                                            sys.stdout.write('.')
-                                    else:
-                                        if self.is_verbose:
-                                            print (chunk_luid+": SKIPPING nonfresh previously marked (simple check since has no player)")
-                            else:
-                                if self.is_verbose:
-                                    print (chunk_luid+": SKIPPING fresh chunk")
-                                #if (not self.is_chunk_yaml_marked(chunk_luid)):
-                                    #is_render_needed = True
-
-                            # This should never happen since keeping the output of minetestmapper-numpy.py (after analyzing that output) is deprecated:
-                            #if self.is_genresult_marked(chunk_luid) and not self.is_chunk_yaml_present(chunk_luid):
-                            #    tmp_chunk = MTChunk()
-                            #    genresult_path = self.get_chunk_genresult_tmp_path(chunk_luid)
-                            #    tmp_chunk.set_from_genresult(genresult_path)
-                            #    chunk_yaml_path = self.get_chunk_yaml_path(chunk_luid)
-                            #    tmp_chunk.save_yaml(chunk_yaml_path)
-                            #    print("(saved yaml to '"+chunk_yaml_path+"')")
-
-
-                            if is_render_needed:
-                                rendered_count += 1
-                                if (self.render_chunk(x,z)):
-                                    total_generated_count += 1
-                                    outline_generates_count += 1
-                            else:
-                                if self.is_chunk_rendered_on_dest(chunk_luid):
-                                    total_generated_count += 1
-                                    outline_generates_count += 1
-                                    tmp_png_path = self.get_chunk_image_path(chunk_luid)
-                                    if self.is_verbose:
-                                        print(chunk_luid+": Skipping existing map tile file " + tmp_png_path + " (delete it to re-render)")
-                                #elif is_empty_chunk:
-                                    #print("Skipping empty chunk " + chunk_luid)
-                                #else:
-                                    #print(chunk_luid+": Not rendered on dest.")
+                            if self.check_chunk(x,z):
+                                this_iteration_generates_count += 1
+                                total_generated_count += 1
                     if self.is_verbose:
                         print ("")  # blank line before next z so output is more readable
                 self.chunkx_min -= 1
@@ -1013,7 +1034,7 @@ class MTChunks:
                         #if self.last_map_refresh_second is not None:
                             #print ("waited "+str(best_timer()-self.last_map_refresh_second)+"s for map update")
                         self.last_map_refresh_second = best_timer()
-                        self.check_map()
+                        self.check_map_inefficient_squarepattern()
                     else:
                         print("waiting before doing map update")
                 else:
@@ -1030,7 +1051,7 @@ class MTChunks:
         if self.refresh_players_enable:
             self.check_players()
         if self.refresh_map_enable:
-            self.check_map()
+            self.check_map_inefficient_squarepattern()
 
 if __name__ == '__main__':
     mtchunks = MTChunks()
