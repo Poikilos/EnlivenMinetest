@@ -16,7 +16,11 @@ This program comes without any warranty, to the extent permitted by applicable l
 	#NOTE: now that loop is default, cron job scripts, which now disable loop for compatibility with new version, are ALL optional and NOT recommended
     # ( to run only once, run: python chunkymap-regen.py --no-loop true )
 * Change program options (or stop it) while looping or rendering by placing chunkymap-signals.txt in the same directory as chunkymap-regen.py (see chunkymap-signals example files)
-	- to maintain stability of  your text editor, save the file, close it, then move/copy it to the directory (or save it as something else then rename it to chunkymap-signals.txt).
+	* to maintain stability of  your text editor, save the file, close it, then move/copy it to the directory (or save it as something else then rename it to chunkymap-signals.txt).
+	* alternatively, in *nix do something like:
+    echo "refresh_map_enable:False" > ~/minetest/util/chunkymap-signals.txt
+	sleep 15s
+	echo "loop_enable:False" > ~/minetest/util/chunkymap-signals.txt
 * Has static html version of map (echo_chunkymap_table() php function) -- see example.php
 	* Zoom in and out
 	* optionally echo name of world that was detected by the scheduled py file
