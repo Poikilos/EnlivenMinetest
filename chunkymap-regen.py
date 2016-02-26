@@ -312,8 +312,8 @@ class MTChunks:
         self.website_root="/var/www/html/minetest"
         self.world_name = "FCAGameAWorld"
         self.os_name="linux"
-        self.refresh_map_seconds = 10
-        self.refresh_players_seconds = 3
+        self.refresh_map_seconds = 299
+        self.refresh_players_seconds = 29
 
         input_string = ""
         if (os.path.sep!="/"):
