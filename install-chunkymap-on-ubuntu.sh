@@ -22,7 +22,7 @@ fi
 if [ ! -d "$CHUNKYMAP_DEST/unused/" ]; then
   mkdir "$CHUNKYMAP_DEST/unused/"
 fi
-cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-regen.py" "$CHUNKYMAP_DEST/unused/"
+cp -f "$CHUNKYMAP_INSTALLER_PATH/chunkymap-regen.py" "$CHUNKYMAP_DEST/"
 #chmod +x "$CHUNKYMAP_DEST/chunkymap-regen.py"
 
 cp -f "$CHUNKYMAP_INSTALLER_PATH/README.md" "$CHUNKYMAP_DEST/"
@@ -32,12 +32,14 @@ rm -f "$CHUNKYMAP_DEST/chunkymap-regen-players.sh"
 rm -f "$CHUNKYMAP_DEST/chunkymap-cronjob"
 rm -f "$CHUNKYMAP_DEST/chunkymap-players-cronjob"
 rm -f "$CHUNKYMAP_DEST/set-minutely-players-crontab-job.sh"
+rm -f "$CHUNKYMAP_DEST/set-minutely-crontab-job.sh"
 #install scripts:
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-regen.sh" "$CHUNKYMAP_DEST/unused/"
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-regen-players.sh" "$CHUNKYMAP_DEST/unused/"
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-cronjob" "$CHUNKYMAP_DEST/unused/"
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-players-cronjob" "$CHUNKYMAP_DEST/unused/"
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/set-minutely-players-crontab-job.sh" "$CHUNKYMAP_DEST/unused/"
+cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/set-minutely-crontab-job.sh" "$CHUNKYMAP_DEST/unused/"
 cp -f "$CHUNKYMAP_INSTALLER_PATH/chunkymap-regen-loop.sh" "$CHUNKYMAP_DEST/"
 cd "$CHUNKYMAP_INSTALLER_PATH"
 python replace-with-current-user.py  # the py file only manipulates the minetest/util directory
@@ -47,6 +49,7 @@ chmod -x "$CHUNKYMAP_DEST/unused/chunkymap-regen.sh"
 chmod -x "$CHUNKYMAP_DEST/unused/chunkymap-regen-players.sh"
 chmod -x "$CHUNKYMAP_DEST/unused/chunkymap-cronjob"
 chmod -x "$CHUNKYMAP_DEST/unused/set-minutely-crontab-job.sh"
+chmod -x "$CHUNKYMAP_DEST/unused/set-minutely-players-crontab-job.sh"
 
 sudo apt-get install python-numpy python-pil
 echo ""
