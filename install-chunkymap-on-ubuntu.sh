@@ -41,6 +41,7 @@ cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-players-cronjob" "$CHUNKYMAP_D
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/set-minutely-players-crontab-job.sh" "$CHUNKYMAP_DEST/unused/"
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/set-minutely-crontab-job.sh" "$CHUNKYMAP_DEST/unused/"
 cp -f "$CHUNKYMAP_INSTALLER_PATH/chunkymap-regen-loop.sh" "$CHUNKYMAP_DEST/"
+cp --no-clobber "$CHUNKYMAP_INSTALLER_PATH/chunkymap-signals*" "$CHUNKYMAP_DEST/"
 cd "$CHUNKYMAP_INSTALLER_PATH"
 python replace-with-current-user.py  # the py file only manipulates the minetest/util directory
 # so chmod those files AFTER running the py above (since it rewrites them and therefore removes x attribute if present):
