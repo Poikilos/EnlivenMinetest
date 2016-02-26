@@ -1,0 +1,3 @@
+#Change player file read frequency
+refresh_players_seconds:60
+

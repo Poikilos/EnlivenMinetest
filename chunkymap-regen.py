@@ -31,14 +31,14 @@ def get_dict_from_conf_file(path,assignment_operator="="):
     return results
 
 def RepresentsInt(s):
-    try: 
+    try:
         int(s)
         return True
     except ValueError:
         return False
 
 def RepresentsFloat(s):
-    try: 
+    try:
         float(s)
         return True
     except ValueError:
@@ -57,7 +57,7 @@ def get_dict_modified_by_conf_file(this_dict, path,assignment_operator="="):
             line = ins.readline()
             if line and len(line)>0:
                 line_strip=line.strip()
-                if not line_strip[0]=="#":  # if not comment
+                if len(line_strip)>0 and not line_strip[0]=="#":  # if not comment
                     if not line_strip[0]=="-":  # ignore yaml arrays
                         ao_index = line_strip.find(assignment_operator)
                         if ao_index>=1:  # intentionally skip zero-length variable names
@@ -145,7 +145,7 @@ class MTChunk:
 
         self.is_player_in_this_chunk = False
         self.is_fresh = False
-        
+
         self.chunk_dict["is_marked_empty"] = False
         self.chunk_dict["is_marked"] = False
         self.chunk_dict["width"] = None
@@ -294,13 +294,15 @@ class MTChunks:
     #ALSO save to YAML:
     #total_generated_count = 0
     #endregion values to save to YAML
-    
+
     loop_enable = None
     is_verbose = None
 
     world_blacklist = None
+    run_count = None
 
     def __init__(self):  #formerly checkpaths() in global scope
+        self.run_count = 0
         self.is_verbose = True
         self.loop_enable = True
         self.refresh_map_enable = True
@@ -341,7 +343,8 @@ class MTChunks:
         self.world_path = os.path.join(self.worlds_path, self.world_name)
         auto_chosen_world = False
         self.world_blacklist = list()
-        self.world_blacklist.append("abiyahhgamebv7world1")
+        self.world_blacklist.append("CarbonUnit")
+        #self.world_blacklist.append("abiyahhgamebv7world1")
         if not os.path.isdir(self.world_path):
             #for item in os.walk(self.worlds_path):
             print ("LOOKING FOR WORLDS IN " + self.worlds_path)
@@ -369,7 +372,7 @@ class MTChunks:
 
         self.is_save_output_ok = True   # Keeping output after analyzing it is no longer necessary since results are saved to YAML, but keeping output provides debug info since is the output of minetestmapper-numpy.py
 
-        
+
         try:
             alt_path = "C:\\python27\python.exe"
             if os.path.isfile(alt_path):
@@ -438,7 +441,7 @@ class MTChunks:
 
     def get_chunk_genresults_tmp_folder(self, chunk_luid):
         return os.path.join(os.path.dirname(os.path.abspath(__file__)), "chunkymap-genresults")
-        
+
     def get_chunk_genresult_tmp_path(self, chunk_luid):
         return os.path.join(self.get_chunk_genresults_tmp_folder(chunk_luid), self.get_chunk_genresult_name(chunk_luid))
 
@@ -572,14 +575,14 @@ class MTChunks:
             if not self.is_save_output_ok:
                 if os.path.isfile(genresult_path):
                     os.remove(genresult_path)
-                
+
         except:
             print ("Could not finish deleting/moving output")
 
 
 
         return result
-                
+
 
     def check_players(self):
         # NOT NEEDED: if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
@@ -633,7 +636,7 @@ class MTChunks:
                     chunk_x = None
                     chunk_y = None
                     chunk_z = None
-                    
+
                     player_position_tuple = get_tuple_from_notation(player_position, filename)
                     if player_position_tuple is not None:
                         #Divide by 10 because I don't know why (minetest issue)
@@ -664,9 +667,9 @@ class MTChunks:
                             saved_player_y = float(map_player_dict["y"])
                         if "z" in map_player_dict.keys():
                             saved_player_z = float(map_player_dict["z"])
-                    
+
                     #if (map_player_dict is None) or not is_same_fvec3( map_player_position_tuple, player_position_tuple):
-                    if (map_player_dict is None) or (saved_player_x is None) or (saved_player_z is None) or (int(saved_player_x)!=int(player_x)) or (int(saved_player_y)!=int(player_y)) or (int(saved_player_z)!=int(player_z)):  
+                    if (map_player_dict is None) or (saved_player_x is None) or (saved_player_z is None) or (int(saved_player_x)!=int(player_x)) or (int(saved_player_y)!=int(player_y)) or (int(saved_player_z)!=int(player_z)):
                         # don't check y since y is elevation in minetest, don't use float since subblock position doesn't matter to map
                         if map_player_dict is not None and saved_player_x is not None and saved_player_y is not None and saved_player_z is not None:
                             #print("PLAYER MOVED: "+str(player_name)+" moved from "+str(map_player_position_tuple)+" to "+str(player_position_tuple))
@@ -699,7 +702,7 @@ class MTChunks:
         if not self.is_verbose:
             print("PLAYERS:")
             print("  saved: "+str(player_written_count)+" (moved:"+str(players_moved_count)+"; new:"+str(players_saved_count)+")")
-            print("  didn't move: "+str(player_name))
+            print("  didn't move: "+str(players_didntmove_count))
 
     def is_player_at_luid(self, chunk_luid):
         result = False
@@ -712,7 +715,7 @@ class MTChunks:
         if chunk_luid in self.chunks.keys():
             result = self.chunks[chunk_luid].is_fresh
         return result
-        
+
     def check_map(self):
         if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
             rendered_count = 0
@@ -784,8 +787,17 @@ class MTChunks:
             print("PROCESSING MAP DATA")
             while outline_generates_count > 0:
                 outline_generates_count = 0
+                self.read_then_remove_signals()
+                if not self.refresh_map_enable:
+                    break
                 for z in range (self.chunkz_min,self.chunkz_max+1):
+                    self.read_then_remove_signals()
+                    if not self.refresh_map_enable:
+                        break
                     for x in range(self.chunkx_min,self.chunkx_max+1):
+                        self.read_then_remove_signals()
+                        if not self.refresh_map_enable:
+                            break
                         #python ~/minetest/util/minetestmapper-numpy.py --region -1200 800 -1200 800 --drawscale --maxheight 100 --minheight -50 --pixelspernode 1 ~/.minetest/worlds/FCAGameAWorld ~/map.png
                         #sudo mv ~/map.png /var/www/html/minetest/images/map.png
 
@@ -924,9 +936,11 @@ class MTChunks:
     def read_then_remove_signals(self):
         signal_path = self.get_signal_path()
         if os.path.isfile(signal_path):
-            signals = get_dict_from_conf_file(signal_path)
+            signals = get_dict_from_conf_file(signal_path,":")
             if signals is not None:
-                for this_key in signals.keys:
+                print("RECEIVED "+str(len(signals))+" signal(s)")
+                for this_key in signals.keys():
+                    print("RECEIVED SIGNAL "+str(this_key)+":"+str(signals[this_key]))
                     if this_key=="loop_enable":
                         if not signals[this_key]:
                             self.loop_enable = False
@@ -961,15 +975,15 @@ class MTChunks:
 
                     else:
                         print("ERROR: unknown signal '"+this_key+"'")
-                    
+
 
             else:
                 print("WARNING: blank '"+signal_path+"'")
             try:
-                os.remove()
+                os.remove(signal_path)
             except:
-                print("FATAL ERROR: "+__file__+" must have permission to remove '"+signal_path+"' so exiting to avoid inability to avoid repeating commands at next launch.")
-                self.loop_enable = False
+                print("ERROR: "+__file__+" must have permission to remove '"+signal_path+"'. Commands will be repeated unless command was loop_enable:false.")  # so exiting to avoid inability to avoid repeating commands at next launch.")
+                #self.loop_enable = False
 
     def run_loop(self):
         #self.last_run_second = best_timer()
@@ -981,19 +995,24 @@ class MTChunks:
             if self.refresh_players_seconds < run_wait_seconds:
                 run_wait_seconds = self.refresh_players_seconds
             print("")
+            print("Ran "+str(self.run_count)+" time(s)")
             self.read_then_remove_signals()
             if self.loop_enable:
                 if self.refresh_players_enable:
                     if self.last_players_refresh_second is None or (best_timer()-self.last_players_refresh_second > self.refresh_players_seconds ):
-                        last_players_refresh_second = best_timer()
+                        #if self.last_players_refresh_second is not None:
+                            #print ("waited "+str(best_timer()-self.last_players_refresh_second)+"s for map update")
+                        self.last_players_refresh_second = best_timer()
                         self.check_players()
                     else:
                         print("waiting before doing player update")
                 else:
                     print("player update is not enabled")
                 if self.refresh_map_enable:
-                    if self.last_map_refresh_second is None or (best_timer()-self.last_map_refresh_second > self.refresh_map_seconds):
-                        last_map_refresh_second = best_timer()
+                    if (self.last_map_refresh_second is None) or (best_timer()-self.last_map_refresh_second > self.refresh_map_seconds):
+                        #if self.last_map_refresh_second is not None:
+                            #print ("waited "+str(best_timer()-self.last_map_refresh_second)+"s for map update")
+                        self.last_map_refresh_second = best_timer()
                         self.check_map()
                     else:
                         print("waiting before doing map update")
@@ -1003,7 +1022,9 @@ class MTChunks:
                 self.is_verbose = True
             run_wait_seconds -= (best_timer()-before_second)
             if (int(float(run_wait_seconds)+.5)>0.0):
+                print ("sleeping for "+str(run_wait_seconds)+"s")
                 time.sleep(run_wait_seconds)
+            self.run_count += 1
 
     def run(self):
         if self.refresh_players_enable:
@@ -1018,9 +1039,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='A mapper for minetest')
     parser.add_argument('--skip-map', type = bool, metavar = ('skip_map'), default = False, help = 'draw map tiles and save YAML files for chunkymap.php to use')
     parser.add_argument('--skip-players', type = bool, metavar = ('skip_players'), default = False, help = 'update player YAML files for chunkymap.php to use')
-    parser.add_argument('--loop', type = bool, metavar = ('loop'), default = False, help = 'keep running until "'+signal_path+'" contains the line '+stop_line)
+    parser.add_argument('--no-loop', type = bool, metavar = ('no_loop'), default = False, help = 'keep running until "'+signal_path+'" contains the line '+stop_line)
     args = parser.parse_args()
-    
+
     if not args.skip_players:
         if not args.skip_map:
             print("Drawing players and map")
@@ -1036,8 +1057,8 @@ if __name__ == '__main__':
             mtchunks.refresh_map_enable = False
             print("Nothing to do since "+str(args))
     if mtchunks.refresh_players_enable or mtchunks.refresh_map_enable:
-        if args.loop:
+        if args.no_loop:
+            mtchunks.run()
+        else:
             print("To stop chunkymap-regen loop, save a line '"+stop_line+"' to '"+signal_path+"'")
             mtchunks.run_loop()
-        else:
-            mtchunks.run()

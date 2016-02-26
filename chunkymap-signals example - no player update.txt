@@ -1,0 +1,2 @@
+#to stop checking for player movements (players will timeout and the php will stop showing the players due to old file modified times)
+refresh_players_enable:False

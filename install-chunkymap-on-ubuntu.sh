@@ -1,7 +1,8 @@
 #!/bin/sh
 cd $HOME
+MT_MY_WEBSITE_PATH=/var/www/html/minetest
 rm -Rf $HOME/minetest-stuff/minetest-chunkymap
-CHUNKYMAP_INSTALLER_DIR=$HOME/Downloads/minetest-chunkymap
+CHUNKYMAP_INSTALLER_PATH=$HOME/Downloads/minetest-chunkymap
 if [ ! -d "$HOME/Downloads" ]; then
 	mkdir "$HOME/Downloads"
 fi
@@ -13,31 +14,51 @@ CHUNKYMAP_DEST=$MINETEST_UTIL
 #rm -f $HOME/minetestmapper-numpy.py
 #wget https://github.com/spillz/minetest/raw/master/util/minetestmapper-numpy.py
 #since colors.txt is in $HOME/minetest/util:
-cp -f "$CHUNKYMAP_INSTALLER_DIR/minetestmapper-numpy.py" "$HOME/minetest/util/minetestmapper-numpy.py"
+cp -f "$CHUNKYMAP_INSTALLER_PATH/minetestmapper-numpy.py" "$HOME/minetest/util/minetestmapper-numpy.py"
 if [ ! -d "$CHUNKYMAP_DEST" ]; then
   # Control will enter here if $DIRECTORY doesn't exist.
   mkdir "$CHUNKYMAP_DEST"
 fi
-cp -f "$CHUNKYMAP_INSTALLER_DIR/chunkymap-regen.py" "$CHUNKYMAP_DEST/"
+if [ ! -d "$CHUNKYMAP_DEST/unused/" ]; then
+  mkdir "$CHUNKYMAP_DEST/unused/"
+fi
+cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-regen.py" "$CHUNKYMAP_DEST/unused/"
 #chmod +x "$CHUNKYMAP_DEST/chunkymap-regen.py"
-cp -f "$CHUNKYMAP_INSTALLER_DIR/chunkymap-regen.sh" "$CHUNKYMAP_DEST/"
-cp -f "$CHUNKYMAP_INSTALLER_DIR/chunkymap-regen-players.sh" "$CHUNKYMAP_DEST/"
-cp -f "$CHUNKYMAP_INSTALLER_DIR/chunkymap-cronjob" "$CHUNKYMAP_DEST/"
-cp -f "$CHUNKYMAP_INSTALLER_DIR/chunkymap-players-cronjob" "$CHUNKYMAP_DEST/"
-cp -f "$CHUNKYMAP_INSTALLER_DIR/set-minutely-players-crontab-job.sh" "$CHUNKYMAP_DEST/"
-cd "$CHUNKYMAP_INSTALLER_DIR"
-python replace-with-current-user.py  # the py file only manipulates the minetest/util folder
-# so chmod those files AFTER running the py above:
-chmod +x "$CHUNKYMAP_DEST/chunkymap-regen.sh"
-chmod +x "$CHUNKYMAP_DEST/chunkymap-regen-players.sh"
-chmod +x "$CHUNKYMAP_DEST/chunkymap-cronjob"
-chmod +x "$CHUNKYMAP_DEST/set-minutely-crontab-job.sh"
+
+cp -f "$CHUNKYMAP_INSTALLER_PATH/README.md" "$CHUNKYMAP_DEST/"
+#remove files place in dest by old version of installer script:
+rm -f "$CHUNKYMAP_DEST/chunkymap-regen.sh"
+rm -f "$CHUNKYMAP_DEST/chunkymap-regen-players.sh"
+rm -f "$CHUNKYMAP_DEST/chunkymap-cronjob"
+rm -f "$CHUNKYMAP_DEST/chunkymap-players-cronjob"
+rm -f "$CHUNKYMAP_DEST/set-minutely-players-crontab-job.sh"
+#install scripts:
+cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-regen.sh" "$CHUNKYMAP_DEST/unused/"
+cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-regen-players.sh" "$CHUNKYMAP_DEST/unused/"
+cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-cronjob" "$CHUNKYMAP_DEST/unused/"
+cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-players-cronjob" "$CHUNKYMAP_DEST/unused/"
+cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/set-minutely-players-crontab-job.sh" "$CHUNKYMAP_DEST/unused/"
+cp -f "$CHUNKYMAP_INSTALLER_PATH/chunkymap-regen-loop.sh" "$CHUNKYMAP_DEST/"
+cd "$CHUNKYMAP_INSTALLER_PATH"
+python replace-with-current-user.py  # the py file only manipulates the minetest/util directory
+# so chmod those files AFTER running the py above (since it rewrites them and therefore removes x attribute if present):
+chmod +x  "$CHUNKYMAP_DEST/chunkymap-regen-loop.sh"
+chmod -x "$CHUNKYMAP_DEST/unused/chunkymap-regen.sh"
+chmod -x "$CHUNKYMAP_DEST/unused/chunkymap-regen-players.sh"
+chmod -x "$CHUNKYMAP_DEST/unused/chunkymap-cronjob"
+chmod -x "$CHUNKYMAP_DEST/unused/set-minutely-crontab-job.sh"
 
 sudo apt-get install python-numpy python-pil
 echo ""
-echo "To learn about chunkymap:"
+echo "To see what needs to be in your $MT_MY_WEBSITE_PATH directory (if you don't use that directory, modify chunkymap-regen.py to use your directory):"
+echo "cd $CHUNKYMAP_DEST/web"
+echo ""
+echo "To view helpful scripts:"
 echo "cd $CHUNKYMAP_DEST"
 echo ""
+echo "To learn more about chunkymap:"
+echo "nano $CHUNKYMAP_DEST/README.md"
+echo
 # NOTE: colors.txt should ALREADY be in $HOME/minetest/util
 
 

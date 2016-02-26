@@ -1,0 +1,3 @@
+#to stop checking for map updates (NOTE: the map update function is only able to detect new chunks, and only checks edge chunks if player is present in one)
+refresh_map_enable:False
+# ALSO stops map generation early if still processing chunks

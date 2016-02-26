@@ -1,0 +1,2 @@
+#Chunk files read frequency (does not keep reading png files if in loop mode since freshness booleans are saved in memory)
+refresh_map_seconds:300
