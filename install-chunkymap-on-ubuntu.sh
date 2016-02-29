@@ -63,6 +63,9 @@ echo ""
 echo "To learn more about chunkymap:"
 echo "nano $CHUNKYMAP_DEST/README.md"
 echo
+echo "To start now assuming configuration matches yours (see README before this):"
+echo sh minetest/util/chunkymap-regen-loop.sh
+echo
 # NOTE: colors.txt should ALREADY be in $HOME/minetest/util
 
 

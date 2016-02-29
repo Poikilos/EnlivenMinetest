@@ -344,7 +344,7 @@ class MTChunks:
         self.world_name = "FCAGameAWorld"
         self.os_name="linux"
         self.refresh_map_seconds = 1 #does one chunk at a time so as not to interrupt player updates too often
-        self.refresh_players_seconds = 29
+        self.refresh_players_seconds = 1
         self.chunk_yaml_name_opener_string = "chunk_"
         self.chunk_yaml_name_dotext_string = ".yml"
 
@@ -601,7 +601,16 @@ class MTChunks:
         #print ("generating x = " + str(x_min) + " to " + str(x_max) + " ,  z = " + str(z_min) + " to " + str(z_max))
         cmd_suffix = ""
         cmd_suffix = " > \""+genresult_path+"\""
+        output_type_string = "minetestmapper-numpy"
         cmd_string = self.python_exe_path + " \""+self.mtmn_path + "\" --region " + str(x_min) + " " + str(x_max) + " " + str(z_min) + " " + str(z_max) + " --maxheight "+str(self.maxheight)+" --minheight "+str(self.minheight)+" --pixelspernode "+str(self.pixelspernode)+" \""+self.world_path+"\" \""+tmp_png_path+"\"" + cmd_suffix
+        
+        if self.os_name!="windows":  #since windows client doesn't normally have minetest-mapper
+            #since minetestmapper-numpy has trouble with leveldb:
+            #such as minetest-mapper --input "/home/owner/.minetest/worlds/FCAGameAWorld"
+            #where geometry option is like --geometry x:y+w+h
+            output_type_string = "minetest-mapper"
+            #NOTE: minetest-mapper is part of the minetest-data package, which can be installed alongside the git version of minetestserver
+            cmd_string = "minetest-mapper --input \""+self.world_path+"\" --draworigin --geometry "+str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min))+"+"+str(int(z_max)-int(z_min))+" --output \""+tmp_png_path+"\""
         dest_png_path = self.get_chunk_image_path(chunk_luid)
         #is_empty_chunk = is_chunk_yaml_marked(chunk_luid) and is_chunk_yaml_marked_empty(chunk_luid)
         print ("Running generator for: "+str((x,z)))
