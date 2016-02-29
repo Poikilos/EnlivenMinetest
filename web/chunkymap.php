@@ -1,4 +1,5 @@
 <?php
+#this is the backend--don't call it directly. instead do include_once('chunkymap.php'); for further info, see example.php
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
