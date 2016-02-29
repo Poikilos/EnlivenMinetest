@@ -610,7 +610,7 @@ class MTChunks:
             #where geometry option is like --geometry x:y+w+h
             output_type_string = "minetest-mapper"
             #NOTE: minetest-mapper is part of the minetest-data package, which can be installed alongside the git version of minetestserver
-            cmd_string = "minetest-mapper --input \""+self.world_path+"\" --draworigin --geometry "+str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min))+"+"+str(int(z_max)-int(z_min))+" --output \""+tmp_png_path+"\""
+            cmd_string = "minetest-mapper --input \""+self.world_path+"\" --draworigin --geometry "+str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min))+"+"+str(int(z_max)-int(z_min))+" --output \""+tmp_png_path+"\""+cmd_suffix
         dest_png_path = self.get_chunk_image_path(chunk_luid)
         #is_empty_chunk = is_chunk_yaml_marked(chunk_luid) and is_chunk_yaml_marked_empty(chunk_luid)
         print ("Running generator for: "+str((x,z)))
