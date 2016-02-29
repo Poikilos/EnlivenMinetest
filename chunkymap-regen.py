@@ -25,6 +25,23 @@ from timeit import default_timer as best_timer
 #sector_ymax = args.self.maxheight/16
 #region server-specific options
 
+#as per http://interactivepython.org/runestone/static/pythonds/BasicDS/ImplementingaQueueinPython.html
+class SimpleQueue:
+    def __init__(self):
+        self.items = []
+
+    def isEmpty(self):
+        return self.items == []
+
+    def enqueue(self, item):
+        self.items.insert(0,item)
+
+    def dequeue(self):
+        return self.items.pop()
+
+    def size(self):
+        return len(self.items)
+
 def get_dict_from_conf_file(path,assignment_operator="="):
     results = None
     results = get_dict_modified_by_conf_file(results, path, assignment_operator)
@@ -125,9 +142,9 @@ def is_same_fvec3(list_a, list_b):
 class MTChunk:
     x = None
     z = None
-    chunk_dict = None
-    is_player_in_this_chunk = None
+    metadata = None
     is_fresh = None
+    luid = None
     #width = None
     #height = None
     #is_marked = None
@@ -141,27 +158,26 @@ class MTChunk:
 
     def __init__(self):
         # NOTE: variables that need to be saved (and only they) should be stored in dict
-        self.chunk_dict = {}
-
-        self.is_player_in_this_chunk = False
+        self.metadata = {}
         self.is_fresh = False
 
-        self.chunk_dict["is_marked_empty"] = False
-        self.chunk_dict["is_marked"] = False
-        self.chunk_dict["width"] = None
-        self.chunk_dict["height"] = None
-        self.chunk_dict["image_w"] = None
-        self.chunk_dict["image_h"] = None
-        self.chunk_dict["image_left"] = None
-        self.chunk_dict["image_top"] = None
-        self.chunk_dict["image_right"] = None
-        self.chunk_dict["image_bottom"] = None
+        self.metadata["is_marked_empty"] = False
+        self.metadata["is_marked"] = False
+        self.metadata["width"] = None
+        self.metadata["height"] = None
+        self.metadata["image_w"] = None
+        self.metadata["image_h"] = None
+        self.metadata["image_left"] = None
+        self.metadata["image_top"] = None
+        self.metadata["image_right"] = None
+        self.metadata["image_bottom"] = None
+        self.metadata["is_traversed"] = False
 
     def load_yaml(self, yml_path):
-        self.chunk_dict = get_dict_modified_by_conf_file(self.chunk_dict,yml_path,":")
+        self.metadata = get_dict_modified_by_conf_file(self.metadata,yml_path,":")
 
     def save_yaml(self, yml_path):
-        save_conf_from_dict(yml_path, self.chunk_dict, assignment_operator=":", save_nulls_enable=False)
+        save_conf_from_dict(yml_path, self.metadata, assignment_operator=":", save_nulls_enable=False)
         #try:
             #outs = open(yml_path, 'w')
             #outs.write("is_marked_empty:"+str(self.is_marked_empty)+"\n")
@@ -200,7 +216,7 @@ class MTChunk:
             #('PNG Region: ', [0, 64, 0, 64])
             #('Pixels PerNode: ', 1)
             #('border: ', 0)
-            self.chunk_dict["is_marked"] = True
+            self.metadata["is_marked"] = True
             ins = open(this_genresult_path, 'r')
             line = True
             while line:
@@ -208,7 +224,7 @@ class MTChunk:
                 if line:
                     line_strip = line.strip()
                     if "data does not exist" in line_strip:
-                        self.chunk_dict["is_marked_empty"] = True
+                        self.metadata["is_marked_empty"] = True
                         break
                     elif "Result image" in line_strip:
                         oparen_index = line_strip.find("(")
@@ -224,12 +240,12 @@ class MTChunk:
                                         if len(chunks)==2:
                                             if chunks[0].strip()=="w":
                                                 try:
-                                                    self.chunk_dict["image_w"]=int(chunks[1].strip())
+                                                    self.metadata["image_w"]=int(chunks[1].strip())
                                                 except:
                                                     print("Bad value for image w:"+str(chunks[1]))
                                             elif chunks[0].strip()=="h":
                                                 try:
-                                                    self.chunk_dict["image_h"]=int(chunks[1].strip())
+                                                    self.metadata["image_h"]=int(chunks[1].strip())
                                                 except:
                                                     print("Bad value for image h:"+str(chunks[1]))
                                             else:
@@ -249,10 +265,10 @@ class MTChunk:
                                 rect_values_list = rect_values_string.split(",")
                                 if len(rect_values_list)==4:
                                     #pngregion=[pngminx, pngmaxx, pngminz, pngmaxz] #from minetestmapper-numpy.py
-                                    self.chunk_dict["image_left"]=int(rect_values_list[0].strip())
-                                    self.chunk_dict["image_right"]=int(rect_values_list[1].strip())
-                                    self.chunk_dict["image_top"]=int(rect_values_list[2].strip())
-                                    self.chunk_dict["image_bottom"]=int(rect_values_list[3].strip())
+                                    self.metadata["image_left"]=int(rect_values_list[0].strip())
+                                    self.metadata["image_right"]=int(rect_values_list[1].strip())
+                                    self.metadata["image_top"]=int(rect_values_list[2].strip())
+                                    self.metadata["image_bottom"]=int(rect_values_list[3].strip())
                                 else:
                                     print("Bad map rect, so ignoring: "+rect_values_string)
             ins.close()
@@ -292,7 +308,7 @@ class MTChunks:
     last_players_refresh_second = None
     last_map_refresh_second = None
     #ALSO save to YAML:
-    #total_generated_count = 0
+    total_generated_count = None
     #endregion values to save to YAML
 
     loop_enable = None
@@ -301,8 +317,21 @@ class MTChunks:
     world_blacklist = None
     run_count = None
     todo_positions = None  # list of tuples (locations) to render next (for fake recursion)
+    todo_index = None
+    yaml_name = None
+    world_yaml_path = None
+    chunkymap_data_path = None
+    preload_all_enable = None
+    chunk_yaml_name_opener_string = None
+    chunk_yaml_name_dotext_string = None
+    mapvars = None
+    rendered_count = None
 
     def __init__(self):  #formerly checkpaths() in global scope
+        self.total_generated_count = 0
+        self.rendered_count = 0
+        self.preload_all_enable = True
+        self.todo_index = -1
         self.todo_positions = list()
         self.run_count = 0
         self.is_verbose = True
@@ -314,8 +343,10 @@ class MTChunks:
         self.website_root="/var/www/html/minetest"
         self.world_name = "FCAGameAWorld"
         self.os_name="linux"
-        self.refresh_map_seconds = 299
+        self.refresh_map_seconds = 1 #does one chunk at a time so as not to interrupt player updates too often
         self.refresh_players_seconds = 29
+        self.chunk_yaml_name_opener_string = "chunk_"
+        self.chunk_yaml_name_dotext_string = ".yml"
 
         input_string = ""
         if (os.path.sep!="/"):
@@ -327,7 +358,6 @@ class MTChunks:
         #input_string = input("What is the root folder of your minetest website ["+self.website_root+"]?")
         if (len(input_string)>0):
             self.website_root = input_string
-        self.chunkymap_data_path=os.path.join(self.website_root,"chunkymapdata")
 
         #input_string = input("What is the game name ["+self.world_name+"]")
         if (len(input_string)>0):
@@ -388,7 +418,27 @@ class MTChunks:
         if self.os_name=="windows":
             self.mtmn_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-numpy.py")
             self.colors_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "colors.txt")
-            self.website_root = os.path.dirname(os.path.abspath(__file__))
+            self.website_root = None
+            prioritized_try_paths = list()
+            prioritized_try_paths.append("C:\\wamp\\www")
+            prioritized_try_paths.append("C:\\www")
+            prioritized_try_paths.append("C:\\Program Files\\Apache Software Foundation\\Apache2.2\\htdocs")
+            
+            #prioritized_try_paths.append("C:\\Program Files\\Apache Software Foundation\\Apache2.2\\htdocs\\folder_test\\website")
+            for try_path in prioritized_try_paths:
+                try:
+                    if os.path.isdir(try_path):
+                        self.website_root = try_path
+                        break
+                except:
+                    pass
+            if self.website_root is None:
+                self.website_root = os.path.dirname(os.path.abspath(__file__))
+            print("Set website_root to "+self.website_root)
+
+        self.chunkymap_data_path=os.path.join(self.website_root,"chunkymapdata")
+        self.yaml_name = "generated.yml"
+        self.world_yaml_path = os.path.join(self.chunkymap_data_path, self.yaml_name)
 
         self.chunkx_min = 0
         self.chunkz_min = 0
@@ -447,8 +497,11 @@ class MTChunks:
     def get_chunk_genresult_tmp_path(self, chunk_luid):
         return os.path.join(self.get_chunk_genresults_tmp_folder(chunk_luid), self.get_chunk_genresult_name(chunk_luid))
 
+    def get_chunk_luid_from_yaml_name(self, yml_name):
+        return yml_name[len(self.chunk_yaml_name_opener_string):-1*len(self.chunk_yaml_name_dotext_string)]
+    
     def get_chunk_yaml_name(self, chunk_luid):
-        return "chunk_"+chunk_luid+".yml"
+        return self.chunk_yaml_name_opener_string+chunk_luid+self.chunk_yaml_name_dotext_string
 
     def is_chunk_yaml_present(self, chunk_luid):
         return os.path.isfile(self.get_chunk_yaml_path(chunk_luid))
@@ -524,11 +577,13 @@ class MTChunks:
     def prepare_chunk_meta(self, chunk_luid):
         if chunk_luid not in self.chunks.keys():
             self.chunks[chunk_luid] = MTChunk()
+            self.chunks[chunk_luid].luid = chunk_luid
             yaml_path = self.get_chunk_yaml_path(chunk_luid)
             if os.path.isfile(yaml_path):
                 self.chunks[chunk_luid].load_yaml(yaml_path)
 
-    def render_chunk(self, x, z):
+    # normally call check_chunk instead, which renders chunk only if necessary
+    def _render_chunk(self, x, z):
         result = False
         chunk_luid = self.get_chunk_luid(x,z)
         png_name = self.get_chunk_image_name(chunk_luid)
@@ -549,7 +604,7 @@ class MTChunks:
         cmd_string = self.python_exe_path + " \""+self.mtmn_path + "\" --region " + str(x_min) + " " + str(x_max) + " " + str(z_min) + " " + str(z_max) + " --maxheight "+str(self.maxheight)+" --minheight "+str(self.minheight)+" --pixelspernode "+str(self.pixelspernode)+" \""+self.world_path+"\" \""+tmp_png_path+"\"" + cmd_suffix
         dest_png_path = self.get_chunk_image_path(chunk_luid)
         #is_empty_chunk = is_chunk_yaml_marked(chunk_luid) and is_chunk_yaml_marked_empty(chunk_luid)
-        print (cmd_string)
+        print ("Running generator for: "+str((x,z)))
         subprocess.call(cmd_string, shell=True)  # TODO: remember not to allow arbitrary command execution, which could happen if input contains ';' when using shell=True
         if os.path.isfile(tmp_png_path):
             result = True
@@ -569,9 +624,9 @@ class MTChunks:
             self.prepare_chunk_meta(chunk_luid)  # DOES load existing yml if exists
             this_chunk = self.chunks[chunk_luid]
             #this_chunk = MTChunk()
+            #this_chunk.luid = chunk_luid
             this_chunk.set_from_genresult(genresult_path)
             chunk_yaml_path = self.get_chunk_yaml_path(chunk_luid)
-            this_chunk.save_yaml(chunk_yaml_path)
             this_chunk.save_yaml(chunk_yaml_path)
             print("(saved yaml to '"+chunk_yaml_path+"')")
             if not self.is_save_output_ok:
@@ -647,12 +702,15 @@ class MTChunks:
                         player_x = float(player_x)
                         player_y = float(player_y)
                         player_z = float(player_z)
-                        chunk_x = int((float(player_x)/self.chunk_size))
-                        chunk_y = int((float(player_y)/self.chunk_size))
-                        chunk_z = int((float(player_z)/self.chunk_size))
+                        chunk_x = int((int(player_x)/self.chunk_size))
+                        chunk_y = int((int(player_y)/self.chunk_size))
+                        chunk_z = int((int(player_z)/self.chunk_size))
                         chunk_luid = self.get_chunk_luid(chunk_x, chunk_z)
                         self.prepare_chunk_meta(chunk_luid)  # DOES load existing yml if exists
-                        self.chunks[chunk_luid].is_player_in_this_chunk = True
+                        if not self.chunks[chunk_luid].metadata["is_traversed"]:
+                            self.chunks[chunk_luid].metadata["is_traversed"] = True
+                            chunk_yaml_path = self.get_chunk_yaml_path(chunk_luid)
+                            self.chunks[chunk_luid].save_yaml(chunk_yaml_path)
 
                     #if is_enough_data:
                     #if player_name!="singleplayer":
@@ -709,7 +767,7 @@ class MTChunks:
     def is_player_at_luid(self, chunk_luid):
         result = False
         if chunk_luid in self.chunks.keys():
-            result = self.chunks[chunk_luid].is_player_in_this_chunk
+            result = self.chunks[chunk_luid].metadata["is_traversed"]
         return result
 
     def is_chunk_fresh(self, chunk_luid):
@@ -718,6 +776,8 @@ class MTChunks:
             result = self.chunks[chunk_luid].is_fresh
         return result
     
+    
+    #Returns: (boolean) whether the chunk image is present on dest (rendered now or earlier)--only possible if there is chunk data at the given location
     def check_chunk(self, x, z):
         result = False
         chunk_luid = self.get_chunk_luid(x,z)
@@ -729,45 +789,46 @@ class MTChunks:
 
         is_render_needed = False
 
-        if not self.is_chunk_fresh(chunk_luid):
-            if is_player_in_this_chunk:
-                if self.is_chunk_yaml_marked(chunk_luid):
-                    if self.is_chunk_yaml_marked_empty(chunk_luid):
-                        is_render_needed = True
-                        if self.is_verbose:
-                            print (chunk_luid+": RENDERING nonfresh previously marked empty (player in it)")
-                        else:
-                            sys.stdout.write('.')
-                    else:
-                        if self.is_verbose:
-                            print (chunk_luid+": SKIPPING nonfresh previously marked (player in it)")
-                        #else:
-                            #sys.stdout.write('.')
-                else:
+        #if not self.is_chunk_fresh(chunk_luid):
+        if is_player_in_this_chunk:
+            if self.is_chunk_yaml_marked(chunk_luid):
+                if self.is_chunk_yaml_marked_empty(chunk_luid):
                     is_render_needed = True
                     if self.is_verbose:
-                        print (chunk_luid+": RENDERING nonfresh unmarked (player in it)")
+                        print (chunk_luid+": RENDERING nonfresh previously marked empty (player in it)")
                     else:
                         sys.stdout.write('.')
+                else:
+                    if self.is_verbose:
+                        print (chunk_luid+": SKIPPING nonfresh previously marked nonempty (player in it)")
+                    #else:
+                        #sys.stdout.write('.')
             else:
-                if (not self.is_chunk_yaml_marked(chunk_luid)):
-                    is_render_needed = True
-                    if self.is_verbose:
-                        print (chunk_luid+": RENDERING nonfresh unmarked (simple check since has no player)")
-                    else:
-                        sys.stdout.write('.')
+                is_render_needed = True
+                if self.is_verbose:
+                    print (chunk_luid+": RENDERING nonfresh unmarked (player in it)")
                 else:
-                    if self.is_verbose:
-                        print (chunk_luid+": SKIPPING nonfresh previously marked (simple check since has no player)")
+                    sys.stdout.write('.')
         else:
-            if self.is_verbose:
-                print (chunk_luid+": SKIPPING fresh chunk")
+            if (not self.is_chunk_yaml_marked(chunk_luid)):
+                is_render_needed = True
+                if self.is_verbose:
+                    print (chunk_luid+": RENDERING nonfresh unmarked (simple check since has no player)")
+                else:
+                    sys.stdout.write('.')
+            else:
+                if self.is_verbose:
+                    print (chunk_luid+": SKIPPING nonfresh previously marked (simple check since has no player)")
+        #else:
+        #    if self.is_verbose:
+        #        print (chunk_luid+": SKIPPING fresh chunk")
             #if (not self.is_chunk_yaml_marked(chunk_luid)):
                 #is_render_needed = True
 
         # This should never happen since keeping the output of minetestmapper-numpy.py (after analyzing that output) is deprecated:
         #if self.is_genresult_marked(chunk_luid) and not self.is_chunk_yaml_present(chunk_luid):
         #    tmp_chunk = MTChunk()
+        #    tmp_chunk.luid = chunk_luid
         #    genresult_path = self.get_chunk_genresult_tmp_path(chunk_luid)
         #    tmp_chunk.set_from_genresult(genresult_path)
         #    chunk_yaml_path = self.get_chunk_yaml_path(chunk_luid)
@@ -776,8 +837,8 @@ class MTChunks:
 
 
         if is_render_needed:
-            rendered_count += 1
-            if (self.render_chunk(x,z)):
+            self.rendered_count += 1
+            if (self._render_chunk(x,z)):
                 result = True
         else:
             if self.is_chunk_rendered_on_dest(chunk_luid):
@@ -790,44 +851,109 @@ class MTChunks:
             #else:
                 #print(chunk_luid+": Not rendered on dest.")
         return result
+    
+    def _check_map_pseudorecursion_branchfrom(self, x, z):
+        chunk_luid = self.get_chunk_luid(x,z)
+        branched_pos = x-1,z
+        #only add if not in list already, to prevent infinite re-branching
+        if branched_pos not in self.todo_positions:
+            self.todo_positions.append(branched_pos)
+        branched_pos = x+1,z
+        if branched_pos not in self.todo_positions:
+            self.todo_positions.append(branched_pos)
+        branched_pos = x,z-1
+        if branched_pos not in self.todo_positions:
+            self.todo_positions.append(branched_pos)
+        branched_pos = x,z+1
+        if branched_pos not in self.todo_positions:
+            self.todo_positions.append(branched_pos)
         
-    def check_map_pseudorecursion(self):
-        if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
-            rendered_count = 0
-        self.todo_positions.clear()
-        self.todo_positions.append((0,0))
-        todo_index = 0
-        while (todo_index<len(self.todo_positions)):
-            this_pos = self.todo_positions[todo_index]
-            x,z = this_pos
-            chunk_luid = self.get_chunk_luid(x,z)
-            is_present = self.check_chunk(x,z)
-            #TODO: finish this asdf
+    def check_map_pseudorecursion_iterate(self):  # , redo_empty_enable=False):
+        if self.todo_index<0:
+            self.check_map_pseudorecursion_start()
+        if self.todo_index>=0:
+            if self.todo_index<len(self.todo_positions):
+                this_pos = self.todo_positions[self.todo_index]
+                x,z = this_pos
+                chunk_luid = self.get_chunk_luid(x,z)
+                is_present = self.check_chunk(x,z)
+                if is_present:
+                    self.total_generated_count += 1
+                    self._check_map_pseudorecursion_branchfrom(x,z)
+                self.todo_index += 1
+            if self.todo_index>=len(self.todo_positions):  # check again since may have branched above, making this untrue
+                self.save_mapvars_if_changed()
+                self.todo_index = -1
         
-
-    def check_map_inefficient_squarepattern(self):
+    def get_coords_from_luid(self,chunk_luid):
+        result = None
+        if chunk_luid is not None:
+            xopener_index = chunk_luid.find("x")
+            zopener_index = chunk_luid.find("z")
+            if xopener_index>=0 and zopener_index>xopener_index:
+                x_string = chunk_luid[xopener_index+1:zopener_index]
+                z_string = chunk_luid[zopener_index+1:]
+                try:
+                    x = int(x_string)
+                    try:
+                        z = int(z_string)
+                        result = x,z
+                    except:
+                        pass
+                except:
+                    pass
+        return result
+    
+    def check_map_pseudorecursion_start(self):
+        if self.todo_index<0:
+            if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
+                self.rendered_count = 0
+                self.todo_positions.clear()
+                self.todo_positions.append((0,0))
+                self.mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
+                self.verify_correct_map()
+                if preload_all_enable:
+                    preload_all_enable = False
+                    minlen=len(self.chunk_yaml_name_opener_string)+4+len(self.chunk_yaml_name_dotext_string)  # +4 for luid, such as x1z2
+                    for dirname, dirnames, filenames in os.walk(self.chunkymap_data_path):
+                        for filename in filenames:
+                            file_fullname = os.path.join(players_path,filename)
+                            #print ("  EXAMINING "+filename)
+                            badstart_string = "."
+                            if (filename[:len(badstart_string)]!=badstart_string):
+                                if len(filename) > minlen:
+                                    chunk_luid = self.get_chunk_luid_from_yaml_name(filename)
+                                    coords = self.get_coords_from_luid(chunk_luid)
+                                    if coords is not None:
+                                        print("Checking chunk "+str(coords)+" *"+str(self.chunk_size)+"")
+                                        self.prepare_chunk_meta(chunk_luid)
+                for chunk_luid in self.chunks.keys():
+                    if self.chunks[chunk_luid].metadata["is_traversed"] and not self.is_chunk_rendered_on_dest(chunk_luid):
+                        if self.chunks[chunk_luid].metadata["is_empty"]:
+                            self.chunks[chunk_luid].metadata["is_empty"] = False
+                            self.chunks[chunk_luid].save_yaml(self.get_chunk_yaml_path(chunk_luid))
+                        coords = self.get_coords_from_luid(chunk_luid)
+                        if coords is not None:
+                            self.todo_positions.append(coords)
+                        else:
+                            print("ERROR: could not get coords from luid '"+chunk_luid+"'")
+                        #ins = open(file_fullname, 'r')
+                        #line = True
+                        #while line:
+                            #line = ins.readline()
+                            #if line:
+                        #ins.close()
+                self.todo_index = 0
+                #while (todo_index<len(self.todo_positions)):
+                self.verify_correct_map()
+    
+    def verify_correct_map(self):
         if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
-            rendered_count = 0
-            self.chunkymap_data_path=os.path.join(self.website_root,"chunkymapdata")
-            yaml_name = "generated.yml"
-            world_yaml_path = os.path.join(self.chunkymap_data_path, yaml_name)
-            if not os.path.isdir(self.chunkymap_data_path):
-                os.mkdir(self.chunkymap_data_path)
-
-            htaccess_path = os.path.join(self.chunkymap_data_path,".htaccess")
-            if not os.path.isdir(self.chunkymap_data_path):
-                os.makedirs(self.chunkymap_data_path)
-            if not os.path.isfile(htaccess_path):
-                self.deny_http_access(self.chunkymap_data_path)
-
-            mapvars = get_dict_from_conf_file(world_yaml_path,":")
-            #is_testonly == (self.os_name=="windows")
-
-            if mapvars is not None and set(['world_name']).issubset(mapvars):
+            if self.mapvars is not None and set(['world_name']).issubset(self.mapvars):
                 #if self.is_verbose:
                 #    print ("  (FOUND self.world_name)")
-                if mapvars["world_name"] != self.world_name:
-                    print ("Removing ALL map data since from WORLD NAME is different (map '"+str(mapvars["world_name"])+"' is not '"+str(self.world_name)+"')...")
+                if self.mapvars["world_name"] != self.world_name:
+                    print ("Removing ALL map data since from WORLD NAME is different (map '"+str(self.mapvars["world_name"])+"' is not '"+str(self.world_name)+"')...")
                     for dirname, dirnames, filenames in os.walk(self.chunkymap_data_path):
                         #index = 0
                         #for j in range(0,len(filenames)):
@@ -843,7 +969,7 @@ class MTChunks:
                                 badstart_string = "chunk"
                                 if (len(filename) >= len(badstart_string)) and (filename[:len(badstart_string)]==badstart_string):
                                     os.remove(file_fullname)
-                                elif filename==yaml_name:
+                                elif filename==self.yaml_name:
                                     os.remove(file_fullname)
                     for dirname, dirnames, filenames in os.walk(os.path.join(self.chunkymap_data_path, "players")):
                         #for j in range(0,len(filenames)):
@@ -860,19 +986,86 @@ class MTChunks:
                                 badend_string = ".yml"
                                 if (len(filename) >= len(badend_string)) and (filename[len(filename)-len(badend_string):]==badend_string):
                                     os.remove(file_fullname)
+        
+    def save_mapvars_if_changed(self):
+        is_changed = False
+        #is_different_world = False
+        new_map_dict = {}
+        new_map_dict["world_name"]=str(self.world_name)
+        new_map_dict["chunk_size"]=str(self.chunk_size)
+        new_map_dict["pixelspernode"]=str(self.pixelspernode)
+        new_map_dict["chunkx_min"]=str(self.chunkx_min)
+        new_map_dict["chunkx_max"]=str(self.chunkx_max)
+        new_map_dict["chunkz_min"]=str(self.chunkz_min)
+        new_map_dict["chunkz_max"]=str(self.chunkz_max)
+        new_map_dict["maxheight"]=str(self.maxheight)
+        new_map_dict["minheight"]=str(self.minheight)
+        new_map_dict["world_path"]=str(self.world_path)
+        new_map_dict["chunkymap_data_path"]=str(self.chunkymap_data_path)
+        new_map_dict["total_generated_count"]=str(self.total_generated_count)
+        if self.mapvars is None:
+            print ("SAVING '" + self.world_yaml_path + "' since nothing was loaded or it did not exist")
+            is_changed = True
+        else:
+            for this_key in new_map_dict.iterkeys():
+                if this_key != "total_generated_count":  # don't care if generated count changed since may have been regenerated
+                    if (this_key not in self.mapvars.keys()):
+                        is_changed = True
+                        print ("SAVING '" + self.world_yaml_path + "' since " + str(this_key) + " not in mapvars")
+                        break
+                    elif (str(self.mapvars[this_key]) != str(new_map_dict[this_key])):
+                        is_changed = True
+                        print ("SAVING '" + self.world_yaml_path + "' since new " + this_key + " value " + str(new_map_dict[this_key]) + " not same as saved value " + str(self.mapvars[this_key]) + "")
+                        break
+        if is_changed:
+            outs = open(self.world_yaml_path, 'w')
+            outs.write("world_name:"+str(self.world_name) + "\n")
+            outs.write("chunk_size:"+str(self.chunk_size) + "\n")
+            outs.write("pixelspernode:"+str(self.pixelspernode) + "\n")
+            outs.write("chunkx_min:"+str(self.chunkx_min) + "\n")
+            outs.write("chunkx_max:"+str(self.chunkx_max) + "\n")
+            outs.write("chunkz_min:"+str(self.chunkz_min) + "\n")
+            outs.write("chunkz_max:"+str(self.chunkz_max) + "\n")
+            #values for command arguments:
+            outs.write("maxheight:"+str(self.maxheight) + "\n")
+            outs.write("minheight:"+str(self.minheight) + "\n")
+            #ALSO save to YAML:
+            outs.write("world_path:"+str(self.world_path) + "\n")
+            outs.write("chunkymap_data_path:"+str(self.chunkymap_data_path) + "\n")
+            outs.write("total_generated_count:"+str(self.total_generated_count) + "\n")
+            outs.close()
+        else:
+            if self.is_verbose:
+                print ("  (Not saving '"+self.world_yaml_path+"' since same value of each current variable is already in file as loaded)")
+
+    def check_map_inefficient_squarepattern(self):
+        if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
+            self.rendered_count = 0
+            if not os.path.isdir(self.chunkymap_data_path):
+                os.mkdir(self.chunkymap_data_path)
+
+            htaccess_path = os.path.join(self.chunkymap_data_path,".htaccess")
+            if not os.path.isdir(self.chunkymap_data_path):
+                os.makedirs(self.chunkymap_data_path)
+            if not os.path.isfile(htaccess_path):
+                self.deny_http_access(self.chunkymap_data_path)
+
+            self.mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
+            #is_testonly == (self.os_name=="windows")
+            
+            self.verify_correct_map()
+
             self.chunkx_min = 0
             self.chunkz_min = 0
             self.chunkx_max = 0
             self.chunkz_max = 0
-            total_generated_count = 0
+            self.total_generated_count = 0
 
             newchunk_luid_list = list()
             this_iteration_generates_count = 1
-            is_changed = False
-            is_different_world = False
-            #if str(self.world_name) != str(mapvars["world_name"]):
+            #if str(self.world_name) != str(self.mapvars["world_name"]):
             #    is_different_world = True
-            #    print("FULL RENDER since chosen world name '"+self.world_name+"' does not match previously rendered world name '"+mapvars["world_name"]+"'")
+            #    print("FULL RENDER since chosen world name '"+self.world_name+"' does not match previously rendered world name '"+self.mapvars["world_name"]+"'")
             print("PROCESSING MAP DATA")
             while this_iteration_generates_count > 0:
                 this_iteration_generates_count = 0
@@ -895,7 +1088,7 @@ class MTChunks:
                         if is_outline:
                             if self.check_chunk(x,z):
                                 this_iteration_generates_count += 1
-                                total_generated_count += 1
+                                self.total_generated_count += 1
                     if self.is_verbose:
                         print ("")  # blank line before next z so output is more readable
                 self.chunkx_min -= 1
@@ -903,54 +1096,9 @@ class MTChunks:
                 self.chunkx_max += 1
                 self.chunkz_max += 1
             #end while square outline (1-chunk-thick outline) generated any png files
-            new_map_dict = {}
-            new_map_dict["world_name"]=str(self.world_name)
-            new_map_dict["chunk_size"]=str(self.chunk_size)
-            new_map_dict["pixelspernode"]=str(self.pixelspernode)
-            new_map_dict["chunkx_min"]=str(self.chunkx_min)
-            new_map_dict["chunkx_max"]=str(self.chunkx_max)
-            new_map_dict["chunkz_min"]=str(self.chunkz_min)
-            new_map_dict["chunkz_max"]=str(self.chunkz_max)
-            new_map_dict["maxheight"]=str(self.maxheight)
-            new_map_dict["minheight"]=str(self.minheight)
-            new_map_dict["world_path"]=str(self.world_path)
-            new_map_dict["chunkymap_data_path"]=str(self.chunkymap_data_path)
-            new_map_dict["total_generated_count"]=str(total_generated_count)
-            if mapvars is None:
-                print ("SAVING '" + world_yaml_path + "' since nothing was loaded or it did not exist")
-                is_changed = True
-            else:
-                for this_key in new_map_dict.iterkeys():
-                    if (this_key not in mapvars.keys()):
-                        is_changed = True
-                        print ("SAVING '" + world_yaml_path + "' since " + str(this_key) + " not in mapvars")
-                        break
-                    elif (str(mapvars[this_key]) != str(new_map_dict[this_key])):
-                        is_changed = True
-                        print ("SAVING '" + world_yaml_path + "' since new " + this_key + " value " + str(new_map_dict[this_key]) + " not same as saved value " + str(mapvars[this_key]) + "")
-                        break
-            if is_changed:
-                outs = open(world_yaml_path, 'w')
-                outs.write("world_name:"+str(self.world_name) + "\n")
-                outs.write("chunk_size:"+str(self.chunk_size) + "\n")
-                outs.write("pixelspernode:"+str(self.pixelspernode) + "\n")
-                outs.write("chunkx_min:"+str(self.chunkx_min) + "\n")
-                outs.write("chunkx_max:"+str(self.chunkx_max) + "\n")
-                outs.write("chunkz_min:"+str(self.chunkz_min) + "\n")
-                outs.write("chunkz_max:"+str(self.chunkz_max) + "\n")
-                #values for command arguments:
-                outs.write("maxheight:"+str(self.maxheight) + "\n")
-                outs.write("minheight:"+str(self.minheight) + "\n")
-                #ALSO save to YAML:
-                outs.write("world_path:"+str(self.world_path) + "\n")
-                outs.write("chunkymap_data_path:"+str(self.chunkymap_data_path) + "\n")
-                outs.write("total_generated_count:"+str(total_generated_count) + "\n")
-                outs.close()
-            else:
-                if self.is_verbose:
-                    print ("  (Not saving '"+world_yaml_path+"' since same value of each current variable is already in file as loaded)")
+            self.save_mapvars_if_changed()
             if not self.is_verbose:
-                print("  rendered: "+str(rendered_count)+" (only checks for new chunks)")
+                print("  rendered: "+str(self.rendered_count)+" (only checks for new chunks)")
         else:
             print ("MAP ERROR: failed since this folder must contain colors.txt and minetestmapper-numpy.py")
 
@@ -1051,7 +1199,8 @@ class MTChunks:
         if self.refresh_players_enable:
             self.check_players()
         if self.refresh_map_enable:
-            self.check_map_inefficient_squarepattern()
+            #self.check_map_inefficient_squarepattern()
+            self.check_map_pseudorecursion_iterate()
 
 if __name__ == '__main__':
     mtchunks = MTChunks()

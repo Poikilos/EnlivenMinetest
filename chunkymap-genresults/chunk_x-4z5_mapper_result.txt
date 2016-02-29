@@ -1,6 +1,6 @@
 Result image (w=16 h=16) will be written to C:\Users\jgustafson\Documents\GitHub\minetest-chunkymap\chunk_x-4z5.png
-Unknown node names: default:grass_1 flowers:mushroom_fertile_brown flowers:mushroom_fertile_red air
-Unknown node ids: 0x0 0x1 0x9 0xc 0x7
+Unknown node names: default:grass_1 flowers:mushroom_fertile_red air
+Unknown node ids: 0x0 0x1 0x9 0x7
 Drawing image
 Saving to: C:\Users\jgustafson\Documents\GitHub\minetest-chunkymap\chunk_x-4z5.png
 ('PNG Region: ', [-64, -64, 80, 80])
