@@ -284,6 +284,7 @@ class MTChunks:
     profile_path = None
     worlds_path = None
     is_save_output_ok = None
+    mt_util_path = None
     mtmn_path = None
     colors_path = None
     python_exe_path = None
@@ -412,9 +413,10 @@ class MTChunks:
             #else may be in path--assume installer worked
         except:
             pass  # do nothing, probably linux
-
-        self.mtmn_path = os.path.join( self.profile_path, "minetest/util/minetestmapper-numpy.py" )
-        self.colors_path = os.path.join( self.profile_path, "minetest/util/colors.txt" )
+        mt_path = os.path.join( self.profile_path, "minetest")
+        self.mt_util_path = os.path.join( mt_path, "util")
+        self.mtmn_path = os.path.join( self.mt_util_path, "minetestmapper-numpy.py" )
+        self.colors_path = os.path.join( self.mt_util_path, "colors.txt" )
         if self.os_name=="windows":
             self.mtmn_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-numpy.py")
             self.colors_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "colors.txt")
@@ -605,12 +607,17 @@ class MTChunks:
         cmd_string = self.python_exe_path + " \""+self.mtmn_path + "\" --region " + str(x_min) + " " + str(x_max) + " " + str(z_min) + " " + str(z_max) + " --maxheight "+str(self.maxheight)+" --minheight "+str(self.minheight)+" --pixelspernode "+str(self.pixelspernode)+" \""+self.world_path+"\" \""+tmp_png_path+"\"" + cmd_suffix
         
         if self.os_name!="windows":  #since windows client doesn't normally have minetest-mapper
-            #since minetestmapper-numpy has trouble with leveldb:
-            #such as minetest-mapper --input "/home/owner/.minetest/worlds/FCAGameAWorld"
-            #where geometry option is like --geometry x:y+w+h
-            output_type_string = "minetest-mapper"
-            #NOTE: minetest-mapper is part of the minetest-data package, which can be installed alongside the git version of minetestserver
-            cmd_string = "/usr/games/minetest-mapper --input \""+self.world_path+"\" --draworigin --geometry "+str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min))+"+"+str(int(z_max)-int(z_min))+" --output \""+tmp_png_path+"\""+cmd_suffix
+            
+            # since minetestmapper-numpy has trouble with leveldb:
+            # such as sudo minetest-mapper --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry -32:-32+64+64 --output /var/www/html/minetest/try1.png
+            # where geometry option is like --geometry x:y+w+h
+            #output_type_string = "minetest-mapper"
+            # NOTE: minetest-mapper is part of the minetest-data package, which can be installed alongside the git version of minetestserver
+            # BUT *buntu Trusty version of it does NOT have geometry option
+            #cmd_string = "/usr/games/minetest-mapper --input \""+self.world_path+"\" --draworigin --geometry "+str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min))+"+"+str(int(z_max)-int(z_min))+" --output \""+tmp_png_path+"\""+cmd_suffix
+            # PYTHON VERSION (doesn't have range)
+            # such as sudo python /home/owner/minetest/util/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry -32:-32+64+64 --output /var/www/html/minetest/try1.png
+            pass
         dest_png_path = self.get_chunk_image_path(chunk_luid)
         #is_empty_chunk = is_chunk_yaml_marked(chunk_luid) and is_chunk_yaml_marked_empty(chunk_luid)
         print ("Running generator for: "+str((x,z)))
