@@ -52,7 +52,7 @@ chmod -x "$CHUNKYMAP_DEST/unused/chunkymap-cronjob"
 chmod -x "$CHUNKYMAP_DEST/unused/set-minutely-crontab-job.sh"
 chmod -x "$CHUNKYMAP_DEST/unused/set-minutely-players-crontab-job.sh"
 
-sudo apt-get install python-numpy python-pil
+sudo apt-get install python-numpy python-pil python-leveldb
 echo ""
 echo "To see what needs to be in your $MT_MY_WEBSITE_PATH directory (if you don't use that directory, modify chunkymap-regen.py to use your directory):"
 echo "cd $CHUNKYMAP_DEST/web"

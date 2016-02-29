@@ -21,6 +21,20 @@ This program comes without any warranty, to the extent permitted by applicable l
     echo "refresh_map_enable:False" > ~/minetest/util/chunkymap-signals.txt
 	sleep 15s
 	echo "loop_enable:False" > ~/minetest/util/chunkymap-signals.txt
+	* list of signals:
+		loop_enable:True
+		loop_enable:False
+		refresh_players_enable:True
+		refresh_players_enable:False
+		refresh_map_enable:True
+		refresh_map_enable:False
+		#rerenders chunks that were rendered in this run:
+		recheck_rendered:True
+		#where 1 is number of seconds:
+		refresh_map_seconds:1
+		#where 1 is number of seconds:
+		refresh_players_seconds:1
+		
 * Has static html version of map (echo_chunkymap_table() php function) -- see example.php
 	* Zoom in and out
 	* optionally echo name of world that was detected by the scheduled py file
@@ -89,6 +103,7 @@ This program comes without any warranty, to the extent permitted by applicable l
     chunkymap-regen-loop.bat
 	* copy example.php and chunkymap.php (and optionally browser.php) to your DocumentRoot or whatever folder will contain the chunkymapdata folder
 ## Known Issues
+* 
 * chunkymap.php should read the size of the chunks -- see near is_file($chunk_genresult_path) in chunkymap.php
 * optionally hide player location
 * Make a method (in chunkymap.php) to echo the map as an html5 canvas (refresh players every 10 seconds, check for new map chunks every minute)

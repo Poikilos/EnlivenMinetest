@@ -789,39 +789,39 @@ class MTChunks:
 
         is_render_needed = False
 
-        #if not self.is_chunk_fresh(chunk_luid):
-        if is_player_in_this_chunk:
-            if self.is_chunk_yaml_marked(chunk_luid):
-                if self.is_chunk_yaml_marked_empty(chunk_luid):
+        if not self.is_chunk_fresh(chunk_luid):
+            if is_player_in_this_chunk:
+                if self.is_chunk_yaml_marked(chunk_luid):
+                    if self.is_chunk_yaml_marked_empty(chunk_luid):
+                        is_render_needed = True
+                        if self.is_verbose:
+                            print (chunk_luid+": RENDERING nonfresh previously marked empty (player in it)")
+                        else:
+                            sys.stdout.write('.')
+                    else:
+                        if self.is_verbose:
+                            print (chunk_luid+": SKIPPING nonfresh previously marked nonempty (player in it)")
+                        #else:
+                            #sys.stdout.write('.')
+                else:
                     is_render_needed = True
                     if self.is_verbose:
-                        print (chunk_luid+": RENDERING nonfresh previously marked empty (player in it)")
+                        print (chunk_luid+": RENDERING nonfresh unmarked (player in it)")
+                    else:
+                        sys.stdout.write('.')
+            else:
+                if (not self.is_chunk_yaml_marked(chunk_luid)):
+                    is_render_needed = True
+                    if self.is_verbose:
+                        print (chunk_luid+": RENDERING nonfresh unmarked (simple check since has no player)")
                     else:
                         sys.stdout.write('.')
                 else:
                     if self.is_verbose:
-                        print (chunk_luid+": SKIPPING nonfresh previously marked nonempty (player in it)")
-                    #else:
-                        #sys.stdout.write('.')
-            else:
-                is_render_needed = True
-                if self.is_verbose:
-                    print (chunk_luid+": RENDERING nonfresh unmarked (player in it)")
-                else:
-                    sys.stdout.write('.')
+                        print (chunk_luid+": SKIPPING nonfresh previously marked (simple check since has no player)")
         else:
-            if (not self.is_chunk_yaml_marked(chunk_luid)):
-                is_render_needed = True
-                if self.is_verbose:
-                    print (chunk_luid+": RENDERING nonfresh unmarked (simple check since has no player)")
-                else:
-                    sys.stdout.write('.')
-            else:
-                if self.is_verbose:
-                    print (chunk_luid+": SKIPPING nonfresh previously marked (simple check since has no player)")
-        #else:
-        #    if self.is_verbose:
-        #        print (chunk_luid+": SKIPPING fresh chunk")
+            if self.is_verbose:
+                print (chunk_luid+": SKIPPING fresh chunk")
             #if (not self.is_chunk_yaml_marked(chunk_luid)):
                 #is_render_needed = True
 
@@ -1136,6 +1136,13 @@ class MTChunks:
                                 print("ERROR: expected >=1 seconds for refresh_players_seconds (int or float)")
                         else:
                             print("ERROR: expected int for "+this_key)
+                    elif this_key=="recheck_rendered":
+                        if type(signals[this_key]) is bool:
+                            if signals[this_key]:
+                                for chunk_luid in self.chunks.keys():
+                                    self.chunks[chunk_luid].is_fresh = False
+                        else:
+                            print("ERROR: expected bool for "+this_key)
                     elif this_key=="refresh_map_enable":
                         if type(signals[this_key]) is bool:
                             self.refresh_map_enable = signals[this_key]
