@@ -36,13 +36,14 @@ rm -f "$CHUNKYMAP_DEST/chunkymap-players-cronjob"
 rm -f "$CHUNKYMAP_DEST/set-minutely-players-crontab-job.sh"
 rm -f "$CHUNKYMAP_DEST/set-minutely-crontab-job.sh"
 #install scripts:
+cp -f "$CHUNKYMAP_INSTALLER_PATH/chunkymap-regen-loop.sh" "$CHUNKYMAP_DEST/"
+#install not-recommended scripts:
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-regen.sh" "$CHUNKYMAP_DEST/unused/"
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-regen-players.sh" "$CHUNKYMAP_DEST/unused/"
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-cronjob" "$CHUNKYMAP_DEST/unused/"
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-players-cronjob" "$CHUNKYMAP_DEST/unused/"
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/set-minutely-players-crontab-job.sh" "$CHUNKYMAP_DEST/unused/"
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/set-minutely-crontab-job.sh" "$CHUNKYMAP_DEST/unused/"
-cp -f "$CHUNKYMAP_INSTALLER_PATH/chunkymap-regen-loop.sh" "$CHUNKYMAP_DEST/"
 if [ ! -d "$CHUNKYMAP_DEST/chunkymap" ]; then
   mkdir "$CHUNKYMAP_DEST/chunkymap"
 fi
