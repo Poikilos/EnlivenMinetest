@@ -24,6 +24,9 @@ This program comes without any warranty, to the extent permitted by applicable l
 	* list of signals:
 		loop_enable:True
 		loop_enable:False
+		#verbose_enable is false for looped (default) mode and true for non-looped mode
+		verbose_enable:True
+		verbose_enable:False
 		refresh_players_enable:True
 		refresh_players_enable:False
 		refresh_map_enable:True

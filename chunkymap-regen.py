@@ -326,7 +326,7 @@ class MTChunks:
     #endregion values to save to YAML
 
     loop_enable = None
-    is_verbose = None
+    verbose_enable = None
 
     world_blacklist = None
     run_count = None
@@ -348,7 +348,7 @@ class MTChunks:
         self.todo_index = -1
         self.todo_positions = list()
         self.run_count = 0
-        self.is_verbose = True
+        self.verbose_enable = True
         self.loop_enable = True
         self.refresh_map_enable = True
         self.refresh_players_enable = True
@@ -778,11 +778,11 @@ class MTChunks:
                         # don't check y since y is elevation in minetest, don't use float since subblock position doesn't matter to map
                         if map_player_dict is not None and saved_player_x is not None and saved_player_y is not None and saved_player_z is not None:
                             #print("PLAYER MOVED: "+str(player_name)+" moved from "+str(map_player_position_tuple)+" to "+str(player_position_tuple))
-                            if self.is_verbose:
+                            if self.verbose_enable:
                                 print("PLAYER MOVED: "+str(player_name)+" moved from "+str(saved_player_x)+","+str(saved_player_y)+","+str(saved_player_z)+" to "+str(player_x)+","+str(player_y)+","+str(player_z))
                             players_moved_count += 1
                         else:
-                            if self.is_verbose:
+                            if self.verbose_enable:
                                 print("SAVING YAML for player '"+str(player_name)+"'")
                             players_saved_count += 1
                         outs = open(player_dest_path, 'w')
@@ -800,11 +800,11 @@ class MTChunks:
                         outs.close()
                         player_written_count += 1
                     else:
-                        if self.is_verbose:
+                        if self.verbose_enable:
                             print("DIDN'T MOVE: "+str(player_name))
                             players_didntmove_count += 1
                     player_count += 1
-        if not self.is_verbose:
+        if not self.verbose_enable:
             print("PLAYERS:")
             print("  saved: "+str(player_written_count)+" (moved:"+str(players_moved_count)+"; new:"+str(players_saved_count)+")")
             print("  didn't move: "+str(players_didntmove_count))
@@ -839,33 +839,33 @@ class MTChunks:
                 if self.is_chunk_yaml_marked(chunk_luid):
                     if self.is_chunk_yaml_marked_empty(chunk_luid):
                         is_render_needed = True
-                        if self.is_verbose:
+                        if self.verbose_enable:
                             print (chunk_luid+": RENDERING nonfresh previously marked empty (player in it)")
                         else:
                             sys.stdout.write('.')
                     else:
-                        if self.is_verbose:
+                        if self.verbose_enable:
                             print (chunk_luid+": SKIPPING nonfresh previously marked nonempty (player in it)")
                         #else:
                             #sys.stdout.write('.')
                 else:
                     is_render_needed = True
-                    if self.is_verbose:
+                    if self.verbose_enable:
                         print (chunk_luid+": RENDERING nonfresh unmarked (player in it)")
                     else:
                         sys.stdout.write('.')
             else:
                 if (not self.is_chunk_yaml_marked(chunk_luid)):
                     is_render_needed = True
-                    if self.is_verbose:
+                    if self.verbose_enable:
                         print (chunk_luid+": RENDERING nonfresh unmarked (simple check since has no player)")
                     else:
                         sys.stdout.write('.')
                 else:
-                    if self.is_verbose:
+                    if self.verbose_enable:
                         print (chunk_luid+": SKIPPING nonfresh previously marked (simple check since has no player)")
         else:
-            if self.is_verbose:
+            if self.verbose_enable:
                 print (chunk_luid+": SKIPPING fresh chunk")
             #if (not self.is_chunk_yaml_marked(chunk_luid)):
                 #is_render_needed = True
@@ -889,7 +889,7 @@ class MTChunks:
             if self.is_chunk_rendered_on_dest(chunk_luid):
                 result = True
                 tmp_png_path = self.get_chunk_image_path(chunk_luid)
-                if self.is_verbose:
+                if self.verbose_enable:
                     print(chunk_luid+": Skipping existing map tile file " + tmp_png_path + " (delete it to re-render)")
             #elif is_empty_chunk:
                 #print("Skipping empty chunk " + chunk_luid)
@@ -995,7 +995,7 @@ class MTChunks:
     def verify_correct_map(self):
         if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
             if self.mapvars is not None and set(['world_name']).issubset(self.mapvars):
-                #if self.is_verbose:
+                #if self.verbose_enable:
                 #    print ("  (FOUND self.world_name)")
                 if self.mapvars["world_name"] != self.world_name:
                     print ("Removing ALL map data since from WORLD NAME is different (map '"+str(self.mapvars["world_name"])+"' is not '"+str(self.world_name)+"')...")
@@ -1009,7 +1009,7 @@ class MTChunks:
                         for filename in filenames:
                             if filename[0] != ".":
                                 file_fullname = os.path.join(self.chunkymap_data_path,filename)
-                                if self.is_verbose:
+                                if self.verbose_enable:
                                     print ("  EXAMINING "+filename)
                                 badstart_string = "chunk"
                                 if (len(filename) >= len(badstart_string)) and (filename[:len(badstart_string)]==badstart_string):
@@ -1020,13 +1020,13 @@ class MTChunks:
                         #for j in range(0,len(filenames)):
                         #    i = len(filenames) - 0 - 1
                         #    if filenames[i][0] == ".":
-                        #    if self.is_verbose:
+                        #    if self.verbose_enable:
                         #        print ("  SKIPPING "+filenames[i])
                         #        filenames.remove_at(i)
                         for filename in filenames:
                             if filename[0] != ".":
                                 file_fullname = os.path.join(self.chunkymap_data_path,filename)
-                                if self.is_verbose:
+                                if self.verbose_enable:
                                     print ("  EXAMINING "+filename)
                                 badend_string = ".yml"
                                 if (len(filename) >= len(badend_string)) and (filename[len(filename)-len(badend_string):]==badend_string):
@@ -1080,7 +1080,7 @@ class MTChunks:
             outs.write("total_generated_count:"+str(self.total_generated_count) + "\n")
             outs.close()
         else:
-            if self.is_verbose:
+            if self.verbose_enable:
                 print ("  (Not saving '"+self.world_yaml_path+"' since same value of each current variable is already in file as loaded)")
 
     def check_map_inefficient_squarepattern(self):
@@ -1134,7 +1134,7 @@ class MTChunks:
                             if self.check_chunk(x,z):
                                 this_iteration_generates_count += 1
                                 self.total_generated_count += 1
-                    if self.is_verbose:
+                    if self.verbose_enable:
                         print ("")  # blank line before next z so output is more readable
                 self.chunkx_min -= 1
                 self.chunkz_min -= 1
@@ -1142,7 +1142,7 @@ class MTChunks:
                 self.chunkz_max += 1
             #end while square outline (1-chunk-thick outline) generated any png files
             self.save_mapvars_if_changed()
-            if not self.is_verbose:
+            if not self.verbose_enable:
                 print("  rendered: "+str(self.rendered_count)+" (only checks for new chunks)")
         else:
             print ("MAP ERROR: failed since this folder must contain colors.txt and minetestmapper-numpy.py")
@@ -1193,6 +1193,11 @@ class MTChunks:
                             self.refresh_map_enable = signals[this_key]
                         else:
                             print("ERROR: expected bool for "+this_key)
+                    elif this_key=="verbose_enable":
+                        if type(signals[this_key]) is bool:
+                            self.verbose_enable = signals[this_key]
+                        else:
+                            print("ERROR: expected bool for "+this_key)
 
                     else:
                         print("ERROR: unknown signal '"+this_key+"'")
@@ -1209,7 +1214,7 @@ class MTChunks:
     def run_loop(self):
         #self.last_run_second = best_timer()
         self.loop_enable = True
-        self.is_verbose = False
+        self.verbose_enable = False
         while self.loop_enable:
             before_second = best_timer()
             run_wait_seconds = self.refresh_map_seconds
@@ -1240,7 +1245,7 @@ class MTChunks:
                 else:
                     print("map update is not enabled")
             else:
-                self.is_verbose = True
+                self.verbose_enable = True
             run_wait_seconds -= (best_timer()-before_second)
             if (int(float(run_wait_seconds)+.5)>0.0):
                 print ("sleeping for "+str(run_wait_seconds)+"s")

@@ -1,0 +1,3 @@
+#or echo "verbose_enable:True" > chunkymap-signals.txt
+verbose_enable:True
+
