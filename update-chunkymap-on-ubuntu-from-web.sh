@@ -9,7 +9,10 @@ fi
 #cd $CHUNKYMAP_INSTALLER_DIR
 chmod +x update-chunkymap-installer-only.sh
 cd $HOME/Downloads
-mv -f update-chunkymap-installer-only.sh "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
+if [ -f "update-chunkymap-installer-only.sh" ]; then
+  # move misplaced file from older versions:
+  mv -f update-chunkymap-installer-only.sh "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
+fi
 sh "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
 #./install-chunkymap-on-ubuntu.sh
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh"

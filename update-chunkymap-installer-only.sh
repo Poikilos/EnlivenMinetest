@@ -7,7 +7,9 @@ if [ ! -d "$HOME/Downloads" ]; then
 fi
 
 cd $HOME/Downloads
-rm master.zip
+if [ -f master.zip ]; then
+  rm master.zip
+fi
 wget https://github.com/expertmm/minetest-chunkymap/archive/master.zip
 rm -f minetest-chunkymap.zip
 mv master.zip minetest-chunkymap.zip
