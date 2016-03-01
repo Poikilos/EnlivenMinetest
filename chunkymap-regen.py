@@ -223,54 +223,67 @@ class MTChunk:
                 line = ins.readline()
                 if line:
                     line_strip = line.strip()
-                    if "data does not exist" in line_strip:
-                        self.metadata["is_marked_empty"] = True
-                        break
-                    elif "Result image" in line_strip:
-                        oparen_index = line_strip.find("(")
-                        if (oparen_index>-1):
-                            cparen_index = line_strip.find(")", oparen_index+1)
-                            if (cparen_index>-1):
-                                operations_string = line_strip[oparen_index+1:cparen_index]
-                                operation_list = operations_string.split(" ")
-                                #if len(operation_list)==2:
-                                for operation_string in operation_list:
-                                    if "=" in operation_string:
-                                        chunks = operation_string.split("=")
-                                        if len(chunks)==2:
-                                            if chunks[0].strip()=="w":
-                                                try:
-                                                    self.metadata["image_w"]=int(chunks[1].strip())
-                                                except:
-                                                    print("Bad value for image w:"+str(chunks[1]))
-                                            elif chunks[0].strip()=="h":
-                                                try:
-                                                    self.metadata["image_h"]=int(chunks[1].strip())
-                                                except:
-                                                    print("Bad value for image h:"+str(chunks[1]))
+                    try:
+                        if ("does not exist" in line_strip):  # official minetestmapper.py says "World does not exist" but expertmm fork and minetestmapper-numpy.py say "data does not exist"
+                            self.metadata["is_marked_empty"] = True
+                            break
+                        elif "Result image" in line_strip:
+                            oparen_index = line_strip.find("(")
+                            if (oparen_index>-1):
+                                cparen_index = line_strip.find(")", oparen_index+1)
+                                if (cparen_index>-1):
+                                    operations_string = line_strip[oparen_index+1:cparen_index]
+                                    operation_list = operations_string.split(" ")
+                                    #if len(operation_list)==2:
+                                    for operation_string in operation_list:
+                                        if "=" in operation_string:
+                                            chunks = operation_string.split("=")
+                                            if len(chunks)==2:
+                                                if chunks[0].strip()=="w":
+                                                    try:
+                                                        self.metadata["image_w"]=int(chunks[1].strip())
+                                                    except:
+                                                        print("Bad value for image w:"+str(chunks[1]))
+                                                elif chunks[0].strip()=="h":
+                                                    try:
+                                                        self.metadata["image_h"]=int(chunks[1].strip())
+                                                    except:
+                                                        print("Bad value for image h:"+str(chunks[1]))
+                                                else:
+                                                    print("Bad name for image variable so ignoring variable named '"+str(chunks[0])+"'")
                                             else:
-                                                print("Bad name for image variable so ignoring variable named '"+str(chunks[0])+"'")
+                                                print("Bad assignment (not 2 sides) so ignoring command '"+operation_string+"'")
                                         else:
-                                            print("Bad assignment (not 2 sides) so ignoring command '"+operation_string+"'")
+                                            print("Bad assignment (operator) so ignoring command '"+operation_string+"'")
+                                    #else:
+                                    #    print("Bad assignment count so ignoring operations string '"+operations_string+"'")
+                        elif "PNG Region" in line_strip:
+                            obracket_index = line_strip.find("[")
+                            if obracket_index>-1:
+                                cbracket_index = line_strip.find("]", obracket_index+1)
+                                if cbracket_index>-1:
+                                    rect_values_string = line_strip[obracket_index+1:cbracket_index]
+                                    rect_values_list = rect_values_string.split(",")
+                                    if len(rect_values_list)==4:
+                                        #pngregion=[pngminx, pngmaxx, pngminz, pngmaxz] #from minetestmapper-numpy.py
+                                        self.metadata["image_left"]=int(rect_values_list[0].strip())
+                                        self.metadata["image_right"]=int(rect_values_list[1].strip())
+                                        self.metadata["image_top"]=int(rect_values_list[2].strip())
+                                        self.metadata["image_bottom"]=int(rect_values_list[3].strip())
                                     else:
-                                        print("Bad assignment (operator) so ignoring command '"+operation_string+"'")
-                                #else:
-                                #    print("Bad assignment count so ignoring operations string '"+operations_string+"'")
-                    elif "PNG Region" in line_strip:
-                        obracket_index = line_strip.find("[")
-                        if obracket_index>-1:
-                            cbracket_index = line_strip.find("]", obracket_index+1)
-                            if cbracket_index>-1:
-                                rect_values_string = line_strip[obracket_index+1:cbracket_index]
-                                rect_values_list = rect_values_string.split(",")
-                                if len(rect_values_list)==4:
-                                    #pngregion=[pngminx, pngmaxx, pngminz, pngmaxz] #from minetestmapper-numpy.py
-                                    self.metadata["image_left"]=int(rect_values_list[0].strip())
-                                    self.metadata["image_right"]=int(rect_values_list[1].strip())
-                                    self.metadata["image_top"]=int(rect_values_list[2].strip())
-                                    self.metadata["image_bottom"]=int(rect_values_list[3].strip())
-                                else:
-                                    print("Bad map rect, so ignoring: "+rect_values_string)
+                                        print("Bad map rect, so ignoring: "+rect_values_string)
+                        elif (len(line_strip)>5) and (line_strip[:5]=="xmin:"):
+                            self.metadata["image_left"] = int(line_strip[5:].strip())
+                        elif (len(line_strip)>5) and (line_strip[:5]=="xmax:"):
+                            self.metadata["image_right"] = int(line_strip[5:].strip())
+                        elif (len(line_strip)>5) and (line_strip[:5]=="zmin:"):
+                            #(zmin is bottom since cartesian)
+                            self.metadata["image_bottom"] = int(line_strip[5:].strip())
+                        elif (len(line_strip)>5) and (line_strip[:5]=="zmax:"):
+                            #(zmax is top since cartesian)
+                            self.metadata["image_top"] = int(line_strip[5:].strip())
+                    except:
+                        print("#failed to parse line:"+str(line_strip))
             ins.close()
 
 
@@ -607,17 +620,24 @@ class MTChunks:
         cmd_string = self.python_exe_path + " \""+self.mtmn_path + "\" --region " + str(x_min) + " " + str(x_max) + " " + str(z_min) + " " + str(z_max) + " --maxheight "+str(self.maxheight)+" --minheight "+str(self.minheight)+" --pixelspernode "+str(self.pixelspernode)+" \""+self.world_path+"\" \""+tmp_png_path+"\"" + cmd_suffix
         
         if self.os_name!="windows":  #since windows client doesn't normally have minetest-mapper
+            #  Since minetestmapper-numpy has trouble with leveldb:
+            #    such as sudo minetest-mapper --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry -32:-32+64+64 --output /var/www/html/minetest/try1.png
+            #    where geometry option is like --geometry x:y+w+h
+            #    output_type_string = "minetest-mapper"
+            #    NOTE: minetest-mapper is part of the minetest-data package, which can be installed alongside the git version of minetestserver
+            #    BUT *buntu Trusty version of it does NOT have geometry option
+            #    cmd_string = "/usr/games/minetest-mapper --input \""+self.world_path+"\" --draworigin --geometry "+str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min))+"+"+str(int(z_max)-int(z_min))+" --output \""+tmp_png_path+"\""+cmd_suffix
+            #    such as sudo python minetestmapper --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry -32:-32+64+64 --output /var/www/html/minetest/try1.png
+            # OR try PYTHON version (doesn't have range):
+            script_path = "/home/owner/minetest/util/minetestmapper.py"
+            region_capable_script_path = "/home/owner/minetest/util/chunkymap/minetestmapper.py"
+            if os.path.isfile(region_capable_script_path):
+                script_path = region_capable_script_path
+                cmd_suffix=" > entire-mtmresult.txt"
+                cmd_string="sudo python /home/owner/minetest/util/minetestmapper.py --input \"/home/owner/.minetest/worlds/FCAGameAWorld\" --output \""+dest_png_path+"\""+cmd_suffix
+            #sudo python /home/owner/minetest/util/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --output /var/www/html/minetest/chunkymapdata/entire.png > entire-mtmresult.txt
+            #    sudo mv entire-mtmresult.txt /home/owner/minetest/util/chunkymap-genresults/
             
-            # since minetestmapper-numpy has trouble with leveldb:
-            # such as sudo minetest-mapper --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry -32:-32+64+64 --output /var/www/html/minetest/try1.png
-            # where geometry option is like --geometry x:y+w+h
-            #output_type_string = "minetest-mapper"
-            # NOTE: minetest-mapper is part of the minetest-data package, which can be installed alongside the git version of minetestserver
-            # BUT *buntu Trusty version of it does NOT have geometry option
-            #cmd_string = "/usr/games/minetest-mapper --input \""+self.world_path+"\" --draworigin --geometry "+str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min))+"+"+str(int(z_max)-int(z_min))+" --output \""+tmp_png_path+"\""+cmd_suffix
-            # PYTHON VERSION (doesn't have range)
-            # such as sudo python /home/owner/minetest/util/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry -32:-32+64+64 --output /var/www/html/minetest/try1.png
-            pass
         dest_png_path = self.get_chunk_image_path(chunk_luid)
         #is_empty_chunk = is_chunk_yaml_marked(chunk_luid) and is_chunk_yaml_marked_empty(chunk_luid)
         print ("Running generator for: "+str((x,z)))

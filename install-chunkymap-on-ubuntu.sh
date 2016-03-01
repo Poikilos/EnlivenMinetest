@@ -41,6 +41,10 @@ cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-players-cronjob" "$CHUNKYMAP_D
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/set-minutely-players-crontab-job.sh" "$CHUNKYMAP_DEST/unused/"
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/set-minutely-crontab-job.sh" "$CHUNKYMAP_DEST/unused/"
 cp -f "$CHUNKYMAP_INSTALLER_PATH/chunkymap-regen-loop.sh" "$CHUNKYMAP_DEST/"
+if [ ! -d "$CHUNKYMAP_DEST/chunkymap" ]; then
+  mkdir "$CHUNKYMAP_DEST/chunkymap"
+fi
+cp -f "$CHUNKYMAP_INSTALLER_PATH/minetestmapper.py" "$CHUNKYMAP_DEST/chunkymap/"
 cp --no-clobber $CHUNKYMAP_INSTALLER_PATH/chunkymap-signals* "$CHUNKYMAP_DEST/"
 cd "$CHUNKYMAP_INSTALLER_PATH"
 python replace-with-current-user.py  # the py file only manipulates the minetest/util directory
