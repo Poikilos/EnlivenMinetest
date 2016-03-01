@@ -614,6 +614,7 @@ class MTChunks:
         z_max = z * self.chunk_size + self.chunk_size - 1
 
         #print ("generating x = " + str(x_min) + " to " + str(x_max) + " ,  z = " + str(z_min) + " to " + str(z_max))
+        geometry_value_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-str(int(x_min))+"+"+str(int(z_max)-int(z_min)))
         cmd_suffix = ""
         cmd_suffix = " > \""+genresult_path+"\""
         output_type_string = "minetestmapper-numpy"
@@ -626,7 +627,7 @@ class MTChunks:
             #    output_type_string = "minetest-mapper"
             #    NOTE: minetest-mapper is part of the minetest-data package, which can be installed alongside the git version of minetestserver
             #    BUT *buntu Trusty version of it does NOT have geometry option
-            #    cmd_string = "/usr/games/minetest-mapper --input \""+self.world_path+"\" --draworigin --geometry "+str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min))+"+"+str(int(z_max)-int(z_min))+" --output \""+tmp_png_path+"\""+cmd_suffix
+            #    cmd_string = "/usr/games/minetest-mapper --input \""+self.world_path+"\" --draworigin --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
             #    such as sudo python minetestmapper --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry -32:-32+64+64 --output /var/www/html/minetest/try1.png
             # OR try PYTHON version (doesn't have range):
             script_path = "/home/owner/minetest/util/minetestmapper.py"
@@ -634,13 +635,13 @@ class MTChunks:
             if os.path.isfile(region_capable_script_path):
                 script_path = region_capable_script_path
                 cmd_suffix=" > entire-mtmresult.txt"
-                cmd_string="sudo python /home/owner/minetest/util/minetestmapper.py --input \"/home/owner/.minetest/worlds/FCAGameAWorld\" --output \""+tmp_png_path+"\""+cmd_suffix
+                cmd_string="sudo python "+script_path+" --input \"/home/owner/.minetest/worlds/FCAGameAWorld\" --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
             #sudo python /home/owner/minetest/util/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --output /var/www/html/minetest/chunkymapdata/entire.png > entire-mtmresult.txt
             #    sudo mv entire-mtmresult.txt /home/owner/minetest/util/chunkymap-genresults/
             
         dest_png_path = self.get_chunk_image_path(chunk_luid)
         #is_empty_chunk = is_chunk_yaml_marked(chunk_luid) and is_chunk_yaml_marked_empty(chunk_luid)
-        print ("Running generator for: "+str((x,z)))
+        print ("Calling map tile renderer for: "+str((x,z)))
         subprocess.call(cmd_string, shell=True)  # TODO: remember not to allow arbitrary command execution, which could happen if input contains ';' when using shell=True
         if os.path.isfile(tmp_png_path):
             result = True
