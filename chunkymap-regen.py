@@ -634,7 +634,7 @@ class MTChunks:
             if os.path.isfile(region_capable_script_path):
                 script_path = region_capable_script_path
                 cmd_suffix=" > entire-mtmresult.txt"
-                cmd_string="sudo python /home/owner/minetest/util/minetestmapper.py --input \"/home/owner/.minetest/worlds/FCAGameAWorld\" --output \""+dest_png_path+"\""+cmd_suffix
+                cmd_string="sudo python /home/owner/minetest/util/minetestmapper.py --input \"/home/owner/.minetest/worlds/FCAGameAWorld\" --output \""+tmp_png_path+"\""+cmd_suffix
             #sudo python /home/owner/minetest/util/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --output /var/www/html/minetest/chunkymapdata/entire.png > entire-mtmresult.txt
             #    sudo mv entire-mtmresult.txt /home/owner/minetest/util/chunkymap-genresults/
             
