@@ -214,9 +214,9 @@ if geometry_string is not None:
             this_width = int(width_string)
             this_height = int(height_string)
             nonchunky_xmin = x
-            nonchunky_xmax = nonchunky_xmin + this_width
+            nonchunky_xmax = nonchunky_xmin + this_width - 1  # -1 since max is inclusive rect
             nonchunky_zmin = z
-            nonchunky_zmax = nonchunky_zmin + this_height
+            nonchunky_zmax = nonchunky_zmin + this_height - 1  # -1 since max is inclusive rect
             print("#geometry:")
             print("#  x:"+str(x))
             print("#  z:"+str(z))
@@ -348,9 +348,9 @@ if os.path.exists(path + "map.sqlite"):
         
         x, y, z = getIntegerAsBlock(r[0])
         
-        if x < sector_xmin or x >= sector_xmax:
+        if x < sector_xmin or x > sector_xmax:
             continue
-        if z < sector_zmin or z >= sector_zmax:
+        if z < sector_zmin or z > sector_zmax:
             continue
         
         xlist.append(x)
