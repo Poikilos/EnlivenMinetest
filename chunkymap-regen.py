@@ -924,8 +924,20 @@ class MTChunks:
                 x,z = this_pos
                 chunk_luid = self.get_chunk_luid(x,z)
                 is_present = self.check_chunk(x,z)
+                
                 if is_present:
                     self.total_generated_count += 1
+                    if x<self.chunkx_min:
+                        self.chunkx_min=x
+                    if x>self.chunkx_max:
+                        self.chunkx_max=x
+                    if z<self.chunkz_min:
+                        self.chunkz_min=z
+                    if z>self.chunkx_max:
+                        self.chunkz_max=z
+                    #end while square outline (1-chunk-thick outline) generated any png files
+                    self.save_mapvars_if_changed()
+                    
                     self._check_map_pseudorecursion_branchfrom(x,z)
                 self.todo_index += 1
             if self.todo_index>=len(self.todo_positions):  # check again since may have branched above, making this untrue
