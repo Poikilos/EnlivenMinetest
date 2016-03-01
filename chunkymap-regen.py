@@ -614,7 +614,7 @@ class MTChunks:
         z_max = z * self.chunk_size + self.chunk_size - 1
 
         #print ("generating x = " + str(x_min) + " to " + str(x_max) + " ,  z = " + str(z_min) + " to " + str(z_max))
-        geometry_value_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min))+"+"+str(int(z_max)-int(z_min)))
+        geometry_value_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min))+"+"+str(int(z_max)-int(z_min))
         cmd_suffix = ""
         cmd_suffix = " > \""+genresult_path+"\""
         output_type_string = "minetestmapper-numpy"
