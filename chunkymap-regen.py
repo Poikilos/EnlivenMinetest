@@ -650,7 +650,7 @@ class MTChunks:
             
         dest_png_path = self.get_chunk_image_path(chunk_luid)
         #is_empty_chunk = is_chunk_yaml_marked(chunk_luid) and is_chunk_yaml_marked_empty(chunk_luid)
-        if self.is_verbose:
+        if self.verbose_enable:
             print("")
             print("Running '"+cmd_string+"'...")
         else:
