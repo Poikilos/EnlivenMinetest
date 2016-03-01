@@ -165,7 +165,10 @@ drawunderground = False
 geometry_string = None
 region_string = None
 
-for o, a in opts:
+#for o, a in opts:
+opt_index = 0
+while opt_index <len(opts):
+    o, a = opts[opt_index]
     if o in ("-h", "--help"):
         usage()
         sys.exit()
@@ -194,9 +197,10 @@ for o, a in opts:
         geometry_string = a
     elif o == "--region":
         region_string = a
+        #region_string = xmin_string+" "+xmax_string+" "+zmin_string+" "+zmax_string
     else:
         assert False, "unhandled option"
-
+    opt_index += 1
 nonchunky_xmin=-1500
 nonchunky_xmax=1500
 nonchunky_zmin=-1500
@@ -236,9 +240,13 @@ if geometry_string is not None:
         usage()
         sys.exit()
 elif region_string is not None:
-    parts = region_string.split(" ")
+    #parts = region_string.split(" ")
+    dimensions = region_string.split(",")
     if len(parts) == 4:
-        xmin_string, xmax_string, zmin_string, zmax_string = parts
+        #xmin_string, xmax_string, zmin_string, zmax_string = parts
+        x_bounds, z_bounds = dimensions
+        xmin_string, xmax_string = x_bounds.split(":")
+        zmin_string, zmax_string = z_bounds.split(":")
         nonchunky_xmin = int(xmin_string)
         nonchunky_xmax = int(xmax_string)
         nonchunky_zmin = int(zmin_string)
@@ -249,7 +257,7 @@ elif region_string is not None:
         print("  zmin:"+str(nonchunky_zmin))
         print("  zmax:"+str(nonchunky_zmax))
     else:
-        print("ERROR: (Incorrect value '"+region_string+"' for region) Region should be in the form: xmin xmax zmin zmax")
+        print("ERROR: (Incorrect value '"+region_string+"' for region) Region should be in the form: xmin:xmax,zmin:zmax")
         usage()
         sys.exit()
 #answer=raw_input("press enter to continue")

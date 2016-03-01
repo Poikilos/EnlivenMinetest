@@ -643,6 +643,7 @@ class MTChunks:
             if os.path.isfile(region_capable_script_path):
                 script_path = region_capable_script_path
                 #cmd_suffix=" > entire-mtmresult.txt"
+                expertmm_region_string = 
                 cmd_string="sudo python "+script_path+" --input \""+self.world_path+"\" --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
             #sudo python /home/owner/minetest/util/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --output /var/www/html/minetest/chunkymapdata/entire.png > entire-mtmresult.txt
             #sudo python /home/owner/minetest/util/chunkymap/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry 0:0+16+16 --output /var/www/html/minetest/chunkymapdata/chunk_x0z0.png > /home/owner/minetest/util/chunkymap-genresults/chunk_x0z0_mapper_result.txt
@@ -810,10 +811,10 @@ class MTChunks:
                             #print("DIDN'T MOVE: "+str(player_name))
                         players_didntmove_count += 1
                     player_count += 1
-        if not self.verbose_enable:
-            print("PLAYERS:")
-            print("  saved: "+str(player_written_count)+" (moved:"+str(players_moved_count)+"; new:"+str(players_saved_count)+")")
-            print("  didn't move: "+str(players_didntmove_count))
+        #if not self.verbose_enable:
+        print("PLAYERS:")
+        print("  saved: "+str(player_written_count)+" (moved:"+str(players_moved_count)+"; new:"+str(players_saved_count)+")")
+        print("  didn't move: "+str(players_didntmove_count))
 
     def is_player_at_luid(self, chunk_luid):
         result = False
@@ -980,6 +981,7 @@ class MTChunks:
     
     def check_map_pseudorecursion_start(self):
         if self.todo_index<0:
+            print("PROCESSING MAP DATA (BRANCH PATTERN)")
             if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
                 self.rendered_count = 0
                 self.todo_positions.clear()
@@ -1140,7 +1142,7 @@ class MTChunks:
             #if str(self.world_name) != str(self.mapvars["world_name"]):
             #    is_different_world = True
             #    print("FULL RENDER since chosen world name '"+self.world_name+"' does not match previously rendered world name '"+self.mapvars["world_name"]+"'")
-            print("PROCESSING MAP DATA")
+            print("PROCESSING MAP DATA (SQUARE)")
             while this_iteration_generates_count > 0:
                 this_iteration_generates_count = 0
                 self.read_then_remove_signals()
@@ -1226,7 +1228,7 @@ class MTChunks:
                         if type(signals[this_key]) is bool:
                             self.verbose_enable = signals[this_key]
                         else:
-                            print("ERROR: expected bool for "+this_key)
+                            print("ERROR: expected true or false after colon for "+this_key)
 
                     else:
                         print("ERROR: unknown signal '"+this_key+"'")
@@ -1268,7 +1270,8 @@ class MTChunks:
                         #if self.last_map_refresh_second is not None:
                             #print ("waited "+str(best_timer()-self.last_map_refresh_second)+"s for map update")
                         self.last_map_refresh_second = best_timer()
-                        self.check_map_inefficient_squarepattern()
+                        self.check_map_pseudorecursion_start()
+                        #self.check_map_inefficient_squarepattern()
                     else:
                         print("waiting before doing map update")
                 else:
