@@ -663,6 +663,7 @@ class MTChunks:
                 print("(moved to '"+dest_png_path+"')")
                 self.prepare_chunk_meta(chunk_luid)  # DOES load existing yml if exists
                 self.chunks[chunk_luid].is_fresh = True
+                self.chunks[chunk_luid].metadata["is_empty"] = False
             except:
                 print ("Could not finish moving '"+tmp_png_path+"' to '"+dest_png_path+"'")
         try:
@@ -885,6 +886,7 @@ class MTChunks:
             self.rendered_count += 1
             if (self._render_chunk(x,z)):
                 result = True
+                
         else:
             if self.is_chunk_rendered_on_dest(chunk_luid):
                 result = True
