@@ -807,8 +807,8 @@ class MTChunks:
                         player_written_count += 1
                     else:
                         if self.verbose_enable:
-                            print("DIDN'T MOVE: "+str(player_name))
-                            players_didntmove_count += 1
+                            #print("DIDN'T MOVE: "+str(player_name))
+                        players_didntmove_count += 1
                     player_count += 1
         if not self.verbose_enable:
             print("PLAYERS:")
@@ -837,7 +837,7 @@ class MTChunks:
         #    self.remove_chunk(chunk_luid)
 
         is_player_in_this_chunk = self.is_player_at_luid(chunk_luid)  #ok if stale, since is only used for whether empty chunk should be regenerated
-
+        
         is_render_needed = False
 
         if not self.is_chunk_fresh(chunk_luid):
@@ -850,10 +850,15 @@ class MTChunks:
                         else:
                             sys.stdout.write('.')
                     else:
-                        if self.verbose_enable:
-                            print (chunk_luid+": SKIPPING nonfresh previously marked nonempty (player in it)")
-                        #else:
-                            #sys.stdout.write('.')
+                        if not self.is_chunk_rendered_on_dest(chunk_luid):
+                            is_render_needed = True
+                            if self.verbose_enable:
+                                print(chunk_luid+": RENDERING where missing image on marked nonempty chunk (player in it)")
+                        else:
+                            if self.verbose_enable:
+                                print (chunk_luid+": SKIPPING nonfresh previously marked nonempty (player in it)")
+                            #else:
+                                #sys.stdout.write('.')
                 else:
                     is_render_needed = True
                     if self.verbose_enable:
@@ -868,8 +873,13 @@ class MTChunks:
                     else:
                         sys.stdout.write('.')
                 else:
-                    if self.verbose_enable:
-                        print (chunk_luid+": SKIPPING nonfresh previously marked (simple check since has no player)")
+                    if not self.is_chunk_rendered_on_dest(chunk_luid):
+                        is_render_needed = True
+                        if self.verbose_enable:
+                            print (chunk_luid+": RENDERING where missing image on nonfresh previously marked (simple check since has no player)")
+                    else:
+                        if self.verbose_enable:
+                            print (chunk_luid+": SKIPPING nonfresh previously marked (simple check since has no player)")
         else:
             if self.verbose_enable:
                 print (chunk_luid+": SKIPPING fresh chunk")
