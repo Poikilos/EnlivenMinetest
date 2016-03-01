@@ -806,7 +806,7 @@ class MTChunks:
                         outs.close()
                         player_written_count += 1
                     else:
-                        if self.verbose_enable:
+                        #if self.verbose_enable:
                             #print("DIDN'T MOVE: "+str(player_name))
                         players_didntmove_count += 1
                     player_count += 1

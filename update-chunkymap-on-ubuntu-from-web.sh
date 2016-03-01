@@ -7,7 +7,7 @@ if [ ! -d "$HOME/Downloads" ]; then
 fi
 
 #cd $CHUNKYMAP_INSTALLER_DIR
-chmod +x update-chunkymap-installer-only.sh
+#chmod +x update-chunkymap-installer-only.sh
 cd $HOME/Downloads
 if [ -f "update-chunkymap-installer-only.sh" ]; then
   # move misplaced file from older versions:
