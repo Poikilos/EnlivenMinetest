@@ -148,7 +148,7 @@ class MTChunk:
     #width = None
     #height = None
     #is_marked = None
-    #is_marked_empty = None
+    #is_empty = None
     #image_w = None
     #image_h = None
     #image_left = None
@@ -161,7 +161,7 @@ class MTChunk:
         self.metadata = {}
         self.is_fresh = False
 
-        self.metadata["is_marked_empty"] = False
+        self.metadata["is_empty"] = False  # formerly is_marked_empty
         self.metadata["is_marked"] = False
         self.metadata["width"] = None
         self.metadata["height"] = None
@@ -180,7 +180,7 @@ class MTChunk:
         save_conf_from_dict(yml_path, self.metadata, assignment_operator=":", save_nulls_enable=False)
         #try:
             #outs = open(yml_path, 'w')
-            #outs.write("is_marked_empty:"+str(self.is_marked_empty)+"\n")
+            #outs.write("is_empty:"+str(self.is_empty)+"\n")
             #outs.write("is_marked:"+str(self.is_marked)+"\n")
             #if self.width is not None:
                 #outs.write("width:"+str(self.width)+"\n")
@@ -225,7 +225,7 @@ class MTChunk:
                     line_strip = line.strip()
                     try:
                         if ("does not exist" in line_strip):  # official minetestmapper.py says "World does not exist" but expertmm fork and minetestmapper-numpy.py say "data does not exist"
-                            self.metadata["is_marked_empty"] = True
+                            self.metadata["is_empty"] = True
                             break
                         elif "Result image" in line_strip:
                             oparen_index = line_strip.find("(")
@@ -543,7 +543,7 @@ class MTChunks:
             #    line = ins.readline()
             #    if line:
             #        line_strip = line.strip()
-            #        if "is_marked_empty:" in line_strip:
+            #        if "is_empty:" in line_strip:
             #            result = True
             #            break
             #ins.close()
@@ -559,7 +559,7 @@ class MTChunks:
                 line = ins.readline()
                 if line:
                     line_strip = line.strip()
-                    prevalue_string="is_marked_empty:"
+                    prevalue_string="is_empty:"
                     if line_strip[:len(prevalue_string)]==prevalue_string:
                         result = bool(line_strip[len(prevalue_string):].strip())
                         break
