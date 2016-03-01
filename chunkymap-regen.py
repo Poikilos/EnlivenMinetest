@@ -353,7 +353,7 @@ class MTChunks:
         self.refresh_map_enable = True
         self.refresh_players_enable = True
         self.chunks = {}
-        self.username = "owner"
+        #self.username = "owner"
         self.website_root="/var/www/html/minetest"
         self.world_name = "FCAGameAWorld"
         self.os_name="linux"
@@ -380,7 +380,15 @@ class MTChunks:
         self.profiles_path = "/home"
         if self.os_name=="windows":
             self.profiles_path = "C:\\Users"
-        self.profile_path = os.path.join(self.profiles_path, self.username)
+        if self.username is not None:
+            self.profile_path = os.path.join(self.profiles_path, self.username)
+        else:
+            if self.os_name=="windows":
+                self.profiles_path = "C:\\Users"
+                self.profile_path = os.environ['USERPROFILE']
+            else:
+                self.profile_path = os.environ['HOME']
+            
         #if (not os.path.isdir(self.profile_path)):
         #    self.profile_path = os.path.join(self.profiles_path, "jgustafson")
         self.dotminetest_path = os.path.join(self.profile_path,".minetest")

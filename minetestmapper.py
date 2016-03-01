@@ -268,8 +268,38 @@ if path[-1:] != "/" and path[-1:] != "\\":
 
 # Load color information for the blocks.
 colors = {}
+colors_path = "colors.txt"
+
+os_name="linux"
+if (os.path.sep!="/"):
+    os_name="windows"
+
+profiles_path = "/home"
+profile_path = None
+if os_name=="windows":
+    profiles_path = "C:\\Users"
+    profile_path = os.environ['USERPROFILE']
+else:
+    profile_path = os.environ['HOME']
+
+mt_path = os.path.join( profile_path, "minetest")
+mt_util_path = os.path.join( mt_path, "util")
+abs_colors_path = os.path.join( mt_util_path, "colors.txt" )
+
+if not os.path.isfile(colors_path):
+    colors_path = abs_colors_path
+
+if not os.path.isfile(colors_path):
+    try:
+        outer_colors_folder_path = os.path.dirname(os.path.dirname(__file__))
+        outer_colors_path = os.path.join(outer_colors_folder_path, "colors.txt")
+        if os.path.isfile(outer_colors_path):
+            colors_path = outer_colors_path
+    except:
+        pass
+
 try:
-    f = file("colors.txt")
+    f = file(colors_path)
 except IOError:
     f = file(os.path.join(os.path.dirname(__file__), "colors.txt"))
 for line in f:
