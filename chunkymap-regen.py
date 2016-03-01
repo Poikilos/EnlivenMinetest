@@ -637,7 +637,7 @@ class MTChunks:
             #    BUT *buntu Trusty version of it does NOT have geometry option
             #    cmd_string = "/usr/games/minetest-mapper --input \""+self.world_path+"\" --draworigin --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
             #    such as sudo python minetestmapper --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry -32:-32+64+64 --output /var/www/html/minetest/try1.png
-            # OR try PYTHON version (doesn't have range):
+            # OR try PYTHON version (looks for expertmm fork which has geometry option like C++ version does):
             script_path = "/home/owner/minetest/util/minetestmapper.py"
             region_capable_script_path = "/home/owner/minetest/util/chunkymap/minetestmapper.py"
             if os.path.isfile(region_capable_script_path):
@@ -645,11 +645,16 @@ class MTChunks:
                 #cmd_suffix=" > entire-mtmresult.txt"
                 cmd_string="sudo python "+script_path+" --input \""+self.world_path+"\" --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
             #sudo python /home/owner/minetest/util/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --output /var/www/html/minetest/chunkymapdata/entire.png > entire-mtmresult.txt
+            #sudo python /home/owner/minetest/util/chunkymap/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry 0:0+16+16 --output /var/www/html/minetest/chunkymapdata/chunk_x0z0.png > /home/owner/minetest/util/chunkymap-genresults/chunk_x0z0_mapper_result.txt
             #    sudo mv entire-mtmresult.txt /home/owner/minetest/util/chunkymap-genresults/
             
         dest_png_path = self.get_chunk_image_path(chunk_luid)
         #is_empty_chunk = is_chunk_yaml_marked(chunk_luid) and is_chunk_yaml_marked_empty(chunk_luid)
-        print ("Calling map tile renderer for: "+str((x,z)))
+        if self.is_verbose:
+            print("")
+            print("Running '"+cmd_string+"'...")
+        else:
+            print ("Calling map tile renderer for: "+str((x,z)))
         subprocess.call(cmd_string, shell=True)  # TODO: remember not to allow arbitrary command execution, which could happen if input contains ';' when using shell=True
         if os.path.isfile(tmp_png_path):
             result = True
