@@ -241,10 +241,10 @@ if geometry_string is not None:
         sys.exit()
 elif region_string is not None:
     #parts = region_string.split(" ")
-    dimensions = region_string.split(",")
-    if len(parts) == 4:
+    axis_info = region_string.split(",")
+    if len(axis_info) == 2:
         #xmin_string, xmax_string, zmin_string, zmax_string = parts
-        x_bounds, z_bounds = dimensions
+        x_bounds, z_bounds = axis_info
         xmin_string, xmax_string = x_bounds.split(":")
         zmin_string, zmax_string = z_bounds.split(":")
         nonchunky_xmin = int(xmin_string)

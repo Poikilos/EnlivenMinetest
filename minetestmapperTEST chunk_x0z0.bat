@@ -14,7 +14,7 @@ SET CHUNKYMAP_CHUNK_ZMAX=15
 SET CHUNKYMAP_CHUNK_LUID=x%CHUNKYMAP_CHUNK_XMIN%z%CHUNKYMAP_CHUNK_ZMIN%
 SET TARGET_GENRESULT_PATH=chunkymap-genresults\chunk_%CHUNKYMAP_CHUNK_LUID%-genresult.txt
 SET TARGET_IMAGE_PATH=chunkymapdata\chunk_%CHUNKYMAP_CHUNK_LUID%.png
-C:\Python27\python minetestmapper.py --input "C:\games\Minetest\worlds\try7amber" --region %CHUNKYMAP_CHUNK_XMIN% %CHUNKYMAP_CHUNK_XMAX% %CHUNKYMAP_CHUNK_ZMIN% %CHUNKYMAP_CHUNK_ZMAX% --output "%TARGET_IMAGE_PATH%" > "%TARGET_GENRESULT_PATH%"
+C:\Python27\python minetestmapper.py --input "C:\games\Minetest\worlds\try7amber" --region %CHUNKYMAP_CHUNK_XMIN%:%CHUNKYMAP_CHUNK_XMAX%,%CHUNKYMAP_CHUNK_ZMIN%:%CHUNKYMAP_CHUNK_ZMAX% --output "%TARGET_IMAGE_PATH%" > "%TARGET_GENRESULT_PATH%"
 REM C:\Python27\python minetestmapper.py --input "C:\games\Minetest\worlds\try7amber" --geometry %CHUNKYMAP_CHUNK_XMIN%:%CHUNKYMAP_CHUNK_ZMIN%+%CHUNKYMAP_CHUNK_WIDTH%+%CHUNKYMAP_CHUNK_HEIGHT% --output "%TARGET_IMAGE_PATH%" > "%TARGET_GENRESULT_PATH%"
 
 REM REM C:\Python27\python minetestmapper.py --input "C:\games\Minetest\worlds\try7amber" --geometry -100:-100+16+16 --output "%TARGET_IMAGE_PATH%" > "%TARGET_GENRESULT_PATH%"

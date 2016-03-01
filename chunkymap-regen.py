@@ -622,7 +622,7 @@ class MTChunks:
         z_max = z * self.chunk_size + self.chunk_size - 1
 
         #print ("generating x = " + str(x_min) + " to " + str(x_max) + " ,  z = " + str(z_min) + " to " + str(z_max))
-        geometry_value_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min)+1)+"+"+str(int(z_max)-int(z_min)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py fork
+        geometry_value_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min)+1)+"+"+str(int(z_max)-int(z_min)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
         cmd_suffix = ""
         cmd_suffix = " > \""+genresult_path+"\""
         output_type_string = "minetestmapper-numpy"
@@ -643,8 +643,9 @@ class MTChunks:
             if os.path.isfile(region_capable_script_path):
                 script_path = region_capable_script_path
                 #cmd_suffix=" > entire-mtmresult.txt"
-                expertmm_region_string = 
-                cmd_string="sudo python "+script_path+" --input \""+self.world_path+"\" --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
+                expertmm_region_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min)+1)+"+"+str(int(z_max)-int(z_min)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
+                #cmd_string="sudo python "+script_path+" --input \""+self.world_path+"\" --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
+                cmd_string="sudo python "+script_path+" --input \""+self.world_path+"\" --region "+expertmm_region_string+" --output \""+tmp_png_path+"\""+cmd_suffix
             #sudo python /home/owner/minetest/util/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --output /var/www/html/minetest/chunkymapdata/entire.png > entire-mtmresult.txt
             #sudo python /home/owner/minetest/util/chunkymap/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry 0:0+16+16 --output /var/www/html/minetest/chunkymapdata/chunk_x0z0.png > /home/owner/minetest/util/chunkymap-genresults/chunk_x0z0_mapper_result.txt
             #    sudo mv entire-mtmresult.txt /home/owner/minetest/util/chunkymap-genresults/
@@ -934,6 +935,8 @@ class MTChunks:
     def check_map_pseudorecursion_iterate(self):  # , redo_empty_enable=False):
         if self.todo_index<0:
             self.check_map_pseudorecursion_start()
+            if self.verbose_enable:
+                print(  "(initialized "+str(len(self.todo_positions))+" branche(s))")
         if self.todo_index>=0:
             if self.todo_index<len(self.todo_positions):
                 this_pos = self.todo_positions[self.todo_index]
@@ -953,12 +956,20 @@ class MTChunks:
                         self.chunkz_max=z
                     #end while square outline (1-chunk-thick outline) generated any png files
                     self.save_mapvars_if_changed()
-                    
+                    prev_len = len(self.todo_positions)
                     self._check_map_pseudorecursion_branchfrom(x,z)
+                    if self.verbose_enable:
+                        print("  ["+str(self.todo_index)+"] branching from "+str((x,z))+" (added "+(len(self.todo_positions)-prev_len)+")")
+                else:
+                    if self.verbose_enable:
+                        print("  ["+str(self.todo_index)+"] not branching from "+str((x,z)))
                 self.todo_index += 1
             if self.todo_index>=len(self.todo_positions):  # check again since may have branched above, making this untrue
                 self.save_mapvars_if_changed()
                 self.todo_index = -1
+        else:
+            if self.verbose_enable:
+                print(  "(no branches)")
         
     def get_coords_from_luid(self,chunk_luid):
         result = None
@@ -984,16 +995,16 @@ class MTChunks:
             print("PROCESSING MAP DATA (BRANCH PATTERN)")
             if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
                 self.rendered_count = 0
-                self.todo_positions.clear()
+                self.todo_positions = list()
                 self.todo_positions.append((0,0))
                 self.mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
                 self.verify_correct_map()
-                if preload_all_enable:
-                    preload_all_enable = False
+                if self.preload_all_enable:
+                    self.preload_all_enable = False
                     minlen=len(self.chunk_yaml_name_opener_string)+4+len(self.chunk_yaml_name_dotext_string)  # +4 for luid, such as x1z2
                     for dirname, dirnames, filenames in os.walk(self.chunkymap_data_path):
                         for filename in filenames:
-                            file_fullname = os.path.join(players_path,filename)
+                            file_fullname = os.path.join(self.chunkymap_data_path,filename)
                             #print ("  EXAMINING "+filename)
                             badstart_string = "."
                             if (filename[:len(badstart_string)]!=badstart_string):
@@ -1270,7 +1281,7 @@ class MTChunks:
                         #if self.last_map_refresh_second is not None:
                             #print ("waited "+str(best_timer()-self.last_map_refresh_second)+"s for map update")
                         self.last_map_refresh_second = best_timer()
-                        self.check_map_pseudorecursion_start()
+                        self.check_map_pseudorecursion_iterate()
                         #self.check_map_inefficient_squarepattern()
                     else:
                         print("waiting before doing map update")
@@ -1288,8 +1299,8 @@ class MTChunks:
         if self.refresh_players_enable:
             self.check_players()
         if self.refresh_map_enable:
-            #self.check_map_inefficient_squarepattern()
-            self.check_map_pseudorecursion_iterate()
+            self.check_map_inefficient_squarepattern()
+            #self.check_map_pseudorecursion_iterate()
 
 if __name__ == '__main__':
     mtchunks = MTChunks()
