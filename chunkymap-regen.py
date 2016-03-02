@@ -388,7 +388,7 @@ class MTChunks:
                 self.profile_path = os.environ['USERPROFILE']
             else:
                 self.profile_path = os.environ['HOME']
-            
+
         #if (not os.path.isdir(self.profile_path)):
         #    self.profile_path = os.path.join(self.profiles_path, "jgustafson")
         self.dotminetest_path = os.path.join(self.profile_path,".minetest")
@@ -446,7 +446,7 @@ class MTChunks:
             prioritized_try_paths.append("C:\\wamp\\www")
             prioritized_try_paths.append("C:\\www")
             prioritized_try_paths.append("C:\\Program Files\\Apache Software Foundation\\Apache2.2\\htdocs")
-            
+
             #prioritized_try_paths.append("C:\\Program Files\\Apache Software Foundation\\Apache2.2\\htdocs\\folder_test\\website")
             for try_path in prioritized_try_paths:
                 try:
@@ -522,7 +522,7 @@ class MTChunks:
 
     def get_chunk_luid_from_yaml_name(self, yml_name):
         return yml_name[len(self.chunk_yaml_name_opener_string):-1*len(self.chunk_yaml_name_dotext_string)]
-    
+
     def get_chunk_yaml_name(self, chunk_luid):
         return self.chunk_yaml_name_opener_string+chunk_luid+self.chunk_yaml_name_dotext_string
 
@@ -625,14 +625,14 @@ class MTChunks:
         geometry_value_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min)+1)+"+"+str(int(z_max)-int(z_min)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
         cmd_suffix = ""
         cmd_suffix = " > \""+genresult_path+"\""
-        output_type_string = "minetestmapper-numpy"
+        self.mapper_id = "minetestmapper-numpy"
         cmd_string = self.python_exe_path + " \""+self.mtmn_path + "\" --region " + str(x_min) + " " + str(x_max) + " " + str(z_min) + " " + str(z_max) + " --maxheight "+str(self.maxheight)+" --minheight "+str(self.minheight)+" --pixelspernode "+str(self.pixelspernode)+" \""+self.world_path+"\" \""+tmp_png_path+"\"" + cmd_suffix
-        
-        if self.os_name!="windows":  #since windows client doesn't normally have minetest-mapper
+
+        if self.mapper_id=="minetestmapper-region": #if self.os_name!="windows":  #since windows client doesn't normally have minetest-mapper
             #  Since minetestmapper-numpy has trouble with leveldb:
             #    such as sudo minetest-mapper --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry -32:-32+64+64 --output /var/www/html/minetest/try1.png
             #    where geometry option is like --geometry x:y+w+h
-            #    output_type_string = "minetest-mapper"
+            #    mapper_id = "minetest-mapper"
             #    NOTE: minetest-mapper is part of the minetest-data package, which can be installed alongside the git version of minetestserver
             #    BUT *buntu Trusty version of it does NOT have geometry option
             #    cmd_string = "/usr/games/minetest-mapper --input \""+self.world_path+"\" --draworigin --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
@@ -649,7 +649,7 @@ class MTChunks:
             #sudo python /home/owner/minetest/util/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --output /var/www/html/minetest/chunkymapdata/entire.png > entire-mtmresult.txt
             #sudo python /home/owner/minetest/util/chunkymap/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry 0:0+16+16 --output /var/www/html/minetest/chunkymapdata/chunk_x0z0.png > /home/owner/minetest/util/chunkymap-genresults/chunk_x0z0_mapper_result.txt
             #    sudo mv entire-mtmresult.txt /home/owner/minetest/util/chunkymap-genresults/
-            
+
         dest_png_path = self.get_chunk_image_path(chunk_luid)
         #is_empty_chunk = is_chunk_yaml_marked(chunk_luid) and is_chunk_yaml_marked_empty(chunk_luid)
         if self.verbose_enable:
@@ -828,8 +828,8 @@ class MTChunks:
         if chunk_luid in self.chunks.keys():
             result = self.chunks[chunk_luid].is_fresh
         return result
-    
-    
+
+
     #Returns: (boolean) whether the chunk image is present on dest (rendered now or earlier)--only possible if there is chunk data at the given location
     def check_chunk(self, x, z):
         result = False
@@ -839,7 +839,7 @@ class MTChunks:
         #    self.remove_chunk(chunk_luid)
 
         is_player_in_this_chunk = self.is_player_at_luid(chunk_luid)  #ok if stale, since is only used for whether empty chunk should be regenerated
-        
+
         is_render_needed = False
 
         if not self.is_chunk_fresh(chunk_luid):
@@ -903,7 +903,7 @@ class MTChunks:
             self.rendered_count += 1
             if (self._render_chunk(x,z)):
                 result = True
-                
+
         else:
             if self.is_chunk_rendered_on_dest(chunk_luid):
                 result = True
@@ -915,7 +915,7 @@ class MTChunks:
             #else:
                 #print(chunk_luid+": Not rendered on dest.")
         return result
-    
+
     def _check_map_pseudorecursion_branchfrom(self, x, z):
         chunk_luid = self.get_chunk_luid(x,z)
         branched_pos = x-1,z
@@ -931,7 +931,7 @@ class MTChunks:
         branched_pos = x,z+1
         if branched_pos not in self.todo_positions:
             self.todo_positions.append(branched_pos)
-        
+
     def check_map_pseudorecursion_iterate(self):  # , redo_empty_enable=False):
         if self.todo_index<0:
             self.check_map_pseudorecursion_start()
@@ -943,7 +943,7 @@ class MTChunks:
                 x,z = this_pos
                 chunk_luid = self.get_chunk_luid(x,z)
                 is_present = self.check_chunk(x,z)
-                
+
                 if is_present:
                     self.total_generated_count += 1
                     if x<self.chunkx_min:
@@ -970,7 +970,7 @@ class MTChunks:
         else:
             if self.verbose_enable:
                 print(  "(no branches)")
-        
+
     def get_coords_from_luid(self,chunk_luid):
         result = None
         if chunk_luid is not None:
@@ -989,7 +989,7 @@ class MTChunks:
                 except:
                     pass
         return result
-    
+
     def check_map_pseudorecursion_start(self):
         if self.todo_index<0:
             print("PROCESSING MAP DATA (BRANCH PATTERN)")
@@ -1033,7 +1033,7 @@ class MTChunks:
                 self.todo_index = 0
                 #while (todo_index<len(self.todo_positions)):
                 self.verify_correct_map()
-    
+
     def verify_correct_map(self):
         if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
             if self.mapvars is not None and set(['world_name']).issubset(self.mapvars):
@@ -1073,7 +1073,7 @@ class MTChunks:
                                 badend_string = ".yml"
                                 if (len(filename) >= len(badend_string)) and (filename[len(filename)-len(badend_string):]==badend_string):
                                     os.remove(file_fullname)
-        
+
     def save_mapvars_if_changed(self):
         is_changed = False
         #is_different_world = False
@@ -1139,7 +1139,7 @@ class MTChunks:
 
             self.mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
             #is_testonly == (self.os_name=="windows")
-            
+
             self.verify_correct_map()
 
             self.chunkx_min = 0

@@ -4,7 +4,7 @@
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
-# and/or modify it under the terms of the DWFYWT
+# and/or modify it under the terms of the DWTFYWT
 # Public License, Version 2, as published by Sam Hocevar. See
 # COPYING for more details.
 
@@ -165,10 +165,7 @@ drawunderground = False
 geometry_string = None
 region_string = None
 
-#for o, a in opts:
-opt_index = 0
-while opt_index <len(opts):
-    o, a = opts[opt_index]
+for o, a in opts:
     if o in ("-h", "--help"):
         usage()
         sys.exit()
@@ -197,10 +194,8 @@ while opt_index <len(opts):
         geometry_string = a
     elif o == "--region":
         region_string = a
-        #region_string = xmin_string+" "+xmax_string+" "+zmin_string+" "+zmax_string
     else:
         assert False, "unhandled option"
-    opt_index += 1
 nonchunky_xmin=-1500
 nonchunky_xmax=1500
 nonchunky_zmin=-1500
@@ -266,7 +261,7 @@ sector_xmax = nonchunky_xmax / 16
 sector_zmin = nonchunky_zmin / 16
 sector_zmax = nonchunky_zmax / 16
 
-        
+
 if path is None:
     print("Please select world path (eg. -i ../worlds/yourworld) (or use --help)")
     sys.exit(1)
@@ -347,20 +342,20 @@ if os.path.exists(path + "map.sqlite"):
     import sqlite3
     conn = sqlite3.connect(path + "map.sqlite")
     cur = conn.cursor()
-    
+
     cur.execute("SELECT `pos` FROM `blocks`")
     while True:
         r = cur.fetchone()
         if not r:
             break
-        
+
         x, y, z = getIntegerAsBlock(r[0])
-        
+
         if x < sector_xmin or x > sector_xmax:
             continue
         if z < sector_zmin or z > sector_zmax:
             continue
-        
+
         xlist.append(x)
         zlist.append(z)
 
@@ -388,7 +383,7 @@ if os.path.exists(path + "sectors"):
         zlist.append(z)
 
 if len(xlist) == 0 or len(zlist) == 0:
-    print("At this chunk data does not exist.")
+    print("At this chunk, data does not exist.")
     sys.exit(1)
 
 # Get rid of doubles
@@ -602,7 +597,7 @@ for n in range(len(xlist)):
             # Let's just memorize these even though it's not really necessary.
             version = readU8(f)
             flags = f.read(1)
-            
+
             #print("version="+str(version))
             #print("flags="+str(version))
 
@@ -611,12 +606,12 @@ for n in range(len(xlist)):
             day_night_differs = ((ord(flags) & 2) != 0)
             lighting_expired = ((ord(flags) & 4) != 0)
             generated = ((ord(flags) & 8) != 0)
-            
+
             #print("is_underground="+str(is_underground))
             #print("day_night_differs="+str(day_night_differs))
             #print("lighting_expired="+str(lighting_expired))
             #print("generated="+str(generated))
-            
+
             if version >= 22:
                 content_width = readU8(f)
                 params_width = readU8(f)
@@ -627,7 +622,7 @@ for n in range(len(xlist)):
                 mapdata = array.array("B", dec_o.decompress(f.read()))
             except:
                 mapdata = []
-            
+
             # Reuse the unused tail of the file
             f.close();
             f = cStringIO.StringIO(dec_o.unused_data)
@@ -640,7 +635,7 @@ for n in range(len(xlist)):
                 # And do nothing with it
             except:
                 metaliststr = []
-            
+
             # Reuse the unused tail of the file
             f.close();
             f = cStringIO.StringIO(dec_o.unused_data)
@@ -677,10 +672,10 @@ for n in range(len(xlist)):
                 data_size = readU16(f)
                 # u8[data_size] data
                 data = f.read(data_size)
-            
+
             timestamp = readU32(f)
             #print("* timestamp="+str(timestamp))
-            
+
             id_to_name = {}
             if version >= 22:
                 name_id_mapping_version = readU8(f)
