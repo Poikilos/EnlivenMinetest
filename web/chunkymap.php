@@ -293,15 +293,15 @@ function echo_chunkymap_table() {
                             //}
                             //$coordinates = explode(",", $tuple_string);
                             //if (count($coordinates)==3) {
-                            //$smallx=(int)$coordinates[0];
-                            //$smallz=(int)$coordinates[2];
-                            $smallx=(int)$player_dict["x"];
-                            $smallz=(int)$player_dict["z"];
-                            $x = (int)( $smallx/$chunkymap_tile_original_w );
-                            $z = (int)( $smallz/$chunkymap_tile_original_h );
+                            //$nonchunky_x=(int)$coordinates[0];
+                            //$nonchunky_z=(int)$coordinates[2];
+                            $nonchunky_x=(int)$player_dict["x"];
+                            $nonchunky_z=(int)$player_dict["z"];
+                            $x = (int)( $nonchunky_x/$chunkymap_tile_original_w );
+                            $z = (int)( $nonchunky_z/$chunkymap_tile_original_h );
                             $chunk_luid = "x".$x."z".$z;
-                            $rel_x = $smallx - ($x*$chunkymap_tile_original_w);
-                            $rel_z = $smallz - ($z*$chunkymap_tile_original_h);
+                            $rel_x = $nonchunky_x - ($x*$chunkymap_tile_original_w);
+                            $rel_z = $nonchunky_z - ($z*$chunkymap_tile_original_h);
                             if (!isset($chunk_assoc[$chunk_luid])) {
                                 $chunk_assoc[$chunk_luid] = array();
                             }
@@ -400,7 +400,8 @@ function echo_chunkymap_table() {
     $z_count = $chunkz_max - $chunkz_min;
     echo "\r\n";
     echo "<center>\r\n";
-    echo_hold( "  <table style=\"border-spacing: 0px; border-style:solid; border-color:gray; border-width:0px\">\r\n");
+	//cellpadding="0" cellspacing="0" still needed for IE
+    echo_hold( "  <table cellpadding=\"0\" cellspacing=\"0\" style=\"border-spacing: 0px; border-style:solid; border-color:gray; border-width:0px\">\r\n");
     $z = (int)$chunkz_max;
     $scale=(float)$chunkymap_view_zoom_multiplier; // no longer /100
     $zoomed_w=(int)((float)$chunkymap_tile_original_w*$scale+.5);
