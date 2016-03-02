@@ -33,7 +33,7 @@ This program comes without any warranty, to the extent permitted by applicable l
 		refresh_map_enable:False
 		#rerenders chunks that were rendered in this run:
 		recheck_rendered:True
-		#where 1 is number of seconds:
+		#where 1 is number of seconds (only delays first iteration--further iterations continue until refreshing player is needed):
 		refresh_map_seconds:1
 		#where 1 is number of seconds:
 		refresh_players_seconds:1

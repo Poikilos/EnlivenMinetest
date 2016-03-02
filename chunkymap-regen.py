@@ -357,8 +357,8 @@ class MTChunks:
         self.website_root="/var/www/html/minetest"
         self.world_name = "FCAGameAWorld"
         self.os_name="linux"
-        self.refresh_map_seconds = 1 #does one chunk at a time so as not to interrupt player updates too often
-        self.refresh_players_seconds = 1
+        self.refresh_map_seconds = 30 #does one chunk at a time so as not to interrupt player updates too often
+        self.refresh_players_seconds = 5
         self.chunk_yaml_name_opener_string = "chunk_"
         self.chunk_yaml_name_dotext_string = ".yml"
 
@@ -1257,6 +1257,7 @@ class MTChunks:
         #self.last_run_second = best_timer()
         self.loop_enable = True
         self.verbose_enable = False
+        is_first_iteration = True
         while self.loop_enable:
             before_second = best_timer()
             run_wait_seconds = self.refresh_map_seconds
@@ -1277,23 +1278,30 @@ class MTChunks:
                 else:
                     print("player update is not enabled")
                 if self.refresh_map_enable:
-                    if (self.last_map_refresh_second is None) or (best_timer()-self.last_map_refresh_second > self.refresh_map_seconds):
-                        #if self.last_map_refresh_second is not None:
-                            #print ("waited "+str(best_timer()-self.last_map_refresh_second)+"s for map update")
-                        self.last_map_refresh_second = best_timer()
-                        self.check_map_pseudorecursion_iterate()
-                        #self.check_map_inefficient_squarepattern()
+                    is_first_run = True
+                    map_render_latency = 0.3
+                    if (not is_first_iteration) or (self.last_map_refresh_second is None) or (best_timer()-self.last_map_refresh_second > self.refresh_map_seconds):
+                        while is_first_run or ( ((best_timer()+map_render_latency)-self.last_players_refresh_second) < self.refresh_players_seconds ):
+                            is_first_run = False
+                            is_first_iteration = self.todo_index<0
+                            #if (self.last_map_refresh_second is None) or (best_timer()-self.last_map_refresh_second > self.refresh_map_seconds):
+                            #if self.last_map_refresh_second is not None:
+                                #print ("waited "+str(best_timer()-self.last_map_refresh_second)+"s for map update")
+                            self.last_map_refresh_second = best_timer()
+                            self.check_map_pseudorecursion_iterate()
+                            map_render_latency = best_timer() - self.last_map_refresh_second
+                            #self.check_map_inefficient_squarepattern()
                     else:
                         print("waiting before doing map update")
                 else:
                     print("map update is not enabled")
+                run_wait_seconds -= (best_timer()-before_second)
+                if (float(run_wait_seconds)>0.0):
+                    print ("sleeping for "+str(run_wait_seconds)+"s")
+                    time.sleep(run_wait_seconds)
+                self.run_count += 1
             else:
                 self.verbose_enable = True
-            run_wait_seconds -= (best_timer()-before_second)
-            if (int(float(run_wait_seconds)+.5)>0.0):
-                print ("sleeping for "+str(run_wait_seconds)+"s")
-                time.sleep(run_wait_seconds)
-            self.run_count += 1
 
     def run(self):
         if self.refresh_players_enable:
