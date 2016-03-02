@@ -705,7 +705,7 @@ class MTChunks:
             geometry_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min)+1)+"+"+str(int(z_max)-int(z_min)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
             #expertmm_region_string = str(x_min) + ":" + str(x_max) + "," + str(z_min) + ":" + str(z_max)
             #cmd_string="sudo python "+script_path+" --input \""+self.world_path+"\" --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
-            cmd_string="sudo python "+script_path+" --input \""+self.world_path+"\" --geometry "+geometry_string+" --output \""+tmp_png_path+"\""+cmd_suffix
+            cmd_string="sudo python "+self.minetestmapper_py_path+" --input \""+self.world_path+"\" --geometry "+geometry_string+" --output \""+tmp_png_path+"\""+cmd_suffix
             #sudo python /home/owner/minetest/util/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --output /var/www/html/minetest/chunkymapdata/entire.png > entire-mtmresult.txt
             #sudo python /home/owner/minetest/util/chunkymap/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry 0:0+16+16 --output /var/www/html/minetest/chunkymapdata/chunk_x0z0.png > /home/owner/minetest/util/chunkymap-genresults/chunk_x0z0_mapper_result.txt
             #    sudo mv entire-mtmresult.txt /home/owner/minetest/util/chunkymap-genresults/
