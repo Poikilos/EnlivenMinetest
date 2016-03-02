@@ -401,7 +401,7 @@ function echo_chunkymap_table() {
     echo "\r\n";
     echo "<center>\r\n";
 	//cellpadding="0" cellspacing="0" still needed for IE
-    echo_hold( "  <table cellpadding=\"0\" cellspacing=\"0\" style=\"border-spacing: 0px; border-style:solid; border-color:gray; border-width:0px\">\r\n");
+    echo_hold( "  <table id=\"chunkymapstatictable\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-spacing: 0px; border-style:solid; border-color:gray; border-width:0px\">\r\n");
     $z = (int)$chunkz_max;
     $scale=(float)$chunkymap_view_zoom_multiplier; // no longer /100
     $zoomed_w=(int)((float)$chunkymap_tile_original_w*$scale+.5);
