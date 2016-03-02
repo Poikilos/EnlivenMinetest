@@ -365,6 +365,7 @@ class MTChunks:
         input_string = ""
         if (os.path.sep!="/"):
             self.os_name="windows"
+            print("Windows detected")
         #input_string = input("Which self.username contains minetest/util/minetestmapper-numpy.py (minetest not .minetest) ["+self.username+"]?")
         if (len(input_string)>0):
             self.username = input_string
@@ -392,7 +393,9 @@ class MTChunks:
         #if (not os.path.isdir(self.profile_path)):
         #    self.profile_path = os.path.join(self.profiles_path, "jgustafson")
         self.dotminetest_path = os.path.join(self.profile_path,".minetest")
-        if (self.os_name=="windows"): self.dotminetest_path = "C:\\games\\Minetest"
+        if (self.os_name=="windows"):
+            self.dotminetest_path = "C:\\games\\Minetest"
+        print("Using dotminetest_path '"+self.dotminetest_path+"'")
         self.worlds_path = os.path.join(self.dotminetest_path,"worlds")
         self.world_path = os.path.join(self.worlds_path, self.world_name)
         auto_chosen_world = False
@@ -457,7 +460,7 @@ class MTChunks:
                     pass
             if self.website_root is None:
                 self.website_root = os.path.dirname(os.path.abspath(__file__))
-            print("Set website_root to "+self.website_root)
+        print("Set website_root to "+self.website_root)
 
         self.chunkymap_data_path=os.path.join(self.website_root,"chunkymapdata")
         self.yaml_name = "generated.yml"
