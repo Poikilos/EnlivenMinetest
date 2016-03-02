@@ -1102,7 +1102,13 @@ class MTChunks:
                 #if self.verbose_enable:
                 #    print ("  (FOUND self.world_name)")
                 if self.mapvars["world_name"] != self.world_name:
+                    print("")
+                    print("")
+                    print("")
+                    print("")
+                    print("")
                     print ("Removing ALL map data since from WORLD NAME is different (map '"+str(self.mapvars["world_name"])+"' is not '"+str(self.world_name)+"')...")
+                    print("")
                     for dirname, dirnames, filenames in os.walk(self.chunkymap_data_path):
                         #index = 0
                         #for j in range(0,len(filenames)):
@@ -1266,26 +1272,30 @@ class MTChunks:
         if os.path.isfile(signal_path):
             signals = get_dict_from_conf_file(signal_path,":")
             if signals is not None:
-                print("RECEIVED "+str(len(signals))+" signal(s)")
+                print("ANALYZING "+str(len(signals))+" signal(s)")
                 for this_key in signals.keys():
-                    print("RECEIVED SIGNAL "+str(this_key)+":"+str(signals[this_key]))
+                    is_signal_ok = True
                     if this_key=="loop_enable":
                         if not signals[this_key]:
                             self.loop_enable = False
                         else:
+                            is_signal_ok = False
                             print("WARNING: Got signal to change loop_enable to True, so doing nothing")
                     elif this_key=="refresh_players_enable":
                         if type(signals[this_key]) is bool:
                             self.refresh_players_enable = signals[this_key]
                         else:
+                            is_signal_ok = False
                             print("ERROR: expected bool for "+this_key)
                     elif this_key=="refresh_map_seconds":
                         if (type(signals[this_key]) is float) or (type(signals[this_key]) is int):
                             if float(signals[this_key])>=1.0:
                                 self.refresh_map_seconds = float(signals[this_key])
                             else:
+                                is_signal_ok = False
                                 print("ERROR: expected >=1 seconds for refresh_map_seconds (int or float)")
                         else:
+                            is_signal_ok = False
                             print("ERROR: expected int for "+this_key)
                     elif this_key=="refresh_players_seconds":
                         if (type(signals[this_key]) is float) or (type(signals[this_key]) is int):
@@ -1294,6 +1304,7 @@ class MTChunks:
                             else:
                                 print("ERROR: expected >=1 seconds for refresh_players_seconds (int or float)")
                         else:
+                            is_signal_ok = False
                             print("ERROR: expected int for "+this_key)
                     elif this_key=="recheck_rendered":
                         if type(signals[this_key]) is bool:
@@ -1301,22 +1312,26 @@ class MTChunks:
                                 for chunk_luid in self.chunks.keys():
                                     self.chunks[chunk_luid].is_fresh = False
                         else:
+                            is_signal_ok = False
                             print("ERROR: expected bool for "+this_key)
                     elif this_key=="refresh_map_enable":
                         if type(signals[this_key]) is bool:
                             self.refresh_map_enable = signals[this_key]
                         else:
+                            is_signal_ok = False
                             print("ERROR: expected bool for "+this_key)
                     elif this_key=="verbose_enable":
                         if type(signals[this_key]) is bool:
                             self.verbose_enable = signals[this_key]
                         else:
+                            is_signal_ok = False
                             print("ERROR: expected true or false after colon for "+this_key)
 
                     else:
+                        is_signal_ok = False
                         print("ERROR: unknown signal '"+this_key+"'")
-
-
+                    if is_signal_ok:
+                        print("RECEIVED SIGNAL "+str(this_key)+":"+str(signals[this_key]))
             else:
                 print("WARNING: blank '"+signal_path+"'")
             try:
@@ -1352,8 +1367,12 @@ class MTChunks:
                 if self.refresh_map_enable:
                     is_first_run = True
                     map_render_latency = 0.3
-                    if (not is_first_iteration) or (self.last_map_refresh_second is None) or (best_timer()-self.last_map_refresh_second > self.refresh_map_seconds):
+                    is_done_iterating = self.todo_index<0
+                    if (not is_first_iteration) or (self.last_map_refresh_second is None) or (best_timer()-self.last_map_refresh_second > self.refresh_map_seconds) or (not is_done_iterating):
                         while is_first_run or ( ((best_timer()+map_render_latency)-self.last_players_refresh_second) < self.refresh_players_seconds ):
+                            self.read_then_remove_signals()
+                            if not self.refresh_map_enable:
+                                break
                             is_first_run = False
                             is_first_iteration = self.todo_index<0
                             #if (self.last_map_refresh_second is None) or (best_timer()-self.last_map_refresh_second > self.refresh_map_seconds):
@@ -1361,6 +1380,8 @@ class MTChunks:
                                 #print ("waited "+str(best_timer()-self.last_map_refresh_second)+"s for map update")
                             self.last_map_refresh_second = best_timer()
                             self.check_map_pseudorecursion_iterate()
+                            if self.todo_index<0:  # if done iterating
+                                break
                             map_render_latency = best_timer() - self.last_map_refresh_second
                             #self.check_map_inefficient_squarepattern()
                     else:
@@ -1368,7 +1389,8 @@ class MTChunks:
                 else:
                     print("map update is not enabled")
                 run_wait_seconds -= (best_timer()-before_second)
-                if (float(run_wait_seconds)>0.0):
+                is_done_iterating = self.todo_index<0
+                if ( (float(run_wait_seconds)>0.0) and (is_done_iterating)):
                     print ("sleeping for "+str(run_wait_seconds)+"s")
                     time.sleep(run_wait_seconds)
                 self.run_count += 1
