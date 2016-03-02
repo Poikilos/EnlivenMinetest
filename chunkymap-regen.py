@@ -298,7 +298,9 @@ class MTChunks:
     worlds_path = None
     is_save_output_ok = None
     mt_util_path = None
-    mtmn_path = None
+    minetestmapper_fast_sqlite_path = None
+    minetestmapper_custom_path = None
+    minetestmapper_py_path = None
     colors_path = None
     python_exe_path = None
     chunks = None
@@ -340,8 +342,12 @@ class MTChunks:
     chunk_yaml_name_dotext_string = None
     mapvars = None
     rendered_count = None
+    backend_string = None
+    #region_separators = None
+    is_backend_detected = None
 
     def __init__(self):  #formerly checkpaths() in global scope
+        self.is_backend_detected = False
         self.total_generated_count = 0
         self.rendered_count = 0
         self.preload_all_enable = True
@@ -361,6 +367,7 @@ class MTChunks:
         self.refresh_players_seconds = 5
         self.chunk_yaml_name_opener_string = "chunk_"
         self.chunk_yaml_name_dotext_string = ".yml"
+        #self.region_separators = [" "," "," "]
 
         input_string = ""
         if (os.path.sep!="/"):
@@ -398,6 +405,7 @@ class MTChunks:
         print("Using dotminetest_path '"+self.dotminetest_path+"'")
         self.worlds_path = os.path.join(self.dotminetest_path,"worlds")
         self.world_path = os.path.join(self.worlds_path, self.world_name)
+        
         auto_chosen_world = False
         self.world_blacklist = list()
         self.world_blacklist.append("CarbonUnit")
@@ -426,10 +434,31 @@ class MTChunks:
                 if auto_chosen_world:
                     break
         self.python_exe_path = "python"
-
+        worldmt_path = os.path.join(self.world_path, "world.mt")
+        self.backend_string="sqlite3"
+        if (os.path.isfile(worldmt_path)):
+            ins = open(worldmt_path, 'r')
+            line = True
+            while line:
+                line = ins.readline()
+                if line:
+                    line_strip = line.strip()
+                    if len(line_strip)>0 and line_strip[0]!="#":
+                        if line_strip[:7]=="backend":
+                            ao_index = line_strip.find("=")
+                            if ao_index>-1:
+                                self.backend_string = line_strip[ao_index+1:].strip()
+                                self.is_backend_detected = True
+                                break
+            ins.close()
+            
+        else:
+            print("ERROR: failed to read '"+worldmt_path+"'")
         self.is_save_output_ok = True   # Keeping output after analyzing it is no longer necessary since results are saved to YAML, but keeping output provides debug info since is the output of minetestmapper-numpy.py
-
-
+        if self.is_backend_detected:
+            print("Detected backend '"+self.backend_string+"' from '"+worldmt_path+"'")
+        else:
+            print("WARNING: Database backend cannot be detected (unable to ensure image generator script will render map)")
         try:
             alt_path = "C:\\python27\python.exe"
             if os.path.isfile(alt_path):
@@ -439,10 +468,24 @@ class MTChunks:
             pass  # do nothing, probably linux
         mt_path = os.path.join( self.profile_path, "minetest")
         self.mt_util_path = os.path.join( mt_path, "util")
-        self.mtmn_path = os.path.join( self.mt_util_path, "minetestmapper-numpy.py" )
+        self.minetestmapper_fast_sqlite_path = os.path.join( self.mt_util_path, "minetestmapper-numpy.py" )
+        if self.os_name=="windows":
+            self.minetestmapper_fast_sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-numpy.py")
+        
+        self.minetestmapper_custom_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper.py")
+        self.mt_chunkymap_path = os.path.join(self.mt_util_path, "chunkymap")
+        try_path = os.path.join(self.mt_chunkymap_path, "minetestmapper.py")
+        if os.path.isfile(try_path):
+            self.minetestmapper_custom_path
+        self.minetestmapper_py_path = self.minetestmapper_fast_sqlite_path
+        if (self.backend_string!="sqlite3"):
+            self.minetestmapper_py_path = self.minetestmapper_custom_path
+        print("Chose image generator script: "+self.minetestmapper_py_path)
+        if not os.path.isfile(self.minetestmapper_py_path):
+            print("ERROR: script does not exist, exiting "+__file__+".")
+            sys.exit()
         self.colors_path = os.path.join( self.mt_util_path, "colors.txt" )
         if self.os_name=="windows":
-            self.mtmn_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-numpy.py")
             self.colors_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "colors.txt")
             self.website_root = None
             prioritized_try_paths = list()
@@ -470,6 +513,16 @@ class MTChunks:
         self.chunkz_min = 0
         self.chunkx_max = 0
         self.chunkz_max = 0
+        self.mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
+        if self.mapvars is not None:
+            if "chunkx_min" in self.mapvars.keys():
+                self.chunkx_min = self.mapvars["chunkx_min"]
+            if "chunkx_max" in self.mapvars.keys():
+                self.chunkx_max = self.mapvars["chunkx_max"]
+            if "chunkz_min" in self.mapvars.keys():
+                self.chunkz_min = self.mapvars["chunkz_min"]
+            if "chunkz_max" in self.mapvars.keys():
+                self.chunkz_max = self.mapvars["chunkz_max"]
 
         self.chunk_size = 16
         self.maxheight = 64
@@ -628,10 +681,10 @@ class MTChunks:
         geometry_value_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min)+1)+"+"+str(int(z_max)-int(z_min)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
         cmd_suffix = ""
         cmd_suffix = " > \""+genresult_path+"\""
-        self.mapper_id = "minetestmapper-numpy"
-        cmd_string = self.python_exe_path + " \""+self.mtmn_path + "\" --region " + str(x_min) + " " + str(x_max) + " " + str(z_min) + " " + str(z_max) + " --maxheight "+str(self.maxheight)+" --minheight "+str(self.minheight)+" --pixelspernode "+str(self.pixelspernode)+" \""+self.world_path+"\" \""+tmp_png_path+"\"" + cmd_suffix
+        #self.mapper_id = "minetestmapper-region"
+        cmd_string = self.python_exe_path + " \""+self.minetestmapper_py_path + "\" --region " + str(x_min) + " " + str(x_max) + " " + str(z_min) + " " + str(z_max) + " --maxheight "+str(self.maxheight)+" --minheight "+str(self.minheight)+" --pixelspernode "+str(self.pixelspernode)+" \""+self.world_path+"\" \""+tmp_png_path+"\"" + cmd_suffix
 
-        if self.mapper_id=="minetestmapper-region": #if self.os_name!="windows":  #since windows client doesn't normally have minetest-mapper
+        if self.minetestmapper_py_path==self.minetestmapper_custom_path:#if self.backend_string!="sqlite3": #if self.mapper_id=="minetestmapper-region": #if self.os_name!="windows":  #since windows client doesn't normally have minetest-mapper
             #  Since minetestmapper-numpy has trouble with leveldb:
             #    such as sudo minetest-mapper --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry -32:-32+64+64 --output /var/www/html/minetest/try1.png
             #    where geometry option is like --geometry x:y+w+h
@@ -641,14 +694,18 @@ class MTChunks:
             #    cmd_string = "/usr/games/minetest-mapper --input \""+self.world_path+"\" --draworigin --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
             #    such as sudo python minetestmapper --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry -32:-32+64+64 --output /var/www/html/minetest/try1.png
             # OR try PYTHON version (looks for expertmm fork which has geometry option like C++ version does):
-            script_path = "/home/owner/minetest/util/minetestmapper.py"
-            region_capable_script_path = "/home/owner/minetest/util/chunkymap/minetestmapper.py"
-            if os.path.isfile(region_capable_script_path):
-                script_path = region_capable_script_path
-                #cmd_suffix=" > entire-mtmresult.txt"
-                expertmm_region_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min)+1)+"+"+str(int(z_max)-int(z_min)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
-                #cmd_string="sudo python "+script_path+" --input \""+self.world_path+"\" --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
-                cmd_string="sudo python "+script_path+" --input \""+self.world_path+"\" --region "+expertmm_region_string+" --output \""+tmp_png_path+"\""+cmd_suffix
+            #script_path = "/home/owner/minetest/util/minetestmapper.py"
+            #region_capable_script_path = "/home/owner/minetest/util/chunkymap/minetestmapper.py"
+            #if self.os_name=="windows":
+            #    region_capable_script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper.py")
+            #    if os.path.isfile(region_capable_script_path):
+            #        script_path=region_capable_script_path
+            #if os.path.isfile(region_capable_script_path):
+                #script_path = region_capable_script_path
+            geometry_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min)+1)+"+"+str(int(z_max)-int(z_min)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
+            #expertmm_region_string = str(x_min) + ":" + str(x_max) + "," + str(z_min) + ":" + str(z_max)
+            #cmd_string="sudo python "+script_path+" --input \""+self.world_path+"\" --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
+            cmd_string="sudo python "+script_path+" --input \""+self.world_path+"\" --geometry "+geometry_string+" --output \""+tmp_png_path+"\""+cmd_suffix
             #sudo python /home/owner/minetest/util/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --output /var/www/html/minetest/chunkymapdata/entire.png > entire-mtmresult.txt
             #sudo python /home/owner/minetest/util/chunkymap/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry 0:0+16+16 --output /var/www/html/minetest/chunkymapdata/chunk_x0z0.png > /home/owner/minetest/util/chunkymap-genresults/chunk_x0z0_mapper_result.txt
             #    sudo mv entire-mtmresult.txt /home/owner/minetest/util/chunkymap-genresults/
@@ -698,7 +755,7 @@ class MTChunks:
 
 
     def check_players(self):
-        # NOT NEEDED: if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
+        # NOT NEEDED: if os.path.isfile(self.minetestmapper_py_path) and os.path.isfile(self.colors_path):
         print("PROCESSING PLAYERS")
         self.chunkymap_data_path=os.path.join(self.website_root,"chunkymapdata")
         chunkymap_players_name = "players"
@@ -858,7 +915,8 @@ class MTChunks:
                         if not self.is_chunk_rendered_on_dest(chunk_luid):
                             is_render_needed = True
                             if self.verbose_enable:
-                                print(chunk_luid+": RENDERING where missing image on marked nonempty chunk (player in it)")
+                                theoretical_path = self.get_chunk_image_path(chunk_luid)
+                                print(chunk_luid+": RENDERING where missing image on marked nonempty chunk (player in it) {dest_png_path:"+theoretical_path+"}")
                         else:
                             if self.verbose_enable:
                                 print (chunk_luid+": SKIPPING nonfresh previously marked nonempty (player in it)")
@@ -880,8 +938,9 @@ class MTChunks:
                 else:
                     if not self.is_chunk_rendered_on_dest(chunk_luid):
                         is_render_needed = True
+                        theoretical_path = self.get_chunk_image_path(chunk_luid)
                         if self.verbose_enable:
-                            print (chunk_luid+": RENDERING where missing image on nonfresh previously marked (simple check since has no player)")
+                            print (chunk_luid+": RENDERING where missing image on nonfresh previously marked (simple check since has no player) {dest_png_path:"+theoretical_path+"}")
                     else:
                         if self.verbose_enable:
                             print (chunk_luid+": SKIPPING nonfresh previously marked (simple check since has no player)")
@@ -962,7 +1021,7 @@ class MTChunks:
                     prev_len = len(self.todo_positions)
                     self._check_map_pseudorecursion_branchfrom(x,z)
                     if self.verbose_enable:
-                        print("  ["+str(self.todo_index)+"] branching from "+str((x,z))+" (added "+(len(self.todo_positions)-prev_len)+")")
+                        print("  ["+str(self.todo_index)+"] branching from "+str((x,z))+" (added "+str(len(self.todo_positions)-prev_len)+")")
                 else:
                     if self.verbose_enable:
                         print("  ["+str(self.todo_index)+"] not branching from "+str((x,z)))
@@ -996,7 +1055,7 @@ class MTChunks:
     def check_map_pseudorecursion_start(self):
         if self.todo_index<0:
             print("PROCESSING MAP DATA (BRANCH PATTERN)")
-            if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
+            if os.path.isfile(self.minetestmapper_py_path) and os.path.isfile(self.colors_path):
                 self.rendered_count = 0
                 self.todo_positions = list()
                 self.todo_positions.append((0,0))
@@ -1038,7 +1097,7 @@ class MTChunks:
                 self.verify_correct_map()
 
     def verify_correct_map(self):
-        if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
+        if os.path.isfile(self.minetestmapper_py_path) and os.path.isfile(self.colors_path):
             if self.mapvars is not None and set(['world_name']).issubset(self.mapvars):
                 #if self.verbose_enable:
                 #    print ("  (FOUND self.world_name)")
@@ -1124,12 +1183,13 @@ class MTChunks:
             outs.write("chunkymap_data_path:"+str(self.chunkymap_data_path) + "\n")
             outs.write("total_generated_count:"+str(self.total_generated_count) + "\n")
             outs.close()
+            self.mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
         else:
             if self.verbose_enable:
                 print ("  (Not saving '"+self.world_yaml_path+"' since same value of each current variable is already in file as loaded)")
 
     def check_map_inefficient_squarepattern(self):
-        if os.path.isfile(self.mtmn_path) and os.path.isfile(self.colors_path):
+        if os.path.isfile(self.minetestmapper_py_path) and os.path.isfile(self.colors_path):
             self.rendered_count = 0
             if not os.path.isdir(self.chunkymap_data_path):
                 os.mkdir(self.chunkymap_data_path)
@@ -1149,6 +1209,15 @@ class MTChunks:
             self.chunkz_min = 0
             self.chunkx_max = 0
             self.chunkz_max = 0
+            if self.mapvars is not None:
+                if "chunkx_min" in self.mapvars.keys():
+                    self.chunkx_min = self.mapvars["chunkx_min"]
+                if "chunkx_max" in self.mapvars.keys():
+                    self.chunkx_max = self.mapvars["chunkx_max"]
+                if "chunkz_min" in self.mapvars.keys():
+                    self.chunkz_min = self.mapvars["chunkz_min"]
+                if "chunkz_max" in self.mapvars.keys():
+                    self.chunkz_max = self.mapvars["chunkz_max"]
             self.total_generated_count = 0
 
             newchunk_luid_list = list()
