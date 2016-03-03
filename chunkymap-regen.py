@@ -667,7 +667,7 @@ class MTChunks:
 
     def print_file(path, indent=""):
         if os.path.isfile(path):
-            if indent = None:
+            if indent is None:
                 indent = ""
             try:
                 ins = open(path, 'r')
@@ -678,8 +678,9 @@ class MTChunks:
                         print(indent+line)
                 ins.close()
             except:
+                print(indent+"print_file: could not finish")
         else:
-            print ("print_file: missing path")
+            print (indent+"print_file: missing path")
         
     # normally call check_chunk instead, which renders chunk only if necessary
     def _render_chunk(self, x, z):
