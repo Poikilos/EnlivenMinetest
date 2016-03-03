@@ -61,6 +61,11 @@ def RepresentsFloat(s):
     except ValueError:
         return False
 
+def view_traceback():
+    ex_type, ex, tb = sys.exc_info()
+    traceback.print_tb(tb)
+    del tb
+
 def get_dict_modified_by_conf_file(this_dict, path,assignment_operator="="):
     results = None
     #print ("Checking "+str(path)+" for settings...")
@@ -666,21 +671,21 @@ class MTChunks:
                 self.chunks[chunk_luid].load_yaml(yaml_path)
 
     def print_file(path, indent=""):
-        if os.path.isfile(path):
-            if indent is None:
-                indent = ""
-            try:
-                ins = open(path, 'r')
-                line = True
-                while line:
-                    line = ins.readline()
-                    if line:
-                        print(indent+line)
-                ins.close()
-            except:
-                print(indent+"print_file: could not finish")
-        else:
-            print (indent+"print_file: missing path")
+        try:
+            if os.path.isfile(path):
+                if indent is None:
+                    indent = ""
+                    ins = open(path, 'r')
+                    line = True
+                    while line:
+                        line = ins.readline()
+                        if line:
+                            print(indent+line)
+                    ins.close()
+            else:
+                print (indent+"print_file: missing path")
+        except:
+            print(indent+"print_file: could not finish")
         
     # normally call check_chunk instead, which renders chunk only if necessary
     def _render_chunk(self, x, z):
@@ -778,8 +783,10 @@ class MTChunks:
 
             except:
                 print (min_indent+"Could not finish deleting/moving output")
+                view_traceback()
         except:
             print(min_indent+"Could not finish deleting/moving temp files")
+            view_traceback()
 
 
         return result
