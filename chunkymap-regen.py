@@ -219,29 +219,6 @@ class MTChunk:
 
     def save_yaml(self, yml_path):
         save_conf_from_dict(yml_path, self.metadata, assignment_operator=":", save_nulls_enable=False)
-        #try:
-            #outs = open(yml_path, 'w')
-            #outs.write("is_empty:"+str(self.is_empty)+"\n")
-            #outs.write("is_marked:"+str(self.is_marked)+"\n")
-            #if self.width is not None:
-                #outs.write("width:"+str(self.width)+"\n")
-            #if self.height is not None:
-                #outs.write("height:"+str(self.height)+"\n")
-            #if self.image_w is not None:
-                #outs.write("image_w:"+str(self.image_w)+"\n")
-            #if self.image_h is not None:
-                #outs.write("image_h:"+str(self.image_h)+"\n")
-            #if self.image_left is not None:
-                #outs.write("image_left:"+str(self.image_left)+"\n")
-            #if self.image_top is not None:
-                #outs.write("image_top:"+str(self.image_top)+"\n")
-            #if self.image_right is not None:
-                #outs.write("image_right:"+str(self.image_right)+"\n")
-            #if self.image_bottom is not None:
-                #outs.write("image_bottom:"+str(self.image_bottom)+"\n")
-            #outs.close()
-        #except:
-            #print("Could not finish saving chunk metadata to '"+str(yml_path)+"': "+str(traceback.format_exc()))
 
     #requires output such as from minetestmapper-numpy.py
     def set_from_genresult(self, this_genresult_path):
@@ -577,28 +554,24 @@ class MTChunks:
 
         if self.mapvars is not None:
             if "chunkx_min" in self.mapvars.keys():
-                #self.chunkx_min = self.mapvars["chunkx_min"]
                 try:
                     self.mapvars["chunkx_min"] = int(self.mapvars["chunkx_min"])
                 except:
                     print("WARNING: chunkx_min was not int so set to 0")
                     self.mapvars["chunkx_min"] = 0
             if "chunkx_max" in self.mapvars.keys():
-                #self.chunkx_max = self.mapvars["chunkx_max"]
                 try:
                     self.mapvars["chunkx_max"] = int(self.mapvars["chunkx_max"])
                 except:
                     print("WARNING: chunkx_max was not int so set to 0")
                     self.mapvars["chunkx_max"] = 0
             if "chunkz_min" in self.mapvars.keys():
-                #self.chunkz_min = self.mapvars["chunkz_min"]
                 try:
                     self.mapvars["chunkz_min"] = int(self.mapvars["chunkz_min"])
                 except:
                     print("WARNING: chunkz_min was not int so set to 0")
                     self.mapvars["chunkz_min"] = 0
             if "chunkz_max" in self.mapvars.keys():
-                #self.chunkz_max = self.mapvars["chunkz_max"]
                 try:
                     self.mapvars["chunkz_max"] = int(self.mapvars["chunkz_max"])
                 except:
@@ -686,18 +659,6 @@ class MTChunks:
             if "is_empty" in self.chunks[chunk_luid].metadata.keys():
                 result = self.chunks[chunk_luid].metadata["is_empty"]
         
-        #if os.path.isfile(yaml_path):
-            #ins = open(yaml_path, 'r')
-            #line = True
-            #while line:
-                #line = ins.readline()
-                #if line:
-                    #line_strip = line.strip()
-                    #prevalue_string="is_empty:"
-                    #if line_strip[:len(prevalue_string)]==prevalue_string:
-                        #result = bool(line_strip[len(prevalue_string):].strip())
-                        #break
-            #ins.close()
         return result
 
     def remove_chunk_image(self, chunk_luid):
@@ -808,7 +769,8 @@ class MTChunks:
             is_marked_before = False
             if chunk_luid in self.chunks.keys():
                 is_marked_before = True
-                is_empty_before = self.chunks[chunk_luid].is_empty
+                if (self.chunks[chunk_luid].metadata is not None) and ("is_empty" in self.chunks[chunk_luid].metadata):
+                    is_empty_before = self.chunks[chunk_luid].metadata["is_empty"]
             self.prepare_chunk_meta(chunk_luid)  # DOES load existing yml if exists
             this_chunk = self.chunks[chunk_luid]
             if os.path.isfile(tmp_png_path):
@@ -849,10 +811,6 @@ class MTChunks:
                         except:
                             pass
             try:
-                
-                #this_chunk = MTChunk()
-                #this_chunk.luid = chunk_luid
-                #is_empty_before = this_chunk.metadata["is_empty"]
                 this_chunk.set_from_genresult(genresult_path)
                 if is_marked_before:
                     if (not is_empty_before) and this_chunk.metadata["is_empty"]:
@@ -1252,12 +1210,6 @@ class MTChunks:
                     print ("Removing ALL map data since from WORLD NAME is different (map '"+str(self.mapvars["world_name"])+"' is not '"+str(self.mapvars["world_name"])+"')...")
                     print("")
                     for dirname, dirnames, filenames in os.walk(self.mapvars["chunkymap_data_path"]):
-                        #index = 0
-                        #for j in range(0,len(filenames)):
-                        #    i = len(filenames) - 0 - 1
-                        #    if filenames[i][0] == ".":
-                        #        print ("  SKIPPING "+filenames[i])
-                        #        filenames.remove_at(i)
                         for filename in filenames:
                             if filename[0] != ".":
                                 file_fullname = os.path.join(self.mapvars["chunkymap_data_path"],filename)
@@ -1269,12 +1221,6 @@ class MTChunks:
                                 elif filename==self.yaml_name:
                                     os.remove(file_fullname)
                     for dirname, dirnames, filenames in os.walk(os.path.join(self.mapvars["chunkymap_data_path"], "players")):
-                        #for j in range(0,len(filenames)):
-                        #    i = len(filenames) - 0 - 1
-                        #    if filenames[i][0] == ".":
-                        #    if self.verbose_enable:
-                        #        print ("  SKIPPING "+filenames[i])
-                        #        filenames.remove_at(i)
                         for filename in filenames:
                             if filename[0] != ".":
                                 file_fullname = os.path.join(self.mapvars["chunkymap_data_path"],filename)
@@ -1293,19 +1239,6 @@ class MTChunks:
     def save_mapvars_if_changed(self):
         is_changed = False
         #is_different_world = False
-        #new_map_dict = {}
-        #new_map_dict["world_name"]=str(self.world_name)
-        #new_map_dict["chunk_size"]=str(self.chunk_size)
-        #new_map_dict["pixelspernode"]=str(self.pixelspernode)
-        #new_map_dict["chunkx_min"]=str(self.chunkx_min)
-        #new_map_dict["chunkx_max"]=str(self.chunkx_max)
-        #new_map_dict["chunkz_min"]=str(self.chunkz_min)
-        #new_map_dict["chunkz_max"]=str(self.chunkz_max)
-        #new_map_dict["maxheight"]=str(self.maxheight)
-        #new_map_dict["minheight"]=str(self.minheight)
-        #new_map_dict["world_path"]=str(self.world_path)
-        #new_map_dict["chunkymap_data_path"]=str(self.chunkymap_data_path)
-        #new_map_dict["total_generated_count"]=str(self.total_generated_count)
         if self.saved_mapvars is None:
             print ("SAVING '" + self.world_yaml_path + "' since nothing was loaded or it did not exist")
             is_changed = True
@@ -1323,22 +1256,6 @@ class MTChunks:
         if is_changed:
             save_conf_from_dict(self.world_yaml_path,self.mapvars,":")
             self.saved_mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
-            #outs = open(self.world_yaml_path, 'w')
-            #outs.write("world_name:"+str(self.world_name) + "\n")
-            #outs.write("chunk_size:"+str(self.chunk_size) + "\n")
-            #outs.write("pixelspernode:"+str(self.pixelspernode) + "\n")
-            #outs.write("chunkx_min:"+str(self.chunkx_min) + "\n")
-            #outs.write("chunkx_max:"+str(self.chunkx_max) + "\n")
-            #outs.write("chunkz_min:"+str(self.chunkz_min) + "\n")
-            #outs.write("chunkz_max:"+str(self.chunkz_max) + "\n")
-            ##values for command arguments:
-            #outs.write("maxheight:"+str(self.maxheight) + "\n")
-            #outs.write("minheight:"+str(self.minheight) + "\n")
-            ##ALSO save to YAML:
-            #outs.write("world_path:"+str(self.world_path) + "\n")
-            #outs.write("chunkymap_data_path:"+str(self.chunkymap_data_path) + "\n")
-            #outs.write("total_generated_count:"+str(self.total_generated_count) + "\n")
-            #outs.close()
             #self.mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
         else:
             if self.verbose_enable:

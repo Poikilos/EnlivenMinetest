@@ -4,8 +4,8 @@
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
-# and/or modify it under the terms of the DWTFYWT
-# Public License, Version 2, as published by Sam Hocevar. See
+# and/or modify it under the terms of the Do What ... You Want To
+# To Public License, Version 2, as published by Sam Hocevar. See
 # COPYING for more details.
 
 # Made by Jogge, modified by celeron55
@@ -132,7 +132,7 @@ usagetext = """minetestmapper.py [options]
   --drawscale
   --drawplayers
   --draworigin
-  --region <xmin> <xmax> <zmin> <zmax>
+  --region <xmin>:<xmax>,<zmin>:<zmax>
   --geometry <xmin>:<zmin>+<width>+<height>
   --drawunderground
 Color format: '#000000'"""
@@ -154,8 +154,8 @@ except getopt.GetoptError as err:
 path = None
 output = "map.png"
 border = 0
-scalecolor = "black"
-bgcolor = "white"
+scalecolor = "white"
+bgcolor = "black"
 origincolor = "red"
 playercolor = "red"
 drawscale = False
@@ -277,10 +277,8 @@ os_name="linux"
 if (os.path.sep!="/"):
     os_name="windows"
 
-profiles_path = "/home"
 profile_path = None
 if os_name=="windows":
-    profiles_path = "C:\\Users"
     profile_path = os.environ['USERPROFILE']
 else:
     profile_path = os.environ['HOME']
@@ -293,13 +291,7 @@ if not os.path.isfile(colors_path):
     colors_path = abs_colors_path
 
 if not os.path.isfile(colors_path):
-    try:
-        outer_colors_folder_path = os.path.dirname(os.path.dirname(__file__))
-        outer_colors_path = os.path.join(outer_colors_folder_path, "colors.txt")
-        if os.path.isfile(outer_colors_path):
-            colors_path = outer_colors_path
-    except:
-        pass
+    print("WARNING: could not find colors.txt is current path or '"+colors_path+"'")
 
 try:
     f = file(colors_path)
