@@ -793,7 +793,7 @@ class MTChunks:
                 if self.is_chunk_traversed_by_player(chunk_luid):
                     print (min_indent+"WARNING: no chunk data though traversed by player:")
                     line_count = print_file(genresult_path, min_indent+"  ")
-                    print(indent+"#EOF: "+str(line_count)+" line(s) in '"+genresult_path+"'")
+                    print(min_indent+"#EOF: "+str(line_count)+" line(s) in '"+genresult_path+"'")
             try:
                 self.prepare_chunk_meta(chunk_luid)  # DOES load existing yml if exists
                 
