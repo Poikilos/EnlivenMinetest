@@ -68,18 +68,25 @@ def view_traceback():
 
 def print_file(path, indent=""):
     try:
-        if os.path.isfile(path):
-            if indent is None:
-                indent = ""
-                ins = open(path, 'r')
-                line = True
-                while line:
-                    line = ins.readline()
-                    if line:
-                        print(indent+line)
-                ins.close()
+        if path is not None:
+            if os.path.isfile(path):
+                line_count = 0
+                if indent is None:
+                    indent = ""
+                    ins = open(path, 'r')
+                    line = True
+                    while line:
+                        line = ins.readline()
+                        line_count += 1
+                        if line:
+                            print(indent+line)
+                    ins.close()
+                    if line_count==0:
+                        print(indent+"print_file WARNING: "+str(line_count)+" line(s) in '"+path+"'")
+            else:
+                print (indent+"print_file: file does not exist")
         else:
-            print (indent+"print_file: missing path")
+            print (indent+"print_file: path is None")
     except:
         print(indent+"print_file: could not finish")
 
