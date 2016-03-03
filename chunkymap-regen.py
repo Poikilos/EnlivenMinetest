@@ -803,6 +803,8 @@ class MTChunks:
             if os.path.isfile(tmp_png_path):
                 os.remove(tmp_png_path)
             subprocess.call(cmd_string, shell=True)  # TODO: remember not to allow arbitrary command execution, which could happen if input contains ';' when using shell=True
+            
+            self.prepare_chunk_meta(chunk_luid)  # DOES load existing yml if exists
             this_chunk = self.chunks[chunk_luid]
             if os.path.isfile(tmp_png_path):
                 result = True
@@ -825,19 +827,23 @@ class MTChunks:
                     print (min_indent+"WARNING: no chunk data though traversed by player:")
                     print(min_indent+"standard output stream:")
                     line_count = print_file(genresult_path, min_indent+"  ")
-                    #if line_count>0:
-                        #print(min_indent+"  #EOF: "+str(line_count)+" line(s) in '"+genresult_path+"'")
-                    #    pass
-                    #else:
-                    print(min_indent+"  #EOF: "+str(line_count)+" line(s) in '"+genresult_path+"'")
-                    subprocess.call(cmd_no_out_string+" 2> \""+genresult_path+"\"", shell=True)
-                    print(min_indent+"standard error stream:")
-                    line_count = print_file(genresult_path, min_indent+"  ")
-                    if (line_count<1):
+                    if line_count>0:
                         print(min_indent+"  #EOF: "+str(line_count)+" line(s) in '"+genresult_path+"'")
-                    print(min_indent+"  (done output of '"+cmd_no_out_string+"')")
+                        pass
+                    else:
+                        print(min_indent+"  #EOF: "+str(line_count)+" line(s) in '"+genresult_path+"'")
+                        subprocess.call(cmd_no_out_string+" 2> \""+genresult_path+"\"", shell=True)
+                        print(min_indent+"standard error stream:")
+                        line_count = print_file(genresult_path, min_indent+"  ")
+                        if (line_count<1):
+                            print(min_indent+"  #EOF: "+str(line_count)+" line(s) in '"+genresult_path+"'")
+                        print(min_indent+"  (done output of '"+cmd_no_out_string+"')")
+                        try:
+                            if os.path.exists(tmp_png_path):
+                                os.rename(tmp_png_path, dest_png_path)
+                        except:
+                            pass
             try:
-                self.prepare_chunk_meta(chunk_luid)  # DOES load existing yml if exists
                 
                 #this_chunk = MTChunk()
                 #this_chunk.luid = chunk_luid
