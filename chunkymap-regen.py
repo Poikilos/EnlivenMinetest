@@ -82,9 +82,9 @@ def print_file(path, indent=""):
                         if line:
                             print(indent+line)
                     ins.close()
-                    if line_count==0:
-                        print(indent+"print_file WARNING: "+str(line_count)+" line(s) in '"+path+"'")
-                    else:
+                    #if line_count==0:
+                        #print(indent+"print_file WARNING: "+str(line_count)+" line(s) in '"+path+"'")
+                    #else:
                         #print(indent+"# "+str(line_count)+" line(s) in '"+path+"'")
             else:
                 print (indent+"print_file: file does not exist")
@@ -767,8 +767,10 @@ class MTChunks:
             if os.path.isfile(tmp_png_path):
                 os.remove(tmp_png_path)
             subprocess.call(cmd_string, shell=True)  # TODO: remember not to allow arbitrary command execution, which could happen if input contains ';' when using shell=True
+            this_chunk = self.chunks[chunk_luid]
             if os.path.isfile(tmp_png_path):
                 result = True
+                this_chunk.metadata["is_empty"] = False
                 try:
                     if (os.path.isfile(dest_png_path)):
                         os.remove(dest_png_path)
@@ -789,10 +791,15 @@ class MTChunks:
                     print(indent+"#EOF: "+str(line_count)+" line(s) in '"+genresult_path+"'")
             try:
                 self.prepare_chunk_meta(chunk_luid)  # DOES load existing yml if exists
-                this_chunk = self.chunks[chunk_luid]
+                
                 #this_chunk = MTChunk()
                 #this_chunk.luid = chunk_luid
+                is_empty_before = this_chunk.metadata["is_empty"]
                 this_chunk.set_from_genresult(genresult_path)
+                if (not is_empty_before) and this_chunk.metadata["is_empty"]:
+                    print("ERROR: chunk changed from nonempty to empty (may happen if output of mapper was not recognized)")
+                elif this_chunk.metadata["is_empty"] and os.path.isfile(dest_png_path):
+                    print("ERROR: chunk marked empty though has data (may happen if output of mapper was not recognized)")
                 chunk_yaml_path = self.get_chunk_yaml_path(chunk_luid)
                 this_chunk.save_yaml(chunk_yaml_path)
                 print(min_indent+"(saved yaml to '"+chunk_yaml_path+"')")
