@@ -66,32 +66,32 @@ def view_traceback():
     traceback.print_tb(tb)
     del tb
 
-def print_file(path, indent=""):
+def print_file(path, min_indent=""):
     line_count = 0
     try:
         if path is not None:
             if os.path.isfile(path):
                 
-                if indent is None:
-                    indent = ""
-                    ins = open(path, 'r')
-                    line = True
-                    while line:
-                        line = ins.readline()
-                        line_count += 1
-                        if line:
-                            print(indent+line)
-                    ins.close()
-                    #if line_count==0:
-                        #print(indent+"print_file WARNING: "+str(line_count)+" line(s) in '"+path+"'")
-                    #else:
-                        #print(indent+"# "+str(line_count)+" line(s) in '"+path+"'")
+                if min_indent is None:
+                    min_indent = ""
+                ins = open(path, 'r')
+                line = True
+                while line:
+                    line = ins.readline()
+                    line_count += 1
+                    if line:
+                        print(min_indent+line)
+                ins.close()
+                #if line_count==0:
+                    #print(min_indent+"print_file WARNING: "+str(line_count)+" line(s) in '"+path+"'")
+                #else:
+                    #print(min_indent+"# "+str(line_count)+" line(s) in '"+path+"'")
             else:
-                print (indent+"print_file: file does not exist")
+                print (min_indent+"print_file: file does not exist")
         else:
-            print (indent+"print_file: path is None")
+            print (min_indent+"print_file: path is None")
     except:
-        print(indent+"print_file: could not finish")
+        print(min_indent+"print_file: could not finish")
         try:
             ins.close()
         except:
@@ -825,17 +825,17 @@ class MTChunks:
                     print (min_indent+"WARNING: no chunk data though traversed by player:")
                     print(min_indent+"standard output stream:")
                     line_count = print_file(genresult_path, min_indent+"  ")
-                    if line_count>0:
+                    #if line_count>0:
                         #print(min_indent+"  #EOF: "+str(line_count)+" line(s) in '"+genresult_path+"'")
-                        pass
-                    else:
+                    #    pass
+                    #else:
+                    print(min_indent+"  #EOF: "+str(line_count)+" line(s) in '"+genresult_path+"'")
+                    subprocess.call(cmd_no_out_string+" 2> \""+genresult_path+"\"", shell=True)
+                    print(min_indent+"standard error stream:")
+                    line_count = print_file(genresult_path, min_indent+"  ")
+                    if (line_count<1):
                         print(min_indent+"  #EOF: "+str(line_count)+" line(s) in '"+genresult_path+"'")
-                        subprocess.call(cmd_no_out_string+" 2> \""+genresult_path+"\"", shell=True)
-                        print(min_indent+"standard error stream:")
-                        line_count = print_file(genresult_path, min_indent+"  ")
-                        if (line_count<1):
-                            print(min_indent+"  #EOF: "+str(line_count)+" line(s) in '"+genresult_path+"'")
-                        print(min_indent+"  (done output of '"+cmd_no_out_string+"')")
+                    print(min_indent+"  (done output of '"+cmd_no_out_string+"')")
             try:
                 self.prepare_chunk_meta(chunk_luid)  # DOES load existing yml if exists
                 
