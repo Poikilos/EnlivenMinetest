@@ -516,11 +516,12 @@ class MTChunks:
         if self.os_name=="windows":
             self.minetestmapper_fast_sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-numpy.py")
         
-        self.minetestmapper_custom_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper.py")
-        self.mt_chunkymap_path = os.path.join(self.mt_util_path, "chunkymap")
-        try_path = os.path.join(self.mt_chunkymap_path, "minetestmapper.py")
-        if os.path.isfile(try_path):
-            self.minetestmapper_custom_path = try_path
+        #self.minetestmapper_custom_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper.py")
+        self.minetestmapper_custom_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-expertmm.py")
+        #self.mt_chunkymap_path = os.path.join(self.mt_util_path, "chunkymap")
+        #try_path = os.path.join(self.mt_chunkymap_path, "minetestmapper.py")
+        #if os.path.isfile(try_path):
+        #    self.minetestmapper_custom_path = try_path
         self.minetestmapper_py_path = self.minetestmapper_fast_sqlite_path
         if (self.backend_string!="sqlite3"):
             self.minetestmapper_py_path = self.minetestmapper_custom_path
