@@ -647,20 +647,25 @@ class MTChunks:
         return result
 
     def is_chunk_yaml_marked_empty(self, chunk_luid):
-        yaml_path = self.get_chunk_yaml_path(chunk_luid)
         result = False
+        yaml_path = self.get_chunk_yaml_path(chunk_luid)
         if os.path.isfile(yaml_path):
-            ins = open(yaml_path, 'r')
-            line = True
-            while line:
-                line = ins.readline()
-                if line:
-                    line_strip = line.strip()
-                    prevalue_string="is_empty:"
-                    if line_strip[:len(prevalue_string)]==prevalue_string:
-                        result = bool(line_strip[len(prevalue_string):].strip())
-                        break
-            ins.close()
+            self.prepare_chunk_meta(chunk_luid)  # DOES get existing data if any file exists
+            if "is_empty" in self.chunks[chunk_luid].metadata.keys():
+                result = self.chunks[chunk_luid].metadata["is_empty"]
+        
+        #if os.path.isfile(yaml_path):
+            #ins = open(yaml_path, 'r')
+            #line = True
+            #while line:
+                #line = ins.readline()
+                #if line:
+                    #line_strip = line.strip()
+                    #prevalue_string="is_empty:"
+                    #if line_strip[:len(prevalue_string)]==prevalue_string:
+                        #result = bool(line_strip[len(prevalue_string):].strip())
+                        #break
+            #ins.close()
         return result
 
     def remove_chunk_image(self, chunk_luid):
