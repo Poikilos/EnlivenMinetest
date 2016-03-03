@@ -364,6 +364,8 @@ class MTChunks:
     backend_string = None
     #region_separators = None
     is_backend_detected = None
+    chunkymap_players_name = None
+    chunkymap_players_path = None
 
     def __init__(self):  #formerly checkpaths() in global scope
         self.is_backend_detected = False
@@ -528,6 +530,24 @@ class MTChunks:
         print("Set website_root to "+self.website_root)
 
         self.mapvars["chunkymap_data_path"]=os.path.join(self.website_root,"chunkymapdata")
+        print("Using chunkymap_data_path '"+self.mapvars["chunkymap_data_path"]+"'")
+        #if not os.path.isdir(self.mapvars["chunkymap_data_path"]):
+        #    os.mkdir(self.mapvars["chunkymap_data_path"])
+        htaccess_path = os.path.join(self.mapvars["chunkymap_data_path"],".htaccess")
+        if not os.path.isdir(self.mapvars["chunkymap_data_path"]):
+            os.makedirs(self.mapvars["chunkymap_data_path"])
+        if not os.path.isfile(htaccess_path):
+            self.deny_http_access(self.mapvars["chunkymap_data_path"])
+
+        self.chunkymap_players_name = "players"
+        self.chunkymap_players_path = os.path.join(self.mapvars["chunkymap_data_path"], self.chunkymap_players_name)
+        htaccess_path = os.path.join(self.chunkymap_players_path,".htaccess")
+        if not os.path.isdir(self.chunkymap_players_path):
+            os.makedirs(self.chunkymap_players_path)
+        if not os.path.isfile(htaccess_path):
+            self.deny_http_access(self.chunkymap_players_path)
+
+
         self.yaml_name = "generated.yml"
         self.world_yaml_path = os.path.join(self.mapvars["chunkymap_data_path"], self.yaml_name)
 
@@ -540,6 +560,8 @@ class MTChunks:
         self.mapvars["minheight"] = -32
         self.mapvars["pixelspernode"] = 1
         self.saved_mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
+        if self.saved_mapvars is None:
+            self.save_mapvars_if_changed()
         #self.mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
         #NOTE: do not save or load self.mapvars yet, because if world name is different than saved, chunks must all be redone
         if self.saved_mapvars is not None:
@@ -838,14 +860,8 @@ class MTChunks:
     def check_players(self):
         # NOT NEEDED: if os.path.isfile(self.minetestmapper_py_path) and os.path.isfile(self.colors_path):
         print("PROCESSING PLAYERS")
-        self.mapvars["chunkymap_data_path"]=os.path.join(self.website_root,"chunkymapdata")
-        chunkymap_players_name = "players"
-        chunkymap_players_path = os.path.join(self.mapvars["chunkymap_data_path"], chunkymap_players_name)
-        htaccess_path = os.path.join(chunkymap_players_path,".htaccess")
-        if not os.path.isdir(chunkymap_players_path):
-            os.makedirs(chunkymap_players_path)
-        if not os.path.isfile(htaccess_path):
-            self.deny_http_access(chunkymap_players_path)
+        #self.mapvars["chunkymap_data_path"]=os.path.join(self.website_root,"chunkymapdata")
+        #chunkymap_players_path = os.path.join(self.mapvars["chunkymap_data_path"], chunkymap_players_name)
 
         players_path = os.path.join(self.mapvars["world_path"], "players")
         player_count = 0
@@ -880,7 +896,7 @@ class MTChunks:
                                     is_enough_data = True
                                     break
                     ins.close()
-                    player_dest_path = os.path.join(chunkymap_players_path,filename+".yml")
+                    player_dest_path = os.path.join(self.chunkymap_players_path,filename+".yml")
                     player_x = None
                     player_y = None
                     player_z = None
@@ -1209,26 +1225,29 @@ class MTChunks:
                     print("")
                     print ("Removing ALL map data since from WORLD NAME is different (map '"+str(self.mapvars["world_name"])+"' is not '"+str(self.mapvars["world_name"])+"')...")
                     print("")
-                    for dirname, dirnames, filenames in os.walk(self.mapvars["chunkymap_data_path"]):
-                        for filename in filenames:
-                            if filename[0] != ".":
-                                file_fullname = os.path.join(self.mapvars["chunkymap_data_path"],filename)
-                                if self.verbose_enable:
-                                    print ("  EXAMINING "+filename)
-                                badstart_string = "chunk"
-                                if (len(filename) >= len(badstart_string)) and (filename[:len(badstart_string)]==badstart_string):
-                                    os.remove(file_fullname)
-                                elif filename==self.yaml_name:
-                                    os.remove(file_fullname)
-                    for dirname, dirnames, filenames in os.walk(os.path.join(self.mapvars["chunkymap_data_path"], "players")):
-                        for filename in filenames:
-                            if filename[0] != ".":
-                                file_fullname = os.path.join(self.mapvars["chunkymap_data_path"],filename)
-                                if self.verbose_enable:
-                                    print ("  EXAMINING "+filename)
-                                badend_string = ".yml"
-                                if (len(filename) >= len(badend_string)) and (filename[len(filename)-len(badend_string):]==badend_string):
-                                    os.remove(file_fullname)
+                    if os.path.isdir(self.mapvars["chunkymap_data_path"]):
+                        for dirname, dirnames, filenames in os.walk(self.mapvars["chunkymap_data_path"]):
+                            for filename in filenames:
+                                if filename[0] != ".":
+                                    file_fullname = os.path.join(self.mapvars["chunkymap_data_path"],filename)
+                                    if self.verbose_enable:
+                                        print ("  EXAMINING "+filename)
+                                    badstart_string = "chunk"
+                                    if (len(filename) >= len(badstart_string)) and (filename[:len(badstart_string)]==badstart_string):
+                                        os.remove(file_fullname)
+                                    elif filename==self.yaml_name:
+                                        os.remove(file_fullname)
+                    players_path = os.path.join(self.mapvars["chunkymap_data_path"], "players")
+                    if os.path.isdir(players_path):
+                        for dirname, dirnames, filenames in os.walk(players_path):
+                            for filename in filenames:
+                                if filename[0] != ".":
+                                    file_fullname = os.path.join(self.mapvars["chunkymap_data_path"],filename)
+                                    if self.verbose_enable:
+                                        print ("  EXAMINING "+filename)
+                                    badend_string = ".yml"
+                                    if (len(filename) >= len(badend_string)) and (filename[len(filename)-len(badend_string):]==badend_string):
+                                        os.remove(file_fullname)
                     self.mapvars["chunkx_min"]=0
                     self.mapvars["chunkx_max"]=0
                     self.mapvars["chunkz_min"]=0
@@ -1264,14 +1283,7 @@ class MTChunks:
     def check_map_inefficient_squarepattern(self):
         if os.path.isfile(self.minetestmapper_py_path) and os.path.isfile(self.colors_path):
             self.rendered_count = 0
-            if not os.path.isdir(self.mapvars["chunkymap_data_path"]):
-                os.mkdir(self.mapvars["chunkymap_data_path"])
-
-            htaccess_path = os.path.join(self.mapvars["chunkymap_data_path"],".htaccess")
-            if not os.path.isdir(self.mapvars["chunkymap_data_path"]):
-                os.makedirs(self.mapvars["chunkymap_data_path"])
-            if not os.path.isfile(htaccess_path):
-                self.deny_http_access(self.mapvars["chunkymap_data_path"])
+            
 
             self.mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
             #is_testonly == (self.os_name=="windows")
