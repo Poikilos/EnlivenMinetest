@@ -67,10 +67,11 @@ def view_traceback():
     del tb
 
 def print_file(path, indent=""):
+    line_count = 0
     try:
         if path is not None:
             if os.path.isfile(path):
-                line_count = 0
+                
                 if indent is None:
                     indent = ""
                     ins = open(path, 'r')
@@ -83,12 +84,19 @@ def print_file(path, indent=""):
                     ins.close()
                     if line_count==0:
                         print(indent+"print_file WARNING: "+str(line_count)+" line(s) in '"+path+"'")
+                    else:
+                        #print(indent+"# "+str(line_count)+" line(s) in '"+path+"'")
             else:
                 print (indent+"print_file: file does not exist")
         else:
             print (indent+"print_file: path is None")
     except:
         print(indent+"print_file: could not finish")
+        try:
+            ins.close()
+        except:
+            pass
+    return line_count
 
 def get_dict_modified_by_conf_file(this_dict, path,assignment_operator="="):
     results = None
@@ -717,7 +725,8 @@ class MTChunks:
         cmd_suffix = ""
         cmd_suffix = " > \""+genresult_path+"\""
         #self.mapper_id = "minetestmapper-region"
-        cmd_string = self.python_exe_path + " \""+self.minetestmapper_py_path + "\" --region " + str(x_min) + " " + str(x_max) + " " + str(z_min) + " " + str(z_max) + " --maxheight "+str(self.maxheight)+" --minheight "+str(self.minheight)+" --pixelspernode "+str(self.pixelspernode)+" \""+self.world_path+"\" \""+tmp_png_path+"\"" + cmd_suffix
+        cmd_no_out_string = self.python_exe_path + " \""+self.minetestmapper_py_path + "\" --region " + str(x_min) + " " + str(x_max) + " " + str(z_min) + " " + str(z_max) + " --maxheight "+str(self.maxheight)+" --minheight "+str(self.minheight)+" --pixelspernode "+str(self.pixelspernode)+" \""+self.world_path+"\" \""+tmp_png_path+"\""
+        cmd_string = cmd_no_out_string + cmd_suffix
 
         if self.minetestmapper_py_path==self.minetestmapper_custom_path:#if self.backend_string!="sqlite3": #if self.mapper_id=="minetestmapper-region": #if self.os_name!="windows":  #since windows client doesn't normally have minetest-mapper
             #  Since minetestmapper-numpy has trouble with leveldb:
@@ -740,7 +749,8 @@ class MTChunks:
             geometry_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min)+1)+"+"+str(int(z_max)-int(z_min)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
             #expertmm_region_string = str(x_min) + ":" + str(x_max) + "," + str(z_min) + ":" + str(z_max)
             #cmd_string="sudo python "+script_path+" --input \""+self.world_path+"\" --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
-            cmd_string="sudo python "+self.minetestmapper_py_path+" --input \""+self.world_path+"\" --geometry "+geometry_string+" --output \""+tmp_png_path+"\""+cmd_suffix
+            cmd_no_out_string = "sudo python "+self.minetestmapper_py_path+" --input \""+self.world_path+"\" --geometry "+geometry_string+" --output \""+tmp_png_path+"\""
+            cmd_string = cmd_no_out_string + cmd_suffix
             #sudo python /home/owner/minetest/util/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --output /var/www/html/minetest/chunkymapdata/entire.png > entire-mtmresult.txt
             #sudo python /home/owner/minetest/util/chunkymap/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry 0:0+16+16 --output /var/www/html/minetest/chunkymapdata/chunk_x0z0.png > /home/owner/minetest/util/chunkymap-genresults/chunk_x0z0_mapper_result.txt
             #    sudo mv entire-mtmresult.txt /home/owner/minetest/util/chunkymap-genresults/
@@ -775,7 +785,8 @@ class MTChunks:
             else:
                 if self.is_chunk_traversed_by_player(chunk_luid):
                     print (min_indent+"WARNING: no chunk data though traversed by player:")
-                    print_file(genresult_path, min_indent+"  ")
+                    line_count = print_file(genresult_path, min_indent+"  ")
+                    print(indent+"#EOF: "+str(line_count)+" line(s) in '"+genresult_path+"'")
             try:
                 self.prepare_chunk_meta(chunk_luid)  # DOES load existing yml if exists
                 this_chunk = self.chunks[chunk_luid]
