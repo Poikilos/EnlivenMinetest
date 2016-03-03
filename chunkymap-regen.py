@@ -665,8 +665,25 @@ class MTChunks:
             if os.path.isfile(yaml_path):
                 self.chunks[chunk_luid].load_yaml(yaml_path)
 
+    def print_file(path, indent=""):
+        if os.path.isfile(path):
+            if indent = None:
+                indent = ""
+            try:
+                ins = open(path, 'r')
+                line = True
+                while line:
+                    line = ins.readline()
+                    if line:
+                        print(indent+line)
+                ins.close()
+            except:
+        else:
+            print ("print_file: missing path")
+        
     # normally call check_chunk instead, which renders chunk only if necessary
     def _render_chunk(self, x, z):
+        min_indent = "  "  # increased below
         result = False
         chunk_luid = self.get_chunk_luid(x,z)
         png_name = self.get_chunk_image_name(chunk_luid)
@@ -681,7 +698,7 @@ class MTChunks:
         z_min = z * self.chunk_size
         z_max = z * self.chunk_size + self.chunk_size - 1
 
-        #print ("generating x = " + str(x_min) + " to " + str(x_max) + " ,  z = " + str(z_min) + " to " + str(z_max))
+        #print (min_indent+"generating x = " + str(x_min) + " to " + str(x_max) + " ,  z = " + str(z_min) + " to " + str(z_max))
         geometry_value_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min)+1)+"+"+str(int(z_max)-int(z_min)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
         cmd_suffix = ""
         cmd_suffix = " > \""+genresult_path+"\""
@@ -717,10 +734,11 @@ class MTChunks:
         dest_png_path = self.get_chunk_image_path(chunk_luid)
         #is_empty_chunk = is_chunk_yaml_marked(chunk_luid) and is_chunk_yaml_marked_empty(chunk_luid)
         #if self.verbose_enable:
-        #    #print("")
-        #    print("  Running '"+cmd_string+"'...")
+        #    #print(min_indent+"")
+        #    print(min_indent+"Running '"+cmd_string+"'...")
         #else:
-        print ("  Calling map tile renderer for: "+str((x,z)))
+        print (min_indent+"Calling map tile renderer for: "+str((x,z)))
+        min_indent += "  "
         try:
             if os.path.isfile(tmp_png_path):
                 os.remove(tmp_png_path)
@@ -731,16 +749,19 @@ class MTChunks:
                     if (os.path.isfile(dest_png_path)):
                         os.remove(dest_png_path)
                 except:
-                    print ("    Could not finish deleting '"+dest_png_path+"'")
+                    print (min_indent+"Could not finish deleting '"+dest_png_path+"'")
                 try:
                     os.rename(tmp_png_path, dest_png_path)
-                    print("    (moved to '"+dest_png_path+"')")
+                    print(min_indent+"(moved to '"+dest_png_path+"')")
                     self.prepare_chunk_meta(chunk_luid)  # DOES load existing yml if exists
                     self.chunks[chunk_luid].is_fresh = True
                     self.chunks[chunk_luid].metadata["is_empty"] = False
                 except:
-                    print ("    Could not finish moving '"+tmp_png_path+"' to '"+dest_png_path+"'")
-            
+                    print (min_indent+"Could not finish moving '"+tmp_png_path+"' to '"+dest_png_path+"'")
+            else:
+                if self.is_chunk_traversed_by_player(chunk_luid):
+                    print (min_indent+"WARNING: no chunk data though traversed by player:")
+                    print_file(genresult_path, min_indent+"  ")
             try:
                 self.prepare_chunk_meta(chunk_luid)  # DOES load existing yml if exists
                 this_chunk = self.chunks[chunk_luid]
@@ -749,15 +770,15 @@ class MTChunks:
                 this_chunk.set_from_genresult(genresult_path)
                 chunk_yaml_path = self.get_chunk_yaml_path(chunk_luid)
                 this_chunk.save_yaml(chunk_yaml_path)
-                print("    (saved yaml to '"+chunk_yaml_path+"')")
+                print(min_indent+"(saved yaml to '"+chunk_yaml_path+"')")
                 if not self.is_save_output_ok:
                     if os.path.isfile(genresult_path):
                         os.remove(genresult_path)
 
             except:
-                print ("    Could not finish deleting/moving output")
+                print (min_indent+"Could not finish deleting/moving output")
         except:
-            print("    Could not finish deleting/moving temp files")
+            print(min_indent+"Could not finish deleting/moving temp files")
 
 
         return result
