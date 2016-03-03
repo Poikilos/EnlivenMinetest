@@ -517,7 +517,7 @@ class MTChunks:
         self.mt_chunkymap_path = os.path.join(self.mt_util_path, "chunkymap")
         try_path = os.path.join(self.mt_chunkymap_path, "minetestmapper.py")
         if os.path.isfile(try_path):
-            self.minetestmapper_custom_path
+            self.minetestmapper_custom_path = try_path
         self.minetestmapper_py_path = self.minetestmapper_fast_sqlite_path
         if (self.backend_string!="sqlite3"):
             self.minetestmapper_py_path = self.minetestmapper_custom_path
@@ -793,7 +793,15 @@ class MTChunks:
                 if self.is_chunk_traversed_by_player(chunk_luid):
                     print (min_indent+"WARNING: no chunk data though traversed by player:")
                     line_count = print_file(genresult_path, min_indent+"  ")
-                    print(min_indent+"#EOF: "+str(line_count)+" line(s) in '"+genresult_path+"'")
+                    if line_count>0:
+                        #print(min_indent+"  #EOF: "+str(line_count)+" line(s) in '"+genresult_path+"'")
+                        pass
+                    else:
+                        subprocess.call(cmd_no_out_string+" 2> \""+genresult_path+"\"", shell=True)
+                        line_count = print_file(genresult_path, min_indent+"  ")
+                        if (line_count<1):
+                            print(min_indent+"  #EOF: "+str(line_count)+" line(s) in '"+genresult_path+"'")
+                        print(min_indent+"  (done output of '"+cmd_no_out_string+"')")
             try:
                 self.prepare_chunk_meta(chunk_luid)  # DOES load existing yml if exists
                 
