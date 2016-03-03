@@ -803,7 +803,11 @@ class MTChunks:
             if os.path.isfile(tmp_png_path):
                 os.remove(tmp_png_path)
             subprocess.call(cmd_string, shell=True)  # TODO: remember not to allow arbitrary command execution, which could happen if input contains ';' when using shell=True
-            
+            is_empty_before = True
+            is_marked_before = False
+            if chunk_luid in self.chunks.keys():
+                is_marked_before = True
+                is_empty_before = self.chunks[chunk_luid].is_empty
             self.prepare_chunk_meta(chunk_luid)  # DOES load existing yml if exists
             this_chunk = self.chunks[chunk_luid]
             if os.path.isfile(tmp_png_path):
@@ -847,12 +851,13 @@ class MTChunks:
                 
                 #this_chunk = MTChunk()
                 #this_chunk.luid = chunk_luid
-                is_empty_before = this_chunk.metadata["is_empty"]
+                #is_empty_before = this_chunk.metadata["is_empty"]
                 this_chunk.set_from_genresult(genresult_path)
-                if (not is_empty_before) and this_chunk.metadata["is_empty"]:
-                    print("ERROR: chunk changed from nonempty to empty (may happen if output of mapper was not recognized)")
-                elif this_chunk.metadata["is_empty"] and os.path.isfile(dest_png_path):
-                    print("ERROR: chunk marked empty though has data (may happen if output of mapper was not recognized)")
+                if is_marked_before:
+                    if (not is_empty_before) and this_chunk.metadata["is_empty"]:
+                        print("ERROR: chunk changed from nonempty to empty (may happen if output of mapper was not recognized)")
+                    elif this_chunk.metadata["is_empty"] and os.path.isfile(dest_png_path):
+                        print("ERROR: chunk marked empty though has data (may happen if output of mapper was not recognized)")
                 chunk_yaml_path = self.get_chunk_yaml_path(chunk_luid)
                 this_chunk.save_yaml(chunk_yaml_path)
                 print(min_indent+"(saved yaml to '"+chunk_yaml_path+"')")
