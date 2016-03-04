@@ -112,6 +112,9 @@ world_path
 	* copy example.php and chunkymap.php (and optionally browser.php) to your DocumentRoot or whatever folder will contain the chunkymapdata folder
 
 ## Known Issues
+
+* Move the following to config dict:
+    python_exe_path
 * chunkymap.php should read the size of the chunks -- see near is_file($chunk_genresult_path) in chunkymap.php
 * optionally hide player location
 * Make a method (in chunkymap.php) to echo the map as an html5 canvas (refresh players every 10 seconds, check for new map chunks every minute)

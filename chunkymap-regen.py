@@ -185,16 +185,6 @@ class MTChunk:
     metadata = None
     is_fresh = None
     luid = None
-    #width = None
-    #height = None
-    #is_marked = None
-    #is_empty = None
-    #image_w = None
-    #image_h = None
-    #image_left = None
-    #image_top = None
-    #image_right = None
-    #image_bottom = None
 
     def __init__(self):
         # NOTE: variables that need to be saved (and only they) should be stored in dict
@@ -305,13 +295,8 @@ class MTChunk:
 
 
 class MTChunks:
-
     chunkymap_data_path = None
-    #profiles_path = None
-    #profile_path = None
-    #worlds_path = None
     is_save_output_ok = None
-    mt_util_path = None
     minetestmapper_fast_sqlite_path = None
     minetestmapper_custom_path = None
     minetestmapper_py_path = None
@@ -319,13 +304,7 @@ class MTChunks:
     python_exe_path = None
     chunks = None
 
-    #world_path = None
-    chunkx_min = 0
-    chunkz_min = 0
-    chunkx_max = 0
-    chunkz_max = 0
-    chunk_size = None
-    #values for command arguments:
+    #region values for subprocess arguments:
     maxheight = 50
     minheight = -25
     pixelspernode = 1
@@ -335,12 +314,11 @@ class MTChunks:
     refresh_players_seconds = None
     last_players_refresh_second = None
     last_map_refresh_second = None
-    #endregion values to save to YAML
+    #endregion values for subprocess arguments:
 
     loop_enable = None
     verbose_enable = None
 
-    #world_blacklist = None
     run_count = None
     todo_positions = None  # list of tuples (locations) to render next (for fake recursion)
     todo_index = None
@@ -391,7 +369,6 @@ class MTChunks:
         if "www_minetest_path" not in self.config.keys():
             self.config["www_minetest_path"] = "/var/www/html/minetest"
             if os_name=="windows":
-                self.colors_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "colors.txt")
                 self.config["www_minetest_path"] = None
                 prioritized_try_paths = list()
                 prioritized_try_paths.append("C:\\wamp\\www")
@@ -428,13 +405,10 @@ class MTChunks:
 
         profile_path = None
         if os_name=="windows":
-            #self.profiles_path = "C:\\Users"
             profile_path = os.environ['USERPROFILE']
         else:
             profile_path = os.environ['HOME']
 
-        #if (not os.path.isdir(profile_path)):
-        #    profile_path = os.path.join(self.profiles_path, "jgustafson")
         if "user_minetest_path" not in self.config.keys():
             self.config["user_minetest_path"] = os.path.join(profile_path,".minetest")
             if (os_name=="windows"):
@@ -451,38 +425,52 @@ class MTChunks:
         
         auto_chosen_world = False
         if "world_path" not in self.config.keys():
-            #self.world_blacklist = list()
-            #if not os.path.isdir(self.config["world_path"]):
-                #for item in os.walk(self.config["worlds_path"]):
             print ("LOOKING FOR WORLDS IN " + self.config["worlds_path"])
             for dirname, dirnames, filenames in os.walk(self.config["worlds_path"]):
-                #index = 0
                 #for j in range(0,len(dirnames)):
                 #    i = len(dirnames) - 0 - 1
                 #    if dirnames[i][0] == ".":
                 #        print ("  SKIPPING "+dirnames[i])
                 #        dirnames.remove_at(i)
+                world_count = 0
+                for subdirname in dirnames:
+                    print ("  EXAMINING "+subdirname)
+                    if subdirname[0]!=".":
+                        world_count += 1
+                index = 0
+                world_number = 0
                 for subdirname in dirnames:
                     print ("  EXAMINING "+subdirname)
                     if subdirname[0]!=".":
                         #if (index == len(dirnames)-1):  # skip first one because the one on my computer is big
-                        #if subdirname not in self.world_blacklist:
-                        #world_name = subdirname
-                        self.config["world_path"] = os.path.join(dirname, subdirname) #  os.path.join(self.config["worlds_path"], "try7amber")
-                        auto_chosen_world = True
-                        break
-                        #index += 1
+                        if (subdirname!="world") or (world_number==(world_count-1)):
+                            self.config["world_path"] = os.path.join(dirname, subdirname) #  os.path.join(self.config["worlds_path"], "try7amber")
+                            auto_chosen_world = True
+                            break
+                        world_number += 1
+                    index += 1
                 if auto_chosen_world:
                     is_config_changed = True
                     break
             input_string = raw_input("World path (blank for ["+self.config["world_path"]+"]): ")
             if (len(input_string)>0):
                 self.config["world_path"] = input_string
+                auto_chosen_world = False
             is_config_changed = True
         print ("Using world_path '"+self.config["world_path"]+"'")
         print("")
         
         self.python_exe_path = "python"
+        if os_name=="windows":
+            try:
+                alt_path = "C:\\python27\python.exe"
+                if os.path.isfile(alt_path):
+                    self.python_exe_path = alt_path
+                #else may be in path--assume installer worked
+            except:
+                pass  # do nothing
+        
+        
         worldmt_path = os.path.join(self.config["world_path"], "world.mt")
         self.backend_string="sqlite3"
         if (os.path.isfile(worldmt_path)):
@@ -508,33 +496,21 @@ class MTChunks:
             print("Detected backend '"+self.backend_string+"' from '"+worldmt_path+"'")
         else:
             print("WARNING: Database backend cannot be detected (unable to ensure image generator script will render map)")
-        try:
-            alt_path = "C:\\python27\python.exe"
-            if os.path.isfile(alt_path):
-                self.python_exe_path = alt_path
-            #else may be in path--assume installer worked
-        except:
-            pass  # do nothing, probably linux
-        minetest_program_path = os.path.join( profile_path, "minetest")
-        self.mt_util_path = os.path.join( minetest_program_path, "util")
-        self.minetestmapper_fast_sqlite_path = os.path.join( self.mt_util_path, "minetestmapper-numpy.py" )
-        if os_name=="windows":
-            self.minetestmapper_fast_sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-numpy.py")
+                    
+        self.minetestmapper_fast_sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-numpy.py")
 
-        #self.minetestmapper_custom_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper.py")
         self.minetestmapper_custom_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-expertmm.py")
-        #self.mt_chunkymap_path = os.path.join(self.mt_util_path, "chunkymap")
-        #try_path = os.path.join(self.mt_chunkymap_path, "minetestmapper.py")
-        #if os.path.isfile(try_path):
-        #    self.minetestmapper_custom_path = try_path
         self.minetestmapper_py_path = self.minetestmapper_fast_sqlite_path
         if (self.backend_string!="sqlite3"):
             self.minetestmapper_py_path = self.minetestmapper_custom_path
         print("Chose image generator script: "+self.minetestmapper_py_path)
         if not os.path.isfile(self.minetestmapper_py_path):
-            print("ERROR: script does not exist, exiting "+__file__+".")
+            print("ERROR: script does not exist, so exiting "+__file__+".")
             sys.exit()
-        self.colors_path = os.path.join( self.mt_util_path, "colors.txt" )
+        self.colors_path = os.path.join(os.path.dirname(os.path.abspath(self.minetestmapper_py_path)), "colors.txt")
+        if not os.path.isfile(self.colors_path):
+            print("ERROR: missing '"+self.colors_path+"', so exiting "+__file__+".")
+            sys.exit()
 
         self.mapvars["chunkymap_data_path"]=os.path.join(self.config["www_minetest_path"],"chunkymapdata")
         print("Using chunkymap_data_path '"+self.mapvars["chunkymap_data_path"]+"'")
@@ -779,7 +755,7 @@ class MTChunks:
             geometry_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min)+1)+"+"+str(int(z_max)-int(z_min)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
             #expertmm_region_string = str(x_min) + ":" + str(x_max) + "," + str(z_min) + ":" + str(z_max)
             #cmd_string="sudo python "+script_path+" --input \""+self.config["world_path"]+"\" --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
-            cmd_no_out_string = "sudo python "+self.minetestmapper_py_path+" --input \""+self.config["world_path"]+"\" --geometry "+geometry_string+" --output \""+tmp_png_path+"\""
+            cmd_no_out_string = self.python_exe_path+" "+self.minetestmapper_py_path+" --bgcolor #000000 --input \""+self.config["world_path"]+"\" --geometry "+geometry_string+" --output \""+tmp_png_path+"\""
             cmd_string = cmd_no_out_string + cmd_suffix
             #sudo python /home/owner/minetest/util/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --output /var/www/html/minetest/chunkymapdata/entire.png > entire-mtmresult.txt
             #sudo python /home/owner/minetest/util/chunkymap/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry 0:0+16+16 --output /var/www/html/minetest/chunkymapdata/chunk_x0z0.png > /home/owner/minetest/util/chunkymap-genresults/chunk_x0z0_mapper_result.txt
@@ -868,10 +844,7 @@ class MTChunks:
 
 
     def check_players(self):
-        # NOT NEEDED: if os.path.isfile(self.minetestmapper_py_path) and os.path.isfile(self.colors_path):
         print("PROCESSING PLAYERS")
-        #self.mapvars["chunkymap_data_path"]=os.path.join(self.config["www_minetest_path"],"chunkymapdata")
-        #chunkymap_players_path = os.path.join(self.mapvars["chunkymap_data_path"], chunkymap_players_name)
 
         players_path = os.path.join(self.config["world_path"], "players")
         player_count = 0
