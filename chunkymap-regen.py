@@ -71,7 +71,7 @@ def print_file(path, min_indent=""):
     try:
         if path is not None:
             if os.path.isfile(path):
-                
+
                 if min_indent is None:
                     min_indent = ""
                 ins = open(path, 'r')
@@ -383,7 +383,7 @@ class MTChunks:
         self.chunks = {}
         #self.username = "owner"
         self.website_root="/var/www/html/minetest"
-        
+
         self.mapvars["world_name"] = "FCAGameAWorld"
         self.os_name="linux"
         self.refresh_map_seconds = 30 #does one chunk at a time so as not to interrupt player updates too often
@@ -428,11 +428,11 @@ class MTChunks:
         print("Using dotminetest_path '"+self.dotminetest_path+"'")
         self.worlds_path = os.path.join(self.dotminetest_path,"worlds")
         self.mapvars["world_path"] = os.path.join(self.worlds_path, self.mapvars["world_name"])
-        
+
         auto_chosen_world = False
         self.world_blacklist = list()
         self.world_blacklist.append("CarbonUnit")
-        #self.world_blacklist.append("abiyahhgamebv7world1")
+        self.world_blacklist.append("abiyahhgamebv7world1")
         if not os.path.isdir(self.mapvars["world_path"]):
             #for item in os.walk(self.worlds_path):
             print ("LOOKING FOR WORLDS IN " + self.worlds_path)
@@ -474,7 +474,7 @@ class MTChunks:
                                 self.is_backend_detected = True
                                 break
             ins.close()
-            
+
         else:
             print("ERROR: failed to read '"+worldmt_path+"'")
         self.is_save_output_ok = True   # Keeping output after analyzing it is no longer necessary since results are saved to YAML, but keeping output provides debug info since is the output of minetestmapper-numpy.py
@@ -494,7 +494,7 @@ class MTChunks:
         self.minetestmapper_fast_sqlite_path = os.path.join( self.mt_util_path, "minetestmapper-numpy.py" )
         if self.os_name=="windows":
             self.minetestmapper_fast_sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-numpy.py")
-        
+
         #self.minetestmapper_custom_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper.py")
         self.minetestmapper_custom_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-expertmm.py")
         #self.mt_chunkymap_path = os.path.join(self.mt_util_path, "chunkymap")
@@ -680,7 +680,7 @@ class MTChunks:
             self.prepare_chunk_meta(chunk_luid)  # DOES get existing data if any file exists
             if "is_empty" in self.chunks[chunk_luid].metadata.keys():
                 result = self.chunks[chunk_luid].metadata["is_empty"]
-        
+
         return result
 
     def remove_chunk_image(self, chunk_luid):
@@ -722,7 +722,7 @@ class MTChunks:
             if os.path.isfile(yaml_path):
                 self.chunks[chunk_luid].load_yaml(yaml_path)
 
-        
+
     # normally call check_chunk instead, which renders chunk only if necessary
     def _render_chunk(self, x, z):
         min_indent = "  "  # increased below
@@ -1041,7 +1041,7 @@ class MTChunks:
                         if (self.is_chunk_rendered_on_dest(chunk_luid)):
                             result[1] = "SKIPPING since RENDERED nonfresh nonempty nontraversed (delete png to re-render)"
                             if self.verbose_enable:
-                               print (min_indent+chunk_luid+":"+result[1]) 
+                               print (min_indent+chunk_luid+":"+result[1])
                         else:
                             is_render_needed = True
                             theoretical_path = self.get_chunk_image_path(chunk_luid)
@@ -1283,7 +1283,7 @@ class MTChunks:
     def check_map_inefficient_squarepattern(self):
         if os.path.isfile(self.minetestmapper_py_path) and os.path.isfile(self.colors_path):
             self.rendered_count = 0
-            
+
 
             self.mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
             #is_testonly == (self.os_name=="windows")
@@ -1303,7 +1303,7 @@ class MTChunks:
                     self.mapvars["chunkz_min"] = self.saved_mapvars["chunkz_min"]
                 if "chunkz_max" in self.saved_mapvars.keys():
                     self.mapvars["chunkz_max"] = self.saved_mapvars["chunkz_max"]
-                
+
             self.mapvars["total_generated_count"] = 0
 
             newchunk_luid_list = list()
