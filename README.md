@@ -48,6 +48,11 @@ This program comes without any warranty, to the extent permitted by applicable l
 
 ## Developer Notes:
 * the map update function is only able to detect new chunks, and only checks edge chunks if player is present in one
+* The following are saved to chunkymap.yml if not already set:
+www_minetest_path (such as /var/www/html/minetest)
+user_minetest_path
+world_name
+world_path
 
 ## Requirements:
 * A minetest version compatible with minetestmapper-numpy.py Made by Jogge, modified by celeron55
@@ -105,9 +110,8 @@ This program comes without any warranty, to the extent permitted by applicable l
 	* run (or if your python executable does not reside in C:\Python27\ then first edit the file):
     chunkymap-regen-loop.bat
 	* copy example.php and chunkymap.php (and optionally browser.php) to your DocumentRoot or whatever folder will contain the chunkymapdata folder
+
 ## Known Issues
-* 
 * chunkymap.php should read the size of the chunks -- see near is_file($chunk_genresult_path) in chunkymap.php
 * optionally hide player location
 * Make a method (in chunkymap.php) to echo the map as an html5 canvas (refresh players every 10 seconds, check for new map chunks every minute)
-* Detect failure of minetestmapper-numpy.py and instead use minetest-mapper if on linux, otherwise show error if neither are present (Windows has no minetest-mapper at least on client 0.4.13)

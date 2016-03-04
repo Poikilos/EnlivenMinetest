@@ -1,6 +1,7 @@
 # chunkymap generated data
 chunkymapdata/
 chunkymap-genresults/
+chunkymap.yml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
