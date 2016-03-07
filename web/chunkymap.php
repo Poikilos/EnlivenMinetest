@@ -244,12 +244,13 @@ function echo_map_heading_text() {
 // }
 function get_chunk_folder_path($x, $z) {
 	global $chunkymapdata_path;
-	$decachunk_x = null;
-	$decachunk_z = null;
-	if ($x<0) { $decachunk_x = $x + $x%10; }
-	else { $decachunk_x = $x - $x%10; }
-	if ($z<0) { $decachunk_z = $z + $z%10; }
-	else { $decachunk_z = $z - $z%10; }
+	//NOTE: floor converts -.5 to -1 (and -1.5 to -2) but .5 to 0
+	$decachunk_x = intval(floor($x/10));
+	$decachunk_z = intval(floor($z/10));
+	//if ($x<0) { $decachunk_x = $x + $x%10; }
+	//else { $decachunk_x = $x - $x%10; }
+	//if ($z<0) { $decachunk_z = $z + $z%10; }
+	//else { $decachunk_z = $z - $z%10; }
 	$result = $chunkymapdata_path.'/16px/'.$decachunk_x.'/'.$decachunk_z;
 	return $result;
 }

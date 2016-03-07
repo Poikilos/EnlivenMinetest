@@ -47,7 +47,7 @@ cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/set-minutely-crontab-job.sh" "$CHUNKYMAP
 if [ ! -d "$CHUNKYMAP_DEST/web" ]; then
 	mkdir "$CHUNKYMAP_DEST/web"
 fi
-cp -Rf $CHUNKYMAP_INSTALLER_PATH/web/* "$CHUNKYMAP_DEST/web/"
+cp -Rf "$CHUNKYMAP_INSTALLER_PATH/web" "$CHUNKYMAP_DEST/"
 
 #if [ ! -d "$CHUNKYMAP_DEST/chunkymap" ]; then
 #  mkdir "$CHUNKYMAP_DEST/chunkymap"

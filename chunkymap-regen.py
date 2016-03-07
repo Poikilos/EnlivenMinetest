@@ -11,6 +11,7 @@ from timeit import default_timer as best_timer
 import time
 #copyfile etc:
 import shutil
+import math
 
 #best_timer = timeit.default_timer
 #if sys.platform == "win32":
@@ -353,6 +354,7 @@ class MTChunks:
     config_name = None
     config_path = None
     data_16px_path = None
+    data_160px_path = None
 
     def __init__(self):  #formerly checkpaths() in global scope
         os_name="linux"
@@ -560,7 +562,16 @@ class MTChunks:
         if not os.path.isfile(htaccess_path):
             self.deny_http_access(self.data_16px_path)
             print("  (created .htaccess)")
-        #TODO: deny access to each hundreds folder under self.data_16px_path? doesn't seem that important for security so maybe not.
+
+        self.data_160px_path = os.path.join(self.chunkymap_data_path, "160px")
+        if not os.path.isdir(self.data_160px_path):
+            os.makedirs(self.data_160px_path)
+            print("Created '"+self.data_160px_path+"'")
+        if not os.path.isfile(htaccess_path):
+            self.deny_http_access(self.data_160px_path)
+            print("  (created .htaccess)")
+        
+        #TODO: deny recursively under these folders? doesn't seem that important for security so maybe not (no player info is there)
 
 
         self.install_website()
@@ -699,20 +710,32 @@ class MTChunks:
 
     def get_signal_path(self):
         return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_signal_name())
+        
+    
 
     def get_chunk_folder_path(self, chunky_x, chunky_z):
         result = None
-        decachunk_x = None
-        decachunk_z = None
-        if chunky_x<0:
-            decachunk_x = chunky_x + chunky_x%10
-        else:
-            decachunk_x = chunky_x - chunky_x%10
-        if chunky_z<0:
-            decachunk_z = chunky_z + chunky_z%10
-        else:
-            decachunk_z = chunky_z - chunky_z%10
-        result = os.path.join( os.path.join(self.data_16px_path, str(decachunk_x)), str(decachunk_z) )
+        decachunk_chunky_x = None
+        decachunk_chunky_z = None
+        #if chunky_x<0:
+        #    decachunk_chunky_x = chunky_x + chunky_x%10
+        #else:
+        #    decachunk_chunky_x = chunky_x - chunky_x%10
+        #if chunky_z<0:
+        #    decachunk_chunky_z = chunky_z + chunky_z%10
+        #else:
+        #    decachunk_chunky_z = chunky_z - chunky_z%10
+        #NOTE: floor converts -.5 to -1 (and -1.5 to -2) but .5 to 0
+        decachunk_chunky_x = int(math.floor(chunky_x/10))
+        decachunk_chunky_z = int(math.floor(chunky_z/10))
+        result = os.path.join( os.path.join(self.data_16px_path, str(decachunk_chunky_x)), str(decachunk_chunky_z) )
+        return result
+
+    def get_decachunk_folder_path_from_chunk(self, chunky_x, chunky_z):
+        result = None
+        superchunky_x = int(math.floor(chunky_x/100))
+        superchunky_x = int(math.floor(chunky_z/100))
+        result = os.path.join( os.path.join(self.data_160px_path, str(superchunky_x)), str(superchunky_x) )
         return result
 
     def create_chunk_folder(self, chunky_x, chunky_z):
