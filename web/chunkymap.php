@@ -255,6 +255,15 @@ function get_chunk_folder_path($x, $z) {
 	return $result;
 }
 
+function get_superchunk_folder_path($x, $z) {
+	global $chunkymapdata_path;
+	//NOTE: floor converts -.5 to -1 (and -1.5 to -2) but .5 to 0
+	$hectochunk_x = intval(floor($x/100));
+	$hectochunk_z = intval(floor($z/100));
+	$result = $chunkymapdata_path.'/160px/'.$hectochunk_x.'/'.$hectochunk_z;
+	return $result;
+}
+
 function echo_chunkymap_table() {
     ini_set('display_errors', 1);
     ini_set('display_startup_errors', 1);

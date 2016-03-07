@@ -13,6 +13,8 @@ import time
 import shutil
 import math
 
+from PIL import Image, ImageDraw, ImageFont, ImageColor
+
 #best_timer = timeit.default_timer
 #if sys.platform == "win32":
     # on Windows, the best timer is time.clock()
@@ -698,10 +700,18 @@ class MTChunks:
     #locally unique identifier (unique to world only)
     def get_chunk_luid(self, chunky_x, chunky_z):
         return "x"+str(chunky_x)+"z"+str(chunky_z)
+        
+    def get_decachunk_image_name(self, chunky_x, chunky_z):
+        decachunk_chunky_x = int(math.floor(chunky_x/10))
+        decachunk_chunky_z = int(math.floor(chunky_z/10))
+        return "decachunk_"+self.get_chunk_luid(decachunk_chunky_x, decachunk_chunky_z)+".jpg"
 
     def get_chunk_image_name(self, chunky_x, chunky_z):
         return "chunk_"+self.get_chunk_luid(chunky_x, chunky_z)+".png"
 
+    def get_decachunk_image_tmp_path(self, chunky_x, chunky_z):
+        return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_decachunk_image_name(chunky_x, chunky_z))
+        
     def get_chunk_image_tmp_path(self, chunky_x, chunky_z):
         return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_chunk_image_name(chunky_x, chunky_z))
 
@@ -710,22 +720,38 @@ class MTChunks:
 
     def get_signal_path(self):
         return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_signal_name())
-        
     
+    def check_decachunk(self, chunky_x, chunky_z):
+        chunk16_coord_list = list()
+        decachunk_chunky_x = int(math.floor(chunky_x/10))
+        decachunk_chunky_z = int(math.floor(chunky_z/10))
+        chunk16x_min = decachunk_chunky_x*10
+        chunk16x_max = chunk16x_min + 15  # NOTE: + 15 even if negative since originally, floor was used
+        chunk16z_min = decachunk_chunky_z*10
+        chunk16z_max = chunk16z_min + 15  # NOTE: + 15 even if negative since originally, floor was used
+        chunky_z = chunk16x_min
+        is_any_part_queued = False
+        while chunky_z <= chunk16z_max:
+            chunky_x = chunk16x_min
+            while chunky_x <=  chunk16x_max:
+                coords = (chunky_x, chunky_z) 
+                chunk16_coord_list.append( coords )
+                if self.todo_index<len(self.todo_positions):
+                    for index in range(self.todo_index,len(self.todo_positions)):
+                        if self.todo_positions == coords:
+                            is_any_part_queued = False
+                            break
+                if is_any_part_queued:
+                    break
+                chunky_x += 1
+            if is_any_part_queued:
+                break
+            chunky_z += 1
+        if not is_any_part_queued:
+            pass
 
     def get_chunk_folder_path(self, chunky_x, chunky_z):
         result = None
-        decachunk_chunky_x = None
-        decachunk_chunky_z = None
-        #if chunky_x<0:
-        #    decachunk_chunky_x = chunky_x + chunky_x%10
-        #else:
-        #    decachunk_chunky_x = chunky_x - chunky_x%10
-        #if chunky_z<0:
-        #    decachunk_chunky_z = chunky_z + chunky_z%10
-        #else:
-        #    decachunk_chunky_z = chunky_z - chunky_z%10
-        #NOTE: floor converts -.5 to -1 (and -1.5 to -2) but .5 to 0
         decachunk_chunky_x = int(math.floor(chunky_x/10))
         decachunk_chunky_z = int(math.floor(chunky_z/10))
         result = os.path.join( os.path.join(self.data_16px_path, str(decachunk_chunky_x)), str(decachunk_chunky_z) )
@@ -733,9 +759,9 @@ class MTChunks:
 
     def get_decachunk_folder_path_from_chunk(self, chunky_x, chunky_z):
         result = None
-        superchunky_x = int(math.floor(chunky_x/100))
-        superchunky_x = int(math.floor(chunky_z/100))
-        result = os.path.join( os.path.join(self.data_160px_path, str(superchunky_x)), str(superchunky_x) )
+        hectochunky_x = int(math.floor(chunky_x/100))
+        hectochunky_x = int(math.floor(chunky_z/100))
+        result = os.path.join( os.path.join(self.data_160px_path, str(hectochunky_x)), str(hectochunky_x) )
         return result
 
     def create_chunk_folder(self, chunky_x, chunky_z):
@@ -743,6 +769,8 @@ class MTChunks:
         if not os.path.isdir(path):
             os.makedirs(path)
 
+    def get_decachunk_image_path(self, chunky_x, chunky_z):
+        return os.path.join(self.get_chunk_folder_path(chunky_x, chunky_z), self.get_decachunk_image_name(chunky_x, chunky_z))
 
     def get_chunk_image_path(self, chunky_x, chunky_z):
         return os.path.join(self.get_chunk_folder_path(chunky_x, chunky_z), self.get_chunk_image_name(chunky_x, chunky_z))
