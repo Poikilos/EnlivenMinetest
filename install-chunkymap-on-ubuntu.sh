@@ -44,6 +44,11 @@ cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-cronjob" "$CHUNKYMAP_DEST/unus
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-players-cronjob" "$CHUNKYMAP_DEST/unused/"
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/set-minutely-players-crontab-job.sh" "$CHUNKYMAP_DEST/unused/"
 cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/set-minutely-crontab-job.sh" "$CHUNKYMAP_DEST/unused/"
+if [ ! -d "$CHUNKYMAP_DEST/web" ]; then
+	mkdir "$CHUNKYMAP_DEST/web"
+fi
+cp -Rf $CHUNKYMAP_INSTALLER_PATH/web/* "$CHUNKYMAP_DEST/web/"
+
 #if [ ! -d "$CHUNKYMAP_DEST/chunkymap" ]; then
 #  mkdir "$CHUNKYMAP_DEST/chunkymap"
 #fi
