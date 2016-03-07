@@ -7,6 +7,10 @@ import time
 import sys
 import timeit
 from timeit import default_timer as best_timer
+#file modified time etc:
+import time
+#copyfile etc:
+import shutil
 
 #best_timer = timeit.default_timer
 #if sys.platform == "win32":
@@ -16,7 +20,7 @@ from timeit import default_timer as best_timer
     # on most other platforms, the best timer is time.time()
 #    best_timer = time.time
 # REQUIRES: see README.md
-# The way to do a full render is deleting all files from the folder self.mapvars["chunkymap_data_path"] such as /var/www/html/minetest/chunkymapdata (or chunkymap in current directory on Windows)
+# The way to do a full render is deleting all files from the folder www_minetest_path/chunkymapdata such as /var/www/html/minetest/chunkymapdata (or chunkymap in current directory on Windows)
 
 #minetestmapper-numpy.py calculates the region as follows:
 #(XMIN','XMAX','ZMIN','ZMAX'), default = (-2000,2000,-2000,2000)
@@ -41,6 +45,16 @@ from timeit import default_timer as best_timer
 
     #def size(self):
         #return len(self.items)
+
+class InstalledFile:
+    source_dir_path = None
+    dest_dir_path = None
+    file_name = None
+
+    def __init__(self, file_name, source_dir_path, dest_dir_path):
+        self.file_name=file_name
+        self.source_dir_path=source_dir_path
+        self.dest_dir_path=dest_dir_path
 
 def get_dict_from_conf_file(path,assignment_operator="="):
     results = None
@@ -180,11 +194,11 @@ def is_same_fvec3(list_a, list_b):
 
 
 class MTChunk:
-    x = None
-    z = None
+    #x = None
+    #z = None
     metadata = None
     is_fresh = None
-    luid = None
+    #luid = None
 
     def __init__(self):
         # NOTE: variables that need to be saved (and only they) should be stored in dict
@@ -324,7 +338,6 @@ class MTChunks:
     todo_index = None
     yaml_name = None
     world_yaml_path = None
-    chunkymap_data_path = None
     preload_all_enable = None
     chunk_yaml_name_opener_string = None
     chunk_yaml_name_dotext_string = None
@@ -339,6 +352,7 @@ class MTChunks:
     config = None
     config_name = None
     config_path = None
+    data_16px_path = None
 
     def __init__(self):  #formerly checkpaths() in global scope
         os_name="linux"
@@ -349,7 +363,7 @@ class MTChunks:
         self.mapvars = {}
         self.config = {}
         self.config_name = "chunkymap.yml"
-        self.config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), self.config_name) 
+        self.config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), self.config_name)
         self.config = get_dict_modified_by_conf_file(self.config, self.config_path, ":")
         is_config_changed = False
         if not os.path.isfile(self.config_path):
@@ -401,7 +415,7 @@ class MTChunks:
         #self.region_separators = [" "," "," "]
 
         input_string = ""
- 
+
 
         profile_path = None
         if os_name=="windows":
@@ -409,24 +423,30 @@ class MTChunks:
         else:
             profile_path = os.environ['HOME']
 
-        if "user_minetest_path" not in self.config.keys():
-            self.config["user_minetest_path"] = os.path.join(profile_path,".minetest")
+        if "profile_minetest_path" not in self.config.keys():
+            self.config["profile_minetest_path"] = os.path.join(profile_path,".minetest")
             if (os_name=="windows"):
-                self.config["user_minetest_path"] = "C:\\games\\Minetest"
-            input_string = raw_input("user minetest path containing worlds folder (blank for ["+self.config["user_minetest_path"]+"]): ")
+                self.config["profile_minetest_path"] = "C:\\games\\Minetest"
+            input_string = raw_input("user minetest path containing worlds folder (blank for ["+self.config["profile_minetest_path"]+"]): ")
             if (len(input_string)>0):
-                self.config["user_minetest_path"] = input_string
+                self.config["profile_minetest_path"] = input_string
             is_config_changed = True
-        print("Using user_minetest_path '"+self.config["user_minetest_path"]+"'")
+        print("Using profile_minetest_path '"+self.config["profile_minetest_path"]+"'")
+        if not os.path.isdir(self.config["profile_minetest_path"]):
+            print("(WARNING: missing, so please close and update profile_minetest_path in '"+self.config_path+"' before next run)")
         print("")
         if "worlds_path" not in self.config.keys():
-            self.config["worlds_path"] = os.path.join(self.config["user_minetest_path"],"worlds")
+            self.config["worlds_path"] = os.path.join(self.config["profile_minetest_path"],"worlds")
             is_config_changed = True
-        
+
         auto_chosen_world = False
-        if "world_path" not in self.config.keys():
+        is_missing_world = False
+        if "world_path" in self.config.keys():
+            if not os.path.isdir(self.config["world_path"]):
+                is_missing_world = True
+        if ("world_path" not in self.config.keys()) or is_missing_world:
             print ("LOOKING FOR WORLDS IN " + self.config["worlds_path"])
-            for dirname, dirnames, filenames in os.walk(self.config["worlds_path"]):
+            for base_path, dirnames, filenames in os.walk(self.config["worlds_path"]):
                 #for j in range(0,len(dirnames)):
                 #    i = len(dirnames) - 0 - 1
                 #    if dirnames[i][0] == ".":
@@ -444,7 +464,7 @@ class MTChunks:
                     if subdirname[0]!=".":
                         #if (index == len(dirnames)-1):  # skip first one because the one on my computer is big
                         if (subdirname!="world") or (world_number==(world_count-1)):
-                            self.config["world_path"] = os.path.join(dirname, subdirname) #  os.path.join(self.config["worlds_path"], "try7amber")
+                            self.config["world_path"] = os.path.join(base_path, subdirname) #  os.path.join(self.config["worlds_path"], "try7amber")
                             auto_chosen_world = True
                             break
                         world_number += 1
@@ -452,14 +472,23 @@ class MTChunks:
                 if auto_chosen_world:
                     is_config_changed = True
                     break
+            if is_missing_world:
+                print("MISSING WORLD '"+self.config["world_path"]+"'")
+                if auto_chosen_world:
+                    print("(so a default was picked below that you can change)")
+                else:
+                    print("(and no world could be found in worlds_path '"+self.config["worlds_path"]+"')")
+
             input_string = raw_input("World path (blank for ["+self.config["world_path"]+"]): ")
             if (len(input_string)>0):
                 self.config["world_path"] = input_string
                 auto_chosen_world = False
             is_config_changed = True
         print ("Using world_path '"+self.config["world_path"]+"'")
+        if not os.path.isdir(self.config["world_path"]):
+            print("(ERROR: missing, so please close immediately and update world_path in '"+self.config_path+"' before next run)")
         print("")
-        
+
         self.python_exe_path = "python"
         if os_name=="windows":
             try:
@@ -469,8 +498,8 @@ class MTChunks:
                 #else may be in path--assume installer worked
             except:
                 pass  # do nothing
-        
-        
+
+
         worldmt_path = os.path.join(self.config["world_path"], "world.mt")
         self.backend_string="sqlite3"
         if (os.path.isfile(worldmt_path)):
@@ -491,12 +520,12 @@ class MTChunks:
 
         else:
             print("ERROR: failed to read '"+worldmt_path+"'")
-        self.is_save_output_ok = True   # Keeping output after analyzing it is no longer necessary since results are saved to YAML, but keeping output provides debug info since is the output of minetestmapper-numpy.py
+        self.is_save_output_ok = False   # Keeping output after analyzing it is no longer necessary since results are saved to YAML, but keeping output provides debug info since is the output of minetestmapper-numpy.py
         if self.is_backend_detected:
             print("Detected backend '"+self.backend_string+"' from '"+worldmt_path+"'")
         else:
             print("WARNING: Database backend cannot be detected (unable to ensure image generator script will render map)")
-                    
+
         self.minetestmapper_fast_sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-numpy.py")
 
         self.minetestmapper_custom_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-expertmm.py")
@@ -512,18 +541,32 @@ class MTChunks:
             print("ERROR: missing '"+self.colors_path+"', so exiting "+__file__+".")
             sys.exit()
 
-        self.mapvars["chunkymap_data_path"]=os.path.join(self.config["www_minetest_path"],"chunkymapdata")
-        print("Using chunkymap_data_path '"+self.mapvars["chunkymap_data_path"]+"'")
-        #if not os.path.isdir(self.mapvars["chunkymap_data_path"]):
-        #    os.mkdir(self.mapvars["chunkymap_data_path"])
-        htaccess_path = os.path.join(self.mapvars["chunkymap_data_path"],".htaccess")
-        if not os.path.isdir(self.mapvars["chunkymap_data_path"]):
-            os.makedirs(self.mapvars["chunkymap_data_path"])
+        self.chunkymap_data_path=os.path.join(self.config["www_minetest_path"],"chunkymapdata")
+        print("Using chunkymap_data_path '"+self.chunkymap_data_path+"'")
+        #if not os.path.isdir(self.chunkymap_data_path):
+        #    os.mkdir(self.chunkymap_data_path)
+        htaccess_path = os.path.join(self.chunkymap_data_path,".htaccess")
+        if not os.path.isdir(self.chunkymap_data_path):
+            os.makedirs(self.chunkymap_data_path)
+            print("Created '"+self.chunkymap_data_path+"'")
         if not os.path.isfile(htaccess_path):
-            self.deny_http_access(self.mapvars["chunkymap_data_path"])
+            self.deny_http_access(self.chunkymap_data_path)
+            print("  (created .htaccess)")
+
+        self.data_16px_path = os.path.join(self.chunkymap_data_path, "16px")
+        if not os.path.isdir(self.data_16px_path):
+            os.makedirs(self.data_16px_path)
+            print("Created '"+self.data_16px_path+"'")
+        if not os.path.isfile(htaccess_path):
+            self.deny_http_access(self.data_16px_path)
+            print("  (created .htaccess)")
+        #TODO: deny access to each hundreds folder under self.data_16px_path? doesn't seem that important for security so maybe not.
+
+
+        self.install_website()
 
         self.chunkymap_players_name = "players"
-        self.chunkymap_players_path = os.path.join(self.mapvars["chunkymap_data_path"], self.chunkymap_players_name)
+        self.chunkymap_players_path = os.path.join(self.chunkymap_data_path, self.chunkymap_players_name)
         htaccess_path = os.path.join(self.chunkymap_players_path,".htaccess")
         if not os.path.isdir(self.chunkymap_players_path):
             os.makedirs(self.chunkymap_players_path)
@@ -532,7 +575,7 @@ class MTChunks:
 
 
         self.yaml_name = "generated.yml"
-        self.world_yaml_path = os.path.join(self.mapvars["chunkymap_data_path"], self.yaml_name)
+        self.world_yaml_path = os.path.join(self.chunkymap_data_path, self.yaml_name)
 
         self.mapvars["chunkx_min"] = 0
         self.mapvars["chunkz_min"] = 0
@@ -543,8 +586,10 @@ class MTChunks:
         self.mapvars["minheight"] = -32
         self.mapvars["pixelspernode"] = 1
         self.saved_mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
+        is_mapvars_changed = False
         if self.saved_mapvars is None:
-            self.save_mapvars_if_changed()
+            is_mapvars_changed = True
+            #self.save_mapvars_if_changed()
         #self.mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
         #NOTE: do not save or load self.mapvars yet, because if world name is different than saved, chunks must all be redone
         if self.saved_mapvars is not None:
@@ -582,8 +627,41 @@ class MTChunks:
                 except:
                     print("WARNING: chunkz_max was not int so set to 0")
                     self.mapvars["chunkz_max"] = 0
+        if is_mapvars_changed:
+            self.save_mapvars_if_changed()
         if is_config_changed:
             self.save_config()
+
+    def install_website(self):
+        this_source_dir_path = os.path.join(os.path.dirname(os.path.abspath(self.minetestmapper_py_path)), "web")
+        this_dest_dir_path = self.config["www_minetest_path"]
+        install_list = list()
+        install_list.append(InstalledFile("browser.php",this_source_dir_path,this_dest_dir_path))
+        install_list.append(InstalledFile("chunkymap.php",this_source_dir_path,this_dest_dir_path))
+        install_list.append(InstalledFile("example.php",this_source_dir_path,this_dest_dir_path))
+        source_web_images_path = os.path.join( os.path.join(os.path.dirname(os.path.abspath(self.minetestmapper_py_path)), "web"), "images")
+        dest_web_images_path = os.path.join( self.config["www_minetest_path"], "images")
+        install_list.append(InstalledFile("chunkymap_zoom-in.png", source_web_images_path, dest_web_images_path))
+        install_list.append(InstalledFile("chunkymap_zoom-out.png", source_web_images_path, dest_web_images_path))
+        install_list.append(InstalledFile("chunkymap_zoom-in_disabled.png", source_web_images_path, dest_web_images_path))
+        install_list.append(InstalledFile("chunkymap_zoom-out_disabled.png", source_web_images_path, dest_web_images_path))
+        source_chunkymapdata = os.path.join( os.path.join(os.path.dirname(os.path.abspath(self.minetestmapper_py_path)), "web"), "chunkymapdata_default")
+        source_chunkymapdata_players = os.path.join(source_chunkymapdata, "players")
+        dest_chunkymapdata_players = os.path.join(self.chunkymap_data_path, "players")
+        install_list.append(InstalledFile("singleplayer.png", source_chunkymapdata_players, dest_chunkymapdata_players))
+        for this_object in install_list:
+            source_path = os.path.join(this_object.source_dir_path, this_object.file_name)
+            installed_path = os.path.join(this_object.dest_dir_path, this_object.file_name)
+            if not os.path.isdir(this_object.dest_dir_path):
+                os.makedirs(this_object.dest_dir_path)
+            if not os.path.isfile(installed_path):
+                shutil.copyfile(source_path, installed_path) # DOES replace destination file
+            else:
+                source_mtime_seconds = time.ctime(os.path.getmtime(source_path))
+                installed_mtime_seconds = time.ctime(os.path.getmtime(installed_path))
+                if source_mtime_seconds>installed_mtime_seconds:
+                    shutil.copyfile(source_path, installed_path) # DOES replace destination file
+
 
     def deny_http_access(self, dir_path):
         htaccess_name = ".htaccess"
@@ -599,19 +677,19 @@ class MTChunks:
         outs.write("deny from all"+"\n")
         outs.write("</Files>"+"\n")
         outs.close()
-        
+
     def save_config(self):
         save_conf_from_dict(self.config_path, self.config, ":")
 
     #locally unique identifier (unique to world only)
-    def get_chunk_luid(self, x,z):
-        return "x"+str(x)+"z"+str(z)
+    def get_chunk_luid(self, chunky_x, chunky_z):
+        return "x"+str(chunky_x)+"z"+str(chunky_z)
 
-    def get_chunk_image_name(self, chunk_luid):
-        return "chunk_"+chunk_luid+".png"
+    def get_chunk_image_name(self, chunky_x, chunky_z):
+        return "chunk_"+self.get_chunk_luid(chunky_x, chunky_z)+".png"
 
-    def get_chunk_image_tmp_path(self, chunk_luid):
-        return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_chunk_image_name(chunk_luid))
+    def get_chunk_image_tmp_path(self, chunky_x, chunky_z):
+        return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_chunk_image_name(chunky_x, chunky_z))
 
     def get_signal_name(self):
         return "chunkymap-signals.txt"
@@ -619,8 +697,29 @@ class MTChunks:
     def get_signal_path(self):
         return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_signal_name())
 
-    def get_chunk_image_path(self, chunk_luid):
-        return os.path.join(self.mapvars["chunkymap_data_path"], self.get_chunk_image_name(chunk_luid))
+    def get_chunk_folder_path(self, chunky_x, chunky_z):
+        result = None
+        decachunk_x = None
+        decachunk_z = None
+        if chunky_x<0:
+            decachunk_x = chunky_x + chunky_x%10
+        else:
+            decachunk_x = chunky_x - chunky_x%10
+        if chunky_z<0:
+            decachunk_z = chunky_z + chunky_z%10
+        else:
+            decachunk_z = chunky_z - chunky_z%10
+        result = os.path.join( os.path.join(self.data_16px_path, str(decachunk_x)), str(decachunk_z) )
+        return result
+
+    def create_chunk_folder(self, chunky_x, chunky_z):
+        path = self.get_chunk_folder_path(chunky_x, chunky_z)
+        if not os.path.isdir(path):
+            os.makedirs(path)
+
+
+    def get_chunk_image_path(self, chunky_x, chunky_z):
+        return os.path.join(self.get_chunk_folder_path(chunky_x, chunky_z), self.get_chunk_image_name(chunky_x, chunky_z))
 
     def get_chunk_genresult_name(self, chunk_luid):
         return "chunk_"+chunk_luid+"_mapper_result.txt"
@@ -634,17 +733,18 @@ class MTChunks:
     def get_chunk_luid_from_yaml_name(self, yml_name):
         return yml_name[len(self.chunk_yaml_name_opener_string):-1*len(self.chunk_yaml_name_dotext_string)]
 
-    def get_chunk_yaml_name(self, chunk_luid):
+    def get_chunk_yaml_name(self, chunky_x, chunky_z):
+        chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
         return self.chunk_yaml_name_opener_string+chunk_luid+self.chunk_yaml_name_dotext_string
 
-    def is_chunk_yaml_present(self, chunk_luid):
-        return os.path.isfile(self.get_chunk_yaml_path(chunk_luid))
+    def is_chunk_yaml_present(self, chunky_x, chunky_z):
+        return os.path.isfile(self.get_chunk_yaml_path(chunky_x, chunky_z))
 
-    def get_chunk_yaml_path(self, chunk_luid):
-        return os.path.join(self.mapvars["chunkymap_data_path"], self.get_chunk_yaml_name(chunk_luid))
+    def get_chunk_yaml_path(self, chunky_x, chunky_z):
+        return os.path.join(self.get_chunk_folder_path(chunky_x, chunky_z), self.get_chunk_yaml_name(chunky_x, chunky_z))
 
-    def is_chunk_yaml_marked(self, chunk_luid):
-        yaml_path = self.get_chunk_yaml_path(chunk_luid)
+    def is_chunk_yaml_marked(self, chunky_x, chunky_z):
+        yaml_path = self.get_chunk_yaml_path(chunky_x, chunky_z)
         result = False
         if os.path.isfile(yaml_path):
             result = True
@@ -660,29 +760,31 @@ class MTChunks:
             #ins.close()
         return result
 
-    def is_chunk_yaml_marked_empty(self, chunk_luid):
+    def is_chunk_yaml_marked_empty(self, chunky_x, chunky_z):
         result = False
-        yaml_path = self.get_chunk_yaml_path(chunk_luid)
+        yaml_path = self.get_chunk_yaml_path(chunky_x, chunky_z)
         if os.path.isfile(yaml_path):
-            self.prepare_chunk_meta(chunk_luid)  # DOES get existing data if any file exists
+            self.prepare_chunk_meta(chunky_x, chunky_z)  # DOES get existing data if any file exists
+            chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
             if "is_empty" in self.chunks[chunk_luid].metadata.keys():
                 result = self.chunks[chunk_luid].metadata["is_empty"]
 
         return result
 
-    def remove_chunk_image(self, chunk_luid):
+    def remove_chunk_image(self, chunky_x, chunky_z):
         result = False
-        tmp_png_path = self.get_chunk_image_path(chunk_luid)
+        tmp_png_path = self.get_chunk_image_path(chunky_x, chunky_z)
         if os.path.isfile(tmp_png_path):
             result = True
             os.remove(tmp_png_path)
         return result
 
-    def remove_chunk(self, chunk_luid):
+    def remove_chunk(self, chunky_x, chunky_z):
         result = False
+        chunk_luid = get_chunk_luid(chunky_x, chunky_z)
         out_path = self.get_chunk_genresult_tmp_path(chunk_luid)
-        tmp_png_path = self.get_chunk_image_path(chunk_luid)
-        yml_path = self.get_chunk_yaml_path(chunk_luid)
+        tmp_png_path = self.get_chunk_image_path(chunky_x, chunky_z)
+        yml_path = self.get_chunk_yaml_path(chunky_x, chunky_z)
         if os.path.isfile(tmp_png_path):
             os.remove(tmp_png_path)
             result = True
@@ -694,40 +796,41 @@ class MTChunks:
             result = True
         return result
 
-    def is_chunk_rendered_on_dest(self, chunk_luid):  #formerly is_chunk_empty_on_dest (reversed)
+    def is_chunk_rendered_on_dest(self, chunky_x, chunky_z):  #formerly is_chunk_empty_on_dest (reversed)
         is_rendered = False
-        dest_png_path = self.get_chunk_image_path(chunk_luid)
+        dest_png_path = self.get_chunk_image_path(chunky_x, chunky_z)
         if os.path.isfile(dest_png_path):
             is_rendered = True
         return is_rendered
 
-    def prepare_chunk_meta(self, chunk_luid):
+    def prepare_chunk_meta(self, chunky_x, chunky_z):
+        chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
         if chunk_luid not in self.chunks.keys():
             self.chunks[chunk_luid] = MTChunk()
-            self.chunks[chunk_luid].luid = chunk_luid
-            yaml_path = self.get_chunk_yaml_path(chunk_luid)
+            #self.chunks[chunk_luid].luid = chunk_luid
+            yaml_path = self.get_chunk_yaml_path(chunky_x, chunky_z)
             if os.path.isfile(yaml_path):
                 self.chunks[chunk_luid].load_yaml(yaml_path)
 
 
     # normally call check_chunk instead, which renders chunk only if necessary
-    def _render_chunk(self, x, z):
+    def _render_chunk(self, chunky_x, chunky_z):
         min_indent = "  "  # increased below
         result = False
-        chunk_luid = self.get_chunk_luid(x,z)
-        png_name = self.get_chunk_image_name(chunk_luid)
-        tmp_png_path = self.get_chunk_image_tmp_path(chunk_luid)
+        chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
+        png_name = self.get_chunk_image_name(chunky_x, chunky_z)
+        tmp_png_path = self.get_chunk_image_tmp_path(chunky_x, chunky_z)
         genresult_name = self.get_chunk_genresult_name(chunk_luid)
         genresult_tmp_folder_path = self.get_chunk_genresults_tmp_folder(chunk_luid)
         if not os.path.isdir(genresult_tmp_folder_path):
             os.makedirs(genresult_tmp_folder_path)
         genresult_path = self.get_chunk_genresult_tmp_path(chunk_luid)
-        x_min = x * self.mapvars["chunk_size"]
-        x_max = x * self.mapvars["chunk_size"] + self.mapvars["chunk_size"] - 1
-        z_min = z * self.mapvars["chunk_size"]
-        z_max = z * self.mapvars["chunk_size"] + self.mapvars["chunk_size"] - 1
+        x_min = chunky_x * self.mapvars["chunk_size"]
+        x_max = chunky_x * self.mapvars["chunk_size"] + self.mapvars["chunk_size"] - 1
+        z_min = chunky_z * self.mapvars["chunk_size"]
+        z_max = chunky_z * self.mapvars["chunk_size"] + self.mapvars["chunk_size"] - 1
 
-        #print (min_indent+"generating x = " + str(x_min) + " to " + str(x_max) + " ,  z = " + str(z_min) + " to " + str(z_max))
+        #print (min_indent+"generating chunky_x = " + str(x_min) + " to " + str(x_max) + " ,  chunky_z = " + str(z_min) + " to " + str(z_max))
         geometry_value_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min)+1)+"+"+str(int(z_max)-int(z_min)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
         cmd_suffix = ""
         cmd_suffix = " > \""+genresult_path+"\""
@@ -735,7 +838,7 @@ class MTChunks:
         cmd_no_out_string = self.python_exe_path + " \""+self.minetestmapper_py_path + "\" --region " + str(x_min) + " " + str(x_max) + " " + str(z_min) + " " + str(z_max) + " --maxheight "+str(self.mapvars["maxheight"])+" --minheight "+str(self.mapvars["minheight"])+" --pixelspernode "+str(self.mapvars["pixelspernode"])+" \""+self.config["world_path"]+"\" \""+tmp_png_path+"\""
         cmd_string = cmd_no_out_string + cmd_suffix
 
-        if self.minetestmapper_py_path==self.minetestmapper_custom_path:#if self.backend_string!="sqlite3": #if self.mapper_id=="minetestmapper-region": 
+        if self.minetestmapper_py_path==self.minetestmapper_custom_path:#if self.backend_string!="sqlite3": #if self.mapper_id=="minetestmapper-region":
             #  Since minetestmapper-numpy has trouble with leveldb:
             #    such as sudo minetest-mapper --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry -32:-32+64+64 --output /var/www/html/minetest/try1.png
             #    where geometry option is like --geometry x:y+w+h
@@ -761,13 +864,13 @@ class MTChunks:
             #sudo python /home/owner/minetest/util/chunkymap/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry 0:0+16+16 --output /var/www/html/minetest/chunkymapdata/chunk_x0z0.png > /home/owner/minetest/util/chunkymap-genresults/chunk_x0z0_mapper_result.txt
             #    sudo mv entire-mtmresult.txt /home/owner/minetest/util/chunkymap-genresults/
 
-        dest_png_path = self.get_chunk_image_path(chunk_luid)
-        #is_empty_chunk = is_chunk_yaml_marked(chunk_luid) and is_chunk_yaml_marked_empty(chunk_luid)
+        dest_png_path = self.get_chunk_image_path(chunky_x, chunky_z)
+        #is_empty_chunk = is_chunk_yaml_marked(chunky_x, chunky_z) and is_chunk_yaml_marked_empty(chunky_x, chunky_z)
         #if self.verbose_enable:
         #    #print(min_indent+"")
         #    print(min_indent+"Running '"+cmd_string+"'...")
         #else:
-        print (min_indent+"Calling map tile renderer for: "+str((x,z)))
+        print (min_indent+"Calling map tile renderer for: "+str((chunky_x, chunky_z)))
         min_indent += "  "
         try:
             if os.path.isfile(tmp_png_path):
@@ -779,7 +882,7 @@ class MTChunks:
                 is_marked_before = True
                 if (self.chunks[chunk_luid].metadata is not None) and ("is_empty" in self.chunks[chunk_luid].metadata):
                     is_empty_before = self.chunks[chunk_luid].metadata["is_empty"]
-            self.prepare_chunk_meta(chunk_luid)  # DOES load existing yml if exists
+            self.prepare_chunk_meta(chunky_x, chunky_z)  # DOES load existing yml if exists
             this_chunk = self.chunks[chunk_luid]
             if os.path.isfile(tmp_png_path):
                 result = True
@@ -790,9 +893,10 @@ class MTChunks:
                 except:
                     print (min_indent+"Could not finish deleting '"+dest_png_path+"'")
                 try:
+                    self.create_chunk_folder(chunky_x, chunky_z)
                     os.rename(tmp_png_path, dest_png_path)
                     print(min_indent+"(moved to '"+dest_png_path+"')")
-                    self.prepare_chunk_meta(chunk_luid)  # DOES load existing yml if exists
+                    self.prepare_chunk_meta(chunky_x, chunky_z)  # DOES load existing yml if exists
                     self.chunks[chunk_luid].is_fresh = True
                     self.chunks[chunk_luid].metadata["is_empty"] = False
                 except:
@@ -825,7 +929,8 @@ class MTChunks:
                         print("ERROR: chunk changed from nonempty to empty (may happen if output of mapper was not recognized)")
                     elif this_chunk.metadata["is_empty"] and os.path.isfile(dest_png_path):
                         print("ERROR: chunk marked empty though has data (may happen if output of mapper was not recognized)")
-                chunk_yaml_path = self.get_chunk_yaml_path(chunk_luid)
+                chunk_yaml_path = self.get_chunk_yaml_path(chunky_x, chunky_z)
+                self.create_chunk_folder(chunky_x, chunky_z)
                 this_chunk.save_yaml(chunk_yaml_path)
                 print(min_indent+"(saved yaml to '"+chunk_yaml_path+"')")
                 if not self.is_save_output_ok:
@@ -852,7 +957,7 @@ class MTChunks:
         players_moved_count = 0
         players_didntmove_count = 0
         players_saved_count = 0
-        for dirname, dirnames, filenames in os.walk(players_path):
+        for base_path, dirnames, filenames in os.walk(players_path):
             for filename in filenames:
                 file_fullname = os.path.join(players_path,filename)
                 #print ("  EXAMINING "+filename)
@@ -889,20 +994,21 @@ class MTChunks:
 
                     player_position_tuple = get_tuple_from_notation(player_position, filename)
                     if player_position_tuple is not None:
-                        #Divide by 10 because I don't know why (minetest issue)
+                        #Divide by 10 because I don't know why (minetest issue, maybe to avoid float rounding errors upon save/load)
                         player_position_tuple = player_position_tuple[0]/10.0, player_position_tuple[1]/10.0, player_position_tuple[2]/10.0
                         player_x, player_y, player_z = player_position_tuple
                         player_x = float(player_x)
                         player_y = float(player_y)
                         player_z = float(player_z)
-                        chunk_x = int((int(player_x)/self.mapvars["chunk_size"]))
-                        chunk_y = int((int(player_y)/self.mapvars["chunk_size"]))
-                        chunk_z = int((int(player_z)/self.mapvars["chunk_size"]))
-                        chunk_luid = self.get_chunk_luid(chunk_x, chunk_z)
-                        self.prepare_chunk_meta(chunk_luid)  # DOES load existing yml if exists
+                        chunky_x = int((int(player_x)/self.mapvars["chunk_size"]))
+                        chunky_y = int((int(player_y)/self.mapvars["chunk_size"]))
+                        chunky_z = int((int(player_z)/self.mapvars["chunk_size"]))
+                        chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
+                        self.prepare_chunk_meta(chunky_x, chunky_z)  # DOES load existing yml if exists
                         if not self.chunks[chunk_luid].metadata["is_traversed"]:
                             self.chunks[chunk_luid].metadata["is_traversed"] = True
-                            chunk_yaml_path = self.get_chunk_yaml_path(chunk_luid)
+                            chunk_yaml_path = self.get_chunk_yaml_path(chunky_x, chunky_z)
+                            self.create_chunk_folder(chunky_x, chunky_z)
                             self.chunks[chunk_luid].save_yaml(chunk_yaml_path)
 
                     #if is_enough_data:
@@ -971,13 +1077,13 @@ class MTChunks:
 
 
     #Returns: (boolean) whether the chunk image is present on dest (rendered now or earlier)--only possible if there is chunk data at the given location
-    def check_chunk(self, x, z):
+    def check_chunk(self, chunky_x, chunky_z):
         min_indent = "  "
         result = [False,""]
-        chunk_luid = self.get_chunk_luid(x,z)
+        chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
 
         #if (is_different_world):  #instead, see above where all chunk files and player files are deleted
-        #    self.remove_chunk(chunk_luid)
+        #    self.remove_chunk(chunky_x, chunky_z)
 
         is_traversed_by_player = self.is_chunk_traversed_by_player(chunk_luid)  #ok if stale, since is only used for whether empty chunk should be regenerated
 
@@ -985,8 +1091,8 @@ class MTChunks:
 
         if not self.is_chunk_fresh(chunk_luid):
             if is_traversed_by_player:
-                if self.is_chunk_yaml_marked(chunk_luid):
-                    if self.is_chunk_yaml_marked_empty(chunk_luid):
+                if self.is_chunk_yaml_marked(chunky_x, chunky_z):
+                    if self.is_chunk_yaml_marked_empty(chunky_x, chunky_z):
                         is_render_needed = True
                         result[1] = "RENDERING since nonfresh empty traversed"
                         if self.verbose_enable:
@@ -994,7 +1100,7 @@ class MTChunks:
                         #else:
                             #sys.stdout.write('.')
                     else:
-                        if self.is_chunk_rendered_on_dest(chunk_luid):
+                        if self.is_chunk_rendered_on_dest(chunky_x, chunky_z):
                             result[1] = "SKIPPING since RENDERED nonfresh nonempty traversed"
                             if self.verbose_enable:
                                 print (min_indent+chunk_luid+": "+result[1])
@@ -1002,7 +1108,7 @@ class MTChunks:
                             is_render_needed = True
                             result[1] = "RENDERING since NONRENDERED nonfresh nonempty traversed"
                             if self.verbose_enable:
-                                theoretical_path = self.get_chunk_image_path(chunk_luid)
+                                theoretical_path = self.get_chunk_image_path(chunky_x, chunky_z)
                                 print (min_indent+chunk_luid+": "+result[1])
                                 print (min_indent+"  {dest_png_path:"+theoretical_path+"}")
                 #end if marked
@@ -1015,19 +1121,19 @@ class MTChunks:
                         #sys.stdout.write('.')
             #end if traversed
             else:
-                if (self.is_chunk_yaml_marked(chunk_luid)):
-                    if (self.is_chunk_yaml_marked_empty(chunk_luid)):
+                if (self.is_chunk_yaml_marked(chunky_x, chunky_z)):
+                    if (self.is_chunk_yaml_marked_empty(chunky_x, chunky_z)):
                         result[1] = "SKIPPING since nonfresh empty nontraversed"
                         if self.verbose_enable:
                             print (min_indent+chunk_luid+": "+result[1])
                     else:
-                        if (self.is_chunk_rendered_on_dest(chunk_luid)):
+                        if (self.is_chunk_rendered_on_dest(chunky_x, chunky_z)):
                             result[1] = "SKIPPING since RENDERED nonfresh nonempty nontraversed (delete png to re-render)"
                             if self.verbose_enable:
                                print (min_indent+chunk_luid+":"+result[1])
                         else:
                             is_render_needed = True
-                            theoretical_path = self.get_chunk_image_path(chunk_luid)
+                            theoretical_path = self.get_chunk_image_path(chunky_x, chunky_z)
                             result[1] = "RENDERING since NONRENDRERED nonfresh nonempty nontraversed"
                             if self.verbose_enable:
                                 print (min_indent+chunk_luid+": "+result[1])
@@ -1043,16 +1149,17 @@ class MTChunks:
             result[1] = "SKIPPING since RENDERED fresh"
             if self.verbose_enable:
                 print (min_indent+chunk_luid+": "+result[1]+" (rendered after starting "+__file__+")")
-            #if (not self.is_chunk_yaml_marked(chunk_luid)):
+            #if (not self.is_chunk_yaml_marked(chunky_x, chunky_z)):
                 #is_render_needed = True
 
         # This should never happen since keeping the output of minetestmapper-numpy.py (after analyzing that output) is deprecated:
-        #if self.is_genresult_marked(chunk_luid) and not self.is_chunk_yaml_present(chunk_luid):
+        #if self.is_genresult_marked(chunk_luid) and not self.is_chunk_yaml_present(chunky_x, chunky_z):
         #    tmp_chunk = MTChunk()
         #    tmp_chunk.luid = chunk_luid
         #    genresult_path = self.get_chunk_genresult_tmp_path(chunk_luid)
         #    tmp_chunk.set_from_genresult(genresult_path)
-        #    chunk_yaml_path = self.get_chunk_yaml_path(chunk_luid)
+        #    chunk_yaml_path = self.get_chunk_yaml_path(chunky_x, chunky_z)
+        #    self.create_chunk_folder(chunky_x, chunky_z)
         #    tmp_chunk.save_yaml(chunk_yaml_path)
         #    print(min_indent+"(saved yaml to '"+chunk_yaml_path+"')")
 
@@ -1061,12 +1168,12 @@ class MTChunks:
             self.rendered_count += 1
             if not self.verbose_enable:
                 print(min_indent+chunk_luid+": "+result[1])
-            if (self._render_chunk(x,z)):
+            if (self._render_chunk(chunky_x, chunky_z)):
                 result[0] = True
         else:
-            if self.is_chunk_rendered_on_dest(chunk_luid):
+            if self.is_chunk_rendered_on_dest(chunky_x, chunky_z):
                 result[0] = True
-                tmp_png_path = self.get_chunk_image_path(chunk_luid)
+                tmp_png_path = self.get_chunk_image_path(chunky_x, chunky_z)
                 #NOTE: do NOT set result[1] since specific reason was already set above
                 if self.verbose_enable:
                     print(min_indent+chunk_luid+": Skipping existing map tile file " + tmp_png_path + " (delete it to re-render)")
@@ -1076,19 +1183,19 @@ class MTChunks:
                 #print(min_indent+chunk_luid+": Not rendered on dest.")
         return result
 
-    def _check_map_pseudorecursion_branchfrom(self, x, z):
-        chunk_luid = self.get_chunk_luid(x,z)
-        branched_pos = x-1,z
+    def _check_map_pseudorecursion_branchfrom(self, chunky_x, chunky_z):
+        chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
+        branched_pos = chunky_x-1, chunky_z
         #only add if not in list already, to prevent infinite re-branching
         if branched_pos not in self.todo_positions:
             self.todo_positions.append(branched_pos)
-        branched_pos = x+1,z
+        branched_pos = chunky_x+1, chunky_z
         if branched_pos not in self.todo_positions:
             self.todo_positions.append(branched_pos)
-        branched_pos = x,z-1
+        branched_pos = chunky_x, chunky_z-1
         if branched_pos not in self.todo_positions:
             self.todo_positions.append(branched_pos)
-        branched_pos = x,z+1
+        branched_pos = chunky_x, chunky_z+1
         if branched_pos not in self.todo_positions:
             self.todo_positions.append(branched_pos)
 
@@ -1101,29 +1208,29 @@ class MTChunks:
         if self.todo_index>=0:
             if self.todo_index<len(self.todo_positions):
                 this_pos = self.todo_positions[self.todo_index]
-                x,z = this_pos
-                chunk_luid = self.get_chunk_luid(x,z)
-                is_present, reason_string = self.check_chunk(x,z)
+                chunky_x, chunky_z = this_pos
+                chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
+                is_present, reason_string = self.check_chunk(chunky_x, chunky_z)
 
                 if is_present:
                     self.mapvars["total_generated_count"] += 1
-                    if x<self.mapvars["chunkx_min"]:
-                        self.mapvars["chunkx_min"]=x
-                    if x>self.mapvars["chunkx_max"]:
-                        self.mapvars["chunkx_max"]=x
-                    if z<self.mapvars["chunkz_min"]:
-                        self.mapvars["chunkz_min"]=z
-                    if z>self.mapvars["chunkz_max"]:
-                        self.mapvars["chunkz_max"]=z
+                    if chunky_x<self.mapvars["chunkx_min"]:
+                        self.mapvars["chunkx_min"]=chunky_x
+                    if chunky_x>self.mapvars["chunkx_max"]:
+                        self.mapvars["chunkx_max"]=chunky_x
+                    if chunky_z<self.mapvars["chunkz_min"]:
+                        self.mapvars["chunkz_min"]=chunky_z
+                    if chunky_z>self.mapvars["chunkz_max"]:
+                        self.mapvars["chunkz_max"]=chunky_z
                     #end while square outline (1-chunk-thick outline) generated any png files
                     self.save_mapvars_if_changed()
                     prev_len = len(self.todo_positions)
-                    self._check_map_pseudorecursion_branchfrom(x,z)
+                    self._check_map_pseudorecursion_branchfrom(chunky_x, chunky_z)
                     if self.verbose_enable:
-                        print(min_indent+"["+str(self.todo_index)+"] branching from "+str((x,z))+" (added "+str(len(self.todo_positions)-prev_len)+")")
+                        print(min_indent+"["+str(self.todo_index)+"] branching from "+str((chunky_x, chunky_z))+" (added "+str(len(self.todo_positions)-prev_len)+")")
                 else:
                     if self.verbose_enable:
-                        print(min_indent+"["+str(self.todo_index)+"] not branching from "+str((x,z)))
+                        print(min_indent+"["+str(self.todo_index)+"] not branching from "+str((chunky_x, chunky_z)))
                 self.todo_index += 1
             if self.todo_index>=len(self.todo_positions):  # check again since may have branched above, making this untrue
                 self.save_mapvars_if_changed()
@@ -1141,10 +1248,10 @@ class MTChunks:
                 x_string = chunk_luid[xopener_index+1:zopener_index]
                 z_string = chunk_luid[zopener_index+1:]
                 try:
-                    x = int(x_string)
+                    chunky_x = int(x_string)
                     try:
-                        z = int(z_string)
-                        result = x,z
+                        chunky_z = int(z_string)
+                        result = chunky_x, chunky_z
                     except:
                         pass
                 except:
@@ -1158,28 +1265,47 @@ class MTChunks:
                 self.rendered_count = 0
                 self.todo_positions = list()
                 self.todo_positions.append((0,0))
-                self.mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
+                #self.mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
                 self.verify_correct_map()
                 if self.preload_all_enable:
                     self.preload_all_enable = False
-                    minlen=len(self.chunk_yaml_name_opener_string)+4+len(self.chunk_yaml_name_dotext_string)  # +4 for luid, such as x1z2
-                    for dirname, dirnames, filenames in os.walk(self.mapvars["chunkymap_data_path"]):
-                        for filename in filenames:
-                            file_fullname = os.path.join(self.mapvars["chunkymap_data_path"],filename)
-                            #print ("  EXAMINING "+filename)
-                            badstart_string = "."
-                            if (filename[:len(badstart_string)]!=badstart_string):
-                                if len(filename) > minlen:
-                                    chunk_luid = self.get_chunk_luid_from_yaml_name(filename)
-                                    coords = self.get_coords_from_luid(chunk_luid)
-                                    if coords is not None:
-                                        print("Checking chunk "+str(coords)+" *"+str(self.mapvars["chunk_size"])+"")
-                                        self.prepare_chunk_meta(chunk_luid)
+                    minlen=len(self.chunk_yaml_name_opener_string)+4+len(self.chunk_yaml_name_dotext_string)  # +4 for luid, such as x1z2 (ok since just a minimum)
+                    #for base_path, dirnames, filenames in os.walk(self.data_16px_path):
+                        #for dirname in dirnames:
+                    #for decachunk_x_basepath, decachunk_x_dirnames, decachunk_x_filenames in os.walk(self.data_16px_path):
+                    for decachunk_x_name in os.listdir(self.data_16px_path):
+                        decachunk_x_path = os.path.join(self.data_16px_path, decachunk_x_name)
+                        #for decachunk_z_basepath, decachunk_z_dirnames, decachunk_z_filenames in os.walk(decachunk_x_dirnames):
+                        if decachunk_x_path[:1]!="." and os.path.isdir(decachunk_x_path):
+                            for decachunk_z_name in os.listdir(decachunk_x_path):
+                                decachunk_z_path = os.path.join(decachunk_x_path, decachunk_z_name)
+                                if decachunk_z_path[:1]!="." and os.path.isdir(decachunk_z_path):
+                                    #for chunk_filename in decachunk_z_filenames:
+                                    for chunk_filename in os.listdir(decachunk_z_path):
+                                        chunk_path = os.path.join(decachunk_z_path, chunk_filename)
+                                        #file_fullname = os.path.join(self.chunkymap_data_path,filename)
+                                        if chunk_filename[:1]!="." and os.path.isfile(chunk_path):
+                                            #print ("  EXAMINING "+filename)
+                                            #badstart_string = "."
+                                            #if (filename[:len(badstart_string)]!=badstart_string):
+                                            if len(chunk_filename) > minlen:
+                                                chunk_luid = self.get_chunk_luid_from_yaml_name(chunk_filename)
+                                                coords = self.get_coords_from_luid(chunk_luid)
+                                                if coords is not None:
+                                                    chunky_x, chunky_z = coords
+                                                    if "chunk_size" not in self.mapvars:
+                                                        print("ERROR: '"+chunk_luid+"' has missing mapvars among {"+str(self.mapvars)+"}")
+                                                        break
+                                                    print("Checking chunk "+str(coords)+" *"+str(self.mapvars["chunk_size"])+"")
+                                                    self.prepare_chunk_meta(chunky_x, chunky_z)
                 for chunk_luid in self.chunks.keys():
-                    if self.chunks[chunk_luid].metadata["is_traversed"] and not self.is_chunk_rendered_on_dest(chunk_luid):
+                    coords = self.get_coords_from_luid(chunk_luid)
+                    chunky_x, chunky_z = coords
+                    if self.chunks[chunk_luid].metadata["is_traversed"] and not self.is_chunk_rendered_on_dest(chunky_x, chunky_z):
                         if self.chunks[chunk_luid].metadata["is_empty"]:
                             self.chunks[chunk_luid].metadata["is_empty"] = False
-                            self.chunks[chunk_luid].save_yaml(self.get_chunk_yaml_path(chunk_luid))
+                            self.create_chunk_folder(chunky_x, chunky_z)
+                            self.chunks[chunk_luid].save_yaml(self.get_chunk_yaml_path(chunky_x, chunky_z))
                         coords = self.get_coords_from_luid(chunk_luid)
                         if coords is not None:
                             self.todo_positions.append(coords)
@@ -1209,11 +1335,11 @@ class MTChunks:
                     #print("")
                     #print ("Removing ALL map data since from WORLD NAME is different (map '"+str(self.config["world_name"])+"' is not '"+str(self.config["world_name"])+"')...")
                     #print("")
-                    #if os.path.isdir(self.mapvars["chunkymap_data_path"]):
-                        #for dirname, dirnames, filenames in os.walk(self.mapvars["chunkymap_data_path"]):
+                    #if os.path.isdir(self.chunkymap_data_path):
+                        #for base_path, dirnames, filenames in os.walk(self.chunkymap_data_path):
                             #for filename in filenames:
                                 #if filename[0] != ".":
-                                    #file_fullname = os.path.join(self.mapvars["chunkymap_data_path"],filename)
+                                    #file_fullname = os.path.join(self.chunkymap_data_path,filename)
                                     #if self.verbose_enable:
                                         #print ("  EXAMINING "+filename)
                                     #badstart_string = "chunk"
@@ -1221,12 +1347,12 @@ class MTChunks:
                                         #os.remove(file_fullname)
                                     #elif filename==self.yaml_name:
                                         #os.remove(file_fullname)
-                    #players_path = os.path.join(self.mapvars["chunkymap_data_path"], "players")
+                    #players_path = os.path.join(self.chunkymap_data_path, "players")
                     #if os.path.isdir(players_path):
-                        #for dirname, dirnames, filenames in os.walk(players_path):
+                        #for base_path, dirnames, filenames in os.walk(players_path):
                             #for filename in filenames:
                                 #if filename[0] != ".":
-                                    #file_fullname = os.path.join(self.mapvars["chunkymap_data_path"],filename)
+                                    #file_fullname = os.path.join(self.chunkymap_data_path,filename)
                                     #if self.verbose_enable:
                                         #print ("  EXAMINING "+filename)
                                     #badend_string = ".yml"
@@ -1270,7 +1396,7 @@ class MTChunks:
 
 
             self.mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
-            
+
 
             self.verify_correct_map()
 
@@ -1301,11 +1427,11 @@ class MTChunks:
                 self.read_then_remove_signals()
                 if not self.refresh_map_enable:
                     break
-                for z in range (self.mapvars["chunkz_min"],self.mapvars["chunkz_max"]+1):
+                for chunky_z in range (self.mapvars["chunkz_min"],self.mapvars["chunkz_max"]+1):
                     self.read_then_remove_signals()
                     if not self.refresh_map_enable:
                         break
-                    for x in range(self.mapvars["chunkx_min"],self.mapvars["chunkx_max"]+1):
+                    for chunky_x in range(self.mapvars["chunkx_min"],self.mapvars["chunkx_max"]+1):
                         self.read_then_remove_signals()
                         if not self.refresh_map_enable:
                             break
@@ -1313,14 +1439,14 @@ class MTChunks:
                         #sudo mv ~/map.png /var/www/html/minetest/images/map.png
 
                         #only generate the edges (since started with region 0 0 0 0) and expanding from there until no png is created:
-                        is_outline = (x==self.mapvars["chunkx_min"]) or (x==self.mapvars["chunkx_max"]) or (z==self.mapvars["chunkz_min"]) or (z==self.mapvars["chunkz_max"])
+                        is_outline = (chunky_x==self.mapvars["chunkx_min"]) or (chunky_x==self.mapvars["chunkx_max"]) or (chunky_z==self.mapvars["chunkz_min"]) or (chunky_z==self.mapvars["chunkz_max"])
                         if is_outline:
-                            is_present, reason_string = self.check_chunk(x,z)
+                            is_present, reason_string = self.check_chunk(chunky_x, chunky_z)
                             if is_present:
                                 this_iteration_generates_count += 1
                                 self.mapvars["total_generated_count"] += 1
                     if self.verbose_enable:
-                        print ("")  # blank line before next z so output is more readable
+                        print ("")  # blank line before next chunky_z so output is more readable
                 self.mapvars["chunkx_min"] -= 1
                 self.mapvars["chunkz_min"] -= 1
                 self.mapvars["chunkx_max"] += 1

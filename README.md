@@ -105,14 +105,14 @@ world_path
 	then:  
 		`C:\python27\python -m pip install "Pillow-3.1.1-cp27-none-win32.whl"`  
 	(but put your specific downloaded whl file instead, such as Pillow-3.1.1-cp27-none-win_amd64.whl)
-	* edit chunkymap_regen.py and uncomment website_root="/var/www/html/minetest" then change the value in quotes to your web server's htdocs folder such as, if you are using Apache, can be found as the value of the DocumentRoot variable in httpd.conf in the Apache folder in Program Files
+	* edit chunkymap_regen.py and uncomment www_minetest_path="/var/www/html/minetest" then change the value in quotes to your web server's htdocs folder such as, if you are using Apache, can be found as the value of the DocumentRoot variable in httpd.conf in the Apache folder in Program Files
 	* edit chunkymap_regen.py and change world_name to your world name
 	* run (or if your python executable does not reside in C:\Python27\ then first edit the file):
     chunkymap-regen-loop.bat
 	* copy example.php and chunkymap.php (and optionally browser.php) to your DocumentRoot or whatever folder will contain the chunkymapdata folder
 
 ## Known Issues
-
+* Detect exceptions in mintestmapper (such as database locked) and do not mark the chunk as is_empty
 * Move the following to config dict:
     python_exe_path
 * chunkymap.php should read the size of the chunks -- see near is_file($chunk_genresult_path) in chunkymap.php

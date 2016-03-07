@@ -20,8 +20,8 @@ if (is_file('chunkymap.php')) {
 	//}
 	//else $chunkymap_view_x=$_REQUEST['chunkymap_view_x'];
 	echo "<center>";
-	echo "<h1>Map of ";
-	echo_worldname();
+	echo "<h1>";
+	echo_map_heading_text();
 	echo "</h1>";
 	echo "</center>";
 	set_chunkymap_view($chunkymap_view_x,$chunkymap_view_z,$chunkymap_view_zoom_multiplier);
