@@ -264,7 +264,8 @@ function get_superchunk_folder_path($x, $z) {
 	return $result;
 }
 
-function echo_chunkymap_table() {
+//formerly echo_chunkymap_table
+function echo_entire_chunkymap_as_chunk_table() {
     ini_set('display_errors', 1);
     ini_set('display_startup_errors', 1);
     error_reporting(E_ALL);

@@ -195,6 +195,21 @@ def is_same_fvec3(list_a, list_b):
     return False
 
 
+class MTDecaChunk:
+    
+    metadata = None
+    last_changed_utc_second = None
+    
+    def __init__(self):
+        self.metadata = {}
+        self.metadata["last_saved_utc_second"] = None
+        self.metadata["luid_list"] = None  # what chunks this decachunk contains (as saved to 160px image)
+
+    def load_yaml(self, yml_path):
+        self.metadata = get_dict_modified_by_conf_file(self.metadata,yml_path,":")
+
+    def save_yaml(self, yml_path):
+        save_conf_from_dict(yml_path, self.metadata, assignment_operator=":", save_nulls_enable=False)
 
 class MTChunk:
     #x = None
@@ -320,6 +335,8 @@ class MTChunks:
     colors_path = None
     python_exe_path = None
     chunks = None
+    decachunks = None
+    total_newly_rendered = None
 
     #region values for subprocess arguments:
     maxheight = 50
@@ -357,8 +374,13 @@ class MTChunks:
     config_path = None
     data_16px_path = None
     data_160px_path = None
+    FLAG_EMPTY_HEXCOLOR = "#010000"
+    world_name = None
+    chunkymap_thisworld_data_path = None
 
     def __init__(self):  #formerly checkpaths() in global scope
+        self.decachunks = {}
+        self.total_newly_rendered = 0
         os_name="linux"
         if (os.path.sep!="/"):
             os_name="windows"
@@ -556,8 +578,17 @@ class MTChunks:
         if not os.path.isfile(htaccess_path):
             self.deny_http_access(self.chunkymap_data_path)
             print("  (created .htaccess)")
-
-        self.data_16px_path = os.path.join(self.chunkymap_data_path, "16px")
+        
+        self.world_name = os.path.basename(self.config["world_path"])
+        self.chunkymap_thisworld_data_path = os.path.join(self.chunkymap_data_path, self.world_name)
+        if not os.path.isdir(self.chunkymap_thisworld_data_path):
+            os.makedirs(self.chunkymap_thisworld_data_path)
+            print("Created '"+self.chunkymap_thisworld_data_path+"'")
+        if not os.path.isfile(htaccess_path):
+            self.deny_http_access(self.chunkymap_thisworld_data_path)
+            print("  (created .htaccess)")
+        
+        self.data_16px_path = os.path.join(self.chunkymap_thisworld_data_path, "16px")
         if not os.path.isdir(self.data_16px_path):
             os.makedirs(self.data_16px_path)
             print("Created '"+self.data_16px_path+"'")
@@ -565,7 +596,7 @@ class MTChunks:
             self.deny_http_access(self.data_16px_path)
             print("  (created .htaccess)")
 
-        self.data_160px_path = os.path.join(self.chunkymap_data_path, "160px")
+        self.data_160px_path = os.path.join(self.chunkymap_thisworld_data_path, "160px")
         if not os.path.isdir(self.data_160px_path):
             os.makedirs(self.data_160px_path)
             print("Created '"+self.data_160px_path+"'")
@@ -579,7 +610,7 @@ class MTChunks:
         self.install_website()
 
         self.chunkymap_players_name = "players"
-        self.chunkymap_players_path = os.path.join(self.chunkymap_data_path, self.chunkymap_players_name)
+        self.chunkymap_players_path = os.path.join(self.chunkymap_thisworld_data_path, self.chunkymap_players_name)
         htaccess_path = os.path.join(self.chunkymap_players_path,".htaccess")
         if not os.path.isdir(self.chunkymap_players_path):
             os.makedirs(self.chunkymap_players_path)
@@ -588,7 +619,7 @@ class MTChunks:
 
 
         self.yaml_name = "generated.yml"
-        self.world_yaml_path = os.path.join(self.chunkymap_data_path, self.yaml_name)
+        self.world_yaml_path = os.path.join(self.chunkymap_thisworld_data_path, self.yaml_name)
 
         self.mapvars["chunkx_min"] = 0
         self.mapvars["chunkz_min"] = 0
@@ -658,9 +689,10 @@ class MTChunks:
         install_list.append(InstalledFile("chunkymap_zoom-out.png", source_web_images_path, dest_web_images_path))
         install_list.append(InstalledFile("chunkymap_zoom-in_disabled.png", source_web_images_path, dest_web_images_path))
         install_list.append(InstalledFile("chunkymap_zoom-out_disabled.png", source_web_images_path, dest_web_images_path))
+        install_list.append(InstalledFile("chunkymap_start.png", source_web_images_path, dest_web_images_path))
         source_chunkymapdata = os.path.join( os.path.join(os.path.dirname(os.path.abspath(self.minetestmapper_py_path)), "web"), "chunkymapdata_default")
         source_chunkymapdata_players = os.path.join(source_chunkymapdata, "players")
-        dest_chunkymapdata_players = os.path.join(self.chunkymap_data_path, "players")
+        dest_chunkymapdata_players = os.path.join(self.chunkymap_thisworld_data_path, "players")
         install_list.append(InstalledFile("singleplayer.png", source_chunkymapdata_players, dest_chunkymapdata_players))
         for this_object in install_list:
             source_path = os.path.join(this_object.source_dir_path, this_object.file_name)
@@ -701,16 +733,31 @@ class MTChunks:
     def get_chunk_luid(self, chunky_x, chunky_z):
         return "x"+str(chunky_x)+"z"+str(chunky_z)
         
-    def get_decachunk_image_name(self, chunky_x, chunky_z):
-        decachunk_chunky_x = int(math.floor(chunky_x/10))
-        decachunk_chunky_z = int(math.floor(chunky_z/10))
-        return "decachunk_"+self.get_chunk_luid(decachunk_chunky_x, decachunk_chunky_z)+".jpg"
+    def get_decachunk_image_name_from_chunk(self, chunky_x, chunky_z):
+        return "decachunk_"+self.get_decachunk_luid_from_chunk(chunky_x, chunky_z)+".jpg"
+
+    def get_decachunk_image_name_from_decachunk(self, decachunky_x, decachunky_z):
+        return "decachunk_"+self.get_decachunk_luid_from_decachunk(decachunky_x, decachunky_z)+".jpg"
+
+    def get_decachunk_luid_from_chunk(self, chunky_x, chunky_z):
+        decachunky_x = int(math.floor(chunky_x/10))
+        decachunky_z = int(math.floor(chunky_z/10))
+        return self.get_chunk_luid(decachunky_x, decachunky_z)
+
+    def get_decachunk_luid_from_decachunk(self, decachunky_x, decachunky_z):
+        return self.get_chunk_luid(decachunky_x, decachunky_z)
+
+    def get_decachunk_yaml_name_from_chunk(self, chunky_x, chunky_z):
+        return "decachunk_"+self.get_decachunk_luid_from_chunk(chunky_x, chunky_z)+".yml"
+
+    def get_decachunk_yaml_name_from_decachunk(self, decachunky_x, decachunky_z):
+        return "decachunk_"+self.get_decachunk_luid_from_decachunk(decachunky_x, decachunky_z)+".yml"
 
     def get_chunk_image_name(self, chunky_x, chunky_z):
         return "chunk_"+self.get_chunk_luid(chunky_x, chunky_z)+".png"
 
-    def get_decachunk_image_tmp_path(self, chunky_x, chunky_z):
-        return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_decachunk_image_name(chunky_x, chunky_z))
+    #def get_decachunk_image_tmp_path_from_decachunk(self, chunky_x, chunky_z):
+        #return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_decachunk_image_name_from_decachunk(chunky_x, chunky_z))
         
     def get_chunk_image_tmp_path(self, chunky_x, chunky_z):
         return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_chunk_image_name(chunky_x, chunky_z))
@@ -721,16 +768,16 @@ class MTChunks:
     def get_signal_path(self):
         return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_signal_name())
     
-    def check_decachunk(self, chunky_x, chunky_z):
+    def check_decachunk_containing_chunk(self, chunky_x, chunky_z):
         chunk16_coord_list = list()
-        decachunk_chunky_x = int(math.floor(chunky_x/10))
-        decachunk_chunky_z = int(math.floor(chunky_z/10))
-        chunk16x_min = decachunk_chunky_x*10
+        decachunky_x = int(math.floor(chunky_x/10))
+        decachunky_z = int(math.floor(chunky_z/10))
+        chunk16x_min = decachunky_x*10
         chunk16x_max = chunk16x_min + 15  # NOTE: + 15 even if negative since originally, floor was used
-        chunk16z_min = decachunk_chunky_z*10
+        chunk16z_min = decachunky_z*10
         chunk16z_max = chunk16z_min + 15  # NOTE: + 15 even if negative since originally, floor was used
-        chunky_z = chunk16x_min
         is_any_part_queued = False
+        chunky_z = chunk16x_min
         while chunky_z <= chunk16z_max:
             chunky_x = chunk16x_min
             while chunky_x <=  chunk16x_max:
@@ -748,20 +795,74 @@ class MTChunks:
                 break
             chunky_z += 1
         if not is_any_part_queued:
-            pass
+            print("    Rendering 160px decachunk "+str((decachunky_x, decachunky_z)))
+            decachunk_global_coords = decachunky_x*160, decachunky_z*160
+            im = Image.new("RGB", (160, 160), self.FLAG_EMPTY_HEXCOLOR)
+            decachunk_yaml_path = self.get_decachunk_yaml_path_from_decachunk(decachunky_x, decachunky_z)
+            decachunk_image_path = self.get_decachunk_image_path_from_decachunk(decachunky_x, decachunky_z)
+            combined_count = 0
+            luid_list = list()
+            for coord in chunk16_coord_list:
+                chunky_x, chunky_z = coord
+                chunk_image_path = self.get_chunk_image_path(chunky_x, chunky_z)
+                if os.path.isfile(chunk_image_path):
+                    participle="initializing"
+                    try:
+                        participle="opening path"
+                        chunk_im = Image.open(open(chunk_image_path, 'rb'))  # double-open to make sure file is finished writing
+                        #NOTE: PIL automatically closes, otherwise you can do something like https://bytes.com/topic/python/answers/24308-pil-do-i-need-close
+                        #fp = open(filename, "rb")
+                        #im = Image.open(fp) # open from file object
+                        #im.load() # make sure PIL has read the data
+                        #fp.close()
+                        chunk_global_coords = chunky_x*16, chunky_z*16
+                        chunk_local_coords = chunk_global_coords[0]-decachunk_global_coords[0], chunk_global_coords[1]-decachunk_global_coords[1]
+                        offset = chunk_local_coords[0], 160-chunk_local_coords[1]  # convert to inverted cartesian since that's the coordinate system of images
+                        im.paste(chunk_im, offset)
+                        luid_list.append(self.get_chunk_luid(chunky_x, chunky_z))
+                    except:
+                        print("Could not finish "+participle+" in check_decachunk_containing_chunk:")
+                        view_traceback()
+            decachunk_folder_path = self.get_decachunk_folder_path_from_decachunk(decachunky_x, decachunky_z)
+            if not os.path.isdir(decachunk_folder_path):
+                os.makedirs(decachunk_folder_path)
+                print("    Made folder '"+decachunk_folder_path+"'")
+            else:
+                print("    Found folder '"+decachunk_folder_path+"'")
+            print("    Saving '"+decachunk_image_path+"'")
+            im.save(decachunk_image_path)
+            decachunk_luid = self.get_decachunk_luid_from_decachunk(decachunky_x, decachunky_z)
+            self.prepare_decachunk_meta_from_decachunk(decachunky_x, decachunky_z)
+            this_second = int(time.time())
+            #if int(self.decachunks[decachunk_luid].metadata["last_saved_utc_second"]) != this_second:
+            self.decachunks[decachunk_luid].metadata["last_saved_utc_second"] = this_second  # time.time() returns float even if OS doesn't give a time in increments smaller than seconds
+            if len(luid_list)>0:
+                self.decachunks[decachunk_luid].metadata["luid_list"] = ','.join(luid_list)
+            else:
+                self.decachunks[decachunk_luid].metadata["luid_list"] = None
+            self.decachunks[decachunk_luid].save_yaml(decachunk_yaml_path)
 
     def get_chunk_folder_path(self, chunky_x, chunky_z):
         result = None
-        decachunk_chunky_x = int(math.floor(chunky_x/10))
-        decachunk_chunky_z = int(math.floor(chunky_z/10))
-        result = os.path.join( os.path.join(self.data_16px_path, str(decachunk_chunky_x)), str(decachunk_chunky_z) )
+        decachunky_x = int(math.floor(chunky_x/10))
+        decachunky_z = int(math.floor(chunky_z/10))
+        result = os.path.join( os.path.join(self.data_16px_path, str(decachunky_x)), str(decachunky_z) )
         return result
 
     def get_decachunk_folder_path_from_chunk(self, chunky_x, chunky_z):
         result = None
-        hectochunky_x = int(math.floor(chunky_x/100))
-        hectochunky_x = int(math.floor(chunky_z/100))
-        result = os.path.join( os.path.join(self.data_160px_path, str(hectochunky_x)), str(hectochunky_x) )
+        if chunky_x is not None and chunky_z is not None:
+            hectochunky_x = int(math.floor(chunky_x/100))
+            hectochunky_x = int(math.floor(chunky_z/100))
+            result = os.path.join( os.path.join(self.data_160px_path, str(hectochunky_x)), str(hectochunky_x) )
+        return result
+
+    def get_decachunk_folder_path_from_decachunk(self, decachunky_x, decachunky_z):
+        result = None
+        if decachunky_x is not None and decachunky_z is not None:
+            hectochunky_x = int(math.floor(decachunky_x/10))
+            hectochunky_x = int(math.floor(decachunky_z/10))
+            result = os.path.join( os.path.join(self.data_160px_path, str(hectochunky_x)), str(hectochunky_x) )
         return result
 
     def create_chunk_folder(self, chunky_x, chunky_z):
@@ -769,8 +870,17 @@ class MTChunks:
         if not os.path.isdir(path):
             os.makedirs(path)
 
-    def get_decachunk_image_path(self, chunky_x, chunky_z):
-        return os.path.join(self.get_chunk_folder_path(chunky_x, chunky_z), self.get_decachunk_image_name(chunky_x, chunky_z))
+    def get_decachunk_image_path_from_chunk(self, chunky_x, chunky_z):
+        return os.path.join(self.get_decachunk_folder_path_from_chunk(chunky_x, chunky_z), self.get_decachunk_image_name_from_chunk(chunky_x, chunky_z))
+
+    def get_decachunk_yaml_path_from_chunk(self, chunky_x, chunky_z):
+        return os.path.join(self.get_decachunk_folder_path_from_chunk(chunky_x, chunky_z), self.get_decachunk_yaml_name_from_chunk(chunky_x, chunky_z))
+
+    def get_decachunk_image_path_from_decachunk(self, decachunky_x, decachunky_z):
+        return os.path.join(self.get_decachunk_folder_path_from_decachunk(decachunky_x, decachunky_z), self.get_decachunk_image_name_from_decachunk(decachunky_x, decachunky_z))
+
+    def get_decachunk_yaml_path_from_decachunk(self, decachunky_x, decachunky_z):
+        return os.path.join(self.get_decachunk_folder_path_from_decachunk(decachunky_x, decachunky_z), self.get_decachunk_yaml_name_from_decachunk(decachunky_x, decachunky_z))
 
     def get_chunk_image_path(self, chunky_x, chunky_z):
         return os.path.join(self.get_chunk_folder_path(chunky_x, chunky_z), self.get_chunk_image_name(chunky_x, chunky_z))
@@ -857,6 +967,24 @@ class MTChunks:
             is_rendered = True
         return is_rendered
 
+    def prepare_decachunk_meta_from_chunk(self, chunky_x, chunky_z):
+        chunk_luid = self.get_decachunk_luid_from_chunk(chunky_x, chunky_z)
+        if chunk_luid not in self.decachunks.keys():
+            self.decachunks[chunk_luid] = MTDecaChunk()
+            #self.chunks[chunk_luid].luid = chunk_luid
+            yaml_path = self.get_decachunk_yaml_path_from_chunk(chunky_x, chunky_z)
+            if os.path.isfile(yaml_path):
+                self.decachunks[chunk_luid].load_yaml(yaml_path)
+
+    def prepare_decachunk_meta_from_decachunk(self, decachunky_x, decachunky_z):
+        chunk_luid = self.get_decachunk_luid_from_decachunk(decachunky_x, decachunky_z)
+        if chunk_luid not in self.decachunks.keys():
+            self.decachunks[chunk_luid] = MTDecaChunk()
+            #self.chunks[chunk_luid].luid = chunk_luid
+            yaml_path = self.get_decachunk_yaml_path_from_decachunk(decachunky_x, decachunky_z)
+            if os.path.isfile(yaml_path):
+                self.decachunks[chunk_luid].load_yaml(yaml_path)
+
     def prepare_chunk_meta(self, chunky_x, chunky_z):
         chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
         if chunk_luid not in self.chunks.keys():
@@ -912,7 +1040,7 @@ class MTChunks:
             geometry_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min)+1)+"+"+str(int(z_max)-int(z_min)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
             #expertmm_region_string = str(x_min) + ":" + str(x_max) + "," + str(z_min) + ":" + str(z_max)
             #cmd_string="sudo python "+script_path+" --input \""+self.config["world_path"]+"\" --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
-            cmd_no_out_string = self.python_exe_path+" "+self.minetestmapper_py_path+" --bgcolor '#000000' --input \""+self.config["world_path"]+"\" --geometry "+geometry_string+" --output \""+tmp_png_path+"\""
+            cmd_no_out_string = self.python_exe_path+" "+self.minetestmapper_py_path+" --bgcolor '"+self.FLAG_EMPTY_HEXCOLOR+"' --input \""+self.config["world_path"]+"\" --geometry "+geometry_string+" --output \""+tmp_png_path+"\""
             cmd_string = cmd_no_out_string + cmd_suffix
             #sudo python /home/owner/minetest/util/minetestmapper.py --bgcolor '#010000' --input "/home/owner/.minetest/worlds/FCAGameAWorld" --output /var/www/html/minetest/chunkymapdata/entire.png > entire-mtmresult.txt
             #sudo python /home/owner/minetest/util/chunkymap/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry 0:0+16+16 --output /var/www/html/minetest/chunkymapdata/chunk_x0z0.png > /home/owner/minetest/util/chunkymap-genresults/chunk_x0z0_mapper_result.txt
@@ -950,6 +1078,7 @@ class MTChunks:
                     self.create_chunk_folder(chunky_x, chunky_z)
                     os.rename(tmp_png_path, dest_png_path)
                     print(min_indent+"(moved to '"+dest_png_path+"')")
+                    self.total_newly_rendered += 1
                     self.prepare_chunk_meta(chunky_x, chunky_z)  # DOES load existing yml if exists
                     self.chunks[chunk_luid].is_fresh = True
                     self.chunks[chunk_luid].metadata["is_empty"] = False
@@ -1264,6 +1393,7 @@ class MTChunks:
                 this_pos = self.todo_positions[self.todo_index]
                 chunky_x, chunky_z = this_pos
                 chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
+                prev_total_newly_rendered = self.total_newly_rendered
                 is_present, reason_string = self.check_chunk(chunky_x, chunky_z)
 
                 if is_present:
@@ -1280,6 +1410,9 @@ class MTChunks:
                     self.save_mapvars_if_changed()
                     prev_len = len(self.todo_positions)
                     self._check_map_pseudorecursion_branchfrom(chunky_x, chunky_z)
+                    #must check_decachunk_containing_chunk AFTER _check_map_pseudorecursion_branchfrom so check_decachunk_containing_chunk can see if there are more to do before rendering superchunk 
+                    if self.total_newly_rendered>prev_total_newly_rendered:
+                        self.check_decachunk_containing_chunk(chunky_x, chunky_z)
                     if self.verbose_enable:
                         print(min_indent+"["+str(self.todo_index)+"] branching from "+str((chunky_x, chunky_z))+" (added "+str(len(self.todo_positions)-prev_len)+")")
                 else:
@@ -1321,6 +1454,7 @@ class MTChunks:
                 self.todo_positions.append((0,0))
                 #self.mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
                 self.verify_correct_map()
+                decachunk_luid_list = list()
                 if self.preload_all_enable:
                     self.preload_all_enable = False
                     minlen=len(self.chunk_yaml_name_opener_string)+4+len(self.chunk_yaml_name_dotext_string)  # +4 for luid, such as x1z2 (ok since just a minimum)
@@ -1337,7 +1471,7 @@ class MTChunks:
                                     #for chunk_filename in decachunk_z_filenames:
                                     for chunk_filename in os.listdir(decachunk_z_path):
                                         chunk_path = os.path.join(decachunk_z_path, chunk_filename)
-                                        #file_fullname = os.path.join(self.chunkymap_data_path,filename)
+                                        #file_fullname = os.path.join(self.chunkymap_thisworld_data_path,filename)
                                         if chunk_filename[:1]!="." and os.path.isfile(chunk_path):
                                             #print ("  EXAMINING "+filename)
                                             #badstart_string = "."
@@ -1347,11 +1481,24 @@ class MTChunks:
                                                 coords = self.get_coords_from_luid(chunk_luid)
                                                 if coords is not None:
                                                     chunky_x, chunky_z = coords
+                                                    decachunk_luid = self.get_decachunk_luid_from_chunk(chunky_x, chunky_z)
+                                                    if decachunk_luid not in decachunk_luid_list:
+                                                        decachunk_luid_list.append(decachunk_luid)
                                                     if "chunk_size" not in self.mapvars:
                                                         print("ERROR: '"+chunk_luid+"' has missing mapvars among {"+str(self.mapvars)+"}")
                                                         break
                                                     print("Checking chunk "+str(coords)+" *"+str(self.mapvars["chunk_size"])+"")
                                                     self.prepare_chunk_meta(chunky_x, chunky_z)
+                    for decachunk_luid in decachunk_luid_list:
+                        coords = self.get_coords_from_luid(decachunk_luid)
+                        if coords is not None:
+                            decachunky_x, decachunky_z = coords
+                            chunky_x = decachunky_x*10
+                            chunky_z = decachunky_z*10
+                            if not os.path.isfile(self.get_decachunk_image_path_from_chunk(chunky_x, chunky_z)):
+                                self.check_decachunk_containing_chunk(chunky_x, chunky_z)
+                        else:
+                            print("ERROR: could not get coords from decachunk luid "+decachunk_luid)
                 for chunk_luid in self.chunks.keys():
                     coords = self.get_coords_from_luid(chunk_luid)
                     chunky_x, chunky_z = coords
@@ -1389,11 +1536,11 @@ class MTChunks:
                     #print("")
                     #print ("Removing ALL map data since from WORLD NAME is different (map '"+str(self.config["world_name"])+"' is not '"+str(self.config["world_name"])+"')...")
                     #print("")
-                    #if os.path.isdir(self.chunkymap_data_path):
-                        #for base_path, dirnames, filenames in os.walk(self.chunkymap_data_path):
+                    #if os.path.isdir(self.chunkymap_thisworld_data_path):
+                        #for base_path, dirnames, filenames in os.walk(self.chunkymap_thisworld_data_path):
                             #for filename in filenames:
                                 #if filename[0] != ".":
-                                    #file_fullname = os.path.join(self.chunkymap_data_path,filename)
+                                    #file_fullname = os.path.join(self.chunkymap_thisworld_data_path,filename)
                                     #if self.verbose_enable:
                                         #print ("  EXAMINING "+filename)
                                     #badstart_string = "chunk"
@@ -1401,12 +1548,12 @@ class MTChunks:
                                         #os.remove(file_fullname)
                                     #elif filename==self.yaml_name:
                                         #os.remove(file_fullname)
-                    #players_path = os.path.join(self.chunkymap_data_path, "players")
+                    #players_path = os.path.join(self.chunkymap_thisworld_data_path, "players")
                     #if os.path.isdir(players_path):
                         #for base_path, dirnames, filenames in os.walk(players_path):
                             #for filename in filenames:
                                 #if filename[0] != ".":
-                                    #file_fullname = os.path.join(self.chunkymap_data_path,filename)
+                                    #file_fullname = os.path.join(self.chunkymap_thisworld_data_path,filename)
                                     #if self.verbose_enable:
                                         #print ("  EXAMINING "+filename)
                                     #badend_string = ".yml"
