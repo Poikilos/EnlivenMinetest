@@ -633,7 +633,7 @@ class MTChunks:
             self.save_config()
 
     def install_website(self):
-        this_source_dir_path = os.path.join(os.path.dirname(os.path.abspath(self.minetestmapper_py_path)), "web")
+        this_source_dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
         this_dest_dir_path = self.config["www_minetest_path"]
         install_list = list()
         install_list.append(InstalledFile("browser.php",this_source_dir_path,this_dest_dir_path))
@@ -652,15 +652,18 @@ class MTChunks:
         for this_object in install_list:
             source_path = os.path.join(this_object.source_dir_path, this_object.file_name)
             installed_path = os.path.join(this_object.dest_dir_path, this_object.file_name)
-            if not os.path.isdir(this_object.dest_dir_path):
-                os.makedirs(this_object.dest_dir_path)
-            if not os.path.isfile(installed_path):
-                shutil.copyfile(source_path, installed_path) # DOES replace destination file
-            else:
-                source_mtime_seconds = time.ctime(os.path.getmtime(source_path))
-                installed_mtime_seconds = time.ctime(os.path.getmtime(installed_path))
-                if source_mtime_seconds>installed_mtime_seconds:
+            if os.path.isfile(source_path):
+                if not os.path.isdir(this_object.dest_dir_path):
+                    os.makedirs(this_object.dest_dir_path)
+                if not os.path.isfile(installed_path):
                     shutil.copyfile(source_path, installed_path) # DOES replace destination file
+                else:
+                    source_mtime_seconds = time.ctime(os.path.getmtime(source_path))
+                    installed_mtime_seconds = time.ctime(os.path.getmtime(installed_path))
+                    if source_mtime_seconds>installed_mtime_seconds:
+                        shutil.copyfile(source_path, installed_path) # DOES replace destination file
+            else:
+                print("WARNING: cannot update file since can't find '"+source_path+"'")
 
 
     def deny_http_access(self, dir_path):
