@@ -339,8 +339,6 @@ class MTChunks:
     total_newly_rendered = None
 
     #region values for subprocess arguments:
-    maxheight = 50
-    minheight = -25
     pixelspernode = 1
     refresh_map_enable = None
     refresh_players_enable = None
@@ -626,7 +624,7 @@ class MTChunks:
         self.mapvars["chunkx_max"] = 0
         self.mapvars["chunkz_max"] = 0
         self.mapvars["chunk_size"] = 16
-        self.mapvars["maxheight"] = 64
+        self.mapvars["maxheight"] = 96
         self.mapvars["minheight"] = -32
         self.mapvars["pixelspernode"] = 1
         self.saved_mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
