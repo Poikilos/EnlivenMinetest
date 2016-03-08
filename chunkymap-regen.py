@@ -59,6 +59,9 @@ class InstalledFile:
         self.source_dir_path=source_dir_path
         self.dest_dir_path=dest_dir_path
 
+def ivec2_equals(pos1, pos2):
+    return (int(pos1[0])==int(pos2[0])) and (int(pos1[1])==int(pos2[1]))
+
 def get_dict_from_conf_file(path,assignment_operator="="):
     results = None
     results = get_dict_modified_by_conf_file(results, path, assignment_operator)
@@ -196,10 +199,10 @@ def is_same_fvec3(list_a, list_b):
 
 
 class MTDecaChunk:
-    
+
     metadata = None
     last_changed_utc_second = None
-    
+
     def __init__(self):
         self.metadata = {}
         self.metadata["last_saved_utc_second"] = None
@@ -576,7 +579,7 @@ class MTChunks:
         if not os.path.isfile(htaccess_path):
             self.deny_http_access(self.chunkymap_data_path)
             print("  (created .htaccess)")
-        
+
         self.world_name = os.path.basename(self.config["world_path"])
         self.chunkymap_thisworld_data_path = os.path.join(self.chunkymap_data_path, self.world_name)
         if not os.path.isdir(self.chunkymap_thisworld_data_path):
@@ -585,7 +588,7 @@ class MTChunks:
         if not os.path.isfile(htaccess_path):
             self.deny_http_access(self.chunkymap_thisworld_data_path)
             print("  (created .htaccess)")
-        
+
         self.data_16px_path = os.path.join(self.chunkymap_thisworld_data_path, "16px")
         if not os.path.isdir(self.data_16px_path):
             os.makedirs(self.data_16px_path)
@@ -601,7 +604,7 @@ class MTChunks:
         if not os.path.isfile(htaccess_path):
             self.deny_http_access(self.data_160px_path)
             print("  (created .htaccess)")
-        
+
         #TODO: deny recursively under these folders? doesn't seem that important for security so maybe not (no player info is there)
 
 
@@ -730,7 +733,7 @@ class MTChunks:
     #locally unique identifier (unique to world only)
     def get_chunk_luid(self, chunky_x, chunky_z):
         return "x"+str(chunky_x)+"z"+str(chunky_z)
-        
+
     def get_decachunk_image_name_from_chunk(self, chunky_x, chunky_z):
         return "decachunk_"+self.get_decachunk_luid_from_chunk(chunky_x, chunky_z)+".jpg"
 
@@ -756,7 +759,7 @@ class MTChunks:
 
     #def get_decachunk_image_tmp_path_from_decachunk(self, chunky_x, chunky_z):
         #return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_decachunk_image_name_from_decachunk(chunky_x, chunky_z))
-        
+
     def get_chunk_image_tmp_path(self, chunky_x, chunky_z):
         return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_chunk_image_name(chunky_x, chunky_z))
 
@@ -765,7 +768,7 @@ class MTChunks:
 
     def get_signal_path(self):
         return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_signal_name())
-    
+
     def check_decachunk_containing_chunk(self, chunky_x, chunky_z):
         chunk16_coord_list = list()
         decachunky_x = int(math.floor(chunky_x/10))
@@ -779,12 +782,12 @@ class MTChunks:
         while chunky_z <= chunk16z_max:
             chunky_x = chunk16x_min
             while chunky_x <=  chunk16x_max:
-                coords = (chunky_x, chunky_z) 
+                coords = (chunky_x, chunky_z)
                 chunk16_coord_list.append( coords )
                 if self.todo_index<len(self.todo_positions):
                     for index in range(self.todo_index,len(self.todo_positions)):
-                        if self.todo_positions == coords:
-                            is_any_part_queued = False
+                        if ivec2_equals(self.todo_positions[self.todo_index], coords):
+                            is_any_part_queued = True
                             break
                 if is_any_part_queued:
                     break
@@ -799,7 +802,7 @@ class MTChunks:
             decachunk_yaml_path = self.get_decachunk_yaml_path_from_decachunk(decachunky_x, decachunky_z)
             decachunk_image_path = self.get_decachunk_image_path_from_decachunk(decachunky_x, decachunky_z)
             combined_count = 0
-            luid_list = list()
+            contains_chunk_luids = list()
             for coord in chunk16_coord_list:
                 chunky_x, chunky_z = coord
                 chunk_image_path = self.get_chunk_image_path(chunky_x, chunky_z)
@@ -817,7 +820,7 @@ class MTChunks:
                         chunk_local_coords = chunk_global_coords[0]-decachunk_global_coords[0], chunk_global_coords[1]-decachunk_global_coords[1]
                         offset = chunk_local_coords[0], 160-chunk_local_coords[1]  # convert to inverted cartesian since that's the coordinate system of images
                         im.paste(chunk_im, offset)
-                        luid_list.append(self.get_chunk_luid(chunky_x, chunky_z))
+                        contains_chunk_luids.append(self.get_chunk_luid(chunky_x, chunky_z))
                     except:
                         print("Could not finish "+participle+" in check_decachunk_containing_chunk:")
                         view_traceback()
@@ -834,10 +837,10 @@ class MTChunks:
             this_second = int(time.time())
             #if int(self.decachunks[decachunk_luid].metadata["last_saved_utc_second"]) != this_second:
             self.decachunks[decachunk_luid].metadata["last_saved_utc_second"] = this_second  # time.time() returns float even if OS doesn't give a time in increments smaller than seconds
-            if len(luid_list)>0:
-                self.decachunks[decachunk_luid].metadata["luid_list"] = ','.join(luid_list)
+            if len(contains_chunk_luids)>0:
+                self.decachunks[decachunk_luid].metadata["contains_chunk_luids"] = ','.join(contains_chunk_luids)
             else:
-                self.decachunks[decachunk_luid].metadata["luid_list"] = None
+                self.decachunks[decachunk_luid].metadata["contains_chunk_luids"] = None
             self.decachunks[decachunk_luid].save_yaml(decachunk_yaml_path)
 
     def get_chunk_folder_path(self, chunky_x, chunky_z):
@@ -1408,7 +1411,7 @@ class MTChunks:
                     self.save_mapvars_if_changed()
                     prev_len = len(self.todo_positions)
                     self._check_map_pseudorecursion_branchfrom(chunky_x, chunky_z)
-                    #must check_decachunk_containing_chunk AFTER _check_map_pseudorecursion_branchfrom so check_decachunk_containing_chunk can see if there are more to do before rendering superchunk 
+                    #must check_decachunk_containing_chunk AFTER _check_map_pseudorecursion_branchfrom so check_decachunk_containing_chunk can see if there are more to do before rendering superchunk
                     if self.total_newly_rendered>prev_total_newly_rendered:
                         self.check_decachunk_containing_chunk(chunky_x, chunky_z)
                     if self.verbose_enable:

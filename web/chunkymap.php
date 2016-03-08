@@ -39,7 +39,7 @@ if (!isset($chunkymap_view_zoom_multiplier)) {
 
 // OPTIONAL:
 $chunkymapdata_path = "chunkymapdata";
-$chunkymap_16px_path = "chunkymapdata/16px";
+$chunkymapdata_thisworld_path = null;
 $showplayers=true;
 
 // NOT OPTIONAL:
@@ -88,8 +88,7 @@ function get_dict_from_conf($path, $assignment_operator) {
     }
     return $result;
 }//end get_dict_from_conf
-
-$map_dict = get_dict_from_conf($chunkymapdata_path."/generated.yml",":");
+$map_dict = null;
 
 //startsWith and endsWith are from:
 //Salmon A. stackoverflow. <http://stackoverflow.com/questions/834303/startswith-and-endswith-functions-in-php>. 5 Feb 2016. 19 Feb, 2016.
@@ -209,8 +208,17 @@ function echo_chunkymap_controls($callback_php_path) {
 
     $in_html="<img src=\"images/$in_img_name\" style=\"width:16pt; height:16pt\" />";
     $out_html="<img src=\"images/$out_img_name\" style=\"width:16pt; height:16pt\" />";
-    if ($is_in) $in_html="<a href=\"?chunkymap_view_zoom_multiplier=$in_zoom#$chunkymap_anchor_name\">$in_html</a>";
-    if ($is_out) $out_html="<a href=\"?chunkymap_view_zoom_multiplier=$out_zoom#$chunkymap_anchor_name\">$out_html</a>";
+	global $world_name;
+	$append_vars="&";
+	if (isset($world_name)) {
+		$prefix = "";
+		if (strlen($append_vars)>0 && !endsWith($append_vars,"&") ) {
+			$prefix = "&";
+		}
+		$append_vars.="$prefix"."world_name=$world_name";
+	}
+    if ($is_in) $in_html="<a href=\"?chunkymap_view_zoom_multiplier=$in_zoom"."$append_vars"."#$chunkymap_anchor_name\">$in_html</a>";
+    if ($is_out) $out_html="<a href=\"?chunkymap_view_zoom_multiplier=$out_zoom"."$append_vars"."#$chunkymap_anchor_name\">$out_html</a>";
     echo $in_html;
     echo $out_html;
 }
@@ -243,7 +251,7 @@ function echo_map_heading_text() {
     // else echo "<span style=\"color:red\">(missing world name)</span>";
 // }
 function get_chunk_folder_path($x, $z) {
-	global $chunkymapdata_path;
+	global $chunkymapdata_thisworld_path;
 	//NOTE: floor converts -.5 to -1 (and -1.5 to -2) but .5 to 0
 	$decachunk_x = intval(floor($x/10));
 	$decachunk_z = intval(floor($z/10));
@@ -251,16 +259,16 @@ function get_chunk_folder_path($x, $z) {
 	//else { $decachunk_x = $x - $x%10; }
 	//if ($z<0) { $decachunk_z = $z + $z%10; }
 	//else { $decachunk_z = $z - $z%10; }
-	$result = $chunkymapdata_path.'/16px/'.$decachunk_x.'/'.$decachunk_z;
+	$result = $chunkymapdata_thisworld_path.'/16px/'.$decachunk_x.'/'.$decachunk_z;
 	return $result;
 }
 
 function get_superchunk_folder_path($x, $z) {
-	global $chunkymapdata_path;
+	global $chunkymapdata_thisworld_path;
 	//NOTE: floor converts -.5 to -1 (and -1.5 to -2) but .5 to 0
 	$hectochunk_x = intval(floor($x/100));
 	$hectochunk_z = intval(floor($z/100));
-	$result = $chunkymapdata_path.'/160px/'.$hectochunk_x.'/'.$hectochunk_z;
+	$result = $chunkymapdata_thisworld_path.'/160px/'.$hectochunk_x.'/'.$hectochunk_z;
 	return $result;
 }
 
@@ -284,6 +292,8 @@ function echo_entire_chunkymap_as_chunk_table() {
     global $chunkymap_tile_original_w;
     global $chunkymap_tile_original_h;
     global $chunkymap_view_zoom_max;
+	global $world_name;
+
     if ($chunkymap_view_zoom_multiplier<$chunkymap_view_zoom_min) $chunkymap_view_zoom_multiplier = $chunkymap_view_zoom_min;
     if ($chunkymap_view_zoom_multiplier>$chunkymap_view_zoom_max) $chunkymap_view_zoom_multiplier = $chunkymap_view_zoom_max;
     //$zoom_divisor = (int)(100/$chunkymap_view_zoom_multiplier);
@@ -301,328 +311,374 @@ function echo_entire_chunkymap_as_chunk_table() {
     $player_count = 0;
     $character_icon_w=8;
     $character_icon_h=8;
-    if ($showplayers==true) {
-        $chunkymap_players_path = $chunkymapdata_path."/players";
-        if ($handle = opendir($chunkymap_players_path)) {
-            while (false !== ($file = readdir($handle))) {
-                if (substr($file, 0, 1) != ".") {
-                    $file_lower = strtolower($file);
-                    if (endsWith($file_lower, ".yml")) {
-                        $player_id=substr($file,0,strlen($file)-4); //-4 for .yml
-                        $file_path = $chunkymap_players_path."/".$file;
-                        $player_dict = get_dict_from_conf($file_path,":");
-                        $player_dict["id"]=$player_id;
-                        //$players[$player_count]=get_dict_from_conf($file_path);
-                        //$players[$player_count]["id"]=$player_id;
-                        //if (isset($player_dict["position"])) {
-                        if (isset($player_dict["x"]) and isset($player_dict["z"])) {
-                            //$tuple_string=trim($player_dict["position"]);
-                            //if ( startsWith($tuple_string, "(") and endsWith($tuple_string, ")") ) {
-                            //  $tuple_string=substr($tuple_string,1,strlen($tuple_string)-2);
-                            //}
-                            //$coordinates = explode(",", $tuple_string);
-                            //if (count($coordinates)==3) {
-                            //$nonchunky_x=(int)$coordinates[0];
-                            //$nonchunky_z=(int)$coordinates[2];
-                            $nonchunky_x=(int)$player_dict["x"];
-                            $nonchunky_z=(int)$player_dict["z"];
-                            $x = (int)( $nonchunky_x/$chunkymap_tile_original_w );
-                            $z = (int)( $nonchunky_z/$chunkymap_tile_original_h );
-                            $chunk_luid = "x".$x."z".$z;
-                            $rel_x = $nonchunky_x - ($x*$chunkymap_tile_original_w);
-                            $rel_z = $nonchunky_z - ($z*$chunkymap_tile_original_h);
-                            if (!isset($chunk_assoc[$chunk_luid])) {
-                                $chunk_assoc[$chunk_luid] = array();
-                            }
-                            if (!isset($chunk_assoc[$chunk_luid]["players"])) {
-                                $chunk_assoc[$chunk_luid]["players"] = array();
-                            }
-                            if (!isset($chunk_assoc[$chunk_luid]["players_count"])) {
-                                $chunk_assoc[$chunk_luid]["players_count"] = 0;
-                            }
-                            //already checked for position in outer case
-                            //DEPRECATED: $chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "position" ] = $player_dict["position"];
-                            $chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "x" ] = $player_dict["x"];
-                            $chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "z" ] = $player_dict["z"];
-                            $chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "rel_x" ] = $rel_x;
-                            $chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "rel_z" ] = $rel_z;
-                            $chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "file_path" ] = $file_path;
+	global $chunkymapdata_thisworld_path;
+	if (isset($world_name)) {
+		$chunkymapdata_thisworld_path = $chunkymapdata_path."/".$world_name;
+		$generated_yml_path = $chunkymapdata_thisworld_path."/generated.yml";
+		if (is_file($generated_yml_path)) {
+			$map_dict = get_dict_from_conf($generated_yml_path,":");
+		}
+		else {
+			echo_error("Missing '".$generated_yml_path."'");
+		}
+		if ($showplayers==true) {
+			$chunkymap_players_path = $chunkymapdata_thisworld_path."/players";
+			if ($handle = opendir($chunkymap_players_path)) {
+				while (false !== ($file = readdir($handle))) {
+					if (substr($file, 0, 1) != ".") {
+						$file_lower = strtolower($file);
+						if (endsWith($file_lower, ".yml")) {
+							$player_id=substr($file,0,strlen($file)-4); //-4 for .yml
+							$file_path = $chunkymap_players_path."/".$file;
+							if (is_file($file_path)) {
+								$player_dict = get_dict_from_conf($file_path,":");
+							}
+							else {
+								echo_error("Missing '$player_dict'");
+							}
+							$player_dict["id"]=$player_id;
+							//$players[$player_count]=get_dict_from_conf($file_path);
+							//$players[$player_count]["id"]=$player_id;
+							//if (isset($player_dict["position"])) {
+							if (isset($player_dict["x"]) and isset($player_dict["z"])) {
+								//$tuple_string=trim($player_dict["position"]);
+								//if ( startsWith($tuple_string, "(") and endsWith($tuple_string, ")") ) {
+								//  $tuple_string=substr($tuple_string,1,strlen($tuple_string)-2);
+								//}
+								//$coordinates = explode(",", $tuple_string);
+								//if (count($coordinates)==3) {
+								//$nonchunky_x=(int)$coordinates[0];
+								//$nonchunky_z=(int)$coordinates[2];
+								$nonchunky_x=(int)$player_dict["x"];
+								$nonchunky_z=(int)$player_dict["z"];
+								$x = (int)( $nonchunky_x/$chunkymap_tile_original_w );
+								$z = (int)( $nonchunky_z/$chunkymap_tile_original_h );
+								$chunk_luid = "x".$x."z".$z;
+								$rel_x = $nonchunky_x - ($x*$chunkymap_tile_original_w);
+								$rel_z = $nonchunky_z - ($z*$chunkymap_tile_original_h);
+								if (!isset($chunk_assoc[$chunk_luid])) {
+									$chunk_assoc[$chunk_luid] = array();
+								}
+								if (!isset($chunk_assoc[$chunk_luid]["players"])) {
+									$chunk_assoc[$chunk_luid]["players"] = array();
+								}
+								if (!isset($chunk_assoc[$chunk_luid]["players_count"])) {
+									$chunk_assoc[$chunk_luid]["players_count"] = 0;
+								}
+								//already checked for position in outer case
+								//DEPRECATED: $chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "position" ] = $player_dict["position"];
+								$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "x" ] = $player_dict["x"];
+								$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "z" ] = $player_dict["z"];
+								$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "rel_x" ] = $rel_x;
+								$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "rel_z" ] = $rel_z;
+								$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "file_path" ] = $file_path;
 
-                            if (isset($player_dict["name"])) {
-                                $chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "name" ] = $player_dict["name"];
-                            }
-                            else {
-                                $chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "name" ] = $player_dict["id"];
-                            }
-                            $chunk_assoc[$chunk_luid]["players_count"] += 1;
-                            //}
-                            //else {
-                            //  echo_error("Bad coordinates $tuple_string for player.");
-                            //}
-                        }
-                        else {
-                            echo_error("Missing player location in data: ".implode(" ",$player_dict));
-                        }
+								if (isset($player_dict["name"])) {
+									$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "name" ] = $player_dict["name"];
+								}
+								else {
+									$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "name" ] = $player_dict["id"];
+								}
+								$chunk_assoc[$chunk_luid]["players_count"] += 1;
+								//}
+								//else {
+								//  echo_error("Bad coordinates $tuple_string for player.");
+								//}
+							}
+							else {
+								echo_error("Missing player location in data: ".implode(" ",$player_dict));
+							}
 
-                        //$player_count++;
-                    }
-                }
-            }
-        }
-    }
-    //if ($map_dict != null) {
-    //  $chunkx_min = $map_dict["chunkx_min"];
-    //  $chunkz_min = $map_dict["chunkz_min"];
-    //  $chunkx_max = $map_dict["chunkx_max"];
-    //  $chunkz_max = $map_dict["chunkz_max"];
-    //}
-    //else {
-        //echo "calculating range...";
-        //NOTE: even though *min and *max could be known from $map_dict, build a dict of chunks in order to align images properly since they are not all the same size:
-		$chunks_16px_path = $chunkymapdata_path.'/'."16px";
-        if ($chunks_16px_handle = opendir($chunks_16px_path)) {
-            while (false !== ($decachunk_x_name = readdir($chunks_16px_handle))) {
-				$decachunk_x_path = $chunks_16px_path."/".$decachunk_x_name;
-                if ((substr($decachunk_x_name, 0, 1) != ".") and is_dir($decachunk_x_path)) {
-					$decachunk_x_handle = opendir($decachunk_x_path);
-					while (false !== ($decachunk_z_name = readdir($decachunk_x_handle))) {
-						$decachunk_z_path = $decachunk_x_path."/".$decachunk_z_name;
-						if ((substr($decachunk_z_name, 0, 1) != ".") and is_dir($decachunk_z_path)) {
-							$decachunk_z_handle = opendir($decachunk_z_path);
-							while (false !== ($chunk_name = readdir($decachunk_z_handle))) {
-								$file_lower = strtolower($chunk_name);
-								if (endsWith($file_lower, $dot_and_ext) and startsWith($file_lower, $x_opener)) {
-									$z_opener_index = strpos($file_lower, $z_opener, strlen($x_opener));
-									if ($z_opener_index !== false) {
-										$x_len = $z_opener_index - strlen($x_opener);
-										$z_len = strlen($file_lower) - strlen($x_opener) - $x_len - strlen($z_opener) - strlen($dot_and_ext);
-										$x = substr($file_lower, strlen($x_opener), $x_len);
-										$z = substr($file_lower, $z_opener_index + strlen($z_opener), $z_len);
-										if (is_int_string($x) and is_int_string($z)) {
-											$chunk_luid = "x".$x."z".$z;
-											if (!isset($chunk_assoc[$chunk_luid])) {
-												$chunk_assoc[$chunk_luid] = array();
+							//$player_count++;
+						}
+					}
+				}
+			}
+		}
+		//if ($map_dict != null) {
+		//  $chunkx_min = $map_dict["chunkx_min"];
+		//  $chunkz_min = $map_dict["chunkz_min"];
+		//  $chunkx_max = $map_dict["chunkx_max"];
+		//  $chunkz_max = $map_dict["chunkz_max"];
+		//}
+		//else {
+			//echo "calculating range...";
+			//NOTE: even though *min and *max could be known from $map_dict, build a dict of chunks in order to align images properly since they are not all the same size:
+			$chunks_16px_path = $chunkymapdata_thisworld_path.'/'."16px";
+			if ($chunks_16px_handle = opendir($chunks_16px_path)) {
+				while (false !== ($decachunk_x_name = readdir($chunks_16px_handle))) {
+					$decachunk_x_path = $chunks_16px_path."/".$decachunk_x_name;
+					if ((substr($decachunk_x_name, 0, 1) != ".") and is_dir($decachunk_x_path)) {
+						$decachunk_x_handle = opendir($decachunk_x_path);
+						while (false !== ($decachunk_z_name = readdir($decachunk_x_handle))) {
+							$decachunk_z_path = $decachunk_x_path."/".$decachunk_z_name;
+							if ((substr($decachunk_z_name, 0, 1) != ".") and is_dir($decachunk_z_path)) {
+								$decachunk_z_handle = opendir($decachunk_z_path);
+								while (false !== ($chunk_name = readdir($decachunk_z_handle))) {
+									$file_lower = strtolower($chunk_name);
+									if (endsWith($file_lower, $dot_and_ext) and startsWith($file_lower, $x_opener)) {
+										$z_opener_index = strpos($file_lower, $z_opener, strlen($x_opener));
+										if ($z_opener_index !== false) {
+											$x_len = $z_opener_index - strlen($x_opener);
+											$z_len = strlen($file_lower) - strlen($x_opener) - $x_len - strlen($z_opener) - strlen($dot_and_ext);
+											$x = substr($file_lower, strlen($x_opener), $x_len);
+											$z = substr($file_lower, $z_opener_index + strlen($z_opener), $z_len);
+											if (is_int_string($x) and is_int_string($z)) {
+												$chunk_luid = "x".$x."z".$z;
+												if (!isset($chunk_assoc[$chunk_luid])) {
+													$chunk_assoc[$chunk_luid] = array();
+												}
+												$chunk_assoc[$chunk_luid]["is_rendered"] = true;
+												if ($is_verbose) echo "$chunk_luid,";
+												if ($x<$chunkx_min) {
+													$chunkx_min=(int)$x;
+												}
+												if ($x>$chunkx_max) {
+													$chunkx_max=(int)$x;
+												}
+												if ($z<$chunkz_min) {
+													$chunkz_min=(int)$z;
+												}
+												if ($z>$chunkz_max) {
+													$chunkz_max=(int)$z;
+												}
 											}
-											$chunk_assoc[$chunk_luid]["is_rendered"] = true;
-											if ($is_verbose) echo "$chunk_luid,";
-											if ($x<$chunkx_min) {
-												$chunkx_min=(int)$x;
+											else {
+												echo "misnamed chunk tile image '$chunk_name' had coordinates ".$x.",".$z." for x,z.";
 											}
-											if ($x>$chunkx_max) {
-												$chunkx_max=(int)$x;
-											}
-											if ($z<$chunkz_min) {
-												$chunkz_min=(int)$z;
-											}
-											if ($z>$chunkz_max) {
-												$chunkz_max=(int)$z;
-											}
-										}
-										else {
-											echo "misnamed chunk tile image '$chunk_name' had coordinates ".$x.",".$z." for x,z.";
 										}
 									}
 								}
+								closedir($decachunk_z_handle);
 							}
-							closedir($decachunk_z_handle);
+						}
+						closedir($decachunk_x_handle);
+					}
+				}
+				if ($is_verbose) echo "checked all chunks.";
+				echo "<!--found chunks in x $chunkx_min to $chunkx_max and z $chunkz_min to $chunkz_max.-->";
+				closedir($chunks_16px_handle);
+			}
+			else {
+				echo_error("could not open $chunks_16px_path");
+			}
+		//}
+
+		$x_count = $chunkx_max - $chunkx_min;
+		$z_count = $chunkz_max - $chunkz_min;
+		echo "\r\n";
+		echo "<center>\r\n";
+		//cellpadding="0" cellspacing="0" still needed for IE
+		echo_hold( "  <table id=\"chunkymapstatictable\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-spacing: 0px; border-style:solid; border-color:gray; border-width:0px\">\r\n");
+		$z = (int)$chunkz_max;
+		$scale=(float)$chunkymap_view_zoom_multiplier; // no longer /100
+		$zoomed_w=(int)((float)$chunkymap_tile_original_w*$scale+.5);
+		$zoomed_h=(int)((float)$chunkymap_tile_original_h*$scale+.5);
+		$genresult_suffix_then_dot_then_ext="_mapper_result.txt";
+		$dot_yaml=".yml";
+		$minute=60;
+		$player_file_age_expired_max_seconds=20*$minute-1;
+		$player_file_age_idle_max_seconds=5*$minute-1;
+		$chunks_16px_path = $chunkymapdata_thisworld_path.'/'."16px";
+		while ($z >= $chunkz_min) {
+			echo_hold( "    <tr>\r\n");
+			$x = (int)$chunkx_min;
+			while ($x <= $chunkx_max) {
+				$this_zoomed_w = $zoomed_w;
+				$this_zoomed_h = $zoomed_h;
+
+				$chunk_yaml_name = $x_opener.$x.$z_opener.$z.$dot_yaml;
+				//$chunk_yaml_path = $chunkymapdata_thisworld_path.'/'.$chunk_yaml_name;
+				//$chunk_yaml_path = $chunks_16px_path.'/'.
+				$chunk_yaml_path = get_chunk_folder_path($x, $z).'/'.$chunk_yaml_name;
+				//$chunk_genresult_name = $x_opener.$x.$z_opener.$z.$genresult_suffix_then_dot_then_ext;
+				//$chunk_genresult_path = $chunkymapdata_thisworld_path.'/'.$chunk_img_name;
+				$td_style_suffix="";
+				$element_align_style_suffix="";
+				$alignment_comment="";
+				//if (is_file($chunk_genresult_path)) {
+					// contains lines such as:
+					//    Result image (w=80 h=64) will be written to chunk_x0z1.png
+					//    ('PNG Region: ', [0, 64, 80, 128])
+					//    ('Pixels PerNode: ', 1)
+					// where PNG Region's list value is an exclusive rect ordered as x1, y1, x2, y2
+					//$found_original_w = null;
+					//$found_original_h = null;
+					//$this_zoomed_w=(int)((float)$found_original_w*$scale+.5);
+					//this_zoomed_h=(int)((float)$found_original_h*$scale+.5);
+				//}
+				if (is_file($chunk_yaml_path)) {
+					// contains lines such as:
+					//is_marked_empty:False
+					//is_marked:True
+					//image_w:80
+					//image_h:80
+					//image_left:0
+					//image_top:64
+					//image_right:-80
+					//image_bottom:-16
+					// where if is_marked_empty, the remaining values don't exist
+					$expected_left = (int)$x * (int)$chunkymap_tile_original_w;
+					$expected_top = (int)$z * (int)$chunkymap_tile_original_h;
+					$expected_right = (int)$x + (int)$chunkymap_tile_original_w;
+					$expected_bottom = (int)$z + (int)$chunkymap_tile_original_h;
+					$chunk_dict = get_dict_from_conf($chunk_yaml_path,":");
+					if (isset($chunk_dict["image_w"])) {
+						$this_zoomed_w=(int)((float)$chunk_dict["image_w"]*$scale+.5);
+					}
+					if (isset($chunk_dict["image_h"])) {
+						$this_zoomed_h=(int)((float)$chunk_dict["image_h"]*$scale+.5);
+					}
+					//TODO: use image_* to determine (if the doesn't touch certain sides of image_w x image_h rect, change the following accordingly)
+					if (isset($chunk_dict["image_left"])) {
+						if (isset($chunk_dict["image_right"])) {
+							if ( (int)$chunk_dict["image_left"] > $expected_left ) {
+								$td_style_suffix.="text-align:right;";
+								//$alignment_comment.="<!-- image_left:".$chunk_dict["image_left"]." is greater than expected $expected_left-->";
+							}
+							//elseif ( (int)$chunk_dict["image_right"] < $expected_right ) {
+							//  $td_style_suffix.="text-align:left;";
+							//}
+							else {
+								$td_style_suffix.="text-align:left;";
+								//$alignment_comment.="<!-- image_left:".$chunk_dict["image_left"]." was the expected $expected_left-->";
+							}
 						}
 					}
-					closedir($decachunk_x_handle);
-                }
-            }
-            if ($is_verbose) echo "checked all chunks.";
-            echo "<!--found chunks in x $chunkx_min to $chunkx_max and z $chunkz_min to $chunkz_max.-->";
-			closedir($chunks_16px_handle);
-        }
-        else {
-            echo_error("could not open $chunks_16px_path");
-        }
-    //}
 
-    $x_count = $chunkx_max - $chunkx_min;
-    $z_count = $chunkz_max - $chunkz_min;
-    echo "\r\n";
-    echo "<center>\r\n";
-    //cellpadding="0" cellspacing="0" still needed for IE
-    echo_hold( "  <table id=\"chunkymapstatictable\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-spacing: 0px; border-style:solid; border-color:gray; border-width:0px\">\r\n");
-    $z = (int)$chunkz_max;
-    $scale=(float)$chunkymap_view_zoom_multiplier; // no longer /100
-    $zoomed_w=(int)((float)$chunkymap_tile_original_w*$scale+.5);
-    $zoomed_h=(int)((float)$chunkymap_tile_original_h*$scale+.5);
-    $genresult_suffix_then_dot_then_ext="_mapper_result.txt";
-    $dot_yaml=".yml";
-    $minute=60;
-    $player_file_age_expired_max_seconds=20*$minute-1;
-    $player_file_age_idle_max_seconds=5*$minute-1;
-	$chunks_16px_path = $chunkymapdata_path.'/'."16px";
-    while ($z >= $chunkz_min) {
-        echo_hold( "    <tr>\r\n");
-        $x = (int)$chunkx_min;
-        while ($x <= $chunkx_max) {
-            $this_zoomed_w = $zoomed_w;
-            $this_zoomed_h = $zoomed_h;
+					//if (isset($chunk_dict["image_right"])) {
+					//  if ( (int)$chunk_dict["image_right"] != $expected_right ) {
+					//      $td_style_suffix.="text-align:left;";
+					//  }
+					//  //else {
+					//  //  $td_style_suffix.="text-align:left;";
+					//  //}
+					//}
 
-            $chunk_yaml_name = $x_opener.$x.$z_opener.$z.$dot_yaml;
-            //$chunk_yaml_path = $chunkymapdata_path.'/'.$chunk_yaml_name;
-			//$chunk_yaml_path = $chunks_16px_path.'/'.
-			$chunk_yaml_path = get_chunk_folder_path($x, $z).'/'.$chunk_yaml_name;
-            //$chunk_genresult_name = $x_opener.$x.$z_opener.$z.$genresult_suffix_then_dot_then_ext;
-            //$chunk_genresult_path = $chunkymapdata_path.'/'.$chunk_img_name;
-            $td_style_suffix="";
-            $element_align_style_suffix="";
-            $alignment_comment="";
-            //if (is_file($chunk_genresult_path)) {
-                // contains lines such as:
-                //    Result image (w=80 h=64) will be written to chunk_x0z1.png
-                //    ('PNG Region: ', [0, 64, 80, 128])
-                //    ('Pixels PerNode: ', 1)
-                // where PNG Region's list value is an exclusive rect ordered as x1, y1, x2, y2
-                //$found_original_w = null;
-                //$found_original_h = null;
-                //$this_zoomed_w=(int)((float)$found_original_w*$scale+.5);
-                //this_zoomed_h=(int)((float)$found_original_h*$scale+.5);
-            //}
-            if (is_file($chunk_yaml_path)) {
-                // contains lines such as:
-                //is_marked_empty:False
-                //is_marked:True
-                //image_w:80
-                //image_h:80
-                //image_left:0
-                //image_top:64
-                //image_right:-80
-                //image_bottom:-16
-                // where if is_marked_empty, the remaining values don't exist
-                $expected_left = (int)$x * (int)$chunkymap_tile_original_w;
-                $expected_top = (int)$z * (int)$chunkymap_tile_original_h;
-                $expected_right = (int)$x + (int)$chunkymap_tile_original_w;
-                $expected_bottom = (int)$z + (int)$chunkymap_tile_original_h;
-                $chunk_dict = get_dict_from_conf($chunk_yaml_path,":");
-                if (isset($chunk_dict["image_w"])) {
-                    $this_zoomed_w=(int)((float)$chunk_dict["image_w"]*$scale+.5);
-                }
-                if (isset($chunk_dict["image_h"])) {
-                    $this_zoomed_h=(int)((float)$chunk_dict["image_h"]*$scale+.5);
-                }
-                //TODO: use image_* to determine (if the doesn't touch certain sides of image_w x image_h rect, change the following accordingly)
-                if (isset($chunk_dict["image_left"])) {
-                    if (isset($chunk_dict["image_right"])) {
-                        if ( (int)$chunk_dict["image_left"] > $expected_left ) {
-                            $td_style_suffix.="text-align:right;";
-                            //$alignment_comment.="<!-- image_left:".$chunk_dict["image_left"]." is greater than expected $expected_left-->";
-                        }
-                        //elseif ( (int)$chunk_dict["image_right"] < $expected_right ) {
-                        //  $td_style_suffix.="text-align:left;";
-                        //}
-                        else {
-                            $td_style_suffix.="text-align:left;";
-                            //$alignment_comment.="<!-- image_left:".$chunk_dict["image_left"]." was the expected $expected_left-->";
-                        }
-                    }
-                }
+					if (isset($chunk_dict["image_top"])) {
+						if (isset($chunk_dict["image_bottom"])) {
+							if ( (int)$chunk_dict["image_top"] > $expected_top) {
+								$element_align_style_suffix.="vertical-align:bottom;";
+								//$alignment_comment.="<!-- image_top:".$chunk_dict["image_top"]." is greater than expected $expected_top-->";
+							}
+							//elseif ( (int)$chunk_dict["image_bottom"] < $expected_bottom) {
+							//  $element_align_style_suffix.="vertical-align:top;";
+							//}
+							else {
+								$element_align_style_suffix.="vertical-align:top;";
+								//$alignment_comment.="<!-- image_top:".$chunk_dict["image_top"]." was the expected $expected_top-->";
+							}
+						}
+					}
+					//if (isset($chunk_dict["image_bottom"])) {
+					//  if ( (int)$chunk_dict["image_bottom"] != $expected_bottom) {
+					//      $element_align_style_suffix.="vertical-align:top;";
+					//  }
+					//  //else {
+					//  //  $element_align_style_suffix.="vertical-align:bottom;";
+					//  //}
+					//}
 
-                //if (isset($chunk_dict["image_right"])) {
-                //  if ( (int)$chunk_dict["image_right"] != $expected_right ) {
-                //      $td_style_suffix.="text-align:left;";
-                //  }
-                //  //else {
-                //  //  $td_style_suffix.="text-align:left;";
-                //  //}
-                //}
+					//$element_align_style_suffix.="vertical-align:left;";
+				}
 
-                if (isset($chunk_dict["image_top"])) {
-                    if (isset($chunk_dict["image_bottom"])) {
-                        if ( (int)$chunk_dict["image_top"] > $expected_top) {
-                            $element_align_style_suffix.="vertical-align:bottom;";
-                            //$alignment_comment.="<!-- image_top:".$chunk_dict["image_top"]." is greater than expected $expected_top-->";
-                        }
-                        //elseif ( (int)$chunk_dict["image_bottom"] < $expected_bottom) {
-                        //  $element_align_style_suffix.="vertical-align:top;";
-                        //}
-                        else {
-                            $element_align_style_suffix.="vertical-align:top;";
-                            //$alignment_comment.="<!-- image_top:".$chunk_dict["image_top"]." was the expected $expected_top-->";
-                        }
-                    }
-                }
-                //if (isset($chunk_dict["image_bottom"])) {
-                //  if ( (int)$chunk_dict["image_bottom"] != $expected_bottom) {
-                //      $element_align_style_suffix.="vertical-align:top;";
-                //  }
-                //  //else {
-                //  //  $element_align_style_suffix.="vertical-align:bottom;";
-                //  //}
-                //}
+				echo_hold( "      <td width=\"1\" style=\"padding:0px; background-color:lightgray; $td_style_suffix $element_align_style_suffix\">");
+				echo_hold("<div style=\"position: relative\">"); //causes child's absolute position to be relative to this div's location, as per http://www.w3schools.com/css/tryit.asp?filename=trycss_position_absolute
+				$chunk_luid = "x".$x."z".$z;
+				$chunk_img_name = $x_opener.$x.$z_opener.$z."$dot_and_ext";
+				$chunk_img_path = get_chunk_folder_path($x, $z).'/'.$chunk_img_name;
+				if (is_file($chunk_img_path)) {
+					echo_hold( "<img class=\"maptileimg\" style=\"width:$this_zoomed_w; height:$this_zoomed_h;\" src=\"$chunk_img_path\"/>");
+				}
+				else {
+					//echo_hold( "<span style=\"font-size:1px\">&nbsp;</span>");
+				}
+				if (isset($chunk_assoc[$chunk_luid]["players_count"])) {
+					echo "<!--CHUNK $chunk_luid: players_count=".$chunk_assoc[$chunk_luid]["players_count"]."-->";
+					$nonprivate_name_beginning_char_count = 20;
 
-                //$element_align_style_suffix.="vertical-align:left;";
-            }
+					for ($player_count=0; $player_count<$chunk_assoc[$chunk_luid]["players_count"]; $player_count++) {
+						$rel_x = $chunk_assoc[$chunk_luid][ "players" ][ $player_count ]["rel_x"];
+						$rel_z = $chunk_assoc[$chunk_luid][ "players" ][ $player_count ]["rel_z"];
+						$is_expired=false;
+						$is_idle=false;
+						if (isset($chunk_assoc[$chunk_luid][ "players" ][ $player_count ]["file_path"])) {
+							$last_player_update_time=filemtime($chunk_assoc[$chunk_luid][ "players" ][ $player_count ]["file_path"]);
+							if (time()-$last_player_update_time > $player_file_age_expired_max_seconds) {
+								$is_expired=true;
+							}
+							elseif (time()-$last_player_update_time > $player_file_age_idle_max_seconds) {
+								$is_idle=true;
+							}
+						}
+						$player_name = $chunk_assoc[$chunk_luid]["players"][$player_count]["name"];
+						if (strlen($chunk_assoc[$chunk_luid]["players"][$player_count]["name"])>$nonprivate_name_beginning_char_count) {
+							$player_name = substr($player_name, 0, $nonprivate_name_beginning_char_count)."*";
+						}
+						//show head full size (not zoomed):
+						$zoomed_head_w=$character_icon_w;//(int)((float)$character_icon_w*$scale+.5);
+						$zoomed_head_h=$character_icon_h;//(int)((float)$character_icon_h*$scale+.5);
+						$rel_x -= (int)($zoomed_head_w/2);
+						$rel_z -= (int)($zoomed_head_h/2);
+						//$img_style="position:absolute; ";
+						$img_style="";
+						$img_border_style="border: 1px solid white;";
+						$text_style="color:white;";
+						if ($is_expired==false) {
+							if ($is_idle==true) {
+								$img_border_style="border: 1px solid rgba(128,128,128,.5);";
+								$img_style.="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
+								$text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
+							}
+							echo_hold( "<div style=\"position:absolute; z-index:999; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; $img_border_style\"><img src=\"chunkymapdata/players/singleplayer.png\" style=\"$img_style\"/><span style=\"$text_style\">$player_name</span></div>" );
+						}
+						//$position_offset_x+=$character_icon_w;
+					}
+				}
+				else echo "<!--CHUNK $chunk_luid: no player count-->";
 
-            echo_hold( "      <td width=\"1\" style=\"padding:0px; background-color:lightgray; $td_style_suffix $element_align_style_suffix\">");
-            echo_hold("<div style=\"position: relative\">"); //causes child's absolute position to be relative to this div's location, as per http://www.w3schools.com/css/tryit.asp?filename=trycss_position_absolute
-            $chunk_luid = "x".$x."z".$z;
-            $chunk_img_name = $x_opener.$x.$z_opener.$z."$dot_and_ext";
-            $chunk_img_path = get_chunk_folder_path($x, $z).'/'.$chunk_img_name;
-            if (is_file($chunk_img_path)) {
-                echo_hold( "<img class=\"maptileimg\" style=\"width:$this_zoomed_w; height:$this_zoomed_h;\" src=\"$chunk_img_path\"/>");
-            }
-            else {
-                //echo_hold( "<span style=\"font-size:1px\">&nbsp;</span>");
-            }
-            if (isset($chunk_assoc[$chunk_luid]["players_count"])) {
-                echo "<!--CHUNK $chunk_luid: players_count=".$chunk_assoc[$chunk_luid]["players_count"]."-->";
-                $nonprivate_name_beginning_char_count = 20;
-
-                for ($player_count=0; $player_count<$chunk_assoc[$chunk_luid]["players_count"]; $player_count++) {
-                    $rel_x = $chunk_assoc[$chunk_luid][ "players" ][ $player_count ]["rel_x"];
-                    $rel_z = $chunk_assoc[$chunk_luid][ "players" ][ $player_count ]["rel_z"];
-                    $is_expired=false;
-                    $is_idle=false;
-                    if (isset($chunk_assoc[$chunk_luid][ "players" ][ $player_count ]["file_path"])) {
-                        $last_player_update_time=filemtime($chunk_assoc[$chunk_luid][ "players" ][ $player_count ]["file_path"]);
-                        if (time()-$last_player_update_time > $player_file_age_expired_max_seconds) {
-                            $is_expired=true;
-                        }
-                        elseif (time()-$last_player_update_time > $player_file_age_idle_max_seconds) {
-                            $is_idle=true;
-                        }
-                    }
-                    $player_name = $chunk_assoc[$chunk_luid]["players"][$player_count]["name"];
-                    if (strlen($chunk_assoc[$chunk_luid]["players"][$player_count]["name"])>$nonprivate_name_beginning_char_count) {
-                        $player_name = substr($player_name, 0, $nonprivate_name_beginning_char_count)."*";
-                    }
-                    //show head full size (not zoomed):
-                    $zoomed_head_w=$character_icon_w;//(int)((float)$character_icon_w*$scale+.5);
-                    $zoomed_head_h=$character_icon_h;//(int)((float)$character_icon_h*$scale+.5);
-                    $rel_x -= (int)($zoomed_head_w/2);
-                    $rel_z -= (int)($zoomed_head_h/2);
-                    //$img_style="position:absolute; ";
-                    $img_style="";
-                    $img_border_style="border: 1px solid white;";
-                    $text_style="color:white;";
-                    if ($is_expired==false) {
-                        if ($is_idle==true) {
-                            $img_border_style="border: 1px solid rgba(128,128,128,.5);";
-                            $img_style.="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
-                            $text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
-                        }
-                        echo_hold( "<div style=\"position:absolute; z-index:999; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; $img_border_style\"><img src=\"chunkymapdata/players/singleplayer.png\" style=\"$img_style\"/><span style=\"$text_style\">$player_name</span></div>" );
-                    }
-                    //$position_offset_x+=$character_icon_w;
-                }
-            }
-            else echo "<!--CHUNK $chunk_luid: no player count-->";
-
-            //echo "        <br/>".$x.",0,".$z;
-            echo_hold($alignment_comment);
-            echo_hold("</div>");
-            echo_hold( "</td>\r\n");
-            $x++;
-        }
-        echo_hold( "    </tr>\r\n");
-        echo_release();
-        $z--;
-    }
-    echo "  </table>\r\n";
-    echo "</center>\r\n";
+				//echo "        <br/>".$x.",0,".$z;
+				echo_hold($alignment_comment);
+				echo_hold("</div>");
+				echo_hold( "</td>\r\n");
+				$x++;
+			}
+			echo_hold( "    </tr>\r\n");
+			echo_release();
+			$z--;
+		}
+		echo "  </table>\r\n";
+		echo "</center>\r\n";
+	}
+	else { //not isset($world_name)
+		echo "<h4>Choose world:</h4>";
+		echo "<ul>";
+		if ($chunkymapdata_handle = opendir($chunkymapdata_path)) {
+			$append_vars="&";
+			if (isset($chunkymap_view_zoom_multiplier)) {
+				$prefix = "";
+				if (strlen($append_vars)>0 and !endsWith($append_vars,"&")) {
+					$prefix = "&";
+				}
+				$append_vars.="$prefix"."&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier";
+			}
+			if (isset($chunkymap_anchor_name)) {
+				$prefix = "";
+				if (strlen($append_vars)>0) {
+					$prefix = "&";
+				}
+				$append_vars.="$prefix"."#$chunkymap_anchor_name";
+			}
+			global $chunkymap_anchor_name;
+			while (false !== ($this_world_name = readdir($chunkymapdata_handle))) {
+				if (substr($this_world_name, 0, 1) != ".") {
+					$this_world_path = $chunkymapdata_path."/".$this_world_name;
+					echo "<li><a href=\"?world_name=$this_world_name"."$append_vars#$chunkymap_anchor_name"."\">$this_world_name</a></li>";
+				}
+			}
+			closedir($chunkymapdata_handle);
+		}
+		echo "</ul>";
+	}
 }
 ?>
