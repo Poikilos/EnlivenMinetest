@@ -395,6 +395,7 @@ class MTChunks:
         is_config_changed = False
         if not os.path.isfile(self.config_path):
             is_config_changed = True
+            print("Creating '"+self.config_path+"'")
         #if self.config is None:
         self.mapvars["total_generated_count"] = 0
         self.rendered_count = 0
