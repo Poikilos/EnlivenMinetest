@@ -24,9 +24,10 @@ MT_MY_WEBSITE_PATH=/var/www/html/minetest
 if [ -f "$HOME/Downloads/minetest-chunkymap/web/chunkymap.php" ]; then
 	if [ -f "$MT_MY_WEBSITE_PATH/chunkymap.php" ]; then
 		sudo cp -f "$HOME/Downloads/minetest-chunkymap/web/chunkymap.php" "$MT_MY_WEBSITE_PATH/"
-		sudo cp --no-clobber "$HOME/Downloads/minetest-chunkymap/web/example.php" "$MT_MY_WEBSITE_PATH/viewchunkymap.php"
+		#sudo cp --no-clobber "$HOME/Downloads/minetest-chunkymap/web/example.php" "$MT_MY_WEBSITE_PATH/viewchunkymap.php"
+		sudo cp -f "$HOME/Downloads/minetest-chunkymap/web/example.php" "$MT_MY_WEBSITE_PATH/example.php"
 		# cannot put wildcard in quotes on unix
-		sudo cp -R --no-clobber $HOME/Downloads/minetest-chunkymap/web/images/* "$MT_MY_WEBSITE_PATH/images/"
+		#sudo cp -R --no-clobber $HOME/Downloads/minetest-chunkymap/web/images/* "$MT_MY_WEBSITE_PATH/images/"
 		#--no-clobber: do not overwrite existing
 	fi
 fi

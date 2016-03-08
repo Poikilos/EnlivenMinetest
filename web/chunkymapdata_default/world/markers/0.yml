@@ -1,4 +1,4 @@
-label:start
+text:Starting Location
 location:0.0,0.0
 image:chunkymapdata/images/start.png
 comment:formerly chunk_markers_x0z0.yml

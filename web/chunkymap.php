@@ -375,10 +375,10 @@ function echo_entire_chunkymap_as_chunk_table() {
 								$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "file_path" ] = $file_path;
 
 								if (isset($player_dict["name"])) {
-									$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "name" ] = $player_dict["name"];
+									$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "text" ] = $player_dict["name"];
 								}
 								else {
-									$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "name" ] = $player_dict["id"];
+									$chunk_assoc[$chunk_luid][ "players" ][ $chunk_assoc[$chunk_luid]["players_count"] ][ "text" ] = $player_dict["id"];
 								}
 								$chunk_assoc[$chunk_luid]["players_count"] += 1;
 								//}
@@ -394,8 +394,65 @@ function echo_entire_chunkymap_as_chunk_table() {
 						}
 					}
 				}
+				closedir($handle);
 			}
 		}
+		
+		$chunkymap_markers_path = $chunkymapdata_thisworld_path."/markers";
+		if ($handle = opendir($chunkymap_markers_path)) {
+			while (false !== ($file_name = readdir($handle))) {
+				if (substr($file_name, 0, 1) != ".") {
+					$file_name_lower = strtolower($file_name);
+					if (endsWith($file_name_lower, ".yml")) {
+						$file_path = $chunkymap_markers_path."/".$file_name;
+						$marker_vars = get_dict_from_conf($file_path, ":");
+						$abs_pos = explode(",",$marker_vars["location"]);
+						if (count($abs_pos)==3) {
+							//convert from 3d to 2d:
+							$abs_pos[1]=$abs_pos[3];
+						}
+						//$text = "";
+						//if (isset($marker_vars["text"])) {
+						//	$text = $marker_vars["text"];
+						//}
+						if (count($abs_pos)>=2) {
+							$chunky_x = intval($abs_pos[0]/$chunkymap_tile_original_w);
+							$chunky_z = intval($abs_pos[1]/$chunkymap_tile_original_h);
+							$rel_x = intval($abs_pos[0]) - ($chunky_x*$chunkymap_tile_original_w);
+							$rel_z = intval($abs_pos[1]) - ($chunky_z*$chunkymap_tile_original_h);
+							$chunk_luid = 'x'.$chunky_x.'z'.$chunky_z;
+							if (!isset($chunk_assoc[$chunk_luid])) {
+								$chunk_assoc[$chunk_luid] = array();
+							}
+							if (!isset($chunk_assoc[$chunk_luid]["markers"])) {
+								$chunk_assoc[$chunk_luid]["markers"] = array();
+							}
+							if (!isset($chunk_assoc[$chunk_luid]["markers_count"])) {
+								$chunk_assoc[$chunk_luid]["markers_count"] = 0;
+							}
+							
+							$chunk_assoc[$chunk_luid][ "markers" ][ $chunk_assoc[$chunk_luid]["markers_count"] ][ "x" ] = $abs_pos[0];
+							$chunk_assoc[$chunk_luid][ "markers" ][ $chunk_assoc[$chunk_luid]["markers_count"] ][ "z" ] = $abs_pos[1];
+							$chunk_assoc[$chunk_luid][ "markers" ][ $chunk_assoc[$chunk_luid]["markers_count"] ][ "rel_x" ] = $rel_x;
+							$chunk_assoc[$chunk_luid][ "markers" ][ $chunk_assoc[$chunk_luid]["markers_count"] ][ "rel_z" ] = $rel_z;
+							if (isset($marker_vars["image"])) {
+								$chunk_assoc[$chunk_luid][ "markers" ][ $chunk_assoc[$chunk_luid]["markers_count"] ][ "image" ] = $marker_vars["image"];
+							}
+							if (isset($marker_vars["text"])) {
+								$chunk_assoc[$chunk_luid][ "markers" ][ $chunk_assoc[$chunk_luid]["markers_count"] ][ "text" ] = $marker_vars["text"];
+							}
+							
+							$chunk_assoc[$chunk_luid]["markers_count"] += 1;
+						}
+						else {
+							echo_error("Bad location in marker file '$file_path'");
+						}
+					}
+				}
+			}
+		}
+		
+		
 		//if ($map_dict != null) {
 		//  $chunkx_min = $map_dict["chunkx_min"];
 		//  $chunkz_min = $map_dict["chunkz_min"];
@@ -612,9 +669,9 @@ function echo_entire_chunkymap_as_chunk_table() {
 								$is_idle=true;
 							}
 						}
-						$player_name = $chunk_assoc[$chunk_luid]["players"][$player_count]["name"];
-						if (strlen($chunk_assoc[$chunk_luid]["players"][$player_count]["name"])>$nonprivate_name_beginning_char_count) {
-							$player_name = substr($player_name, 0, $nonprivate_name_beginning_char_count)."*";
+						$text = $chunk_assoc[$chunk_luid]["players"][$player_count]["text"];
+						if (strlen($chunk_assoc[$chunk_luid]["players"][$player_count]["text"])>$nonprivate_name_beginning_char_count) {
+							$text = substr($text, 0, $nonprivate_name_beginning_char_count)."*";
 						}
 						//show head full size (not zoomed):
 						$zoomed_head_w=$character_icon_w;//(int)((float)$character_icon_w*$scale+.5);
@@ -631,13 +688,66 @@ function echo_entire_chunkymap_as_chunk_table() {
 								$img_style.="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
 								$text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
 							}
-							echo_hold( "<div style=\"position:absolute; z-index:999; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; $img_border_style\"><img src=\"$chunkymapdata_thisworld_path/players/singleplayer.png\" style=\"$img_style\"/><span style=\"$text_style\">$player_name</span></div>" );
+							echo_hold( "<div style=\"position:absolute; z-index:999; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; $img_border_style\"><img src=\"$chunkymapdata_thisworld_path/players/singleplayer.png\" style=\"$img_style\"/><span style=\"$text_style\">$text</span></div>" );
 						}
 						//$position_offset_x+=$character_icon_w;
 					}
 				}
 				else echo "<!--CHUNK $chunk_luid: no player count-->";
 
+				if (isset($chunk_assoc[$chunk_luid]["markers_count"])) {
+					echo "<!--CHUNK $chunk_luid: markers_count=".$chunk_assoc[$chunk_luid]["markers_count"]."-->";
+					$nonprivate_name_beginning_char_count = 20;
+
+					for ($marker_count=0; $marker_count<$chunk_assoc[$chunk_luid]["markers_count"]; $marker_count++) {
+						$rel_x = $chunk_assoc[$chunk_luid][ "markers" ][ $marker_count ]["rel_x"];
+						$rel_z = $chunk_assoc[$chunk_luid][ "markers" ][ $marker_count ]["rel_z"];
+						$is_expired=false;
+						$is_idle=false;
+						// if (isset($chunk_assoc[$chunk_luid][ "markers" ][ $marker_count ]["file_path"])) {
+							// $last_marker_update_time=filemtime($chunk_assoc[$chunk_luid][ "markers" ][ $marker_count ]["file_path"]);
+							// if (time()-$last_marker_update_time > $marker_file_age_expired_max_seconds) {
+								// $is_expired=true;
+							// }
+							// elseif (time()-$last_marker_update_time > $marker_file_age_idle_max_seconds) {
+								// $is_idle=true;
+							// }
+						// }
+						
+						$text = $chunk_assoc[$chunk_luid]["markers"][$marker_count]["text"];
+						$image_path = "";
+						if (isset($chunk_assoc[$chunk_luid]["markers"][$marker_count]["image"])) {
+							$image_path = $chunk_assoc[$chunk_luid]["markers"][$marker_count]["image"];
+						}
+						if (strlen($chunk_assoc[$chunk_luid]["markers"][$marker_count]["text"])>$nonprivate_name_beginning_char_count) {
+							$text = substr($text, 0, $nonprivate_name_beginning_char_count)."*";
+						}
+						//show head full size (not zoomed):
+						//$zoomed_head_w=$character_icon_w;//(int)((float)$character_icon_w*$scale+.5);
+						//$zoomed_head_h=$character_icon_h;//(int)((float)$character_icon_h*$scale+.5);
+						$zoomed_image_w=16;
+						$zoomed_image_h=16;
+						$rel_x -= (int)($zoomed_image_w/2);
+						$rel_z -= (int)($zoomed_image_h/2);
+						//$img_style="position:absolute; ";
+						$img_style="";
+						$img_border_style="";
+						//$img_border_style="border: 1px solid white;";
+						$text_style="color:white;";
+						if ($is_expired==false) {
+							if ($is_idle==true) {
+								$img_border_style="";
+								//$img_border_style="border: 1px solid rgba(128,128,128,.5);";
+								$img_style.="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
+								$text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
+							}
+							echo_hold( "<div style=\"position:absolute; z-index:999; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; $img_border_style\"><img src=\"$image_path\" style=\"$img_style\"/><span style=\"$text_style\">$text</span></div>" );
+						}
+						//$position_offset_x+=$character_icon_w;
+					}
+				}
+				else echo "<!--CHUNK $chunk_luid: no player count-->";
+				
 				//echo "        <br/>".$x.",0,".$z;
 				echo_hold($alignment_comment);
 				echo_hold("</div>");
