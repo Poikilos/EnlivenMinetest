@@ -725,6 +725,9 @@ class MTChunks:
         source_chunkymapdata_players = os.path.join(source_web_chunkymapdata_world_path, "players")
         dest_chunkymapdata_players = os.path.join(self.chunkymap_thisworld_data_path, "players")
         install_list.append(InstalledFile("singleplayer.png", source_chunkymapdata_players, dest_chunkymapdata_players))
+        source_chunkymapdata_markers = os.path.join(source_web_chunkymapdata_world_path, "markers")
+        dest_chunkymapdata_markers = os.path.join(self.chunkymap_thisworld_data_path, "markers")
+        install_list.append(InstalledFile("0.yml", source_chunkymapdata_markers, dest_chunkymapdata_markers))
         for this_object in install_list:
             source_path = os.path.join(this_object.source_dir_path, this_object.file_name)
             installed_path = os.path.join(this_object.dest_dir_path, this_object.file_name)
