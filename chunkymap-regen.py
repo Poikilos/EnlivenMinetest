@@ -507,7 +507,7 @@ class MTChunks:
                 else:
                     print("(and no world could be found in worlds_path '"+self.config["worlds_path"]+"')")
 
-            input_string = raw_input("World path (blank for ["+self.config["world_path"]+"]): ")
+            input_string = raw_input("World path--must type full path (blank for ["+self.config["world_path"]+"]): ")
             if (len(input_string)>0):
                 self.config["world_path"] = input_string
                 auto_chosen_world = False
