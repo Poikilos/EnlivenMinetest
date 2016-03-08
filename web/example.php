@@ -26,9 +26,6 @@ if (is_file('chunkymap.php')) {
 	echo "</center>";
 	set_chunkymap_view($chunkymap_view_x,$chunkymap_view_z,$chunkymap_view_zoom_multiplier);
 	echo "<table><tr><td style=\"text-align:left\">";
-	echo_chunkymap_anchor();
-	echo_chunkymap_controls(__FILE__);
-	echo " ".($chunkymap_view_zoom_multiplier*100.0)."%";//(string)((int)($chunkymap_view_zoom_multiplier*100+.5));
 	echo_entire_chunkymap_as_chunk_table();
 	echo "</td></tr></table>";
 	//echo "returned from echo_entire_chunkymap_as_chunk_table.";

@@ -128,7 +128,7 @@ function echo_chunkymap_anchor() {
     global $chunkymap_anchor_name;
     echo "<a name=\"$chunkymap_anchor_name\"></a>";
 }
-function echo_chunkymap_controls($callback_php_path) {
+function echo_chunkymap_controls() {
     global $chunkymap_view_x;
     global $chunkymap_view_z;
     global $chunkymap_view_zoom_multiplier;
@@ -279,6 +279,10 @@ function echo_entire_chunkymap_as_chunk_table() {
     error_reporting(E_ALL);
     //error_reporting(-1);
 
+	echo_chunkymap_anchor();
+	echo_chunkymap_controls();
+	echo " ".($chunkymap_view_zoom_multiplier*100.0)."%";//(string)((int)($chunkymap_view_zoom_multiplier*100+.5));
+
     global $is_echo_never_held;
     $is_echo_never_held=true;
     global $chunkymap_view_x;
@@ -313,6 +317,21 @@ function echo_entire_chunkymap_as_chunk_table() {
     $character_icon_w=8;
     $character_icon_h=8;
 	global $chunkymapdata_thisworld_path;
+	if (!isset($world_name)) {
+		if ($handle = opendir($chunkymapdata_worlds_path)) {
+			while (false !== ($file_name = readdir($handle))) {
+				if (substr($file_name, 0, 1) != ".") {
+					$file_path = $chunkymapdata_worlds_path."/".$file_name;
+					if (is_dir($file_path)) {
+						$world_name=$file_name;
+						break;
+					}
+				}
+			}
+			closedir($handle);
+		}
+		
+	}
 	if (isset($world_name)) {
 		$chunkymapdata_thisworld_path = $chunkymapdata_worlds_path."/".$world_name;
 		$generated_yml_path = $chunkymapdata_thisworld_path."/generated.yml";
@@ -325,12 +344,12 @@ function echo_entire_chunkymap_as_chunk_table() {
 		if ($showplayers==true) {
 			$chunkymap_players_path = $chunkymapdata_thisworld_path."/players";
 			if ($handle = opendir($chunkymap_players_path)) {
-				while (false !== ($file = readdir($handle))) {
-					if (substr($file, 0, 1) != ".") {
-						$file_lower = strtolower($file);
+				while (false !== ($file_name = readdir($handle))) {
+					if (substr($file_name, 0, 1) != ".") {
+						$file_lower = strtolower($file_name);
 						if (endsWith($file_lower, ".yml")) {
-							$player_id=substr($file,0,strlen($file)-4); //-4 for .yml
-							$file_path = $chunkymap_players_path."/".$file;
+							$player_id=substr($file_name,0,strlen($file_name)-4); //-4 for .yml
+							$file_path = $chunkymap_players_path."/".$file_name;
 							if (is_file($file_path)) {
 								$player_dict = get_dict_from_conf($file_path,":");
 							}
