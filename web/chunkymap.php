@@ -279,9 +279,6 @@ function echo_entire_chunkymap_as_chunk_table() {
     error_reporting(E_ALL);
     //error_reporting(-1);
 
-	echo_chunkymap_anchor();
-	echo_chunkymap_controls();
-	echo " ".($chunkymap_view_zoom_multiplier*100.0)."%";//(string)((int)($chunkymap_view_zoom_multiplier*100+.5));
 
     global $is_echo_never_held;
     $is_echo_never_held=true;
@@ -298,6 +295,10 @@ function echo_entire_chunkymap_as_chunk_table() {
     global $chunkymap_tile_original_h;
     global $chunkymap_view_zoom_max;
 	global $world_name;
+
+	echo_chunkymap_anchor();
+	echo_chunkymap_controls();
+	echo " ".($chunkymap_view_zoom_multiplier*100.0)."%";//(string)((int)($chunkymap_view_zoom_multiplier*100+.5));
 
     if ($chunkymap_view_zoom_multiplier<$chunkymap_view_zoom_min) $chunkymap_view_zoom_multiplier = $chunkymap_view_zoom_min;
     if ($chunkymap_view_zoom_multiplier>$chunkymap_view_zoom_max) $chunkymap_view_zoom_multiplier = $chunkymap_view_zoom_max;
