@@ -331,6 +331,7 @@ class MTChunk:
 
 class MTChunks:
     chunkymap_data_path = None
+    chunkymapdata_worlds_path = None
     is_save_output_ok = None
     minetestmapper_fast_sqlite_path = None
     minetestmapper_custom_path = None
@@ -575,6 +576,7 @@ class MTChunks:
             sys.exit()
 
         self.chunkymap_data_path=os.path.join(self.config["www_minetest_path"],"chunkymapdata")
+        self.chunkymapdata_worlds_path=os.path.join(self.chunkymap_data_path, "worlds")
         print("Using chunkymap_data_path '"+self.chunkymap_data_path+"'")
         #if not os.path.isdir(self.chunkymap_data_path):
         #    os.mkdir(self.chunkymap_data_path)
@@ -586,8 +588,18 @@ class MTChunks:
             self.deny_http_access(self.chunkymap_data_path)
             print("  (created .htaccess)")
 
+        htaccess_path = os.path.join(self.chunkymapdata_worlds_path,".htaccess")
+        if not os.path.isdir(self.chunkymapdata_worlds_path):
+            os.makedirs(self.chunkymapdata_worlds_path)
+            print("Created '"+self.chunkymapdata_worlds_path+"'")
+        if not os.path.isfile(htaccess_path):
+            self.deny_http_access(self.chunkymapdata_worlds_path)
+            print("  (created .htaccess)")
+
+
+
         self.world_name = os.path.basename(self.config["world_path"])
-        self.chunkymap_thisworld_data_path = os.path.join(self.chunkymap_data_path, self.world_name)
+        self.chunkymap_thisworld_data_path = os.path.join(self.chunkymapdata_worlds_path, self.world_name)
         if not os.path.isdir(self.chunkymap_thisworld_data_path):
             os.makedirs(self.chunkymap_thisworld_data_path)
             print("Created '"+self.chunkymap_thisworld_data_path+"'")
@@ -614,7 +626,7 @@ class MTChunks:
         #TODO: deny recursively under these folders? doesn't seem that important for security so maybe not (no player info is there)
 
 
-        self.install_website()
+        self.install_default_world_data()
 
         self.chunkymap_players_name = "players"
         self.chunkymap_players_path = os.path.join(self.chunkymap_thisworld_data_path, self.chunkymap_players_name)
@@ -683,22 +695,34 @@ class MTChunks:
         if is_config_changed:
             self.save_config()
 
-    def install_website(self):
-        this_source_dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
-        this_dest_dir_path = self.config["www_minetest_path"]
+    #def install_default_world_data(self):
+        #source_web_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
+        #dest_web_chunkymapdata_world_path = self.chunkymap_thisworld_data_path
+        #dest_web_chunkymapdata_world_players_path = os.path.join(self.chunkymap_thisworld_data_path, "players")
+        #install_list.append(InstalledFile("singleplayer.png", source_chunkymapdata_players, dest_chunkymapdata_players))
+
+
+    #formerly install_website
+    def install_default_world_data(self):
+        source_web_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
+        source_web_chunkymapdata_path = os.path.join(source_web_path, "chunkymapdata_default")
+        source_web_chunkymapdata_world_path = os.path.join(source_web_chunkymapdata_path, "world")
+        source_web_chunkymapdata_images_path = os.path.join(source_web_chunkymapdata_path, "images")
+        dest_web_path = self.config["www_minetest_path"]
+        dest_web_chunkymapdata_path = os.path.join(self.config["www_minetest_path"],"chunkymapdata")
+        dest_web_chunkymapdata_images_path = os.path.join(dest_web_chunkymapdata_path,"images")
         install_list = list()
-        install_list.append(InstalledFile("browser.php",this_source_dir_path,this_dest_dir_path))
-        install_list.append(InstalledFile("chunkymap.php",this_source_dir_path,this_dest_dir_path))
-        install_list.append(InstalledFile("example.php",this_source_dir_path,this_dest_dir_path))
-        source_web_images_path = os.path.join( os.path.join(os.path.dirname(os.path.abspath(self.minetestmapper_py_path)), "web"), "images")
-        dest_web_images_path = os.path.join( self.config["www_minetest_path"], "images")
-        install_list.append(InstalledFile("chunkymap_zoom-in.png", source_web_images_path, dest_web_images_path))
-        install_list.append(InstalledFile("chunkymap_zoom-out.png", source_web_images_path, dest_web_images_path))
-        install_list.append(InstalledFile("chunkymap_zoom-in_disabled.png", source_web_images_path, dest_web_images_path))
-        install_list.append(InstalledFile("chunkymap_zoom-out_disabled.png", source_web_images_path, dest_web_images_path))
-        install_list.append(InstalledFile("chunkymap_start.png", source_web_images_path, dest_web_images_path))
-        source_chunkymapdata = os.path.join( os.path.join(os.path.dirname(os.path.abspath(self.minetestmapper_py_path)), "web"), "chunkymapdata_default")
-        source_chunkymapdata_players = os.path.join(source_chunkymapdata, "players")
+        install_list.append(InstalledFile("browser.php",source_web_path,dest_web_path))
+        install_list.append(InstalledFile("chunkymap.php",source_web_path,dest_web_path))
+        install_list.append(InstalledFile("example.php",source_web_path,dest_web_path))
+        install_list.append(InstalledFile("zoom-in.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("zoom-out.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("zoom-in_disabled.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("zoom-out_disabled.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("start.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("target_start.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("compass-rose.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        source_chunkymapdata_players = os.path.join(source_web_chunkymapdata_world_path, "players")
         dest_chunkymapdata_players = os.path.join(self.chunkymap_thisworld_data_path, "players")
         install_list.append(InstalledFile("singleplayer.png", source_chunkymapdata_players, dest_chunkymapdata_players))
         for this_object in install_list:

@@ -37,8 +37,8 @@ if (!isset($chunkymap_view_zoom_multiplier)) {
     $chunkymap_view_zoom_multiplier=.25;
 }
 
-// OPTIONAL:
 $chunkymapdata_path = "chunkymapdata";
+$chunkymapdata_worlds_path = $chunkymapdata_path."/worlds";
 $chunkymapdata_thisworld_path = null;
 $showplayers=true;
 
@@ -137,8 +137,8 @@ function echo_chunkymap_controls($callback_php_path) {
     global $chunkymap_anchor_name;
     $is_in=false;
     $is_out=false;
-    $in_img_name = "chunkymap_zoom-in.png";
-    $out_img_name = "chunkymap_zoom-out.png";
+    $in_img_name = "zoom-in.png";
+    $out_img_name = "zoom-out.png";
 
     $in_zoom = $chunkymap_view_zoom_multiplier;
     if ($in_zoom<$chunkymap_view_zoom_max) {
@@ -146,14 +146,14 @@ function echo_chunkymap_controls($callback_php_path) {
         $in_zoom = $chunkymap_view_zoom_multiplier*2.0;
         //echo "in:$in_zoom ";
     }
-    else $in_img_name = "chunkymap_zoom-in_disabled.png";
+    else $in_img_name = "zoom-in_disabled.png";
 
     $out_zoom = $chunkymap_view_zoom_multiplier;
     if ($out_zoom>$chunkymap_view_zoom_min) {
         $is_out=true;
         $out_zoom = ($chunkymap_view_zoom_multiplier/2.0);
     }
-    else $out_img_name = "chunkymap_zoom-out_disabled.png";
+    else $out_img_name = "zoom-out_disabled.png";
 
     $zoom_clip = $chunkymap_view_zoom_max;
     $found=false;
@@ -206,8 +206,8 @@ function echo_chunkymap_controls($callback_php_path) {
     }
     if (!$found) $in_zoom=$chunkymap_view_zoom_max;
 
-    $in_html="<img src=\"images/$in_img_name\" style=\"width:16pt; height:16pt\" />";
-    $out_html="<img src=\"images/$out_img_name\" style=\"width:16pt; height:16pt\" />";
+    $in_html="<img src=\"chunkymapdata/images/$in_img_name\" style=\"width:16pt; height:16pt\" />";
+    $out_html="<img src=\"chunkymapdata/images/$out_img_name\" style=\"width:16pt; height:16pt\" />";
 	global $world_name;
 	$append_vars="&";
 	if (isset($world_name)) {
@@ -287,6 +287,7 @@ function echo_entire_chunkymap_as_chunk_table() {
     global $chunkymap_view_zoom_max;
     global $chunkymap_view_zoom_min;
     global $chunkymapdata_path;
+	global $chunkymapdata_worlds_path;
     global $map_dict;
     global $is_verbose;
     global $chunkymap_tile_original_w;
@@ -313,7 +314,7 @@ function echo_entire_chunkymap_as_chunk_table() {
     $character_icon_h=8;
 	global $chunkymapdata_thisworld_path;
 	if (isset($world_name)) {
-		$chunkymapdata_thisworld_path = $chunkymapdata_path."/".$world_name;
+		$chunkymapdata_thisworld_path = $chunkymapdata_worlds_path."/".$world_name;
 		$generated_yml_path = $chunkymapdata_thisworld_path."/generated.yml";
 		if (is_file($generated_yml_path)) {
 			$map_dict = get_dict_from_conf($generated_yml_path,":");
@@ -630,7 +631,7 @@ function echo_entire_chunkymap_as_chunk_table() {
 								$img_style.="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
 								$text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
 							}
-							echo_hold( "<div style=\"position:absolute; z-index:999; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; $img_border_style\"><img src=\"chunkymapdata/players/singleplayer.png\" style=\"$img_style\"/><span style=\"$text_style\">$player_name</span></div>" );
+							echo_hold( "<div style=\"position:absolute; z-index:999; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; $img_border_style\"><img src=\"$chunkymapdata_thisworld_path/players/singleplayer.png\" style=\"$img_style\"/><span style=\"$text_style\">$player_name</span></div>" );
 						}
 						//$position_offset_x+=$character_icon_w;
 					}
@@ -653,7 +654,7 @@ function echo_entire_chunkymap_as_chunk_table() {
 	else { //not isset($world_name)
 		echo "<h4>Choose world:</h4>";
 		echo "<ul>";
-		if ($chunkymapdata_handle = opendir($chunkymapdata_path)) {
+		if ($chunkymapdata_handle = opendir($chunkymapdata_worlds_path)) {
 			$append_vars="&";
 			if (isset($chunkymap_view_zoom_multiplier)) {
 				$prefix = "";
@@ -672,7 +673,7 @@ function echo_entire_chunkymap_as_chunk_table() {
 			global $chunkymap_anchor_name;
 			while (false !== ($this_world_name = readdir($chunkymapdata_handle))) {
 				if (substr($this_world_name, 0, 1) != ".") {
-					$this_world_path = $chunkymapdata_path."/".$this_world_name;
+					$this_world_path = $chunkymapdata_worlds_path."/".$this_world_name;
 					echo "<li><a href=\"?world_name=$this_world_name"."$append_vars#$chunkymap_anchor_name"."\">$this_world_name</a></li>";
 				}
 			}
