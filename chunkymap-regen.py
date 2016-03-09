@@ -74,8 +74,8 @@ def is_dict_subset(new_dict, old_dict, verbose_messages_enable, verbose_dest_des
     try:
         if old_dict is not None:
             if new_dict is not None:
-                old_dict_keys = self.old_dict.keys()
-                for this_key in self.new_dict.iterkeys():
+                old_dict_keys = old_dict.keys()
+                for this_key in new_dict.iterkeys():
                     if (this_key not in old_dict_keys):
                         is_changed = True
                         if verbose_messages_enable:
