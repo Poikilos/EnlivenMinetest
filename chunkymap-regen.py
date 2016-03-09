@@ -380,6 +380,8 @@ class MTChunks:
     FLAG_EMPTY_HEXCOLOR = "#010000"
     world_name = None
     chunkymap_thisworld_data_path = None
+    genresult_name_opener_string = "chunk_"
+    genresult_name_closer_string = "_mapper_result.txt"
 
     def __init__(self):  #formerly checkpaths() in global scope
         self.decachunks = {}
@@ -846,7 +848,7 @@ class MTChunks:
                         participle="opening path"
                         chunk_im = Image.open(open(chunk_image_path, 'rb'))  # double-open to make sure file is finished writing
                         #NOTE: PIL automatically closes, otherwise you can do something like https://bytes.com/topic/python/answers/24308-pil-do-i-need-close
-                        #fp = open(filename, "rb")
+                        #fp = open(file_name, "rb")
                         #im = Image.open(fp) # open from file object
                         #im.load() # make sure PIL has read the data
                         #fp.close()
@@ -920,17 +922,33 @@ class MTChunks:
     def get_chunk_image_path(self, chunky_x, chunky_z):
         return os.path.join(self.get_chunk_folder_path(chunky_x, chunky_z), self.get_chunk_image_name(chunky_x, chunky_z))
 
-    def get_chunk_genresult_name(self, chunk_luid):
-        return "chunk_"+chunk_luid+"_mapper_result.txt"
+    def get_chunk_genresult_name(self, chunky_x, chunky_z):
+        chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
+        return self.genresult_name_opener_string+chunk_luid+self.genresult_name_closer_string
 
-    def get_chunk_genresults_tmp_folder(self, chunk_luid):
+    def get_chunk_luid_from_genresult_name(self, file_name):
+        return file_name[len(self.genresult_name_opener_string):-1*len(self.genresult_name_closer_string)]
+
+    def get_chunk_genresult_tmp_folder(self, chunky_x, chunky_z):
+        #coords = self.get_coords_from_luid(chunk_luid)
+        #if coords is not None:
+        #    chunky_x, chunky_z = coords
+        tmp_path = self.get_chunk_genresults_base_path()
+        decachunky_x = int(math.floor(chunky_x/10))
+        decachunky_z = int(math.floor(chunky_z/10))
+        tmp_path = os.path.join( os.path.join(tmp_path, str(decachunky_x)), str(decachunky_z) )
+        return tmp_path
+
+    def get_chunk_genresults_base_path(self):
+        #formerly get_chunk_genresults_tmp_folder(self, chunk_luid)
         return os.path.join(os.path.dirname(os.path.abspath(__file__)), "chunkymap-genresults")
 
-    def get_chunk_genresult_tmp_path(self, chunk_luid):
-        return os.path.join(self.get_chunk_genresults_tmp_folder(chunk_luid), self.get_chunk_genresult_name(chunk_luid))
+    def get_chunk_genresult_tmp_path(self, chunky_x, chunky_z):
+        return os.path.join(self.get_chunk_genresult_tmp_folder(chunky_x, chunky_z), self.get_chunk_genresult_name(chunky_x, chunky_z))
 
-    def get_chunk_luid_from_yaml_name(self, yml_name):
-        return yml_name[len(self.chunk_yaml_name_opener_string):-1*len(self.chunk_yaml_name_dotext_string)]
+    def get_chunk_luid_from_yaml_name(self, file_name):
+        return file_name[len(self.chunk_yaml_name_opener_string):-1*len(self.chunk_yaml_name_dotext_string)]
+
 
     def get_chunk_yaml_name(self, chunky_x, chunky_z):
         chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
@@ -981,7 +999,7 @@ class MTChunks:
     def remove_chunk(self, chunky_x, chunky_z):
         result = False
         chunk_luid = get_chunk_luid(chunky_x, chunky_z)
-        out_path = self.get_chunk_genresult_tmp_path(chunk_luid)
+        out_path = self.get_chunk_genresult_tmp_path(chunky_x, chunky_z)
         tmp_png_path = self.get_chunk_image_path(chunky_x, chunky_z)
         yml_path = self.get_chunk_yaml_path(chunky_x, chunky_z)
         if os.path.isfile(tmp_png_path):
@@ -993,6 +1011,7 @@ class MTChunks:
         if os.path.isfile(out_path):
             os.remove(out_path)
             result = True
+        #TODO: if folder becomes empty, remove it
         return result
 
     def is_chunk_rendered_on_dest(self, chunky_x, chunky_z):  #formerly is_chunk_empty_on_dest (reversed)
@@ -1037,11 +1056,11 @@ class MTChunks:
         chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
         png_name = self.get_chunk_image_name(chunky_x, chunky_z)
         tmp_png_path = self.get_chunk_image_tmp_path(chunky_x, chunky_z)
-        genresult_name = self.get_chunk_genresult_name(chunk_luid)
-        genresult_tmp_folder_path = self.get_chunk_genresults_tmp_folder(chunk_luid)
+        genresult_name = self.get_chunk_genresult_name(chunky_x, chunky_z)
+        genresult_tmp_folder_path = self.get_chunk_genresult_tmp_folder(chunky_x, chunky_z)
         if not os.path.isdir(genresult_tmp_folder_path):
             os.makedirs(genresult_tmp_folder_path)
-        genresult_path = self.get_chunk_genresult_tmp_path(chunk_luid)
+        genresult_path = self.get_chunk_genresult_tmp_path(chunky_x, chunky_z)
         x_min = chunky_x * self.mapvars["chunk_size"]
         x_max = chunky_x * self.mapvars["chunk_size"] + self.mapvars["chunk_size"] - 1
         z_min = chunky_z * self.mapvars["chunk_size"]
@@ -1176,14 +1195,15 @@ class MTChunks:
         players_didntmove_count = 0
         players_saved_count = 0
         for base_path, dirnames, filenames in os.walk(players_path):
-            for filename in filenames:
-                file_fullname = os.path.join(players_path,filename)
-                #print ("  EXAMINING "+filename)
-                badstart_string = "."
+            for file_name in filenames:
+                file_path = os.path.join(players_path,file_name)
+                #print ("  EXAMINING "+file_name)
+                #badstart_string = "."
                 player_name = None
                 player_position = None
-                if (filename[:len(badstart_string)]!=badstart_string):
-                    ins = open(file_fullname, 'r')
+                #if (file_name[:len(badstart_string)]!=badstart_string):
+                if (file_name[:1]!="."):
+                    ins = open(file_path, 'r')
                     line = True
                     is_enough_data = False
                     while line:
@@ -1202,7 +1222,7 @@ class MTChunks:
                                     is_enough_data = True
                                     break
                     ins.close()
-                    player_dest_path = os.path.join(self.chunkymap_players_path,filename+".yml")
+                    player_dest_path = os.path.join(self.chunkymap_players_path,file_name+".yml")
                     player_x = None
                     player_y = None
                     player_z = None
@@ -1210,7 +1230,7 @@ class MTChunks:
                     chunk_y = None
                     chunk_z = None
 
-                    player_position_tuple = get_tuple_from_notation(player_position, filename)
+                    player_position_tuple = get_tuple_from_notation(player_position, file_name)
                     if player_position_tuple is not None:
                         #Divide by 10 because I don't know why (minetest issue, maybe to avoid float rounding errors upon save/load)
                         player_position_tuple = player_position_tuple[0]/10.0, player_position_tuple[1]/10.0, player_position_tuple[2]/10.0
@@ -1374,7 +1394,7 @@ class MTChunks:
         #if self.is_genresult_marked(chunk_luid) and not self.is_chunk_yaml_present(chunky_x, chunky_z):
         #    tmp_chunk = MTChunk()
         #    tmp_chunk.luid = chunk_luid
-        #    genresult_path = self.get_chunk_genresult_tmp_path(chunk_luid)
+        #    genresult_path = self.get_chunk_genresult_tmp_path(chunky_x, chunky_z)
         #    tmp_chunk.set_from_genresult(genresult_path)
         #    chunk_yaml_path = self.get_chunk_yaml_path(chunky_x, chunky_z)
         #    self.create_chunk_folder(chunky_x, chunky_z)
@@ -1509,9 +1529,45 @@ class MTChunks:
         #for mod_name in worldgen_mod_list:
             #mod_path = self.asdf
             #if os.path.isdir( 
+    
+    def correct_genresults_paths(self):
+        count = 0
+        folder_path = self.get_chunk_genresults_base_path()
+        for base_path, dirnames, filenames in os.walk(folder_path):
+            for file_name in filenames:
+                file_path = os.path.join(folder_path,file_name)
+                #print ("  EXAMINING "+file_name)
+                #badstart_string = "."
+                player_name = None
+                player_position = None
+                #if (file_name[:len(badstart_string)]!=badstart_string):
+                if (file_name[:1]!="."):
+                    if len(file_name)>=len(self.genresult_name_opener_string)+4+len(self.genresult_name_closer_string):
+                        chunk_luid = self.get_chunk_luid_from_genresult_name(file_name)
+                        coords = self.get_coords_from_luid(chunk_luid)
+                        if coords is not None:
+                            chunky_x, chunky_z = coords
+                            corrected_folder_path = self.get_chunk_genresult_tmp_folder(chunky_x, chunky_z)
+                            if not os.path.isdir(corrected_folder_path):
+                                os.makedirs(corrected_folder_path)
+                                print("    create \""+corrected_folder_path+"\"")
+                            #corrected_file_path = os.path.join(corrected_folder_path, file_name)
+                            corrected_file_path = self.get_chunk_genresult_tmp_path(chunky_x, chunky_z)
+                            if os.path.isfile(corrected_file_path):
+                                os.remove(corrected_file_path)
+                            print("    move \""+file_path+"\" to \""+corrected_file_path+"\"")
+                            os.rename(file_path, corrected_file_path)
+                            count += 1
+                        else:
+                            print("WARNING: found unusable genresults file '"+file_name+"' in ")
+        if count>0:
+            print("")
+            print("MOVED "+str(count)+" genresult file(s)")
+            print("")
+            print("")
+        
 
     def check_map_pseudorecursion_start(self):
-        
         if self.todo_index<0:
             print("PROCESSING MAP DATA (BRANCH PATTERN)")
             if os.path.isfile(self.minetestmapper_py_path) and os.path.isfile(self.colors_path):
@@ -1523,6 +1579,7 @@ class MTChunks:
                 decachunk_luid_list = list()
                 if self.preload_all_enable:
                     self.preload_all_enable = False
+                    self.correct_genresults_paths()
                     minlen=len(self.chunk_yaml_name_opener_string)+4+len(self.chunk_yaml_name_dotext_string)  # +4 for luid, such as x1z2 (ok since just a minimum)
                     #for base_path, dirnames, filenames in os.walk(self.data_16px_path):
                         #for dirname in dirnames:
@@ -1537,11 +1594,11 @@ class MTChunks:
                                     #for chunk_filename in decachunk_z_filenames:
                                     for chunk_filename in os.listdir(decachunk_z_path):
                                         chunk_path = os.path.join(decachunk_z_path, chunk_filename)
-                                        #file_fullname = os.path.join(self.chunkymap_thisworld_data_path,filename)
+                                        #file_path = os.path.join(self.chunkymap_thisworld_data_path,file_name)
                                         if chunk_filename[:1]!="." and os.path.isfile(chunk_path):
-                                            #print ("  EXAMINING "+filename)
+                                            #print ("  EXAMINING "+file_name)
                                             #badstart_string = "."
-                                            #if (filename[:len(badstart_string)]!=badstart_string):
+                                            #if (file_name[:len(badstart_string)]!=badstart_string):
                                             if len(chunk_filename) > minlen:
                                                 chunk_luid = self.get_chunk_luid_from_yaml_name(chunk_filename)
                                                 coords = self.get_coords_from_luid(chunk_luid)
@@ -1583,7 +1640,7 @@ class MTChunks:
                             self.todo_positions.append(coords)
                         else:
                             print("ERROR: could not get coords from luid '"+chunk_luid+"'")
-                        #ins = open(file_fullname, 'r')
+                        #ins = open(file_path, 'r')
                         #line = True
                         #while line:
                             #line = ins.readline()
@@ -1594,6 +1651,7 @@ class MTChunks:
                 self.verify_correct_map()
 
     def verify_correct_map(self):
+        #NOTE: NO LONGER NEEDED since each world has its own folder in chunkymapdata/worlds folder
         pass
         #if os.path.isfile(self.minetestmapper_py_path) and os.path.isfile(self.colors_path):
             #if self.mapvars is not None and set(['world_name']).issubset(self.mapvars):
@@ -1609,27 +1667,27 @@ class MTChunks:
                     #print("")
                     #if os.path.isdir(self.chunkymap_thisworld_data_path):
                         #for base_path, dirnames, filenames in os.walk(self.chunkymap_thisworld_data_path):
-                            #for filename in filenames:
-                                #if filename[0] != ".":
-                                    #file_fullname = os.path.join(self.chunkymap_thisworld_data_path,filename)
+                            #for file_name in filenames:
+                                #if file_name[0] != ".":
+                                    #file_path = os.path.join(self.chunkymap_thisworld_data_path,file_name)
                                     #if self.verbose_enable:
-                                        #print ("  EXAMINING "+filename)
+                                        #print ("  EXAMINING "+file_name)
                                     #badstart_string = "chunk"
-                                    #if (len(filename) >= len(badstart_string)) and (filename[:len(badstart_string)]==badstart_string):
-                                        #os.remove(file_fullname)
-                                    #elif filename==self.yaml_name:
-                                        #os.remove(file_fullname)
+                                    #if (len(file_name) >= len(badstart_string)) and (file_name[:len(badstart_string)]==badstart_string):
+                                        #os.remove(file_path)
+                                    #elif file_name==self.yaml_name:
+                                        #os.remove(file_path)
                     #players_path = os.path.join(self.chunkymap_thisworld_data_path, "players")
                     #if os.path.isdir(players_path):
                         #for base_path, dirnames, filenames in os.walk(players_path):
-                            #for filename in filenames:
-                                #if filename[0] != ".":
-                                    #file_fullname = os.path.join(self.chunkymap_thisworld_data_path,filename)
+                            #for file_name in filenames:
+                                #if file_name[0] != ".":
+                                    #file_path = os.path.join(self.chunkymap_thisworld_data_path,file_name)
                                     #if self.verbose_enable:
-                                        #print ("  EXAMINING "+filename)
+                                        #print ("  EXAMINING "+file_name)
                                     #badend_string = ".yml"
-                                    #if (len(filename) >= len(badend_string)) and (filename[len(filename)-len(badend_string):]==badend_string):
-                                        #os.remove(file_fullname)
+                                    #if (len(file_name) >= len(badend_string)) and (file_name[len(file_name)-len(badend_string):]==badend_string):
+                                        #os.remove(file_path)
                     #self.mapvars["chunkx_min"]=0
                     #self.mapvars["chunkx_max"]=0
                     #self.mapvars["chunkz_min"]=0
