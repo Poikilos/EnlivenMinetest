@@ -1208,7 +1208,7 @@ class MTChunks:
                 #self.create_chunk_folder(chunky_x, chunky_z)
                 #this_chunk.save_yaml(chunk_yaml_path)
                 #if is_changed:
-                if not is_dict_subset(self.chunks[chunk_luid].metadata, old_meta, False)  # , True, "chunk_yaml_path")
+                if not is_dict_subset(self.chunks[chunk_luid].metadata, old_meta, False):  # , True, "chunk_yaml_path")
                     self.save_chunk_meta(chunky_x, chunky_z)
                 #print(min_indent+"(saved yaml to '"+chunk_yaml_path+"')")
                 if not self.is_save_output_ok:
@@ -1581,9 +1581,11 @@ class MTChunks:
     def correct_genresults_paths(self):
         count = 0
         folder_path = self.get_chunk_genresults_base_path()
-        for base_path, dirnames, filenames in os.walk(folder_path):
-            for file_name in filenames:
-                file_path = os.path.join(folder_path,file_name)
+        #for base_path, dirnames, filenames in os.walk(folder_path):
+        for file_name in os.listdir(folder_path):
+            #for file_name in filenames:
+            file_path = os.path.join(folder_path,file_name)
+            if os.path.isfile(file_path):
                 #print ("  EXAMINING "+file_name)
                 #badstart_string = "."
                 player_name = None
@@ -1603,8 +1605,12 @@ class MTChunks:
                             corrected_file_path = self.get_chunk_genresult_tmp_path(chunky_x, chunky_z)
                             if os.path.isfile(corrected_file_path):
                                 os.remove(corrected_file_path)
-                            print("    moving \""+file_path+"\" to \""+corrected_file_path+"\"")
-                            os.rename(file_path, corrected_file_path)
+                            try:
+                                os.rename(file_path, corrected_file_path)
+                            except:
+                                #TODO: why does this happen (file does not exist)???
+                                print("    Could not finish moving \""+file_path+"\" to \""+corrected_file_path+"\"")
+
                             count += 1
                         else:
                             print("WARNING: found unusable genresults file '"+file_name+"' in ")
