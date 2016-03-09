@@ -1,10 +1,9 @@
 #!/usr/bin/env python2
-# expertmm fork from 2016-02-01 git version
 # -*- coding: utf-8 -*-
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
-# and/or modify it under the terms of the Do What ... You Want To
+# and/or modify it under the terms of the Do What ... You Want
 # To Public License, Version 2, as published by Sam Hocevar. See
 # COPYING for more details.
 
@@ -16,6 +15,7 @@
 #                        to make it easily executable on Linux
 # 2011-07-30: WF: Support for content types extension, refactoring
 # 2011-07-30: erlehmann: PEP 8 compliance.
+# 2016-03-08: expertmm: geometry and region params
 
 # Requires Python Imaging Library: http://www.pythonware.com/products/pil/
 
@@ -154,8 +154,8 @@ except getopt.GetoptError as err:
 path = None
 output = "map.png"
 border = 0
-scalecolor = "white"
-bgcolor = "black"
+scalecolor = "black"
+bgcolor = "white"
 origincolor = "red"
 playercolor = "red"
 drawscale = False
@@ -229,11 +229,11 @@ if geometry_string is not None:
         else:
             print("ERROR: (Missing coordinates in '"+geometry_string+"' for geometry) Geometry should be in the form: x:z+width+height")
             usage()
-            sys.exit()
+            sys.exit(2)
     else:
         print("ERROR: (Incorrect value '"+geometry_string+"' for geometry) Geometry should be in the form: x:z+width+height")
         usage()
-        sys.exit()
+        sys.exit(2)
 elif region_string is not None:
     #parts = region_string.split(" ")
     axis_info = region_string.split(",")
@@ -254,7 +254,7 @@ elif region_string is not None:
     else:
         print("ERROR: (Incorrect value '"+region_string+"' for region) Region should be in the form: xmin:xmax,zmin:zmax")
         usage()
-        sys.exit()
+        sys.exit(2)
 #answer=raw_input("press enter to continue")
 sector_xmin = nonchunky_xmin / 16
 sector_xmax = nonchunky_xmax / 16
@@ -375,7 +375,7 @@ if os.path.exists(path + "sectors"):
         zlist.append(z)
 
 if len(xlist) == 0 or len(zlist) == 0:
-    print("At this chunk, data does not exist.")
+    print("At this location, data does not exist.")
     sys.exit(1)
 
 # Get rid of doubles
