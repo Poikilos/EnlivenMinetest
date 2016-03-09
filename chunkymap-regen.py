@@ -417,8 +417,10 @@ class MTChunks:
     chunkymap_thisworld_data_path = None
     genresult_name_opener_string = "chunk_"
     genresult_name_closer_string = "_mapper_result.txt"
+    min_indent = None
 
     def __init__(self):  #formerly checkpaths() in global scope
+        self.min_indent = "  "
         self.decachunks = {}
         self.total_newly_rendered = 0
         os_name="linux"
@@ -1231,7 +1233,7 @@ class MTChunks:
             self.prepare_chunk_meta(chunky_x, chunky_z)
         self.create_chunk_folder(chunky_x, chunky_z)
         self.chunks[chunk_luid].save_yaml(chunk_yaml_path)
-        print(min_indent+"(saved yaml to '"+chunk_yaml_path+"')")
+        print(self.min_indent+"(saved yaml to '"+chunk_yaml_path+"')")
 
     def check_players(self):
         print("PROCESSING PLAYERS")
