@@ -1224,7 +1224,7 @@ class MTChunks:
 
         return result
 
-    def save_chunk_meta(chunky_x, chunky_z):
+    def save_chunk_meta(self, chunky_x, chunky_z):
         chunk_yaml_path = self.get_chunk_yaml_path(chunky_x, chunky_z)
         chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
         if not chunk_luid in self.chunks:
