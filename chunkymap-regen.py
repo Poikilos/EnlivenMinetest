@@ -1479,8 +1479,8 @@ class MTChunks:
                 except:
                     pass
         return result
-
-    def check_map_pseudorecursion_start(self):
+    
+    def apply_auto_tags_by_worldgen_mods(self, chunky_x, chunky_z):
         worldgen_mod_list = list()
         worldgen_mod_list.append("technic_worldgen")
         worldgen_mod_list.append("mg")
@@ -1489,7 +1489,28 @@ class MTChunks:
         worldgen_mod_list.append("sea")
         worldgen_mod_list.append("moretrees")
         worldgen_mod_list.append("caverealms")
-        worldgen_mod_list.append("nature_classic")  # NOTE: plantlife_modpack has this and other stuff, but just mention this one in tags since it is unique to the modpack
+        #worldgen_mod_list.append("nature_classic")  # NOTE: plantlife_modpack has this and other stuff, but just mention this one in tags since it is unique to the modpack
+        worldgen_mod_list.append("plantlife_modpack")  #ok if installed as modpack instead of putting individual mods in mods folder
+        
+        chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
+        if chunk_luid not in self.chunks.keys():
+            self.prepare_chunk_meta(chunky_x, chunky_z)
+        auto_tags_string=""
+        existing_tags_string=""
+        tags_list = None
+        if ("tags" in self.chunks[chunk_luid].metadata) and (self.chunks[chunk_luid].metadata["tags"] is not None):
+            existing_tags_string=self.chunks[chunk_luid].metadata["tags"]
+            tags_list=existing_tags_string.split(",")
+            for index in range(0,len(tags_list)):
+                tags_list[index]=tags_list[index].strip()
+        else:
+            tags_list = list()
+        #TODO: finish this
+        #for mod_name in worldgen_mod_list:
+            #mod_path = self.asdf
+            #if os.path.isdir( 
+
+    def check_map_pseudorecursion_start(self):
         
         if self.todo_index<0:
             print("PROCESSING MAP DATA (BRANCH PATTERN)")
@@ -1536,9 +1557,9 @@ class MTChunks:
                                                     self.prepare_chunk_meta(chunky_x, chunky_z)
                                                     
                                                     #if ("tags" not in self.chunks[chunk_luid].metadata):
-                                                    self.chunks[chunk_luid].metadata["tags"] = "moreores,caverealms"
-                                                    self.chunks[chunk_luid].save_yaml(chunk_path)
-                                                    print("  saved tags to '"+chunk_path+"'")
+                                                        #self.chunks[chunk_luid].metadata["tags"] = "moreores,caverealms"
+                                                        #self.chunks[chunk_luid].save_yaml(chunk_path)
+                                                        #print("  saved tags to '"+chunk_path+"'")
                     for decachunk_luid in decachunk_luid_list:
                         coords = self.get_coords_from_luid(decachunk_luid)
                         if coords is not None:
