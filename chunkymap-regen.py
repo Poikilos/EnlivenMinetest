@@ -1199,9 +1199,11 @@ class MTChunks:
                                 os.rename(tmp_png_path, dest_png_path)
                         except:
                             pass
+            participle = "checking result"
             try:
                 is_changed = this_chunk.set_from_genresult(genresult_path)
                 if is_marked_before:
+                    participle = "checking for marks"
                     if (not is_empty_before) and this_chunk.metadata["is_empty"]:
                         print("ERROR: chunk changed from nonempty to empty (may happen if output of mapper was not recognized)")
                     elif this_chunk.metadata["is_empty"] and os.path.isfile(dest_png_path):
@@ -1210,14 +1212,17 @@ class MTChunks:
                 #self.create_chunk_folder(chunky_x, chunky_z)
                 #this_chunk.save_yaml(chunk_yaml_path)
                 #if is_changed:
+                participle = "accessing dict"
                 if not is_dict_subset(self.chunks[chunk_luid].metadata, old_meta, False):  # , True, "chunk_yaml_path")
+                    participle = "saving chunk meta"
                     self.save_chunk_meta(chunky_x, chunky_z)
                 #print(min_indent+"(saved yaml to '"+chunk_yaml_path+"')")
                 if not self.is_save_output_ok:
                     if os.path.isfile(genresult_path):
+                        participle = "removing "+genresult_path
                         os.remove(genresult_path)
             except:
-                print (min_indent+"Could not finish deleting/moving output")
+                print (min_indent+"Could not finish "+participle+" while deleting/moving output")
                 view_traceback()
         except:
             print(min_indent+"Could not finish deleting/moving temp files")
