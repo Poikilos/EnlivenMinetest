@@ -237,6 +237,7 @@ class MTChunk:
         self.metadata["image_right"] = None
         self.metadata["image_bottom"] = None
         self.metadata["is_traversed"] = False
+        self.metadata["tags"] = None
 
     def load_yaml(self, yml_path):
         self.metadata = get_dict_modified_by_conf_file(self.metadata,yml_path,":")
@@ -1523,6 +1524,9 @@ class MTChunks:
                                                         break
                                                     print("Checking chunk "+str(coords)+" *"+str(self.mapvars["chunk_size"])+"")
                                                     self.prepare_chunk_meta(chunky_x, chunky_z)
+                                                    self.chunks[chunk_luid].metadata["tags"] = "moreores"
+                                                    self.chunks[chunk_luid].save_yaml(chunk_path)
+                                                    print("  saved tags to '"+chunk_path+"'")
                     for decachunk_luid in decachunk_luid_list:
                         coords = self.get_coords_from_luid(decachunk_luid)
                         if coords is not None:
