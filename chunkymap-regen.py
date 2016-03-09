@@ -49,6 +49,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageColor
     #def size(self):
         #return len(self.items)
 
+
 class InstalledFile:
     source_dir_path = None
     dest_dir_path = None
@@ -58,6 +59,37 @@ class InstalledFile:
         self.file_name=file_name
         self.source_dir_path=source_dir_path
         self.dest_dir_path=dest_dir_path
+
+        
+def get_dict_deepcopy(old_dict):
+    new_dict = None
+    if type(old_dict) is dict:
+        new_dict = {}
+        for this_key in old_dict.iterkeys():
+            new_dict[this_key] = old_dict[this_key]
+    return new_dict
+
+def is_dict_subset(new_dict, old_dict, verbose_messages_enable, verbose_dest_description="unknown file"):
+    is_changed = False
+    if old_dict is not None:
+        if new_dict is not None:
+            old_dict_keys = self.old_dict.keys()
+            for this_key in self.new_dict.iterkeys():
+                if (this_key not in old_dict_keys):
+                    is_changed = True
+                    if verbose_messages_enable:
+                        print("SAVING '"+verbose_dest_description+"' since "+str(this_key)+" not in saved version.")
+                    break
+                elif new_dict[this_key] != old_dict[this_key]:
+                    is_changed = True
+                    if verbose_messages_enable:
+                        print("SAVING '"+verbose_dest_description+"' since "+str(this_key)+" not same as saved version.")
+                    break
+        #else new_dict is None so no change detected (no new information)
+    else:
+        if new_dict is not None:
+            is_changed = True
+    return is_changed
 
 def ivec2_equals(pos1, pos2):
     return (int(pos1[0])==int(pos2[0])) and (int(pos1[1])==int(pos2[1]))
@@ -246,9 +278,11 @@ class MTChunk:
         save_conf_from_dict(yml_path, self.metadata, assignment_operator=":", save_nulls_enable=False)
 
     #requires output such as from minetestmapper-numpy.py
+    #returns whether save is needed (whether metadata was changed)
     def set_from_genresult(self, this_genresult_path):
         #this_genresult_path = mtchunks.get_chunk_genresult_path(chunk_luid)
-        result = False
+        is_changed = False
+        old_meta = get_dict_deepcopy(self.metadata)
         if os.path.isfile(this_genresult_path):
             #may have data such as:
             #Result image (w=16 h=16) will be written to chunk_x0z0.png
@@ -328,7 +362,8 @@ class MTChunk:
                     except:
                         print("#failed to parse line:"+str(line_strip))
             ins.close()
-
+        is_changed = is_dict_subset(self.metadata, old_meta, False)
+        return is_changed
 
 class MTChunks:
     chunkymap_data_path = None
@@ -1112,13 +1147,16 @@ class MTChunks:
             if os.path.isfile(tmp_png_path):
                 os.remove(tmp_png_path)
             subprocess.call(cmd_string, shell=True)  # TODO: remember not to allow arbitrary command execution, which could happen if input contains ';' when using shell=True
-            is_empty_before = True
-            is_marked_before = False
-            if chunk_luid in self.chunks.keys():
-                is_marked_before = True
-                if (self.chunks[chunk_luid].metadata is not None) and ("is_empty" in self.chunks[chunk_luid].metadata):
-                    is_empty_before = self.chunks[chunk_luid].metadata["is_empty"]
+            #is_empty_before = True
+            #is_marked_before = False
             self.prepare_chunk_meta(chunky_x, chunky_z)  # DOES load existing yml if exists
+            old_meta = get_dict_deepcopy(self.chunks[chunk_luid].metadata)
+            is_marked_before = self.chunks[chunk_luid].metadata["is_marked"]
+            is_empty_before = self.chunks[chunk_luid].metadata["is_empty"]
+            #if chunk_luid in self.chunks.keys():
+                #is_marked_before = True
+                #if (self.chunks[chunk_luid].metadata is not None) and ("is_empty" in self.chunks[chunk_luid].metadata):
+                #    is_empty_before = self.chunks[chunk_luid].metadata["is_empty"]
             this_chunk = self.chunks[chunk_luid]
             if os.path.isfile(tmp_png_path):
                 result = True
@@ -1160,20 +1198,22 @@ class MTChunks:
                         except:
                             pass
             try:
-                this_chunk.set_from_genresult(genresult_path)
+                is_changed = this_chunk.set_from_genresult(genresult_path)
                 if is_marked_before:
                     if (not is_empty_before) and this_chunk.metadata["is_empty"]:
                         print("ERROR: chunk changed from nonempty to empty (may happen if output of mapper was not recognized)")
                     elif this_chunk.metadata["is_empty"] and os.path.isfile(dest_png_path):
                         print("ERROR: chunk marked empty though has data (may happen if output of mapper was not recognized)")
-                chunk_yaml_path = self.get_chunk_yaml_path(chunky_x, chunky_z)
-                self.create_chunk_folder(chunky_x, chunky_z)
-                this_chunk.save_yaml(chunk_yaml_path)
-                print(min_indent+"(saved yaml to '"+chunk_yaml_path+"')")
+                #chunk_yaml_path = self.get_chunk_yaml_path(chunky_x, chunky_z)
+                #self.create_chunk_folder(chunky_x, chunky_z)
+                #this_chunk.save_yaml(chunk_yaml_path)
+                #if is_changed:
+                if not is_dict_subset(self.chunks[chunk_luid].metadata, old_meta, False)  # , True, "chunk_yaml_path")
+                    self.save_chunk_meta(chunky_x, chunky_z)
+                #print(min_indent+"(saved yaml to '"+chunk_yaml_path+"')")
                 if not self.is_save_output_ok:
                     if os.path.isfile(genresult_path):
                         os.remove(genresult_path)
-
             except:
                 print (min_indent+"Could not finish deleting/moving output")
                 view_traceback()
@@ -1184,6 +1224,14 @@ class MTChunks:
 
         return result
 
+    def save_chunk_meta(chunky_x, chunky_z):
+        chunk_yaml_path = self.get_chunk_yaml_path(chunky_x, chunky_z)
+        chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
+        if not chunk_luid in self.chunks:
+            self.prepare_chunk_meta(chunky_x, chunky_z)
+        self.create_chunk_folder(chunky_x, chunky_z)
+        self.chunks[chunk_luid].save_yaml(chunk_yaml_path)
+        print(min_indent+"(saved yaml to '"+chunk_yaml_path+"')")
 
     def check_players(self):
         print("PROCESSING PLAYERS")
@@ -1245,9 +1293,7 @@ class MTChunks:
                         self.prepare_chunk_meta(chunky_x, chunky_z)  # DOES load existing yml if exists
                         if not self.chunks[chunk_luid].metadata["is_traversed"]:
                             self.chunks[chunk_luid].metadata["is_traversed"] = True
-                            chunk_yaml_path = self.get_chunk_yaml_path(chunky_x, chunky_z)
-                            self.create_chunk_folder(chunky_x, chunky_z)
-                            self.chunks[chunk_luid].save_yaml(chunk_yaml_path)
+                            self.save_chunk_meta(chunky_x, chunky_z)
 
                     #if is_enough_data:
                     #if player_name!="singleplayer":
@@ -1529,6 +1575,8 @@ class MTChunks:
         #for mod_name in worldgen_mod_list:
             #mod_path = self.asdf
             #if os.path.isdir( 
+        #if is_changed:
+        #    self.save_chunk_meta(chunky_x, chunky_z)
     
     def correct_genresults_paths(self):
         count = 0
@@ -1549,13 +1597,13 @@ class MTChunks:
                             chunky_x, chunky_z = coords
                             corrected_folder_path = self.get_chunk_genresult_tmp_folder(chunky_x, chunky_z)
                             if not os.path.isdir(corrected_folder_path):
+                                print("    creating \""+corrected_folder_path+"\"")
                                 os.makedirs(corrected_folder_path)
-                                print("    create \""+corrected_folder_path+"\"")
                             #corrected_file_path = os.path.join(corrected_folder_path, file_name)
                             corrected_file_path = self.get_chunk_genresult_tmp_path(chunky_x, chunky_z)
                             if os.path.isfile(corrected_file_path):
                                 os.remove(corrected_file_path)
-                            print("    move \""+file_path+"\" to \""+corrected_file_path+"\"")
+                            print("    moving \""+file_path+"\" to \""+corrected_file_path+"\"")
                             os.rename(file_path, corrected_file_path)
                             count += 1
                         else:
@@ -1615,7 +1663,7 @@ class MTChunks:
                                                     
                                                     #if ("tags" not in self.chunks[chunk_luid].metadata):
                                                         #self.chunks[chunk_luid].metadata["tags"] = "moreores,caverealms"
-                                                        #self.chunks[chunk_luid].save_yaml(chunk_path)
+                                                        #self.save_chunk_meta(chunky_x, chunky_z)
                                                         #print("  saved tags to '"+chunk_path+"'")
                     for decachunk_luid in decachunk_luid_list:
                         coords = self.get_coords_from_luid(decachunk_luid)
@@ -1629,23 +1677,22 @@ class MTChunks:
                             print("ERROR: could not get coords from decachunk luid "+decachunk_luid)
                 for chunk_luid in self.chunks.keys():
                     coords = self.get_coords_from_luid(chunk_luid)
-                    chunky_x, chunky_z = coords
-                    if self.chunks[chunk_luid].metadata["is_traversed"] and not self.is_chunk_rendered_on_dest(chunky_x, chunky_z):
-                        if self.chunks[chunk_luid].metadata["is_empty"]:
-                            self.chunks[chunk_luid].metadata["is_empty"] = False
-                            self.create_chunk_folder(chunky_x, chunky_z)
-                            self.chunks[chunk_luid].save_yaml(self.get_chunk_yaml_path(chunky_x, chunky_z))
-                        coords = self.get_coords_from_luid(chunk_luid)
-                        if coords is not None:
+                    if coords is not None:
+                        chunky_x, chunky_z = coords
+                        if self.chunks[chunk_luid].metadata["is_traversed"] and not self.is_chunk_rendered_on_dest(chunky_x, chunky_z):
+                            if self.chunks[chunk_luid].metadata["is_empty"]:
+                                self.chunks[chunk_luid].metadata["is_empty"] = False
+                                self.save_chunk_meta(chunky_x, chunky_z)
+                            #if coords is not None:
                             self.todo_positions.append(coords)
-                        else:
-                            print("ERROR: could not get coords from luid '"+chunk_luid+"'")
-                        #ins = open(file_path, 'r')
-                        #line = True
-                        #while line:
-                            #line = ins.readline()
-                            #if line:
-                        #ins.close()
+                            #ins = open(file_path, 'r')
+                            #line = True
+                            #while line:
+                                #line = ins.readline()
+                                #if line:
+                            #ins.close()
+                    else:
+                        print("ERROR: could not get coords from luid '"+chunk_luid+"'")
                 self.todo_index = 0
                 #while (todo_index<len(self.todo_positions)):
                 self.verify_correct_map()
