@@ -1481,6 +1481,16 @@ class MTChunks:
         return result
 
     def check_map_pseudorecursion_start(self):
+        worldgen_mod_list = list()
+        worldgen_mod_list.append("technic_worldgen")
+        worldgen_mod_list.append("mg")
+        worldgen_mod_list.append("moreores")
+        worldgen_mod_list.append("lapis")
+        worldgen_mod_list.append("sea")
+        worldgen_mod_list.append("moretrees")
+        worldgen_mod_list.append("caverealms")
+        worldgen_mod_list.append("nature_classic")  # NOTE: plantlife_modpack has this and other stuff, but just mention this one in tags since it is unique to the modpack
+        
         if self.todo_index<0:
             print("PROCESSING MAP DATA (BRANCH PATTERN)")
             if os.path.isfile(self.minetestmapper_py_path) and os.path.isfile(self.colors_path):
@@ -1524,7 +1534,9 @@ class MTChunks:
                                                         break
                                                     print("Checking chunk "+str(coords)+" *"+str(self.mapvars["chunk_size"])+"")
                                                     self.prepare_chunk_meta(chunky_x, chunky_z)
-                                                    self.chunks[chunk_luid].metadata["tags"] = "moreores"
+                                                    
+                                                    #if ("tags" not in self.chunks[chunk_luid].metadata):
+                                                    self.chunks[chunk_luid].metadata["tags"] = "moreores,caverealms"
                                                     self.chunks[chunk_luid].save_yaml(chunk_path)
                                                     print("  saved tags to '"+chunk_path+"'")
                     for decachunk_luid in decachunk_luid_list:
