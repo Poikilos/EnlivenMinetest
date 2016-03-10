@@ -250,11 +250,11 @@ function echo_map_heading_text() {
     // }
     // else echo "<span style=\"color:red\">(missing world name)</span>";
 // }
-function get_chunk_folder_path($x, $z) {
+function get_chunk_folder_path_from_chunky_coords($chunky_x, $chunky_z) {
 	global $chunkymapdata_thisworld_path;
 	//NOTE: floor converts -.5 to -1 (and -1.5 to -2) but .5 to 0
-	$decachunk_x = intval(floor($x/10));
-	$decachunk_z = intval(floor($z/10));
+	$decachunk_x = get_decachunky_coord_from_chunky_coord($chunky_x);
+	$decachunk_z = get_decachunky_coord_from_chunky_coord($chunky_z);
 	//if ($x<0) { $decachunk_x = $x + $x%10; }
 	//else { $decachunk_x = $x - $x%10; }
 	//if ($z<0) { $decachunk_z = $z + $z%10; }
@@ -263,17 +263,175 @@ function get_chunk_folder_path($x, $z) {
 	return $result;
 }
 
-function get_superchunk_folder_path($x, $z) {
+function get_decachunk_folder_path_from_location($x, $z) {
 	global $chunkymapdata_thisworld_path;
 	//NOTE: floor converts -.5 to -1 (and -1.5 to -2) but .5 to 0
-	$hectochunk_x = intval(floor($x/100));
-	$hectochunk_z = intval(floor($z/100));
+	$chunky_x = get_chunky_coord_from_location($x);
+	$chunky_z = get_chunky_coord_from_location($z);
+	$decachunky_x = get_decachunky_coord_from_chunky_coord($chunky_x);
+	$decachunky_z = get_decachunky_coord_from_chunky_coord($chunky_z);
+	$hectochunk_x = get_hectochunky_coord_from_decachunky_coord($decachunky_x);
+	$hectochunk_z = get_hectochunky_coord_from_decachunky_coord($decachunky_z);
 	$result = $chunkymapdata_thisworld_path.'/160px/'.$hectochunk_x.'/'.$hectochunk_z;
 	return $result;
 }
 
+function get_decachunk_folder_path_from_decachunk($chunky_x, $chunky_z) {
+	global $chunkymapdata_thisworld_path;
+	//NOTE: floor converts -.5 to -1 (and -1.5 to -2) but .5 to 0
+	$hectochunk_x = get_hectochunky_coord_from_decachunky_coord($chunky_x);
+	$hectochunk_z = get_hectochunky_coord_from_decachunky_coord($chunky_z);
+	$result = $chunkymapdata_thisworld_path.'/160px/'.$hectochunk_x.'/'.$hectochunk_z;
+	return $result;
+}
+
+function get_chunky_coord_from_location($location_x) {
+	$chunk_x = intval($location_x/16);
+	return $chunk_x;
+}
+
+function get_decachunky_coord_from_chunky_coord($chunky_x) {
+	return intval(floor((float)$chunky_x/10.0));
+}
+
+function get_hectochunky_coord_from_decachunky_coord($chunky_x) {
+	return intval(floor((float)$chunky_x/10.0));
+}
+
+function get_decachunky_coord_from_location($location_x) {
+	$chunk_x = get_chunky_coord_from_location($location_x);
+	$decachunk_x = get_decachunky_coord_from_chunky_coord($chunk_x);
+	return $decachunk_x;
+}
+
+function get_decachunk_image_name_from_decachunk($x, $z) {
+	return "decachunk_x"."$x"."z"."$z".".jpg";
+}
+
+function echo_chunkymap_canvas() {
+    global $chunkymap_view_x;
+    global $chunkymap_view_z;
+    global $chunkymap_view_zoom_multiplier;
+    global $chunkymap_view_zoom_max;
+    global $chunkymap_view_zoom_min;
+	global $showplayers;
+
+	check_world();
+	global $chunkymapdata_thisworld_path;
+	global $world_name;
+	global $chunkymapdata_worlds_path;
+
+    $x_opener="decachunk_x";
+    $z_opener="z";
+    $dot_and_ext = ".jpg";
+	
+    if ($chunkymap_view_zoom_multiplier<$chunkymap_view_zoom_min) $chunkymap_view_zoom_multiplier = $chunkymap_view_zoom_min;
+    if ($chunkymap_view_zoom_multiplier>$chunkymap_view_zoom_max) $chunkymap_view_zoom_multiplier = $chunkymap_view_zoom_max;
+	
+	$decachunks_per_page = 1.0/$chunkymap_view_zoom_multiplier;
+	$view_w = (($decachunks_per_page*160.0));
+	$view_h = (($decachunks_per_page*160.0));
+	$view_left = (($chunkymap_view_x)) - (($view_w/2.0));
+	$view_right = $view_left + $view_w;
+	//z is cartesian still:
+	$view_top = (($chunkymap_view_z)) + (($view_h/2.0));
+	$view_bottom = $view_top - $view_h;
+
+	echo_chunkymap_anchor();
+	echo_chunkymap_controls();
+	echo "\r\n";
+	echo " ".($chunkymap_view_zoom_multiplier*100.0)."%\r\n";//(string)((int)($chunkymap_view_zoom_multiplier*100+.5));
+	//"chunkymapdata/images/compass-rose.png"
+	//"chunkymapdata/images/start.png"
+	$decachunky_min_x = get_decachunky_coord_from_location($view_left);
+	$decachunky_min_z = get_decachunky_coord_from_location($view_bottom);
+	$decachunky_max_x = get_decachunky_coord_from_location($view_right);
+	$decachunky_max_z = get_decachunky_coord_from_location($view_top);
+	$decachunky_count_x = $decachunky_max_x-$decachunky_min_x+1;
+	$decachunky_count_z = $decachunky_max_z-$decachunky_min_z+1;
+	
+	//#region local vars
+	$generated_yml_path = $chunkymapdata_thisworld_path."/generated.yml";
+	//#endregion local vars
+	
+	$decachunky_z=$decachunky_max_z;
+	//echo "<br/>";
+	//echo "$decachunky_min_x:$decachunky_max_x,$decachunky_min_z:$decachunky_max_z<br/>";
+	$td_placeholder_content="<!--widening table--><img src=\"chunkymapdata/images/decachunk-blank.jpg\" style=\"width:100%; -webkit-filter: opacity(40%); filter: opacity(40%); background-color:black\"/>";
+	$td_placeholder_content_1px="<!--widening table--><img src=\"chunkymapdata/images/decachunk-blank.jpg\" style=\"width:1px; -webkit-filter: opacity(40%); filter: opacity(40%); background-color:black\"/>";
+	echo '<table id="chunkymap_table" cellspacing="0" cellpadding="0" style="width:100%">'."\r\n";
+	echo '  <tr>'."\r\n";
+	echo '    <td style="width:5%">'."$td_placeholder_content".'</td>'."\r\n";
+	echo "    <td style=\"width:90%\"><a href=\"?$world_name=world_name&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier&chunkymap_view_x=$chunkymap_view_x&chunkymap_view_z=".($chunkymap_view_z+($view_h/2.0))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-up.png" style="width:100%"/>'.'</a></td>'."\r\n";
+	echo '    <td style="width:5%">'."$td_placeholder_content".'</td>'."\r\n";
+	echo '  </tr>'."\r\n";
+	$cell_perc=intval(round(100.0/$decachunky_count_x));
+	echo '  <tr>'."\r\n";
+	echo "    <td style=\"width:5%\"><a href=\"?$world_name=world_name&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier&chunkymap_view_x=".($chunkymap_view_x-($view_w/2.0))."&chunkymap_view_z=$chunkymap_view_z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-left.png" style="width:100%"/>'.'</a></td>'."\r\n";
+	echo '    <td style="width:90%">'."\r\n";
+	echo '      <table id="decachunk_table" cellspacing="0" cellpadding="0" style="width:100%; background-color:black">'."\r\n";
+	while ($decachunky_z>=$decachunky_min_z) {
+		echo '        <tr>'."\r\n";
+		$decachunky_x=$decachunky_min_x;
+		$cell_perc_remaining=100;
+		while ($decachunky_x<=$decachunky_max_x) {
+			$decachunk_file_name=get_decachunk_image_name_from_decachunk($decachunky_x, $decachunky_z);
+			$decachunk_file_path=get_decachunk_folder_path_from_decachunk($decachunky_x, $decachunky_z).'/'.$decachunk_file_name;
+			$td_content="<!--no decachunk $decachunk_file_path--><img src=\"chunkymapdata/images/decachunk-blank.jpg\" style=\"width:100%\"/>";
+			if (is_file($decachunk_file_path)) {
+				$td_content="<img src=\"$decachunk_file_path\" style=\"width:100%\"/>";
+			}
+			$this_cell_perc=$cell_perc;
+			if ($cell_perc_remaining>=$this_cell_perc) {
+				echo "          <td style=\"width:$this_cell_perc%\">"."$td_content".'</td>'."\r\n";
+				//echo '          <td>'."$decachunky_x,$decachunky_z".'</td>'."\r\n";
+				$cell_perc_remaining-=$this_cell_perc;
+			}
+			$decachunky_x+=1;
+		}
+		if ($cell_perc_remaining>0) {
+			$td_content=$td_placeholder_content_1px;
+			echo "          <td>$td_content</td>"."\r\n";
+		}
+		echo '          </tr>'."\r\n";
+		$decachunky_z-=1;
+	}
+	echo '      </table>'."\r\n";
+	echo '    </td>'."\r\n";
+	echo "    <td style=\"width:5%\"><a href=\"?$world_name=world_name&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier&chunkymap_view_x=".($chunkymap_view_x+($view_w/2.0))."&chunkymap_view_z=$chunkymap_view_z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-right.png" style="width:100%"/>'.'</a></td>'."\r\n";
+	echo '  </tr>'."\r\n";
+	echo '  <tr>'."\r\n";
+	echo '    <td style="width:5%">'."$td_placeholder_content".'</td>'."\r\n";
+	echo "    <td style=\"width:90%\"><a href=\"?$world_name=world_name&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier&chunkymap_view_x=$chunkymap_view_x&chunkymap_view_z=".($chunkymap_view_z-($view_h/2.0))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-down.png" style="width:100%"/>'.'</a></td>'."\r\n";
+	echo '    <td style="width:5%">'."$td_placeholder_content".'</td>'."\r\n";
+	echo '  </tr>'."\r\n";
+	echo '</table>'."\r\n";
+}
+
+function check_world() {
+	global $chunkymapdata_thisworld_path;
+	global $world_name;
+	global $chunkymapdata_worlds_path;
+	if (!isset($world_name)) {
+		if ($handle = opendir($chunkymapdata_worlds_path)) {
+			while (false !== ($file_name = readdir($handle))) {
+				if (substr($file_name, 0, 1) != ".") {
+					$file_path = $chunkymapdata_worlds_path."/".$file_name;
+					if (is_dir($file_path)) {
+						$world_name=$file_name;
+						break;
+					}
+				}
+			}
+			closedir($handle);
+		}
+	}
+	if (isset($world_name)) {
+		$chunkymapdata_thisworld_path = $chunkymapdata_worlds_path."/".$world_name;
+	}
+}
 //formerly echo_chunkymap_table
-function echo_entire_chunkymap_as_chunk_table() {
+function echo_chunkymap_as_chunk_table($show_all_enable) {
     ini_set('display_errors', 1);
     ini_set('display_startup_errors', 1);
     error_reporting(E_ALL);
@@ -303,7 +461,7 @@ function echo_entire_chunkymap_as_chunk_table() {
     if ($chunkymap_view_zoom_multiplier<$chunkymap_view_zoom_min) $chunkymap_view_zoom_multiplier = $chunkymap_view_zoom_min;
     if ($chunkymap_view_zoom_multiplier>$chunkymap_view_zoom_max) $chunkymap_view_zoom_multiplier = $chunkymap_view_zoom_max;
     //$zoom_divisor = (int)(100/$chunkymap_view_zoom_multiplier);
-    $chunk_assoc = array();  // used for determining which chunks are on the edge, since not all generated map tiles are the same size (edge tile images are smaller and corner ones are smaller yet)
+    $chunk_assoc = array();  // used for storing players; and used for determining which chunks are on the edge, since not all generated map tiles are the same size (edge tile images are smaller and corner ones are smaller yet)
     $chunk_count = 0;
     $x_opener="chunk_x";
     $z_opener="z";
@@ -312,29 +470,30 @@ function echo_entire_chunkymap_as_chunk_table() {
     $chunkz_min = 0;
     $chunkx_max = 0;
     $chunkz_max = 0;
+	$chunks_per_page = (1.0/$chunkymap_view_zoom_multiplier)*10;
+
+	$view_w = (($chunks_per_page*16.0));
+	$view_h = (($chunks_per_page*16.0));
+	$view_left = (($chunkymap_view_x)) - (($view_w/2.0));
+	$view_right = $view_left + $view_w;
+	//z is cartesian still:
+	$view_top = (($chunkymap_view_z)) + (($view_h/2.0));
+	$view_bottom = $view_top - $view_h;
+	
+	if (!$show_all_enable) {
+		$chunkx_min=intval($view_left/$chunkymap_tile_original_w);
+		$chunkx_max=intval($view_right/$chunkymap_tile_original_w);
+		$chunkz_min=intval($view_bottom/$chunkymap_tile_original_w);
+		$chunkz_max=intval($view_top/$chunkymap_tile_original_w);
+	}
     global $showplayers;
     $players = array();
     $player_count = 0;
     $character_icon_w=8;
     $character_icon_h=8;
 	global $chunkymapdata_thisworld_path;
-	if (!isset($world_name)) {
-		if ($handle = opendir($chunkymapdata_worlds_path)) {
-			while (false !== ($file_name = readdir($handle))) {
-				if (substr($file_name, 0, 1) != ".") {
-					$file_path = $chunkymapdata_worlds_path."/".$file_name;
-					if (is_dir($file_path)) {
-						$world_name=$file_name;
-						break;
-					}
-				}
-			}
-			closedir($handle);
-		}
-		
-	}
+	check_world();
 	if (isset($world_name)) {
-		$chunkymapdata_thisworld_path = $chunkymapdata_worlds_path."/".$world_name;
 		$generated_yml_path = $chunkymapdata_thisworld_path."/generated.yml";
 		if (is_file($generated_yml_path)) {
 			$map_dict = get_dict_from_conf($generated_yml_path,":");
@@ -508,17 +667,19 @@ function echo_entire_chunkymap_as_chunk_table() {
 												}
 												$chunk_assoc[$chunk_luid]["is_rendered"] = true;
 												if ($is_verbose) echo "$chunk_luid,";
-												if ($x<$chunkx_min) {
-													$chunkx_min=(int)$x;
-												}
-												if ($x>$chunkx_max) {
-													$chunkx_max=(int)$x;
-												}
-												if ($z<$chunkz_min) {
-													$chunkz_min=(int)$z;
-												}
-												if ($z>$chunkz_max) {
-													$chunkz_max=(int)$z;
+												if ($show_all_enable) {
+													if ($x<$chunkx_min) {
+														$chunkx_min=(int)$x;
+													}
+													if ($x>$chunkx_max) {
+														$chunkx_max=(int)$x;
+													}
+													if ($z<$chunkz_min) {
+														$chunkz_min=(int)$z;
+													}
+													if ($z>$chunkz_max) {
+														$chunkz_max=(int)$z;
+													}
 												}
 											}
 											else {
@@ -568,7 +729,7 @@ function echo_entire_chunkymap_as_chunk_table() {
 				$chunk_yaml_name = $x_opener.$x.$z_opener.$z.$dot_yaml;
 				//$chunk_yaml_path = $chunkymapdata_thisworld_path.'/'.$chunk_yaml_name;
 				//$chunk_yaml_path = $chunks_16px_path.'/'.
-				$chunk_yaml_path = get_chunk_folder_path($x, $z).'/'.$chunk_yaml_name;
+				$chunk_yaml_path = get_chunk_folder_path_from_chunky_coords($x, $z).'/'.$chunk_yaml_name;
 				//$chunk_genresult_name = $x_opener.$x.$z_opener.$z.$genresult_suffix_then_dot_then_ext;
 				//$chunk_genresult_path = $chunkymapdata_thisworld_path.'/'.$chunk_img_name;
 				$td_style_suffix="";
@@ -664,7 +825,7 @@ function echo_entire_chunkymap_as_chunk_table() {
 				echo_hold("<div style=\"position: relative\">"); //causes child's absolute position to be relative to this div's location, as per http://www.w3schools.com/css/tryit.asp?filename=trycss_position_absolute
 				$chunk_luid = "x".$x."z".$z;
 				$chunk_img_name = $x_opener.$x.$z_opener.$z."$dot_and_ext";
-				$chunk_img_path = get_chunk_folder_path($x, $z).'/'.$chunk_img_name;
+				$chunk_img_path = get_chunk_folder_path_from_chunky_coords($x, $z).'/'.$chunk_img_name;
 				if (is_file($chunk_img_path)) {
 					echo_hold( "<img class=\"maptileimg\" style=\"width:$this_zoomed_w; height:$this_zoomed_h;\" src=\"$chunk_img_path\"/>");
 				}
@@ -761,7 +922,7 @@ function echo_entire_chunkymap_as_chunk_table() {
 								$img_style.="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
 								$text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
 							}
-							echo_hold( "<div style=\"position:absolute; z-index:999; left:$rel_x; top:$rel_z; width: $zoomed_head_w; height: $zoomed_head_h; $img_border_style\"><img src=\"$image_path\" style=\"$img_style\"/><span style=\"$text_style\">$text</span></div>" );
+							echo_hold( "<div style=\"position:absolute; z-index:999; left:$rel_x; top:$rel_z; width: $zoomed_image_w; height: $zoomed_image_h; $img_border_style\"><img src=\"$image_path\" style=\"$img_style\"/><span style=\"$text_style\">$text</span></div>" );
 						}
 						//$position_offset_x+=$character_icon_w;
 					}

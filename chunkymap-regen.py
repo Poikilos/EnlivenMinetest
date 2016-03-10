@@ -390,7 +390,7 @@ class MTChunks:
     python_exe_path = None
     chunks = None
     decachunks = None
-    total_newly_rendered = None
+    rendered_this_session_count = None
 
     #region values for subprocess arguments:
     pixelspernode = 1
@@ -436,7 +436,7 @@ class MTChunks:
     def __init__(self):  #formerly checkpaths() in global scope
         self.min_indent = "  "
         self.decachunks = {}
-        self.total_newly_rendered = 0
+        self.rendered_this_session_count = 0
         os_name="linux"
         if (os.path.sep!="/"):
             os_name="windows"
@@ -828,8 +828,8 @@ class MTChunks:
         return "decachunk_"+self.get_decachunk_luid_from_decachunk(decachunky_x, decachunky_z)+".jpg"
 
     def get_decachunk_luid_from_chunk(self, chunky_x, chunky_z):
-        decachunky_x = int(math.floor(chunky_x/10))
-        decachunky_z = int(math.floor(chunky_z/10))
+        decachunky_x = self.get_decachunky_coord_from_chunky_coord(chunky_x)
+        decachunky_z = self.get_decachunky_coord_from_chunky_coord(chunky_z)
         return self.get_chunk_luid(decachunky_x, decachunky_z)
 
     def get_decachunk_luid_from_decachunk(self, decachunky_x, decachunky_z):
@@ -856,24 +856,31 @@ class MTChunks:
     def get_signal_path(self):
         return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_signal_name())
 
+    def get_decachunky_coord_from_chunky_coord(self, chunky_x):
+        return int(math.floor(float(chunky_x)/10.0))
+
     def check_decachunk_containing_chunk(self, chunky_x, chunky_z):
         chunk16_coord_list = list()
-        decachunky_x = int(math.floor(chunky_x/10))
-        decachunky_z = int(math.floor(chunky_z/10))
+        decachunky_x = self.get_decachunky_coord_from_chunky_coord(chunky_x)
+        decachunky_z = self.get_decachunky_coord_from_chunky_coord(chunky_z)
         chunk16x_min = decachunky_x*10
         chunk16x_max = chunk16x_min + 15  # NOTE: + 15 even if negative since originally, floor was used
         chunk16z_min = decachunky_z*10
         chunk16z_max = chunk16z_min + 15  # NOTE: + 15 even if negative since originally, floor was used
+        chunky_x_count=chunk16x_max-chunk16x_min+1
+        chunky_z_count=chunk16z_max-chunk16z_min+1
         is_any_part_queued = False
-        chunky_z = chunk16x_min
+        chunky_z = chunk16z_min
+        preview_strings = list()
         while chunky_z <= chunk16z_max:
+            preview_strings.append("")
             chunky_x = chunk16x_min
-            while chunky_x <=  chunk16x_max:
+            while chunky_x <= chunk16x_max:
                 coords = (chunky_x, chunky_z)
                 chunk16_coord_list.append( coords )
                 if self.todo_index<len(self.todo_positions):
                     for index in range(self.todo_index,len(self.todo_positions)):
-                        if ivec2_equals(self.todo_positions[self.todo_index], coords):
+                        if ivec2_equals(self.todo_positions[index], coords):
                             is_any_part_queued = True
                             break
                 if is_any_part_queued:
@@ -883,17 +890,28 @@ class MTChunks:
                 break
             chunky_z += 1
         if not is_any_part_queued:
+            print("")
+            print("")
             print("    Rendering 160px decachunk "+str((decachunky_x, decachunky_z)))
+            if self.verbose_enable:
+                print("      USING ("+str(len(chunk16_coord_list))+") chunks: "+str(chunk16_coord_list))
+                print("")
+            else:
+                print("      USING ("+str(len(chunk16_coord_list))+") chunks")
             decachunk_global_coords = decachunky_x*160, decachunky_z*160
             im = Image.new("RGB", (160, 160), self.FLAG_EMPTY_HEXCOLOR)
             decachunk_yaml_path = self.get_decachunk_yaml_path_from_decachunk(decachunky_x, decachunky_z)
             decachunk_image_path = self.get_decachunk_image_path_from_decachunk(decachunky_x, decachunky_z)
             combined_count = 0
             contains_chunk_luids = list()
+            
             for coord in chunk16_coord_list:
                 chunky_x, chunky_z = coord
+                chunky_offset_x = chunky_x - chunk16x_min
+                chunky_offset_z = chunky_z - chunk16x_min
                 chunk_image_path = self.get_chunk_image_path(chunky_x, chunky_z)
                 if os.path.isfile(chunk_image_path):
+                    preview_strings[chunky_offset_z] += "1"
                     participle="initializing"
                     try:
                         participle="opening path"
@@ -911,6 +929,14 @@ class MTChunks:
                     except:
                         print("Could not finish "+participle+" in check_decachunk_containing_chunk:")
                         view_traceback()
+                else:
+                    preview_strings[chunky_offset_z] += "0"
+            chunky_offset_z = chunky_z_count - 1
+            print(self.min_indent+"Usable chunk images mask:")
+            while chunky_offset_z>=0:
+                print(self.min_indent+"  "+preview_strings[chunky_offset_z])
+                chunky_offset_z -= 1
+            print("")
             decachunk_folder_path = self.get_decachunk_folder_path_from_decachunk(decachunky_x, decachunky_z)
             if not os.path.isdir(decachunk_folder_path):
                 os.makedirs(decachunk_folder_path)
@@ -932,24 +958,27 @@ class MTChunks:
 
     def get_chunk_folder_path(self, chunky_x, chunky_z):
         result = None
-        decachunky_x = int(math.floor(chunky_x/10))
-        decachunky_z = int(math.floor(chunky_z/10))
+        decachunky_x = self.get_decachunky_coord_from_chunky_coord(chunky_x)
+        decachunky_z = self.get_decachunky_coord_from_chunky_coord(chunky_z)
         result = os.path.join( os.path.join(self.data_16px_path, str(decachunky_x)), str(decachunky_z) )
         return result
 
     def get_decachunk_folder_path_from_chunk(self, chunky_x, chunky_z):
         result = None
         if chunky_x is not None and chunky_z is not None:
-            hectochunky_x = int(math.floor(chunky_x/100))
-            hectochunky_x = int(math.floor(chunky_z/100))
-            result = os.path.join( os.path.join(self.data_160px_path, str(hectochunky_x)), str(hectochunky_x) )
+            decachunk_x = self.get_decachunky_coord_from_chunky_coord(chunky_x)
+            decachunk_z = self.get_decachunky_coord_from_chunky_coord(chunky_z)
+            #hectochunky_x = int(math.floor(chunky_x/100))
+            #hectochunky_z = int(math.floor(chunky_z/100))
+            #result = os.path.join( os.path.join(self.data_160px_path, str(hectochunky_x)), str(hectochunky_x) )
+            result = self.get_decachunk_folder_path_from_decachunk(decachunk_x, decachunk_z)
         return result
 
     def get_decachunk_folder_path_from_decachunk(self, decachunky_x, decachunky_z):
         result = None
         if decachunky_x is not None and decachunky_z is not None:
-            hectochunky_x = int(math.floor(decachunky_x/10))
-            hectochunky_x = int(math.floor(decachunky_z/10))
+            hectochunky_x = int(math.floor(float(decachunky_x)/10.0))
+            hectochunky_z = int(math.floor(float(decachunky_z)/10.0))
             result = os.path.join( os.path.join(self.data_160px_path, str(hectochunky_x)), str(hectochunky_x) )
         return result
 
@@ -985,8 +1014,8 @@ class MTChunks:
         #if coords is not None:
         #    chunky_x, chunky_z = coords
         tmp_path = self.get_chunk_genresults_base_path()
-        decachunky_x = int(math.floor(chunky_x/10))
-        decachunky_z = int(math.floor(chunky_z/10))
+        decachunky_x = self.get_decachunky_coord_from_chunky_coord(chunky_x)
+        decachunky_z = self.get_decachunky_coord_from_chunky_coord(chunky_z)
         tmp_path = os.path.join( os.path.join(tmp_path, str(decachunky_x)), str(decachunky_z) )
         return tmp_path
 
@@ -1186,10 +1215,11 @@ class MTChunks:
                     self.create_chunk_folder(chunky_x, chunky_z)
                     os.rename(tmp_png_path, dest_png_path)
                     print(min_indent+"(moved to '"+dest_png_path+"')")
-                    self.total_newly_rendered += 1
+                    self.rendered_this_session_count += 1
                     self.prepare_chunk_meta(chunky_x, chunky_z)  # DOES load existing yml if exists
                     self.chunks[chunk_luid].is_fresh = True
                     self.chunks[chunk_luid].metadata["is_empty"] = False
+                    print (min_indent+"{rendered_this_session_count:"+str(self.rendered_this_session_count)+"}")
                 except:
                     print (min_indent+"Could not finish moving '"+tmp_png_path+"' to '"+dest_png_path+"'")
             else:
@@ -1515,7 +1545,7 @@ class MTChunks:
                 this_pos = self.todo_positions[self.todo_index]
                 chunky_x, chunky_z = this_pos
                 chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
-                prev_total_newly_rendered = self.total_newly_rendered
+                prev_rendered_this_session_count = self.rendered_this_session_count
                 is_present, reason_string = self.check_chunk(chunky_x, chunky_z)
 
                 if is_present:
@@ -1533,7 +1563,7 @@ class MTChunks:
                     prev_len = len(self.todo_positions)
                     self._check_map_pseudorecursion_branchfrom(chunky_x, chunky_z)
                     #must check_decachunk_containing_chunk AFTER _check_map_pseudorecursion_branchfrom so check_decachunk_containing_chunk can see if there are more to do before rendering superchunk
-                    if self.total_newly_rendered>prev_total_newly_rendered:
+                    if self.rendered_this_session_count>prev_rendered_this_session_count:
                         self.check_decachunk_containing_chunk(chunky_x, chunky_z)
                     if self.verbose_enable:
                         print(min_indent+"["+str(self.todo_index)+"] branching from "+str((chunky_x, chunky_z))+" (added "+str(len(self.todo_positions)-prev_len)+")")

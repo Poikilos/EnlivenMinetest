@@ -12,7 +12,7 @@ error_reporting(E_ALL);
 if (is_file('chunkymap.php')) {
 	//echo "including...";
 	include_once('chunkymap.php');
-	//echo "about to call echo_entire_chunkymap_as_chunk_table...";
+	//echo "about to call echo_chunkymap_as_chunk_table...";
 
 	//The following is not needed, since chunkymap.php should be included above and puts all $_REQUEST array variables into $GLOBALS array
 	//if (!isset($_REQUEST['chunkymap_view_x'])) {//if (!isset($chunkymap_view_x)) {
@@ -26,9 +26,10 @@ if (is_file('chunkymap.php')) {
 	echo "</center>";
 	set_chunkymap_view($chunkymap_view_x,$chunkymap_view_z,$chunkymap_view_zoom_multiplier);
 	echo "<table><tr><td style=\"text-align:left\">";
-	echo_entire_chunkymap_as_chunk_table();
+	echo_chunkymap_as_chunk_table(false);
+	echo_chunkymap_canvas();
 	echo "</td></tr></table>";
-	//echo "returned from echo_entire_chunkymap_as_chunk_table.";
+	//echo "returned from echo_chunkymap_as_chunk_table.";
 }
 else {
 	echo "missing chunkymap.php";
