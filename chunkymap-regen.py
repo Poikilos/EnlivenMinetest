@@ -60,7 +60,7 @@ class InstalledFile:
         self.source_dir_path=source_dir_path
         self.dest_dir_path=dest_dir_path
 
-        
+
 def get_dict_deepcopy(old_dict):
     new_dict = None
     if type(old_dict) is dict:
@@ -391,6 +391,7 @@ class MTChunks:
     chunks = None
     decachunks = None
     rendered_this_session_count = None
+    #force_rerender_decachunks_enable = None
 
     #region values for subprocess arguments:
     pixelspernode = 1
@@ -434,6 +435,7 @@ class MTChunks:
     min_indent = None
 
     def __init__(self):  #formerly checkpaths() in global scope
+        #self.force_rerender_decachunks_enable = True
         self.min_indent = "  "
         self.decachunks = {}
         self.rendered_this_session_count = 0
@@ -904,7 +906,7 @@ class MTChunks:
             decachunk_image_path = self.get_decachunk_image_path_from_decachunk(decachunky_x, decachunky_z)
             combined_count = 0
             contains_chunk_luids = list()
-            
+
             for coord in chunk16_coord_list:
                 chunky_x, chunky_z = coord
                 chunky_offset_x = chunky_x - chunk16x_min
@@ -1563,8 +1565,9 @@ class MTChunks:
                     prev_len = len(self.todo_positions)
                     self._check_map_pseudorecursion_branchfrom(chunky_x, chunky_z)
                     #must check_decachunk_containing_chunk AFTER _check_map_pseudorecursion_branchfrom so check_decachunk_containing_chunk can see if there are more to do before rendering superchunk
-                    if self.rendered_this_session_count>prev_rendered_this_session_count:
-                        self.check_decachunk_containing_chunk(chunky_x, chunky_z)
+                    #always check since already checks queue and doesn't render decachunk on last rendered chunk, but instead on last queued chunk in decachunk
+                    #if self.rendered_this_session_count>prev_rendered_this_session_count or self.force_rerender_decachunks_enable:
+                    self.check_decachunk_containing_chunk(chunky_x, chunky_z)
                     if self.verbose_enable:
                         print(min_indent+"["+str(self.todo_index)+"] branching from "+str((chunky_x, chunky_z))+" (added "+str(len(self.todo_positions)-prev_len)+")")
                 else:
@@ -1596,7 +1599,7 @@ class MTChunks:
                 except:
                     pass
         return result
-    
+
     def apply_auto_tags_by_worldgen_mods(self, chunky_x, chunky_z):
         worldgen_mod_list = list()
         worldgen_mod_list.append("technic_worldgen")
@@ -1608,7 +1611,7 @@ class MTChunks:
         worldgen_mod_list.append("caverealms")
         #worldgen_mod_list.append("nature_classic")  # NOTE: plantlife_modpack has this and other stuff, but just mention this one in tags since it is unique to the modpack
         worldgen_mod_list.append("plantlife_modpack")  #ok if installed as modpack instead of putting individual mods in mods folder
-        
+
         chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
         if chunk_luid not in self.chunks.keys():
             self.prepare_chunk_meta(chunky_x, chunky_z)
@@ -1625,10 +1628,10 @@ class MTChunks:
         #TODO: finish this
         #for mod_name in worldgen_mod_list:
             #mod_path = self.asdf
-            #if os.path.isdir( 
+            #if os.path.isdir(
         #if is_changed:
         #    self.save_chunk_meta(chunky_x, chunky_z)
-    
+
     def correct_genresults_paths(self):
         count = 0
         folder_path = self.get_chunk_genresults_base_path()
@@ -1670,7 +1673,7 @@ class MTChunks:
             print("MOVED "+str(count)+" genresult file(s)")
             print("")
             print("")
-        
+
 
     def check_map_pseudorecursion_start(self):
         if self.todo_index<0:
@@ -1717,7 +1720,7 @@ class MTChunks:
                                                         break
                                                     print("Checking chunk "+str(coords)+" *"+str(self.mapvars["chunk_size"])+"")
                                                     self.prepare_chunk_meta(chunky_x, chunky_z)
-                                                    
+
                                                     #if ("tags" not in self.chunks[chunk_luid].metadata):
                                                         #self.chunks[chunk_luid].metadata["tags"] = "moreores,caverealms"
                                                         #self.save_chunk_meta(chunky_x, chunky_z)

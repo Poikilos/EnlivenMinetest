@@ -12,7 +12,7 @@ def view_traceback():
     traceback.print_tb(tb)
     del tb
 
-#as per Pedro Lobito on http://stackoverflow.com/questions/802134/changing-user-agent-on-urllib2-urlopen    
+#as per Pedro Lobito on http://stackoverflow.com/questions/802134/changing-user-agent-on-urllib2-urlopen
 from urllib import FancyURLopener
 class MyOpener(FancyURLopener, object):
     version = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11'
@@ -21,16 +21,17 @@ def web_get(url, file_name):
     myopener = MyOpener()
     print("Downloading "+url+"...")
     myopener.retrieve(url, file_name)
-    
 
-#as per http://stackoverflow.com/questions/22676/how-do-i-download-a-file-over-http-using-python
+
+#as per http://stackoverflow.com/questions/22676/how-do-i-download-a-file-over-http-using-python but FAILS (404 Error) since user agent is not recognized, and setting user agent string does not fix it. use web_get above instead.
 def web_get_BADUSERAGENT(url, file_name):
+    print("This function probably will not work since settings user agent doesn't work with urllib2 request object (user agent is not recognized, and 404 error is usually the result). Try web_get instead.")
     file_name = None
     try:
         #url = "http://download.thinkbroadband.com/10MB.zip"
 
         #file_name = url.split('/')[-1]
-        
+
         u = urllib2.urlopen(url)
         f = open(file_name, 'wb')
         meta = u.info()
@@ -148,7 +149,7 @@ if python_folder_name.lower()[:7]!="python3":
         python_Lib_path = os.path.join(python_folder_path,"Lib")
         python_Lib_site_packages_path = os.path.join(python_Lib_path, "site-packages")
         if os.path.isdir(python_Lib_site_packages_path):
-            
+
             installed_numpy_path = os.path.join(python_Lib_site_packages_path, "numpy")
             if not os.path.isdir(installed_numpy_path):
                 #downloaded_numpy_path = os.path.join(downloads_path, downloaded_numpy_name)
@@ -161,7 +162,7 @@ if python_folder_name.lower()[:7]!="python3":
 
                 if os.path.isfile(downloaded_numpy_path):
                     subprocess.call(install_numpy_cmd_string)
-            
+
             if os.path.isdir(installed_numpy_path):
                 print("Numpy was detected at '"+installed_numpy_path+"'")
                 installed_pillow_path = os.path.join(python_Lib_site_packages_path, "PIL")
@@ -207,4 +208,4 @@ if python_folder_name.lower()[:7]!="python3":
         else:
             raw_input("Cannot detect a site-packages folder in python installation of current python executable "+sys.executable+" so installation cannot continue. Press enter to exit.")
 else:
-    raw_input("This installer does not know the correct wheels for python 3 (detected at "+python_folder_path+"). Please run this script with python 2 instead. Please see README.md for manual installation, but download python 3 wheels instead of the example wheels listed in README.md. Press enter to exit.")
+    raw_input("This installer does not know the correct wheels for python 3 (detected at "+python_folder_path+"). Please run this script with python 2 instead. Please see README.md for manual installation, but download and install Python 3 wheels instead of the example wheels listed in README.md. Press enter to exit.")
