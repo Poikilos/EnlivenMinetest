@@ -49,8 +49,8 @@ $chunkymap_tile_original_h=16;
 $chunk_dimension_min=$chunkymap_tile_original_w;
 if ($chunkymap_tile_original_h<$chunk_dimension_min) $chunk_dimension_min=$chunkymap_tile_original_h;
 
-$chunkymap_view_zoom_min=1.0/$chunk_dimension_min; //should be a number that would get to exactly 100 eventually if multiplied by 2 repeatedly (such as 0.09765625); 0.005 was avoided since tiles used to be 80x80 pixels
-$chunkymap_view_zoom_max=13107200.0;
+$chunkymap_view_min_zoom=1.0/$chunk_dimension_min; //should be a number that would get to exactly 100 eventually if multiplied by 2 repeatedly (such as 0.09765625); 0.005 was avoided since tiles used to be 80x80 pixels
+$chunkymap_view_max_zoom=13107200.0;
 
 function echo_error($val) {
     if (!isset($val)) {
@@ -132,8 +132,8 @@ function echo_chunkymap_controls() {
     global $chunkymap_view_x;
     global $chunkymap_view_z;
     global $chunkymap_view_zoom_multiplier;
-    global $chunkymap_view_zoom_max;
-    global $chunkymap_view_zoom_min;
+    global $chunkymap_view_max_zoom;
+    global $chunkymap_view_min_zoom;
     global $chunkymap_anchor_name;
     $is_in=false;
     $is_out=false;
@@ -141,7 +141,7 @@ function echo_chunkymap_controls() {
     $out_img_name = "zoom-out.png";
 
     $in_zoom = $chunkymap_view_zoom_multiplier;
-    if ($in_zoom<$chunkymap_view_zoom_max) {
+    if ($in_zoom<$chunkymap_view_max_zoom) {
         $is_in=true;
         $in_zoom = $chunkymap_view_zoom_multiplier*2.0;
         //echo "in:$in_zoom ";
@@ -149,15 +149,15 @@ function echo_chunkymap_controls() {
     else $in_img_name = "zoom-in_disabled.png";
 
     $out_zoom = $chunkymap_view_zoom_multiplier;
-    if ($out_zoom>$chunkymap_view_zoom_min) {
+    if ($out_zoom>$chunkymap_view_min_zoom) {
         $is_out=true;
         $out_zoom = ($chunkymap_view_zoom_multiplier/2.0);
     }
     else $out_img_name = "zoom-out_disabled.png";
 
-    $zoom_clip = $chunkymap_view_zoom_max;
+    $zoom_clip = $chunkymap_view_max_zoom;
     $found=false;
-    while ($zoom_clip>=$chunkymap_view_zoom_min) {
+    while ($zoom_clip>=$chunkymap_view_min_zoom) {
         if ($out_zoom>$zoom_clip) {
             $out_zoom=$zoom_clip*2;
             $found=true;
@@ -166,11 +166,11 @@ function echo_chunkymap_controls() {
         $zoom_clip = $zoom_clip/2;
     }
     if (!$found) {
-        $out_zoom=$chunkymap_view_zoom_min;
+        $out_zoom=$chunkymap_view_min_zoom;
     }
-    //if ($in_zoom>$chunkymap_view_zoom_max) {
-    //  $in_zoom=$chunkymap_view_zoom_max;
-    //  echo "<!--clipping to max $chunkymap_view_zoom_max-->";
+    //if ($in_zoom>$chunkymap_view_max_zoom) {
+    //  $in_zoom=$chunkymap_view_max_zoom;
+    //  echo "<!--clipping to max $chunkymap_view_max_zoom-->";
     //}
     //elseif ($in_zoom>200) $in_zoom=400;
     //elseif ($in_zoom>100) $in_zoom=200;
@@ -181,9 +181,9 @@ function echo_chunkymap_controls() {
     //elseif ($in_zoom>4) $in_zoom=12;
     //elseif ($in_zoom>2) $in_zoom=4;
     //elseif ($in_zoom>1) $in_zoom=2;
-    //else $in_zoom=$chunkymap_view_zoom_min;  // if ($in_zoom>1) $in_zoom=5;
+    //else $in_zoom=$chunkymap_view_min_zoom;  // if ($in_zoom>1) $in_zoom=5;
     //echo "in:$in_zoom ";
-    // if ($out_zoom<$chunkymap_view_zoom_min) $out_zoom=$chunkymap_view_zoom_min;
+    // if ($out_zoom<$chunkymap_view_min_zoom) $out_zoom=$chunkymap_view_min_zoom;
     // elseif ($out_zoom<2) $out_zoom=1;
     // elseif ($out_zoom<4) $out_zoom=2;
     // elseif ($out_zoom<12) $out_zoom=4;
@@ -192,11 +192,11 @@ function echo_chunkymap_controls() {
     // elseif ($out_zoom<75) $out_zoom=50;
     // elseif ($out_zoom<100) $out_zoom=75;
     //elseif ($out_zoom<200) $out_zoom=100;
-    //elseif ($out_zoom<$chunkymap_view_zoom_max) $out_zoom=(int)($chunkymap_view_zoom_max/2);
-    //else $out_zoom=$chunkymap_view_zoom_max; //if ($out_zoom>76) $out_zoom=100;
-    $zoom_clip=$chunkymap_view_zoom_min;
+    //elseif ($out_zoom<$chunkymap_view_max_zoom) $out_zoom=(int)($chunkymap_view_max_zoom/2);
+    //else $out_zoom=$chunkymap_view_max_zoom; //if ($out_zoom>76) $out_zoom=100;
+    $zoom_clip=$chunkymap_view_min_zoom;
     $found=false;
-    while ($zoom_clip<=$chunkymap_view_zoom_max) {
+    while ($zoom_clip<=$chunkymap_view_max_zoom) {
         if ($in_zoom<($zoom_clip*2)) {
             $in_zoom=$zoom_clip;
             $found=true;
@@ -204,7 +204,7 @@ function echo_chunkymap_controls() {
         }
         $zoom_clip = $zoom_clip * 2;
     }
-    if (!$found) $in_zoom=$chunkymap_view_zoom_max;
+    if (!$found) $in_zoom=$chunkymap_view_max_zoom;
 
     $in_html="<img src=\"chunkymapdata/images/$in_img_name\" style=\"width:16pt; height:16pt\" />";
     $out_html="<img src=\"chunkymapdata/images/$out_img_name\" style=\"width:16pt; height:16pt\" />";
@@ -312,8 +312,8 @@ function echo_chunkymap_canvas() {
     global $chunkymap_view_x;
     global $chunkymap_view_z;
     global $chunkymap_view_zoom_multiplier;
-    global $chunkymap_view_zoom_max;
-    global $chunkymap_view_zoom_min;
+    global $chunkymap_view_max_zoom;
+    global $chunkymap_view_min_zoom;
 	global $showplayers;
 
 	check_world();
@@ -325,8 +325,8 @@ function echo_chunkymap_canvas() {
     $z_opener="z";
     $dot_and_ext = ".jpg";
 	
-    if ($chunkymap_view_zoom_multiplier<$chunkymap_view_zoom_min) $chunkymap_view_zoom_multiplier = $chunkymap_view_zoom_min;
-    if ($chunkymap_view_zoom_multiplier>$chunkymap_view_zoom_max) $chunkymap_view_zoom_multiplier = $chunkymap_view_zoom_max;
+    if ($chunkymap_view_zoom_multiplier<$chunkymap_view_min_zoom) $chunkymap_view_zoom_multiplier = $chunkymap_view_min_zoom;
+    if ($chunkymap_view_zoom_multiplier>$chunkymap_view_max_zoom) $chunkymap_view_zoom_multiplier = $chunkymap_view_max_zoom;
 	
 	$decachunks_per_page = 1.0/$chunkymap_view_zoom_multiplier;
 	$view_w = (($decachunks_per_page*160.0));
@@ -358,7 +358,7 @@ function echo_chunkymap_canvas() {
 	//echo "<br/>";
 	//echo "$decachunky_min_x:$decachunky_max_x,$decachunky_min_z:$decachunky_max_z<br/>";
 	$td_placeholder_content="<!--widening table--><img src=\"chunkymapdata/images/decachunk-blank.jpg\" style=\"width:100%; -webkit-filter: opacity(40%); filter: opacity(40%); background-color:black\"/>";
-	$td_placeholder_content_1px="<!--widening table--><img src=\"chunkymapdata/images/decachunk-blank.jpg\" style=\"width:1px; -webkit-filter: opacity(40%); filter: opacity(40%); background-color:black\"/>";
+	$td_1px_placeholder_content="<!--widening table--><img src=\"chunkymapdata/images/decachunk-blank.jpg\" style=\"width:1px; -webkit-filter: opacity(40%); filter: opacity(40%); background-color:black\"/>";
 	echo '<table id="chunkymap_table" cellspacing="0" cellpadding="0" style="width:100%">'."\r\n";
 	echo '  <tr>'."\r\n";
 	echo '    <td style="width:5%">'."$td_placeholder_content".'</td>'."\r\n";
@@ -390,7 +390,7 @@ function echo_chunkymap_canvas() {
 			$decachunky_x+=1;
 		}
 		if ($cell_perc_remaining>0) {
-			$td_content=$td_placeholder_content_1px;
+			$td_content=$td_1px_placeholder_content;
 			echo "          <td>$td_content</td>"."\r\n";
 		}
 		echo '          </tr>'."\r\n";
@@ -443,33 +443,33 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
     global $chunkymap_view_x;
     global $chunkymap_view_z;
     global $chunkymap_view_zoom_multiplier;
-    global $chunkymap_view_zoom_max;
-    global $chunkymap_view_zoom_min;
+    global $chunkymap_view_max_zoom;
+    global $chunkymap_view_min_zoom;
     global $chunkymapdata_path;
 	global $chunkymapdata_worlds_path;
     global $map_dict;
     global $is_verbose;
     global $chunkymap_tile_original_w;
     global $chunkymap_tile_original_h;
-    global $chunkymap_view_zoom_max;
+    global $chunkymap_view_max_zoom;
 	global $world_name;
 
 	echo_chunkymap_anchor();
 	echo_chunkymap_controls();
 	echo " ".($chunkymap_view_zoom_multiplier*100.0)."%";//(string)((int)($chunkymap_view_zoom_multiplier*100+.5));
 
-    if ($chunkymap_view_zoom_multiplier<$chunkymap_view_zoom_min) $chunkymap_view_zoom_multiplier = $chunkymap_view_zoom_min;
-    if ($chunkymap_view_zoom_multiplier>$chunkymap_view_zoom_max) $chunkymap_view_zoom_multiplier = $chunkymap_view_zoom_max;
+    if ($chunkymap_view_zoom_multiplier<$chunkymap_view_min_zoom) $chunkymap_view_zoom_multiplier = $chunkymap_view_min_zoom;
+    if ($chunkymap_view_zoom_multiplier>$chunkymap_view_max_zoom) $chunkymap_view_zoom_multiplier = $chunkymap_view_max_zoom;
     //$zoom_divisor = (int)(100/$chunkymap_view_zoom_multiplier);
     $chunk_assoc = array();  // used for storing players; and used for determining which chunks are on the edge, since not all generated map tiles are the same size (edge tile images are smaller and corner ones are smaller yet)
     $chunk_count = 0;
     $x_opener="chunk_x";
     $z_opener="z";
     $dot_and_ext = ".png";
-    $chunkx_min = 0;
-    $chunkz_min = 0;
-    $chunkx_max = 0;
-    $chunkz_max = 0;
+    $min_chunkx = 0;
+    $min_chunkz = 0;
+    $max_chunkx = 0;
+    $max_chunkz = 0;
 	$chunks_per_page = (1.0/$chunkymap_view_zoom_multiplier)*10;
 
 	$view_w = (($chunks_per_page*16.0));
@@ -481,10 +481,10 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
 	$view_bottom = $view_top - $view_h;
 	
 	if (!$show_all_enable) {
-		$chunkx_min=intval($view_left/$chunkymap_tile_original_w);
-		$chunkx_max=intval($view_right/$chunkymap_tile_original_w);
-		$chunkz_min=intval($view_bottom/$chunkymap_tile_original_w);
-		$chunkz_max=intval($view_top/$chunkymap_tile_original_w);
+		$min_chunkx=intval($view_left/$chunkymap_tile_original_w);
+		$max_chunkx=intval($view_right/$chunkymap_tile_original_w);
+		$min_chunkz=intval($view_bottom/$chunkymap_tile_original_w);
+		$max_chunkz=intval($view_top/$chunkymap_tile_original_w);
 	}
     global $showplayers;
     $players = array();
@@ -633,10 +633,10 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
 		
 		
 		//if ($map_dict != null) {
-		//  $chunkx_min = $map_dict["chunkx_min"];
-		//  $chunkz_min = $map_dict["chunkz_min"];
-		//  $chunkx_max = $map_dict["chunkx_max"];
-		//  $chunkz_max = $map_dict["chunkz_max"];
+		//  $min_chunkx = $map_dict["min_chunkx"];
+		//  $min_chunkz = $map_dict["min_chunkz"];
+		//  $max_chunkx = $map_dict["max_chunkx"];
+		//  $max_chunkz = $map_dict["max_chunkz"];
 		//}
 		//else {
 			//echo "calculating range...";
@@ -648,18 +648,18 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
 					if ((substr($decachunk_x_name, 0, 1) != ".") and is_dir($decachunk_x_path)) {
 						$decachunk_x_handle = opendir($decachunk_x_path);
 						while (false !== ($decachunk_z_name = readdir($decachunk_x_handle))) {
-							$decachunk_z_path = $decachunk_x_path."/".$decachunk_z_name;
-							if ((substr($decachunk_z_name, 0, 1) != ".") and is_dir($decachunk_z_path)) {
-								$decachunk_z_handle = opendir($decachunk_z_path);
+							$decachunk_folder_path = $decachunk_x_path."/".$decachunk_z_name;
+							if ((substr($decachunk_z_name, 0, 1) != ".") and is_dir($decachunk_folder_path)) {
+								$decachunk_z_handle = opendir($decachunk_folder_path);
 								while (false !== ($chunk_name = readdir($decachunk_z_handle))) {
 									$file_lower = strtolower($chunk_name);
 									if (endsWith($file_lower, $dot_and_ext) and startsWith($file_lower, $x_opener)) {
 										$z_opener_index = strpos($file_lower, $z_opener, strlen($x_opener));
 										if ($z_opener_index !== false) {
 											$x_len = $z_opener_index - strlen($x_opener);
-											$z_len = strlen($file_lower) - strlen($x_opener) - $x_len - strlen($z_opener) - strlen($dot_and_ext);
+											$remaining_len = strlen($file_lower) - strlen($x_opener) - $x_len - strlen($z_opener) - strlen($dot_and_ext);
 											$x = substr($file_lower, strlen($x_opener), $x_len);
-											$z = substr($file_lower, $z_opener_index + strlen($z_opener), $z_len);
+											$z = substr($file_lower, $z_opener_index + strlen($z_opener), $remaining_len);
 											if (is_int_string($x) and is_int_string($z)) {
 												$chunk_luid = "x".$x."z".$z;
 												if (!isset($chunk_assoc[$chunk_luid])) {
@@ -668,17 +668,17 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
 												$chunk_assoc[$chunk_luid]["is_rendered"] = true;
 												if ($is_verbose) echo "$chunk_luid,";
 												if ($show_all_enable) {
-													if ($x<$chunkx_min) {
-														$chunkx_min=(int)$x;
+													if ($x<$min_chunkx) {
+														$min_chunkx=(int)$x;
 													}
-													if ($x>$chunkx_max) {
-														$chunkx_max=(int)$x;
+													if ($x>$max_chunkx) {
+														$max_chunkx=(int)$x;
 													}
-													if ($z<$chunkz_min) {
-														$chunkz_min=(int)$z;
+													if ($z<$min_chunkz) {
+														$min_chunkz=(int)$z;
 													}
-													if ($z>$chunkz_max) {
-														$chunkz_max=(int)$z;
+													if ($z>$max_chunkz) {
+														$max_chunkz=(int)$z;
 													}
 												}
 											}
@@ -695,7 +695,7 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
 					}
 				}
 				if ($is_verbose) echo "checked all chunks.";
-				echo "<!--found chunks in x $chunkx_min to $chunkx_max and z $chunkz_min to $chunkz_max.-->";
+				echo "<!--found chunks in x $min_chunkx to $max_chunkx and z $min_chunkz to $max_chunkz.-->";
 				closedir($chunks_16px_handle);
 			}
 			else {
@@ -703,13 +703,13 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
 			}
 		//}
 
-		$x_count = $chunkx_max - $chunkx_min;
-		$z_count = $chunkz_max - $chunkz_min;
+		$x_count = $max_chunkx - $min_chunkx;
+		$z_count = $max_chunkz - $min_chunkz;
 		echo "\r\n";
 		echo "<center>\r\n";
 		//cellpadding="0" cellspacing="0" still needed for IE
 		echo_hold( "  <table id=\"chunkymapstatictable\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-spacing: 0px; border-style:solid; border-color:gray; border-width:0px\">\r\n");
-		$z = (int)$chunkz_max;
+		$z = (int)$max_chunkz;
 		$scale=(float)$chunkymap_view_zoom_multiplier; // no longer /100
 		$zoomed_w=(int)((float)$chunkymap_tile_original_w*$scale+.5);
 		$zoomed_h=(int)((float)$chunkymap_tile_original_h*$scale+.5);
@@ -719,10 +719,10 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
 		$player_file_age_expired_max_seconds=20*$minute-1;
 		$player_file_age_idle_max_seconds=5*$minute-1;
 		$chunks_16px_path = $chunkymapdata_thisworld_path.'/'."16px";
-		while ($z >= $chunkz_min) {
+		while ($z >= $min_chunkz) {
 			echo_hold( "    <tr>\r\n");
-			$x = (int)$chunkx_min;
-			while ($x <= $chunkx_max) {
+			$x = (int)$min_chunkx;
+			while ($x <= $max_chunkx) {
 				$this_zoomed_w = $zoomed_w;
 				$this_zoomed_h = $zoomed_h;
 

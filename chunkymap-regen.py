@@ -696,10 +696,10 @@ class MTChunks:
         self.yaml_name = "generated.yml"
         self.world_yaml_path = os.path.join(self.chunkymap_thisworld_data_path, self.yaml_name)
 
-        self.mapvars["chunkx_min"] = 0
-        self.mapvars["chunkz_min"] = 0
-        self.mapvars["chunkx_max"] = 0
-        self.mapvars["chunkz_max"] = 0
+        self.mapvars["min_chunkx"] = 0
+        self.mapvars["min_chunkz"] = 0
+        self.mapvars["max_chunkx"] = 0
+        self.mapvars["max_chunkz"] = 0
         self.mapvars["chunk_size"] = 16
         self.mapvars["maxheight"] = 96
         self.mapvars["minheight"] = -32
@@ -712,40 +712,40 @@ class MTChunks:
         #self.mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
         #NOTE: do not save or load self.mapvars yet, because if world name is different than saved, chunks must all be redone
         if self.saved_mapvars is not None:
-            if "chunkx_min" in self.saved_mapvars.keys():
-                self.mapvars["chunkx_min"] = self.saved_mapvars["chunkx_min"]
-            if "chunkx_max" in self.saved_mapvars.keys():
-                self.mapvars["chunkx_max"] = self.saved_mapvars["chunkx_max"]
-            if "chunkz_min" in self.saved_mapvars.keys():
-                self.mapvars["chunkz_min"] = self.saved_mapvars["chunkz_min"]
-            if "chunkz_max" in self.saved_mapvars.keys():
-                self.mapvars["chunkz_max"] = self.saved_mapvars["chunkz_max"]
+            if "min_chunkx" in self.saved_mapvars.keys():
+                self.mapvars["min_chunkx"] = self.saved_mapvars["min_chunkx"]
+            if "max_chunkx" in self.saved_mapvars.keys():
+                self.mapvars["max_chunkx"] = self.saved_mapvars["max_chunkx"]
+            if "min_chunkz" in self.saved_mapvars.keys():
+                self.mapvars["min_chunkz"] = self.saved_mapvars["min_chunkz"]
+            if "max_chunkz" in self.saved_mapvars.keys():
+                self.mapvars["max_chunkz"] = self.saved_mapvars["max_chunkz"]
 
         if self.mapvars is not None:
-            if "chunkx_min" in self.mapvars.keys():
+            if "min_chunkx" in self.mapvars.keys():
                 try:
-                    self.mapvars["chunkx_min"] = int(self.mapvars["chunkx_min"])
+                    self.mapvars["min_chunkx"] = int(self.mapvars["min_chunkx"])
                 except:
-                    print("WARNING: chunkx_min was not int so set to 0")
-                    self.mapvars["chunkx_min"] = 0
-            if "chunkx_max" in self.mapvars.keys():
+                    print("WARNING: min_chunkx was not int so set to 0")
+                    self.mapvars["min_chunkx"] = 0
+            if "max_chunkx" in self.mapvars.keys():
                 try:
-                    self.mapvars["chunkx_max"] = int(self.mapvars["chunkx_max"])
+                    self.mapvars["max_chunkx"] = int(self.mapvars["max_chunkx"])
                 except:
-                    print("WARNING: chunkx_max was not int so set to 0")
-                    self.mapvars["chunkx_max"] = 0
-            if "chunkz_min" in self.mapvars.keys():
+                    print("WARNING: max_chunkx was not int so set to 0")
+                    self.mapvars["max_chunkx"] = 0
+            if "min_chunkz" in self.mapvars.keys():
                 try:
-                    self.mapvars["chunkz_min"] = int(self.mapvars["chunkz_min"])
+                    self.mapvars["min_chunkz"] = int(self.mapvars["min_chunkz"])
                 except:
-                    print("WARNING: chunkz_min was not int so set to 0")
-                    self.mapvars["chunkz_min"] = 0
-            if "chunkz_max" in self.mapvars.keys():
+                    print("WARNING: min_chunkz was not int so set to 0")
+                    self.mapvars["min_chunkz"] = 0
+            if "max_chunkz" in self.mapvars.keys():
                 try:
-                    self.mapvars["chunkz_max"] = int(self.mapvars["chunkz_max"])
+                    self.mapvars["max_chunkz"] = int(self.mapvars["max_chunkz"])
                 except:
-                    print("WARNING: chunkz_max was not int so set to 0")
-                    self.mapvars["chunkz_max"] = 0
+                    print("WARNING: max_chunkz was not int so set to 0")
+                    self.mapvars["max_chunkz"] = 0
         if is_mapvars_changed:
             self.save_mapvars_if_changed()
         if is_config_changed:
@@ -859,27 +859,41 @@ class MTChunks:
         return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_signal_name())
 
     def get_decachunky_coord_from_chunky_coord(self, chunky_x):
+        # 15 becomes 1
+        # 10 becomes 1
+        #  5 becomes 0
+        # -5 becomes -1
+        #-10 becomes -1
+        #-15 becomes -2
         return int(math.floor(float(chunky_x)/10.0))
+    
+    def get_chunky_coord_from_decachunky_coord(self, decachunky_x):
+        # 1 becomes 10
+        # 0 becomes 0
+        #-1 becomes -10
+        return int(decachunky_x*10)
 
     def check_decachunk_containing_chunk(self, chunky_x, chunky_z):
-        chunk16_coord_list = list()
+        chunky_coord_list = list()
         decachunky_x = self.get_decachunky_coord_from_chunky_coord(chunky_x)
         decachunky_z = self.get_decachunky_coord_from_chunky_coord(chunky_z)
-        chunk16x_min = decachunky_x*10
-        chunk16x_max = chunk16x_min + 15  # NOTE: + 15 even if negative since originally, floor was used
-        chunk16z_min = decachunky_z*10
-        chunk16z_max = chunk16z_min + 15  # NOTE: + 15 even if negative since originally, floor was used
-        chunky_x_count=chunk16x_max-chunk16x_min+1
-        chunky_z_count=chunk16z_max-chunk16z_min+1
+        chunky_x_min = decachunky_x*10
+        chunky_max_x = chunky_x_min + 15  # NOTE: + 15 even if negative since originally, floor was used
+        chunky_z_min = decachunky_z*10
+        chunky_max_z = chunky_z_min + 15  # NOTE: + 15 even if negative since originally, floor was used
+        x_chunky_count = chunky_max_x-chunky_x_min+1
+        z_chunky_count = chunky_max_z-chunky_z_min+1
         is_any_part_queued = False
-        chunky_z = chunk16z_min
-        preview_strings = list()
-        while chunky_z <= chunk16z_max:
-            preview_strings.append("")
-            chunky_x = chunk16x_min
-            while chunky_x <= chunk16x_max:
+        preview_strings = list(z_chunky_count)
+        queued_chunk_coords = None
+        chunky_offset_z = 0
+        chunky_z = chunky_z_min
+        while chunky_z <= chunky_max_z:
+            preview_strings[chunky_offset_z] = ""
+            chunky_x = chunky_x_min
+            while chunky_x <= chunky_max_x:
                 coords = (chunky_x, chunky_z)
-                chunk16_coord_list.append( coords )
+                chunky_coord_list.append( coords )
                 if self.todo_index<len(self.todo_positions):
                     for index in range(self.todo_index,len(self.todo_positions)):
                         if ivec2_equals(self.todo_positions[index], coords):
@@ -891,15 +905,17 @@ class MTChunks:
             if is_any_part_queued:
                 break
             chunky_z += 1
-        if not is_any_part_queued:
+            chunky_offset_z += 1
+        #if not is_any_part_queued:
+        if queued_chunk_coords is None:
             print("")
             print("")
             print("    Rendering 160px decachunk "+str((decachunky_x, decachunky_z)))
             if self.verbose_enable:
-                print("      USING ("+str(len(chunk16_coord_list))+") chunks: "+str(chunk16_coord_list))
+                print("      USING ("+str(len(chunky_coord_list))+") chunks: "+str(chunky_coord_list))
                 print("")
             else:
-                print("      USING ("+str(len(chunk16_coord_list))+") chunks")
+                print("      USING ("+str(len(chunky_coord_list))+") chunks")
             decachunk_global_coords = decachunky_x*160, decachunky_z*160
             im = Image.new("RGB", (160, 160), self.FLAG_EMPTY_HEXCOLOR)
             decachunk_yaml_path = self.get_decachunk_yaml_path_from_decachunk(decachunky_x, decachunky_z)
@@ -907,10 +923,10 @@ class MTChunks:
             combined_count = 0
             contains_chunk_luids = list()
 
-            for coord in chunk16_coord_list:
+            for coord in chunky_coord_list:
                 chunky_x, chunky_z = coord
-                chunky_offset_x = chunky_x - chunk16x_min
-                chunky_offset_z = chunky_z - chunk16x_min
+                chunky_offset_x = chunky_x - chunky_x_min
+                chunky_offset_z = chunky_z - chunky_z_min
                 chunk_image_path = self.get_chunk_image_path(chunky_x, chunky_z)
                 if os.path.isfile(chunk_image_path):
                     preview_strings[chunky_offset_z] += "1"
@@ -933,11 +949,21 @@ class MTChunks:
                         view_traceback()
                 else:
                     preview_strings[chunky_offset_z] += "0"
-            chunky_offset_z = chunky_z_count - 1
-            print(self.min_indent+"Usable chunk images mask:")
-            while chunky_offset_z>=0:
-                print(self.min_indent+"  "+preview_strings[chunky_offset_z])
-                chunky_offset_z -= 1
+            chunky_offset_z = z_chunky_count - 1
+            try:
+                print(self.min_indent+"Usable chunk images mask:")
+                while chunky_offset_z>=0:
+                    print(self.min_indent+"  "+preview_strings[chunky_offset_z])
+                    chunky_offset_z -= 1
+            except:
+                print(self.min_indent+"Could not finish showing mask (this should never happen)")
+                print(self.min_indent+"  z_chunky_count:"+str(z_chunky_count))
+                print(self.min_indent+"  len(preview_strings):"+str(len(preview_strings)))
+                print(self.min_indent+"  chunky_x_min:"+str(chunky_x_min))
+                print(self.min_indent+"  chunky_max_x:"+str(chunky_max_x))
+                print(self.min_indent+"  chunky_z_min:"+str(chunky_z_min))
+                print(self.min_indent+"  chunky_max_z:"+str(chunky_max_z))
+                view_traceback()
             print("")
             decachunk_folder_path = self.get_decachunk_folder_path_from_decachunk(decachunky_x, decachunky_z)
             if not os.path.isdir(decachunk_folder_path):
@@ -957,6 +983,8 @@ class MTChunks:
             else:
                 self.decachunks[decachunk_luid].metadata["contains_chunk_luids"] = None
             self.decachunks[decachunk_luid].save_yaml(decachunk_yaml_path)
+        else:
+            print("Not rendering decachunk "+str((decachunky_x,decachunky_z))+" yet since contains queued chunk "+str(queued_chunk_coords)+".")
 
     def get_chunk_folder_path(self, chunky_x, chunky_z):
         result = None
@@ -1143,17 +1171,17 @@ class MTChunks:
         if not os.path.isdir(genresult_tmp_folder_path):
             os.makedirs(genresult_tmp_folder_path)
         genresult_path = self.get_chunk_genresult_tmp_path(chunky_x, chunky_z)
-        x_min = chunky_x * self.mapvars["chunk_size"]
-        x_max = chunky_x * self.mapvars["chunk_size"] + self.mapvars["chunk_size"] - 1
-        z_min = chunky_z * self.mapvars["chunk_size"]
-        z_max = chunky_z * self.mapvars["chunk_size"] + self.mapvars["chunk_size"] - 1
+        min_x = chunky_x * self.mapvars["chunk_size"]
+        max_x = chunky_x * self.mapvars["chunk_size"] + self.mapvars["chunk_size"] - 1
+        min_z = chunky_z * self.mapvars["chunk_size"]
+        max_z = chunky_z * self.mapvars["chunk_size"] + self.mapvars["chunk_size"] - 1
 
-        #print (min_indent+"generating chunky_x = " + str(x_min) + " to " + str(x_max) + " ,  chunky_z = " + str(z_min) + " to " + str(z_max))
-        geometry_value_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min)+1)+"+"+str(int(z_max)-int(z_min)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
+        #print (min_indent+"generating chunky_x = " + str(min_x) + " to " + str(max_x) + " ,  chunky_z = " + str(min_z) + " to " + str(max_z))
+        geometry_value_string = str(min_x)+":"+str(min_z)+"+"+str(int(max_x)-int(min_x)+1)+"+"+str(int(max_z)-int(min_z)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
         cmd_suffix = ""
         cmd_suffix = " > \""+genresult_path+"\""
         #self.mapper_id = "minetestmapper-region"
-        cmd_no_out_string = self.python_exe_path + " \""+self.minetestmapper_py_path + "\" --region " + str(x_min) + " " + str(x_max) + " " + str(z_min) + " " + str(z_max) + " --maxheight "+str(self.mapvars["maxheight"])+" --minheight "+str(self.mapvars["minheight"])+" --pixelspernode "+str(self.mapvars["pixelspernode"])+" \""+self.config["world_path"]+"\" \""+tmp_png_path+"\""
+        cmd_no_out_string = self.python_exe_path + " \""+self.minetestmapper_py_path + "\" --region " + str(min_x) + " " + str(max_x) + " " + str(min_z) + " " + str(max_z) + " --maxheight "+str(self.mapvars["maxheight"])+" --minheight "+str(self.mapvars["minheight"])+" --pixelspernode "+str(self.mapvars["pixelspernode"])+" \""+self.config["world_path"]+"\" \""+tmp_png_path+"\""
         cmd_string = cmd_no_out_string + cmd_suffix
 
         if self.minetestmapper_py_path==self.minetestmapper_custom_path:#if self.backend_string!="sqlite3": #if self.mapper_id=="minetestmapper-region":
@@ -1173,8 +1201,8 @@ class MTChunks:
             #        script_path=region_capable_script_path
             #if os.path.isfile(region_capable_script_path):
                 #script_path = region_capable_script_path
-            geometry_string = str(x_min)+":"+str(z_min)+"+"+str(int(x_max)-int(x_min)+1)+"+"+str(int(z_max)-int(z_min)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
-            #expertmm_region_string = str(x_min) + ":" + str(x_max) + "," + str(z_min) + ":" + str(z_max)
+            geometry_string = str(min_x)+":"+str(min_z)+"+"+str(int(max_x)-int(min_x)+1)+"+"+str(int(max_z)-int(min_z)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
+            #expertmm_region_string = str(min_x) + ":" + str(max_x) + "," + str(min_z) + ":" + str(max_z)
             #cmd_string="sudo python "+script_path+" --input \""+self.config["world_path"]+"\" --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
             cmd_no_out_string = self.python_exe_path+" "+self.minetestmapper_py_path+" --bgcolor '"+self.FLAG_EMPTY_HEXCOLOR+"' --input \""+self.config["world_path"]+"\" --geometry "+geometry_string+" --output \""+tmp_png_path+"\""
             cmd_string = cmd_no_out_string + cmd_suffix
@@ -1552,14 +1580,14 @@ class MTChunks:
 
                 if is_present:
                     self.mapvars["total_generated_count"] += 1
-                    if chunky_x<self.mapvars["chunkx_min"]:
-                        self.mapvars["chunkx_min"]=chunky_x
-                    if chunky_x>self.mapvars["chunkx_max"]:
-                        self.mapvars["chunkx_max"]=chunky_x
-                    if chunky_z<self.mapvars["chunkz_min"]:
-                        self.mapvars["chunkz_min"]=chunky_z
-                    if chunky_z>self.mapvars["chunkz_max"]:
-                        self.mapvars["chunkz_max"]=chunky_z
+                    if chunky_x<self.mapvars["min_chunkx"]:
+                        self.mapvars["min_chunkx"]=chunky_x
+                    if chunky_x>self.mapvars["max_chunkx"]:
+                        self.mapvars["max_chunkx"]=chunky_x
+                    if chunky_z<self.mapvars["min_chunkz"]:
+                        self.mapvars["min_chunkz"]=chunky_z
+                    if chunky_z>self.mapvars["max_chunkz"]:
+                        self.mapvars["max_chunkz"]=chunky_z
                     #end while square outline (1-chunk-thick outline) generated any png files
                     self.save_mapvars_if_changed()
                     prev_len = len(self.todo_positions)
@@ -1729,9 +1757,10 @@ class MTChunks:
                         coords = self.get_coords_from_luid(decachunk_luid)
                         if coords is not None:
                             decachunky_x, decachunky_z = coords
-                            chunky_x = decachunky_x*10
-                            chunky_z = decachunky_z*10
+                            chunky_x = self.get_chunky_coord_from_decachunky_coord(decachunky_x)
+                            chunky_z = self.get_chunky_coord_from_decachunky_coord(decachunky_z)
                             if not os.path.isfile(self.get_decachunk_image_path_from_chunk(chunky_x, chunky_z)):
+                                print("Checking decachunk "+str(decachunky_x)+","+str(decachunky_z))
                                 self.check_decachunk_containing_chunk(chunky_x, chunky_z)
                         else:
                             print("ERROR: could not get coords from decachunk luid "+decachunk_luid)
@@ -1795,10 +1824,10 @@ class MTChunks:
                                     #badend_string = ".yml"
                                     #if (len(file_name) >= len(badend_string)) and (file_name[len(file_name)-len(badend_string):]==badend_string):
                                         #os.remove(file_path)
-                    #self.mapvars["chunkx_min"]=0
-                    #self.mapvars["chunkx_max"]=0
-                    #self.mapvars["chunkz_min"]=0
-                    #self.mapvars["chunkz_max"]=0
+                    #self.mapvars["min_chunkx"]=0
+                    #self.mapvars["max_chunkx"]=0
+                    #self.mapvars["min_chunkz"]=0
+                    #self.mapvars["max_chunkz"]=0
                     #self.save_mapvars_if_changed()
                     ##do not neet to run self.save_mapvars_if_changed() since already removed the yml
 
@@ -1837,19 +1866,19 @@ class MTChunks:
 
             self.verify_correct_map()
 
-            self.mapvars["chunkx_min"] = 0
-            self.mapvars["chunkz_min"] = 0
-            self.mapvars["chunkx_max"] = 0
-            self.mapvars["chunkz_max"] = 0
+            self.mapvars["min_chunkx"] = 0
+            self.mapvars["min_chunkz"] = 0
+            self.mapvars["max_chunkx"] = 0
+            self.mapvars["max_chunkz"] = 0
             if self.saved_mapvars is not None:
-                if "chunkx_min" in self.saved_mapvars.keys():
-                    self.mapvars["chunkx_min"] = self.saved_mapvars["chunkx_min"]
-                if "chunkx_max" in self.saved_mapvars.keys():
-                    self.mapvars["chunkx_max"] = self.saved_mapvars["chunkx_max"]
-                if "chunkz_min" in self.saved_mapvars.keys():
-                    self.mapvars["chunkz_min"] = self.saved_mapvars["chunkz_min"]
-                if "chunkz_max" in self.saved_mapvars.keys():
-                    self.mapvars["chunkz_max"] = self.saved_mapvars["chunkz_max"]
+                if "min_chunkx" in self.saved_mapvars.keys():
+                    self.mapvars["min_chunkx"] = self.saved_mapvars["min_chunkx"]
+                if "max_chunkx" in self.saved_mapvars.keys():
+                    self.mapvars["max_chunkx"] = self.saved_mapvars["max_chunkx"]
+                if "min_chunkz" in self.saved_mapvars.keys():
+                    self.mapvars["min_chunkz"] = self.saved_mapvars["min_chunkz"]
+                if "max_chunkz" in self.saved_mapvars.keys():
+                    self.mapvars["max_chunkz"] = self.saved_mapvars["max_chunkz"]
 
             self.mapvars["total_generated_count"] = 0
 
@@ -1864,11 +1893,11 @@ class MTChunks:
                 self.read_then_remove_signals()
                 if not self.refresh_map_enable:
                     break
-                for chunky_z in range (self.mapvars["chunkz_min"],self.mapvars["chunkz_max"]+1):
+                for chunky_z in range (self.mapvars["min_chunkz"],self.mapvars["max_chunkz"]+1):
                     self.read_then_remove_signals()
                     if not self.refresh_map_enable:
                         break
-                    for chunky_x in range(self.mapvars["chunkx_min"],self.mapvars["chunkx_max"]+1):
+                    for chunky_x in range(self.mapvars["min_chunkx"],self.mapvars["max_chunkx"]+1):
                         self.read_then_remove_signals()
                         if not self.refresh_map_enable:
                             break
@@ -1876,7 +1905,7 @@ class MTChunks:
                         #sudo mv ~/map.png /var/www/html/minetest/images/map.png
 
                         #only generate the edges (since started with region 0 0 0 0) and expanding from there until no png is created:
-                        is_outline = (chunky_x==self.mapvars["chunkx_min"]) or (chunky_x==self.mapvars["chunkx_max"]) or (chunky_z==self.mapvars["chunkz_min"]) or (chunky_z==self.mapvars["chunkz_max"])
+                        is_outline = (chunky_x==self.mapvars["min_chunkx"]) or (chunky_x==self.mapvars["max_chunkx"]) or (chunky_z==self.mapvars["min_chunkz"]) or (chunky_z==self.mapvars["max_chunkz"])
                         if is_outline:
                             is_present, reason_string = self.check_chunk(chunky_x, chunky_z)
                             if is_present:
@@ -1884,10 +1913,10 @@ class MTChunks:
                                 self.mapvars["total_generated_count"] += 1
                     if self.verbose_enable:
                         print ("")  # blank line before next chunky_z so output is more readable
-                self.mapvars["chunkx_min"] -= 1
-                self.mapvars["chunkz_min"] -= 1
-                self.mapvars["chunkx_max"] += 1
-                self.mapvars["chunkz_max"] += 1
+                self.mapvars["min_chunkx"] -= 1
+                self.mapvars["min_chunkz"] -= 1
+                self.mapvars["max_chunkx"] += 1
+                self.mapvars["max_chunkz"] += 1
             #end while square outline (1-chunk-thick outline) generated any png files
             self.save_mapvars_if_changed()
             if not self.verbose_enable:
