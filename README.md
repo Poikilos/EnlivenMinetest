@@ -87,29 +87,33 @@ world_path
 	#--no-clobber: do not overwrite existing
 	# after you do this, the update script will do it for you if you are using /var/www/html/minetest, otherwise edit the update script before using it to get these things updated
 * IF you are using Windows
-	* put these files anywhere
-	* python 2.7.x such as from python.org
-	* run get_python_architecture.py to make sure you know whether to download the following in 32-bit or 64-bit  
-	Administrator Command Prompt (to find it in Win 10, right-click windows menu)
-	* update python package system:  
-		`C:\python27\python -m pip install --upgrade pip wheel setuptools`
-	* numpy such as can be installed via the easy unofficial installer wheel at  
-	http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy  
-	then:  
-	cd to the folder where you downloaded the whl file  
-		`C:\python27\python -m pip install "numpy-1.10.4+mkl-cp27-cp27m-win32.whl"`  
-	(but put your specific downloaded whl file instead)  
-	* Pillow (instead of PIL (Python Imaging Library) which is a pain on Windows): there is a PIL installer wheel for Python such as 2.7 here:  
-	http://www.lfd.uci.edu/~gohlke/pythonlibs/  
-	as suggested on http://stackoverflow.com/questions/2088304/installing-pil-python-imaging-library-in-win7-64-bits-python-2-6-4  
-	then:  
-		`C:\python27\python -m pip install "Pillow-3.1.1-cp27-none-win32.whl"`  
-	(but put your specific downloaded whl file instead, such as Pillow-3.1.1-cp27-none-win_amd64.whl)
-	* edit chunkymap_regen.py and uncomment www_minetest_path="/var/www/html/minetest" then change the value in quotes to your web server's htdocs folder such as, if you are using Apache, can be found as the value of the DocumentRoot variable in httpd.conf in the Apache folder in Program Files
-	* edit chunkymap_regen.py and change world_name to your world name
-	* run (or if your python executable does not reside in C:\Python27\ then first edit the file):
-    chunkymap-regen-loop.bat
-	* copy example.php and chunkymap.php (and optionally browser.php) to your DocumentRoot or whatever folder will contain the chunkymapdata folder
+	* Install Python 2.7
+	* Run install-chunkymap-on-windows.bat
+	(which just runs C:\Python27\python install-chunkymap-on-windows.py)
+	(the installer will automatically download and install numpy and Pillow)
+	* OPTIONAL manual install:
+		* put these files anywhere
+		* python 2.7.x such as from python.org
+		* run get_python_architecture.py to make sure you know whether to download the following in 32-bit or 64-bit  
+		Administrator Command Prompt (to find it in Win 10, right-click windows menu)
+		* update python package system:  
+			`C:\python27\python -m pip install --upgrade pip wheel setuptools`
+		* numpy such as can be installed via the easy unofficial installer wheel at  
+		http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy  
+		then:  
+		cd to the folder where you downloaded the whl file  
+			`C:\python27\python -m pip install "numpy-1.10.4+mkl-cp27-cp27m-win32.whl"`  
+		(but put your specific downloaded whl file instead)  
+		* Pillow (instead of PIL (Python Imaging Library) which is a pain on Windows): there is a PIL installer wheel for Python such as 2.7 here:  
+		http://www.lfd.uci.edu/~gohlke/pythonlibs/  
+		as suggested on http://stackoverflow.com/questions/2088304/installing-pil-python-imaging-library-in-win7-64-bits-python-2-6-4  
+		then:  
+			`C:\python27\python -m pip install "Pillow-3.1.1-cp27-none-win32.whl"`  
+		(but put your specific downloaded whl file instead, such as Pillow-3.1.1-cp27-none-win_amd64.whl)
+		* run (or if your python executable does not reside in C:\Python27\ then first edit the file):
+		chunkymap-regen-loop.bat
+		(all the batch does is run C:\Python27\python chunkymap-regen.py)
+		(chunkymap-regen.py will ask for configuration options on first run and ask for your www root)
 
 ## Known Issues
 * Detect exceptions in mintestmapper (such as database locked) and do not mark the chunk as is_empty
