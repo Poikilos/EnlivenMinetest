@@ -13,6 +13,9 @@ import time
 import shutil
 import math
 
+from minetestmeta import *
+from expertmm import *
+
 from PIL import Image, ImageDraw, ImageFont, ImageColor
 
 #best_timer = timeit.default_timer
@@ -48,191 +51,6 @@ from PIL import Image, ImageDraw, ImageFont, ImageColor
 
     #def size(self):
         #return len(self.items)
-
-
-class InstalledFile:
-    source_dir_path = None
-    dest_dir_path = None
-    file_name = None
-
-    def __init__(self, file_name, source_dir_path, dest_dir_path):
-        self.file_name=file_name
-        self.source_dir_path=source_dir_path
-        self.dest_dir_path=dest_dir_path
-
-
-def get_dict_deepcopy(old_dict):
-    new_dict = None
-    if type(old_dict) is dict:
-        new_dict = {}
-        for this_key in old_dict.iterkeys():
-            new_dict[this_key] = old_dict[this_key]
-    return new_dict
-
-def is_dict_subset(new_dict, old_dict, verbose_messages_enable, verbose_dest_description="unknown file"):
-    is_changed = False
-    try:
-        if old_dict is not None:
-            if new_dict is not None:
-                old_dict_keys = old_dict.keys()
-                for this_key in new_dict.iterkeys():
-                    if (this_key not in old_dict_keys):
-                        is_changed = True
-                        if verbose_messages_enable:
-                            print("SAVING '"+verbose_dest_description+"' since "+str(this_key)+" not in saved version.")
-                        break
-                    elif new_dict[this_key] != old_dict[this_key]:
-                        is_changed = True
-                        if verbose_messages_enable:
-                            print("SAVING '"+verbose_dest_description+"' since "+str(this_key)+" not same as saved version.")
-                        break
-            #else new_dict is None so no change detected (no new information)
-        else:
-            if new_dict is not None:
-                is_changed = True
-    except:
-        print("Could not finish is_dict_subset:")
-        view_traceback()
-    return is_changed
-
-def ivec2_equals(pos1, pos2):
-    return (int(pos1[0])==int(pos2[0])) and (int(pos1[1])==int(pos2[1]))
-
-def get_dict_from_conf_file(path,assignment_operator="="):
-    results = None
-    results = get_dict_modified_by_conf_file(results, path, assignment_operator)
-    return results
-
-def RepresentsInt(s):
-    try:
-        int(s)
-        return True
-    except ValueError:
-        return False
-
-def RepresentsFloat(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
-
-def view_traceback():
-    ex_type, ex, tb = sys.exc_info()
-    traceback.print_tb(tb)
-    del tb
-
-def print_file(path, min_indent=""):
-    line_count = 0
-    try:
-        if path is not None:
-            if os.path.isfile(path):
-
-                if min_indent is None:
-                    min_indent = ""
-                ins = open(path, 'r')
-                line = True
-                while line:
-                    line = ins.readline()
-                    line_count += 1
-                    if line:
-                        print(min_indent+line)
-                ins.close()
-                #if line_count==0:
-                    #print(min_indent+"print_file WARNING: "+str(line_count)+" line(s) in '"+path+"'")
-                #else:
-                    #print(min_indent+"# "+str(line_count)+" line(s) in '"+path+"'")
-            else:
-                print (min_indent+"print_file: file does not exist")
-        else:
-            print (min_indent+"print_file: path is None")
-    except:
-        print(min_indent+"print_file: could not finish")
-        try:
-            ins.close()
-        except:
-            pass
-    return line_count
-
-def get_dict_modified_by_conf_file(this_dict, path,assignment_operator="="):
-    results = this_dict
-    #print ("Checking "+str(path)+" for settings...")
-    if (results is None) or (type(results) is not dict):
-        results = {}
-    if os.path.isfile(path):
-        ins = open(path, 'r')
-        line = True
-        while line:
-            line = ins.readline()
-            if line and len(line)>0:
-                line_strip=line.strip()
-                if len(line_strip)>0 and not line_strip[0]=="#":  # if not comment
-                    if not line_strip[0]=="-":  # ignore yaml arrays
-                        ao_index = line_strip.find(assignment_operator)
-                        if ao_index>=1:  # intentionally skip zero-length variable names
-                            if ao_index<len(line_strip)-1:  # skip yaml implicit nulls or yaml objects
-                                result_name = line_strip[:ao_index].strip()
-                                result_value = line_strip[ao_index+1:].strip()
-                                result_lower = result_value.lower()
-                                if result_value=="None" or result_value=="null" or result_value=="~" or result_value=="NULL":
-                                    result_value = None
-                                elif result_lower=="true":
-                                    result_value = True
-                                elif result_lower=="false":
-                                    result_value = False
-                                elif RepresentsInt(result_value):
-                                    result_value = int(result_value)
-                                elif RepresentsFloat(result_value):
-                                    result_value = float(result_value)
-                                #print ("   CHECKING... "+result_name+":"+result_value)
-                                results[result_name]=result_value
-        ins.close()
-    return results
-
-def save_conf_from_dict(path, this_dict, assignment_operator="=", save_nulls_enable=True):
-    try:
-        outs = open(path, 'w')
-        for this_key in this_dict.keys():
-            if save_nulls_enable or (this_dict[this_key] is not None):
-                if this_dict[this_key] is None:
-                    outs.write(this_key+assignment_operator+"null\n")
-                else:
-                    outs.write(this_key+assignment_operator+str(this_dict[this_key])+"\n")
-        outs.close()
-    except:
-        print("Could not finish saving chunk metadata to '"+str(path)+"': "+str(traceback.format_exc()))
-        try:
-            outs.close()
-        except:
-            pass
-
-def get_tuple_from_notation(line, debug_src_name="<unknown object>"):
-    result = None
-    if line is not None:
-        # mark chunk
-        tuple_noparen_pos_string = line.strip("() \n\r")
-        pos_strings = tuple_noparen_pos_string.split(",")
-        if len(pos_strings) == 3:
-            try:
-                player_x = float(pos_strings[0])
-                player_y = float(pos_strings[1])
-                player_z = float(pos_strings[2])
-            except:
-                player_x = int(pos_strings[0])
-                player_y = int(pos_strings[1])
-                player_z = int(pos_strings[2])
-            result = player_x, player_y, player_z
-        else:
-            print("'"+debug_src_name+"' has bad position data--should be 3-length (x,y,z) in position value: "+str(pos_strings))
-    return result
-
-def is_same_fvec3(list_a, list_b):
-    result = False
-    if list_a is not None and list_b is not None:
-        if len(list_a)>=3 and len(list_b)>=3:
-            result = (float(list_a[0]) == float(list_b[0])) and (float(list_a[1]) == float(list_b[1])) and (float(list_a[2]) == float(list_b[2]))
-    return False
-
 
 class MTDecaChunk:
 
@@ -866,7 +684,7 @@ class MTChunks:
         #-10 becomes -1
         #-15 becomes -2
         return int(math.floor(float(chunky_x)/10.0))
-    
+
     def get_chunky_coord_from_decachunky_coord(self, decachunky_x):
         # 1 becomes 10
         # 0 becomes 0
@@ -877,20 +695,20 @@ class MTChunks:
         chunky_coord_list = list()
         decachunky_x = self.get_decachunky_coord_from_chunky_coord(chunky_x)
         decachunky_z = self.get_decachunky_coord_from_chunky_coord(chunky_z)
-        chunky_x_min = decachunky_x*10
-        chunky_max_x = chunky_x_min + 15  # NOTE: + 15 even if negative since originally, floor was used
-        chunky_z_min = decachunky_z*10
-        chunky_max_z = chunky_z_min + 15  # NOTE: + 15 even if negative since originally, floor was used
-        x_chunky_count = chunky_max_x-chunky_x_min+1
-        z_chunky_count = chunky_max_z-chunky_z_min+1
+        chunky_min_x = decachunky_x*10
+        chunky_max_x = chunky_min_x + 15  # NOTE: + 15 even if negative since originally, floor was used
+        chunky_min_z = decachunky_z*10
+        chunky_max_z = chunky_min_z + 15  # NOTE: + 15 even if negative since originally, floor was used
+        x_chunky_count = chunky_max_x-chunky_min_x+1
+        z_chunky_count = chunky_max_z-chunky_min_z+1
         is_any_part_queued = False
-        preview_strings = list(z_chunky_count)
+        preview_strings = z_chunky_count*[None]
         queued_chunk_coords = None
         chunky_offset_z = 0
-        chunky_z = chunky_z_min
+        chunky_z = chunky_min_z
         while chunky_z <= chunky_max_z:
             preview_strings[chunky_offset_z] = ""
-            chunky_x = chunky_x_min
+            chunky_x = chunky_min_x
             while chunky_x <= chunky_max_x:
                 coords = (chunky_x, chunky_z)
                 chunky_coord_list.append( coords )
@@ -912,7 +730,7 @@ class MTChunks:
             print("")
             print("    Rendering 160px decachunk "+str((decachunky_x, decachunky_z)))
             if self.verbose_enable:
-                print("      USING ("+str(len(chunky_coord_list))+") chunks: "+str(chunky_coord_list))
+                print("      USING ("+str(len(chunky_coord_list))+") chunks (region "++":"++","++":"++"): "+str(chunky_coord_list))
                 print("")
             else:
                 print("      USING ("+str(len(chunky_coord_list))+") chunks")
@@ -925,8 +743,8 @@ class MTChunks:
 
             for coord in chunky_coord_list:
                 chunky_x, chunky_z = coord
-                chunky_offset_x = chunky_x - chunky_x_min
-                chunky_offset_z = chunky_z - chunky_z_min
+                chunky_offset_x = chunky_x - chunky_min_x
+                chunky_offset_z = chunky_z - chunky_min_z
                 chunk_image_path = self.get_chunk_image_path(chunky_x, chunky_z)
                 if os.path.isfile(chunk_image_path):
                     preview_strings[chunky_offset_z] += "1"
@@ -953,15 +771,17 @@ class MTChunks:
             try:
                 print(self.min_indent+"Usable chunk images mask:")
                 while chunky_offset_z>=0:
+                    if preview_strings[chunky_offset_z] is None:
+                        preview_strings[chunky_offset_z] = "<None>"
                     print(self.min_indent+"  "+preview_strings[chunky_offset_z])
                     chunky_offset_z -= 1
             except:
                 print(self.min_indent+"Could not finish showing mask (this should never happen)")
                 print(self.min_indent+"  z_chunky_count:"+str(z_chunky_count))
                 print(self.min_indent+"  len(preview_strings):"+str(len(preview_strings)))
-                print(self.min_indent+"  chunky_x_min:"+str(chunky_x_min))
+                print(self.min_indent+"  chunky_min_x:"+str(chunky_min_x))
                 print(self.min_indent+"  chunky_max_x:"+str(chunky_max_x))
-                print(self.min_indent+"  chunky_z_min:"+str(chunky_z_min))
+                print(self.min_indent+"  chunky_min_z:"+str(chunky_min_z))
                 print(self.min_indent+"  chunky_max_z:"+str(chunky_max_z))
                 view_traceback()
             print("")
@@ -1629,16 +1449,6 @@ class MTChunks:
         return result
 
     def apply_auto_tags_by_worldgen_mods(self, chunky_x, chunky_z):
-        worldgen_mod_list = list()
-        worldgen_mod_list.append("technic_worldgen")
-        worldgen_mod_list.append("mg")
-        worldgen_mod_list.append("moreores")
-        worldgen_mod_list.append("lapis")
-        worldgen_mod_list.append("sea")
-        worldgen_mod_list.append("moretrees")
-        worldgen_mod_list.append("caverealms")
-        #worldgen_mod_list.append("nature_classic")  # NOTE: plantlife_modpack has this and other stuff, but just mention this one in tags since it is unique to the modpack
-        worldgen_mod_list.append("plantlife_modpack")  #ok if installed as modpack instead of putting individual mods in mods folder
 
         chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
         if chunk_luid not in self.chunks.keys():
@@ -1654,9 +1464,9 @@ class MTChunks:
         else:
             tags_list = list()
         #TODO: finish this
-        #for mod_name in worldgen_mod_list:
-            #mod_path = self.asdf
-            #if os.path.isdir(
+        for mod_name in mtmeta.worldgen_mod_list:
+            mod_path = os.path.join(mtmeta.config["mods_path"], mod_name)
+            #if os.path.isdir(mod_path)
         #if is_changed:
         #    self.save_chunk_meta(chunky_x, chunky_z)
 
