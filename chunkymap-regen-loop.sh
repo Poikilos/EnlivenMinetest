@@ -1,7 +1,7 @@
 #!/bin/sh
 echo To reconnect with this screen type:
 echo
-echo sudo screen -r
+echo sudo screen -r chunkymapregen
 echo
 # -S names the socket (-t only sets the title)
 #FAILS: flock -n /var/run/chunkymap-loop.lockfile -c "screen -S chunkymapregen python /home/owner/minetest/util/chunkymap-regen.py"
