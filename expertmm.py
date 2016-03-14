@@ -31,6 +31,8 @@ class InstalledFile:
         self.file_name=file_name
         self.source_dir_path=source_dir_path
         self.dest_dir_path=dest_dir_path
+        
+
 
 class ConfigManager:
     #config_name = None
@@ -138,7 +140,7 @@ def is_dict_subset(new_dict, old_dict, verbose_messages_enable, verbose_dest_des
         view_traceback()
     return is_changed
 
-def vec2_not_in(this_list, this_vec):
+def vec2_not_in(this_vec, this_list):
     result = False
     if this_list is not None and this_vec is not None:
         for try_vec in this_list:
@@ -261,6 +263,26 @@ def save_conf_from_dict(path, this_dict, assignment_operator="=", save_nulls_ena
             outs.close()
         except:
             pass
+            
+def get_list_from_hex(hex_string):
+    results = None
+    if hex_string is not None:
+        if len(hex_string)>=2:
+            if hex_string[:2]=="0x":
+                hex_string = hex_string[2:]
+            elif hex_string[:1]=="#":
+                hex_string = hex_string[1:]
+            if len(hex_string)>0 and hex_string[len(hex_string)-1:]=="h":
+                hex_string = hex_string[:len(hex_string)-1]
+            index = 0
+            while index<len(hex_string):
+                if results is None:
+                    results = list()
+                if len(hex_string)-index >= 2:
+                    results.append(int(hex_string[index:index+2], 16))
+                index += 2
+                
+    return results
 
 def get_tuple_from_notation(line, debug_src_name="<unknown object>"):
     result = None

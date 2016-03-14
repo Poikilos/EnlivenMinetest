@@ -163,6 +163,9 @@ def load_world_and_mod_data():
                 this_primary_world_path = try_path
             minetestinfo._data["primary_world_path"] = this_primary_world_path
             auto_chosen_world = False
+        else:
+            if default_world_path is not None:
+                minetestinfo._data["primary_world_path"] = default_world_path
         minetestinfo.save_yaml()
 
     if get_world_var("gameid") != minetestinfo.get_var("game_path"):

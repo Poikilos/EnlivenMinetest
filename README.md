@@ -38,7 +38,7 @@ This program comes without any warranty, to the extent permitted by applicable l
 		#where 1 is number of seconds:
 		refresh_players_seconds:1
 		
-* Has static html version of map (echo_chunkymap_table() php function) -- see example.php
+* Can show a static html version of map (echo_chunkymap_table() php function) -- see viewchunkymap.php
 	* Zoom in and out
 	* optionally echo name of world that was detected by the scheduled py file
 	* shows player location (can optionally show only first characters of name, for privacy; there is no saved setting yet, so to adjust, you must change the value of $nonprivate_name_beginning_char_count in chunkymap.php)	
@@ -78,11 +78,11 @@ world_path
 	(if you are not using /var/www/html/minetest/chunkymapdata, edit chunkymap-cronjob script to use the correct directory, then)
     `chmod +x set-minutely-crontab-job.sh && ./set-minutely-crontab-job.sh`
 * IF you are using Linux
-	* Either copy your code to example.php and use it, or just rename it to map.php (or anything you want) then link to it.
+	* Rename viewchunkymap.php so it won't be overwritten on update if you want to modify it (or anything you want) then make a link to it on your website or share the link some other way.
 	# The commands below will work if you are using the web installer, or have done mv minetest-chunkymap-master "$HOME/Downloads/minetest-chunkymap" (and if you are using /var/www/html/minetest -- otherwise change that below)
 	MT_MY_WEBSITE_PATH=/var/www/html/minetest
 	sudo cp -f "$HOME/Downloads/minetest-chunkymap/web/chunkymap.php" "$MT_MY_WEBSITE_PATH/chunkymap.php"
-	sudo cp --no-clobber "$HOME/Downloads/minetest-chunkymap/web/example.php" "$MT_MY_WEBSITE_PATH/viewchunkymap.php"
+	sudo cp -f "$HOME/Downloads/minetest-chunkymap/web/viewchunkymap.php" "$MT_MY_WEBSITE_PATH/viewchunkymap.php"
 	sudo cp -R --no-clobber "$HOME/Downloads/minetest-chunkymap/web/images/*" "$MT_MY_WEBSITE_PATH/images/"
 	#--no-clobber: do not overwrite existing
 	# after you do this, the update script will do it for you if you are using /var/www/html/minetest, otherwise edit the update script before using it to get these things updated
