@@ -328,7 +328,10 @@ function echo_chunkymap_canvas() {
     if ($chunkymap_view_zoom_multiplier<$chunkymap_view_min_zoom) $chunkymap_view_zoom_multiplier = $chunkymap_view_min_zoom;
     if ($chunkymap_view_zoom_multiplier>$chunkymap_view_max_zoom) $chunkymap_view_zoom_multiplier = $chunkymap_view_max_zoom;
 	
-	$decachunks_per_page = 1.0/$chunkymap_view_zoom_multiplier;
+	$decachunks_per_page = intval(1.0/$chunkymap_view_zoom_multiplier);
+	if ($decachunks_per_page<1) {
+		$decachunks_per_page = 1;
+	}
 	$view_w = (($decachunks_per_page*160.0));
 	$view_h = (($decachunks_per_page*160.0));
 	$view_left = (($chunkymap_view_x)) - (($view_w/2.0));
@@ -362,13 +365,13 @@ function echo_chunkymap_canvas() {
 	echo '<table id="chunkymap_table" cellspacing="0" cellpadding="0" style="width:100%">'."\r\n";
 	echo '  <tr>'."\r\n";
 	echo '    <td style="width:5%">'."$td_placeholder_content".'</td>'."\r\n";
-	echo "    <td style=\"width:90%\"><a href=\"?$world_name=world_name&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier&chunkymap_view_x=$chunkymap_view_x&chunkymap_view_z=".($chunkymap_view_z+($view_h/2.0))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-up.png" style="width:100%"/>'.'</a></td>'."\r\n";
+	echo "    <td style=\"width:95%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier&chunkymap_view_x=$chunkymap_view_x&chunkymap_view_z=".($chunkymap_view_z+($view_h/2.0))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-up.png" style="width:90%"/>'.'</a></td>'."\r\n";
 	echo '    <td style="width:5%">'."$td_placeholder_content".'</td>'."\r\n";
 	echo '  </tr>'."\r\n";
 	$cell_perc=intval(round(100.0/$decachunky_count_x));
 	echo '  <tr>'."\r\n";
-	echo "    <td style=\"width:5%\"><a href=\"?$world_name=world_name&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier&chunkymap_view_x=".($chunkymap_view_x-($view_w/2.0))."&chunkymap_view_z=$chunkymap_view_z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-left.png" style="width:100%"/>'.'</a></td>'."\r\n";
-	echo '    <td style="width:90%">'."\r\n";
+	echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier&chunkymap_view_x=".($chunkymap_view_x-($view_w/2.0))."&chunkymap_view_z=$chunkymap_view_z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-left.png" style="width:90%"/>'.'</a></td>'."\r\n";
+	echo '    <td style="width:95%">'."\r\n";
 	echo '      <table id="decachunk_table" cellspacing="0" cellpadding="0" style="width:100%; background-color:black">'."\r\n";
 	while ($decachunky_z>=$decachunky_min_z) {
 		echo '        <tr>'."\r\n";
@@ -398,11 +401,11 @@ function echo_chunkymap_canvas() {
 	}
 	echo '      </table>'."\r\n";
 	echo '    </td>'."\r\n";
-	echo "    <td style=\"width:5%\"><a href=\"?$world_name=world_name&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier&chunkymap_view_x=".($chunkymap_view_x+($view_w/2.0))."&chunkymap_view_z=$chunkymap_view_z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-right.png" style="width:100%"/>'.'</a></td>'."\r\n";
+	echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier&chunkymap_view_x=".($chunkymap_view_x+($view_w/2.0))."&chunkymap_view_z=$chunkymap_view_z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-right.png" style="width:100%"/>'.'</a></td>'."\r\n";
 	echo '  </tr>'."\r\n";
 	echo '  <tr>'."\r\n";
 	echo '    <td style="width:5%">'."$td_placeholder_content".'</td>'."\r\n";
-	echo "    <td style=\"width:90%\"><a href=\"?$world_name=world_name&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier&chunkymap_view_x=$chunkymap_view_x&chunkymap_view_z=".($chunkymap_view_z-($view_h/2.0))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-down.png" style="width:100%"/>'.'</a></td>'."\r\n";
+	echo "    <td style=\"width:90%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier&chunkymap_view_x=$chunkymap_view_x&chunkymap_view_z=".($chunkymap_view_z-($view_h/2.0))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-down.png" style="width:100%"/>'.'</a></td>'."\r\n";
 	echo '    <td style="width:5%">'."$td_placeholder_content".'</td>'."\r\n";
 	echo '  </tr>'."\r\n";
 	echo '</table>'."\r\n";

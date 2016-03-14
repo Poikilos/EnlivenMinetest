@@ -13,7 +13,7 @@ import time
 import shutil
 import math
 
-from minetestmeta import *
+from minetestinfo import *
 from expertmm import *
 
 from PIL import Image, ImageDraw, ImageFont, ImageColor
@@ -240,9 +240,6 @@ class MTChunks:
     is_backend_detected = None
     chunkymap_players_name = None
     chunkymap_players_path = None
-    config = None
-    config_name = None
-    config_path = None
     data_16px_path = None
     data_160px_path = None
     FLAG_EMPTY_HEXCOLOR = "#010000"
@@ -257,21 +254,8 @@ class MTChunks:
         self.min_indent = "  "
         self.decachunks = {}
         self.rendered_this_session_count = 0
-        os_name="linux"
-        if (os.path.sep!="/"):
-            os_name="windows"
-            print("Windows detected")
         self.is_backend_detected = False
         self.mapvars = {}
-        self.config = {}
-        self.config_name = "chunkymap.yml"
-        self.config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), self.config_name)
-        self.config = get_dict_modified_by_conf_file(self.config, self.config_path, ":")
-        is_config_changed = False
-        if not os.path.isfile(self.config_path):
-            is_config_changed = True
-            print("Creating '"+self.config_path+"'")
-        #if self.config is None:
         self.mapvars["total_generated_count"] = 0
         self.rendered_count = 0
         self.preload_all_enable = True
@@ -283,33 +267,6 @@ class MTChunks:
         self.refresh_map_enable = True
         self.refresh_players_enable = True
         self.chunks = {}
-        if "www_minetest_path" not in self.config.keys():
-            self.config["www_minetest_path"] = "/var/www/html/minetest"
-            if os_name=="windows":
-                self.config["www_minetest_path"] = None
-                prioritized_try_paths = list()
-                prioritized_try_paths.append("C:\\wamp\\www")
-                prioritized_try_paths.append("C:\\www")
-                prioritized_try_paths.append("C:\\Program Files\\Apache Software Foundation\\Apache2.2\\htdocs")
-
-                #prioritized_try_paths.append("C:\\Program Files\\Apache Software Foundation\\Apache2.2\\htdocs\\folder_test\\website")
-                for try_path in prioritized_try_paths:
-                    try:
-                        if os.path.isdir(try_path):
-                            self.config["www_minetest_path"] = try_path
-                            break
-                    except:
-                        pass
-                if self.config["www_minetest_path"] is None:
-                    self.config["www_minetest_path"] = os.path.dirname(os.path.abspath(__file__))
-            input_string = raw_input("Minetest website (blank for ["+self.config["www_minetest_path"]+"]): ")
-            if (len(input_string)>0):
-                self.config["www_minetest_path"] = input_string
-            is_config_changed = True
-            #print("Set www_minetest_path to '"+self.config["www_minetest_path"]+"'")
-        #else:
-        print("Using www_minetest_path '"+self.config["www_minetest_path"]+"'")
-        print("")
 
         self.refresh_map_seconds = 30 #does one chunk at a time so as not to interrupt player updates too often
         self.refresh_players_seconds = 5
@@ -319,83 +276,19 @@ class MTChunks:
 
         input_string = ""
 
-
-        profile_path = None
-        if os_name=="windows":
-            profile_path = os.environ['USERPROFILE']
+        if minetestinfo.get_var("primary_world_path") is not None:
+            if os.path.isdir(minetestinfo.get_var("primary_world_path")):
+                print ("Using primary_world_path '"+minetestinfo.get_var("primary_world_path")+"'")
+            else:
+                print ("ERROR: Missing world '"+minetestinfo.get_var("primary_world_path")+"'")
+                sys.exit(2)
         else:
-            profile_path = os.environ['HOME']
+            print ("ERROR: No primary_world_path")
+            sys.exit(2)
 
-        if "profile_minetest_path" not in self.config.keys():
-            self.config["profile_minetest_path"] = os.path.join(profile_path,".minetest")
-            if (os_name=="windows"):
-                self.config["profile_minetest_path"] = "C:\\games\\Minetest"
-            input_string = raw_input("user minetest path containing worlds folder (blank for ["+self.config["profile_minetest_path"]+"]): ")
-            if (len(input_string)>0):
-                self.config["profile_minetest_path"] = input_string
-            is_config_changed = True
-        print("Using profile_minetest_path '"+self.config["profile_minetest_path"]+"'")
-        if not os.path.isdir(self.config["profile_minetest_path"]):
-            print("(WARNING: missing, so please close and update profile_minetest_path in '"+self.config_path+"' before next run)")
-        print("")
-        if "worlds_path" not in self.config.keys():
-            self.config["worlds_path"] = os.path.join(self.config["profile_minetest_path"],"worlds")
-            is_config_changed = True
-
-        auto_chosen_world = False
-        is_missing_world = False
-        if "world_path" in self.config.keys():
-            if not os.path.isdir(self.config["world_path"]):
-                is_missing_world = True
-        if ("world_path" not in self.config.keys()) or is_missing_world:
-            print ("LOOKING FOR WORLDS IN " + self.config["worlds_path"])
-            for base_path, dirnames, filenames in os.walk(self.config["worlds_path"]):
-                #for j in range(0,len(dirnames)):
-                #    i = len(dirnames) - 0 - 1
-                #    if dirnames[i][0] == ".":
-                #        print ("  SKIPPING "+dirnames[i])
-                #        dirnames.remove_at(i)
-                world_count = 0
-                for subdirname in dirnames:
-                    print ("  EXAMINING "+subdirname)
-                    if subdirname[0]!=".":
-                        world_count += 1
-                index = 0
-                world_number = 0
-                for subdirname in dirnames:
-                    print ("  EXAMINING "+subdirname)
-                    if subdirname[0]!=".":
-                        #if (index == len(dirnames)-1):  # skip first one because the one on my computer is big
-                        if (subdirname!="world") or (world_number==(world_count-1)):
-                            self.config["world_path"] = os.path.join(base_path, subdirname) #  os.path.join(self.config["worlds_path"], "try7amber")
-                            auto_chosen_world = True
-                            break
-                        world_number += 1
-                    index += 1
-                if auto_chosen_world:
-                    is_config_changed = True
-                    break
-            if is_missing_world:
-                print("MISSING WORLD '"+self.config["world_path"]+"'")
-                if auto_chosen_world:
-                    print("(so a default was picked below that you can change)")
-                else:
-                    print("(and no world could be found in worlds_path '"+self.config["worlds_path"]+"')")
-
-            input_string = raw_input("World path (or world name if above; blank for ["+self.config["world_path"]+"]): ")
-            if (len(input_string)>0):
-
-                try_path = os.path.join(self.config["worlds_path"], input_string)
-                this_world_path = input_string
-                if (not os.path.isdir(this_world_path)) and os.path.isdir(try_path):
-                    this_world_path = try_path
-                self.config["world_path"] = this_world_path
-                auto_chosen_world = False
-            is_config_changed = True
-        print ("Using world_path '"+self.config["world_path"]+"'")
-        if not os.path.isdir(self.config["world_path"]):
-            print("(ERROR: missing, so please close immediately and update world_path in '"+self.config_path+"' before next run)")
-        print("")
+        #if not os.path.isdir(minetestinfo.get_var("primary_world_path")):
+        #    print("(ERROR: missing, so please close immediately and update primary_world_path in '"+minetestinfo._config_path+"' before next run)")
+        #print("")
 
         self.python_exe_path = "python"
         if os_name=="windows":
@@ -408,7 +301,7 @@ class MTChunks:
                 pass  # do nothing
 
 
-        worldmt_path = os.path.join(self.config["world_path"], "world.mt")
+        worldmt_path = os.path.join(minetestinfo.get_var("primary_world_path"), "world.mt")
         self.backend_string="sqlite3"
         if (os.path.isfile(worldmt_path)):
             ins = open(worldmt_path, 'r')
@@ -443,13 +336,14 @@ class MTChunks:
         print("Chose image generator script: "+self.minetestmapper_py_path)
         if not os.path.isfile(self.minetestmapper_py_path):
             print("ERROR: script does not exist, so exiting "+__file__+".")
-            sys.exit()
+            sys.exit(2)
         self.colors_path = os.path.join(os.path.dirname(os.path.abspath(self.minetestmapper_py_path)), "colors.txt")
         if not os.path.isfile(self.colors_path):
             print("ERROR: missing '"+self.colors_path+"', so exiting "+__file__+".")
-            sys.exit()
+            sys.exit(2)
 
-        self.chunkymap_data_path=os.path.join(self.config["www_minetest_path"],"chunkymapdata")
+
+        self.chunkymap_data_path=os.path.join(minetestinfo.get_var("www_minetest_path"),"chunkymapdata")
         self.chunkymapdata_worlds_path=os.path.join(self.chunkymap_data_path, "worlds")
         print("Using chunkymap_data_path '"+self.chunkymap_data_path+"'")
         #if not os.path.isdir(self.chunkymap_data_path):
@@ -470,9 +364,7 @@ class MTChunks:
             self.deny_http_access(self.chunkymapdata_worlds_path)
             print("  (created .htaccess)")
 
-
-
-        self.world_name = os.path.basename(self.config["world_path"])
+        self.world_name = os.path.basename(minetestinfo.get_var("primary_world_path"))
         self.chunkymap_thisworld_data_path = os.path.join(self.chunkymapdata_worlds_path, self.world_name)
         if not os.path.isdir(self.chunkymap_thisworld_data_path):
             os.makedirs(self.chunkymap_thisworld_data_path)
@@ -566,8 +458,6 @@ class MTChunks:
                     self.mapvars["max_chunkz"] = 0
         if is_mapvars_changed:
             self.save_mapvars_if_changed()
-        if is_config_changed:
-            self.save_config()
 
     #def install_default_world_data(self):
         #source_web_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
@@ -582,8 +472,8 @@ class MTChunks:
         source_web_chunkymapdata_path = os.path.join(source_web_path, "chunkymapdata_default")
         source_web_chunkymapdata_world_path = os.path.join(source_web_chunkymapdata_path, "world")
         source_web_chunkymapdata_images_path = os.path.join(source_web_chunkymapdata_path, "images")
-        dest_web_path = self.config["www_minetest_path"]
-        dest_web_chunkymapdata_path = os.path.join(self.config["www_minetest_path"],"chunkymapdata")
+        dest_web_path = minetestinfo.get_var("www_minetest_path")
+        dest_web_chunkymapdata_path = os.path.join(minetestinfo.get_var("www_minetest_path"),"chunkymapdata")
         dest_web_chunkymapdata_images_path = os.path.join(dest_web_chunkymapdata_path,"images")
         install_list = list()
         install_list.append(InstalledFile("browser.php",source_web_path,dest_web_path))
@@ -596,6 +486,12 @@ class MTChunks:
         install_list.append(InstalledFile("start.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
         install_list.append(InstalledFile("target_start.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
         install_list.append(InstalledFile("compass-rose.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("arrow-wide-up.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("arrow-wide-down.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("arrow-wide-left.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("arrow-wide-right.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("chunk-blank.jpg", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("decachunk-blank.jpg", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
         source_chunkymapdata_players = os.path.join(source_web_chunkymapdata_world_path, "players")
         dest_chunkymapdata_players = os.path.join(self.chunkymap_thisworld_data_path, "players")
         install_list.append(InstalledFile("singleplayer.png", source_chunkymapdata_players, dest_chunkymapdata_players))
@@ -616,7 +512,7 @@ class MTChunks:
                     if source_mtime_seconds>installed_mtime_seconds:
                         shutil.copyfile(source_path, installed_path) # DOES replace destination file
             else:
-                print("WARNING: cannot update file since can't find '"+source_path+"'")
+                raw_input("WARNING: cannot update file since can't find '"+source_path+"'")
 
 
     def deny_http_access(self, dir_path):
@@ -634,8 +530,6 @@ class MTChunks:
         outs.write("</Files>"+"\n")
         outs.close()
 
-    def save_config(self):
-        save_conf_from_dict(self.config_path, self.config, ":")
 
     #locally unique identifier (unique to world only)
     def get_chunk_luid(self, chunky_x, chunky_z):
@@ -696,9 +590,9 @@ class MTChunks:
         decachunky_x = self.get_decachunky_coord_from_chunky_coord(chunky_x)
         decachunky_z = self.get_decachunky_coord_from_chunky_coord(chunky_z)
         chunky_min_x = decachunky_x*10
-        chunky_max_x = chunky_min_x + 15  # NOTE: + 15 even if negative since originally, floor was used
+        chunky_max_x = chunky_min_x + 9  # NOTE: ADD even if negative since originally, floor was used
         chunky_min_z = decachunky_z*10
-        chunky_max_z = chunky_min_z + 15  # NOTE: + 15 even if negative since originally, floor was used
+        chunky_max_z = chunky_min_z + 9  # NOTE: ADD even if negative since originally, floor was used
         x_chunky_count = chunky_max_x-chunky_min_x+1
         z_chunky_count = chunky_max_z-chunky_min_z+1
         is_any_part_queued = False
@@ -706,6 +600,7 @@ class MTChunks:
         queued_chunk_coords = None
         chunky_offset_z = 0
         chunky_z = chunky_min_z
+        queued_index = None
         while chunky_z <= chunky_max_z:
             preview_strings[chunky_offset_z] = ""
             chunky_x = chunky_min_x
@@ -716,6 +611,10 @@ class MTChunks:
                     for index in range(self.todo_index,len(self.todo_positions)):
                         if ivec2_equals(self.todo_positions[index], coords):
                             is_any_part_queued = True
+                            if queued_chunk_coords is None:
+                                queued_chunk_coords = list()
+                            queued_chunk_coords.append(coords)
+                            queued_index = index
                             break
                 if is_any_part_queued:
                     break
@@ -730,10 +629,10 @@ class MTChunks:
             print("")
             print("    Rendering 160px decachunk "+str((decachunky_x, decachunky_z)))
             if self.verbose_enable:
-                print("      USING ("+str(len(chunky_coord_list))+") chunks (region "++":"++","++":"++"): "+str(chunky_coord_list))
+                print("      USING ("+str(len(chunky_coord_list))+") chunks (region "+str(chunky_min_x)+":"+str(chunky_max_x)+","+str(chunky_min_z)+":"+str(chunky_max_z)+"): "+str(chunky_coord_list))
                 print("")
             else:
-                print("      USING ("+str(len(chunky_coord_list))+") chunks")
+                print("      USING ("+str(len(chunky_coord_list))+") chunks (region "+str(chunky_min_x)+":"+str(chunky_max_x)+","+str(chunky_min_z)+":"+str(chunky_max_z)+")")
             decachunk_global_coords = decachunky_x*160, decachunky_z*160
             im = Image.new("RGB", (160, 160), self.FLAG_EMPTY_HEXCOLOR)
             decachunk_yaml_path = self.get_decachunk_yaml_path_from_decachunk(decachunky_x, decachunky_z)
@@ -763,17 +662,17 @@ class MTChunks:
                         im.paste(chunk_im, offset)
                         contains_chunk_luids.append(self.get_chunk_luid(chunky_x, chunky_z))
                     except:
-                        print("Could not finish "+participle+" in check_decachunk_containing_chunk:")
+                        print(self.min_indent+"Could not finish "+participle+" in check_decachunk_containing_chunk:")
                         view_traceback()
                 else:
                     preview_strings[chunky_offset_z] += "0"
             chunky_offset_z = z_chunky_count - 1
             try:
-                print(self.min_indent+"Usable chunk images mask:")
+                print(self.min_indent+"Usable chunk images mask (height:"+str(z_chunky_count)+"):")
                 while chunky_offset_z>=0:
                     if preview_strings[chunky_offset_z] is None:
                         preview_strings[chunky_offset_z] = "<None>"
-                    print(self.min_indent+"  "+preview_strings[chunky_offset_z])
+                    print(self.min_indent+"  "+str(chunky_offset_z)+":"+preview_strings[chunky_offset_z])
                     chunky_offset_z -= 1
             except:
                 print(self.min_indent+"Could not finish showing mask (this should never happen)")
@@ -788,10 +687,10 @@ class MTChunks:
             decachunk_folder_path = self.get_decachunk_folder_path_from_decachunk(decachunky_x, decachunky_z)
             if not os.path.isdir(decachunk_folder_path):
                 os.makedirs(decachunk_folder_path)
-                print("    Made folder '"+decachunk_folder_path+"'")
+                print(self.min_indent+"Made folder '"+decachunk_folder_path+"'")
             else:
-                print("    Found folder '"+decachunk_folder_path+"'")
-            print("    Saving '"+decachunk_image_path+"'")
+                print(self.min_indent+"Found folder '"+decachunk_folder_path+"'")
+            print(self.min_indent+"Saving '"+decachunk_image_path+"'")
             im.save(decachunk_image_path)
             decachunk_luid = self.get_decachunk_luid_from_decachunk(decachunky_x, decachunky_z)
             self.prepare_decachunk_meta_from_decachunk(decachunky_x, decachunky_z)
@@ -804,7 +703,8 @@ class MTChunks:
                 self.decachunks[decachunk_luid].metadata["contains_chunk_luids"] = None
             self.decachunks[decachunk_luid].save_yaml(decachunk_yaml_path)
         else:
-            print("Not rendering decachunk "+str((decachunky_x,decachunky_z))+" yet since contains queued chunk "+str(queued_chunk_coords)+".")
+            print(self.min_indent+"Not rendering decachunk "+str((decachunky_x,decachunky_z))+" yet since contains queued chunk "+str(queued_chunk_coords))
+            print(self.min_indent+"  (index:["+str(queued_index)+"]; len:"+str(len(self.todo_positions))+") .")
 
     def get_chunk_folder_path(self, chunky_x, chunky_z):
         result = None
@@ -829,7 +729,7 @@ class MTChunks:
         if decachunky_x is not None and decachunky_z is not None:
             hectochunky_x = int(math.floor(float(decachunky_x)/10.0))
             hectochunky_z = int(math.floor(float(decachunky_z)/10.0))
-            result = os.path.join( os.path.join(self.data_160px_path, str(hectochunky_x)), str(hectochunky_x) )
+            result = os.path.join( os.path.join(self.data_160px_path, str(hectochunky_x)), str(hectochunky_z) )
         return result
 
     def create_chunk_folder(self, chunky_x, chunky_z):
@@ -1001,7 +901,7 @@ class MTChunks:
         cmd_suffix = ""
         cmd_suffix = " > \""+genresult_path+"\""
         #self.mapper_id = "minetestmapper-region"
-        cmd_no_out_string = self.python_exe_path + " \""+self.minetestmapper_py_path + "\" --region " + str(min_x) + " " + str(max_x) + " " + str(min_z) + " " + str(max_z) + " --maxheight "+str(self.mapvars["maxheight"])+" --minheight "+str(self.mapvars["minheight"])+" --pixelspernode "+str(self.mapvars["pixelspernode"])+" \""+self.config["world_path"]+"\" \""+tmp_png_path+"\""
+        cmd_no_out_string = self.python_exe_path + " \""+self.minetestmapper_py_path + "\" --region " + str(min_x) + " " + str(max_x) + " " + str(min_z) + " " + str(max_z) + " --maxheight "+str(self.mapvars["maxheight"])+" --minheight "+str(self.mapvars["minheight"])+" --pixelspernode "+str(self.mapvars["pixelspernode"])+" \""+minetestinfo.get_var("primary_world_path")+"\" \""+tmp_png_path+"\""
         cmd_string = cmd_no_out_string + cmd_suffix
 
         if self.minetestmapper_py_path==self.minetestmapper_custom_path:#if self.backend_string!="sqlite3": #if self.mapper_id=="minetestmapper-region":
@@ -1011,7 +911,7 @@ class MTChunks:
             #    mapper_id = "minetest-mapper"
             #    NOTE: minetest-mapper is part of the minetest-data package, which can be installed alongside the git version of minetestserver
             #    BUT *buntu Trusty version of it does NOT have geometry option
-            #    cmd_string = "/usr/games/minetest-mapper --input \""+self.config["world_path"]+"\" --draworigin --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
+            #    cmd_string = "/usr/games/minetest-mapper --input \""+minetestinfo.get_var("primary_world_path")+"\" --draworigin --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
             #    such as sudo python minetestmapper --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry -32:-32+64+64 --output /var/www/html/minetest/try1.png
             # OR try PYTHON version (looks for expertmm fork which has geometry option like C++ version does):
             #script_path = "/home/owner/minetest/util/minetestmapper.py"
@@ -1023,8 +923,8 @@ class MTChunks:
                 #script_path = region_capable_script_path
             geometry_string = str(min_x)+":"+str(min_z)+"+"+str(int(max_x)-int(min_x)+1)+"+"+str(int(max_z)-int(min_z)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
             #expertmm_region_string = str(min_x) + ":" + str(max_x) + "," + str(min_z) + ":" + str(max_z)
-            #cmd_string="sudo python "+script_path+" --input \""+self.config["world_path"]+"\" --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
-            cmd_no_out_string = self.python_exe_path+" "+self.minetestmapper_py_path+" --bgcolor '"+self.FLAG_EMPTY_HEXCOLOR+"' --input \""+self.config["world_path"]+"\" --geometry "+geometry_string+" --output \""+tmp_png_path+"\""
+            #cmd_string="sudo python "+script_path+" --input \""+minetestinfo.get_var("primary_world_path")+"\" --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
+            cmd_no_out_string = self.python_exe_path+" "+self.minetestmapper_py_path+" --bgcolor '"+self.FLAG_EMPTY_HEXCOLOR+"' --input \""+minetestinfo.get_var("primary_world_path")+"\" --geometry "+geometry_string+" --output \""+tmp_png_path+"\""
             cmd_string = cmd_no_out_string + cmd_suffix
             #sudo python /home/owner/minetest/util/minetestmapper.py --bgcolor '#010000' --input "/home/owner/.minetest/worlds/FCAGameAWorld" --output /var/www/html/minetest/chunkymapdata/entire.png > entire-mtmresult.txt
             #sudo python /home/owner/minetest/util/chunkymap/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry 0:0+16+16 --output /var/www/html/minetest/chunkymapdata/chunk_x0z0.png > /home/owner/minetest/util/chunkymap-genresults/chunk_x0z0_mapper_result.txt
@@ -1137,7 +1037,7 @@ class MTChunks:
     def check_players(self):
         print("PROCESSING PLAYERS")
 
-        players_path = os.path.join(self.config["world_path"], "players")
+        players_path = os.path.join(minetestinfo.get_var("primary_world_path"), "players")
         player_count = 0
         player_written_count = 0
         players_moved_count = 0
@@ -1368,20 +1268,22 @@ class MTChunks:
                 #print(min_indent+chunk_luid+": Not rendered on dest.")
         return result
 
+
+
     def _check_map_pseudorecursion_branchfrom(self, chunky_x, chunky_z):
         chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
         branched_pos = chunky_x-1, chunky_z
         #only add if not in list already, to prevent infinite re-branching
-        if branched_pos not in self.todo_positions:
+        if vec2_not_in(branched_pos,self.todo_positions):
             self.todo_positions.append(branched_pos)
         branched_pos = chunky_x+1, chunky_z
-        if branched_pos not in self.todo_positions:
+        if vec2_not_in(branched_pos, self.todo_positions):
             self.todo_positions.append(branched_pos)
         branched_pos = chunky_x, chunky_z-1
-        if branched_pos not in self.todo_positions:
+        if vec2_not_in(branched_pos, self.todo_positions):
             self.todo_positions.append(branched_pos)
         branched_pos = chunky_x, chunky_z+1
-        if branched_pos not in self.todo_positions:
+        if vec2_not_in(branched_pos, self.todo_positions):
             self.todo_positions.append(branched_pos)
 
     def check_map_pseudorecursion_iterate(self):  # , redo_empty_enable=False):
@@ -1449,7 +1351,6 @@ class MTChunks:
         return result
 
     def apply_auto_tags_by_worldgen_mods(self, chunky_x, chunky_z):
-
         chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
         if chunk_luid not in self.chunks.keys():
             self.prepare_chunk_meta(chunky_x, chunky_z)
@@ -1463,12 +1364,16 @@ class MTChunks:
                 tags_list[index]=tags_list[index].strip()
         else:
             tags_list = list()
-        #TODO: finish this
-        for mod_name in mtmeta.worldgen_mod_list:
-            mod_path = os.path.join(mtmeta.config["mods_path"], mod_name)
-            #if os.path.isdir(mod_path)
-        #if is_changed:
-        #    self.save_chunk_meta(chunky_x, chunky_z)
+
+        for mod_name in worldgen_mod_list:
+            if mod_name in loaded_mod_list:
+                if mod_name not in tags_list:
+                    tags_list.append(mod_name)
+                    is_changed = True
+
+        if is_changed:
+            self.chunks[chunk_luid].metadata["tags"] = ','.join(tags_list)
+            self.save_chunk_meta(chunky_x, chunky_z)
 
     def correct_genresults_paths(self):
         count = 0

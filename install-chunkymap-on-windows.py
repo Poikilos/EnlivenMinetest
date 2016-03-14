@@ -76,7 +76,7 @@ if is_detected:
     detected_msg = " (detected above)"
 
 print("")
-answer = raw_input("Enter #of bits in your python architecture [blank for "+os_bits+detected_msg+"]: ")
+answer = raw_input("Enter #of bits in your PYTHON architecture (may be different from #of bits of Windows) [blank for "+os_bits+detected_msg+"]: ")
 
 if answer is not None:
     answer = answer.strip()
