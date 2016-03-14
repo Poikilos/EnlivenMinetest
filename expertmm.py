@@ -1,6 +1,7 @@
 import os
 import sys
 import traceback
+import copy
 
 verbose_enable = False
 
@@ -21,6 +22,7 @@ alpha_chars = alpha_upper_chars+alpha_lower_chars
 alnum_chars = alpha_chars+digit_chars
 identifier_chars = alnum_chars+"_"
 identifier_and_dot_chars = identifier_chars+"."
+min_indent = ""
 
 class InstalledFile:
     source_dir_path = None
@@ -111,7 +113,7 @@ def get_dict_deepcopy(old_dict):
     if type(old_dict) is dict:
         new_dict = {}
         for this_key in old_dict.iterkeys():
-            new_dict[this_key] = old_dict[this_key]
+            new_dict[this_key] = copy.deepcopy(old_dict[this_key])
     return new_dict
 
 def is_dict_subset(new_dict, old_dict, verbose_messages_enable, verbose_dest_description="unknown file"):
@@ -173,8 +175,8 @@ def RepresentsFloat(s):
 
 def view_traceback():
     ex_type, ex, tb = sys.exc_info()
-    print(str(ex_type))
-    print(str(ex))
+    print(min_indent+str(ex_type))
+    print(min_indent+str(ex))
     traceback.print_tb(tb)
     del tb
 
