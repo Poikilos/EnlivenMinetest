@@ -1,0 +1,5 @@
+SET CHUNKYMAPDATA_PATH=C:\wamp\www\chunkymapdata
+SET CHUNKYMAPDATA_WORLDS_PATH=%CHUNKYMAPDATA_PATH%\worlds
+rd /s /q "%CHUNKYMAPDATA_WORLDS_PATH%"
+if NOT ["%errorlevel%"]==["0"] pause
+REM explorer "%CHUNKYMAPDATA_PATH%"

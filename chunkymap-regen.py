@@ -625,14 +625,18 @@ class MTChunks:
                     raw_input("ERROR: FLAG_COLOR (obtained from FLAG_EMPTY_HEXCOLOR) has "+len(FLAG_COLOR)+" element(s) (3 or 4 expected)")
         return result
 
-    def get_index_of_chunk_on_todo_list(self, chunky_pos):
+    def get_index_of_chunk_on_todo_list(self, chunky_pos, allow_current_chunk_enable=False):
         result = -1
         if self.todo_index > -1:
             if self.todo_index<len(self.todo_positions):
-                for index in range(self.todo_index,len(self.todo_positions)):
-                    if ivec2_equals(self.todo_positions[index], chunky_pos):
-                        result = index
-                        break
+                first_index = self.todo_index + 1
+                if allow_current_chunk_enable:
+                    first_index = self.todo_index
+                if first_index<len(self.todo_positions):
+                    for index in range(first_index,len(self.todo_positions)):
+                        if ivec2_equals(self.todo_positions[index], chunky_pos):
+                            result = index
+                            break
         return result
 
 
@@ -642,9 +646,9 @@ class MTChunks:
             decachunky_x = self.get_decachunky_coord_from_chunky_coord(chunky_x)
             decachunky_z = self.get_decachunky_coord_from_chunky_coord(chunky_z)
             chunky_min_x = decachunky_x*10
-            chunky_max_x = chunky_min_x + 9  # NOTE: ADD even if negative since originally, floor was used
+            chunky_max_x = chunky_min_x + 9  # NOTE: ADD even if negative, since originally floor was used
             chunky_min_z = decachunky_z*10
-            chunky_max_z = chunky_min_z + 9  # NOTE: ADD even if negative since originally, floor was used
+            chunky_max_z = chunky_min_z + 9  # NOTE: ADD even if negative, since originally floor was used
             x_chunky_count = chunky_max_x-chunky_min_x+1
             z_chunky_count = chunky_max_z-chunky_min_z+1
             is_any_part_queued = False
@@ -660,7 +664,7 @@ class MTChunks:
                 while chunky_x <= chunky_max_x:
                     coords = (chunky_x, chunky_z)
                     chunky_coord_list.append( coords )
-                    queued_index = self.get_index_of_chunk_on_todo_list(coords)
+                    queued_index = self.get_index_of_chunk_on_todo_list(coords, allow_current_chunk_enable=False)
                     is_any_part_queued = queued_index > -1
                     if is_any_part_queued:
                         if queued_chunk_coords is None:
@@ -704,8 +708,6 @@ class MTChunks:
                             print(min_indent+"ERROR in check_decachunk_containing_chunk: no outline of chunks could be found around "+str(chunky_pos))
                     if not is_chunk_complete:
                         break
-
-
 
             #if not is_any_part_queued:
             #if queued_chunk_coords is None:
@@ -1413,21 +1415,23 @@ class MTChunks:
                     #must check_decachunk_containing_chunk AFTER _check_map_pseudorecursion_branchfrom so check_decachunk_containing_chunk can see if there are more to do before rendering superchunk
                     #always check since already checks queue and doesn't render decachunk on last rendered chunk, but instead on last queued chunk in decachunk
                     #if self.rendered_this_session_count>prev_rendered_this_session_count or self.force_rerender_decachunks_enable:
-                    #self.check_decachunk_containing_chunk(chunky_x, chunky_z)
+                    
+                    #Now is ok to check_decachunk_containing_chunk, since does not count current index as unfinished (allow_current_chunk_enable=False):
+                    self.check_decachunk_containing_chunk(chunky_x, chunky_z)
                     if self.verbose_enable:
                         print(min_indent+"["+str(self.todo_index)+"] branching from "+str((chunky_x, chunky_z))+" (added "+str(len(self.todo_positions)-prev_len)+")")
                 else:
-                    #self.check_decachunk_containing_chunk(chunky_x, chunky_z)
+                    #Now is ok to check_decachunk_containing_chunk, since does not count current index as unfinished (allow_current_chunk_enable=False):
+                    self.check_decachunk_containing_chunk(chunky_x, chunky_z)
                     if self.verbose_enable:
                         print(min_indent+"["+str(self.todo_index)+"] not branching from "+str((chunky_x, chunky_z)))
                 self.todo_index += 1
-
-                #check_decachunk_containing_chunk AFTER incrementing todo_index so that self being queued doesn't prevent decachunk render:
                 self.check_decachunk_containing_chunk(chunky_x, chunky_z)
             if self.todo_index>=len(self.todo_positions):  # check again since may have branched above, making this untrue
                 self.save_mapvars_if_changed()
                 self.todo_index = -1
-                self.todo_positions = list()
+                #self.todo_positions = list()  # there seems to be issues where not empty due to delayed garbage collection
+                while len(self.todo_positions) > 0 : self.todo_positions.pop()
         else:
             if self.verbose_enable:
                 print(min_indent+"(no branches)")
@@ -1595,7 +1599,8 @@ class MTChunks:
             print("PROCESSING MAP DATA (BRANCH PATTERN)")
             if os.path.isfile(self.minetestmapper_py_path) and os.path.isfile(self.colors_path):
                 self.rendered_count = 0
-                self.todo_positions = list()
+                #self.todo_positions = list()  # there seems to be issues where not empty due to delayed garbage collection
+                while len(self.todo_positions) > 0 : self.todo_positions.pop()
                 self.todo_positions.append((0,0))
                 #self.mapvars = get_dict_from_conf_file(self.world_yaml_path,":")
                 self.verify_correct_map()
@@ -1610,10 +1615,10 @@ class MTChunks:
                     for decachunk_x_name in os.listdir(self.data_16px_path):
                         decachunk_x_path = os.path.join(self.data_16px_path, decachunk_x_name)
                         #for decachunk_z_basepath, decachunk_z_dirnames, decachunk_z_filenames in os.walk(decachunk_x_dirnames):
-                        if decachunk_x_path[:1]!="." and os.path.isdir(decachunk_x_path):
+                        if decachunk_x_name[:1]!="." and os.path.isdir(decachunk_x_path):
                             for decachunk_z_name in os.listdir(decachunk_x_path):
                                 decachunk_z_path = os.path.join(decachunk_x_path, decachunk_z_name)
-                                if decachunk_z_path[:1]!="." and os.path.isdir(decachunk_z_path):
+                                if decachunk_z_name[:1]!="." and os.path.isdir(decachunk_z_path):
                                     #for chunk_filename in decachunk_z_filenames:
                                     for chunk_filename in os.listdir(decachunk_z_path):
                                         chunk_path = os.path.join(decachunk_z_path, chunk_filename)
