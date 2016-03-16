@@ -26,7 +26,9 @@ if (is_file('chunkymap.php')) {
 	//echo "</center>";
 	set_chunkymap_view($chunkymap_view_x,$chunkymap_view_z,$chunkymap_view_zoom);
 	//echo "<table><tr><td style=\"text-align:left\">";
-	echo_chunk_debug_canvas();
+	$chunk_mode_enable=true; //this should usually be false;
+	$debug_mode_enable=false; //this renders colors based on yml files instead of drawing images
+	echo_chunkymap_canvas($chunk_mode_enable,$debug_mode_enable);
 	//echo_chunkymap_as_chunk_table(false);
 	//echo_decachunk_table();
 	//echo "</td></tr></table>";

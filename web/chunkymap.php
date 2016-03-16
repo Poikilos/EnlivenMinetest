@@ -54,6 +54,16 @@ $chunkymap_zoom_delta=1.5;
 $chunkymap_view_min_zoom=0.0173415299; //1.0/$chunk_dimension_min; //should be a number that would get to exactly 100 eventually if multiplied by chunkymap_zoom_delta repeatedly (such as 0.09765625 if chunkymap_zoom_delta were 2); 0.005 was avoided since tiles used to be 80x80 pixels
 $chunkymap_view_max_zoom=16585998.48141; //13107200.0;
 
+
+$decachunk_prefix_string="decachunk_";
+$decachunk_prefix_then_x_string=$decachunk_prefix_string."x";
+$chunk_prefix_string="chunk_";
+$chunk_prefix_then_x_string=$chunk_prefix_string."x";
+$z_opener="z";
+$dot_yaml=".yml";
+$decachunk_dot_and_ext=".jpg";
+$chunk_dot_and_ext = ".png";
+
 function echo_error($val) {
     if (!isset($val)) {
         $val="Unknown Error";
@@ -302,11 +312,27 @@ function get_decachunky_coord_from_location($location_x) {
 	return $decachunk_x;
 }
 
-function get_decachunk_image_name_from_decachunk($x, $z) {
-	return "decachunk_x"."$x"."z"."$z".".jpg";
+function get_decachunk_image_path_from_decachunk($decachunky_x, $decachunky_z) {
+	return get_decachunk_folder_path_from_decachunk($decachunky_x, $decachunky_z)."/".get_decachunk_image_name_from_decachunk($decachunky_x, $decachunky_z);
 }
 
-function echo_chunk_debug_canvas() {
+function get_decachunk_image_name_from_decachunk($x, $z) {
+	global $decachunk_prefix_string;
+	global $decachunk_dot_and_ext;
+	return "$decachunk_prefix_string"."$x"."z"."$z"."$decachunk_dot_and_ext";
+}
+
+function get_javascript_bool_value($this_bool) {
+	$result = "false";
+	if ($this_bool == true) {
+		$result = "true";
+	}
+	return $result;
+}
+
+//chunk_mode_enable: shows chunk png images instead of decachunk jpg images (slower)
+//debug_mode_enable: draws colored rectangles based on yml files instead of drawing images
+function echo_chunkymap_canvas($chunk_mode_enable, $debug_mode_enable) {
     global $chunkymap_view_x;
     global $chunkymap_view_z;
     global $chunkymap_view_zoom;
@@ -314,25 +340,76 @@ function echo_chunk_debug_canvas() {
     global $chunkymap_view_min_zoom;
 	global $showplayers;
 	global $chunkymap_zoom_delta;
+	
+	check_world();
+	
+	$chunks_per_tile_x_count = 10;
+	$chunks_per_tile_z_count = 10;
+	
+	//use decachunk jpgs by default for speed:
 	$tile_w = 160;
 	$tile_h = 160;
 	
+	if (isset($chunk_mode_enable) and ($chunk_mode_enable===true)) {
+		$tile_w = 16;
+		$tile_h = 16;
+		$chunks_per_tile_x_count = 1;
+		$chunks_per_tile_z_count = 1;
+	}
+	else {
+		$chunk_mode_enable=false;
+	}
+	
+	$locations_per_tile_x_count = $chunks_per_tile_x_count*16;
+	$locations_per_tile_z_count = $chunks_per_tile_z_count*16;
+		
     if ($chunkymap_view_zoom<$chunkymap_view_min_zoom) $chunkymap_view_zoom = $chunkymap_view_min_zoom;
     if ($chunkymap_view_zoom>$chunkymap_view_max_zoom) $chunkymap_view_zoom = $chunkymap_view_max_zoom;
 
-	$world_camera_w = 6.0 * (1.0/$chunkymap_view_zoom);
-	$world_camera_h = $world_camera_w; //start with square camera to make sure enough chunks are loaded
+	$world_camera_w = (800/$tile_w) * (1.0/$chunkymap_view_zoom); //screen should be 800pt wide always (so 12pt is similar on all screens and only varies with physical size of screen in inches, and since pt was invented to replace px)
+	$world_camera_left = $chunkymap_view_x-$world_camera_w/2.0;
+	
+	$world_camera_h = $world_camera_w; //start with square camera to make sure enough chunks are loaded and since neither screen height nor ratio can be known from php since it is only run on server-side
+	$world_camera_top = $chunkymap_view_z+$world_camera_h/2.0; //plus since cartesian until drawn [then flipped]
 	
 	$chunky_view_x = get_chunky_coord_from_location($chunkymap_view_x);
 	$chunky_view_z = get_chunky_coord_from_location($chunkymap_view_z);
 
-	$chunky_min_x = 0;
-	$chunky_max_x = 0;
-	$chunky_min_z = 0;
-	$chunky_max_z = 0;
+	#tile is either chunk or decachunk
+	$min_tiley_x = -1;
+	$max_tiley_x = 0;
+	$min_tiley_z = -1;
+	$max_tiley_z = 0;
 	
+	$world_camera_right = $world_camera_left+$world_camera_w;
+	$world_camera_bottom = $world_camera_top-$world_camera_h; //minus since cartesian until drawn [then flipped]
 	
+	//Only whether the near edges are in the canvas matters (get bottom of max since always cartesian until drawn [then inverted]):
+	$min_tiley_x__chunk_location_right = $min_tiley_x*$locations_per_tile_x_count+$locations_per_tile_x_count;
+	$max_tiley_x__chunk_location_left = $max_tiley_x*$locations_per_tile_x_count;
+	$min_tiley_z__chunk_location_top = $min_tiley_z*$locations_per_tile_z_count;
+	$max_tiley_z__chunk_location_bottom = $max_tiley_z*$locations_per_tile_z_count+$locations_per_tile_z_count;
 	
+	while ($min_tiley_x__chunk_location_right>$world_camera_left) {
+		$min_tiley_x -= 1;
+		$min_tiley_x__chunk_location_right = $min_tiley_x*$locations_per_tile_x_count+$locations_per_tile_x_count;
+	}
+	while ($max_tiley_x__chunk_location_left<$world_camera_right) {
+		$max_tiley_x += 1;
+		$max_tiley_x__chunk_location_left = $max_tiley_x*$locations_per_tile_x_count;
+	}
+	while ($min_tiley_z__chunk_location_top>$world_camera_bottom) {
+		$min_tiley_z -= 1;
+		$min_tiley_z__chunk_location_top = $min_tiley_z*$locations_per_tile_z_count;
+	}
+	while ($max_tiley_z__chunk_location_bottom<$world_camera_top) {
+		$max_tiley_z += 1;
+		$max_tiley_z__chunk_location_bottom = $max_tiley_z*$locations_per_tile_z_count+$locations_per_tile_z_count;
+	}
+	
+	//$tile_x_count = $max_tiley_x-$min_tiley_x+1;
+	//$tile_z_count = $max_tiley_z-$min_tiley_z+1;	
+
 	echo '<canvas id="myCanvas"></canvas> ';
 	echo '<script>
 		var my_canvas = document.getElementById("myCanvas");
@@ -342,6 +419,10 @@ function echo_chunk_debug_canvas() {
 		var chunkymap_view_max_zoom='.$chunkymap_view_max_zoom.';
 		var chunkymap_view_min_zoom='.$chunkymap_view_min_zoom.';
 		var chunkymap_zoom_delta='.$chunkymap_zoom_delta.';
+		var chunk_mode_enable='.get_javascript_bool_value($chunk_mode_enable).';
+		var debug_mode_enable='.get_javascript_bool_value($debug_mode_enable).';
+		var chunks_per_tile_x_count='.$chunks_per_tile_x_count.';
+		var chunks_per_tile_z_count='.$chunks_per_tile_z_count.';
 		var tile_w='.$tile_w.';
 		var tile_h='.$tile_h.';
 		var size_1em_pixel_count = null;
@@ -354,8 +435,8 @@ function echo_chunk_debug_canvas() {
 		var padding_w = null;
 		var padding_h = null;
 		var pen_x = null;
-		var world_camera_w = null;
-		var world_camera_h = null;
+		var world_camera_w = null; //calculated below
+		var world_camera_h = null; //calculated below
 		var current_w = null;
 		var current_h = null;
 		var current_ratio = null;
@@ -373,12 +454,13 @@ function echo_chunk_debug_canvas() {
 			draw_map();
 		}
 		function process_view_change() {
+			//NOTE: this should be exactly the same math as php uses to make sure there are the same #of tiles displayed as were loaded by php
 			if (current_w>current_h) {
-				world_camera_w = 6.0 * (1.0/chunkymap_view_zoom);
+				world_camera_w = (800/tile_w) * (1.0/chunkymap_view_zoom);
 				world_camera_h = world_camera_w/current_ratio;
 			}
 			else {
-				world_camera_h = 6.0 * (1.0/chunkymap_view_zoom);
+				world_camera_h = (800/tile_h) * (1.0/chunkymap_view_zoom);
 				world_camera_w = world_camera_h*current_ratio;
 			}
 		}
@@ -615,6 +697,38 @@ function echo_chunk_debug_canvas() {
 	echo '<img id="zoom-in_disabled" src="chunkymapdata/images/zoom-in_disabled.png"/>';
 	echo '<img id="zoom-out" src="chunkymapdata/images/zoom-out.png"/>';
 	echo '<img id="zoom-out_disabled" src="chunkymapdata/images/zoom-out_disabled.png"/>';
+	$this_tiley_z=$max_tiley_z; //start at max since screen is inverted cartesian
+	if ($debug_mode_enable!==true) {
+		//this table is hidden when javascript runs successfully, but it is also a map though not very functional
+		echo '<table id="chunk_table" cellpadding="0" cellspacing="0" style="width:100%">'."\r\n";
+		while ($this_tiley_z>=$min_tiley_z) {
+			$this_tiley_x=$min_tiley_x;
+			echo "  <tr>\r\n";
+			while ($this_tiley_x<=$max_tiley_x) {
+				$img_path=null;
+				if ($chunk_mode_enable) {
+					$img_path=get_chunk_image_path_from_chunky_coords($this_tiley_x, $this_tiley_z);
+					if (!is_file($img_path)) {
+						echo "<!-- no chunk $img_path -->";
+						$img_path="chunkymapdata/images/chunk-blank.jpg";
+					}
+				}
+				else {
+					$img_path=get_decachunk_image_path_from_decachunk($this_tiley_x, $this_tiley_z);
+					if (!is_file($img_path)) {
+						echo "<!-- no decachunk $img_path -->";
+						$img_path="chunkymapdata/images/decachunk-blank.jpg";
+					}
+				}
+				echo "  <td>"."<img class=\"maptileimg\" src=\"$img_path\" style=\"width:100%\"/>"."</td>\r\n";
+				$this_tiley_x++;
+			}
+			echo "  </tr>\r\n";
+			$this_tiley_z-=1;
+		}
+		echo '</table>';
+	}
+	
 	//TODO: $chunkymap_view_zoom SHOULD BE interpreted so each block (pixel) is 1pt: 1066x600 pt canvas would have 66+2/3 blocks horizontally, is 37.5 blocks vertically
 	//so, at zoom 1.0 canvas should show 60 chunks across (6 decachunks across)
 }
@@ -626,15 +740,14 @@ function echo_decachunk_table() {
     global $chunkymap_view_max_zoom;
     global $chunkymap_view_min_zoom;
 	global $showplayers;
-
+	global $decachunk_dot_and_ext;
+	global $decachunk_prefix_then_x_string;
+	
 	check_world();
 	global $chunkymapdata_thisworld_path;
 	global $world_name;
 	global $chunkymapdata_worlds_path;
-
-    $x_opener="decachunk_x";
-    $z_opener="z";
-    $dot_and_ext = ".jpg";
+	global $z_opener;
 	
     if ($chunkymap_view_zoom<$chunkymap_view_min_zoom) $chunkymap_view_zoom = $chunkymap_view_min_zoom;
     if ($chunkymap_view_zoom>$chunkymap_view_max_zoom) $chunkymap_view_zoom = $chunkymap_view_max_zoom;
@@ -748,6 +861,25 @@ function check_world() {
 		$chunkymapdata_thisworld_path = $chunkymapdata_worlds_path."/".$world_name;
 	}
 }
+function get_chunk_yaml_path_from_chunky_coords($chunky_x, $chunky_z) {
+	return get_chunk_folder_path_from_chunky_coords($chunky_x, $chunky_z).'/'.get_chunk_yaml_file_name($chunky_x, $chunky_z);
+}
+function get_chunk_image_path_from_chunky_coords($chunky_x, $chunky_z) {
+	return get_chunk_folder_path_from_chunky_coords($chunky_x, $chunky_z).'/'.get_chunk_file_name($chunky_x, $chunky_z);
+}
+function get_chunk_yaml_file_name($chunky_x, $chunky_z) {
+	global $chunk_prefix_then_x_string;
+	global $dot_yaml;
+	global $z_opener;
+	return $chunk_prefix_then_x_string.$chunky_x.$z_opener.$chunky_z.$dot_yaml;
+}
+function get_chunk_file_name($chunky_x, $chunky_z) {
+	global $chunk_prefix_then_x_string;
+	global $dot_yaml;
+	global $z_opener;
+	global $chunk_dot_and_ext;
+	return $chunk_prefix_then_x_string.$chunky_x.$z_opener.$chunky_z."$chunk_dot_and_ext";
+}
 //formerly echo_chunkymap_table
 function echo_chunkymap_as_chunk_table($show_all_enable) {
     ini_set('display_errors', 1);
@@ -771,6 +903,9 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
     global $chunkymap_tile_original_h;
     global $chunkymap_view_max_zoom;
 	global $world_name;
+	global $chunk_dot_and_ext;
+	global $z_opener;
+	global $dot_yaml;
 
 	echo_chunkymap_anchor();
 	echo_chunkymap_controls();
@@ -781,9 +916,9 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
     //$zoom_divisor = (int)(100/$chunkymap_view_zoom);
     $chunk_assoc = array();  // used for storing players; and used for determining which chunks are on the edge, since not all generated map tiles are the same size (edge tile images are smaller and corner ones are smaller yet)
     $chunk_count = 0;
-    $x_opener="chunk_x";
-    $z_opener="z";
-    $dot_and_ext = ".png";
+    $chunk_prefix_then_x_string="chunk_x";
+    
+    
     $min_chunkx = 0;
     $min_chunkz = 0;
     $max_chunkx = 0;
@@ -971,12 +1106,12 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
 								$decachunk_z_handle = opendir($decachunk_folder_path);
 								while (false !== ($chunk_name = readdir($decachunk_z_handle))) {
 									$file_lower = strtolower($chunk_name);
-									if (endsWith($file_lower, $dot_and_ext) and startsWith($file_lower, $x_opener)) {
-										$z_opener_index = strpos($file_lower, $z_opener, strlen($x_opener));
+									if (endsWith($file_lower, $chunk_dot_and_ext) and startsWith($file_lower, $chunk_prefix_then_x_string)) {
+										$z_opener_index = strpos($file_lower, $z_opener, strlen($chunk_prefix_then_x_string));
 										if ($z_opener_index !== false) {
-											$x_len = $z_opener_index - strlen($x_opener);
-											$remaining_len = strlen($file_lower) - strlen($x_opener) - $x_len - strlen($z_opener) - strlen($dot_and_ext);
-											$x = substr($file_lower, strlen($x_opener), $x_len);
+											$x_len = $z_opener_index - strlen($chunk_prefix_then_x_string);
+											$remaining_len = strlen($file_lower) - strlen($chunk_prefix_then_x_string) - $x_len - strlen($z_opener) - strlen($chunk_dot_and_ext);
+											$x = substr($file_lower, strlen($chunk_prefix_then_x_string), $x_len);
 											$z = substr($file_lower, $z_opener_index + strlen($z_opener), $remaining_len);
 											if (is_int_string($x) and is_int_string($z)) {
 												$chunk_luid = "x".$x."z".$z;
@@ -1032,7 +1167,7 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
 		$zoomed_w=(int)((float)$chunkymap_tile_original_w*$scale+.5);
 		$zoomed_h=(int)((float)$chunkymap_tile_original_h*$scale+.5);
 		$genresult_suffix_then_dot_then_ext="_mapper_result.txt";
-		$dot_yaml=".yml";
+		
 		$minute=60;
 		$player_file_age_expired_max_seconds=20*$minute-1;
 		$player_file_age_idle_max_seconds=5*$minute-1;
@@ -1044,11 +1179,10 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
 				$this_zoomed_w = $zoomed_w;
 				$this_zoomed_h = $zoomed_h;
 
-				$chunk_yaml_name = $x_opener.$x.$z_opener.$z.$dot_yaml;
 				//$chunk_yaml_path = $chunkymapdata_thisworld_path.'/'.$chunk_yaml_name;
 				//$chunk_yaml_path = $chunks_16px_path.'/'.
-				$chunk_yaml_path = get_chunk_folder_path_from_chunky_coords($x, $z).'/'.$chunk_yaml_name;
-				//$chunk_genresult_name = $x_opener.$x.$z_opener.$z.$genresult_suffix_then_dot_then_ext;
+				$chunk_yaml_path = get_chunk_yaml_path_from_chunky_coords($x,$z);
+				//$chunk_genresult_name = $chunk_prefix_then_x_string.$x.$z_opener.$z.$genresult_suffix_then_dot_then_ext;
 				//$chunk_genresult_path = $chunkymapdata_thisworld_path.'/'.$chunk_img_name;
 				$td_style_suffix="";
 				$element_align_style_suffix="";
@@ -1142,8 +1276,7 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
 				echo_hold( "      <td width=\"1\" style=\"padding:0px; background-color:lightgray; $td_style_suffix $element_align_style_suffix\">");
 				echo_hold("<div style=\"position: relative\">"); //causes child's absolute position to be relative to this div's location, as per http://www.w3schools.com/css/tryit.asp?filename=trycss_position_absolute
 				$chunk_luid = "x".$x."z".$z;
-				$chunk_img_name = $x_opener.$x.$z_opener.$z."$dot_and_ext";
-				$chunk_img_path = get_chunk_folder_path_from_chunky_coords($x, $z).'/'.$chunk_img_name;
+				$chunk_img_path = get_chunk_image_path_from_chunky_coords($x, $z);
 				if (is_file($chunk_img_path)) {
 					echo_hold( "<img class=\"maptileimg\" style=\"width:$this_zoomed_w; height:$this_zoomed_h;\" src=\"$chunk_img_path\"/>");
 				}

@@ -862,7 +862,7 @@ class MTChunks:
 
     def get_chunk_genresults_base_path(self):
         #formerly get_chunk_genresults_tmp_folder(self, chunk_luid)
-        return os.path.join(os.path.dirname(os.path.abspath(__file__)), "chunkymap-genresults")
+        return os.path.join( os.path.join(os.path.dirname(os.path.abspath(__file__)), "chunkymap-genresults"), self.world_name)
 
     def get_chunk_genresult_tmp_path(self, chunky_x, chunky_z):
         return os.path.join(self.get_chunk_genresult_tmp_folder(chunky_x, chunky_z), self.get_chunk_genresult_name(chunky_x, chunky_z))
