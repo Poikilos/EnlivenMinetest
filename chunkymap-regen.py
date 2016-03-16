@@ -590,9 +590,9 @@ class MTChunks:
         # 0 becomes 0
         #-1 becomes -10
         return int(decachunky_x*10)
-    
-    
-    
+
+
+
     def is_worldborder_chunk(self, chunky_x, chunky_z):
         result = False
         image_path = self.get_chunk_image_path(chunky_x, chunky_z)
@@ -634,7 +634,7 @@ class MTChunks:
                         result = index
                         break
         return result
-        
+
 
     def check_decachunk_containing_chunk(self, chunky_x, chunky_z):
         try:
@@ -704,9 +704,9 @@ class MTChunks:
                             print(min_indent+"ERROR in check_decachunk_containing_chunk: no outline of chunks could be found around "+str(chunky_pos))
                     if not is_chunk_complete:
                         break
-            
-            
-            
+
+
+
             #if not is_any_part_queued:
             #if queued_chunk_coords is None:
             if is_chunk_complete and not is_any_part_queued:
@@ -1421,7 +1421,7 @@ class MTChunks:
                     if self.verbose_enable:
                         print(min_indent+"["+str(self.todo_index)+"] not branching from "+str((chunky_x, chunky_z)))
                 self.todo_index += 1
-                
+
                 #check_decachunk_containing_chunk AFTER incrementing todo_index so that self being queued doesn't prevent decachunk render:
                 self.check_decachunk_containing_chunk(chunky_x, chunky_z)
             if self.todo_index>=len(self.todo_positions):  # check again since may have branched above, making this untrue
@@ -1572,7 +1572,7 @@ class MTChunks:
                     result = True
                     break
         return result
-        
+
 
     def is_nonworldborder_isrendered_count_gt_or_eq(chunky_coords_list, min_count):
         result = False

@@ -28,15 +28,15 @@ date_default_timezone_set('EST'); //required by PHP >=5.1.0
 if ($is_verbose) echo "globals...";
 //$chunkymap_view_x=0;
 //$chunkymap_view_z=0;
-//$chunkymap_view_zoom_multiplier=25;
+//$chunkymap_view_zoom=25;
 if (!isset($chunkymap_view_x)) {
     $chunkymap_view_x=0;
 }
 if (!isset($chunkymap_view_z)) {
     $chunkymap_view_z=0;
 }
-if (!isset($chunkymap_view_zoom_multiplier)) {
-    $chunkymap_view_zoom_multiplier=.25;
+if (!isset($chunkymap_view_zoom)) {
+    $chunkymap_view_zoom=.25;
 }
 
 $chunkymapdata_path = "chunkymapdata";
@@ -44,15 +44,15 @@ $chunkymapdata_worlds_path = $chunkymapdata_path."/worlds";
 $chunkymapdata_thisworld_path = null;
 $showplayers=true;
 
-// NOT OPTIONAL:
+// NOT OPTIONAL for table version:
 $chunkymap_tile_original_w=16;
 $chunkymap_tile_original_h=16;
 
 $chunk_dimension_min=$chunkymap_tile_original_w;
 if ($chunkymap_tile_original_h<$chunk_dimension_min) $chunk_dimension_min=$chunkymap_tile_original_h;
-
-$chunkymap_view_min_zoom=1.0/$chunk_dimension_min; //should be a number that would get to exactly 100 eventually if multiplied by 2 repeatedly (such as 0.09765625); 0.005 was avoided since tiles used to be 80x80 pixels
-$chunkymap_view_max_zoom=13107200.0;
+$chunkymap_zoom_delta=1.5;
+$chunkymap_view_min_zoom=0.0173415299; //1.0/$chunk_dimension_min; //should be a number that would get to exactly 100 eventually if multiplied by chunkymap_zoom_delta repeatedly (such as 0.09765625 if chunkymap_zoom_delta were 2); 0.005 was avoided since tiles used to be 80x80 pixels
+$chunkymap_view_max_zoom=16585998.48141; //13107200.0;
 
 function echo_error($val) {
     if (!isset($val)) {
@@ -118,13 +118,13 @@ function is_int_string($val) {
     }
     return $result;
 }
-function set_chunkymap_view($set_chunkymap_view_x, $set_chunkymap_view_z, $set_chunkymap_view_zoom_multiplier) {
+function set_chunkymap_view($set_chunkymap_view_x, $set_chunkymap_view_z, $set_chunkymap_view_zoom) {
     global $chunkymap_view_x;
     global $chunkymap_view_z;
-    global $chunkymap_view_zoom_multiplier;
+    global $chunkymap_view_zoom;
     $chunkymap_view_x = $set_chunkymap_view_x;
     $chunkymap_view_z = $set_chunkymap_view_z;
-    $chunkymap_view_zoom_multiplier = $set_chunkymap_view_zoom_multiplier;
+    $chunkymap_view_zoom = $set_chunkymap_view_zoom;
 }
 function echo_chunkymap_anchor() {
     global $chunkymap_anchor_name;
@@ -133,7 +133,7 @@ function echo_chunkymap_anchor() {
 function echo_chunkymap_controls() {
     global $chunkymap_view_x;
     global $chunkymap_view_z;
-    global $chunkymap_view_zoom_multiplier;
+    global $chunkymap_view_zoom;
     global $chunkymap_view_max_zoom;
     global $chunkymap_view_min_zoom;
     global $chunkymap_anchor_name;
@@ -142,18 +142,18 @@ function echo_chunkymap_controls() {
     $in_img_name = "zoom-in.png";
     $out_img_name = "zoom-out.png";
 
-    $in_zoom = $chunkymap_view_zoom_multiplier;
+    $in_zoom = $chunkymap_view_zoom;
     if ($in_zoom<$chunkymap_view_max_zoom) {
         $is_in=true;
-        $in_zoom = $chunkymap_view_zoom_multiplier*2.0;
+        $in_zoom = $chunkymap_view_zoom*2.0;
         //echo "in:$in_zoom ";
     }
     else $in_img_name = "zoom-in_disabled.png";
 
-    $out_zoom = $chunkymap_view_zoom_multiplier;
+    $out_zoom = $chunkymap_view_zoom;
     if ($out_zoom>$chunkymap_view_min_zoom) {
         $is_out=true;
-        $out_zoom = ($chunkymap_view_zoom_multiplier/2.0);
+        $out_zoom = ($chunkymap_view_zoom/2.0);
     }
     else $out_img_name = "zoom-out_disabled.png";
 
@@ -208,19 +208,15 @@ function echo_chunkymap_controls() {
     }
     if (!$found) $in_zoom=$chunkymap_view_max_zoom;
 
-    $in_html="<img src=\"chunkymapdata/images/$in_img_name\" style=\"width:16pt; height:16pt\" />";
-    $out_html="<img src=\"chunkymapdata/images/$out_img_name\" style=\"width:16pt; height:16pt\" />";
+    $in_html="<img src=\"chunkymapdata/images/$in_img_name\" style=\"width:0.5in; height:0.5in\" />";
+    $out_html="<img src=\"chunkymapdata/images/$out_img_name\" style=\"width:0.5in; height:0.5in\" />";
 	global $world_name;
-	$append_vars="&";
+	$append_vars="";
 	if (isset($world_name)) {
-		$prefix = "";
-		if (strlen($append_vars)>0 && !endsWith($append_vars,"&") ) {
-			$prefix = "&";
-		}
-		$append_vars.="$prefix"."world_name=$world_name";
+		$append_vars.="&"."world_name=$world_name";
 	}
-    if ($is_in) $in_html="<a href=\"?chunkymap_view_zoom_multiplier=$in_zoom"."$append_vars"."#$chunkymap_anchor_name\">$in_html</a>";
-    if ($is_out) $out_html="<a href=\"?chunkymap_view_zoom_multiplier=$out_zoom"."$append_vars"."#$chunkymap_anchor_name\">$out_html</a>";
+    if ($is_in) $in_html="<a href=\"?chunkymap_view_zoom=$in_zoom"."$append_vars"."#$chunkymap_anchor_name\">$in_html</a>";
+    if ($is_out) $out_html="<a href=\"?chunkymap_view_zoom=$out_zoom"."$append_vars"."#$chunkymap_anchor_name\">$out_html</a>";
     echo $in_html;
     echo $out_html;
 }
@@ -287,9 +283,9 @@ function get_decachunk_folder_path_from_decachunk($chunky_x, $chunky_z) {
 	return $result;
 }
 
-function get_chunky_coord_from_location($location_x) {
-	$chunk_x = intval($location_x/16);
-	return $chunk_x;
+function get_chunky_coord_from_location($location_coord) {
+	$chunk_coord = intval(floor((float)$location_coord/16));
+	return $chunk_coord;
 }
 
 function get_decachunky_coord_from_chunky_coord($chunky_x) {
@@ -310,10 +306,323 @@ function get_decachunk_image_name_from_decachunk($x, $z) {
 	return "decachunk_x"."$x"."z"."$z".".jpg";
 }
 
-function echo_chunkymap_canvas() {
+function echo_chunk_debug_canvas() {
     global $chunkymap_view_x;
     global $chunkymap_view_z;
-    global $chunkymap_view_zoom_multiplier;
+    global $chunkymap_view_zoom;
+    global $chunkymap_view_max_zoom;
+    global $chunkymap_view_min_zoom;
+	global $showplayers;
+	global $chunkymap_zoom_delta;
+	$tile_w = 160;
+	$tile_h = 160;
+	
+    if ($chunkymap_view_zoom<$chunkymap_view_min_zoom) $chunkymap_view_zoom = $chunkymap_view_min_zoom;
+    if ($chunkymap_view_zoom>$chunkymap_view_max_zoom) $chunkymap_view_zoom = $chunkymap_view_max_zoom;
+
+	$world_camera_w = 6.0 * (1.0/$chunkymap_view_zoom);
+	$world_camera_h = $world_camera_w; //start with square camera to make sure enough chunks are loaded
+	
+	$chunky_view_x = get_chunky_coord_from_location($chunkymap_view_x);
+	$chunky_view_z = get_chunky_coord_from_location($chunkymap_view_z);
+
+	$chunky_min_x = 0;
+	$chunky_max_x = 0;
+	$chunky_min_z = 0;
+	$chunky_max_z = 0;
+	
+	
+	
+	echo '<canvas id="myCanvas"></canvas> ';
+	echo '<script>
+		var my_canvas = document.getElementById("myCanvas");
+		var chunkymap_view_x='.$chunkymap_view_x.';
+		var chunkymap_view_z='.$chunkymap_view_z.';
+		var chunkymap_view_zoom='.$chunkymap_view_zoom.';
+		var chunkymap_view_max_zoom='.$chunkymap_view_max_zoom.';
+		var chunkymap_view_min_zoom='.$chunkymap_view_min_zoom.';
+		var chunkymap_zoom_delta='.$chunkymap_zoom_delta.';
+		var tile_w='.$tile_w.';
+		var tile_h='.$tile_h.';
+		var size_1em_pixel_count = null;
+		var font_string = null;
+		//var ctx = my_canvas.getContext("2d");
+		//ctx.canvas.width = window.innerWidth;
+		//ctx.canvas.height = window.innerHeight;
+		//ctx.fillStyle = "rgb(r,g,b)";
+		var size_1pt_pixel_count = null;
+		var padding_w = null;
+		var padding_h = null;
+		var pen_x = null;
+		var world_camera_w = null;
+		var world_camera_h = null;
+		var current_w = null;
+		var current_h = null;
+		var current_ratio = null;
+		var zoom_in_button_index = null;
+		var zoom_out_button_index = null;
+		var zoom_out_label_index = null;
+		var location_label_index = null;
+		
+		function zoom_in() {
+			chunkymap_view_zoom*=chunkymap_zoom_delta;
+			draw_map();
+		}
+		function zoom_out() {
+			chunkymap_view_zoom/=chunkymap_zoom_delta;
+			draw_map();
+		}
+		function process_view_change() {
+			if (current_w>current_h) {
+				world_camera_w = 6.0 * (1.0/chunkymap_view_zoom);
+				world_camera_h = world_camera_w/current_ratio;
+			}
+			else {
+				world_camera_h = 6.0 * (1.0/chunkymap_view_zoom);
+				world_camera_w = world_camera_h*current_ratio;
+			}
+		}
+		
+		function process_resize(ctx) {
+			//var ctx = my_canvas.getContext("2d");
+			ctx.canvas.width = window.innerWidth;
+			ctx.canvas.height = window.innerHeight;
+			//current_w = ctx.canvas.width;
+			//current_h = ctx.canvas.width;
+			current_w = window.innerWidth;
+			current_h = window.innerHeight;
+			current_ratio = current_w/current_h;
+			if (ctx.canvas.height<ctx.canvas.width) {
+				size_1em_pixel_count = Math.round(ctx.canvas.height/32);
+			}
+			else {
+				size_1em_pixel_count = Math.round(ctx.canvas.width/32);
+			}
+			font_string = Math.round(size_1em_pixel_count)+"px Arial";
+			size_1pt_pixel_count = size_1em_pixel_count/16;
+			padding_w = size_1em_pixel_count/2;
+			padding_h = size_1em_pixel_count/2;
+			
+			process_view_change();
+		}
+		
+		var bw_count = 0;
+		var bawidgets = new Array();
+		var last_bawidget = null;
+		function add_bawidget(x, y, width, height, this_onclick, name) {
+			this_widget = Array();
+			this_widget["x"] = x;
+			this_widget["y"] = y;
+			this_widget["width"] = width;
+			this_widget["height"] = height;
+			this_widget["click_event"] = this_onclick;
+			this_widget["name"] = name;
+
+			this_widget["image"] = null;
+			this_widget["text"] = null;
+			bawidgets[bw_count] = this_widget;
+			last_bawidget = this_widget;
+			bw_count++;
+		}
+		function contains_coords(bawidget, cursor_x, cursor_y) {
+			right = bawidget.x+bawidget.width;
+			bottom = bawidget.y+bawidget.height;
+			return cursor_x>=bawidget.x && cursor_y>=bawidget.y && cursor_x<right && cursor_y<bottom;
+		}
+		function click_if_contains(bawidget, cursor_x, cursor_y) {
+			if (contains_coords(bawidget, cursor_x, cursor_y)) {
+				if (bawidget["click_event"] != null) {
+					bawidget["click_event"]();
+				}
+			}
+		}
+		
+		function process_zoom_change() {
+			var zoom_in_img = null;
+			var zoom_out_img = null;
+			var zoom_in_img_disabled = null;
+			var zoom_out_img_disabled = null;
+			var tmp_zoom_out_ptr = zoom_out;
+			var tmp_zoom_in_ptr = zoom_in;
+			
+			if (chunkymap_view_zoom<chunkymap_view_min_zoom) {chunkymap_view_zoom = chunkymap_view_min_zoom;}
+			if (chunkymap_view_zoom>chunkymap_view_max_zoom) {chunkymap_view_zoom = chunkymap_view_max_zoom;}
+			
+			if (chunkymap_view_zoom==chunkymap_view_min_zoom) {
+				zoom_out_img = document.getElementById("zoom-out_disabled");
+				tmp_zoom_out_ptr = null;
+			}
+			else {
+				zoom_out_img = document.getElementById("zoom-out");
+			}
+			if (chunkymap_view_zoom==chunkymap_view_max_zoom) {
+				zoom_in_img = document.getElementById("zoom-in_disabled");
+				tmp_zoom_in_ptr = null;
+			}
+			else {
+				zoom_in_img = document.getElementById("zoom-in");
+			}
+			location_label["text"] = chunkymap_view_x+","+chunkymap_view_z;
+			
+			zoom_label_value=chunkymap_view_zoom*100;
+			if (zoom_label_value>1) {
+				zoom_label_value = Math.round(zoom_label_value, 1);
+			}
+			else {
+				zoom_label_value = Math.round(zoom_label_value, 7);
+			}
+			zoom_label["text"]=zoom_label_value+"%";
+			
+			zoom_in_button["click_event"]=tmp_zoom_in_ptr;
+			zoom_in_button["image"]=zoom_in_img;
+			zoom_out_button["click_event"]=tmp_zoom_out_ptr;
+			zoom_out_button["image"]=zoom_out_img;
+		}
+		
+		
+		function draw_map() {
+			process_zoom_change();
+			var r = 0; //border
+			var g = 0; //exists
+			var b = 0; //
+			
+			var alert_string="";
+			if (current_ratio==null) {
+				alert_string+="current_ratio is null; ";
+			}
+			if (font_string==null) {
+				alert_string+="font_string is null; ";
+			}
+			if (current_w==null) {
+				alert_w+="current_ratio is null; ";
+			}
+			if (current_w==null) {
+				alert_w+="current_ratio is null; ";
+			}
+			if (current_ratio==null) {
+				alert_string+="current_ratio is null; ";
+			}
+			if (alert_string.length>0) {
+				alert(alert_string);
+			}
+			
+			var ctx = my_canvas.getContext("2d");
+			process_resize(ctx);
+			
+			ctx.fillStyle = "black";
+			ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+			
+			ctx.fillStyle = "white";
+			ctx.rect(20,20,150,100);
+			ctx.stroke(); 
+			
+			//size_1pt_pixel_count = ctx.canvas.height/600.0;
+			var bw_index = 0;
+			
+			
+			
+			for (i=0; i<bawidgets.length; i++) {
+				this_widget = bawidgets[i];
+				this_img = this_widget["image"]				
+				if (this_widget["text"] != null) {
+					ctx.font = font_string;
+					ctx.fillStyle = "rgb(255,255,255)";
+					ctx.fillText(this_widget["text"], this_widget["x"], this_widget["y"]);
+				}
+				else if (this_img != null) {
+					ctx.drawImage(this_img, this_widget.x, this_widget.y, this_widget.width, this_widget.height);
+				}
+			}
+		}
+		
+		window.onload = function() {
+			my_canvas.onclick = function(event) {
+				for (i=0; i<bawidgets.length; i++) {
+					click_if_contains(bawidgets[i], event.clientX, event.clientY);
+				}
+			};
+			
+			var ctx = my_canvas.getContext("2d");
+			process_resize(ctx);
+			
+			var pen_x = size_1em_pixel_count;
+			var pen_y = size_1em_pixel_count;
+			var tmp_w = null;
+			var tmp_h = null;
+			var compass_rose_w = size_1em_pixel_count*5;
+			
+			
+			
+			
+			//LOCATION LABEL (no click):
+			bw_index = add_bawidget(pen_x+compass_rose_w/4, pen_y, tmp_w, tmp_h, null, "location_label");
+			location_label = last_bawidget;
+			//done on each draw: last_bawidget["text"] = 
+			
+			pen_y += size_1em_pixel_count + padding_h;
+			
+			//COMPASS ROSE (no click):
+			var compass_rose_img = document.getElementById("compass-rose");
+			var this_h_ratio = compass_rose_img.height/compass_rose_img.width;
+			tmp_w = compass_rose_w;
+			tmp_h = tmp_w*this_h_ratio;
+			bw_index = add_bawidget(pen_x-padding_w, pen_y, tmp_w, tmp_h, null, "compass-rose");
+			last_bawidget["image"] = compass_rose_img;
+			compass_rose_img.style.visibility="hidden";
+			pen_y += last_bawidget.height+padding_h;
+			
+			//ZOOM LABEL (no click):
+			bw_index = add_bawidget(pen_x+compass_rose_w/5, pen_y, tmp_w, tmp_h, null, "zoom_label");
+			zoom_label = last_bawidget;
+			//done on each draw: last_bawidget["text"] = (chunkymap_view_zoom*100)+"%"
+			pen_y += size_1em_pixel_count + padding_h;
+
+			//ZOOM IN:
+			var zoom_in_img = document.getElementById("zoom-in");
+			this_h_ratio = zoom_in_img.height/zoom_in_img.width;
+			tmp_w = size_1em_pixel_count*2;
+			tmp_h = tmp_w*this_h_ratio;
+			bw_index = add_bawidget(pen_x, pen_y, tmp_w, tmp_h, null, "zoom-in", null);
+			//zoom_in_button_index = bw_index;
+			zoom_in_button = last_bawidget;
+			last_bawidget["image"]=zoom_in_img;
+			zoom_in_img.style.visibility="hidden";
+			document.getElementById("zoom-in_disabled").style.visibility="hidden";
+			//pen_y += tmp_h+padding_h;
+			pen_x += tmp_w;
+			
+			//ZOOM OUT
+			var zoom_out_img = document.getElementById("zoom-out");
+			this_h_ratio = zoom_out_img.height/zoom_out_img.width;
+			tmp_w = size_1em_pixel_count*2;
+			tmp_h = tmp_w*this_h_ratio;
+			bw_index = add_bawidget(pen_x, pen_y, tmp_w, tmp_h, null, "zoom-out", null);
+			zoom_out_button = last_bawidget;
+			//zoom_out_button_index = bw_index;
+			last_bawidget["image"]=zoom_out_img;
+			zoom_out_img.style.visibility="hidden";
+			document.getElementById("zoom-out_disabled").style.visibility="hidden";
+			pen_y += tmp_h+padding_h;
+			pen_x -= tmp_w;			
+			
+			
+			draw_map();
+		}
+		</script>
+		';
+	echo '<img id="compass-rose" src="chunkymapdata/images/compass-rose.png"/>';
+	echo '<img id="zoom-in" src="chunkymapdata/images/zoom-in.png"/>';
+	echo '<img id="zoom-in_disabled" src="chunkymapdata/images/zoom-in_disabled.png"/>';
+	echo '<img id="zoom-out" src="chunkymapdata/images/zoom-out.png"/>';
+	echo '<img id="zoom-out_disabled" src="chunkymapdata/images/zoom-out_disabled.png"/>';
+	//TODO: $chunkymap_view_zoom SHOULD BE interpreted so each block (pixel) is 1pt: 1066x600 pt canvas would have 66+2/3 blocks horizontally, is 37.5 blocks vertically
+	//so, at zoom 1.0 canvas should show 60 chunks across (6 decachunks across)
+}
+
+function echo_decachunk_table() {
+    global $chunkymap_view_x;
+    global $chunkymap_view_z;
+    global $chunkymap_view_zoom;
     global $chunkymap_view_max_zoom;
     global $chunkymap_view_min_zoom;
 	global $showplayers;
@@ -327,25 +636,29 @@ function echo_chunkymap_canvas() {
     $z_opener="z";
     $dot_and_ext = ".jpg";
 	
-    if ($chunkymap_view_zoom_multiplier<$chunkymap_view_min_zoom) $chunkymap_view_zoom_multiplier = $chunkymap_view_min_zoom;
-    if ($chunkymap_view_zoom_multiplier>$chunkymap_view_max_zoom) $chunkymap_view_zoom_multiplier = $chunkymap_view_max_zoom;
+    if ($chunkymap_view_zoom<$chunkymap_view_min_zoom) $chunkymap_view_zoom = $chunkymap_view_min_zoom;
+    if ($chunkymap_view_zoom>$chunkymap_view_max_zoom) $chunkymap_view_zoom = $chunkymap_view_max_zoom;
 	
-	$decachunks_per_page = intval(1.0/$chunkymap_view_zoom_multiplier);
+	$decachunks_per_page = intval(6.0/$chunkymap_view_zoom);
 	if ($decachunks_per_page<1) {
 		$decachunks_per_page = 1;
 	}
-	$view_w = (($decachunks_per_page*160.0));
-	$view_h = (($decachunks_per_page*160.0));
-	$view_left = (($chunkymap_view_x)) - (($view_w/2.0));
-	$view_right = $view_left + $view_w;
+	$viewer_ratio = 16.0/9.0;
+	$world_camera_w = 6.0 * (1.0/$chunkymap_view_zoom);
+	$world_camera_h = $world_camera_w;
+	//$world_camera_w = (($decachunks_per_page*160.0));
+	//$world_camera_h = (($decachunks_per_page*160.0));
+	
+	$view_left = (($chunkymap_view_x)) - (($world_camera_w/2.0));
+	$view_right = $view_left + $world_camera_w;
 	//z is cartesian still:
-	$view_top = (($chunkymap_view_z)) + (($view_h/2.0));
-	$view_bottom = $view_top - $view_h;
+	$view_top = (($chunkymap_view_z)) + (($world_camera_h/2.0));
+	$view_bottom = $view_top - $world_camera_h;
 
 	echo_chunkymap_anchor();
 	echo_chunkymap_controls();
 	echo "\r\n";
-	echo " ".($chunkymap_view_zoom_multiplier*100.0)."%\r\n";//(string)((int)($chunkymap_view_zoom_multiplier*100+.5));
+	echo " ".($chunkymap_view_zoom*100.0)."%\r\n";//(string)((int)($chunkymap_view_zoom*100+.5));
 	//"chunkymapdata/images/compass-rose.png"
 	//"chunkymapdata/images/start.png"
 	$decachunky_min_x = get_decachunky_coord_from_location($view_left);
@@ -367,12 +680,12 @@ function echo_chunkymap_canvas() {
 	echo '<table id="chunkymap_table" cellspacing="0" cellpadding="0" style="width:100%">'."\r\n";
 	echo '  <tr>'."\r\n";
 	echo '    <td style="width:5%">'."$td_placeholder_content".'</td>'."\r\n";
-	echo "    <td style=\"width:95%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier&chunkymap_view_x=$chunkymap_view_x&chunkymap_view_z=".($chunkymap_view_z+($view_h/2.0))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-up.png" style="width:90%"/>'.'</a></td>'."\r\n";
+	echo "    <td style=\"width:95%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=$chunkymap_view_x&chunkymap_view_z=".($chunkymap_view_z+($world_camera_h/2.0))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-up.png" style="width:90%"/>'.'</a></td>'."\r\n";
 	echo '    <td style="width:5%">'."$td_placeholder_content".'</td>'."\r\n";
 	echo '  </tr>'."\r\n";
 	$cell_perc=intval(round(100.0/$decachunky_count_x));
 	echo '  <tr>'."\r\n";
-	echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier&chunkymap_view_x=".($chunkymap_view_x-($view_w/2.0))."&chunkymap_view_z=$chunkymap_view_z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-left.png" style="width:90%"/>'.'</a></td>'."\r\n";
+	echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=".($chunkymap_view_x-($world_camera_w/2.0))."&chunkymap_view_z=$chunkymap_view_z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-left.png" style="width:90%"/>'.'</a></td>'."\r\n";
 	echo '    <td style="width:95%">'."\r\n";
 	echo '      <table id="decachunk_table" cellspacing="0" cellpadding="0" style="width:100%; background-color:black">'."\r\n";
 	while ($decachunky_z>=$decachunky_min_z) {
@@ -403,11 +716,11 @@ function echo_chunkymap_canvas() {
 	}
 	echo '      </table>'."\r\n";
 	echo '    </td>'."\r\n";
-	echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier&chunkymap_view_x=".($chunkymap_view_x+($view_w/2.0))."&chunkymap_view_z=$chunkymap_view_z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-right.png" style="width:100%"/>'.'</a></td>'."\r\n";
+	echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=".($chunkymap_view_x+($world_camera_w/2.0))."&chunkymap_view_z=$chunkymap_view_z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-right.png" style="width:100%"/>'.'</a></td>'."\r\n";
 	echo '  </tr>'."\r\n";
 	echo '  <tr>'."\r\n";
 	echo '    <td style="width:5%">'."$td_placeholder_content".'</td>'."\r\n";
-	echo "    <td style=\"width:90%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier&chunkymap_view_x=$chunkymap_view_x&chunkymap_view_z=".($chunkymap_view_z-($view_h/2.0))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-down.png" style="width:100%"/>'.'</a></td>'."\r\n";
+	echo "    <td style=\"width:90%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=$chunkymap_view_x&chunkymap_view_z=".($chunkymap_view_z-($world_camera_h/2.0))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-down.png" style="width:100%"/>'.'</a></td>'."\r\n";
 	echo '    <td style="width:5%">'."$td_placeholder_content".'</td>'."\r\n";
 	echo '  </tr>'."\r\n";
 	echo '</table>'."\r\n";
@@ -447,7 +760,7 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
     $is_echo_never_held=true;
     global $chunkymap_view_x;
     global $chunkymap_view_z;
-    global $chunkymap_view_zoom_multiplier;
+    global $chunkymap_view_zoom;
     global $chunkymap_view_max_zoom;
     global $chunkymap_view_min_zoom;
     global $chunkymapdata_path;
@@ -461,11 +774,11 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
 
 	echo_chunkymap_anchor();
 	echo_chunkymap_controls();
-	echo " ".($chunkymap_view_zoom_multiplier*100.0)."%";//(string)((int)($chunkymap_view_zoom_multiplier*100+.5));
+	echo " ".($chunkymap_view_zoom*100.0)."%";//(string)((int)($chunkymap_view_zoom*100+.5));
 
-    if ($chunkymap_view_zoom_multiplier<$chunkymap_view_min_zoom) $chunkymap_view_zoom_multiplier = $chunkymap_view_min_zoom;
-    if ($chunkymap_view_zoom_multiplier>$chunkymap_view_max_zoom) $chunkymap_view_zoom_multiplier = $chunkymap_view_max_zoom;
-    //$zoom_divisor = (int)(100/$chunkymap_view_zoom_multiplier);
+    if ($chunkymap_view_zoom<$chunkymap_view_min_zoom) $chunkymap_view_zoom = $chunkymap_view_min_zoom;
+    if ($chunkymap_view_zoom>$chunkymap_view_max_zoom) $chunkymap_view_zoom = $chunkymap_view_max_zoom;
+    //$zoom_divisor = (int)(100/$chunkymap_view_zoom);
     $chunk_assoc = array();  // used for storing players; and used for determining which chunks are on the edge, since not all generated map tiles are the same size (edge tile images are smaller and corner ones are smaller yet)
     $chunk_count = 0;
     $x_opener="chunk_x";
@@ -475,15 +788,15 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
     $min_chunkz = 0;
     $max_chunkx = 0;
     $max_chunkz = 0;
-	$chunks_per_page = (1.0/$chunkymap_view_zoom_multiplier)*10;
+	$chunks_per_page = (1.0/$chunkymap_view_zoom)*10;
 
-	$view_w = (($chunks_per_page*16.0));
-	$view_h = (($chunks_per_page*16.0));
-	$view_left = (($chunkymap_view_x)) - (($view_w/2.0));
-	$view_right = $view_left + $view_w;
+	$world_camera_w = (($chunks_per_page*16.0));
+	$world_camera_h = (($chunks_per_page*16.0));
+	$view_left = (($chunkymap_view_x)) - (($world_camera_w/2.0));
+	$view_right = $view_left + $world_camera_w;
 	//z is cartesian still:
-	$view_top = (($chunkymap_view_z)) + (($view_h/2.0));
-	$view_bottom = $view_top - $view_h;
+	$view_top = (($chunkymap_view_z)) + (($world_camera_h/2.0));
+	$view_bottom = $view_top - $world_camera_h;
 	
 	if (!$show_all_enable) {
 		$min_chunkx=intval($view_left/$chunkymap_tile_original_w);
@@ -715,7 +1028,7 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
 		//cellpadding="0" cellspacing="0" still needed for IE
 		echo_hold( "  <table id=\"chunkymapstatictable\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-spacing: 0px; border-style:solid; border-color:gray; border-width:0px\">\r\n");
 		$z = (int)$max_chunkz;
-		$scale=(float)$chunkymap_view_zoom_multiplier; // no longer /100
+		$scale=(float)$chunkymap_view_zoom; // no longer /100
 		$zoomed_w=(int)((float)$chunkymap_tile_original_w*$scale+.5);
 		$zoomed_h=(int)((float)$chunkymap_tile_original_h*$scale+.5);
 		$genresult_suffix_then_dot_then_ext="_mapper_result.txt";
@@ -952,12 +1265,12 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
 		echo "<ul>";
 		if ($chunkymapdata_handle = opendir($chunkymapdata_worlds_path)) {
 			$append_vars="&";
-			if (isset($chunkymap_view_zoom_multiplier)) {
+			if (isset($chunkymap_view_zoom)) {
 				$prefix = "";
 				if (strlen($append_vars)>0 and !endsWith($append_vars,"&")) {
 					$prefix = "&";
 				}
-				$append_vars.="$prefix"."&chunkymap_view_zoom_multiplier=$chunkymap_view_zoom_multiplier";
+				$append_vars.="$prefix"."&chunkymap_view_zoom=$chunkymap_view_zoom";
 			}
 			if (isset($chunkymap_anchor_name)) {
 				$prefix = "";
@@ -979,3 +1292,4 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
 	}
 }
 ?>
+
