@@ -29,6 +29,10 @@ worldgen_mod_list.append("tsm_railcorridors")
 
 loaded_mod_list = list()
 
+prepackaged_game_mod_list = list()
+prepackaged_gameid = "minetest_game"
+new_mod_list = list()
+
 minetestinfo = ConfigManager(os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmeta.yml"), ":")
 
 os_name="linux"
@@ -40,6 +44,12 @@ game_path_from_gameid_dict = {}
 def get_gameid_from_game_path(path):
     result = None
     if path is not None:
+        result = os.path.basename(path)
+    return result
+
+def get_game_name_from_game_path(path):
+    result = None
+    if path is not None:
         game_conf_path = os.path.join(path, "game.conf")
         if os.path.isfile(game_conf_path):
             game_conf_dict = get_dict_from_conf_file(game_conf_path)
@@ -48,23 +58,34 @@ def get_gameid_from_game_path(path):
                 if (result is None) or (len(result.strip())<1):
                     result = None
                     print("WARNING: missing 'name' in game.conf in '"+path+"'")
+                else:
+                    result = result.strip()
         else:
             print("WARNING: no game.conf in '"+path+"'")
     return result
 
+#This is case-insensitive
 def get_game_path_from_gameid(gameid):
     result = None
     games_path = os.path.join(minetestinfo.get_var("shared_minetest_path"), "games")
     if gameid is not None:
         if os.path.isdir(games_path):
+            game_count = 0
             for this_game_name in os.listdir(games_path):
+                game_count += 1
                 this_game_path = os.path.join(games_path, this_game_name)
                 #for decachunk_z_basepath, decachunk_z_dirnames, decachunk_z_filenames in os.walk(this_game_dirnames):
                 if this_game_name[:1]!="." and os.path.isdir(this_game_path):
                     this_gameid = get_gameid_from_game_path(this_game_path)
-                    if this_gameid == gameid:
-                        result = this_game_path
-                        break
+                    #print("get_game_path_from_gameid is seeing if '"+str(this_gameid)+"' is the desired '"+gameid+"'")
+                    if this_gameid is not None:
+                        if this_gameid.lower() == gameid.lower():
+                            result = this_game_path
+                            break
+                #else:
+                    #print("skipping '"+this_game_path+"'")
+            if game_count<=0:
+                print("WARNING: "+str(game_count)+" games in '"+games_path+"'.")
         else:
             print("ERROR: cannot get game_path from gameid since games path is not ready yet (or '"+games_path+"' does not exist for some other reason such as shared_minetest_path is wrong and does not contain games folder)")
     else:
@@ -141,7 +162,10 @@ def init_minetestinfo():
 def load_world_and_mod_data():
     #if games_path =
     global loaded_mod_list
+    global prepackaged_game_mod_list
     while len(loaded_mod_list) > 0 : loaded_mod_list.pop()  # instead of remaking, pop to ensure global is changed
+    while len(prepackaged_game_mod_list) > 0 : prepackaged_game_mod_list.pop()
+    while len(new_mod_list) > 0 : new_mod_list.pop()
     is_world_changed = False
     auto_chosen_world = False
     is_missing_world = False
@@ -208,14 +232,16 @@ def load_world_and_mod_data():
     #if minetestinfo.contains("game_path"):
     #    game_name = os.path.basename(minetestinfo.get_var("game_path"))
     tmp_gameid = get_world_var("gameid")
-    tmp_game_gameid = get_gameid_from_game_path(minetestinfo.get_var("game_path"))
+    tmp_game_gameid = get_gameid_from_game_path( minetestinfo.get_var("game_path") )
     if tmp_game_gameid is not None:
         #print("World gameid is "+str(tmp_gameid))
-        print(" (game_path gameid is "+str(tmp_game_gameid)+")")
-    if tmp_gameid != tmp_game_gameid:
-        is_world_changed = True
+        print(" (game.conf in game_path has 'gameid' "+str(tmp_game_gameid)+")")
+    if minetestinfo.contains("game_path"):
+        if (tmp_gameid is None) or (tmp_gameid.lower() != tmp_game_gameid.lower()):
+            is_world_changed = True
     
     default_gameid = None
+    games_path = os.path.join(minetestinfo.get_var("shared_minetest_path"), "games")
     if (not minetestinfo.contains("game_path")) or is_world_changed:
         if minetestinfo.contains("game_path"):
             default_gameid = get_gameid_from_game_path(minetestinfo.get_var("game_path"))
@@ -227,10 +253,8 @@ def load_world_and_mod_data():
                 explained_string = " is different than game_path in "+minetestinfo._config_path+" so game_path must be confirmed"
             print("")
             print("gameid '"+default_gameid+"' detected in world"+explained_string+".")
-
-        games_path = os.path.join(minetestinfo.get_var("shared_minetest_path"), "games")
-        game_blacklist = list()  # is only used if there is no game defined in world
-        game_blacklist.append("minetest_game")
+        game_folder_name_blacklist = list()  # is only used if there is no game defined in world
+        game_folder_name_blacklist.append(prepackaged_gameid)
         games_list = list()
         if default_gameid is None:
             if os.path.isdir(games_path):
@@ -245,7 +269,7 @@ def load_world_and_mod_data():
                     sub_path = os.path.join(folder_path,sub_name)
                     if os.path.isdir(sub_path):
                         if (sub_name[:1]!="."):
-                            if (sub_name != "minetest_game") or (real_index>=real_count-1):
+                            if (sub_name not in game_folder_name_blacklist) or (real_index>=real_count-1):
                                 this_gameid = get_gameid_from_game_path(sub_path)
                                 if default_gameid is None:
                                     default_gameid = this_gameid
@@ -253,46 +277,87 @@ def load_world_and_mod_data():
                     real_index += 1
         if default_gameid is not None:
             path_msg = ""
+            default_game_path = get_game_path_from_gameid(default_gameid)
+            if default_game_path is None:
+                print("ERROR: got default gameid '"+default_gameid+"' but there is no matching game path that has this in game.conf.")
             if len(games_list)>0:
-                path_msg = " (or gameid if listed above)"
                 for try_gameid in games_list:
                     print("  "+try_gameid)
-            minetestinfo.prepare_var("game_path",os.path.join(games_path,default_gameid),"game (your subgame) path"+path_msg)
-
-            if (not os.path.isdir(minetestinfo.get_var("game_path"))):
+                path_msg = " (or gameid if listed above)"
+            minetestinfo.prepare_var("game_path",default_game_path,"game (your subgame) path"+path_msg)
+            if minetestinfo.get_var("game_path") in games_list:
+                #convert game_path to a game path (this is why intentionally used as param for get_game_path_from_gameid)
                 try_path = get_game_path_from_gameid(minetestinfo.get_var("game_path"))
                 if try_path is not None:
                     if os.path.isdir(try_path):
                         minetestinfo.set_var("game_path",try_path)
-                else:
-                    try_path = os.path.join(games_path,minetestinfo.get_var("game_path"))
-                    if os.path.isdir(try_path):
-                        minetestinfo.set_var("game_path",try_path)
-
-        mods_path = None
-        if minetestinfo.contains("game_path") and os.path.isdir(minetestinfo.get_var("game_path")):
-            mods_path = os.path.join(minetestinfo.get_var("game_path"), "mods")
-            folder_path = mods_path
-            for sub_name in os.listdir(folder_path):
-                sub_path = os.path.join(folder_path,sub_name)
-                if os.path.isdir(sub_path):
-                    if (sub_name[:1]!="."):
-                        if get_world_var("load_mod_"+sub_name) == True:
-                            loaded_mod_list.append(sub_name)
+            elif (not os.path.isdir(minetestinfo.get_var("game_path"))):
+                try_path = os.path.join(games_path,minetestinfo.get_var("game_path"))
+                if os.path.isdir(try_path):
+                    minetestinfo.set_var("game_path",try_path)
         else:
-            print("Could not find game folder '"+minetestinfo.get_var("game_path")+"'. Please fix game_path in '"+minetestinfo._config_path+"' to point to your subgame, so that game and mod management features will work.")
-        print("Mod list for current game: "+','.join(loaded_mod_list))
-        #mods_path
-        #mod_path = os.path.join(mods_path, mod_name)
-        #if os.path.isdir(mod_path):
+            print("WARNING: could not get default gameid--perhaps 'games_path' in '"+minetestinfo._config_path+"' is wrong.")
+    
+    mods_path = None
+    prepackaged_game_path = None
+    if games_path is not None:
+        prepackaged_game_path = os.path.join(games_path, prepackaged_gameid)
+    print("")
+    if len(prepackaged_game_mod_list)<1:
+        prepackaged_game_mod_list = get_modified_mod_list_from_game_path(prepackaged_game_mod_list, prepackaged_game_path)
+        print(prepackaged_gameid+" has the following mod(s): "+','.join(prepackaged_game_mod_list))
+    
+    if minetestinfo.contains("game_path") and os.path.isdir(minetestinfo.get_var("game_path")):
+        loaded_mod_list = get_modified_mod_list_from_game_path(loaded_mod_list, minetestinfo.get_var("game_path"))
+        #print("Mod list for current game: "+','.join(loaded_mod_list))
+        
+        for this_mod in loaded_mod_list:
+            if this_mod not in prepackaged_game_mod_list:
+                new_mod_list.append(this_mod)
+        new_mod_list_msg = ""
+        if len(new_mod_list)>0:
+            new_mod_list_msg = ": "+','.join(new_mod_list)
+        gameid = os.path.basename(minetestinfo.get_var("game_path"))
+        print(gameid+" has "+str(len(new_mod_list))+" mod(s) beyond "+prepackaged_gameid+new_mod_list_msg+")")
+    else:
+        print("Could not find game folder '"+minetestinfo.get_var("game_path")+"'. Please fix game_path in '"+minetestinfo._config_path+"' to point to your subgame, so that game and mod management features will work.")
+
+def get_modified_mod_list_from_game_path(mod_list, game_path):
+    if mod_list is None:
+        mod_list = list()
+    if game_path is not None and os.path.isdir(game_path):
+        mods_path = os.path.join(game_path, "mods")
+        folder_path = mods_path
+        missing_load_mod_setting_count = 0
+        check_world_mt()
+        for sub_name in os.listdir(folder_path):
+            sub_path = os.path.join(folder_path,sub_name)
+            if os.path.isdir(sub_path):
+                if (sub_name[:1]!="."):
+                    load_this_mod = True
+                    load_mod_variable_name = "load_mod_"+sub_name
+                    if (world_mt_mapvars is not None) and (load_mod_variable_name in world_mt_mapvars):
+                        load_this_mod = get_world_var(load_mod_variable_name)
+                    if load_this_mod == True:
+                        if sub_name not in mod_list:
+                            mod_list.append(sub_name)        
+    return mod_list
 
 world_mt_mapvars = None
 world_mt_mapvars_world_path = None
 def get_world_var(name):
     result = None
+    check_world_mt()
+    if (world_mt_mapvars is not None):
+        if name in world_mt_mapvars:
+            result = world_mt_mapvars[name]
+        else:
+            print("WARNING: Tried to get '"+name+"' from world but this world.mt does not have the variable")
+    return result
+
+def check_world_mt():
     global world_mt_mapvars_world_path
     world_path = minetestinfo.get_var("primary_world_path")
-
     #world_mt_mapvars = None
     global world_mt_mapvars
     if world_mt_mapvars is None or (world_path != world_mt_mapvars_world_path):
@@ -301,16 +366,12 @@ def get_world_var(name):
         world_mt_mapvars_world_path = world_path
         if world_path is not None:
             this_world_mt_path = os.path.join(world_path, "world.mt")
+            #DO convert strings to autodetected types:
             world_mt_mapvars = get_dict_from_conf_file(this_world_mt_path,"=")
             if world_mt_mapvars is None:
                 print("ERROR: Tried to get world.mt settings but couldn't read '"+this_world_mt_path+"'")
         else:
             print("ERROR: Tried to get '"+name+"' but primary_world_path is None")
-    if (world_mt_mapvars is not None):
-        if name in world_mt_mapvars:
-            result = world_mt_mapvars[name]
-        else:
-            print("WARNING: Tried to get '"+name+"' from world but this world.mt does not have the variable")
-    return result
+    
 
 init_minetestinfo()
