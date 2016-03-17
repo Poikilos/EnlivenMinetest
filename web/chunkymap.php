@@ -252,8 +252,8 @@ function get_javascript_bool_value($this_bool) {
 }
 
 //chunk_mode_enable: shows chunk png images instead of decachunk jpg images (slower)
-//debug_mode_enable: draws colored rectangles based on yml files instead of drawing images
-function echo_chunkymap_canvas($chunk_mode_enable, $debug_mode_enable, $html4_mode_enable) {
+//visual_debug_enable: draws colored rectangles based on yml files instead of drawing images
+function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_mode_enable) {
     global $chunkymap_view_x;
     global $chunkymap_view_z;
     global $chunkymap_view_zoom;
@@ -346,7 +346,7 @@ function echo_chunkymap_canvas($chunk_mode_enable, $debug_mode_enable, $html4_mo
 				var chunkymap_view_min_zoom='.$chunkymap_view_min_zoom.';
 				var chunkymap_zoom_delta='.$chunkymap_change_zoom_multiplier.';
 				var chunk_mode_enable='.get_javascript_bool_value($chunk_mode_enable).';
-				var debug_mode_enable='.get_javascript_bool_value($debug_mode_enable).';
+				var visual_debug_enable='.get_javascript_bool_value($visual_debug_enable).';
 				var chunks_per_tile_x_count='.$chunks_per_tile_x_count.';
 				var chunks_per_tile_z_count='.$chunks_per_tile_z_count.';
 				var tile_w='.$tile_w.';
@@ -529,8 +529,6 @@ function echo_chunkymap_canvas($chunk_mode_enable, $debug_mode_enable, $html4_mo
 					//size_1pt_pixel_count = ctx.canvas.height/600.0;
 					var bw_index = 0;
 					
-					
-					
 					for (i=0; i<bawidgets.length; i++) {
 						this_widget = bawidgets[i];
 						this_img = this_widget["image"]				
@@ -572,11 +570,11 @@ function echo_chunkymap_canvas($chunk_mode_enable, $debug_mode_enable, $html4_mo
 					pen_y += size_1em_pixel_count + padding_h;
 					
 					//COMPASS ROSE (no click):
-					var compass_rose_img = document.getElementById("compass-rose");
+					var compass_rose_img = document.getElementById("compass_rose");
 					var this_h_ratio = compass_rose_img.height/compass_rose_img.width;
 					tmp_w = compass_rose_w;
 					tmp_h = tmp_w*this_h_ratio;
-					bw_index = add_bawidget(pen_x-padding_w, pen_y, tmp_w, tmp_h, null, "compass-rose");
+					bw_index = add_bawidget(pen_x-padding_w, pen_y, tmp_w, tmp_h, null, "compass_rose");
 					last_bawidget["image"] = compass_rose_img;
 					compass_rose_img.style.visibility="hidden";
 					pen_y += last_bawidget.height+padding_h;
@@ -630,13 +628,13 @@ function echo_chunkymap_canvas($chunk_mode_enable, $debug_mode_enable, $html4_mo
 		else {
 			$td_tile_placeholder_content = $td_decachunk_placeholder_content
 		}
-		echo '<img id="compass-rose" src="chunkymapdata/images/compass_rose.png"/>';
+		echo '<img id="compass_rose" src="chunkymapdata/images/compass_rose.png"/>';
 		echo '<img id="zoom_in" src="chunkymapdata/images/zoom_in.png"/>';
 		echo '<img id="zoom_in_disabled" src="chunkymapdata/images/zoom_in_disabled.png"/>';
 		echo '<img id="zoom_out" src="chunkymapdata/images/zoom_out.png"/>';
 		echo '<img id="zoom_out_disabled" src="chunkymapdata/images/zoom_out_disabled.png"/>';
 		$this_tiley_z=$max_tiley_z; //start at max since screen is inverted cartesian
-		if ($debug_mode_enable!==true) {
+		if ($visual_debug_enable!==true) {
 			//this table loads the images then is hidden when javascript runs successfully, but it is also a map though not very functional
 			echo '<table id="chunkymap_table" cellspacing="0" cellpadding="0" style="width:100%">'."\r\n";
 			echo '  <tr>'."\r\n";

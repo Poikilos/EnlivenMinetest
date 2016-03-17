@@ -207,6 +207,7 @@ class MTChunks:
     colors_path = None
     python_exe_path = None
     chunks = None
+    players = None  # dict with id as subscript, each containing player metadata dict
     decachunks = None
     rendered_this_session_count = None
     #force_rerender_decachunks_enable = None
@@ -1131,9 +1132,61 @@ class MTChunks:
         self.create_chunk_folder(chunky_x, chunky_z)
         self.chunks[chunk_luid].save_yaml(chunk_yaml_path)
         print(min_indent+"(saved yaml to '"+chunk_yaml_path+"')")
+        
+    def get_new_player_index(self):
+        result = None
+        if self.players is not None:
+            result = 0
+            for this_key in self.players.keys():
+                this_player = self.players[this_key]
+                if "index" in this_player:
+                    if this_player["index"]==result:
+                        result = this_player["index"] + 1
+        return result
+
+    def save_player(self, playerid):
+        if self.players is not None:
+            if playerid is not None:
+                if playerid in self.players:
+                    if not os.path.isdir(self.chunkymap_players_path):
+                        os.makedirs(self.chunkymap_players_path)
+                        self.deny_http_access(self.chunkymap_players_path)
+                    this_player = self.players[playerid]
+                    if "index" in this_player:
+                        player_path = os.path.join(self.chunkymap_players_path, this_player["index"])
+                        save_conf_from_dict(player_path, this_player, ":")
+                    else:
+                        print("ERROR: cannot save player since missing 'index' ('index' is used for filename on map)")
+                else:
+                    print("ERROR: tried to save nonexistant player id '"+str(playerid)+"'")
+            else:
+                print("ERROR: save_player(None) was attempted.")
+        else:
+            print("ERROR: Tried save_player but the players dict is not ready (self.players is None)")
 
     def check_players(self):
         print("PROCESSING PLAYERS")
+        if self.players is None:
+            self.players = {}
+            if os.path.isdir(self.chunkymap_players_path):
+                folder_path = self.chunkymap_players_path
+                for sub_name in os.listdir(folder_path):
+                    sub_path = os.path.join(folder_path,sub_name)
+                    if os.path.isfile(sub_path):
+                        if (sub_name[:1]!="."):
+                            if len(sub_name)>4 and sub_name[-4:]==".yml":
+                                player_dict = get_dict_from_conf_file(sub_path,":")
+                                if player_dict is not None:
+                                    if "id" in player_dict:
+                                        if (player_dict["id"] is not None) and (len(player_dict["id"])>0):
+                                            self.players[player_dict["id"]] = player_dict
+                                        else:
+                                            print("ERROR: no 'id' in chunkymap player entry '"+sub_path+"'")
+                                else:
+                                    print("ERROR: could not read any yaml values from '"+sub_path+"'")
+            else:
+                os.makedirs(self.chunkymap_players_path)
+                self.deny_http_access(self.chunkymap_players_path)
 
         players_path = os.path.join(minetestinfo.get_var("primary_world_path"), "players")
         player_count = 0
@@ -1169,7 +1222,28 @@ class MTChunks:
                                     is_enough_data = True
                                     break
                     ins.close()
-                    player_dest_path = os.path.join(self.chunkymap_players_path,file_name+".yml")
+                    player_index = None
+                    this_player = None
+                    is_changed = False
+                    if file_name in self.players:
+                        this_player = self.players[file_name]
+                        if "index" in this_player:
+                            player_index = self.players[file_name]["index"]
+                        else:
+                            player_index = self.get_new_player_index()
+                            self.players[file_name]["index"] = player_index
+                            is_changed = True
+                    else:
+                        this_player = {}
+                        player_index = self.get_new_player_index()
+                        this_player["index"] = player_index
+                        self.players[file_name] = this_player
+                        is_changed = True
+                    player_dest_path = None
+                    if player_index is not None:
+                        player_dest_path = os.path.join(self.chunkymap_players_path, player_index+".yml")
+                    else:
+                        print("ERROR: player_index is None for '"+file_name+"' (this should never happen)")
                     player_x = None
                     player_y = None
                     player_z = None
@@ -1196,24 +1270,44 @@ class MTChunks:
 
                     #if is_enough_data:
                     #if player_name!="singleplayer":
-                    map_player_dict = get_dict_from_conf_file(player_dest_path,":")
+                    #this_player = get_dict_from_conf_file(player_dest_path,":")
                     #map_player_position_tuple = None
                     saved_player_x = None
                     saved_player_y = None
                     saved_player_y = None
-                    if map_player_dict is not None:
-                        #map_player_position_tuple = saved_player_x, saved_player_y, saved_player_z
-                        if "x" in map_player_dict.keys():
-                            saved_player_x = float(map_player_dict["x"])
-                        if "y" in map_player_dict.keys():
-                            saved_player_y = float(map_player_dict["y"])
-                        if "z" in map_player_dict.keys():
-                            saved_player_z = float(map_player_dict["z"])
+                    #map_player_position_tuple = saved_player_x, saved_player_y, saved_player_z
+                    is_moved = False
+                    if "x" in this_player.keys():
+                        saved_player_x = float(this_player["x"])
+                        if int(saved_player_x) != int(player_x):
+                            is_moved = True
+                    else:
+                        this_player["x"] = player_x
+                        is_moved = True
+                    if "y" in this_player.keys():
+                        saved_player_y = float(this_player["y"])
+                        if int(saved_player_y) != int(player_y):
+                            is_moved = True
+                    else:
+                        this_player["y"] = player_y
+                        is_moved = True
+                    if "z" in this_player.keys():
+                        saved_player_z = float(this_player["z"])
+                        if int(saved_player_z) != int(player_z):
+                            is_moved = True
+                    else:
+                        this_player["z"] = player_z
+                        is_moved = True
+                    if is_moved:
+                        is_changed = True
+                    
 
-                    #if (map_player_dict is None) or not is_same_fvec3( map_player_position_tuple, player_position_tuple):
-                    if (map_player_dict is None) or (saved_player_x is None) or (saved_player_z is None) or (int(saved_player_x)!=int(player_x)) or (int(saved_player_y)!=int(player_y)) or (int(saved_player_z)!=int(player_z)):
+                    #if (this_player is None) or not is_same_fvec3( map_player_position_tuple, player_position_tuple):
+                    #if (this_player is None) or (saved_player_x is None) or (saved_player_z is None) or (int(saved_player_x)!=int(player_x)) or (int(saved_player_y)!=int(player_y)) or (int(saved_player_z)!=int(player_z)):
+                    if is_changed:
                         # don't check y since y is elevation in minetest, don't use float since subblock position doesn't matter to map
-                        if map_player_dict is not None and saved_player_x is not None and saved_player_y is not None and saved_player_z is not None:
+                        #if this_player is not None and saved_player_x is not None and saved_player_y is not None and saved_player_z is not None:
+                        if is_moved:
                             #print("PLAYER MOVED: "+str(player_name)+" moved from "+str(map_player_position_tuple)+" to "+str(player_position_tuple))
                             if self.verbose_enable:
                                 print("PLAYER MOVED: "+str(player_name)+" moved from "+str(saved_player_x)+","+str(saved_player_y)+","+str(saved_player_z)+" to "+str(player_x)+","+str(player_y)+","+str(player_z))
@@ -1222,19 +1316,21 @@ class MTChunks:
                             if self.verbose_enable:
                                 print("SAVING YAML for player '"+str(player_name)+"'")
                             players_saved_count += 1
-                        outs = open(player_dest_path, 'w')
-                        if player_name is not None:
-                            outs.write("name:"+player_name+"\n")  # python automatically uses correct newline for your os when you put "\n"
-                        #if player_position is not None:
-                        #    outs.write("position:"+player_position+"\n")
-                        if player_x is not None:
-                            outs.write("x:"+str(player_x)+"\n")
-                        if player_y is not None:
-                            outs.write("y:"+str(player_y)+"\n")
-                        if player_z is not None:
-                            outs.write("z:"+str(player_z)+"\n")
-                        outs.write("is_enough_data:"+str(is_enough_data))
-                        outs.close()
+                        save_conf_from_dict(player_dest_path, this_player, ":", save_nulls_enable=False)
+                        #outs = open(player_dest_path, 'w')
+                        #outs.write("id:"+file_name)
+                        #if player_name is not None:
+                        #    outs.write("name:"+player_name+"\n")  # python automatically uses correct newline for your os when you put "\n"
+                        ##if player_position is not None:
+                        ##    outs.write("position:"+player_position+"\n")
+                        #if player_x is not None:
+                        #    outs.write("x:"+str(player_x)+"\n")
+                        #if player_y is not None:
+                        #    outs.write("y:"+str(player_y)+"\n")
+                        #if player_z is not None:
+                        #    outs.write("z:"+str(player_z)+"\n")
+                        #outs.write("is_enough_data:"+str(is_enough_data))
+                        #outs.close()
                         player_written_count += 1
                     else:
                         #if self.verbose_enable:
@@ -1244,7 +1340,7 @@ class MTChunks:
         #if not self.verbose_enable:
         print("PLAYERS:")
         print("  saved: "+str(player_written_count)+" (moved:"+str(players_moved_count)+"; new:"+str(players_saved_count)+")")
-        print("  didn't move: "+str(players_didntmove_count))
+        print("  didn't change: "+str(players_didntmove_count))
 
     def is_chunk_traversed_by_player(self, chunk_luid):
         result = False

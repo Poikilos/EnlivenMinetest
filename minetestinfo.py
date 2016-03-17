@@ -33,6 +33,8 @@ prepackaged_game_mod_list = list()
 prepackaged_gameid = "minetest_game"
 new_mod_list = list()
 
+user_excluded_mod_count = 0
+
 minetestinfo = ConfigManager(os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmeta.yml"), ":")
 
 os_name="linux"
@@ -305,7 +307,7 @@ def load_world_and_mod_data():
     print("")
     if len(prepackaged_game_mod_list)<1:
         prepackaged_game_mod_list = get_modified_mod_list_from_game_path(prepackaged_game_mod_list, prepackaged_game_path)
-        print(prepackaged_gameid+" has the following mod(s): "+','.join(prepackaged_game_mod_list))
+        print(prepackaged_gameid+" has "+str(len(prepackaged_game_mod_list))+" mod(s): "+','.join(prepackaged_game_mod_list))
     
     if minetestinfo.contains("game_path") and os.path.isdir(minetestinfo.get_var("game_path")):
         loaded_mod_list = get_modified_mod_list_from_game_path(loaded_mod_list, minetestinfo.get_var("game_path"))
@@ -318,11 +320,15 @@ def load_world_and_mod_data():
         if len(new_mod_list)>0:
             new_mod_list_msg = ": "+','.join(new_mod_list)
         gameid = os.path.basename(minetestinfo.get_var("game_path"))
+        print("")
         print(gameid+" has "+str(len(new_mod_list))+" mod(s) beyond "+prepackaged_gameid+new_mod_list_msg+")")
+        if (user_excluded_mod_count>0):
+            print("  (not including "+str(user_excluded_mod_count)+" mods(s) excluded by world.mt)")
     else:
         print("Could not find game folder '"+minetestinfo.get_var("game_path")+"'. Please fix game_path in '"+minetestinfo._config_path+"' to point to your subgame, so that game and mod management features will work.")
 
 def get_modified_mod_list_from_game_path(mod_list, game_path):
+    global user_excluded_mod_count
     if mod_list is None:
         mod_list = list()
     if game_path is not None and os.path.isdir(game_path):
@@ -330,6 +336,7 @@ def get_modified_mod_list_from_game_path(mod_list, game_path):
         folder_path = mods_path
         missing_load_mod_setting_count = 0
         check_world_mt()
+        user_excluded_mod_count = 0
         for sub_name in os.listdir(folder_path):
             sub_path = os.path.join(folder_path,sub_name)
             if os.path.isdir(sub_path):
@@ -338,6 +345,8 @@ def get_modified_mod_list_from_game_path(mod_list, game_path):
                     load_mod_variable_name = "load_mod_"+sub_name
                     if (world_mt_mapvars is not None) and (load_mod_variable_name in world_mt_mapvars):
                         load_this_mod = get_world_var(load_mod_variable_name)
+                        if load_this_mod != True:
+                            user_excluded_mod_count += 1
                     if load_this_mod == True:
                         if sub_name not in mod_list:
                             mod_list.append(sub_name)        

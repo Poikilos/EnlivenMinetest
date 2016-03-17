@@ -47,6 +47,10 @@ This program comes without any warranty, to the extent permitted by applicable l
 * Has optional script to add crontab entry (to schedule update script every minute that runs the py file unless the py file is not complete [took longer than 1 minute])
 
 ## Developer Notes:
+* Player username privacy: check_players in chunkymap-regen.py intentionally makes up an index and uses that as the filename on the destination, so that ajax can update players without knowing either their id (filename of minetest player file) or display name (listed in the player file)
+(this way, only usernames can be known if chunkymap.php allows that, or the person is logged in to the server)
+Because of the feature, chunkymap-regen.py must prevent duplicates based on value of id in the resulting yml files (minetest player filename as id).
+This should be hard to corrupt since id is used as the indexer for the players dict (however, extra files with no matching entry in the dict will still need to be deleted if they exist)
 * games_path and mods_path should not be stored in minetestmeta.yml, since otherwise the values may deviate from the parent directories.
 To avoid this problem, instead derive the paths from the parent paths using your favorite language such as in the following examples:
 	games_path = os.path.join(minetestinfo.get_var("shared_minetest_path"), "games")
