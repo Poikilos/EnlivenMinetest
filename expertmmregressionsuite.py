@@ -14,7 +14,10 @@ module_list.append("traceback")
 
 from expertmm import *
 
-
+#TODO: code checking such as:
+# * check for redefining member variable (missing "self.") [since python does not throw NameError on definition, only if used and not defined]
+# * check for signs in len params (such as where str(len(part1+part2)) should be str(len(part1))+part2
+# * check for only variable name in quotes (maybe the programmer meant to use the value)
 
 def view_traceback():
     ex_type, ex, tb = sys.exc_info()
