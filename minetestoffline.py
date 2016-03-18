@@ -7,41 +7,96 @@ import os
 from datetime import datetime
 
 from expertmm import *
+from minetestinfo import *
+
 #C:\Users\jgustafson\Desktop\Backup\fcalocal\home\owner\.minetest\worlds\FCAGameAWorld\players
-minetest_players_path = "C:\\Users\\jgustafson\\Desktop\\Backup\\fcalocal\\home\\owner\\.minetest\\worlds\\FCAGameAWorld\\players"
+#minetest_players_path = "C:\\Users\\jgustafson\\Desktop\\Backup\\fcalocal\\home\\owner\\.minetest\\worlds\\FCAGameAWorld\\players"
+players_path = os.path.join(minetestinfo.get_var("primary_world_path"), "players")
 _MAX_STACK_QTY = 99
 PLAYER_STORAGE_FILE_DOT_THEN_EXT = ".conf"
-debugs_list = list()
-debugs_list.append("C:\\Users\\jgustafson\\Desktop\\Backup\\fcalocal\\home\\owner\\.minetest\\debug_archived\\2016\\03\\16.txt")
-debugs_list.append("C:\\Users\\jgustafson\\Desktop\\Backup\\fcalocal\\home\\owner\\.minetest\\debug_archived\\2016\\03\\17.txt")
-min_date_string = "2016-03-15 12:12:00"
-global_player_storage_path = "C:\\Users\\jgustafson\\Desktop\\Backup\\fcalocal\\home\\owner\\.minetest\\worlds\\FCAGameAWorld\\player_storage"
-real_names_path = "H:\\Minetest\\FCAGameAWorld - Minetest Users - Real Names.txt"
-after_broken = {}
-after_broken["default:stone"] = "default:cobble"
-after_broken["default:stone_with_iron"] = "default:iron_lump"
-after_broken["default:stone_with_copper"] = "default:copper_lump"
-after_broken["default:stone_with_coal"] = "default:coal_lump"
-after_broken["default:dirt_with_grass"] = "default:dirt"
-after_broken["moreores:mineral_tin"] = "moreores:tin_lump"
-after_broken["default:stone_with_mese"] = "default:mese_crystal"
-after_broken["moreores:mineral_silver"] = "moreores:silver_lump"
-after_broken["default:stone_with_gold"] = "default:gold_lump"
-after_broken["default:stone_with_diamond"] = "default:diamond"
-#after_broken[""] = ""
-#after_broken[""] = ""
-#after_broken[""] = ""
-#after_broken[""] = ""
-#after_broken[""] = ""
+#debugs_list = list()
+#debugs_list.append("C:\\Users\\jgustafson\\Desktop\\Backup\\fcalocal\\home\\owner\\.minetest\\debug_archived\\2016\\03\\16.txt")
+#debugs_list.append("C:\\Users\\jgustafson\\Desktop\\Backup\\fcalocal\\home\\owner\\.minetest\\debug_archived\\2016\\03\\17.txt")
+debug_txt_path = os.path.join(minetestinfo.get_var("profile_minetest_path"), "debug.txt")
+min_date_string = None
+#min_date_string = "2016-03-15 12:12:00"
+DEBUG_TXT_TIME_FORMAT_STRING="%Y-%m-%d %H:%M:%S"
+is_start_now = False
+while min_date_string is None:
+    default_min_date_string = datetime.strftime(datetime.now(), DEBUG_TXT_TIME_FORMAT_STRING)
+    print("")
+    print("Please enter starting date for player locations and block obtaining to be replayed (only used for inventory recovery feature).")
+    answer = raw_input("Replay Start [YYYY-MM-DD HH-mm-SS format] (blank for "+default_min_date_string+"): ")
+    if len(answer.strip())>0:
+        try:
+            min_date = datetime.strptime(answer, DEBUG_TXT_TIME_FORMAT_STRING)
+            tmp_string = datetime.strftime(min_date, DEBUG_TXT_TIME_FORMAT_STRING)
+            confirm = raw_input(tmp_string+" ok [Y/n]? ")
+            if confirm.strip().lower()=="y" or confirm.strip().lower()=="yes":
+                min_date_string = tmp_string
+        except:
+            print("Bad date format. Please try again.")
+    else:
+        is_start_now = True
+        min_date_string = default_min_date_string
+print("Using start "+min_date_string)
+if is_start_now:
+    print("  (which is the current time, so nothing will be replayed [this is the default just be extra careful, because if you run the replay function on the same part of the log more than once, that will double #of each item each player digs and double the quantity of those items in players offline storage folder])")
+print("")
+players_offline_storage_name = "players_offline_storage"
+deprecated_players_offline_storage_name = "player_storage"
+#H:\Minetest\player_storage
+players_offline_storage_path = os.path.join(minetestinfo.get_var("primary_world_path"), players_offline_storage_name)
+deprecated_players_offline_storage_path = os.path.join(minetestinfo.get_var("primary_world_path"),deprecated_players_offline_storage_name)
+if os.path.isdir(deprecated_players_offline_storage_path):
+    print("moving \""+deprecated_players_offline_storage_path+"\" to")
+    print("  "+players_offline_storage_path)
+    shutil.move(deprecated_players_offline_storage_path, players_offline_storage_path)
+print("Using offline players_offline_storage_path:")
+print("  "+players_offline_storage_path)
+print("  (used for inventory recovery and other offline storage features)")
+#players_offline_storage_path = os.path.join("C:\\Users\\jgustafson\\Desktop\\Backup\\fcalocal\\home\\owner\\.minetest\\worlds\\FCAGameAWorld", players_offline_storage_name)
+irl_person_csv_name = None
+irl_person_csv_path = None
+world_name = None
+try:
+    world_name = os.path.basename(os.path.abspath(minetestinfo.get_var("primary_world_path")))
+    print("")
+    print("Using world_name '"+str(world_name)+"'")
+
+except:
+    print("Could not finish getting world folder name.")
+    view_traceback()
+try:
+    deprecated_irl_person_csv_name = world_name + " - Minetest Users - Real Names.txt"
+    irl_person_csv_name = "irl_person_info.csv"
+    print("")
+    if os.path.isdir(minetestinfo.get_var("primary_world_path")):
+        irl_person_csv_path = os.path.join(minetestinfo.get_var("primary_world_path"), irl_person_csv_name)
+        if os.sep=="\\":
+            deprecated_irl_person_csv_path = os.path.join("H:\\Minetest", deprecated_irl_person_csv_name)
+            if os.path.isfile(deprecated_irl_person_csv_name):
+                print("moving \""+deprecated_irl_person_csv_path+"\" to")
+                print("  "+irl_person_csv_path)
+                os.rename(deprecated_irl_person_csv_path, irl_person_csv_path)
+        print("Using irl_person_csv_path:")
+        print("  "+str(irl_person_csv_path))
+        print("")
+    else:
+        print("No world folder found, so leaving irl_person_csv_path as None")
+except:
+    print("Could not finish building irl_person_csv_path.")
+    view_traceback()
+
+print("")
 
 class MinetestInventoryItem:
     owner = None  # optional, only used for debug output
-    
     name = None
     qty = None
     param = None
     suffix = None
-    
+
     #If addend is negative, will return negative if can't take that many, otherwise 0
     def push_qty(self, addend):
         leftover = 0
@@ -56,7 +111,7 @@ class MinetestInventoryItem:
             self.param = None
             self.suffix = None
         return leftover
-    
+
     def get_item_as_inventory_line(self):
         result = None
         is_msg = False
@@ -71,7 +126,7 @@ class MinetestInventoryItem:
                             result += " "+self.param
                         if self.suffix is not None:
                             result += " "+self.suffix
-                        
+
                 else:
                     owner_msg = ""
                     if self.owner is not None:
@@ -89,7 +144,7 @@ class MinetestInventoryItem:
         if is_msg:
             raw_input("Press enter to continue...")
         return result
-    
+
     def set_from_inventory_line(self, line):
         self.name = None
         self.qty = None
@@ -127,10 +182,10 @@ class MinetestInventory:
     name = None
     width = None
     items = None
-    
+
     def __init__(self):
         self.items = list()  # IS allowed to have duplicate names
-    
+
     def push_item(self, item_id, qty):
         for index in range(0,len(self.items)):
             if self.items[index].name==item_id:
@@ -148,7 +203,7 @@ class MinetestInventory:
                     if qty==0:
                         break
         return qty
-    
+
     def write_to_stream(self, outs):
         if self.name is not None:
             #if self.width is not None:
@@ -177,7 +232,7 @@ class MinetestPlayer:
     player_args = None
     inventories = None
     oops_list = None
-    
+
     def __init__(self, playerid):
         self.player_args = {}
         self.player_args["breath"] = 11
@@ -190,7 +245,7 @@ class MinetestPlayer:
         self.player_args["yaw"] = 0.0
         self.playerid = playerid
         self.inventories = list()
-    
+
     # returns how many didnt' fit in any inventory lists
     def push_item(self, item_id, qty):
         main_index = -1
@@ -208,10 +263,10 @@ class MinetestPlayer:
                     qty = self.inventories[index].push_item(item_id, qty)
                     break
         return qty
-                
+
     def save(self):
         if "name" in self.player_args:
-            player_path = os.path.join(minetest_players_path, self.playerid)
+            player_path = os.path.join(players_path, self.playerid)
             self.save_as(player_path)
 
     def save_as(self, player_path):
@@ -232,14 +287,14 @@ class MinetestPlayer:
             outs.close()
         else:
             print("ERROR in minetestplayer.save: missing 'name' in player_args")
-    
+
     def load(self):
         if self.playerid is not None and len(self.playerid.strip())>0:
-            player_path = os.path.join(minetest_players_path, self.playerid)
+            player_path = os.path.join(players_path, self.playerid)
             self.load_from_file(player_path)
         else:
             print("ERROR in minetestplayer.load: 'playerid' member was not set (unique filename for players folder)")
-    
+
     def load_from_file(self, player_path):
         section = "PlayerArgs"
         ins = None
@@ -318,7 +373,7 @@ class MinetestPlayer:
         except:
             pass
 
-DEBUG_TXT_TIME_FORMAT_STRING="%Y-%m-%d %H:%M:%S"
+
 player_file_indicator_string = "PlayerArgsEnd"
 player_file_extension = ""  # player files have no extension in minetest
 replay_file_ao = "="
@@ -364,13 +419,13 @@ def recover_player_files_by_content(recovery_source_path, dest_players_path):
                             shutil.copyfile(sub_path, dest_path)
                         print("  recovered to '"+dest_path+"'")
 players = None
-def load_player_storage(player_storage_path):
+def load_players_offline_storage(this_players_offline_storage_path):
     global players
     players = {}
-    if not os.path.exists(player_storage_path):
-        os.makedirs(player_storage_path)
+    if not os.path.exists(this_players_offline_storage_path):
+        os.makedirs(this_players_offline_storage_path)
     else:
-        folder_path = player_storage_path
+        folder_path = this_players_offline_storage_path
         for sub_name in os.listdir(folder_path):
             sub_path = os.path.join(folder_path,sub_name)
             if os.path.isfile(sub_path):
@@ -380,17 +435,17 @@ def load_player_storage(player_storage_path):
                         players[playerid] = get_dict_from_conf_file(sub_path, replay_file_ao)
 
 #returns list of give commands if has problem
-def move_storage_to_players(storage_path, output_players_folder_path, leftover_give_commands_folder_path, change_player_position_enable=True):
+def move_storage_to_players(this_players_offline_storage_path, output_players_folder_path, leftover_give_commands_folder_path, change_player_position_enable=True):
     give_commands_by_playerid = {}
-    if os.path.isdir(storage_path):
-        folder_path = storage_path
+    if os.path.isdir(this_players_offline_storage_path):
+        folder_path = this_players_offline_storage_path
         for sub_name in os.listdir(folder_path):
             sub_path = os.path.join(folder_path,sub_name)
             if os.path.isfile(sub_path):
                 if (sub_name[:1]!="."):
                     if len(sub_name) > len(PLAYER_STORAGE_FILE_DOT_THEN_EXT):
                         playerid = sub_name[:-len(PLAYER_STORAGE_FILE_DOT_THEN_EXT)]
-                        player_path = os.path.join(minetest_players_path, playerid)
+                        player_path = os.path.join(players_path, playerid)
                         if os.path.isfile(player_path):
                             this_storage = get_dict_from_conf_file(sub_path, "=")
                             minetestplayer = MinetestPlayer(playerid)
@@ -432,13 +487,13 @@ def move_storage_to_players(storage_path, output_players_folder_path, leftover_g
                         else:
                             print("WARNING: no playerid '"+playerid+"', so keeping storage file")
     else:
-        print("ERROR: missing storage folder '"+storage_path+"'")
-    
+        print("ERROR: missing players' offline storage folder '"+this_players_offline_storage_path+"'")
 
-def convert_storage_to_give_commands_DEPRECATED(storage_path, output_folder_path, real_names_path):
+
+def convert_storage_to_give_commands_DEPRECATED(this_players_offline_storage_path, output_folder_path, irl_person_csv_path):
     global players
     #if players is None:
-    #    load_player_storage(player_storage_path)
+    #    load_players_offline_storage(this_players_offline_storage_path)
     while True:
         print("")
         playerid = raw_input("Minetest Username: ")
@@ -446,12 +501,12 @@ def convert_storage_to_give_commands_DEPRECATED(storage_path, output_folder_path
         identifiable_user_description = "first initial + last name + grad year"
         identifiable_user_string = raw_input(identifiable_user_description+": ")
         if len(playerid)>0:
-            player_storage_path = os.path.join(storage_path,playerid)
+            player_storage_path = os.path.join(this_players_offline_storage_path, playerid)
             if os.path.isfile(player_storage_path):
                 #if len(real_name_string)>0:
                 identifiable_user_string_strip = identifiable_user_string.strip()
                 if len(identifiable_user_string_strip)>0:
-                    appends = open(real_names_path, 'a')
+                    appends = open(irl_person_csv_path, 'a')
                     #line = playerid.strip().replace(","," ")+","+real_name_string.replace(","," ")+","
                     line = playerid.strip().replace(","," ")+","+real_name_string+","+identifiable_user_string_strip.replace(","," ")
                     appends.append(line+"\n")
@@ -475,22 +530,23 @@ def convert_storage_to_give_commands_DEPRECATED(storage_path, output_folder_path
                     appends.close()
                 else:
                     print(identifiable_user_description+" not accepted, so nothing will be done.")
-                
+
             else:
                 print("No storage file was found named '"+player_storage_path+"'")
         else:
             break
 
-def modify_player_storage_from_debug(debug_txt_path, player_storage_path, min_date_string):
+def debug_log_replay_to_offline_player_storage(debug_txt_path, this_players_offline_storage_path, min_date_string):
     global players
     min_date = None
     if min_date_string is not None:
         min_date = datetime.strptime(min_date_string, DEBUG_TXT_TIME_FORMAT_STRING)
-    print("Using min date "+str(min_date))
-    raw_input("press enter to continue...")
+    print("This will only work if server is offline.")
+    print("  (Using min date "+str(min_date)+")")
+    raw_input("  press enter to continue, otherwise exit this Window or Ctrl-C to terminate script in GNU/Linux systems...")
     if players is None:
-        load_player_storage(global_player_storage_path)   
-    
+        load_players_offline_storage(this_players_offline_storage_path)
+
     ins = open(debug_txt_path, 'r')
     line = True
     while line:
@@ -500,7 +556,7 @@ def modify_player_storage_from_debug(debug_txt_path, player_storage_path, min_da
             ao_index = line.find(ao)
             #look for lines such as:
             #2016-03-03 11:42:17: ACTION[Server]: 1234567your digs default:stone at (-21,-81,-80)
-            
+
             if ao_index>-1:
                 date_string = line[:ao_index].strip()
                 action_date = datetime.strptime(date_string, DEBUG_TXT_TIME_FORMAT_STRING)
@@ -524,7 +580,7 @@ def modify_player_storage_from_debug(debug_txt_path, player_storage_path, min_da
                         playerid = action_string[:name_ender_index]
                         print("playerid:"+playerid)
                         item_ender_index = action_string.find(" ",name_ender_index+len(name_ender))
-                        
+
                         if item_ender_index > -1:
                             item_string = action_string[name_ender_index+len(name_ender):item_ender_index]
                             is_enough_information = True
@@ -549,7 +605,7 @@ def modify_player_storage_from_debug(debug_txt_path, player_storage_path, min_da
                             if playerid not in players:
                                 players[playerid] = {}
                             this_player = players[playerid]
-                            
+
                     if is_enough_information:
                         at_delimiter_index = action_string.find(at_delimiter)
                         if at_delimiter_index>-1:
@@ -567,18 +623,18 @@ def modify_player_storage_from_debug(debug_txt_path, player_storage_path, min_da
                             print("  note: Saving since min_date is None")
                         else:
                             print("  note: Saving since "+datetime.strftime(action_date,DEBUG_TXT_TIME_FORMAT_STRING)+" >= "+datetime.strftime(min_date,DEBUG_TXT_TIME_FORMAT_STRING))
-                        
+
                     if position_string is not None:
                         this_player["position"] = position_string
                         print("  position: "+position_string)
                     if position_one_to_one_string is not None:
                         #this_player["position"] = position_string
                         print("  block: "+position_one_to_one_string)
-                
+
     for playerid in players.keys():
-        player_replay_path = os.path.join(player_storage_path, playerid+PLAYER_STORAGE_FILE_DOT_THEN_EXT)
+        player_replay_path = os.path.join(this_players_offline_storage_path, playerid+PLAYER_STORAGE_FILE_DOT_THEN_EXT)
         save_conf_from_dict(player_replay_path, players[playerid], replay_file_ao)
-        
+
     #ins.close()
     #outs = open(output_path, 'w')
     #outs.write(line+"\n")
@@ -589,17 +645,18 @@ def modify_player_storage_from_debug(debug_txt_path, player_storage_path, min_da
 
 ### RESTORE ITEMS FROM DEBUG.TXT:
 #"C:\Users\jgustafson\Desktop\Backup\fcalocal\home\owner\.minetest\debug_archived\2016\03\"
-##modify_player_storage_from_debug("C:\\Users\\jgustafson\\Desktop\\Backup\\fcalocal\\home\\owner\\.minetest\\debug.txt", global_player_storage_path, min_date_string)
+##debug_log_replay_to_offline_player_storage("C:\\Users\\jgustafson\\Desktop\\Backup\\fcalocal\\home\\owner\\.minetest\\debug.txt", players_offline_storage_path, min_date_string)
 
-#for debug_path in debugs_list:
-#    modify_player_storage_from_debug(debug_path, global_player_storage_path, min_date_string)
+##for debug_path in debugs_list:
+##    debug_log_replay_to_offline_player_storage(debug_path, players_offline_storage_path, min_date_string)
+#debug_log_replay_to_offline_player_storage(debug_txt_path, players_offline_storage_path, min_date_string)
 
-#C:\Users\jgustafson\ownCloud\FCA\player_storage
 
-give_path = os.path.join(global_player_storage_path, "give")
-#convert_storage_to_give_commands(global_player_storage_path, give_path, real_names_path)
 
-#move_storage_to_players(global_player_storage_path, minetest_players_path, give_path, change_player_position_enable=True)
+give_path = os.path.join(players_offline_storage_path, "give")
+#convert_storage_to_give_commands_DEPRECATED(players_offline_storage_path, give_path, irl_person_csv_path)
+
+#move_storage_to_players(players_offline_storage_path, players_path, give_path, change_player_position_enable=True)
 
 
 
@@ -613,4 +670,9 @@ give_path = os.path.join(global_player_storage_path, "give")
 #minetestplayer.playerid = "mrg-try1"
 #minetestplayer.save()
 if os.sep == "\\":
-    print("REMEMBER if you plan on using these player files on a 'nix-like system, run dos2unix * on your world's players folder after copying from this Windows machine to convert line endings, otherwise inventory will be blanked out!")
+    print("# REMEMBER If you later copy player files to a GNU/Linux machine cd to your world's players folder then run dos2unix such as:")
+    print("    sudo apt-get update")
+    print("    sudo apt-get install dos2unix")
+    print("    cd "+os.path.join(minetestinfo.get_var("primary_world_path"), "players"))
+    print("    dos2unix *")
+    print("# to convert line endings, otherwise inventory and all PlayerArgs will be loaded as blank (if using player files with Windows line endings on GNU/Linux copy of minetest).")

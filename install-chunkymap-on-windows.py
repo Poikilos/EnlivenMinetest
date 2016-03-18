@@ -24,7 +24,7 @@ def web_get(url, file_name):
 
 
 #as per http://stackoverflow.com/questions/22676/how-do-i-download-a-file-over-http-using-python but FAILS (404 Error) since user agent is not recognized, and setting user agent string does not fix it. use web_get above instead.
-def web_get_BADUSERAGENT(url, file_name):
+def web_get_DEPRECATED(url, file_name):
     print("This function probably will not work since settings user agent doesn't work with urllib2 request object (user agent is not recognized, and 404 error is usually the result). Try web_get instead.")
     file_name = None
     try:

@@ -27,6 +27,24 @@ worldgen_mod_list.append("tsm_mines")
 worldgen_mod_list.append("tsm_pyramids")
 worldgen_mod_list.append("tsm_railcorridors")
 
+after_broken = {}
+after_broken["default:stone"] = "default:cobble"
+after_broken["default:stone_with_iron"] = "default:iron_lump"
+after_broken["default:stone_with_copper"] = "default:copper_lump"
+after_broken["default:stone_with_coal"] = "default:coal_lump"
+after_broken["default:dirt_with_grass"] = "default:dirt"
+after_broken["moreores:mineral_tin"] = "moreores:tin_lump"
+after_broken["default:stone_with_mese"] = "default:mese_crystal"
+after_broken["moreores:mineral_silver"] = "moreores:silver_lump"
+after_broken["default:stone_with_gold"] = "default:gold_lump"
+after_broken["default:stone_with_diamond"] = "default:diamond"
+#after_broken[""] = ""
+#after_broken[""] = ""
+#after_broken[""] = ""
+#after_broken[""] = ""
+#after_broken[""] = ""
+
+
 loaded_mod_list = list()
 
 prepackaged_game_mod_list = list()
@@ -241,7 +259,7 @@ def load_world_and_mod_data():
     if minetestinfo.contains("game_path"):
         if (tmp_gameid is None) or (tmp_gameid.lower() != tmp_game_gameid.lower()):
             is_world_changed = True
-    
+
     default_gameid = None
     games_path = os.path.join(minetestinfo.get_var("shared_minetest_path"), "games")
     if (not minetestinfo.contains("game_path")) or is_world_changed:
@@ -299,7 +317,7 @@ def load_world_and_mod_data():
                     minetestinfo.set_var("game_path",try_path)
         else:
             print("WARNING: could not get default gameid--perhaps 'games_path' in '"+minetestinfo._config_path+"' is wrong.")
-    
+
     mods_path = None
     prepackaged_game_path = None
     if games_path is not None:
@@ -308,11 +326,11 @@ def load_world_and_mod_data():
     if len(prepackaged_game_mod_list)<1:
         prepackaged_game_mod_list = get_modified_mod_list_from_game_path(prepackaged_game_mod_list, prepackaged_game_path)
         print(prepackaged_gameid+" has "+str(len(prepackaged_game_mod_list))+" mod(s): "+','.join(prepackaged_game_mod_list))
-    
+
     if minetestinfo.contains("game_path") and os.path.isdir(minetestinfo.get_var("game_path")):
         loaded_mod_list = get_modified_mod_list_from_game_path(loaded_mod_list, minetestinfo.get_var("game_path"))
         #print("Mod list for current game: "+','.join(loaded_mod_list))
-        
+
         for this_mod in loaded_mod_list:
             if this_mod not in prepackaged_game_mod_list:
                 new_mod_list.append(this_mod)
@@ -349,7 +367,7 @@ def get_modified_mod_list_from_game_path(mod_list, game_path):
                             user_excluded_mod_count += 1
                     if load_this_mod == True:
                         if sub_name not in mod_list:
-                            mod_list.append(sub_name)        
+                            mod_list.append(sub_name)
     return mod_list
 
 world_mt_mapvars = None
@@ -381,6 +399,6 @@ def check_world_mt():
                 print("ERROR: Tried to get world.mt settings but couldn't read '"+this_world_mt_path+"'")
         else:
             print("ERROR: Tried to get '"+name+"' but primary_world_path is None")
-    
+
 
 init_minetestinfo()
