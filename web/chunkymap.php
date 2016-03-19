@@ -55,7 +55,6 @@ $chunkymap_camera_pan_delta=.5;
 $chunkymap_view_min_zoom=0.0173415299; //1.0/$chunk_dimension_min; //should be a number that would get to exactly 100 eventually if multiplied by chunkymap_zoom_delta repeatedly (such as 0.09765625 if chunkymap_zoom_delta were 2); 0.005 was avoided since tiles used to be 80x80 pixels
 $chunkymap_view_max_zoom=16585998.48141; //13107200.0;
 
-
 $decachunk_prefix_string="decachunk_";
 $decachunk_prefix_then_x_string=$decachunk_prefix_string."x";
 $chunk_prefix_string="chunk_";
@@ -251,6 +250,18 @@ function get_javascript_bool_value($this_bool) {
 	return $result;
 }
 
+function get_javascript_int_value($this_val) {
+	$result = $this_val;
+	if ($this_val === null) {
+		$result = "null";
+	}
+	else {
+		$this_val = intval($this_val);
+		$result = "$this_val";
+	}
+	return $result;
+}
+
 //chunk_mode_enable: shows chunk png images instead of decachunk jpg images (slower)
 //visual_debug_enable: draws colored rectangles based on yml files instead of drawing images
 function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_mode_enable) {
@@ -263,6 +274,7 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 	global $chunkymap_change_zoom_multiplier;
 	global $chunkymap_camera_pan_delta;
 	global $world_name;
+	global $chunkymapdata_thisworld_path;
 	
 	check_world();
 	
@@ -335,6 +347,43 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 		
 		$tile_x_count = $max_tiley_x-$min_tiley_x+1;
 		$tile_z_count = $max_tiley_z-$min_tiley_z+1;	
+		$si_yml_path = "$chunkymapdata_thisworld_path/singleimage.yml";
+		$si_metadata = null;
+		
+		$si_left = null;
+		$si_top = null;
+		$si_w = null;
+		$si_h = null;
+		$si_bottom = null;
+		$si_right = null;
+		if (is_file($si_yml_path)) {
+			$si_metadata = get_dict_from_conf($si_yml_path, ":");
+			if ($si_metadata!==null) {
+				if (isset($si_metadata["image_top"]) and isset($si_metadata["image_bottom"])) {
+					if ($si_metadata["image_top"]<$si_metadata["image_bottom"]) {
+						$cartesian_bottom = $si_metadata["image_top"];
+						$si_metadata["image_top"] = $si_metadata["image_bottom"];
+						$si_metadata["image_bottom"] = $cartesian_bottom;
+					}
+				}
+				if (isset($si_metadata["image_left"])) { $si_left=$si_metadata["image_left"]; }
+				if (isset($si_metadata["image_top"])) { $si_top=$si_metadata["image_top"]; }
+				if (isset($si_metadata["image_w"])) { $si_w=$si_metadata["image_w"]; }
+				if (isset($si_metadata["image_h"])) { $si_h=$si_metadata["image_h"]; }
+				if (isset($si_metadata["image_bottom"])) {
+					$si_bottom = $si_metadata["image_bottom"];
+				}
+				elseif (isset($si_metadata["image_top"]) and isset($si_metadata["image_h"])) {
+					$si_bottom=$si_top-$si_h; //minus since cartesian (which is assured above)
+				}
+				if (isset($si_metadata["image_right"])) {
+					$si_right = $si_metadata["image_right"];
+				}
+				elseif (isset($si_metadata["image_left"]) and isset($si_metadata["image_w"])) {
+					$si_right=$si_left+$si_w;
+				}
+			}
+		}
 		if ($html4_mode_enable!==true) {
 			echo '<canvas id="myCanvas"></canvas> ';
 			echo '<script>
@@ -351,6 +400,12 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 				var chunks_per_tile_z_count='.$chunks_per_tile_z_count.';
 				var tile_w='.$tile_w.';
 				var tile_h='.$tile_h.';
+				var si_left='.get_javascript_int_value($si_left).';
+				var si_top='.get_javascript_int_value($si_top).';
+				var si_w='.get_javascript_int_value($si_w).';
+				var si_h='.get_javascript_int_value($si_h).';
+				var si_bottom='.get_javascript_int_value($si_bottom).';
+				var si_right='.get_javascript_int_value($si_right).';
 				var EM_PER_WIDTH_COUNT = '.$EM_PER_WIDTH_COUNT.';
 				var size_1em_pixel_count = null;
 				var font_string = null;
@@ -364,6 +419,10 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 				var pen_x = null;
 				var world_camera_w = null; //calculated below
 				var world_camera_h = null; //calculated below
+				var world_camera_left = null; //calculated below
+				var world_camera_top = null; //calculated below
+				var world_camera_right = null; //calculated below
+				var world_camera_bottom = null; //calculated below
 				var current_w = null;
 				var current_h = null;
 				var current_ratio = null;
@@ -371,6 +430,7 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 				var zoom_out_button_index = null;
 				var zoom_out_label_index = null;
 				var location_label_index = null;
+				var debug_label = null;
 				
 				function zoom_in() {
 					chunkymap_view_zoom*=chunkymap_zoom_delta;
@@ -390,6 +450,10 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 						world_camera_h = (800/tile_h) * (1.0/chunkymap_view_zoom);
 						world_camera_w = world_camera_h*current_ratio;
 					}
+					world_camera_left = chunkymap_view_x - (world_camera_w/2.0);
+					world_camera_top = chunkymap_view_z + (world_camera_h/2.0); //plus since cartesian
+					world_camera_right = world_camera_left+world_camera_w;
+					world_camera_bottom = world_camera_top - world_camera_h; //minus since cartesion
 				}
 				
 				function process_resize(ctx) {
@@ -522,12 +586,33 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 					ctx.fillStyle = "black";
 					ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
 					
-					ctx.fillStyle = "white";
-					ctx.rect(20,20,150,100);
-					ctx.stroke(); 
+					//ctx.fillStyle = "white";
+					//ctx.rect(20,20,150,100);
+					//ctx.stroke(); 
 					
 					//size_1pt_pixel_count = ctx.canvas.height/600.0;
+					var zoomed_size_1pt_pixel_count = size_1pt_pixel_count*chunkymap_view_zoom;
 					var bw_index = 0;
+					
+					var si = document.getElementById("singleimage");
+					if ((si!==null)&&(si_left!==null)&&(si_top!==null)&&(si_w!==null)&&(si_h!==null)) {
+						var si_canvas_x = (si_left-world_camera_left)*zoomed_size_1pt_pixel_count;
+						//var si_canvas_right = (si_right-world_camera_left)*zoomed_size_1pt_pixel_count;
+						//var si_canvas_w = si_canvas_right-si_canvas_x;
+						var si_canvas_w = si_w*zoomed_size_1pt_pixel_count;
+						var si_canvas_right = si_canvas_x+si_canvas_w;
+						
+						//invert since cartesian:
+						var si_canvas_y = (world_camera_top-si_top)*zoomed_size_1pt_pixel_count;
+						//var si_canvas_bottom = (world_camera_bottom-si_top)*zoomed_size_1pt_pixel_count;
+						//var si_canvas_h = si_canvas_bottom-si_canvas_y;
+						var si_canvas_h = si_h*zoomed_size_1pt_pixel_count;
+						var si_canvas_bottom = si_canvas_y + si_canvas_h;
+						
+						ctx.drawImage(si, si_canvas_x, si_canvas_y, si_canvas_w, si_canvas_h);
+						//debug_label["text"] = "--map "+si_canvas_x+":"+si_canvas_right+","+si_canvas_y+":"+si_canvas_bottom+" "+si_canvas_w+"x"+si_canvas_h+" --camera "+world_camera_left+":"+world_camera_right+","+world_camera_bottom+":"+world_camera_top;
+						debug_label["text"] = "--map "+Math.round(si_canvas_x)+":"+Math.round(si_canvas_right)+","+Math.round(si_canvas_y)+":"+Math.round(si_canvas_bottom)+" "+Math.round(si_canvas_w)+"x"+Math.round(si_canvas_h)+" --camera "+Math.round(world_camera_left)+":"+Math.round(world_camera_right)+","+Math.round(world_camera_bottom)+":"+Math.round(world_camera_top);
+					}
 					
 					for (i=0; i<bawidgets.length; i++) {
 						this_widget = bawidgets[i];
@@ -610,9 +695,14 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 					last_bawidget["image"]=zoom_out_img;
 					zoom_out_img.style.visibility="hidden";
 					document.getElementById("zoom_out_disabled").style.visibility="hidden";
-					pen_y += tmp_h+padding_h;
+					pen_y += tmp_h+size_1em_pixel_count+padding_h;
 					pen_x -= tmp_w;			
-					
+
+					//DEBUG LABEL (no click):
+					bw_index = add_bawidget(pen_x+compass_rose_w/4, pen_y, tmp_w, tmp_h, null, "debug_label");
+					debug_label = last_bawidget;
+					//done on each draw: last_bawidget["text"] = 
+					pen_y += size_1em_pixel_count + padding_h;
 					
 					draw_map();
 				}
@@ -626,7 +716,19 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 			$td_tile_placeholder_content = $td_chunk_placeholder_content;
 		}
 		else {
-			$td_tile_placeholder_content = $td_decachunk_placeholder_content
+			$td_tile_placeholder_content = $td_decachunk_placeholder_content;
+		}
+		$si_path = "$chunkymapdata_thisworld_path/singleimage.png";
+		$si_yml_path = "$chunkymapdata_thisworld_path/singleimage.yml";
+		if (is_file($si_path) and is_file($si_yml_path)) {
+			//$style_append="; visibility:hidden";
+			$style_append="";
+			echo '<table style="width:100%'."$style_append".'">'."\r\n";
+			echo '  <tr><td style="background-image:url(\'chunkymapdata/images/loading.png\'); background-repeat: no-repeat; background-size: 100% 100%">'."\r\n";
+			$style_append="";
+			echo '    <img id="singleimage" style="width:100%; $style_append" src="'."$si_path".'"/>'."\r\n";
+			echo '  </td></tr>'."\r\n";
+			echo '</table>'."\r\n";
 		}
 		echo '<img id="compass_rose" src="chunkymapdata/images/compass_rose.png"/>';
 		echo '<img id="zoom_in" src="chunkymapdata/images/zoom_in.png"/>';
@@ -642,7 +744,7 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 			echo "    <td style=\"width:95%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=$chunkymap_view_x&chunkymap_view_z=".($chunkymap_view_z+($world_camera_h*$chunkymap_camera_pan_delta))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-up.png" style="width:90%"/>'.'</a></td>'."\r\n";
 			echo '    <td style="width:5%">'."$td_tile_placeholder_content".'</td>'."\r\n";
 			echo '  </tr>'."\r\n";
-			$cell_perc=intval(round(100.0/$decachunky_count_x));
+			$cell_perc=intval(round(100.0/$tile_x_count));
 			echo '  <tr>'."\r\n";
 			echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=".($chunkymap_view_x-($world_camera_w*$chunkymap_camera_pan_delta))."&chunkymap_view_z=$chunkymap_view_z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-left.png" style="width:90%"/>'.'</a></td>'."\r\n";
 			echo '    <td style="width:95%">'."\r\n";		

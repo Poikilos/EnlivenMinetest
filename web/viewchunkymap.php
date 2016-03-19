@@ -1,10 +1,16 @@
 <html style="width:100%; height:100%">
 <head>
 <title>Chunkymap</title>
-<meta http-equiv="refresh" content="30">
+<?php
+$html4_mode_enable=false; //if true, does not echo canvas nor client-side scripting
+if ($html4_mode_enable===true) {
+echo '<meta http-equiv="refresh" content="45">';
+}
+echo '
 </head>
 <body style="font-family:calibri,sans; width:100%; height:100%; margin:0; padding:0" topmargin="0" leftmargin="0" rightmargin="0" bottommargin="0">
-<?php
+';
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -28,7 +34,7 @@ if (is_file('chunkymap.php')) {
 	//echo "<table><tr><td style=\"text-align:left\">";
 	$chunk_mode_enable=true; //(this should normally be false) if true, uses 16x16 png files instead of the 160x160 decachunks; it is slower but may have more of the map during times when new chunks are explored but before the render queue is done and the decachunk images are created from the chunk images.);
 	$visual_debug_enable=false; //if true, this renders colors based on yml files instead of drawing images (and does not echo images at all)
-	$html4_mode_enable=false; //if true, does not echo canvas nor client-side scripting
+	
 	echo_chunkymap_canvas($chunk_mode_enable,$visual_debug_enable,$html4_mode_enable);
 	//echo_chunkymap_as_chunk_table(false);
 	//echo_decachunk_table();

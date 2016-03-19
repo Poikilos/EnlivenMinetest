@@ -75,4 +75,3 @@ default:apple 200 0 0
 default:desert_sand 210 180 50
 default:desert_stone 150 100 30
 default:dry_shrub 100 80 40
-

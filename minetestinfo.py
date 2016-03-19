@@ -44,6 +44,7 @@ after_broken["default:stone_with_diamond"] = "default:diamond"
 #after_broken[""] = ""
 #after_broken[""] = ""
 
+genresult_name_closer_string = "_mapper_result.txt"
 
 loaded_mod_list = list()
 
@@ -55,11 +56,154 @@ user_excluded_mod_count = 0
 
 minetestinfo = ConfigManager(os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmeta.yml"), ":")
 
-os_name="linux"
-if (os.path.sep!="/"):
-    os_name="windows"
-    print("Windows detected")
 game_path_from_gameid_dict = {}
+FLAG_EMPTY_HEXCOLOR = "#010000"
+
+
+class MTDecaChunk:
+
+    metadata = None
+    last_changed_utc_second = None
+
+    def __init__(self):
+        self.metadata = {}
+        self.metadata["last_saved_utc_second"] = None
+        self.metadata["luid_list"] = None  # what chunks this decachunk contains (as saved to 160px image)
+
+    def load_yaml(self, yml_path):
+        self.metadata = get_dict_modified_by_conf_file(self.metadata,yml_path,":")
+
+    def save_yaml(self, yml_path):
+        save_conf_from_dict(yml_path, self.metadata, assignment_operator=":", save_nulls_enable=False)
+
+class MTChunk:
+    #x = None
+    #z = None
+    metadata = None
+    is_fresh = None
+    #luid = None
+
+    def __init__(self):
+        # NOTE: variables that need to be saved (and only they) should be stored in dict
+        self.metadata = {}
+        self.is_fresh = False
+
+        self.metadata["is_empty"] = False  # formerly is_marked_empty
+        self.metadata["is_marked"] = False
+        self.metadata["width"] = None
+        self.metadata["height"] = None
+        self.metadata["image_w"] = None
+        self.metadata["image_h"] = None
+        self.metadata["image_left"] = None
+        self.metadata["image_top"] = None
+        self.metadata["image_right"] = None
+        self.metadata["image_bottom"] = None
+        self.metadata["is_traversed"] = False
+        self.metadata["tags"] = None
+
+    def load_yaml(self, yml_path):
+        self.metadata = get_dict_modified_by_conf_file(self.metadata,yml_path,":")
+
+    def save_yaml(self, yml_path):
+        save_conf_from_dict(yml_path, self.metadata, assignment_operator=":", save_nulls_enable=False)
+
+    #requires output such as from minetestmapper-numpy.py
+    #returns whether save is needed (whether metadata was changed)
+    def set_from_genresult(self, this_genresult_path):
+        #this_genresult_path = mtchunks.get_chunk_genresult_path(chunk_luid)
+        participle = "getting copy of dict"
+        try:
+            is_changed = False
+            old_meta = get_dict_deepcopy(self.metadata)
+            if os.path.isfile(this_genresult_path):
+                #may have data such as:
+                #Result image (w=16 h=16) will be written to chunk_x0z0.png
+                #Unknown node names: meze:meze default:stone_with_iron air default:dirt_with_snow default:stone_with_copper default:snow
+                #Unknown node ids: 0x0 0x1 0x2 0x3 0x4 0x5 0x6 0x7
+                #Drawing image
+                #Saving to: chunk_x0z0.png
+                #('PNG Region: ', [0, 64, 0, 64])
+                #('Pixels PerNode: ', 1)
+                #('border: ', 0)
+                self.metadata["is_marked"] = True
+                participle = "opening '"+this_genresult_path+"'"
+                ins = open(this_genresult_path, 'r')
+                line = True
+                counting_number = 1
+                while line:
+                    participle = "reading line "+str(counting_number)
+                    line = ins.readline()
+                    if line:
+                        line_strip = line.strip()
+                        try:
+                            if ("does not exist" in line_strip):  # official minetestmapper.py says "World does not exist" but expertmm fork and minetestmapper-numpy.py say "data does not exist"
+                                self.metadata["is_empty"] = True
+                                break
+                            elif "Result image" in line_strip:
+                                oparen_index = line_strip.find("(")
+                                if (oparen_index>-1):
+                                    cparen_index = line_strip.find(")", oparen_index+1)
+                                    if (cparen_index>-1):
+                                        operations_string = line_strip[oparen_index+1:cparen_index]
+                                        operation_list = operations_string.split(" ")
+                                        #if len(operation_list)==2:
+                                        for operation_string in operation_list:
+                                            if "=" in operation_string:
+                                                chunks = operation_string.split("=")
+                                                if len(chunks)==2:
+                                                    if chunks[0].strip()=="w":
+                                                        try:
+                                                            self.metadata["image_w"]=int(chunks[1].strip())
+                                                        except:
+                                                            print("Bad value for image w:"+str(chunks[1]))
+                                                    elif chunks[0].strip()=="h":
+                                                        try:
+                                                            self.metadata["image_h"]=int(chunks[1].strip())
+                                                        except:
+                                                            print("Bad value for image h:"+str(chunks[1]))
+                                                    else:
+                                                        print("Bad name for image variable so ignoring variable named '"+str(chunks[0])+"'")
+                                                else:
+                                                    print("Bad assignment (not 2 sides) so ignoring command '"+operation_string+"'")
+                                            else:
+                                                print("Bad assignment (operator) so ignoring command '"+operation_string+"'")
+                                        #else:
+                                        #    print("Bad assignment count so ignoring operations string '"+operations_string+"'")
+                            elif "PNG Region" in line_strip:
+                                obracket_index = line_strip.find("[")
+                                if obracket_index>-1:
+                                    cbracket_index = line_strip.find("]", obracket_index+1)
+                                    if cbracket_index>-1:
+                                        rect_values_string = line_strip[obracket_index+1:cbracket_index]
+                                        rect_values_list = rect_values_string.split(",")
+                                        if len(rect_values_list)==4:
+                                            #pngregion=[pngminx, pngmaxx, pngminz, pngmaxz] #from minetestmapper-numpy.py
+                                            self.metadata["image_left"]=int(rect_values_list[0].strip())
+                                            self.metadata["image_right"]=int(rect_values_list[1].strip())
+                                            self.metadata["image_top"]=int(rect_values_list[2].strip())
+                                            self.metadata["image_bottom"]=int(rect_values_list[3].strip())
+                                        else:
+                                            print("Bad map rect, so ignoring: "+rect_values_string)
+                            elif (len(line_strip)>5) and (line_strip[:5]=="xmin:"):
+                                self.metadata["image_left"] = int(line_strip[5:].strip())
+                            elif (len(line_strip)>5) and (line_strip[:5]=="xmax:"):
+                                self.metadata["image_right"] = int(line_strip[5:].strip())
+                            elif (len(line_strip)>5) and (line_strip[:5]=="zmin:"):
+                                #(zmin is bottom since cartesian)
+                                self.metadata["image_bottom"] = int(line_strip[5:].strip())
+                            elif (len(line_strip)>5) and (line_strip[:5]=="zmax:"):
+                                #(zmax is top since cartesian)
+                                self.metadata["image_top"] = int(line_strip[5:].strip())
+                        except:
+                            print("#failed to parse line:"+str(line_strip))
+                    counting_number += 1
+                ins.close()
+            participle = "checking for changes"
+            is_changed = is_dict_subset(self.metadata, old_meta, False)
+        except:
+            print("Could not finish "+participle+" in set_from_genresult:")
+            view_traceback()
+        return is_changed
 
 def get_gameid_from_game_path(path):
     result = None

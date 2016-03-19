@@ -5,6 +5,10 @@ import copy
 
 verbose_enable = False
 
+os_name = "GNU/Linux"
+if os.sep=="\\":
+    os_name = "windows"
+    print("Windows detected")
 
 #formerly pcttext:
 #uppercase_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -33,7 +37,7 @@ class InstalledFile:
         self.file_name=file_name
         self.source_dir_path=source_dir_path
         self.dest_dir_path=dest_dir_path
-        
+
 
 
 class ConfigManager:
@@ -265,7 +269,7 @@ def save_conf_from_dict(path, this_dict, assignment_operator="=", save_nulls_ena
             outs.close()
         except:
             pass
-            
+
 def get_list_from_hex(hex_string):
     results = None
     if hex_string is not None:
@@ -283,7 +287,7 @@ def get_list_from_hex(hex_string):
                 if len(hex_string)-index >= 2:
                     results.append(int(hex_string[index:index+2], 16))
                 index += 2
-                
+
     return results
 
 def get_tuple_from_notation(line, debug_src_name="<unknown object>"):

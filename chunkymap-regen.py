@@ -15,9 +15,13 @@ import math
 
 from minetestinfo import *
 from expertmm import *
+#python_exe_path is from:
+from pythoninfo import *
 
 from PIL import Image, ImageDraw, ImageFont, ImageColor
+#mode_to_bpp dict is from Antti Haapala. <http://stackoverflow.com/questions/28913988/is-there-a-way-to-measure-the-memory-consumption-of-a-png-image>. 7 Mar 2015. 28 Feb 2016.
 mode_to_bpp = {'1':1, 'L':8, 'P':8, 'RGB':24, 'RGBA':32, 'CMYK':32, 'YCbCr':24, 'I':32, 'F':32}
+
 #best_timer = timeit.default_timer
 #if sys.platform == "win32":
     # on Windows, the best timer is time.clock()
@@ -26,7 +30,8 @@ mode_to_bpp = {'1':1, 'L':8, 'P':8, 'RGB':24, 'RGBA':32, 'CMYK':32, 'YCbCr':24, 
     # on most other platforms, the best timer is time.time()
 #    best_timer = time.time
 # REQUIRES: see README.md
-# The way to do a full render is deleting all files from the folder www_minetest_path/chunkymapdata such as /var/www/html/minetest/chunkymapdata (or chunkymap in current directory on Windows)
+
+# The way to do a full render is deleting all files from the world folder under chunkymapdata under your system's www_minetest_path such as /var/www/html/minetest/chunkymapdata/world
 
 #minetestmapper-numpy.py calculates the region as follows:
 #(XMIN','XMAX','ZMIN','ZMAX'), default = (-2000,2000,-2000,2000)
@@ -52,150 +57,7 @@ mode_to_bpp = {'1':1, 'L':8, 'P':8, 'RGB':24, 'RGBA':32, 'CMYK':32, 'YCbCr':24, 
     #def size(self):
         #return len(self.items)
 
-class MTDecaChunk:
 
-    metadata = None
-    last_changed_utc_second = None
-
-    def __init__(self):
-        self.metadata = {}
-        self.metadata["last_saved_utc_second"] = None
-        self.metadata["luid_list"] = None  # what chunks this decachunk contains (as saved to 160px image)
-
-    def load_yaml(self, yml_path):
-        self.metadata = get_dict_modified_by_conf_file(self.metadata,yml_path,":")
-
-    def save_yaml(self, yml_path):
-        save_conf_from_dict(yml_path, self.metadata, assignment_operator=":", save_nulls_enable=False)
-
-class MTChunk:
-    #x = None
-    #z = None
-    metadata = None
-    is_fresh = None
-    #luid = None
-
-    def __init__(self):
-        # NOTE: variables that need to be saved (and only they) should be stored in dict
-        self.metadata = {}
-        self.is_fresh = False
-
-        self.metadata["is_empty"] = False  # formerly is_marked_empty
-        self.metadata["is_marked"] = False
-        self.metadata["width"] = None
-        self.metadata["height"] = None
-        self.metadata["image_w"] = None
-        self.metadata["image_h"] = None
-        self.metadata["image_left"] = None
-        self.metadata["image_top"] = None
-        self.metadata["image_right"] = None
-        self.metadata["image_bottom"] = None
-        self.metadata["is_traversed"] = False
-        self.metadata["tags"] = None
-
-    def load_yaml(self, yml_path):
-        self.metadata = get_dict_modified_by_conf_file(self.metadata,yml_path,":")
-
-    def save_yaml(self, yml_path):
-        save_conf_from_dict(yml_path, self.metadata, assignment_operator=":", save_nulls_enable=False)
-
-    #requires output such as from minetestmapper-numpy.py
-    #returns whether save is needed (whether metadata was changed)
-    def set_from_genresult(self, this_genresult_path):
-        #this_genresult_path = mtchunks.get_chunk_genresult_path(chunk_luid)
-        participle = "getting copy of dict"
-        try:
-            is_changed = False
-            old_meta = get_dict_deepcopy(self.metadata)
-            if os.path.isfile(this_genresult_path):
-                #may have data such as:
-                #Result image (w=16 h=16) will be written to chunk_x0z0.png
-                #Unknown node names: meze:meze default:stone_with_iron air default:dirt_with_snow default:stone_with_copper default:snow
-                #Unknown node ids: 0x0 0x1 0x2 0x3 0x4 0x5 0x6 0x7
-                #Drawing image
-                #Saving to: chunk_x0z0.png
-                #('PNG Region: ', [0, 64, 0, 64])
-                #('Pixels PerNode: ', 1)
-                #('border: ', 0)
-                self.metadata["is_marked"] = True
-                participle = "opening '"+this_genresult_path+"'"
-                ins = open(this_genresult_path, 'r')
-                line = True
-                counting_number = 1
-                while line:
-                    participle = "reading line "+str(counting_number)
-                    line = ins.readline()
-                    if line:
-                        line_strip = line.strip()
-                        try:
-                            if ("does not exist" in line_strip):  # official minetestmapper.py says "World does not exist" but expertmm fork and minetestmapper-numpy.py say "data does not exist"
-                                self.metadata["is_empty"] = True
-                                break
-                            elif "Result image" in line_strip:
-                                oparen_index = line_strip.find("(")
-                                if (oparen_index>-1):
-                                    cparen_index = line_strip.find(")", oparen_index+1)
-                                    if (cparen_index>-1):
-                                        operations_string = line_strip[oparen_index+1:cparen_index]
-                                        operation_list = operations_string.split(" ")
-                                        #if len(operation_list)==2:
-                                        for operation_string in operation_list:
-                                            if "=" in operation_string:
-                                                chunks = operation_string.split("=")
-                                                if len(chunks)==2:
-                                                    if chunks[0].strip()=="w":
-                                                        try:
-                                                            self.metadata["image_w"]=int(chunks[1].strip())
-                                                        except:
-                                                            print("Bad value for image w:"+str(chunks[1]))
-                                                    elif chunks[0].strip()=="h":
-                                                        try:
-                                                            self.metadata["image_h"]=int(chunks[1].strip())
-                                                        except:
-                                                            print("Bad value for image h:"+str(chunks[1]))
-                                                    else:
-                                                        print("Bad name for image variable so ignoring variable named '"+str(chunks[0])+"'")
-                                                else:
-                                                    print("Bad assignment (not 2 sides) so ignoring command '"+operation_string+"'")
-                                            else:
-                                                print("Bad assignment (operator) so ignoring command '"+operation_string+"'")
-                                        #else:
-                                        #    print("Bad assignment count so ignoring operations string '"+operations_string+"'")
-                            elif "PNG Region" in line_strip:
-                                obracket_index = line_strip.find("[")
-                                if obracket_index>-1:
-                                    cbracket_index = line_strip.find("]", obracket_index+1)
-                                    if cbracket_index>-1:
-                                        rect_values_string = line_strip[obracket_index+1:cbracket_index]
-                                        rect_values_list = rect_values_string.split(",")
-                                        if len(rect_values_list)==4:
-                                            #pngregion=[pngminx, pngmaxx, pngminz, pngmaxz] #from minetestmapper-numpy.py
-                                            self.metadata["image_left"]=int(rect_values_list[0].strip())
-                                            self.metadata["image_right"]=int(rect_values_list[1].strip())
-                                            self.metadata["image_top"]=int(rect_values_list[2].strip())
-                                            self.metadata["image_bottom"]=int(rect_values_list[3].strip())
-                                        else:
-                                            print("Bad map rect, so ignoring: "+rect_values_string)
-                            elif (len(line_strip)>5) and (line_strip[:5]=="xmin:"):
-                                self.metadata["image_left"] = int(line_strip[5:].strip())
-                            elif (len(line_strip)>5) and (line_strip[:5]=="xmax:"):
-                                self.metadata["image_right"] = int(line_strip[5:].strip())
-                            elif (len(line_strip)>5) and (line_strip[:5]=="zmin:"):
-                                #(zmin is bottom since cartesian)
-                                self.metadata["image_bottom"] = int(line_strip[5:].strip())
-                            elif (len(line_strip)>5) and (line_strip[:5]=="zmax:"):
-                                #(zmax is top since cartesian)
-                                self.metadata["image_top"] = int(line_strip[5:].strip())
-                        except:
-                            print("#failed to parse line:"+str(line_strip))
-                    counting_number += 1
-                ins.close()
-            participle = "checking for changes"
-            is_changed = is_dict_subset(self.metadata, old_meta, False)
-        except:
-            print("Could not finish "+participle+" in set_from_genresult:")
-            view_traceback()
-        return is_changed
 
 class MTChunks:
     chunkymap_data_path = None
@@ -243,18 +105,17 @@ class MTChunks:
     chunkymap_players_path = None
     data_16px_path = None
     data_160px_path = None
-    FLAG_EMPTY_HEXCOLOR = "#010000"
+
     FLAG_COLORS_LIST = None
     world_name = None
     chunkymap_thisworld_data_path = None
     genresult_name_opener_string = "chunk_"
-    genresult_name_closer_string = "_mapper_result.txt"
     min_indent = None
 
     def __init__(self):  #formerly checkpaths() in global scope
         #self.force_rerender_decachunks_enable = True
         self.FLAG_COLORS_LIST = list()
-        self.FLAG_COLOR_CHANNELS = get_list_from_hex(self.FLAG_EMPTY_HEXCOLOR)
+        self.FLAG_COLOR_CHANNELS = get_list_from_hex(FLAG_EMPTY_HEXCOLOR)
         self.FLAG_COLORS_LIST.append(self.FLAG_COLOR_CHANNELS)
         self.FLAG_COLORS_LIST.append((255,255,255))  #for compatibility with maps generated by earlier versions ONLY
         self.FLAG_COLORS_LIST.append((0,0,0))  #for compatibility with maps generated by earlier versions ONLY
@@ -297,17 +158,6 @@ class MTChunks:
         #    print("(ERROR: missing, so please close immediately and update primary_world_path in '"+minetestinfo._config_path+"' before next run)")
         #print("")
 
-        self.python_exe_path = "python"
-        if os_name=="windows":
-            try:
-                alt_path = "C:\\python27\python.exe"
-                if os.path.isfile(alt_path):
-                    self.python_exe_path = alt_path
-                #else may be in path--assume installer worked
-            except:
-                pass  # do nothing
-
-
         worldmt_path = os.path.join(minetestinfo.get_var("primary_world_path"), "world.mt")
         self.backend_string="sqlite3"
         if (os.path.isfile(worldmt_path)):
@@ -334,8 +184,8 @@ class MTChunks:
         else:
             print("WARNING: Database backend cannot be detected (unable to ensure image generator script will render map)")
 
+        #region the following is also in singleimage.py
         self.minetestmapper_fast_sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-numpy.py")
-
         self.minetestmapper_custom_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-expertmm.py")
         self.minetestmapper_py_path = self.minetestmapper_fast_sqlite_path
         if (self.backend_string!="sqlite3"):
@@ -348,6 +198,7 @@ class MTChunks:
         if not os.path.isfile(self.colors_path):
             print("ERROR: missing '"+self.colors_path+"', so exiting "+__file__+".")
             sys.exit(2)
+        #endregion the following is also in singleimage.py
 
 
         self.chunkymap_data_path=os.path.join(minetestinfo.get_var("www_minetest_path"),"chunkymapdata")
@@ -493,6 +344,7 @@ class MTChunks:
         install_list.append(InstalledFile("start.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
         install_list.append(InstalledFile("target_start.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
         install_list.append(InstalledFile("compass-rose.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("loading.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
         install_list.append(InstalledFile("arrow-wide-up.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
         install_list.append(InstalledFile("arrow-wide-down.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
         install_list.append(InstalledFile("arrow-wide-left.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
@@ -623,7 +475,7 @@ class MTChunks:
                         result = True
                         break
                 else:
-                    raw_input("ERROR: FLAG_COLOR (obtained from FLAG_EMPTY_HEXCOLOR) has "+len(FLAG_COLOR)+" element(s) (3 or 4 expected)")
+                    raw_input("ERROR: FLAG_COLOR (obtained from FLAG_EMPTY_HEXCOLOR in minetestinfo.py) has "+len(FLAG_COLOR)+" element(s) (3 or 4 expected)")
         return result
 
     def get_index_of_chunk_on_todo_list(self, chunky_pos, allow_current_chunk_enable=False):
@@ -722,7 +574,7 @@ class MTChunks:
                 else:
                     print("      USING ("+str(len(chunky_coord_list))+") chunks (region "+str(chunky_min_x)+":"+str(chunky_max_x)+","+str(chunky_min_z)+":"+str(chunky_max_z)+")")
                 decachunk_global_coords = decachunky_x*160, decachunky_z*160
-                im = Image.new("RGB", (160, 160), self.FLAG_EMPTY_HEXCOLOR)
+                im = Image.new("RGB", (160, 160), FLAG_EMPTY_HEXCOLOR)
                 decachunk_yaml_path = self.get_decachunk_yaml_path_from_decachunk(decachunky_x, decachunky_z)
                 decachunk_image_path = self.get_decachunk_image_path_from_decachunk(decachunky_x, decachunky_z)
                 combined_count = 0
@@ -848,10 +700,10 @@ class MTChunks:
 
     def get_chunk_genresult_name(self, chunky_x, chunky_z):
         chunk_luid = self.get_chunk_luid(chunky_x, chunky_z)
-        return self.genresult_name_opener_string+chunk_luid+self.genresult_name_closer_string
+        return self.genresult_name_opener_string+chunk_luid+genresult_name_closer_string
 
     def get_chunk_luid_from_genresult_name(self, file_name):
-        return file_name[len(self.genresult_name_opener_string):-1*len(self.genresult_name_closer_string)]
+        return file_name[len(self.genresult_name_opener_string):-1*len(genresult_name_closer_string)]
 
     def get_chunk_genresult_tmp_folder(self, chunky_x, chunky_z):
         #coords = self.get_coords_from_luid(chunk_luid)
@@ -995,7 +847,7 @@ class MTChunks:
         cmd_suffix = ""
         cmd_suffix = " > \""+genresult_path+"\""
         #self.mapper_id = "minetestmapper-region"
-        cmd_no_out_string = self.python_exe_path + " \""+self.minetestmapper_py_path + "\" --region " + str(min_x) + " " + str(max_x) + " " + str(min_z) + " " + str(max_z) + " --maxheight "+str(self.mapvars["maxheight"])+" --minheight "+str(self.mapvars["minheight"])+" --pixelspernode "+str(self.mapvars["pixelspernode"])+" \""+minetestinfo.get_var("primary_world_path")+"\" \""+tmp_png_path+"\""
+        cmd_no_out_string = python_exe_path + " \""+self.minetestmapper_py_path + "\" --region " + str(min_x) + " " + str(max_x) + " " + str(min_z) + " " + str(max_z) + " --maxheight "+str(self.mapvars["maxheight"])+" --minheight "+str(self.mapvars["minheight"])+" --pixelspernode "+str(self.mapvars["pixelspernode"])+" \""+minetestinfo.get_var("primary_world_path")+"\" \""+tmp_png_path+"\""
         cmd_string = cmd_no_out_string + cmd_suffix
 
         if self.minetestmapper_py_path==self.minetestmapper_custom_path:#if self.backend_string!="sqlite3": #if self.mapper_id=="minetestmapper-region":
@@ -1016,9 +868,15 @@ class MTChunks:
             #if os.path.isfile(region_capable_script_path):
                 #script_path = region_capable_script_path
             geometry_string = str(min_x)+":"+str(min_z)+"+"+str(int(max_x)-int(min_x)+1)+"+"+str(int(max_z)-int(min_z)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
+            geometry_param = " --geometry "+geometry_string
             #expertmm_region_string = str(min_x) + ":" + str(max_x) + "," + str(min_z) + ":" + str(max_z)
             #cmd_string="sudo python "+script_path+" --input \""+minetestinfo.get_var("primary_world_path")+"\" --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
-            cmd_no_out_string = self.python_exe_path+" "+self.minetestmapper_py_path+" --bgcolor '"+self.FLAG_EMPTY_HEXCOLOR+"' --input \""+minetestinfo.get_var("primary_world_path")+"\" --geometry "+geometry_string+" --output \""+tmp_png_path+"\""
+            world_path = minetestinfo.get_var("primary_world_path")
+            io_string = " --input \""+world_path+"\" --output \""+tmp_png_path+"\""
+            #if "numpy" in self.minetestmapper_py_path:
+            #    io_string = " \""+world_path+"\" \""+tmp_png_path+"\""
+            #    geometry_param = " --region " + str(min_x) + " " + str(max_x) + " " + str(min_z) + " " + str(max_z)
+            cmd_no_out_string = python_exe_path+" "+self.minetestmapper_py_path+" --bgcolor '"+FLAG_EMPTY_HEXCOLOR+"'"+geometry_param+io_string
             cmd_string = cmd_no_out_string + cmd_suffix
             #sudo python /home/owner/minetest/util/minetestmapper.py --bgcolor '#010000' --input "/home/owner/.minetest/worlds/FCAGameAWorld" --output /var/www/html/minetest/chunkymapdata/entire.png > entire-mtmresult.txt
             #sudo python /home/owner/minetest/util/chunkymap/minetestmapper.py --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry 0:0+16+16 --output /var/www/html/minetest/chunkymapdata/chunk_x0z0.png > /home/owner/minetest/util/chunkymap-genresults/chunk_x0z0_mapper_result.txt
@@ -1132,7 +990,7 @@ class MTChunks:
         self.create_chunk_folder(chunky_x, chunky_z)
         self.chunks[chunk_luid].save_yaml(chunk_yaml_path)
         print(min_indent+"(saved yaml to '"+chunk_yaml_path+"')")
-        
+
     def get_new_player_index(self):
         result = None
         if self.players is not None:
@@ -1300,7 +1158,7 @@ class MTChunks:
                         is_moved = True
                     if is_moved:
                         is_changed = True
-                    
+
 
                     #if (this_player is None) or not is_same_fvec3( map_player_position_tuple, player_position_tuple):
                     #if (this_player is None) or (saved_player_x is None) or (saved_player_z is None) or (int(saved_player_x)!=int(player_x)) or (int(saved_player_y)!=int(player_y)) or (int(saved_player_z)!=int(player_z)):
@@ -1511,7 +1369,7 @@ class MTChunks:
                     #must check_decachunk_containing_chunk AFTER _check_map_pseudorecursion_branchfrom so check_decachunk_containing_chunk can see if there are more to do before rendering superchunk
                     #always check since already checks queue and doesn't render decachunk on last rendered chunk, but instead on last queued chunk in decachunk
                     #if self.rendered_this_session_count>prev_rendered_this_session_count or self.force_rerender_decachunks_enable:
-                    
+
                     #Now is ok to check_decachunk_containing_chunk, since does not count current index as unfinished (allow_current_chunk_enable=False):
                     self.check_decachunk_containing_chunk(chunky_x, chunky_z)
                     if self.verbose_enable:
@@ -1590,7 +1448,7 @@ class MTChunks:
                 player_position = None
                 #if (file_name[:len(badstart_string)]!=badstart_string):
                 if (file_name[:1]!="."):
-                    if len(file_name)>=len(self.genresult_name_opener_string)+4+len(self.genresult_name_closer_string):
+                    if len(file_name)>=len(self.genresult_name_opener_string)+4+len(genresult_name_closer_string):
                         chunk_luid = self.get_chunk_luid_from_genresult_name(file_name)
                         coords = self.get_coords_from_luid(chunk_luid)
                         if coords is not None:
