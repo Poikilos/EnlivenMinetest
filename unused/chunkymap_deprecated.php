@@ -507,9 +507,8 @@ function echo_chunkymap_as_chunk_table($show_all_enable) {
 		$zoomed_h=(int)((float)$chunkymap_tile_original_h*$scale+.5);
 		$genresult_suffix_then_dot_then_ext="_mapper_result.txt";
 		
-		$minute=60;
-		$player_file_age_expired_max_seconds=20*$minute-1;
-		$player_file_age_idle_max_seconds=5*$minute-1;
+		global $player_file_age_expired_max_seconds;
+		global $player_file_age_idle_max_seconds;
 		$chunks_16px_path = $chunkymapdata_thisworld_path.'/'."16px";
 		while ($z >= $min_chunkz) {
 			echo_hold( "    <tr>\r\n");

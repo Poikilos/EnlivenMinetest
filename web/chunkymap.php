@@ -7,6 +7,11 @@ if (($_SERVER['PHP_SELF'] == "chunkymap.php") or endsWith($_SERVER['PHP_SELF'],"
 }
 
 
+
+$minute=60;
+$player_file_age_expired_max_seconds=20*$minute-1;
+$player_file_age_idle_max_seconds=5*$minute-1;
+
 //NOTE: for parse errors, MUST add the following line to  php.ini (such as /etc/php5/apache2/php.ini): display_errors = on
 if (is_file('browser.php')) {
     include_once('browser.php');
@@ -262,9 +267,98 @@ function get_javascript_int_value($this_val) {
 	return $result;
 }
 
+function get_markers_from_dir($chunkymap_markers_path) {
+	global $chunkymapdata_thisworld_path;
+	global $player_file_age_expired_max_seconds;
+	global $player_file_age_idle_max_seconds;
+	global $show_expired_players_enable;
+	$markers=array();
+	$markers_count=0;
+	if ($handle = opendir($chunkymap_markers_path)) {
+		while (false !== ($file_name = readdir($handle))) {
+			if (substr($file_name, 0, 1) != ".") {
+				$file_name_lower = strtolower($file_name);
+				if (endsWith($file_name_lower, ".yml")) {
+					$file_path = $chunkymap_markers_path."/".$file_name;
+					$marker_vars = get_dict_from_conf($file_path, ":");
+					if (isset($marker_vars["x"]) and isset($marker_vars["z"])) {
+						$is_expired=false;
+						$is_idle=false;
+						if (isset($marker_vars["utc_mtime"])) {
+							$last_player_update_time = strtotime($marker_vars["utc_mtime"]);
+							if (time()-$last_player_update_time > $player_file_age_expired_max_seconds) {
+								$is_expired=true;
+							}
+							elseif (time()-$last_player_update_time > $player_file_age_idle_max_seconds) {
+								$is_idle=true;
+							}
+							if ($is_expired===false) {
+								$markers[$markers_count]["utc_mtime"] = $marker_vars["utc_mtime"];
+							}
+						}
+						if (($show_expired_players_enable===true) or ($is_expired===false)) {
+							$markers[$markers_count]["x"] = $marker_vars["x"];
+							$markers[$markers_count]["z"] = $marker_vars["z"];
+							$markers[$markers_count]["is_idle"] = $is_idle;
+							$markers[$markers_count]["is_expired"] = $is_expired;
+							if (isset($marker_vars["y"])) {
+								$markers[$markers_count]["y"] = $marker_vars["y"];
+							}
+							if (isset($marker_vars["image"])) {
+								$try_path = "$chunkymapdata_thisworld_path/".$marker_vars["image"];
+								if (is_file($try_path)) {
+									$markers[$markers_count]["image"] = $try_path; //this is the normal place to store them actually
+								}
+								else {
+									$markers[$markers_count]["image"] = $marker_vars["image"];
+								}
+							}
+							else {
+								if (isset($marker_vars["index"])) {
+									$try_path = "$chunkymapdata_thisworld_path/players/".$marker_vars["index"].".jpg";
+									if (is_file($try_path)) {
+										$markers[$markers_count]["image"] = $try_path;
+										echo_error("detected image $try_path\r\n");
+									}
+									else {
+										
+										$try_path = "$chunkymapdata_thisworld_path/players/".$marker_vars["index"].".png";
+										if (is_file($try_path)) {
+											$markers[$markers_count]["image"] = $try_path;
+										}
+									}
+								}
+								else {
+									echo_error("missing index in marker file $file_name\r\n");
+								}
+							}
+							if (isset($marker_vars["name"])) {
+								$markers[$markers_count]["name"] = $marker_vars["name"];
+							}
+							if (isset($marker_vars["index"])) {
+								$markers[$markers_count]["index"] = $marker_vars["index"]; //for ajax to get player location with neither playerid nor name known
+							}
+							if (isset($marker_vars["playerid"])) {
+								$markers[$markers_count]["playerid"] = $marker_vars["playerid"];
+							}
+							$markers_count+=1;
+						}
+						
+					}
+					else {
+						echo_error("Bad location in marker file '$file_path'");
+					}
+				}
+			}
+		}
+	}
+	return $markers;
+}
+
+
 //chunk_mode_enable: shows chunk png images instead of decachunk jpg images (slower)
 //visual_debug_enable: draws colored rectangles based on yml files instead of drawing images
-function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_mode_enable) {
+function echo_chunkymap_canvas($show_player_names_enable, $chunk_mode_enable, $visual_debug_enable, $html4_mode_enable) {
     global $x;
     global $z;
     global $zoom;
@@ -302,7 +396,7 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 		if ($zoom<$chunkymap_view_min_zoom) $zoom = $chunkymap_view_min_zoom;
 		if ($zoom>$chunkymap_view_max_zoom) $zoom = $chunkymap_view_max_zoom;
 
-		$EM_PER_WIDTH_COUNT = 800.0/12.0;
+		$EM_PER_WIDTH_COUNT = 800.0/12.0; //ultimately derived from 12pt font on 800x600 display--no really, this is right
 		
 		$camera_w = (800) * (1.0/$zoom); //screen should be 800pt wide always (so 12pt is similar on all screens and only varies with physical size of screen in inches, and since pt was invented to replace px)
 		$camera_left = $x-$camera_w/2.0;
@@ -384,6 +478,51 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 				}
 			}
 		}
+		
+		$markers = get_markers_from_dir($chunkymapdata_thisworld_path."/markers");
+		$players = get_markers_from_dir($chunkymapdata_thisworld_path."/players");
+		$index = 0;
+		$players_count = count($players);
+		while ($index<$players_count) {
+			$this_player = $players[$index];
+			$img_src = "$chunkymapdata_thisworld_path/players/singleplayer.png";
+			if (!isset($players[$index]["image"])) {
+				$players[$index]["image"] = $img_src;
+			}
+			if (isset($players[$index]["image"])) {
+				if (isset($players[$index]["index"])) {
+					$public_index=$players[$index]["index"];
+					$players[$index]["img_id"] = "player"."$public_index"."_img";
+					//echo ("players[index][img_id]:".$players[$index]["img_id"]);
+				}
+				else {
+					echo_error("Missing index for player\r\n");
+				}
+			}
+			else {
+				echo echo_error("Missing image for player\r\n");
+			}
+			$index++;
+		}
+		//echo ("finished adding id to $players_count player(s)\r\n");
+		//img_id is actually only needed for canvas drawing
+		$index = 0;
+		$markers_count = count($markers);
+		while ($index<$markers_count) {
+			if (isset($markers[$index]["image"])) {
+				if (isset($markers[$index]["index"])) {
+					$public_index=$markers[$index]["index"];
+					$markers[$index]["img_id"] = "marker"."$public_index"."_img";
+				}
+				else {
+					echo_error("Missing index for marker "+$markers[$index]["name"]);
+				}
+			}
+			$index++;
+		}
+		//images are echoed further down
+		
+		
 		if ($html4_mode_enable!==true) {
 		//image-rendering: -moz-crisp-edges; image-rendering:-o-crisp-edges; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; -ms-interpolation-mode: nearest-neighbor;
 			echo '<canvas id="myCanvas"></canvas> ';
@@ -392,6 +531,84 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 				var x='.$x.';
 				var z='.$z.';
 				var zoom='.$zoom.';
+				//var default_player_img = document.getElementById("singleplayer_img");';
+				
+				$player_count = count($players);
+				echo '
+				//var player_count='.$player_count.';
+				var players=[';
+				$index=0;
+				while ($index<$player_count) {
+					echo "{";
+					$this_player = $players[$index];
+					//if (isset($this_player["index"])) {
+					$public_index = $this_player["index"];
+					//}
+					echo "x:".$this_player["x"].",\r\n";
+					echo "z:".$this_player["z"].",\r\n";
+					if (($show_player_names_enable===true) and isset($this_player["name"])) {
+						echo "name:\"".$this_player["name"]."\",\r\n";
+					}
+					else {
+						echo "name:null,\r\n";
+					}
+					if (isset($this_player["img_id"])) {
+						echo "img_id:\"".$this_player["img_id"]."\",\r\n";
+						echo "img_enable:true,\r\n";
+					}
+					else {
+						echo "img_enable:false,\r\n";
+					}
+					echo "is_expired:".get_javascript_bool_value($this_player["is_expired"]).",\r\n";
+					echo "is_idle:".get_javascript_bool_value($this_player["is_idle"]).",\r\n";
+					echo "index:$public_index\r\n";
+					echo "}";
+					$index++;
+					if ($index!=$player_count) {
+						echo ",";
+					}
+					echo "\r\n";
+				}
+				echo '];'."\r\n";
+				
+				$marker_count = count($markers);
+				echo '
+				//var marker_count='.$marker_count.';
+				var markers=[';
+				$index=0;
+				while ($index<$marker_count) {
+					echo "{";
+					$this_marker = $markers[$index];
+					//if (isset($this_marker["index"])) {
+					$public_index = $this_marker["index"];
+					//}
+					echo "x:".$this_marker["x"].",\r\n";
+					echo "z:".$this_marker["z"].",\r\n";
+					if (isset($this_marker["name"])) {
+						echo "name:\"".$this_marker["name"]."\",\r\n";
+					}
+					else {
+						echo "name:null,\r\n";
+					}
+					if (isset($this_marker["img_id"])) {
+						echo "img_id:\"".$this_marker["img_id"]."\",\r\n";
+						echo "img_enable:true,\r\n";
+					}
+					else {
+						echo "img_enable:false,\r\n";
+					}
+					echo "is_expired:".get_javascript_bool_value($this_marker["is_expired"]).",\r\n";
+					echo "is_idle:".get_javascript_bool_value($this_marker["is_idle"]).",\r\n";
+					echo "index:$public_index\r\n";
+					echo "}";
+					$index++;
+					if ($index!=$marker_count) {
+						echo ",";
+					}
+					echo "\r\n\r\n";
+				}
+				echo '];
+				
 				var chunkymap_view_max_zoom='.$chunkymap_view_max_zoom.';
 				var chunkymap_view_min_zoom='.$chunkymap_view_min_zoom.';
 				var chunkymap_zoom_delta='.$chunkymap_change_zoom_multiplier.';
@@ -430,7 +647,11 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 				var zoom_in_button_index = null;
 				var zoom_out_button_index = null;
 				var zoom_out_label_index = null;
-				var location_label_index = null;
+				var xy_label_index = null;
+				var xy_label = null;
+				var zoom_label = null;
+				var zoom_in_button = null;
+				var zoom_out_button = null;
 				var label0 = null;
 				var label1 = null;
 				var label2 = null;
@@ -447,13 +668,56 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 				var zoomed_size_1pt_pixel_count = null;
 				var ctx = null;
 				
+				ctx = my_canvas.getContext("2d");
+				process_resize();
+				ctx.fillStyle = "black";
+				ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+				var tmp_widget = {x:100,y:100,text:"Loading..."};
+				draw_widget_recolored(tmp_widget, "rgb(128,128,128)");
+
+				var powered_by_label = create_bawidget(ctx.canvas.width/2, size_1em_pixel_count/4, 0, 0, null, "powered_by_label");
+				powered_by_label.text = "Chunkymap";
+				powered_by_label.size_em = .75;
+				//powered_by_label.color_string = "rgb(12,132,245)"
+				powered_by_label.color_string = "rgb(192,192,192)"
+				
 				function zoom_in() {
 					zoom*=chunkymap_zoom_delta;
+					process_zoom_change();  //DOES call process_view_change
 					draw_map();
 				}
 				function zoom_out() {
 					zoom/=chunkymap_zoom_delta;
+					process_zoom_change();  //DOES call process_view_change
 					draw_map();
+				}
+				function process_resize() {
+					//var ctx = my_canvas.getContext("2d");
+					ctx.canvas.width = window.innerWidth;
+					ctx.canvas.height = window.innerHeight;
+					current_w = ctx.canvas.width;
+					current_h = ctx.canvas.height;
+					//current_w = window.innerWidth;
+					//current_h = window.innerHeight;
+					current_ratio = current_w/current_h;
+					
+					//if (ctx.canvas.height<ctx.canvas.width) {
+					//	size_1em_pixel_count = Math.round(ctx.canvas.height/32);
+					//}
+					//else {
+					size_1em_pixel_count = Math.round(ctx.canvas.width/EM_PER_WIDTH_COUNT);
+					//}
+					if (powered_by_label!=null) {
+						//powered_by_label.y = ctx.canvas.height-size_1em_pixel_count;
+						powered_by_label.y = size_1em_pixel_count/4;
+					}
+					font_string = Math.round(size_1em_pixel_count)+"px Calibri";
+					size_1pt_pixel_count = size_1em_pixel_count/16;
+					padding_w = Math.round(size_1em_pixel_count/3.0);
+					padding_h = Math.round(size_1em_pixel_count/3.0);
+					canvas_offset_x = my_canvas.offsetLeft; //or ctx.canvas.offsetLeft;  //or ?
+					canvas_offset_y = my_canvas.offsetTop; //or ctx.canvas.offsetTop;  //or ?
+					process_zoom_change();  //DOES call process_view_change
 				}
 				function process_view_change() {
 					//NOTE: this should be exactly the same math as php uses to make sure there are the same #of tiles displayed as were loaded by php
@@ -469,85 +733,10 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 					camera_top = z + (camera_h/2.0); //plus since cartesian
 					camera_right = camera_left+camera_w;
 					camera_bottom = camera_top - camera_h; //minus since cartesion
-				}
-				
-				function get_world_point_from_screen_point(screen_point) {
-					horz_ratio = screen_point.x/current_w;
-					vert_ratio = screen_point.y/current_h;
-					inverse_vert_ratio = 1.0 - vert_ratio;
-					return {
-						x:camera_left+horz_ratio*camera_w,
-						z:camera_bottom+inverse_vert_ratio*camera_h
-					};
-				}
-				
-				function get_screen_point_from_world_coords(location_x, location_z) {
-					//var half_camera_w = camera_w/2.0;
-					//var half_camera_h = camera_h/2.0;
-					horz_ratio = location_x/(camera_right-camera_left);
-					vert_ratio = location_z/(camera_bottom-camera_top);
-					return {
-						x:horz_ratio*current_w,
-						y:vert_ratio*current_h
-					};
-				}
-				
-				function process_resize(ctx) {
-					//var ctx = my_canvas.getContext("2d");
-					ctx.canvas.width = window.innerWidth;
-					ctx.canvas.height = window.innerHeight;
-					current_w = ctx.canvas.width;
-					current_h = ctx.canvas.width;
-					//current_w = window.innerWidth;
-					//current_h = window.innerHeight;
-					current_ratio = current_w/current_h;
-					
-					//if (ctx.canvas.height<ctx.canvas.width) {
-					//	size_1em_pixel_count = Math.round(ctx.canvas.height/32);
-					//}
-					//else {
-					size_1em_pixel_count = Math.round(ctx.canvas.width/EM_PER_WIDTH_COUNT);
-					//}
-					font_string = Math.round(size_1em_pixel_count)+"px Arial";
-					size_1pt_pixel_count = size_1em_pixel_count/16;
-					padding_w = Math.round(size_1em_pixel_count/3.0);
-					padding_h = Math.round(size_1em_pixel_count/3.0);
-					canvas_offset_x = my_canvas.offsetLeft; //or ctx.canvas.offsetLeft;  //or ?
-					canvas_offset_y = my_canvas.offsetTop; //or ctx.canvas.offsetTop;  //or ?
-					zoomed_size_1pt_pixel_count = size_1pt_pixel_count*zoom;
-					process_view_change();
-				}
-				
-				var bw_count = 0;
-				var bawidgets = new Array();
-				var last_bawidget = null;
-				function add_bawidget(at_x, at_y, width, height, this_onclick, name) {
-					this_widget = Array();
-					this_widget.x = at_x;
-					this_widget.y = at_y;
-					this_widget.width = width;
-					this_widget.height = height;
-					this_widget.click_event = this_onclick;
-					this_widget.name = name;
-					this_widget.image = null;
-					this_widget.text = null;
-					bawidgets[bw_count] = this_widget;
-					last_bawidget = this_widget;
-					bw_count++;
-				}
-				function contains_coords(bawidget, cursor_x, cursor_y) {
-					right = bawidget.x+bawidget.width;
-					bottom = bawidget.y+bawidget.height;
-					return cursor_x>=bawidget.x && cursor_y>=bawidget.y && cursor_x<right && cursor_y<bottom;
-				}
-				function click_if_contains(bawidget, cursor_x, cursor_y) {
-					if (contains_coords(bawidget, cursor_x, cursor_y)) {
-						if (bawidget.click_event != null) {
-							bawidget.click_event();
-						}
+					if (label4!=null) {
+						//change_widget(label4, "[4] camera_w: "+Math.round(camera_w)+"; camera_h:"+Math.round(camera_h))
 					}
 				}
-				
 				function process_zoom_change() {
 					var zoom_in_img = null;
 					var zoom_out_img = null;
@@ -573,7 +762,9 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 					else {
 						zoom_in_img = document.getElementById("zoom_in");
 					}
-					location_label.text = Math.round(x)+","+Math.round(z);
+					if (xy_label!=null) {
+						xy_label.text = Math.round(x)+","+Math.round(z);
+					}
 					
 					zoom_label_value=zoom*100;
 					if (zoom_label_value>1) {
@@ -582,18 +773,153 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 					else {
 						zoom_label_value = Math.round(zoom_label_value, 7);
 					}
-					zoom_label.text=zoom_label_value+"%";
+					zoomed_size_1pt_pixel_count = size_1pt_pixel_count*zoom;
+					if (zoom_label!=null) {
+						change_widget(zoom_label, zoom_label_value+"%");
+						//zoom_label.text=zoom_label_value+"%";
+					}
+					if (label3!=null) {
+						//change_widget(label3, "size_1pt_pixel_count:"+size_1pt_pixel_count+"  zoomed_size_1pt_pixel_count:"+zoomed_size_1pt_pixel_count);
+					}
 					
-					zoom_in_button.click_event=tmp_zoom_in_ptr;
-					zoom_in_button.image=zoom_in_img;
-					zoom_out_button.click_event=tmp_zoom_out_ptr;
-					zoom_out_button.image=zoom_out_img;
+					if (zoom_in_button!=null) {
+						zoom_in_button.click_event=tmp_zoom_in_ptr;
+						zoom_in_button.image=zoom_in_img;
+					}
+					if (zoom_out_button!=null) {
+						zoom_out_button.click_event=tmp_zoom_out_ptr;
+						zoom_out_button.image=zoom_out_img;
+					}
+					process_view_change();
+				}
+				
+				function get_world_point_from_screen_point(screen_point) {
+					horz_ratio = screen_point.x/current_w;
+					vert_ratio = screen_point.y/current_h;
+					inverse_vert_ratio = 1.0 - vert_ratio;
+					return {
+						x:camera_left+horz_ratio*camera_w,
+						z:camera_bottom+inverse_vert_ratio*camera_h
+					};
+				}
+				
+				function get_screen_point_from_world_coords(location_x, location_z) {					
+					//var half_camera_w = camera_w/2.0;
+					//var half_camera_h = camera_h/2.0;
+					//subtract camera coords first (subtract both coords since location and camera are both cartesian)
+					horz_ratio = (location_x-camera_left)/(camera_right-camera_left);
+					vert_ratio = (location_z-camera_top)/(camera_bottom-camera_top);
+					return {
+						x:horz_ratio*current_w,
+						y:vert_ratio*current_h
+					};
+				}
+				
+				//size_em: size_width_keeping_aspect_this_many_em
+				function draw_markers(this_list, size_em, default_color_string) {
+					is_debug_shown = false;
+					for (i=0; i<this_list.length; i++) {
+						this_marker = this_list[i];
+						screen_point = get_screen_point_from_world_coords(this_marker.x, this_marker.z);
+						var pen_x = 0;
+						var pen_y = 0;
+						var w = size_em*size_1em_pixel_count;
+						if (w<zoomed_size_1pt_pixel_count) {
+							w = zoomed_size_1pt_pixel_count;
+						}
+						if (this_marker.img_enable) {
+							this_image = document.getElementById(this_marker.img_id);
+							
+							var h = w*(this_image.height/this_image.width);
+							ctx.drawImage(this_image, screen_point.x-w/2.0, screen_point.y-h/2.0, w, h);
+							//pen_y += h;
+							pen_x += w/2;
+						}
+						else {
+							
+							var radius = w/4.0;
+							ctx.beginPath();
+							ctx.arc(screen_point.x, screen_point.y, radius, 0, 2 * Math.PI, false);
+							//ctx.fillStyle = \'white\';
+							ctx.fillStyle = default_color_string;
+							ctx.fill();
+							ctx.lineWidth = size_1pt_pixel_count;
+							ctx.strokeStyle = \'#003300\';
+							ctx.stroke();							
+							pen_x += w;
+							pen_y += radius;
+						}
+						
+						if (this_marker.name!=null) {
+							if (!is_debug_shown) {
+								if ((this_marker.name!="singleplayer") || (i==(this_list.length-1)) ) {
+									//change_widget(label1, "recent marker: "+this_marker.name+" at x"+Math.round(this_marker.x)+",z"+Math.round(this_marker.z)+" (screen "+Math.round(screen_point.x)+","+Math.round(screen_point.y)+")");
+									is_debug_shown = true;
+								}
+							}
+							ctx.font = font_string;
+							ctx.strokeStyle="rgb(0,0,0)";
+							ctx.lineWidth= size_1pt_pixel_count*3;
+							ctx.strokeText(this_marker.name, screen_point.x+pen_x, screen_point.y+pen_y+size_1em_pixel_count/2);
+							ctx.fillStyle = "rgb(255,255,255)";
+							if (this_marker.is_expired) {
+								ctx.fillStyle = "rgb(255,0,0)";
+								ctx.globalAlpha = .33;
+							}
+							else if (this_marker.is_idle) {
+								ctx.globalAlpha = .5;
+							}
+							ctx.fillText(this_marker.name, screen_point.x+pen_x, screen_point.y+pen_y+size_1em_pixel_count/2);
+							ctx.globalAlpha = 1.0;
+						}
+					}
+				}
+				
+				var bw_count = 0;
+				var bawidgets = new Array();
+				var last_bawidget = null;
+				
+				
+				function create_bawidget(at_x, at_y, width, height, this_onclick, name) {
+					this_widget = Array();
+					this_widget.color_string = "rgb(255,255,255)";
+					this_widget.size_em=1.0;
+					this_widget.visible = true;
+					this_widget.x = at_x;
+					this_widget.y = at_y;
+					this_widget.width = width;
+					this_widget.height = height;
+					this_widget.click_event = this_onclick;
+					this_widget.name = name;
+					this_widget.image = null;
+					this_widget.text = null;
+					return this_widget;
+				}
+				
+				function add_bawidget(at_x, at_y, width, height, this_onclick, name) {
+					this_widget = create_bawidget(at_x, at_y, width, height, this_onclick, name);
+					bawidgets[bw_count] = this_widget;
+					last_bawidget = this_widget;
+					bw_count++;
+				}
+				function contains_coords(bawidget, cursor_x, cursor_y) {
+					right = bawidget.x+bawidget.width;
+					bottom = bawidget.y+bawidget.height;
+					return cursor_x>=bawidget.x && cursor_y>=bawidget.y && cursor_x<right && cursor_y<bottom;
+				}
+				function click_if_contains(bawidget, cursor_x, cursor_y) {
+					if (contains_coords(bawidget, cursor_x, cursor_y)) {
+						if (bawidget.click_event != null) {
+							bawidget.click_event();
+						}
+					}
 				}
 				
 				
 				
+				
 				function draw_map() {
-					process_zoom_change();
+					
 					var r = 0; //border
 					var g = 0; //exists
 					var b = 0; //
@@ -618,8 +944,8 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 						alert(alert_string);
 					}
 					
-					ctx = my_canvas.getContext("2d");
-					process_resize(ctx);
+					
+					process_resize();
 					
 					ctx.fillStyle = "black";
 					ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
@@ -641,36 +967,47 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 						
 						ctx.drawImage(si, si_canvas_topleft.x, si_canvas_topleft.y, si_canvas_w, si_canvas_h);
 						//label5.text = "--map "+si_canvas_topleft.x+":"+si_canvas_bottomright.x+","+si_canvas_topleft.y+":"+si_canvas_bottomright.y+" "+si_canvas_w+"x"+si_canvas_h+" --camera "+camera_left+":"+camera_right+","+camera_bottom+":"+camera_top;
-						label5.text = "map world bounds: "+si_left+":"+si_right+","+si_bottom+":"+si_top;
-						label1.text = "map on canvas "+Math.round(si_canvas_topleft.x)+":"+Math.round(si_canvas_bottomright.x)+","+Math.round(si_canvas_topleft.y)+":"+Math.round(si_canvas_bottomright.y)+" "+Math.round(si_canvas_w)+"x"+Math.round(si_canvas_h);
-						label2.text="camera "+Math.round(camera_left)+":"+Math.round(camera_right)+","+Math.round(camera_bottom)+":"+Math.round(camera_top);
-						label3.text="size_1pt_pixel_count:"+size_1pt_pixel_count+"  zoomed_size_1pt_pixel_count:"+zoomed_size_1pt_pixel_count;
-						label4.text="canvas "+current_w+"x"+current_h;
+						//label5.text = "map world bounds: "+si_left+":"+si_right+","+si_bottom+":"+si_top;
+						//label1.text = "map on canvas "+Math.round(si_canvas_topleft.x)+":"+Math.round(si_canvas_bottomright.x)+","+Math.round(si_canvas_topleft.y)+":"+Math.round(si_canvas_bottomright.y)+" "+Math.round(si_canvas_w)+"x"+Math.round(si_canvas_h);
+						//label2.text="[2] camera: "+Math.round(camera_left)+":"+Math.round(camera_right)+","+Math.round(camera_bottom)+":"+Math.round(camera_top);
+						//UNUSED (or mouse screen position): label4.text="canvas "+current_w+"x"+current_h;
 					}
-					
+					draw_markers(markers, 1, "rgb(71,219,37)");
+					draw_markers(players, .7, "white");
 					for (i=0; i<bawidgets.length; i++) {
 						draw_widget(bawidgets[i]);
 					}
-				}
+					draw_widget(powered_by_label);
+				}//end draw map
 				
 				function change_widget(this_widget, new_text) {
-					draw_widget_recolored(this_widget, "rgb(0,0,0)");
+					//draw_widget_recolored(this_widget, "rgb(64,64,64)");
+					ctx.fillStyle="rgb(0,0,0)";
+					if (this_widget.text != null) {
+						text_h = size_1em_pixel_count*this_widget.size_em;
+						ctx.fillRect(this_widget.x, this_widget.y-size_1em_pixel_count*this_widget.size_em+text_h/4, this_widget.text.length*size_1em_pixel_count*this_widget.size_em/2.0, text_h);
+					}
 					this_widget.text = new_text;
-					draw_widget_recolored(this_widget, "rgb(255,255,255)");
+					draw_widget_recolored(this_widget, this_widget.color_string);
 				}
 				
 				function draw_widget(this_widget) {
-					draw_widget_recolored(this_widget, "rgb(255,255,255)");
+					draw_widget_recolored(this_widget, this_widget.color_string);
 				}
 				
+				
+				
 				function draw_widget_recolored(this_widget, color_string) {
-					if (this_widget.text != null) {
-						ctx.font = font_string;
-						ctx.fillStyle = color_string;
-						ctx.fillText(this_widget.text, this_widget.x, this_widget.y);
-					}
-					if (this_widget.image != null) {
-						ctx.drawImage(this_widget.image, this_widget.x, this_widget.y, this_widget.width, this_widget.height);
+					if (this_widget.visible) {
+						if (this_widget.text != null) {
+							//ctx.font = font_string;
+							ctx.font = Math.round(this_widget.size_em*size_1em_pixel_count)+"px Calibri";
+							ctx.fillStyle = color_string;
+							ctx.fillText(this_widget.text, this_widget.x, this_widget.y);
+						}
+						if (this_widget.image != null) {
+							ctx.drawImage(this_widget.image, this_widget.x, this_widget.y, this_widget.width, this_widget.height);
+						}
 					}
 				}
 				
@@ -705,19 +1042,20 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 					mouse_point.x = parseInt(e.clientX-my_canvas.offsetLeft);
 					mouse_point.y = parseInt(e.clientY-my_canvas.offsetTop);
 					is_mouse_down = true;
-					change_widget(label0, mouse_point.x+","+mouse_point.y+" mouse down");
+					//change_widget(label0, mouse_point.x+","+mouse_point.y+" mouse down");
 				}
 				var handle_mouseup = function(e) {
 					is_mouse_down = false;
 					do_end_drag();
-					change_widget(label0, "mouse released");
+					//change_widget(label0, "mouse released");
 					//label0.text="mouse released";
 					//draw_map();
 				}
 				handle_mouseout = function (e) {
 					is_mouse_down = false;
 					do_end_drag();
-					change_widget(label0, "mouse left window");
+					//change_widget(label0, "(cursor is outside of window)");
+					change_widget(label0, "");
 					//label0.text="mouse left window";
 					draw_map();
 				}
@@ -745,18 +1083,21 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 					my_canvas.addEventListener("mousemove", function(e) {
 						mouse_point.x = parseInt(e.clientX-my_canvas.offsetLeft);
 						mouse_point.y = parseInt(e.clientY-my_canvas.offsetTop);
+						//var this_text = "on your screen: "+mouse_point.x+","+mouse_point.y+" mousemove";
+						//change_widget(label4, this_text);
 						
 						
 						world_point = get_world_point_from_screen_point(mouse_point);
 						if (is_mouse_down) {
-							var this_text = mouse_point.x+","+mouse_point.y+" mousemove";
-							this_text += " is_mouse_down=True"
-							//label0.text = this_text;
-							change_widget(label0, this_text);
 							if (dragging_prev_point.x>-1 && dragging_prev_point.y>-1) {
-								//flip both axes to give the effect of moving the map instead of the camera (z was already flipped [cartesian] so flip again):
-								x -= (mouse_point.x - dragging_prev_point.x)/zoomed_size_1pt_pixel_count;
-								z += (mouse_point.y - dragging_prev_point.y)/zoomed_size_1pt_pixel_count;
+								//flip both axes to give the effect of moving the map instead of the camera:
+								prev_cursor_world_point = get_world_point_from_screen_point(dragging_prev_point);
+								cursor_world_point = get_world_point_from_screen_point(mouse_point);
+								x -= cursor_world_point.x - prev_cursor_world_point.x;
+								z -= cursor_world_point.z - prev_cursor_world_point.z;
+								//(z was already flipped [cartesian] so flip again):
+								//x -= (mouse_point.x - dragging_prev_point.x)/zoomed_size_1pt_pixel_count;
+								//z += (mouse_point.y - dragging_prev_point.y)/zoomed_size_1pt_pixel_count;
 								process_view_change();
 							}
 							dragging_prev_point.x=mouse_point.x;
@@ -764,8 +1105,9 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 							draw_map();
 						}
 						else {
-							change_widget(label0, mouse_point.x+","+mouse_point.y+" world_point: "+Math.round(world_point.x)+","+Math.round(world_point.z));
+							//change_widget(label0, mouse_point.x+","+mouse_point.y+" world_point: "+Math.round(world_point.x)+","+Math.round(world_point.z));
 						}
+						change_widget(label0, "location: "+Math.round(world_point.x)+","+Math.round(world_point.z));
 					  }, false);
 					//my_canvas.addEventListener("mousemove", function(evt) {
 					//	var mousePos = getMousePos(my_canvas, evt);
@@ -793,8 +1135,8 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 					//	handle_mouseout(event);
 					//};
 						
-					var ctx = my_canvas.getContext("2d");
-					process_resize(ctx);
+					//ctx = my_canvas.getContext("2d");
+					process_resize();
 					
 					var pen_x = size_1em_pixel_count;
 					var pen_y = size_1em_pixel_count;
@@ -803,8 +1145,9 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 					var compass_rose_w = size_1em_pixel_count*5;
 					
 					//LOCATION LABEL (no click):
-					bw_index = add_bawidget(pen_x+compass_rose_w/4, pen_y, tmp_w, tmp_h, null, "location_label");
-					location_label = last_bawidget;
+					bw_index = add_bawidget(pen_x+compass_rose_w/4, pen_y, tmp_w, tmp_h, null, "xy_label");
+					xy_label = last_bawidget;
+					xy_label.visible = false;
 					//done on each draw: last_bawidget.text = 
 					
 					pen_y += size_1em_pixel_count + padding_h;
@@ -889,6 +1232,10 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 					//done on each draw: last_bawidget.text = 
 					pen_y += size_1em_pixel_count + padding_h;
 					
+					document.getElementById("chunkymap_table").style.visibility="hidden";
+					document.getElementById("singleimage_table").style.visibility="hidden";
+					
+					process_zoom_change();
 					draw_map();
 				}
 				</script>
@@ -903,18 +1250,137 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 		else {
 			$td_tile_placeholder_content = $td_decachunk_placeholder_content;
 		}
-		$si_path = "$chunkymapdata_thisworld_path/singleimage.png";
+		
+		
+		$si_path = "$chunkymapdata_thisworld_path/singleimage.jpg";
 		$si_yml_path = "$chunkymapdata_thisworld_path/singleimage.yml";
 		if (is_file($si_path) and is_file($si_yml_path)) {
-			//$style_append="; visibility:hidden";
 			$style_append="";
-			echo '<table style="width:100%'."$style_append".'">'."\r\n";
+			if ($html4_mode_enable===true) {
+				echo '<table id="singleimage_table" style="width:100%'."$style_append".'">'."\r\n";
+			}
+			else {
+				$style_append="; visibility:hidden";
+				echo '<table id="singleimage_table" style="position:absolute; top:0px; left:0px; width:0px; height:0px'."$style_append".'">'."\r\n";
+			}
 			echo '  <tr><td style="background-image:url(\'chunkymapdata/images/loading.png\'); background-repeat: no-repeat; background-size: 100% 100%">'."\r\n";
 			$style_append="";
+			$players_count = count($players);
+			$index=0;
+			while ($index<$players_count) {
+				$this_player = $players[$index];
+				$public_index = $this_player["index"];
+				// z-index:999; 
+				$zoomed_head_w="1%";
+				$img_style="";
+				$img_border_style="border: 1px solid white;";
+				$text_style="color:white;";
+				$img_id = null;
+				$img_enable = true;
+				$img_src = "$chunkymapdata_thisworld_path/players/singleplayer.png";
+				if (!isset($this_player["image"])) {
+					$this_player["image"] = $img_src;
+				}
+				if (isset($this_player["image"])) {
+					$img_src = $this_player["image"];
+					if (isset($this_player["img_id"])) { //this is only needed for changing canvas drawing location via ajax
+						$img_id = $this_player["img_id"];
+						$img_enable = true;
+					}
+					else {
+						echo "missing player img_id\r\n";
+					}
+				}
+				else {
+					echo "missing player image\r\n";
+				}
+				//$text = "$public_index";
+				$text = "";
+				if ($show_player_names_enable) {
+					if (isset($this_player["name"])) {
+						$text = $this_player["name"];
+					}
+				}
+				if ($this_player["is_expired"]===true) { //should only be used for debug
+					$img_border_style="border: 1px solid rgba(128,128,128,.5);";
+					$img_style.="opacity: 0.1; filter: alpha(opacity=10);";  //filter is for IE8 and below
+					$text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
+					$text.=" (expired)";
+				}
+				elseif ($this_player["is_idle"]===true) {
+					$img_border_style="border: 1px solid rgba(128,128,128,.5);";
+					$img_style.="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
+					$text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
+				}
+				
+				$rel_x = "50%"; //TODO: NOT YET IMPLEMENTED (determine from actual location)
+				$rel_z = "50%"; //TODO: NOT YET IMPLEMENTED (determine from actual location)
+				
+				echo "    <div style=\"position:absolute; left:$rel_x; top:$rel_z; width: $zoomed_head_w; $img_border_style\">\r\n";
+				if ($img_enable===true) {
+					$id_string = "";
+					if ($img_id!==null) {
+						$id_string=" id=\"$img_id\"";
+					}
+					echo "      <img$id_string src=\"$img_src\" style=\"$img_style\"/>\r\n";
+				}
+				echo "      <span style=\"$text_style\">$text</span></div>\r\n";
+				$index++;
+			}//end for player
+			
+			$markers_count = count($markers);
+			$index=0;
+			echo "\r\n";
+			while ($index<$markers_count) {
+				$this_marker = $markers[$index];
+				$public_index = $this_marker["index"];
+				// z-index:999; 
+				$zoomed_head_w="2%";
+				$img_style="";
+				$img_border_style="border: 1px solid white;";
+				$text_style="color:white;";
+				$img_id = "marker"."$public_index"."_img";
+				$img_enable = false;
+				$img_src = null;
+				$text = "";
+				if (isset($this_marker["image"])) {
+					$img_enable = true;
+					$img_src = $this_marker["image"];
+				}
+				else {
+					$text = "$public_index";
+				}
+				if (isset($this_marker["name"])) {
+					$text = $this_marker["name"];
+				}
+				if ($this_marker["is_expired"]===true) { //should only be used for debug
+					$img_border_style="border: 1px solid rgba(128,128,128,.5);";
+					$img_style.="opacity: 0.1; filter: alpha(opacity=10);";  //filter is for IE8 and below
+					$text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
+					$text.=" (expired)";
+				}
+				elseif ($this_marker["is_idle"]===true) {
+					$img_border_style="border: 1px solid rgba(128,128,128,.5);";
+					$img_style.="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
+					$text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
+				}
+				
+				$rel_x = "50%"; //TODO: NOT YET IMPLEMENTED (determine from actual location)
+				$rel_z = "50%"; //TODO: NOT YET IMPLEMENTED (determine from actual location)
+				
+				echo "    <div style=\"position:absolute; left:$rel_x; top:$rel_z; width: $zoomed_head_w; $img_border_style\">\r\n";
+				if ($img_enable===true) {
+					echo "      <img id=\"$img_id\" src=\"$img_src\" style=\"$img_style\"/>\r\n";
+				}
+				echo "      <span style=\"$text_style\">$text</span></div>\r\n";
+				$index++;
+			}//end for marker
 			echo '    <img id="singleimage" style="width:100%; $style_append" src="'."$si_path".'"/>'."\r\n";
 			echo '  </td></tr>'."\r\n";
 			echo '</table>'."\r\n";
 		}
+		
+		//echo "<img id=\"singleplayer_img\" src=\"$chunkymapdata_thisworld_path/players/singleplayer.png\" style=\"visibility:hidden\"/>";
 		echo '<img id="compass_rose" src="chunkymapdata/images/compass_rose.png"/>';
 		echo '<img id="zoom_in" src="chunkymapdata/images/zoom_in.png"/>';
 		echo '<img id="zoom_in_disabled" src="chunkymapdata/images/zoom_in_disabled.png"/>';
@@ -923,7 +1389,12 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 		$this_tiley_z=$max_tiley_z; //start at max since screen is inverted cartesian
 		if ($visual_debug_enable!==true) {
 			//this table loads the images then is hidden when javascript runs successfully, but it is also a map though not very functional
-			echo '<table id="chunkymap_table" cellspacing="0" cellpadding="0" style="width:100%">'."\r\n";
+			if ($html4_mode_enable===true) {
+				echo '<table id="chunkymap_table" cellspacing="0" cellpadding="0" style="width:100%">'."\r\n";
+			}
+			else {
+				echo '<table id="chunkymap_table" cellspacing="0" cellpadding="0" style="position:absolute; top:0px; left:0px; width:0px; height:0px; visibility:hidden">'."\r\n";
+			}
 			echo '  <tr>'."\r\n";
 			echo '    <td style="width:5%">'."$td_tile_placeholder_content".'</td>'."\r\n";
 			echo "    <td style=\"width:95%\"><a href=\"?world_name=$world_name&zoom=$zoom&x=$x&z=".($z+($camera_h*$chunkymap_camera_pan_delta))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow_wide_up.png" style="width:90%"/>'.'</a></td>'."\r\n";
@@ -970,6 +1441,9 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 			echo '    <td style="width:5%">'."$td_decachunk_placeholder_content".'</td>'."\r\n";
 			echo '  </tr>'."\r\n";
 			echo '</table>'."\r\n";
+		}
+		if ($html4_mode_enable===true) {
+			echo '<center><small>Powered by <a href="https://github.com/expertmm/minetest-chunkymap">Chunkymap</a></small></center>';
 		}
 	}
 	else { //not isset($world_name)

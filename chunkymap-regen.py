@@ -9,6 +9,7 @@ import timeit
 from timeit import default_timer as best_timer
 #file modified time etc:
 import time
+#from datetime import datetime
 #copyfile etc:
 import shutil
 import math
@@ -21,7 +22,7 @@ from pythoninfo import *
 from PIL import Image, ImageDraw, ImageFont, ImageColor
 #mode_to_bpp dict is from Antti Haapala. <http://stackoverflow.com/questions/28913988/is-there-a-way-to-measure-the-memory-consumption-of-a-png-image>. 7 Mar 2015. 28 Feb 2016.
 mode_to_bpp = {'1':1, 'L':8, 'P':8, 'RGB':24, 'RGBA':32, 'CMYK':32, 'YCbCr':24, 'I':32, 'F':32}
-
+INTERNAL_TIME_FORMAT_STRING="%Y-%m-%d %H:%M:%S"
 #best_timer = timeit.default_timer
 #if sys.platform == "win32":
     # on Windows, the best timer is time.clock()
@@ -337,20 +338,20 @@ class MTChunks:
         install_list.append(InstalledFile("browser.php",source_web_path,dest_web_path))
         install_list.append(InstalledFile("chunkymap.php",source_web_path,dest_web_path))
         install_list.append(InstalledFile("viewchunkymap.php",source_web_path,dest_web_path))
-        install_list.append(InstalledFile("zoom-in.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
-        install_list.append(InstalledFile("zoom-out.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
-        install_list.append(InstalledFile("zoom-in_disabled.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
-        install_list.append(InstalledFile("zoom-out_disabled.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("zoom_in.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("zoom_out.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("zoom_in_disabled.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("zoom_out_disabled.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
         install_list.append(InstalledFile("start.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
         install_list.append(InstalledFile("target_start.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
-        install_list.append(InstalledFile("compass-rose.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("compass_rose.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
         install_list.append(InstalledFile("loading.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
-        install_list.append(InstalledFile("arrow-wide-up.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
-        install_list.append(InstalledFile("arrow-wide-down.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
-        install_list.append(InstalledFile("arrow-wide-left.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
-        install_list.append(InstalledFile("arrow-wide-right.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
-        install_list.append(InstalledFile("chunk-blank.jpg", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
-        install_list.append(InstalledFile("decachunk-blank.jpg", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("arrow_wide_up.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("arrow_wide_down.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("arrow_wide_left.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("arrow_wide_right.png", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("chunk_blank.jpg", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
+        install_list.append(InstalledFile("decachunk_blank.jpg", source_web_chunkymapdata_images_path, dest_web_chunkymapdata_images_path))
         source_chunkymapdata_players = os.path.join(source_web_chunkymapdata_world_path, "players")
         dest_chunkymapdata_players = os.path.join(self.chunkymap_thisworld_data_path, "players")
         install_list.append(InstalledFile("singleplayer.png", source_chunkymapdata_players, dest_chunkymapdata_players))
@@ -371,7 +372,8 @@ class MTChunks:
                     if source_mtime_seconds>installed_mtime_seconds:
                         shutil.copyfile(source_path, installed_path) # DOES replace destination file
             else:
-                raw_input("WARNING: cannot update file since can't find '"+source_path+"'")
+                print("WARNING: cannot update file since can't find '"+source_path+"'")
+                raw_input("Press enter to continue...")
 
 
     def deny_http_access(self, dir_path):
@@ -1083,8 +1085,17 @@ class MTChunks:
                     player_index = None
                     this_player = None
                     is_changed = False
+                    #(mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(file_path)
+                    mtime = time.gmtime(os.path.getmtime(file_path))
+                    #NOTE: time.gmtime converts long timestamp to 9-long tuple
+                    this_mtime_string = time.strftime(INTERNAL_TIME_FORMAT_STRING, mtime)
+                    #mtime = os.path.getmtime(file_path)
+                    #this_mtime_string = datetime.strftime(mtime, INTERNAL_TIME_FORMAT_STRING)
                     if file_name in self.players:
                         this_player = self.players[file_name]
+                        if ("utc_mtime" not in this_player) or (this_player["utc_mtime"]!=this_mtime_string):
+                            this_player["utc_mtime"]=this_mtime_string
+                            is_changed = True
                         if "index" in this_player:
                             player_index = self.players[file_name]["index"]
                         else:
@@ -1095,11 +1106,15 @@ class MTChunks:
                         this_player = {}
                         player_index = self.get_new_player_index()
                         this_player["index"] = player_index
+                        this_player["playerid"] = file_name
+                        this_player["utc_mtime"] = this_mtime_string
+                        if player_name is not None:
+                            this_player["name"] = player_name
                         self.players[file_name] = this_player
                         is_changed = True
                     player_dest_path = None
                     if player_index is not None:
-                        player_dest_path = os.path.join(self.chunkymap_players_path, player_index+".yml")
+                        player_dest_path = os.path.join(self.chunkymap_players_path, str(player_index)+".yml")
                     else:
                         print("ERROR: player_index is None for '"+file_name+"' (this should never happen)")
                     player_x = None
@@ -1198,7 +1213,7 @@ class MTChunks:
         #if not self.verbose_enable:
         print("PLAYERS:")
         print("  saved: "+str(player_written_count)+" (moved:"+str(players_moved_count)+"; new:"+str(players_saved_count)+")")
-        print("  didn't change: "+str(players_didntmove_count))
+        print("  didn't move: "+str(players_didntmove_count))
 
     def is_chunk_traversed_by_player(self, chunk_luid):
         result = False

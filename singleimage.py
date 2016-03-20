@@ -3,7 +3,8 @@ import os
 from minetestinfo import *
 #python_exe_path is from:
 from pythoninfo import *
-
+#from PIL import Image, ImageDraw, ImageFont, ImageColor
+from PIL import Image
 
 class ChunkymapOfflineRenderer:
 
@@ -56,6 +57,7 @@ class ChunkymapOfflineRenderer:
 
         #cmd_no_out_string = python_exe_path+" "+self.minetestmapper_py_path+" --bgcolor '"+self.FLAG_EMPTY_HEXCOLOR+"' --input \""+minetestinfo.get_var("primary_world_path")+"\" --geometry "+geometry_string+" --output \""+tmp_png_path+"\""
         png_name = "singleimage.png"
+
         tmp_png_path = os.path.join(genresults_folder_path, png_name)
         squote = ""
         if os_name!="windows":
@@ -87,8 +89,27 @@ class ChunkymapOfflineRenderer:
                     os.remove(dest_png_path)
                 os.rename(tmp_png_path, dest_png_path)
                 final_png_path = dest_png_path
-            print("Map image saved to:")
+            print("Png image saved to:")
             print("  "+final_png_path)
+            print("Converting to jpg...")
+            pngim = Image.open(final_png_path)
+            #jpgim = Image.new('RGB', pngim.size, (0, 0, 0))
+            #jpgim.paste(pngim.convert("RGB"), (0,0,pngim.size[0],pngim.size[0]))
+            jpg_name = "singleimage.jpg"
+            dest_jpg_path = os.path.join(www_chunkymapdata_world_path, jpg_name)
+            if os.path.isfile(dest_jpg_path):
+                os.remove(dest_jpg_path)
+                if not os.path.isfile(dest_jpg_path):
+                    print("  removed old '"+dest_jpg_path+"'")
+                else:
+                    print("  failed to remove'"+dest_jpg_path+"'")
+            #jpgim.save(dest_jpg_path)
+            pngim.save(dest_jpg_path, 'JPEG')
+            if os.path.isfile(dest_jpg_path):
+                print("jpg image saved to:")
+                print("  "+dest_jpg_path)
+            else:
+                print("Could not write '"+dest_jpg_path+"'")
             if os.path.isfile(genresult_path):
                 print("Results:")
                 print("  "+genresult_path)
