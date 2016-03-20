@@ -21,16 +21,16 @@ if (is_file('chunkymap.php')) {
 	//echo "about to call echo_chunkymap_as_chunk_table...";
 
 	//The following is not needed, since chunkymap.php should be included above and puts all $_REQUEST array variables into $GLOBALS array
-	//if (!isset($_REQUEST['chunkymap_view_x'])) {//if (!isset($chunkymap_view_x)) {
-	//	$chunkymap_view_x=0;
+	//if (!isset($_REQUEST['x'])) {//if (!isset($x)) {
+	//	$x=0;
 	//}
-	//else $chunkymap_view_x=$_REQUEST['chunkymap_view_x'];
+	//else $x=$_REQUEST['x'];
 	//echo "<center>";
 	//echo "<h1>";
 	//echo_map_heading_text();
 	//echo "</h1>";
 	//echo "</center>";
-	set_chunkymap_view($chunkymap_view_x,$chunkymap_view_z,$chunkymap_view_zoom);
+	set_chunkymap_view($x,$z,$zoom);
 	//echo "<table><tr><td style=\"text-align:left\">";
 	$chunk_mode_enable=true; //(this should normally be false) if true, uses 16x16 png files instead of the 160x160 decachunks; it is slower but may have more of the map during times when new chunks are explored but before the render queue is done and the decachunk images are created from the chunk images.);
 	$visual_debug_enable=false; //if true, this renders colors based on yml files instead of drawing images (and does not echo images at all)

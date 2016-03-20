@@ -173,12 +173,12 @@ function echo_decachunk_table() {
 	echo '<table id="chunkymap_table" cellspacing="0" cellpadding="0" style="width:100%">'."\r\n";
 	echo '  <tr>'."\r\n";
 	echo '    <td style="width:5%">'."$td_decachunk_placeholder_content".'</td>'."\r\n";
-	echo "    <td style=\"width:95%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=$chunkymap_view_x&chunkymap_view_z=".($chunkymap_view_z+($world_camera_h*$chunkymap_camera_pan_delta))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-up.png" style="width:90%"/>'.'</a></td>'."\r\n";
+	echo "    <td style=\"width:95%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=$chunkymap_view_x&chunkymap_view_z=".($chunkymap_view_z+($world_camera_h*$chunkymap_camera_pan_delta))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow_wide_up.png" style="width:90%"/>'.'</a></td>'."\r\n";
 	echo '    <td style="width:5%">'."$td_decachunk_placeholder_content".'</td>'."\r\n";
 	echo '  </tr>'."\r\n";
 	$cell_perc=intval(round(100.0/$decachunky_count_x));
 	echo '  <tr>'."\r\n";
-	echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=".($chunkymap_view_x-($world_camera_w*$chunkymap_camera_pan_delta))."&chunkymap_view_z=$chunkymap_view_z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-left.png" style="width:90%"/>'.'</a></td>'."\r\n";
+	echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=".($chunkymap_view_x-($world_camera_w*$chunkymap_camera_pan_delta))."&chunkymap_view_z=$chunkymap_view_z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow_wide_left.png" style="width:90%"/>'.'</a></td>'."\r\n";
 	echo '    <td style="width:95%">'."\r\n";
 	echo '      <table id="decachunk_table" cellspacing="0" cellpadding="0" style="width:100%; background-color:black">'."\r\n";
 	while ($decachunky_z>=$decachunky_min_z) {
@@ -188,7 +188,7 @@ function echo_decachunk_table() {
 		while ($decachunky_x<=$decachunky_max_x) {
 			$decachunk_file_name=get_decachunk_image_name_from_decachunk($decachunky_x, $decachunky_z);
 			$decachunk_file_path=get_decachunk_folder_path_from_decachunk($decachunky_x, $decachunky_z).'/'.$decachunk_file_name;
-			$td_content="<!--no decachunk $decachunk_file_path--><img src=\"chunkymapdata/images/decachunk-blank.jpg\" style=\"width:100%\"/>";
+			$td_content="<!--no decachunk $decachunk_file_path--><img src=\"chunkymapdata/images/decachunk_blank.jpg\" style=\"width:100%\"/>";
 			if (is_file($decachunk_file_path)) {
 				$td_content="<img src=\"$decachunk_file_path\" style=\"width:100%\"/>";
 			}
@@ -209,11 +209,11 @@ function echo_decachunk_table() {
 	}
 	echo '      </table>'."\r\n";
 	echo '    </td>'."\r\n";
-	echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=".($chunkymap_view_x+($world_camera_w*$chunkymap_camera_pan_delta))."&chunkymap_view_z=$chunkymap_view_z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-right.png" style="width:100%"/>'.'</a></td>'."\r\n";
+	echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=".($chunkymap_view_x+($world_camera_w*$chunkymap_camera_pan_delta))."&chunkymap_view_z=$chunkymap_view_z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow_wide_right.png" style="width:100%"/>'.'</a></td>'."\r\n";
 	echo '  </tr>'."\r\n";
 	echo '  <tr>'."\r\n";
 	echo '    <td style="width:5%">'."$td_decachunk_placeholder_content".'</td>'."\r\n";
-	echo "    <td style=\"width:90%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=$chunkymap_view_x&chunkymap_view_z=".($chunkymap_view_z-($world_camera_h*$chunkymap_camera_pan_delta))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-down.png" style="width:100%"/>'.'</a></td>'."\r\n";
+	echo "    <td style=\"width:90%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=$chunkymap_view_x&chunkymap_view_z=".($chunkymap_view_z-($world_camera_h*$chunkymap_camera_pan_delta))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow_wide_down.png" style="width:100%"/>'.'</a></td>'."\r\n";
 	echo '    <td style="width:5%">'."$td_decachunk_placeholder_content".'</td>'."\r\n";
 	echo '  </tr>'."\r\n";
 	echo '</table>'."\r\n";

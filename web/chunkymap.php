@@ -26,17 +26,17 @@ if ($is_verbose) echo "timezone...";
 date_default_timezone_set('EST'); //required by PHP >=5.1.0
 
 if ($is_verbose) echo "globals...";
-//$chunkymap_view_x=0;
-//$chunkymap_view_z=0;
-//$chunkymap_view_zoom=25;
-if (!isset($chunkymap_view_x)) {
-    $chunkymap_view_x=0;
+//$x=0;
+//$z=0;
+//$zoom=25;
+if (!isset($x)) {
+    $x=0;
 }
-if (!isset($chunkymap_view_z)) {
-    $chunkymap_view_z=0;
+if (!isset($z)) {
+    $z=0;
 }
-if (!isset($chunkymap_view_zoom)) {
-    $chunkymap_view_zoom=.25;
+if (!isset($zoom)) {
+    $zoom=.25;
 }
 
 $chunkymapdata_path = "chunkymapdata";
@@ -66,9 +66,9 @@ $chunk_dot_and_ext = ".png";
 
 //$more_attribs_string="; -webkit-filter: opacity(0%); filter: opacity(0%)";
 $more_attribs_string="";
-$td_decachunk_placeholder_content="<!--widening table--><img src=\"chunkymapdata/images/decachunk-blank.jpg\" style=\"width:100%; background-color:black".$more_attribs_string."\"/>";
-$td_chunk_placeholder_content="<!--widening table--><img src=\"chunkymapdata/images/chunk-blank.jpg\" style=\"width:100%; background-color:black".$more_attribs_string."\"/>";
-$td_1px_placeholder_content="<!--widening table--><img src=\"chunkymapdata/images/chunk-blank.jpg\" style=\"width:1px; background-color:black".$more_attribs_string."\"/>";
+$td_decachunk_placeholder_content="<!--widening table--><img src=\"chunkymapdata/images/decachunk_blank.jpg\" style=\"width:100%; background-color:black".$more_attribs_string."\"/>";
+$td_chunk_placeholder_content="<!--widening table--><img src=\"chunkymapdata/images/chunk_blank.jpg\" style=\"width:100%; background-color:black".$more_attribs_string."\"/>";
+$td_1px_placeholder_content="<!--widening table--><img src=\"chunkymapdata/images/chunk_blank.jpg\" style=\"width:1px; background-color:black".$more_attribs_string."\"/>";
 
 
 function echo_error($val) {
@@ -139,12 +139,12 @@ function is_int_string($val) {
     return $result;
 }
 function set_chunkymap_view($set_chunkymap_view_x, $set_chunkymap_view_z, $set_chunkymap_view_zoom) {
-    global $chunkymap_view_x;
-    global $chunkymap_view_z;
-    global $chunkymap_view_zoom;
-    $chunkymap_view_x = $set_chunkymap_view_x;
-    $chunkymap_view_z = $set_chunkymap_view_z;
-    $chunkymap_view_zoom = $set_chunkymap_view_zoom;
+    global $x;
+    global $z;
+    global $zoom;
+    $x = $set_chunkymap_view_x;
+    $z = $set_chunkymap_view_z;
+    $zoom = $set_chunkymap_view_zoom;
 }
 
 function echo_map_heading_text() {
@@ -164,19 +164,19 @@ function get_chunk_folder_path_from_chunky_coords($chunky_x, $chunky_z) {
 	//NOTE: floor converts -.5 to -1 (and -1.5 to -2) but .5 to 0
 	$decachunk_x = get_decachunky_coord_from_chunky_coord($chunky_x);
 	$decachunk_z = get_decachunky_coord_from_chunky_coord($chunky_z);
-	//if ($x<0) { $decachunk_x = $x + $x%10; }
-	//else { $decachunk_x = $x - $x%10; }
-	//if ($z<0) { $decachunk_z = $z + $z%10; }
-	//else { $decachunk_z = $z - $z%10; }
+	//if ($chunky_x<0) { $decachunk_x = $chunky_x + $chunky_x%10; }
+	//else { $decachunk_x = $chunky_x - $chunky_x%10; }
+	//if ($chunky_z<0) { $decachunk_z = $chunky_z + $chunky_z%10; }
+	//else { $decachunk_z = $chunky_z - $chunky_z%10; }
 	$result = $chunkymapdata_thisworld_path.'/16px/'.$decachunk_x.'/'.$decachunk_z;
 	return $result;
 }
 
-function get_decachunk_folder_path_from_location($x, $z) {
+function get_decachunk_folder_path_from_location($location_x, $location_z) {
 	global $chunkymapdata_thisworld_path;
 	//NOTE: floor converts -.5 to -1 (and -1.5 to -2) but .5 to 0
-	$chunky_x = get_chunky_coord_from_location($x);
-	$chunky_z = get_chunky_coord_from_location($z);
+	$chunky_x = get_chunky_coord_from_location($location_x);
+	$chunky_z = get_chunky_coord_from_location($location_z);
 	$decachunky_x = get_decachunky_coord_from_chunky_coord($chunky_x);
 	$decachunky_z = get_decachunky_coord_from_chunky_coord($chunky_z);
 	$hectochunk_x = get_hectochunky_coord_from_decachunky_coord($decachunky_x);
@@ -217,10 +217,10 @@ function get_decachunk_image_path_from_decachunk($decachunky_x, $decachunky_z) {
 	return get_decachunk_folder_path_from_decachunk($decachunky_x, $decachunky_z)."/".get_decachunk_image_name_from_decachunk($decachunky_x, $decachunky_z);
 }
 
-function get_decachunk_image_name_from_decachunk($x, $z) {
+function get_decachunk_image_name_from_decachunk($decachunky_x, $decachunky_z) {
 	global $decachunk_prefix_string;
 	global $decachunk_dot_and_ext;
-	return "$decachunk_prefix_string"."$x"."z"."$z"."$decachunk_dot_and_ext";
+	return "$decachunk_prefix_string"."$decachunky_x"."z"."$decachunky_z"."$decachunk_dot_and_ext";
 }
 function get_chunk_yaml_path_from_chunky_coords($chunky_x, $chunky_z) {
 	return get_chunk_folder_path_from_chunky_coords($chunky_x, $chunky_z).'/'.get_chunk_yaml_file_name($chunky_x, $chunky_z);
@@ -265,9 +265,9 @@ function get_javascript_int_value($this_val) {
 //chunk_mode_enable: shows chunk png images instead of decachunk jpg images (slower)
 //visual_debug_enable: draws colored rectangles based on yml files instead of drawing images
 function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_mode_enable) {
-    global $chunkymap_view_x;
-    global $chunkymap_view_z;
-    global $chunkymap_view_zoom;
+    global $x;
+    global $z;
+    global $zoom;
     global $chunkymap_view_max_zoom;
     global $chunkymap_view_min_zoom;
 	global $showplayers;
@@ -299,19 +299,19 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 		$locations_per_tile_x_count = $chunks_per_tile_x_count*16;
 		$locations_per_tile_z_count = $chunks_per_tile_z_count*16;
 			
-		if ($chunkymap_view_zoom<$chunkymap_view_min_zoom) $chunkymap_view_zoom = $chunkymap_view_min_zoom;
-		if ($chunkymap_view_zoom>$chunkymap_view_max_zoom) $chunkymap_view_zoom = $chunkymap_view_max_zoom;
+		if ($zoom<$chunkymap_view_min_zoom) $zoom = $chunkymap_view_min_zoom;
+		if ($zoom>$chunkymap_view_max_zoom) $zoom = $chunkymap_view_max_zoom;
 
 		$EM_PER_WIDTH_COUNT = 800.0/12.0;
 		
-		$world_camera_w = (800/$tile_w) * (1.0/$chunkymap_view_zoom); //screen should be 800pt wide always (so 12pt is similar on all screens and only varies with physical size of screen in inches, and since pt was invented to replace px)
-		$world_camera_left = $chunkymap_view_x-$world_camera_w/2.0;
+		$camera_w = (800) * (1.0/$zoom); //screen should be 800pt wide always (so 12pt is similar on all screens and only varies with physical size of screen in inches, and since pt was invented to replace px)
+		$camera_left = $x-$camera_w/2.0;
 		
-		$world_camera_h = $world_camera_w; //start with square camera to make sure enough chunks are loaded and since neither screen height nor ratio can be known from php since it is only run on server-side
-		$world_camera_top = $chunkymap_view_z+$world_camera_h/2.0; //plus since cartesian until drawn [then flipped]
+		$camera_h = $camera_w; //start with square camera to make sure enough chunks are loaded and since neither screen height nor ratio can be known from php since it is only run on server-side
+		$camera_top = $z+$camera_h/2.0; //plus since cartesian until drawn [then flipped]
 		
-		$chunky_view_x = get_chunky_coord_from_location($chunkymap_view_x);
-		$chunky_view_z = get_chunky_coord_from_location($chunkymap_view_z);
+		$chunky_view_x = get_chunky_coord_from_location($x);
+		$chunky_view_z = get_chunky_coord_from_location($z);
 
 		#tile is either chunk or decachunk
 		$min_tiley_x = -1;
@@ -319,8 +319,8 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 		$min_tiley_z = -1;
 		$max_tiley_z = 0;
 		
-		$world_camera_right = $world_camera_left+$world_camera_w;
-		$world_camera_bottom = $world_camera_top-$world_camera_h; //minus since cartesian until drawn [then flipped]
+		$camera_right = $camera_left+$camera_w;
+		$camera_bottom = $camera_top-$camera_h; //minus since cartesian until drawn [then flipped]
 		
 		//Only whether the near edges are in the canvas matters (get bottom of max since always cartesian until drawn [then inverted]):
 		$min_tiley_x__chunk_location_right = $min_tiley_x*$locations_per_tile_x_count+$locations_per_tile_x_count;
@@ -328,19 +328,19 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 		$min_tiley_z__chunk_location_top = $min_tiley_z*$locations_per_tile_z_count;
 		$max_tiley_z__chunk_location_bottom = $max_tiley_z*$locations_per_tile_z_count+$locations_per_tile_z_count;
 		
-		while ($min_tiley_x__chunk_location_right>$world_camera_left) {
+		while ($min_tiley_x__chunk_location_right>$camera_left) {
 			$min_tiley_x -= 1;
 			$min_tiley_x__chunk_location_right = $min_tiley_x*$locations_per_tile_x_count+$locations_per_tile_x_count;
 		}
-		while ($max_tiley_x__chunk_location_left<$world_camera_right) {
+		while ($max_tiley_x__chunk_location_left<$camera_right) {
 			$max_tiley_x += 1;
 			$max_tiley_x__chunk_location_left = $max_tiley_x*$locations_per_tile_x_count;
 		}
-		while ($min_tiley_z__chunk_location_top>$world_camera_bottom) {
+		while ($min_tiley_z__chunk_location_top>$camera_bottom) {
 			$min_tiley_z -= 1;
 			$min_tiley_z__chunk_location_top = $min_tiley_z*$locations_per_tile_z_count;
 		}
-		while ($max_tiley_z__chunk_location_bottom<$world_camera_top) {
+		while ($max_tiley_z__chunk_location_bottom<$camera_top) {
 			$max_tiley_z += 1;
 			$max_tiley_z__chunk_location_bottom = $max_tiley_z*$locations_per_tile_z_count+$locations_per_tile_z_count;
 		}
@@ -385,12 +385,13 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 			}
 		}
 		if ($html4_mode_enable!==true) {
+		//image-rendering: -moz-crisp-edges; image-rendering:-o-crisp-edges; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; -ms-interpolation-mode: nearest-neighbor;
 			echo '<canvas id="myCanvas"></canvas> ';
 			echo '<script>
 				var my_canvas = document.getElementById("myCanvas");
-				var chunkymap_view_x='.$chunkymap_view_x.';
-				var chunkymap_view_z='.$chunkymap_view_z.';
-				var chunkymap_view_zoom='.$chunkymap_view_zoom.';
+				var x='.$x.';
+				var z='.$z.';
+				var zoom='.$zoom.';
 				var chunkymap_view_max_zoom='.$chunkymap_view_max_zoom.';
 				var chunkymap_view_min_zoom='.$chunkymap_view_min_zoom.';
 				var chunkymap_zoom_delta='.$chunkymap_change_zoom_multiplier.';
@@ -417,12 +418,12 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 				var padding_w = null;
 				var padding_h = null;
 				var pen_x = null;
-				var world_camera_w = null; //calculated below
-				var world_camera_h = null; //calculated below
-				var world_camera_left = null; //calculated below
-				var world_camera_top = null; //calculated below
-				var world_camera_right = null; //calculated below
-				var world_camera_bottom = null; //calculated below
+				var camera_w = null; //calculated below
+				var camera_h = null; //calculated below
+				var camera_left = null; //calculated below
+				var camera_top = null; //calculated below
+				var camera_right = null; //calculated below
+				var camera_bottom = null; //calculated below
 				var current_w = null;
 				var current_h = null;
 				var current_ratio = null;
@@ -430,40 +431,75 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 				var zoom_out_button_index = null;
 				var zoom_out_label_index = null;
 				var location_label_index = null;
-				var debug_label = null;
+				var label0 = null;
+				var label1 = null;
+				var label2 = null;
+				var label3 = null;
+				var label4 = null;
+				var label5 = null;
+				var canvas_offset_x = 0;
+				var canvas_offset_y = 0;
+				var is_mouse_down = false;
+				var mouse_start_point = {x:-1, y:-1};
+				var mouse_end_point = {x:-1, y:-1};
+				var mouse_point = {x:-1, y:-1};
+				var dragging_prev_point = {x:-1, y:-1};
+				var zoomed_size_1pt_pixel_count = null;
+				var ctx = null;
 				
 				function zoom_in() {
-					chunkymap_view_zoom*=chunkymap_zoom_delta;
+					zoom*=chunkymap_zoom_delta;
 					draw_map();
 				}
 				function zoom_out() {
-					chunkymap_view_zoom/=chunkymap_zoom_delta;
+					zoom/=chunkymap_zoom_delta;
 					draw_map();
 				}
 				function process_view_change() {
 					//NOTE: this should be exactly the same math as php uses to make sure there are the same #of tiles displayed as were loaded by php
 					if (current_w>current_h) {
-						world_camera_w = (800/tile_w) * (1.0/chunkymap_view_zoom);
-						world_camera_h = world_camera_w/current_ratio;
+						camera_w = (800) * (1.0/zoom);
+						camera_h = camera_w/current_ratio;
 					}
 					else {
-						world_camera_h = (800/tile_h) * (1.0/chunkymap_view_zoom);
-						world_camera_w = world_camera_h*current_ratio;
+						camera_h = (800) * (1.0/zoom);
+						camera_w = camera_h*current_ratio;
 					}
-					world_camera_left = chunkymap_view_x - (world_camera_w/2.0);
-					world_camera_top = chunkymap_view_z + (world_camera_h/2.0); //plus since cartesian
-					world_camera_right = world_camera_left+world_camera_w;
-					world_camera_bottom = world_camera_top - world_camera_h; //minus since cartesion
+					camera_left = x - (camera_w/2.0);
+					camera_top = z + (camera_h/2.0); //plus since cartesian
+					camera_right = camera_left+camera_w;
+					camera_bottom = camera_top - camera_h; //minus since cartesion
+				}
+				
+				function get_world_point_from_screen_point(screen_point) {
+					horz_ratio = screen_point.x/current_w;
+					vert_ratio = screen_point.y/current_h;
+					inverse_vert_ratio = 1.0 - vert_ratio;
+					return {
+						x:camera_left+horz_ratio*camera_w,
+						z:camera_bottom+inverse_vert_ratio*camera_h
+					};
+				}
+				
+				function get_screen_point_from_world_coords(location_x, location_z) {
+					//var half_camera_w = camera_w/2.0;
+					//var half_camera_h = camera_h/2.0;
+					horz_ratio = location_x/(camera_right-camera_left);
+					vert_ratio = location_z/(camera_bottom-camera_top);
+					return {
+						x:horz_ratio*current_w,
+						y:vert_ratio*current_h
+					};
 				}
 				
 				function process_resize(ctx) {
 					//var ctx = my_canvas.getContext("2d");
 					ctx.canvas.width = window.innerWidth;
 					ctx.canvas.height = window.innerHeight;
-					//current_w = ctx.canvas.width;
-					//current_h = ctx.canvas.width;
-					current_w = window.innerWidth;
-					current_h = window.innerHeight;
+					current_w = ctx.canvas.width;
+					current_h = ctx.canvas.width;
+					//current_w = window.innerWidth;
+					//current_h = window.innerHeight;
 					current_ratio = current_w/current_h;
 					
 					//if (ctx.canvas.height<ctx.canvas.width) {
@@ -474,26 +510,27 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 					//}
 					font_string = Math.round(size_1em_pixel_count)+"px Arial";
 					size_1pt_pixel_count = size_1em_pixel_count/16;
-					padding_w = size_1em_pixel_count/2;
-					padding_h = size_1em_pixel_count/2;
-					
+					padding_w = Math.round(size_1em_pixel_count/3.0);
+					padding_h = Math.round(size_1em_pixel_count/3.0);
+					canvas_offset_x = my_canvas.offsetLeft; //or ctx.canvas.offsetLeft;  //or ?
+					canvas_offset_y = my_canvas.offsetTop; //or ctx.canvas.offsetTop;  //or ?
+					zoomed_size_1pt_pixel_count = size_1pt_pixel_count*zoom;
 					process_view_change();
 				}
 				
 				var bw_count = 0;
 				var bawidgets = new Array();
 				var last_bawidget = null;
-				function add_bawidget(x, y, width, height, this_onclick, name) {
+				function add_bawidget(at_x, at_y, width, height, this_onclick, name) {
 					this_widget = Array();
-					this_widget["x"] = x;
-					this_widget["y"] = y;
-					this_widget["width"] = width;
-					this_widget["height"] = height;
-					this_widget["click_event"] = this_onclick;
-					this_widget["name"] = name;
-
-					this_widget["image"] = null;
-					this_widget["text"] = null;
+					this_widget.x = at_x;
+					this_widget.y = at_y;
+					this_widget.width = width;
+					this_widget.height = height;
+					this_widget.click_event = this_onclick;
+					this_widget.name = name;
+					this_widget.image = null;
+					this_widget.text = null;
 					bawidgets[bw_count] = this_widget;
 					last_bawidget = this_widget;
 					bw_count++;
@@ -505,8 +542,8 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 				}
 				function click_if_contains(bawidget, cursor_x, cursor_y) {
 					if (contains_coords(bawidget, cursor_x, cursor_y)) {
-						if (bawidget["click_event"] != null) {
-							bawidget["click_event"]();
+						if (bawidget.click_event != null) {
+							bawidget.click_event();
 						}
 					}
 				}
@@ -519,39 +556,40 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 					var tmp_zoom_out_ptr = zoom_out;
 					var tmp_zoom_in_ptr = zoom_in;
 					
-					if (chunkymap_view_zoom<chunkymap_view_min_zoom) {chunkymap_view_zoom = chunkymap_view_min_zoom;}
-					if (chunkymap_view_zoom>chunkymap_view_max_zoom) {chunkymap_view_zoom = chunkymap_view_max_zoom;}
+					if (zoom<chunkymap_view_min_zoom) {zoom = chunkymap_view_min_zoom;}
+					if (zoom>chunkymap_view_max_zoom) {zoom = chunkymap_view_max_zoom;}
 					
-					if (chunkymap_view_zoom==chunkymap_view_min_zoom) {
+					if (zoom==chunkymap_view_min_zoom) {
 						zoom_out_img = document.getElementById("zoom_out_disabled");
 						tmp_zoom_out_ptr = null;
 					}
 					else {
 						zoom_out_img = document.getElementById("zoom_out");
 					}
-					if (chunkymap_view_zoom==chunkymap_view_max_zoom) {
+					if (zoom==chunkymap_view_max_zoom) {
 						zoom_in_img = document.getElementById("zoom_in_disabled");
 						tmp_zoom_in_ptr = null;
 					}
 					else {
 						zoom_in_img = document.getElementById("zoom_in");
 					}
-					location_label["text"] = chunkymap_view_x+","+chunkymap_view_z;
+					location_label.text = Math.round(x)+","+Math.round(z);
 					
-					zoom_label_value=chunkymap_view_zoom*100;
+					zoom_label_value=zoom*100;
 					if (zoom_label_value>1) {
 						zoom_label_value = Math.round(zoom_label_value, 1);
 					}
 					else {
 						zoom_label_value = Math.round(zoom_label_value, 7);
 					}
-					zoom_label["text"]=zoom_label_value+"%";
+					zoom_label.text=zoom_label_value+"%";
 					
-					zoom_in_button["click_event"]=tmp_zoom_in_ptr;
-					zoom_in_button["image"]=zoom_in_img;
-					zoom_out_button["click_event"]=tmp_zoom_out_ptr;
-					zoom_out_button["image"]=zoom_out_img;
+					zoom_in_button.click_event=tmp_zoom_in_ptr;
+					zoom_in_button.image=zoom_in_img;
+					zoom_out_button.click_event=tmp_zoom_out_ptr;
+					zoom_out_button.image=zoom_out_img;
 				}
+				
 				
 				
 				function draw_map() {
@@ -580,7 +618,7 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 						alert(alert_string);
 					}
 					
-					var ctx = my_canvas.getContext("2d");
+					ctx = my_canvas.getContext("2d");
 					process_resize(ctx);
 					
 					ctx.fillStyle = "black";
@@ -591,50 +629,170 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 					//ctx.stroke(); 
 					
 					//size_1pt_pixel_count = ctx.canvas.height/600.0;
-					var zoomed_size_1pt_pixel_count = size_1pt_pixel_count*chunkymap_view_zoom;
 					var bw_index = 0;
 					
 					var si = document.getElementById("singleimage");
 					if ((si!==null)&&(si_left!==null)&&(si_top!==null)&&(si_w!==null)&&(si_h!==null)) {
-						var si_canvas_x = (si_left-world_camera_left)*zoomed_size_1pt_pixel_count;
-						//var si_canvas_right = (si_right-world_camera_left)*zoomed_size_1pt_pixel_count;
-						//var si_canvas_w = si_canvas_right-si_canvas_x;
-						var si_canvas_w = si_w*zoomed_size_1pt_pixel_count;
-						var si_canvas_right = si_canvas_x+si_canvas_w;
 						
-						//invert since cartesian:
-						var si_canvas_y = (world_camera_top-si_top)*zoomed_size_1pt_pixel_count;
-						//var si_canvas_bottom = (world_camera_bottom-si_top)*zoomed_size_1pt_pixel_count;
-						//var si_canvas_h = si_canvas_bottom-si_canvas_y;
-						var si_canvas_h = si_h*zoomed_size_1pt_pixel_count;
-						var si_canvas_bottom = si_canvas_y + si_canvas_h;
+						si_canvas_topleft = get_screen_point_from_world_coords(si_left, si_top);
+						si_canvas_bottomright = get_screen_point_from_world_coords(si_right, si_bottom);
+						si_canvas_w = si_canvas_bottomright.x - si_canvas_topleft.x;
+						si_canvas_h = si_canvas_bottomright.y - si_canvas_topleft.y;
 						
-						ctx.drawImage(si, si_canvas_x, si_canvas_y, si_canvas_w, si_canvas_h);
-						//debug_label["text"] = "--map "+si_canvas_x+":"+si_canvas_right+","+si_canvas_y+":"+si_canvas_bottom+" "+si_canvas_w+"x"+si_canvas_h+" --camera "+world_camera_left+":"+world_camera_right+","+world_camera_bottom+":"+world_camera_top;
-						debug_label["text"] = "--map "+Math.round(si_canvas_x)+":"+Math.round(si_canvas_right)+","+Math.round(si_canvas_y)+":"+Math.round(si_canvas_bottom)+" "+Math.round(si_canvas_w)+"x"+Math.round(si_canvas_h)+" --camera "+Math.round(world_camera_left)+":"+Math.round(world_camera_right)+","+Math.round(world_camera_bottom)+":"+Math.round(world_camera_top);
+						ctx.drawImage(si, si_canvas_topleft.x, si_canvas_topleft.y, si_canvas_w, si_canvas_h);
+						//label5.text = "--map "+si_canvas_topleft.x+":"+si_canvas_bottomright.x+","+si_canvas_topleft.y+":"+si_canvas_bottomright.y+" "+si_canvas_w+"x"+si_canvas_h+" --camera "+camera_left+":"+camera_right+","+camera_bottom+":"+camera_top;
+						label5.text = "map world bounds: "+si_left+":"+si_right+","+si_bottom+":"+si_top;
+						label1.text = "map on canvas "+Math.round(si_canvas_topleft.x)+":"+Math.round(si_canvas_bottomright.x)+","+Math.round(si_canvas_topleft.y)+":"+Math.round(si_canvas_bottomright.y)+" "+Math.round(si_canvas_w)+"x"+Math.round(si_canvas_h);
+						label2.text="camera "+Math.round(camera_left)+":"+Math.round(camera_right)+","+Math.round(camera_bottom)+":"+Math.round(camera_top);
+						label3.text="size_1pt_pixel_count:"+size_1pt_pixel_count+"  zoomed_size_1pt_pixel_count:"+zoomed_size_1pt_pixel_count;
+						label4.text="canvas "+current_w+"x"+current_h;
 					}
 					
 					for (i=0; i<bawidgets.length; i++) {
-						this_widget = bawidgets[i];
-						this_img = this_widget["image"]				
-						if (this_widget["text"] != null) {
-							ctx.font = font_string;
-							ctx.fillStyle = "rgb(255,255,255)";
-							ctx.fillText(this_widget["text"], this_widget["x"], this_widget["y"]);
-						}
-						else if (this_img != null) {
-							ctx.drawImage(this_img, this_widget.x, this_widget.y, this_widget.width, this_widget.height);
-						}
+						draw_widget(bawidgets[i]);
 					}
 				}
 				
-				window.onload = function() {
-					my_canvas.onclick = function(event) {
-						for (i=0; i<bawidgets.length; i++) {
-							click_if_contains(bawidgets[i], event.clientX, event.clientY);
-						}
-					};
+				function change_widget(this_widget, new_text) {
+					draw_widget_recolored(this_widget, "rgb(0,0,0)");
+					this_widget.text = new_text;
+					draw_widget_recolored(this_widget, "rgb(255,255,255)");
+				}
+				
+				function draw_widget(this_widget) {
+					draw_widget_recolored(this_widget, "rgb(255,255,255)");
+				}
+				
+				function draw_widget_recolored(this_widget, color_string) {
+					if (this_widget.text != null) {
+						ctx.font = font_string;
+						ctx.fillStyle = color_string;
+						ctx.fillText(this_widget.text, this_widget.x, this_widget.y);
+					}
+					if (this_widget.image != null) {
+						ctx.drawImage(this_widget.image, this_widget.x, this_widget.y, this_widget.width, this_widget.height);
+					}
+				}
+				
+				function do_end_drag() {
+					dragging_prev_point.x=-1;
+					dragging_prev_point.y=-1;
+				}
+
+				// var handle_mousemove = function (e) {
+					// mouse_point.x = parseInt(e.clientX-my_canvas.offsetLeft);
+					// mouse_point.y = parseInt(e.clientY-my_canvas.offsetTop);
 					
+					
+					// world_point = get_world_point_from_screen_point(mouse_point);
+					// if (is_mouse_down) {
+						// label0.text = mouse_point.x+","+mouse_point.y+" mousemove ";
+						// label0.text += " is_mouse_down=True"
+						// if (dragging_prev_point.x>-1 && dragging_prev_point.y>-1) {
+							// x += (mouse_point.x - dragging_prev_point.x)/zoomed_size_1pt_pixel_count;
+							// z -= (mouse_point.x - dragging_prev_point.x)/zoomed_size_1pt_pixel_count;
+							// process_view_change();
+						// }
+						// dragging_prev_point.x=mouse_point.x;
+						// dragging_prev_point.y=mouse_point.y;
+						// draw_map();
+					// }
+					// else {
+						// change_widget(label0, mouse_point.x+","+mouse_point.y+" world_point: "+world_point.x+","+world_point.z);
+					// }
+				// }
+				var handle_mousedown = function(e) {
+					mouse_point.x = parseInt(e.clientX-my_canvas.offsetLeft);
+					mouse_point.y = parseInt(e.clientY-my_canvas.offsetTop);
+					is_mouse_down = true;
+					change_widget(label0, mouse_point.x+","+mouse_point.y+" mouse down");
+				}
+				var handle_mouseup = function(e) {
+					is_mouse_down = false;
+					do_end_drag();
+					change_widget(label0, "mouse released");
+					//label0.text="mouse released";
+					//draw_map();
+				}
+				handle_mouseout = function (e) {
+					is_mouse_down = false;
+					do_end_drag();
+					change_widget(label0, "mouse left window");
+					//label0.text="mouse left window";
+					draw_map();
+				}
+				
+				function getMousePos(canvas, e) {
+					var rect = canvas.getBoundingClientRect();
+					return {
+							x: e.clientX - rect.left,
+							y: e.clientY - rect.top
+							};
+				}
+				
+				window.onload = function() {
+					//my_canvas = document.getElementById("myCanvas");
+					//my_canvas.onclick = function(event) {
+					//	for (i=0; i<bawidgets.length; i++) {
+					//		click_if_contains(bawidgets[i], event.clientX, event.clientY);
+					//	}
+					//};
+					
+					//my_canvas.addEventListener("mousemove", handle_mousemove, false);
+					my_canvas.addEventListener("mousedown", handle_mousedown, false);
+					my_canvas.addEventListener("mouseup", handle_mouseup, false);
+					my_canvas.addEventListener("mouseout", handle_mouseout, false);
+					my_canvas.addEventListener("mousemove", function(e) {
+						mouse_point.x = parseInt(e.clientX-my_canvas.offsetLeft);
+						mouse_point.y = parseInt(e.clientY-my_canvas.offsetTop);
+						
+						
+						world_point = get_world_point_from_screen_point(mouse_point);
+						if (is_mouse_down) {
+							var this_text = mouse_point.x+","+mouse_point.y+" mousemove";
+							this_text += " is_mouse_down=True"
+							//label0.text = this_text;
+							change_widget(label0, this_text);
+							if (dragging_prev_point.x>-1 && dragging_prev_point.y>-1) {
+								//flip both axes to give the effect of moving the map instead of the camera (z was already flipped [cartesian] so flip again):
+								x -= (mouse_point.x - dragging_prev_point.x)/zoomed_size_1pt_pixel_count;
+								z += (mouse_point.y - dragging_prev_point.y)/zoomed_size_1pt_pixel_count;
+								process_view_change();
+							}
+							dragging_prev_point.x=mouse_point.x;
+							dragging_prev_point.y=mouse_point.y;
+							draw_map();
+						}
+						else {
+							change_widget(label0, mouse_point.x+","+mouse_point.y+" world_point: "+Math.round(world_point.x)+","+Math.round(world_point.z));
+						}
+					  }, false);
+					//my_canvas.addEventListener("mousemove", function(evt) {
+					//	var mousePos = getMousePos(my_canvas, evt);
+					//	var message = "Mouse position: " + mousePos.x + "," + mousePos.y;
+					//	label0.text = message;
+					//	draw_map();
+					//  }, false);
+					my_canvas.addEventListener("click", function(e){
+						for (i=0; i<bawidgets.length; i++) {
+							click_if_contains(bawidgets[i], e.clientX, e.clientY);
+						}
+					});
+					//my_canvas.addEventListener(\'mousemove\', handle_mousemove, false);
+					//FAILS: my_canvas.onmousemove = handle_mousemove;
+					//FAILS: my_canvas.onmousemove = function(event) {
+					//	handle_mousemove(event);
+					//};
+					//my_canvas.mousedown = function(event) {
+					//	handle_mousedown(event);
+					//};
+					//my_canvas.mouseup = function(event) {
+					//	handle_mouseup(event);
+					//};
+					//my_canvas.mouseout = function(event) {
+					//	handle_mouseout(event);
+					//};
+						
 					var ctx = my_canvas.getContext("2d");
 					process_resize(ctx);
 					
@@ -644,13 +802,10 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 					var tmp_h = null;
 					var compass_rose_w = size_1em_pixel_count*5;
 					
-					
-					
-					
 					//LOCATION LABEL (no click):
 					bw_index = add_bawidget(pen_x+compass_rose_w/4, pen_y, tmp_w, tmp_h, null, "location_label");
 					location_label = last_bawidget;
-					//done on each draw: last_bawidget["text"] = 
+					//done on each draw: last_bawidget.text = 
 					
 					pen_y += size_1em_pixel_count + padding_h;
 					
@@ -660,14 +815,14 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 					tmp_w = compass_rose_w;
 					tmp_h = tmp_w*this_h_ratio;
 					bw_index = add_bawidget(pen_x-padding_w, pen_y, tmp_w, tmp_h, null, "compass_rose");
-					last_bawidget["image"] = compass_rose_img;
+					last_bawidget.image = compass_rose_img;
 					compass_rose_img.style.visibility="hidden";
 					pen_y += last_bawidget.height+padding_h;
 					
 					//ZOOM LABEL (no click):
 					bw_index = add_bawidget(pen_x+compass_rose_w/5, pen_y, tmp_w, tmp_h, null, "zoom_label");
 					zoom_label = last_bawidget;
-					//done on each draw: last_bawidget["text"] = (chunkymap_view_zoom*100)+"%"
+					//done on each draw: last_bawidget.text = (zoom*100)+"%"
 					pen_y += size_1em_pixel_count + padding_h;
 
 					//ZOOM IN:
@@ -678,7 +833,7 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 					bw_index = add_bawidget(pen_x, pen_y, tmp_w, tmp_h, null, "zoom_in", null);
 					//zoom_in_button_index = bw_index;
 					zoom_in_button = last_bawidget;
-					last_bawidget["image"]=zoom_in_img;
+					last_bawidget.image=zoom_in_img;
 					zoom_in_img.style.visibility="hidden";
 					document.getElementById("zoom_in_disabled").style.visibility="hidden";
 					//pen_y += tmp_h+padding_h;
@@ -692,16 +847,46 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 					bw_index = add_bawidget(pen_x, pen_y, tmp_w, tmp_h, null, "zoom_out", null);
 					zoom_out_button = last_bawidget;
 					//zoom_out_button_index = bw_index;
-					last_bawidget["image"]=zoom_out_img;
+					last_bawidget.image=zoom_out_img;
 					zoom_out_img.style.visibility="hidden";
 					document.getElementById("zoom_out_disabled").style.visibility="hidden";
 					pen_y += tmp_h+size_1em_pixel_count+padding_h;
 					pen_x -= tmp_w;			
 
-					//DEBUG LABEL (no click):
-					bw_index = add_bawidget(pen_x+compass_rose_w/4, pen_y, tmp_w, tmp_h, null, "debug_label");
-					debug_label = last_bawidget;
-					//done on each draw: last_bawidget["text"] = 
+					//label0 (no click):
+					bw_index = add_bawidget(pen_x, pen_y, tmp_w, tmp_h, null, "label0");
+					label0 = last_bawidget;
+					//done on each draw: last_bawidget.text = 
+					pen_y += size_1em_pixel_count + padding_h;
+
+					//label1 (no click):
+					bw_index = add_bawidget(pen_x, pen_y, tmp_w, tmp_h, null, "label1");
+					label1 = last_bawidget;
+					//done on each draw: last_bawidget.text = 
+					pen_y += size_1em_pixel_count + padding_h;
+
+					//label2 (no click):
+					bw_index = add_bawidget(pen_x, pen_y, tmp_w, tmp_h, null, "label2");
+					label2 = last_bawidget;
+					//done on each draw: last_bawidget.text = 
+					pen_y += size_1em_pixel_count + padding_h;
+
+					//label3 (no click):
+					bw_index = add_bawidget(pen_x, pen_y, tmp_w, tmp_h, null, "label3");
+					label3 = last_bawidget;
+					//done on each draw: last_bawidget.text = 
+					pen_y += size_1em_pixel_count + padding_h;
+
+					//label4 (no click):
+					bw_index = add_bawidget(pen_x, pen_y, tmp_w, tmp_h, null, "label4");
+					label4 = last_bawidget;
+					//done on each draw: last_bawidget.text = 
+					pen_y += size_1em_pixel_count + padding_h;
+
+					//label5 (no click):
+					bw_index = add_bawidget(pen_x, pen_y, tmp_w, tmp_h, null, "label5");
+					label5 = last_bawidget;
+					//done on each draw: last_bawidget.text = 
 					pen_y += size_1em_pixel_count + padding_h;
 					
 					draw_map();
@@ -741,12 +926,12 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 			echo '<table id="chunkymap_table" cellspacing="0" cellpadding="0" style="width:100%">'."\r\n";
 			echo '  <tr>'."\r\n";
 			echo '    <td style="width:5%">'."$td_tile_placeholder_content".'</td>'."\r\n";
-			echo "    <td style=\"width:95%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=$chunkymap_view_x&chunkymap_view_z=".($chunkymap_view_z+($world_camera_h*$chunkymap_camera_pan_delta))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-up.png" style="width:90%"/>'.'</a></td>'."\r\n";
+			echo "    <td style=\"width:95%\"><a href=\"?world_name=$world_name&zoom=$zoom&x=$x&z=".($z+($camera_h*$chunkymap_camera_pan_delta))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow_wide_up.png" style="width:90%"/>'.'</a></td>'."\r\n";
 			echo '    <td style="width:5%">'."$td_tile_placeholder_content".'</td>'."\r\n";
 			echo '  </tr>'."\r\n";
 			$cell_perc=intval(round(100.0/$tile_x_count));
 			echo '  <tr>'."\r\n";
-			echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=".($chunkymap_view_x-($world_camera_w*$chunkymap_camera_pan_delta))."&chunkymap_view_z=$chunkymap_view_z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-left.png" style="width:90%"/>'.'</a></td>'."\r\n";
+			echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&zoom=$zoom&x=".($x-($camera_w*$chunkymap_camera_pan_delta))."&z=$z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow_wide_left.png" style="width:90%"/>'.'</a></td>'."\r\n";
 			echo '    <td style="width:95%">'."\r\n";		
 			echo '      <table id="chunk_table" cellpadding="0" cellspacing="0" style="width:100%">'."\r\n";
 			while ($this_tiley_z>=$min_tiley_z) {
@@ -759,14 +944,14 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 						$img_path=get_chunk_image_path_from_chunky_coords($this_tiley_x, $this_tiley_z);
 						if (!is_file($img_path)) {
 							echo "<!-- no chunk $img_path -->";
-							$img_path="chunkymapdata/images/chunk-blank.jpg";
+							$img_path="chunkymapdata/images/chunk_blank.jpg";
 						}
 					}
 					else {
 						$img_path=get_decachunk_image_path_from_decachunk($this_tiley_x, $this_tiley_z);
 						if (!is_file($img_path)) {
 							echo "<!-- no decachunk $img_path -->";
-							$img_path="chunkymapdata/images/decachunk-blank.jpg";
+							$img_path="chunkymapdata/images/decachunk_blank.jpg";
 						}
 					}
 					echo "<img class=\"maptileimg\" src=\"$img_path\" style=\"width:100%\"/>"."</td>\r\n";
@@ -777,11 +962,11 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 			}
 			echo '      </table>';
 			echo '    </td>'."\r\n";
-			echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=".($chunkymap_view_x+($world_camera_w*$chunkymap_camera_pan_delta))."&chunkymap_view_z=$chunkymap_view_z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-right.png" style="width:100%"/>'.'</a></td>'."\r\n";
+			echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&zoom=$zoom&x=".($x+($camera_w*$chunkymap_camera_pan_delta))."&z=$z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow_wide_right.png" style="width:100%"/>'.'</a></td>'."\r\n";
 			echo '  </tr>'."\r\n";
 			echo '  <tr>'."\r\n";
 			echo '    <td style="width:5%">'."$td_decachunk_placeholder_content".'</td>'."\r\n";
-			echo "    <td style=\"width:90%\"><a href=\"?world_name=$world_name&chunkymap_view_zoom=$chunkymap_view_zoom&chunkymap_view_x=$chunkymap_view_x&chunkymap_view_z=".($chunkymap_view_z-($world_camera_h*$chunkymap_camera_pan_delta))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow-wide-down.png" style="width:100%"/>'.'</a></td>'."\r\n";
+			echo "    <td style=\"width:90%\"><a href=\"?world_name=$world_name&zoom=$zoom&x=$x&z=".($z-($camera_h*$chunkymap_camera_pan_delta))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow_wide_down.png" style="width:100%"/>'.'</a></td>'."\r\n";
 			echo '    <td style="width:5%">'."$td_decachunk_placeholder_content".'</td>'."\r\n";
 			echo '  </tr>'."\r\n";
 			echo '</table>'."\r\n";
@@ -792,12 +977,12 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 		echo "<ul>";
 		if ($chunkymapdata_handle = opendir($chunkymapdata_worlds_path)) {
 			$append_vars="&";
-			if (isset($chunkymap_view_zoom)) {
+			if (isset($zoom)) {
 				$prefix = "";
 				if (strlen($append_vars)>0 and !endsWith($append_vars,"&")) {
 					$prefix = "&";
 				}
-				$append_vars.="$prefix"."&chunkymap_view_zoom=$chunkymap_view_zoom";
+				$append_vars.="$prefix"."&zoom=$zoom";
 			}
 			if (isset($chunkymap_anchor_name)) {
 				$prefix = "";
@@ -818,7 +1003,7 @@ function echo_chunkymap_canvas($chunk_mode_enable, $visual_debug_enable, $html4_
 		echo "</ul>";
 	}
 	
-	//TODO: $chunkymap_view_zoom SHOULD BE interpreted so each block (pixel) is 1pt: 1066x600 pt canvas would have 66+2/3 blocks horizontally, is 37.5 blocks vertically
+	//TODO: $zoom SHOULD BE interpreted so each block (pixel) is 1pt: 1066x600 pt canvas would have 66+2/3 blocks horizontally, is 37.5 blocks vertically
 	//so, at zoom 1.0 canvas should show 60 chunks across (6 decachunks across)
 }//end echo_chunkymap_canvas
 
