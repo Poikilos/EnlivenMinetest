@@ -189,8 +189,9 @@ class MTChunks:
         self.minetestmapper_fast_sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-numpy.py")
         self.minetestmapper_custom_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-expertmm.py")
         self.minetestmapper_py_path = self.minetestmapper_fast_sqlite_path
-        if (self.backend_string!="sqlite3"):
-            self.minetestmapper_py_path = self.minetestmapper_custom_path
+        #if (self.backend_string!="sqlite3"):
+            # minetestmapper-numpy had trouble with leveldb but this fork has it fixed so use numpy always always instead of running the following line
+            #self.minetestmapper_py_path = self.minetestmapper_custom_path
         print("Chose image generator script: "+self.minetestmapper_py_path)
         if not os.path.isfile(self.minetestmapper_py_path):
             print("ERROR: script does not exist, so exiting "+__file__+".")
