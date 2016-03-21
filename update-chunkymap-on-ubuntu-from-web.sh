@@ -1,6 +1,8 @@
 #!/bin/sh
 cd $HOME
-#rm -Rf $HOME/minetest-stuff/minetest-chunkymap
+if [ -d "$HOME/minetest-stuff/minetest-chunkymap" ]; then
+  rm -Rf $HOME/minetest-stuff/minetest-chunkymap
+fi
 CHUNKYMAP_INSTALLER_DIR=$HOME/Downloads/minetest-chunkymap
 if [ ! -d "$HOME/Downloads" ]; then
 	mkdir "$HOME/Downloads"
@@ -9,15 +11,18 @@ fi
 #cd $CHUNKYMAP_INSTALLER_DIR
 #chmod +x update-chunkymap-installer-only.sh
 cd $HOME/Downloads
-if [ -f "update-chunkymap-installer-only.sh" ]; then
+#if [ -f "update-chunkymap-installer-only.sh" ]; then
   # move misplaced file from older versions:
-  mv -f update-chunkymap-installer-only.sh "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
-fi
+  #mv -f update-chunkymap-installer-only.sh "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
+#fi
 sh "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
 #./install-chunkymap-on-ubuntu.sh
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh"
+echo ""
+echo "running install-chunkymap-on-ubuntu.sh..."
 sh "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh"
-
+echo "...returned to update-chunkymap-on-ubuntu-from-web.sh"
+echo ""
 MT_MY_WEBSITE_PATH=/var/www/html/minetest
 
 # IF already installed to default MT_MY_WEBSITE_PATH, update the files:

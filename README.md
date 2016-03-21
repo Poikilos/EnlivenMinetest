@@ -10,7 +10,7 @@ This program comes without any warranty, to the extent permitted by applicable l
 * Runs as python script (loop by default to reduce disc reads since stores certain info) run like:
     python chunkymap-regen.py
 	or to get back to it later with screen -r, instead install screen command (or tmux may work) then run:
-	screen -t chunkymapregen python /home/owner/minetest/util/chunkymap-regen.py
+	screen -t chunkymapregen python $HOME/chunkymap/chunkymap-regen.py
 	#where -t chunkymapregen just names the screen chunkymapregen
 	#Then if you are using screen and want to leave the output without terminating the process press Ctrl a d
 	#NOTE: now that loop is default, cron job scripts, which now disable loop for compatibility with new version, are ALL optional and NOT recommended
@@ -18,9 +18,9 @@ This program comes without any warranty, to the extent permitted by applicable l
 * Change program options (or stop it) while looping or rendering by placing chunkymap-signals.txt in the same directory as chunkymap-regen.py (see chunkymap-signals example files)
 	* to maintain stability of  your text editor, save the file, close it, then move/copy it to the directory (or save it as something else then rename it to chunkymap-signals.txt).
 	* alternatively, in *nix do something like:
-    echo "refresh_map_enable:False" > ~/minetest/util/chunkymap-signals.txt
+    echo "refresh_map_enable:False" > $HOME/chunkymap/chunkymap-signals.txt
 	sleep 15s
-	echo "loop_enable:False" > ~/minetest/util/chunkymap-signals.txt
+	echo "loop_enable:False" > $HOME/chunkymap/chunkymap-signals.txt
 	* list of signals:
 		loop_enable:True
 		loop_enable:False
@@ -83,7 +83,7 @@ world_path
 	* Install the git version of minetest (or otherwise install 0.4.13 or other version compatible with the map generators used by chunkymap)
 	OPTION 2: IF you are using Ubuntu go to a terminal, cd to this directory,  
 	then switch user to the one that will run minetestserver
-	(since install-chunkymap-on-ubuntu.sh DOES replace "/home/owner" with current user's home [replace-with-current-user.py, which is automatically called by install, will change /home/owner to current user's directory in each script that install copies to $HOME/minetest/util])  
+	(since install-chunkymap-on-ubuntu.sh DOES replace "/home/owner" with current user's home [replace-with-current-user.py, which is automatically called by install, will change /home/owner to current user's directory in each script that install copies to $HOME/chunkymap])  
 	then go to Terminal and run:  
 	`minetestserver`  
 	then when it is finished loading, press Ctrl C then run:  
@@ -108,7 +108,7 @@ world_path
 	* Run install-chunkymap-on-windows.bat
 	(which just runs C:\Python27\python install-chunkymap-on-windows.py)
 	(the installer will automatically download and install numpy and Pillow)
-	* OPTIONAL manual install:
+	* or OPTIONALLY manual install what the above script does:
 		* put these files anywhere
 		* python 2.7.x such as from python.org
 		* run get_python_architecture.py to make sure you know whether to download the following in 32-bit or 64-bit  

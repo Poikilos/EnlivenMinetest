@@ -12,7 +12,7 @@ filenames.append(os.path.join("unused","set-minutely-crontab-job.sh"))
 filenames.append("chunkymap-regen-loop.sh")
 
 home_path = expanduser("~")
-home_minetest_chunkymap_path = os.path.join(home_path,"minetest/util")
+home_minetest_chunkymap_path = os.path.join(home_path,"chunkymap")
 #home_minetest_chunkymap_unused_path = os.path.join(home_minetest_chunkymap_path, "unused")
 #for dirname, dirnames, filenames in os.walk(home_minetest_chunkymap_path):
 if "\\" not in home_minetest_chunkymap_path:
@@ -35,7 +35,7 @@ if "\\" not in home_minetest_chunkymap_path:
                     os.remove(temp_path)
                     ins.close()
                 else:
-                    print "FAILED to rewrite the file '"+file_path+"' (to change minetest util path to '"+home_minetest_chunkymap_path+"')--perhaps it is in use. Make the file writeable then try running "+__FILE__+" again."
+                    print "FAILED to rewrite the file '"+file_path+"' (to change chunkymap path to '"+home_minetest_chunkymap_path+"')--perhaps it is in use. Make the file writeable then try running "+__FILE__+" again."
                     input("Press enter to continue...")
             else:
                 print "SKIPPED "+filename+" since not installed (probably ok since deprecated files are still listed here)"
@@ -44,4 +44,4 @@ if "\\" not in home_minetest_chunkymap_path:
         print "Please install a compatible version of minetest-server package, run minetestserver once, then if you were running a chunkymap installer that called this py file, re-run that installer (otherwise re-run this script if you are sure that installer was successful)."
         input("Press enter to continue...")
 else:
-    print "This script only works on GNU/Linux systems (it is not needed on Windows, since on Windows, chunkymap will detect the scripts and colors.txt in the same directory as itself instead of using the minecraftserver minetest/util directory)"
+    print "This script only works on GNU/Linux systems (it is not needed on Windows, since on Windows, chunkymap will detect the scripts and colors.txt in the same directory as itself instead of using the minetestserver chunkymap directory)"

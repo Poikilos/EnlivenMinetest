@@ -57,6 +57,7 @@ def web_get_DEPRECATED(url, file_name):
         view_traceback()
     return file_name
 
+
 python_folder_path = os.path.dirname(sys.executable)
 
 print("")
@@ -201,6 +202,7 @@ if python_folder_name.lower()[:7]!="python3":
                         outs.close()
                         print("  OR by double-clicking")
                         print("  "+run_bat_path)
+					raw_input("Press enter to exit.")
                 else:
                     raw_input("Cannot detect nor install "+installed_pillow_path+" so installation cannot continue. Try downloading "+downloaded_pillow_name+" to '"+downloads_path+"' then run this script again. Press enter to exit.")
             else:

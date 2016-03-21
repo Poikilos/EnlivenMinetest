@@ -55,6 +55,9 @@ if os.path.isdir(deprecated_players_offline_storage_path):
 print("Using offline players_offline_storage_path:")
 print("  "+players_offline_storage_path)
 print("  (used for inventory recovery and other offline storage features)")
+give_path = os.path.join(players_offline_storage_path, "give")
+print("give_path:")
+print("  (used for give commands for inventory leftover if more to transfer after filling destination inventory)")
 #players_offline_storage_path = os.path.join("C:\\Users\\jgustafson\\Desktop\\Backup\\fcalocal\\home\\owner\\.minetest\\worlds\\FCAGameAWorld", players_offline_storage_name)
 irl_person_csv_name = None
 irl_person_csv_path = None
@@ -94,7 +97,7 @@ class MinetestInventoryItem:
     owner = None  # optional, only used for debug output
     name = None
     qty = None
-    param = None
+    param = None  # normally toolid
     suffix = None
 
     #If addend is negative, will return negative if can't take that many, otherwise 0
@@ -640,6 +643,10 @@ def debug_log_replay_to_offline_player_storage(debug_txt_path, this_players_offl
     #outs.write(line+"\n")
     #outs.close()
 
+def player_inventory_transfer(from_playerid, to_playerid):
+    from_player_path = os.path.join(players_path, from_playerid)
+    to_player_path = os.path.join(players_path, to_playerid)
+    to_player_givescript_path = os.path.join(give_path, to_playerid)
 
 #recover_player_files_by_content("C:\\1.RaiseDataRecovery", "C:\\Users\\jgustafson\\Desktop\\Backup\\fcalocal\\home\\owner\\.minetest\\worlds\\FCAGameAWorld\\players")
 
@@ -653,11 +660,10 @@ def debug_log_replay_to_offline_player_storage(debug_txt_path, this_players_offl
 
 
 
-give_path = os.path.join(players_offline_storage_path, "give")
+
 #convert_storage_to_give_commands_DEPRECATED(players_offline_storage_path, give_path, irl_person_csv_path)
 
 #move_storage_to_players(players_offline_storage_path, players_path, give_path, change_player_position_enable=True)
-
 
 
 ### FOR TESTING PURPOSES:

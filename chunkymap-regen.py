@@ -862,8 +862,8 @@ class MTChunks:
             #    cmd_string = "/usr/games/minetest-mapper --input \""+minetestinfo.get_var("primary_world_path")+"\" --draworigin --geometry "+geometry_value_string+" --output \""+tmp_png_path+"\""+cmd_suffix
             #    such as sudo python minetestmapper --input "/home/owner/.minetest/worlds/FCAGameAWorld" --geometry -32:-32+64+64 --output /var/www/html/minetest/try1.png
             # OR try PYTHON version (looks for expertmm fork which has geometry option like C++ version does):
-            #script_path = "/home/owner/minetest/util/minetestmapper.py"
-            #region_capable_script_path = "/home/owner/minetest/util/chunkymap/minetestmapper.py"
+            #script_path = "$HOME/chunkymap/minetestmapper.py"
+            #region_capable_script_path = "$HOME/chunkymap/minetestmapper-expertmm.py"
             #    region_capable_script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper.py")
             #    if os.path.isfile(region_capable_script_path):
             #        script_path=region_capable_script_path
