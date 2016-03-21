@@ -133,8 +133,9 @@ world_path
 		(chunkymap-regen.py will ask for configuration options on first run and ask for your www root)
 
 ## Known Issues
+* webapp: save selected world to a config file (click world on first visit to write initial config) instead of being silently autoselected
 * Fix chunk generation and draw decachunks to canvas (so singleimage.py is not required to be run before chunkymap-regen.py)
-* Detect exceptions in mintestmapper (such as database locked) and do not mark the chunk as is_empty
+* Detect exceptions in mintestmapper (such as database locked) and do NOT mark the chunk as is_empty
 * Move the following to config dict:
     python_exe_path
 * chunkymap.php should read the size of the chunks -- see near is_file($chunk_genresult_path) in chunkymap.php
