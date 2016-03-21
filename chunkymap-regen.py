@@ -133,7 +133,7 @@ class MTChunks:
         self.run_count = 0
         self.verbose_enable = True
         self.loop_enable = True
-        self.refresh_map_enable = True
+        self.refresh_map_enable = False
         self.refresh_players_enable = True
         self.chunks = {}
 
@@ -318,6 +318,8 @@ class MTChunks:
                     self.mapvars["max_chunkz"] = 0
         if is_mapvars_changed:
             self.save_mapvars_if_changed()
+        if not self.refresh_map_enable:
+            print("refresh_map_enable has been turned off by default since is WIP")
 
     #def install_default_world_data(self):
         #source_web_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
