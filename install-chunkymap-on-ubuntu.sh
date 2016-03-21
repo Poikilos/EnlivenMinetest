@@ -21,15 +21,16 @@ CHUNKYMAP_DEST=$HOME/chunkymap
 #rm -f $HOME/minetestmapper-numpy.py
 #wget https://github.com/spillz/minetest/raw/master/util/minetestmapper-numpy.py
 #cp -f "$CHUNKYMAP_INSTALLER_PATH/minetestmapper-numpy.py" "$HOME/minetest/util/minetestmapper-numpy.py"
-#if [ ! -d "$CHUNKYMAP_DEST" ]; then
-#  mkdir "$CHUNKYMAP_DEST"
-#fi
+if [ ! -d "$CHUNKYMAP_DEST" ]; then
+  mkdir "$CHUNKYMAP_DEST"
+fi
 #if [ ! -d "$CHUNKYMAP_DEST/unused/" ]; then
 #  mkdir "$CHUNKYMAP_DEST/unused/"
 #fi
 #NOTE: chmod +x is done last (see below)
 
-mv -Rvf "$CHUNKYMAP_INSTALLER_PATH" "$CHUNKYMAP_DEST"
+cp -Rf "$CHUNKYMAP_INSTALLER_PATH/*" "$CHUNKYMAP_DEST/"
+rm -Rf "$CHUNKYMAP_INSTALLER_PATH"
 rm "$CHUNKYMAP_DEST/*.bat"
 rm "$CHUNKYMAP_DEST/install-chunkymap-on-windows.py"
 
