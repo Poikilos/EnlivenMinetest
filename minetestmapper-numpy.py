@@ -467,10 +467,10 @@ class LVLDB:
         for k in self.conn.RangeIter():
             #if k is not None and len(k)>0:
             try:
-                val = k[0]
-                if k[0][:2]=="\\x":
+                #val = k[0]
+                #if k[0][:2]=="\\x":
                     #in leveldb, minetest stores \x before every byte of the value, so remove all and prepend 0x so python can convert to int
-                    val = "\\0x" + k[0].replace("\\x", "")
+                    #val = "\\0x" + k[0].replace("\\x", "")
                 x, y, z = getIntegerAsBlock(int(val))
                 yield x, y, z, k[0]
             except:
