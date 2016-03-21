@@ -17,7 +17,7 @@ fi
   #mv -f update-chunkymap-installer-only.sh "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
 #fi
 #sh "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
-if [ -d "$CHUNKYMAP_DEST/update-chunkymap-installer-only.sh" ]; then
+if [ -f "$CHUNKYMAP_DEST/update-chunkymap-installer-only.sh" ]; then
 	sh "$CHUNKYMAP_DEST/update-chunkymap-installer-only.sh"
 else
 	sh "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
