@@ -23,11 +23,13 @@ if [ -f minetest-chunkymap.zip ]; then
   rm -f minetest-chunkymap.zip
 fi
 mv master.zip minetest-chunkymap.zip
+
 unzip minetest-chunkymap.zip
 if [ -d "$CHUNKYMAP_INSTALLER_DIR" ]; then
   rm -Rf "$CHUNKYMAP_INSTALLER_DIR"
 fi
 mv "$HOME/Downloads/minetest-chunkymap-master" "$CHUNKYMAP_INSTALLER_DIR"
+
 #cd minetest-chunkymap
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh"
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"

@@ -4,19 +4,26 @@ if [ -d "$HOME/minetest-stuff/minetest-chunkymap" ]; then
   rm -Rf $HOME/minetest-stuff/minetest-chunkymap
 fi
 CHUNKYMAP_INSTALLER_DIR=$HOME/Downloads/minetest-chunkymap
+CHUNKYMAP_DEST=$HOME/chunkymap
 if [ ! -d "$HOME/Downloads" ]; then
 	mkdir "$HOME/Downloads"
 fi
 
 #cd $CHUNKYMAP_INSTALLER_DIR
 #chmod +x update-chunkymap-installer-only.sh
-cd $HOME/Downloads
+#cd $CHUNKYMAP_DEST
 #if [ -f "update-chunkymap-installer-only.sh" ]; then
   # move misplaced file from older versions:
   #mv -f update-chunkymap-installer-only.sh "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
 #fi
-sh "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
+#sh "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
+if [ -d "$CHUNKYMAP_DEST/update-chunkymap-installer-only.sh" ]; then
+	sh "$CHUNKYMAP_DEST/update-chunkymap-installer-only.sh"
+else
+	sh "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
+fi
 #./install-chunkymap-on-ubuntu.sh
+cd $HOME/Downloads
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh"
 echo ""
 echo "running install-chunkymap-on-ubuntu.sh..."
