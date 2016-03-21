@@ -445,6 +445,7 @@ class SQLDB:
         self.cur.execute("SELECT `pos` FROM `blocks`")
         while True:
             r = self.cur.fetchone()
+            print("getting int from first index of value "+str(r))
             if not r:
                 break
             x, y, z = getIntegerAsBlock(r[0])
@@ -466,10 +467,16 @@ class LVLDB:
         for k in self.conn.RangeIter():
             #if k is not None and len(k)>0:
             try:
-                x, y, z = getIntegerAsBlock(int(k[0]))
+                val = k[0]
+                if k[0][:2]=="\\x":
+                    #in leveldb, minetest stores \x before every byte of the value, so remove all and prepend 0x so python can convert to int
+                    val = "\\0x" + k[0].replace("\\x", "")
+                x, y, z = getIntegerAsBlock(int(val))
                 yield x, y, z, k[0]
             except:
-                print("WARNING: no int at first index in value '"+str(k))
+                print("Could not finish getting int from first index of value "+str(k))
+                #prints tons of output such as Could not finish getting int from first index of value ('\x00\x00\x00\x0e\x00\x02\x85 ', '\x19\x08\x02\x02x\x9c\xed\xc11\x01\x00\x00\x00\xc2\xa0\xf5Om\x0c\x1f\xa0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\xb7\x01@\x00\x00\x01x\x9cc\x00\x00\x00\x01\x00\x01\x00\x00\x00\xff\xff\xff\xff\x00\x00\x01\x00\x00\x00\x06ignore\n\x00\x00')
+
 
     def get(self, pos):
         return BytesIO(self.conn.Get(pos))

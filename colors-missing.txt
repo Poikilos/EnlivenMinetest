@@ -187,3 +187,5 @@ seaplants:seaplantssandkelpbrown
 youngtrees:youngtree_top
 seacoral:seacoraldirtredviolet
 seaplants:seaplantssandseagrassred
+meze:meze
+default:junglewood
