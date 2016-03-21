@@ -464,8 +464,11 @@ class LVLDB:
 
     def __iter__(self):
         for k in self.conn.RangeIter():
-            x, y, z = getIntegerAsBlock(int(k[0]))
-            yield x, y, z, k[0]
+            if k is not None and len(k)>0:
+                x, y, z = getIntegerAsBlock(int(k[0]))
+                yield x, y, z, k[0]
+            else:
+                print("WARNING: no data at first index in value '"+str(k))
 
     def get(self, pos):
         return BytesIO(self.conn.Get(pos))
