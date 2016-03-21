@@ -653,7 +653,7 @@ class MTChunks:
                 print(min_indent+"  (index:["+str(queued_index)+"]; len:"+str(len(self.todo_positions))+") .")
         except:
             print(min_indent+"Could not finish check_decachunk_containing_chunk:")
-            view_traceback(min_indent)
+            view_traceback()
 
     def get_chunk_folder_path(self, chunky_x, chunky_z):
         result = None
