@@ -590,6 +590,11 @@ def debug_log_replay_to_offline_player_storage(debug_txt_path, this_players_offl
                             if "digs" in name_ender:
                                 if item_string in after_broken:
                                     item_string = after_broken[item_string]
+                                else:
+                                    for item_startswith in after_broken_startswith:
+                                        if item_startswith == item_string[:len(item_startswith)]:
+                                            item_string = after_broken_startswith[item_startswith]
+                                            break
                             print("  "+item_string)
                             if playerid not in players:
                                 players[playerid] = {}

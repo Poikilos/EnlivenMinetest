@@ -20,7 +20,11 @@ from expertmm import *
 # * check for only variable name in quotes (maybe the programmer meant to use the value)
 # * check for use of os.dirname (should be os.path.dirname)
 # * mixing width with y (or height or z) and mixing height with x (or width)
+# PHP:
 # * using '+' next to '"' in php seperated only by whitespace (probably meant concatenate operator '.')
+# SHELL SCRIPT:
+# * don't use '*' inside quotes (fails)
+# * using HOME without preceding dollar sign
 
 def view_traceback():
     ex_type, ex, tb = sys.exc_info()

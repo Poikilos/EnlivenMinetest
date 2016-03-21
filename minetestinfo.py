@@ -42,7 +42,13 @@ after_broken["default:stone_with_diamond"] = "default:diamond"
 #after_broken[""] = ""
 #after_broken[""] = ""
 #after_broken[""] = ""
-#after_broken[""] = ""
+
+
+after_broken_startswith = {}
+after_broken_startswith["pipeworks:mese_tube_"] = "pipeworks:mese_tube_000000"
+after_broken_startswith["pipeworks:conductor_tube_off_"] = "pipeworks:conductor_tube_off_1"
+after_broken_startswith["pipeworks:tube_"] = "pipeworks:tube_1"
+after_broken_startswith["Item pipeworks:accelerator_tube_"] = "pipeworks:accelerator_tube_1"
 
 genresult_name_closer_string = "_mapper_result.txt"
 

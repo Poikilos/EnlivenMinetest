@@ -89,12 +89,14 @@ chmod -x "$CHUNKYMAP_DEST/unused/set-minutely-crontab-job.sh"
 chmod -x "$CHUNKYMAP_DEST/unused/set-minutely-players-crontab-job.sh"
 
 #if [ -f "$HOME/update-chunkymap-on-ubuntu-from-web.sh" ]; then
-cp -f "HOME/chunkymap/update-chunkymap-on-ubuntu-from-web.sh" "HOME/update-chunkymap-on-ubuntu-from-web.sh"
+cp -f "$HOME/chunkymap/update-chunkymap-on-ubuntu-from-web.sh" "$HOME/"
 #fi
-#cp -f "HOME/chunkymap/install-chunkymap-on-ubuntu-from-web.sh" "HOME/install-chunkymap-on-ubuntu-from-web.sh"
-rm "HOME/install-chunkymap-on-ubuntu-from-web.sh"
-rm "HOME/mapper-refresh-minetestserver.bat"
-rm "HOME/mapper-refresh-minetestserver"
+#cp -f "$HOME/chunkymap/install-chunkymap-on-ubuntu-from-web.sh" "$HOME/install-chunkymap-on-ubuntu-from-web.sh"
+
+#remove deprecated stuff
+#rm "$HOME/install-chunkymap-on-ubuntu-from-web.sh"
+#rm "$HOME/mapper-refresh-minetestserver.bat"
+#rm "$HOME/mapper-refresh-minetestserver"
 
 sudo apt-get install python-numpy python-pil python-leveldb
 echo ""
