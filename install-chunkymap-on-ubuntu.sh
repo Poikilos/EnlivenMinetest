@@ -10,7 +10,7 @@ if [ ! -d "$HOME/Downloads/minetest-chunkymap" ]; then
   echo "please run install-chunkymap-on-ubuntu-from-web.sh or update-chunkymap-installer-only.sh first.";
 else
 #else run everything from here down
-
+echo "running installer"
 
 #MINETEST_UTIL=$HOME/minetest/util
 #CHUNKYMAP_DEST=$MINETEST_UTIL
@@ -29,9 +29,10 @@ fi
 #fi
 #NOTE: chmod +x is done last (see below)
 
-cp -Rf "$CHUNKYMAP_INSTALLER_PATH/*" "$CHUNKYMAP_DEST/"
+# asterisk CANNOT be in quotes
+cp -Rf $CHUNKYMAP_INSTALLER_PATH/* "$CHUNKYMAP_DEST/"
 rm -Rf "$CHUNKYMAP_INSTALLER_PATH"
-rm "$CHUNKYMAP_DEST/*.bat"
+rm $CHUNKYMAP_DEST/*.bat
 rm "$CHUNKYMAP_DEST/install-chunkymap-on-windows.py"
 
 #region DEPRECATED
