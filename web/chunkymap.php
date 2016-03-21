@@ -274,83 +274,88 @@ function get_markers_from_dir($chunkymap_markers_path) {
 	global $show_expired_players_enable;
 	$markers=array();
 	$markers_count=0;
-	if ($handle = opendir($chunkymap_markers_path)) {
-		while (false !== ($file_name = readdir($handle))) {
-			if (substr($file_name, 0, 1) != ".") {
-				$file_name_lower = strtolower($file_name);
-				if (endsWith($file_name_lower, ".yml")) {
-					$file_path = $chunkymap_markers_path."/".$file_name;
-					$marker_vars = get_dict_from_conf($file_path, ":");
-					if (isset($marker_vars["x"]) and isset($marker_vars["z"])) {
-						$is_expired=false;
-						$is_idle=false;
-						if (isset($marker_vars["utc_mtime"])) {
-							$last_player_update_time = strtotime($marker_vars["utc_mtime"]);
-							if (time()-$last_player_update_time > $player_file_age_expired_max_seconds) {
-								$is_expired=true;
-							}
-							elseif (time()-$last_player_update_time > $player_file_age_idle_max_seconds) {
-								$is_idle=true;
-							}
-							if ($is_expired===false) {
-								$markers[$markers_count]["utc_mtime"] = $marker_vars["utc_mtime"];
-							}
-						}
-						if (($show_expired_players_enable===true) or ($is_expired===false)) {
-							$markers[$markers_count]["x"] = $marker_vars["x"];
-							$markers[$markers_count]["z"] = $marker_vars["z"];
-							$markers[$markers_count]["is_idle"] = $is_idle;
-							$markers[$markers_count]["is_expired"] = $is_expired;
-							if (isset($marker_vars["y"])) {
-								$markers[$markers_count]["y"] = $marker_vars["y"];
-							}
-							if (isset($marker_vars["image"])) {
-								$try_path = "$chunkymapdata_thisworld_path/".$marker_vars["image"];
-								if (is_file($try_path)) {
-									$markers[$markers_count]["image"] = $try_path; //this is the normal place to store them actually
+	if (is_dir($chunkymap_markers_path)) {
+		if ($handle = opendir($chunkymap_markers_path)) {
+			while (false !== ($file_name = readdir($handle))) {
+				if (substr($file_name, 0, 1) != ".") {
+					$file_name_lower = strtolower($file_name);
+					if (endsWith($file_name_lower, ".yml")) {
+						$file_path = $chunkymap_markers_path."/".$file_name;
+						$marker_vars = get_dict_from_conf($file_path, ":");
+						if (isset($marker_vars["x"]) and isset($marker_vars["z"])) {
+							$is_expired=false;
+							$is_idle=false;
+							if (isset($marker_vars["utc_mtime"])) {
+								$last_player_update_time = strtotime($marker_vars["utc_mtime"]);
+								if (time()-$last_player_update_time > $player_file_age_expired_max_seconds) {
+									$is_expired=true;
 								}
-								else {
-									$markers[$markers_count]["image"] = $marker_vars["image"];
+								elseif (time()-$last_player_update_time > $player_file_age_idle_max_seconds) {
+									$is_idle=true;
+								}
+								if ($is_expired===false) {
+									$markers[$markers_count]["utc_mtime"] = $marker_vars["utc_mtime"];
 								}
 							}
-							else {
-								if (isset($marker_vars["index"])) {
-									$try_path = "$chunkymapdata_thisworld_path/players/".$marker_vars["index"].".jpg";
+							if (($show_expired_players_enable===true) or ($is_expired===false)) {
+								$markers[$markers_count]["x"] = $marker_vars["x"];
+								$markers[$markers_count]["z"] = $marker_vars["z"];
+								$markers[$markers_count]["is_idle"] = $is_idle;
+								$markers[$markers_count]["is_expired"] = $is_expired;
+								if (isset($marker_vars["y"])) {
+									$markers[$markers_count]["y"] = $marker_vars["y"];
+								}
+								if (isset($marker_vars["image"])) {
+									$try_path = "$chunkymapdata_thisworld_path/".$marker_vars["image"];
 									if (is_file($try_path)) {
-										$markers[$markers_count]["image"] = $try_path;
-										echo_error("detected image $try_path\r\n");
+										$markers[$markers_count]["image"] = $try_path; //this is the normal place to store them actually
 									}
 									else {
-										
-										$try_path = "$chunkymapdata_thisworld_path/players/".$marker_vars["index"].".png";
-										if (is_file($try_path)) {
-											$markers[$markers_count]["image"] = $try_path;
-										}
+										$markers[$markers_count]["image"] = $marker_vars["image"];
 									}
 								}
 								else {
-									echo_error("missing index in marker file $file_name\r\n");
+									if (isset($marker_vars["index"])) {
+										$try_path = "$chunkymapdata_thisworld_path/players/".$marker_vars["index"].".jpg";
+										if (is_file($try_path)) {
+											$markers[$markers_count]["image"] = $try_path;
+											echo_error("detected image $try_path\r\n");
+										}
+										else {
+											
+											$try_path = "$chunkymapdata_thisworld_path/players/".$marker_vars["index"].".png";
+											if (is_file($try_path)) {
+												$markers[$markers_count]["image"] = $try_path;
+											}
+										}
+									}
+									else {
+										echo_error("missing index in marker file $file_name\r\n");
+									}
 								}
+								if (isset($marker_vars["name"])) {
+									$markers[$markers_count]["name"] = $marker_vars["name"];
+								}
+								if (isset($marker_vars["index"])) {
+									$markers[$markers_count]["index"] = $marker_vars["index"]; //for ajax to get player location with neither playerid nor name known
+								}
+								if (isset($marker_vars["playerid"])) {
+									$markers[$markers_count]["playerid"] = $marker_vars["playerid"];
+								}
+								$markers_count+=1;
 							}
-							if (isset($marker_vars["name"])) {
-								$markers[$markers_count]["name"] = $marker_vars["name"];
-							}
-							if (isset($marker_vars["index"])) {
-								$markers[$markers_count]["index"] = $marker_vars["index"]; //for ajax to get player location with neither playerid nor name known
-							}
-							if (isset($marker_vars["playerid"])) {
-								$markers[$markers_count]["playerid"] = $marker_vars["playerid"];
-							}
-							$markers_count+=1;
+							
 						}
-						
-					}
-					else {
-						echo_error("Bad location in marker file '$file_path'");
+						else {
+							echo_error("Bad location in marker file '$file_path'");
+						}
 					}
 				}
 			}
 		}
+	}
+	else {
+		echo "<!--missing $chunkymap_markers_path-->";
 	}
 	return $markers;
 }
@@ -675,9 +680,10 @@ function echo_chunkymap_canvas($show_player_names_enable, $chunk_mode_enable, $v
 				var tmp_widget = {x:100,y:100,text:"Loading..."};
 				draw_widget_recolored(tmp_widget, "rgb(128,128,128)");
 
-				var powered_by_label = create_bawidget(ctx.canvas.width/2, size_1em_pixel_count/4, 0, 0, null, "powered_by_label");
+				var powered_by_label_size_em = .75;
+				var powered_by_label = create_bawidget(ctx.canvas.width/2, size_1em_pixel_count*powered_by_label_size_em, 0, 0, null, "powered_by_label");
 				powered_by_label.text = "Chunkymap";
-				powered_by_label.size_em = .75;
+				powered_by_label.size_em = powered_by_label_size_em;
 				//powered_by_label.color_string = "rgb(12,132,245)"
 				powered_by_label.color_string = "rgb(192,192,192)"
 				
