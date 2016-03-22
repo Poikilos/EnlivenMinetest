@@ -1,0 +1,3 @@
+Author,URL,AccessDate
+sfan5,https://raw.githubusercontent.com/sfan5/minetest-mapper-cpp/master/colors.txt,2016-03-22
+VenesseE,http://digitalaudioconcepts.com/vanessa/hobbies/minetest/colors.txt,2016-03-22

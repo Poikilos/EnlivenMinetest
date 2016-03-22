@@ -1,0 +1,149 @@
+snow:trunk 234 207 156
+snow:needles 47 80 41
+snow:sapling_pine 95 255 0
+snow:ice 155 155 255
+snow:snow 221 223 255
+snow:dirt_with_snow 221 223 255
+snow:snow_block 221 223 255
+
+paragen:permafrost 181 144 107
+paragen:dirt 181 144 107
+paragen:desertstone 105 56 43
+paragen:needles 47 80 41
+paragen:jungleleaf 119 132 50
+paragen:cactus 95 255 0
+paragen:grass 27 35 25
+paragen:swampwater 48 108 48
+paragen:swampwaterflow 48 108 48
+paragen:stone 97 93 92
+paragen:sand 218 180 106
+paragen:luxblock 255 218 90
+paragen:goldengrass 188 160 0
+paragen:drygrass 147 119 71
+paragen:activelayer 147 119 71
+paragen:water 11 53 115
+paragen:waterflow 11 53 115
+paragen:snow 221 223 255
+
+paragenv7:dirt 181 144 107
+paragenv7:permafrost 181 144 107
+paragenv7:acacialeaf 47 80 41
+paragenv7:needles 47 80 41
+paragenv7:jungleleaf 119 132 50
+paragenv7:ssapling 95 255 0
+paragenv7:psapling 95 255 0
+paragenv7:cactus 95 255 0
+paragenv7:grass 27 35 25
+paragenv7:goldengrass 188 160 0
+paragenv7:drygrass 147 119 71
+
+flexrealm:perfrost 181 144 107
+flexrealm:dirt 181 144 107
+flexrealm:destone 105 56 43
+flexrealm:needles 47 80 41
+flexrealm:junleaf 119 132 50
+flexrealm:grass 27 35 25
+flexrealm:swatzero 48 108 48
+flexrealm:swatfour 48 108 48
+flexrealm:swatflow 48 108 48
+flexrealm:stone 97 93 92
+flexrealm:sand 218 180 106
+flexrealm:desand 227 138 73
+flexrealm:drygrass 147 119 71
+flexrealm:frograss 87 76 45
+flexrealm:watzero 11 53 115
+flexrealm:watfour 11 53 115
+flexrealm:watflow 11 53 115
+flexrealm:cloud 227 233 240
+
+watershed:dirt 181 144 107
+watershed:redstone 105 56 43
+watershed:needles 47 80 41
+watershed:jungleleaf 119 132 50
+watershed:stone 97 93 92
+watershed:grass 27 35 25
+watershed:water 11 53 115
+watershed:waterflow 11 53 115
+
+moonrealm:stone 97 93 92
+moonrealm:dust 132 132 132
+moonrealm:luxore 255 255 0
+moonrealm:luxnode 255 255 0
+moonrealm:waterice 155 155 255
+
+asteroid:snowblock 221 223 255
+asteroid:waterice 155 155 255
+asteroid:stone 97 93 92
+asteroid:cobble 116 112 111
+asteroid:gravel 137 125 112
+asteroid:dust 132 132 132
+
+trail:dirt_walked 181 144 107
+trail:dirt_with_grass_walked 255 0 0
+trail:desert_sand_walked 255 0 0
+trail:snow_walked 255 0 0
+trail:snow_block_walked 255 0 0
+trail:sand_walked 255 0 0
+
+conifers:trunk 234 207 156
+conifers:trunk_reversed 234 207 156
+conifers:leaves 47 80 41
+conifers:leaves_special 47 80 41
+conifers:sapling 95 255 0
+
+volcano:magma_source 255 51 0
+volcano:magma_slow 255 51 0
+volcano:magma_flowing 255 51 0
+volcano:ash 132 132 132
+
+slabrealm:redstone 105 56 43
+slabrealm:jleaf 47 80 41
+slabrealm:needles 47 80 41
+slabrealm:jsapling 95 255 0
+slabrealm:psapling 95 255 0
+slabrealm:grassslab 27 35 25
+slabrealm:stone 97 93 92
+slabrealm:slith 204 204 204
+slabrealm:desertsandslab 227 138 73
+slabrealm:sandslab 218 180 106
+slabrealm:snowslab 221 223 255
+slabrealm:snowblock 221 223 255
+slabrealm:ice 155 155 255
+slabrealm:cloud 227 233 240
+
+landup:destone 105 56 43
+landup:stone 97 93 92
+landup:grass 27 35 25
+
+floatindev:desertstone 105 56 43
+floatindev:stone 97 93 92
+
+jungletree:leaves_green 47 80 41
+jungletree:leaves_red 47 80 41
+jungletree:leaves_yellow 47 80 41
+jungletree:sapling 95 255 0
+
+slabworld:slabstone 97 93 92
+slabworld:slith 204 204 204
+slabworld:cslith 204 204 204
+slabworld:cslithslab 204 204 204
+slabworld:cslithstair 204 204 204
+slabworld:lighton 255 218 90
+slabworld:light 255 218 90
+slabworld:slabcloud 227 233 240
+slabworld:redslabstone 105 56 43
+
+vrealm:sand 218 180 106
+vrealm:grass 27 35 25
+vrealm:desert_sand 227 138 73
+
+moonlet:lighton 255 218 90
+moonlet:light 255 218 90
+moonlet:omsand 227 138 73
+moonlet:omstone 206 113 68
+
+flolands:floatstone 66 72 97
+flolands:floatsand 106 218 196
+
+noise23:flosand 106 218 196
+noise23:stone 97 93 92

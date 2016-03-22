@@ -22,27 +22,32 @@ min_date_string = None
 #min_date_string = "2016-03-15 12:12:00"
 DEBUG_TXT_TIME_FORMAT_STRING="%Y-%m-%d %H:%M:%S"
 is_start_now = False
-while min_date_string is None:
-    default_min_date_string = datetime.strftime(datetime.now(), DEBUG_TXT_TIME_FORMAT_STRING)
+
+def confirm_min_date():
+    global min_date_string
+    while min_date_string is None:
+        default_min_date_string = datetime.strftime(datetime.now(), DEBUG_TXT_TIME_FORMAT_STRING)
+        print("")
+        print("Please enter starting date for player locations and block obtaining to be replayed (only used for inventory recovery feature).")
+        answer = raw_input("Replay Start [YYYY-MM-DD HH-mm-SS format] (blank for "+default_min_date_string+"): ")
+        if len(answer.strip())>0:
+            try:
+                min_date = datetime.strptime(answer, DEBUG_TXT_TIME_FORMAT_STRING)
+                tmp_string = datetime.strftime(min_date, DEBUG_TXT_TIME_FORMAT_STRING)
+                confirm = raw_input(tmp_string+" ok [Y/n]? ")
+                if confirm.strip().lower()=="y" or confirm.strip().lower()=="yes":
+                    min_date_string = tmp_string
+            except:
+                print("Bad date format. Please try again.")
+        else:
+            is_start_now = True
+            min_date_string = default_min_date_string
+    print("Using start "+min_date_string)
+    if is_start_now:
+        print("  (which is the current time, so nothing will be replayed [this is the default just be extra careful, because if you run the replay function on the same part of the log more than once, that will double #of each item each player digs and double the quantity of those items in players offline storage folder])")
     print("")
-    print("Please enter starting date for player locations and block obtaining to be replayed (only used for inventory recovery feature).")
-    answer = raw_input("Replay Start [YYYY-MM-DD HH-mm-SS format] (blank for "+default_min_date_string+"): ")
-    if len(answer.strip())>0:
-        try:
-            min_date = datetime.strptime(answer, DEBUG_TXT_TIME_FORMAT_STRING)
-            tmp_string = datetime.strftime(min_date, DEBUG_TXT_TIME_FORMAT_STRING)
-            confirm = raw_input(tmp_string+" ok [Y/n]? ")
-            if confirm.strip().lower()=="y" or confirm.strip().lower()=="yes":
-                min_date_string = tmp_string
-        except:
-            print("Bad date format. Please try again.")
-    else:
-        is_start_now = True
-        min_date_string = default_min_date_string
-print("Using start "+min_date_string)
-if is_start_now:
-    print("  (which is the current time, so nothing will be replayed [this is the default just be extra careful, because if you run the replay function on the same part of the log more than once, that will double #of each item each player digs and double the quantity of those items in players offline storage folder])")
-print("")
+    
+
 players_offline_storage_name = "players_offline_storage"
 deprecated_players_offline_storage_name = "player_storage"
 #H:\Minetest\player_storage
@@ -190,21 +195,24 @@ class MinetestInventory:
         self.items = list()  # IS allowed to have duplicate names
 
     def push_item(self, item_id, qty):
-        for index in range(0,len(self.items)):
-            if self.items[index].name==item_id:
-                qty = self.items[index].push_qty(qty)
-                if qty==0:
-                    break
-        if qty!=0:
+        if item_id!="Empty":
             for index in range(0,len(self.items)):
-                if self.items[index].name=="Empty":
-                    self.items[index].name = item_id
-                    self.items[index].qty = 0
-                    self.items[index].param = None  #TODO: set this! id needed for tools (see itemstring format at https://github.com/minetest/minetest/blob/master/doc/world_format.txt )
-                    self.items[index].suffix = None
+                if self.items[index].name==item_id:
                     qty = self.items[index].push_qty(qty)
                     if qty==0:
                         break
+            if qty!=0:
+                for index in range(0,len(self.items)):
+                    if self.items[index].name=="Empty":
+                        self.items[index].name = item_id
+                        self.items[index].qty = 0
+                        self.items[index].param = None  #TODO: set this! id needed for tools (see itemstring format at https://github.com/minetest/minetest/blob/master/doc/world_format.txt )
+                        self.items[index].suffix = None
+                        qty = self.items[index].push_qty(qty)
+                        if qty==0:
+                            break
+        else:
+            qty = 0
         return qty
 
     def write_to_stream(self, outs):
@@ -264,6 +272,7 @@ class MinetestPlayer:
             for index in range(0,len(self.inventories)):
                 if self.inventories[index].name=="craft":
                     qty = self.inventories[index].push_item(item_id, qty)
+                    #break even if nonzero, since only have this one inventory left (no bag guaranteed)
                     break
         return qty
 
@@ -659,6 +668,7 @@ def player_inventory_transfer(from_playerid, to_playerid):
 #"C:\Users\jgustafson\Desktop\Backup\fcalocal\home\owner\.minetest\debug_archived\2016\03\"
 ##debug_log_replay_to_offline_player_storage("C:\\Users\\jgustafson\\Desktop\\Backup\\fcalocal\\home\\owner\\.minetest\\debug.txt", players_offline_storage_path, min_date_string)
 
+#confirm_min_date()
 ##for debug_path in debugs_list:
 ##    debug_log_replay_to_offline_player_storage(debug_path, players_offline_storage_path, min_date_string)
 #debug_log_replay_to_offline_player_storage(debug_txt_path, players_offline_storage_path, min_date_string)

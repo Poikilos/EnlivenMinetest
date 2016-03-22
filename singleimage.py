@@ -8,7 +8,7 @@ from PIL import Image
 
 class ChunkymapOfflineRenderer:
 
-    minetestmapper_fast_sqlite_path = None
+    minetestmapper_numpy_path = None
     minetestmapper_custom_path = None
     minetestmapper_py_path = None
     backend_string = None
@@ -20,9 +20,9 @@ class ChunkymapOfflineRenderer:
         self.backend_string = get_world_var("backend")
 
         #region the following is also in singleimage.py
-        self.minetestmapper_fast_sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-numpy.py")
+        self.minetestmapper_numpy_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-numpy.py")
         self.minetestmapper_custom_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-expertmm.py")
-        self.minetestmapper_py_path = self.minetestmapper_fast_sqlite_path
+        self.minetestmapper_py_path = self.minetestmapper_numpy_path
         #if (self.backend_string!="sqlite3"):
             # minetestmapper-numpy had trouble with leveldb but this fork has it fixed so use numpy always always instead of running the following line
             # self.minetestmapper_py_path = self.minetestmapper_custom_path

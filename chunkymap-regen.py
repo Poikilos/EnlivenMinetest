@@ -64,7 +64,7 @@ class MTChunks:
     chunkymap_data_path = None
     chunkymapdata_worlds_path = None
     is_save_output_ok = None
-    minetestmapper_fast_sqlite_path = None
+    minetestmapper_numpy_path = None
     minetestmapper_custom_path = None
     minetestmapper_py_path = None
     colors_path = None
@@ -186,9 +186,9 @@ class MTChunks:
             print("WARNING: Database backend cannot be detected (unable to ensure image generator script will render map)")
 
         #region the following is also in singleimage.py
-        self.minetestmapper_fast_sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-numpy.py")
+        self.minetestmapper_numpy_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-numpy.py")
         self.minetestmapper_custom_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-expertmm.py")
-        self.minetestmapper_py_path = self.minetestmapper_fast_sqlite_path
+        self.minetestmapper_py_path = self.minetestmapper_numpy_path
         #if (self.backend_string!="sqlite3"):
             # minetestmapper-numpy had trouble with leveldb but this fork has it fixed so use numpy always always instead of running the following line
             #self.minetestmapper_py_path = self.minetestmapper_custom_path

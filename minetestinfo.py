@@ -38,6 +38,18 @@ after_broken["default:stone_with_mese"] = "default:mese_crystal"
 after_broken["moreores:mineral_silver"] = "moreores:silver_lump"
 after_broken["default:stone_with_gold"] = "default:gold_lump"
 after_broken["default:stone_with_diamond"] = "default:diamond"
+#NOTE: this stuff could be scraped from lua such as /usr/local/share/minetest/games/fca_game_a/mods/technic/technic_worldgen/nodes.lua
+after_broken["technic:mineral_uranium"] = "technic:uranium_lump"
+after_broken["technic:mineral_chromium"] = "technic:chromium_lump"
+after_broken["technic:mineral_zinc"] = "technic:zinc_lump"
+after_broken["technic:mineral_lead"] = "technic:lead_lump"
+after_broken["technic:mineral_sulfur"] = "technic:sulfur_lump"
+after_broken["caverealms:hanging_thin_ice"] = "caverealms:thin_ice"
+after_broken["caverealms:stone_with_moss"] = "default:cobble"
+after_broken["caverealms:stone_with_lichen"] = "default:cobble"
+after_broken["caverealms:stone_with_algae"] = "default:cobble"
+after_broken["caverealms:constant_flame"] = "Empty"
+#after_broken[""] = ""
 #after_broken[""] = ""
 #after_broken[""] = ""
 #after_broken[""] = ""
@@ -49,6 +61,8 @@ after_broken_startswith["pipeworks:mese_tube_"] = "pipeworks:mese_tube_000000"
 after_broken_startswith["pipeworks:conductor_tube_off_"] = "pipeworks:conductor_tube_off_1"
 after_broken_startswith["pipeworks:tube_"] = "pipeworks:tube_1"
 after_broken_startswith["Item pipeworks:accelerator_tube_"] = "pipeworks:accelerator_tube_1"
+
+#TODO: crafts (scrape list of ingredients to remove from inventory)
 
 genresult_name_closer_string = "_mapper_result.txt"
 
@@ -264,6 +278,7 @@ def get_game_path_from_gameid(gameid):
 
 
 def init_minetestinfo():
+    global dict_entries_modified_count
     if not minetestinfo.contains("www_minetest_path"):
         default_www_minetest_path = "/var/www/html/minetest"
         if os_name=="windows":
@@ -327,7 +342,82 @@ def init_minetestinfo():
         else:
             break
     load_world_and_mod_data()
+    print("")
+    lib_path = os.path.join(profile_path, "minetest")
+    util_path = os.path.join(lib_path, "util")
+    base_colors_txt = os.path.join(util_path, "colors.txt")
+    if not os.path.isfile(base_colors_txt):
+        base_colors_txt = os.path.join(os.path.dirname(os.path.abspath(__file__)), "colors (base).txt")
+    colors_folder_path = os.path.join( os.path.dirname(os.path.abspath(__file__)), "colors")
+    colors_repos_folder_path = os.path.join(colors_folder_path, "repos")
+    colors_fragments_folder_path = os.path.join(colors_folder_path, "fragments")
+    head_colors_txt = os.path.join( colors_repos_folder_path, "VenessaE.txt")
+    
+    dest_colors_txt = os.path.join( os.path.dirname(os.path.abspath(__file__)), "colors.txt")
+    if not os.path.isfile(dest_colors_txt):
+        print("")
+        print("Generating colors ("+dest_colors_txt+")...")
+        base_colors = get_dict_from_conf_file(base_colors_txt,assignment_operator=" ",inline_comments_enable=True)
+        merged_colors = get_dict_deepcopy(base_colors)
+        print("")
+        print(base_colors_txt+" has "+str(len(merged_colors))+" color(s)")
+        if os.path.isfile(head_colors_txt):
+            head_colors = get_dict_from_conf_file(head_colors_txt,assignment_operator=" ", inline_comments_enable=True)
+            print(os.path.basename(head_colors_txt)+" has "+str(len(head_colors))+" color(s)")
+            #merged_colors = get_dict_modified_by_conf_file(merged_colors, head_colors_txt,assignment_operator=" ", inline_comments_enable=True)
+            entries_changed_count = 0
+            entries_new_count = 0
+            for this_key in head_colors:
+                if this_key not in merged_colors:
+                    merged_colors[this_key] = head_colors[this_key]
+                    entries_new_count += 1
+                elif merged_colors[this_key] != head_colors[this_key]:
+                    merged_colors[this_key] = head_colors[this_key]
+                    entries_changed_count += 1
+            print("  "+singular_or_plural("entry","entries",entries_new_count+entries_changed_count) + " ("+str(entries_new_count)+" new, "+str(entries_changed_count)+" changed) merged from "+os.path.basename(head_colors_txt))
+        else:
+            print("Missing '"+head_colors_txt+"'")
+        this_name = "sfan5.txt"
+        show_max_count = 7
+        this_path = os.path.join(colors_repos_folder_path, this_name)
+        append_colors = get_dict_from_conf_file(this_path,assignment_operator=" ",inline_comments_enable=True)
+        if os.path.isfile(this_path):
+            appended_count = 0
+            print("")
+            print("Reading "+this_path+"...")
+            for this_key in append_colors.keys():
+                if this_key not in merged_colors:
+                    merged_colors[this_key] = append_colors[this_key]
+                    if appended_count<show_max_count:
+                        print("  "+this_key+" "+merged_colors[this_key])
+                    elif appended_count==show_max_count:
+                        print("  ...")
+                    appended_count += 1
+            print("  "+singular_or_plural("entry","entries",appended_count)+" appended from "+this_name)
+        else:
+            print("Missing "+this_path)
+        folder_path = colors_fragments_folder_path
+        if os.path.isdir(folder_path):
+            for sub_name in os.listdir(folder_path):
+                sub_path = os.path.join(folder_path, sub_name)
+                if sub_name[:1]!="." and os.path.isfile(sub_path):
+                    print("")
+                    print("Reading "+sub_path+"...")
+                    appended_count = 0
+                    append_colors = get_dict_from_conf_file(sub_path, assignment_operator=" ",inline_comments_enable=True)
+                    for this_key in append_colors.keys():
+                        if this_key not in merged_colors:
+                            merged_colors[this_key] = append_colors[this_key]
+                            if appended_count<show_max_count:
+                                print("  "+this_key+" "+merged_colors[this_key])
+                            elif appended_count==show_max_count:
+                                print("  ...")
+                            appended_count += 1
+                    print("  "+singular_or_plural("entry","entries",appended_count)+" appended from "+sub_name)
 
+        save_conf_from_dict(dest_colors_txt, merged_colors, assignment_operator=" ")
+    else:
+        print("Using colors "+dest_colors_txt)
 
 def load_world_and_mod_data():
     #if games_path =

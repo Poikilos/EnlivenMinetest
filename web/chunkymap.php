@@ -361,9 +361,9 @@ function get_markers_from_dir($chunkymap_markers_path) {
 }
 
 
-//chunk_mode_enable: shows chunk png images instead of decachunk jpg images (slower)
+//chunks_enable: shows chunk png images instead of decachunk jpg images (slower)
 //visual_debug_enable: draws colored rectangles based on yml files instead of drawing images
-function echo_chunkymap_canvas($show_player_names_enable, $chunk_mode_enable, $visual_debug_enable, $html4_mode_enable) {
+function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $chunks_enable, $visual_debug_enable, $html4_mode_enable) {
     global $x;
     global $z;
     global $zoom;
@@ -385,14 +385,14 @@ function echo_chunkymap_canvas($show_player_names_enable, $chunk_mode_enable, $v
 		$tile_w = 160;
 		$tile_h = 160;
 		
-		if (isset($chunk_mode_enable) and ($chunk_mode_enable===true)) {
+		if (isset($chunks_enable) and ($chunks_enable===true)) {
 			$tile_w = 16;
 			$tile_h = 16;
 			$chunks_per_tile_x_count = 1;
 			$chunks_per_tile_z_count = 1;
 		}
 		else {
-			$chunk_mode_enable=false;
+			$chunks_enable=false;
 		}
 		
 		$locations_per_tile_x_count = $chunks_per_tile_x_count*16;
@@ -617,7 +617,7 @@ function echo_chunkymap_canvas($show_player_names_enable, $chunk_mode_enable, $v
 				var chunkymap_view_max_zoom='.$chunkymap_view_max_zoom.';
 				var chunkymap_view_min_zoom='.$chunkymap_view_min_zoom.';
 				var chunkymap_zoom_delta='.$chunkymap_change_zoom_multiplier.';
-				var chunk_mode_enable='.get_javascript_bool_value($chunk_mode_enable).';
+				var chunks_enable='.get_javascript_bool_value($chunks_enable).';
 				var visual_debug_enable='.get_javascript_bool_value($visual_debug_enable).';
 				var chunks_per_tile_x_count='.$chunks_per_tile_x_count.';
 				var chunks_per_tile_z_count='.$chunks_per_tile_z_count.';
@@ -1250,7 +1250,7 @@ function echo_chunkymap_canvas($show_player_names_enable, $chunk_mode_enable, $v
 		global $td_decachunk_placeholder_content;
 		global $td_chunk_placeholder_content;
 		$td_tile_placeholder_content = null;
-		if ($chunk_mode_enable) {
+		if ($chunks_enable) {
 			$td_tile_placeholder_content = $td_chunk_placeholder_content;
 		}
 		else {
@@ -1393,60 +1393,68 @@ function echo_chunkymap_canvas($show_player_names_enable, $chunk_mode_enable, $v
 		echo '<img id="zoom_out" src="chunkymapdata/images/zoom_out.png"/>';
 		echo '<img id="zoom_out_disabled" src="chunkymapdata/images/zoom_out_disabled.png"/>';
 		$this_tiley_z=$max_tiley_z; //start at max since screen is inverted cartesian
-		if ($visual_debug_enable!==true) {
-			//this table loads the images then is hidden when javascript runs successfully, but it is also a map though not very functional
-			if ($html4_mode_enable===true) {
-				echo '<table id="chunkymap_table" cellspacing="0" cellpadding="0" style="width:100%">'."\r\n";
-			}
-			else {
-				echo '<table id="chunkymap_table" cellspacing="0" cellpadding="0" style="position:absolute; top:0px; left:0px; width:0px; height:0px; visibility:hidden">'."\r\n";
-			}
-			echo '  <tr>'."\r\n";
-			echo '    <td style="width:5%">'."$td_tile_placeholder_content".'</td>'."\r\n";
-			echo "    <td style=\"width:95%\"><a href=\"?world_name=$world_name&zoom=$zoom&x=$x&z=".($z+($camera_h*$chunkymap_camera_pan_delta))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow_wide_up.png" style="width:90%"/>'.'</a></td>'."\r\n";
-			echo '    <td style="width:5%">'."$td_tile_placeholder_content".'</td>'."\r\n";
-			echo '  </tr>'."\r\n";
-			$cell_perc=intval(round(100.0/$tile_x_count));
-			echo '  <tr>'."\r\n";
-			echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&zoom=$zoom&x=".($x-($camera_w*$chunkymap_camera_pan_delta))."&z=$z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow_wide_left.png" style="width:90%"/>'.'</a></td>'."\r\n";
-			echo '    <td style="width:95%">'."\r\n";		
-			echo '      <table id="chunk_table" cellpadding="0" cellspacing="0" style="width:100%">'."\r\n";
-			while ($this_tiley_z>=$min_tiley_z) {
-				$this_tiley_x=$min_tiley_x;
-				echo "        <tr>\r\n";
-				while ($this_tiley_x<=$max_tiley_x) {
-					$img_path=null;
-					echo "        <td>";
-					if ($chunk_mode_enable) {
-						$img_path=get_chunk_image_path_from_chunky_coords($this_tiley_x, $this_tiley_z);
-						if (!is_file($img_path)) {
-							echo "<!-- no chunk $img_path -->";
-							$img_path="chunkymapdata/images/chunk_blank.jpg";
-						}
-					}
-					else {
-						$img_path=get_decachunk_image_path_from_decachunk($this_tiley_x, $this_tiley_z);
-						if (!is_file($img_path)) {
-							echo "<!-- no decachunk $img_path -->";
-							$img_path="chunkymapdata/images/decachunk_blank.jpg";
-						}
-					}
-					echo "<img class=\"maptileimg\" src=\"$img_path\" style=\"width:100%\"/>"."</td>\r\n";
-					$this_tiley_x++;
+		if (($decachunks_enable==true) or ($chunks_enable==true)) {
+			if ($visual_debug_enable!==true) {
+				//this table loads the images then is hidden when javascript runs successfully, but it is also a map though not very functional
+				if ($html4_mode_enable===true) {
+					echo '<table id="chunkymap_table" cellspacing="0" cellpadding="0" style="width:100%">'."\r\n";
 				}
-				echo "        </tr>\r\n";
-				$this_tiley_z-=1;
+				else {
+					echo '<table id="chunkymap_table" cellspacing="0" cellpadding="0" style="position:absolute; top:0px; left:0px; width:0px; height:0px; visibility:hidden">'."\r\n";
+				}
+				echo '  <tr>'."\r\n";
+				echo '    <td style="width:5%">'."$td_tile_placeholder_content".'</td>'."\r\n";
+				echo "    <td style=\"width:95%\"><a href=\"?world_name=$world_name&zoom=$zoom&x=$x&z=".($z+($camera_h*$chunkymap_camera_pan_delta))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow_wide_up.png" style="width:90%"/>'.'</a></td>'."\r\n";
+				echo '    <td style="width:5%">'."$td_tile_placeholder_content".'</td>'."\r\n";
+				echo '  </tr>'."\r\n";
+				$cell_perc=intval(round(100.0/$tile_x_count));
+				echo '  <tr>'."\r\n";
+				echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&zoom=$zoom&x=".($x-($camera_w*$chunkymap_camera_pan_delta))."&z=$z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow_wide_left.png" style="width:90%"/>'.'</a></td>'."\r\n";
+				echo '    <td style="width:95%">'."\r\n";		
+				echo '      <table id="chunk_table" cellpadding="0" cellspacing="0" style="width:100%">'."\r\n";
+				while ($this_tiley_z>=$min_tiley_z) {
+					$this_tiley_x=$min_tiley_x;
+					echo "        <tr>\r\n";
+					while ($this_tiley_x<=$max_tiley_x) {
+						$img_path=null;
+						echo "        <td>";
+						if ($chunks_enable) {
+							$img_path=get_chunk_image_path_from_chunky_coords($this_tiley_x, $this_tiley_z);
+							if (!is_file($img_path)) {
+								echo "<!-- no chunk $img_path -->";
+								$img_path="chunkymapdata/images/chunk_blank.jpg";
+							}
+						}
+						else {
+							$img_path=get_decachunk_image_path_from_decachunk($this_tiley_x, $this_tiley_z);
+							if (!is_file($img_path)) {
+								echo "<!-- no decachunk $img_path -->";
+								$img_path="chunkymapdata/images/decachunk_blank.jpg";
+							}
+						}
+						echo "<img class=\"maptileimg\" src=\"$img_path\" style=\"width:100%\"/>"."</td>\r\n";
+						$this_tiley_x++;
+					}
+					echo "        </tr>\r\n";
+					$this_tiley_z-=1;
+				}
+				echo '      </table>';
+				echo '    </td>'."\r\n";
+				echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&zoom=$zoom&x=".($x+($camera_w*$chunkymap_camera_pan_delta))."&z=$z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow_wide_right.png" style="width:100%"/>'.'</a></td>'."\r\n";
+				echo '  </tr>'."\r\n";
+				echo '  <tr>'."\r\n";
+				echo '    <td style="width:5%">'."$td_decachunk_placeholder_content".'</td>'."\r\n";
+				echo "    <td style=\"width:90%\"><a href=\"?world_name=$world_name&zoom=$zoom&x=$x&z=".($z-($camera_h*$chunkymap_camera_pan_delta))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow_wide_down.png" style="width:100%"/>'.'</a></td>'."\r\n";
+				echo '    <td style="width:5%">'."$td_decachunk_placeholder_content".'</td>'."\r\n";
+				echo '  </tr>'."\r\n";
+				echo '</table>'."\r\n";
 			}
-			echo '      </table>';
-			echo '    </td>'."\r\n";
-			echo "    <td style=\"width:5%\"><a href=\"?world_name=$world_name&zoom=$zoom&x=".($x+($camera_w*$chunkymap_camera_pan_delta))."&z=$z#chunkymap_top\">".'<img src="chunkymapdata/images/arrow_wide_right.png" style="width:100%"/>'.'</a></td>'."\r\n";
-			echo '  </tr>'."\r\n";
-			echo '  <tr>'."\r\n";
-			echo '    <td style="width:5%">'."$td_decachunk_placeholder_content".'</td>'."\r\n";
-			echo "    <td style=\"width:90%\"><a href=\"?world_name=$world_name&zoom=$zoom&x=$x&z=".($z-($camera_h*$chunkymap_camera_pan_delta))."#chunkymap_top\">".'<img src="chunkymapdata/images/arrow_wide_down.png" style="width:100%"/>'.'</a></td>'."\r\n";
-			echo '    <td style="width:5%">'."$td_decachunk_placeholder_content".'</td>'."\r\n";
-			echo '  </tr>'."\r\n";
-			echo '</table>'."\r\n";
+		}
+		else {
+			if ($html4_mode_enable===true) {
+				//else see above for singleimage (if singleimage doesn't exist, this should run though)
+				//echo 'There is nothing to do for html4_mode_enable since neither chunks nor decachunks were enabled (singleimage html4 is not yet implemented).';
+			}
 		}
 		if ($html4_mode_enable===true) {
 			echo '<center><small>Powered by <a href="https://github.com/expertmm/minetest-chunkymap">Chunkymap</a></small></center>';

@@ -38,10 +38,11 @@ if (is_file('chunkymap.php')) {
 	//echo "</center>";
 	set_chunkymap_view($x,$z,$zoom);
 	//echo "<table><tr><td style=\"text-align:left\">";
-	$chunk_mode_enable=true; //(this should normally be false) if true, uses 16x16 png files instead of the 160x160 decachunks; it is slower but may have more of the map during times when new chunks are explored but before the render queue is done and the decachunk images are created from the chunk images.);
+	$chunks_enable=false; //(this should normally be false) if true, uses 16x16 png files instead of the 160x160 decachunks; it is slower but may have more of the map during times when new chunks are explored but before the render queue is done and the decachunk images are created from the chunk images.);
+	$decachunks_enable=false; //(this should normally be false) if true, uses 16x16 png files instead of the 160x160 decachunks; it is slower but may have more of the map during times when new chunks are explored but before the render queue is done and the decachunk images are created from the chunk images.);
 	$visual_debug_enable=false; //if true, this renders colors based on yml files instead of drawing images (and does not echo images at all)
 	$show_player_names_enable=true;
-	echo_chunkymap_canvas($show_player_names_enable,$chunk_mode_enable,$visual_debug_enable,$html4_mode_enable);
+	echo_chunkymap_canvas($show_player_names_enable,$decachunks_enable,$chunks_enable,$visual_debug_enable,$html4_mode_enable);
 	//echo_chunkymap_as_chunk_table(false);
 	//echo_decachunk_table();
 	//echo "</td></tr></table>";

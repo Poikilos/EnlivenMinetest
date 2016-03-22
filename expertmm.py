@@ -27,6 +27,7 @@ alnum_chars = alpha_chars+digit_chars
 identifier_chars = alnum_chars+"_"
 identifier_and_dot_chars = identifier_chars+"."
 min_indent = ""
+dict_entries_modified_count = 0
 
 class InstalledFile:
     source_dir_path = None
@@ -158,9 +159,9 @@ def vec2_not_in(this_vec, this_list):
 def ivec2_equals(pos1, pos2):
     return (int(pos1[0])==int(pos2[0])) and (int(pos1[1])==int(pos2[1]))
 
-def get_dict_from_conf_file(path,assignment_operator="="):
+def get_dict_from_conf_file(path,assignment_operator="=",comment_delimiter="#",inline_comments_enable=False):
     results = None
-    results = get_dict_modified_by_conf_file(results, path, assignment_operator)
+    results = get_dict_modified_by_conf_file(results, path, assignment_operator, comment_delimiter=comment_delimiter, inline_comments_enable=inline_comments_enable)
     return results
 
 def RepresentsInt(s):
@@ -216,7 +217,20 @@ def print_file(path, min_indent=""):
             pass
     return line_count
 
+def singular_or_plural(singular, plural, count):
+    result = plural
+    
+    if count==1:
+        result = singular
+    return str(count)+" "+result
+
+def get_dict_entries_modified_count():
+    
+    return dict_entries_modified_count
+
 def get_dict_modified_by_conf_file(this_dict, path, assignment_operator="=", comment_delimiter="#", inline_comments_enable=False):
+    global dict_entries_modified_count
+    dict_entries_modified_count = 0
     results = this_dict
     #print ("Checking "+str(path)+" for settings...")
     if (results is None) or (type(results) is not dict):
@@ -249,6 +263,9 @@ def get_dict_modified_by_conf_file(this_dict, path, assignment_operator="=", com
                                 elif RepresentsFloat(result_value):
                                     result_value = float(result_value)
                                 #print ("   CHECKING... "+result_name+":"+result_value)
+                                if (result_name not in results) or (results[result_name]!=result_value):
+                                    dict_entries_modified_count += 1
+                                    #print(str(dict_entries_modified_count))
                                 results[result_name]=result_value
         ins.close()
     return results

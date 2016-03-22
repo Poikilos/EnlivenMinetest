@@ -1,0 +1,22 @@
+nature:blossom                                                  79  100  68
+
+flowers:flower_cotton                                           145 165 127
+flowers:flower_dandelion_white                                  161 174 149
+flowers:flower_rose                                             153   9   0
+flowers:flower_tulip                                            175 114   0
+flowers:flower_viola                                            84   90  64
+flowers:flower_dandelion_yellow                                 144 138   0
+flowers:flower_geranium                                         75  101  84
+flowers:flower_waterlily                                        119 166 100
+flowers:flower_seaweed                                          48  114 107
+
+default:sapling                                                 71   64  41
+
+teleporter:teleporter_pad                                       248 231 153
+
+bushes:strawberry_bush                                          23   75  17
+
+fire:basic_flame                                                76    9   0
+
+craft_guide:lcd_pc                                              64   64  64
+craft_guide:sign_wall                                           212 212 212

@@ -3,6 +3,7 @@ chunkymapdata/
 chunkymap-genresults/
 chunkymap.yml
 minetestmeta.yml
+colors.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
