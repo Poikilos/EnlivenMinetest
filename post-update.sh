@@ -14,6 +14,7 @@ echo "running install-chunkymap-on-ubuntu.sh..."
 sh "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh"
 echo "...returned to update-chunkymap-on-ubuntu-from-web.sh"
 echo ""
+echo "destination set to $CHUNKYMAP_DEST"
 MT_MY_WEBSITE_PATH=/var/www/html/minetest
 
 # IF already installed to default MT_MY_WEBSITE_PATH, update the files:
