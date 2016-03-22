@@ -715,7 +715,7 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 					//}
 					if (powered_by_label!=null) {
 						//powered_by_label.y = ctx.canvas.height-size_1em_pixel_count;
-						powered_by_label.y = size_1em_pixel_count/4;
+						powered_by_label.y = size_1em_pixel_count/2;
 					}
 					font_string = Math.round(size_1em_pixel_count)+"px Calibri";
 					size_1pt_pixel_count = size_1em_pixel_count/16;
