@@ -47,7 +47,8 @@ class ChunkymapOfflineRenderer:
         if not os.path.isdir(genresults_folder_path):
             os.makedirs(genresults_folder_path)
         genresult_path = os.path.join(genresults_folder_path, "singleimage"+genresult_name_closer_string)
-        cmd_suffix = " > \""+genresult_path+"\""
+        gen_error_path = os.path.join(genresults_folder_path, "singleimage"+gen_error_name_closer_string)
+        cmd_suffix = " 1> \""+genresult_path+"\""
 
         #blank since singleimage mode:
         #geometry_string = str(min_x)+":"+str(min_z)+"+"+str(int(max_x)-int(min_x)+1)+"+"+str(int(max_z)-int(min_z)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py

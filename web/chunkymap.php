@@ -1385,6 +1385,9 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 			echo '  </td></tr>'."\r\n";
 			echo '</table>'."\r\n";
 		}
+		else {
+			echo '<--no '."$si_path".'-->'+"\r\n";
+		}
 		
 		//echo "<img id=\"singleplayer_img\" src=\"$chunkymapdata_thisworld_path/players/singleplayer.png\" style=\"visibility:hidden\"/>";
 		echo '<img id="compass_rose" src="chunkymapdata/images/compass_rose.png"/>';

@@ -65,6 +65,7 @@ after_broken_startswith["Item pipeworks:accelerator_tube_"] = "pipeworks:acceler
 #TODO: crafts (scrape list of ingredients to remove from inventory)
 
 genresult_name_closer_string = "_mapper_result.txt"
+gen_error_name_closer_string = "_mapper_err.txt"
 
 loaded_mod_list = list()
 
