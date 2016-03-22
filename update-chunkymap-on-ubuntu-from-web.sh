@@ -33,9 +33,9 @@ echo ""
 MT_MY_WEBSITE_PATH=/var/www/html/minetest
 
 # IF already installed to default MT_MY_WEBSITE_PATH, update the files:
-if [ -f "$HOME/Downloads/minetest-chunkymap/web/chunkymap.php" ]; then
+if [ -f "$HOME/chunkymap/web/chunkymap.php" ]; then
 	if [ -f "$MT_MY_WEBSITE_PATH/chunkymap.php" ]; then
-		sudo cp -f "$HOME/Downloads/minetest-chunkymap/web/chunkymap.php" "$MT_MY_WEBSITE_PATH/"
+		sudo cp -f "$HOME/chunkymap/web/chunkymap.php" "$MT_MY_WEBSITE_PATH/"
 		echo "updated $MT_MY_WEBSITE_PATH/chunkymap.php"
 		#sudo cp --no-clobber "$HOME/Downloads/minetest-chunkymap/web/viewchunkymap.php" "$MT_MY_WEBSITE_PATH/viewchunkymap.php"
 		sudo cp -f "$HOME/Downloads/minetest-chunkymap/web/viewchunkymap.php" "$MT_MY_WEBSITE_PATH/viewchunkymap.php"
