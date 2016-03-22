@@ -427,8 +427,8 @@ def load_world_and_mod_data():
         game_folder_name_blacklist.append(prepackaged_gameid)
         games_list = list()
         if default_gameid is None:
-            if os.path.isdir(games_path):
-                folder_path = games_path
+            folder_path = games_path
+            if os.path.isdir(folder_path):
                 sub_names = os.listdir(folder_path)
                 real_count = 0
                 for sub_name in sub_names:
