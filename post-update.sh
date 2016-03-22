@@ -1,7 +1,7 @@
 #./install-chunkymap-on-ubuntu.sh
 echo ""
-echo ""
-echo "Now performing post-update (updated updater)"
+echo " "
+echo "Now performing POST-UPDATE (the updated updater)"
 CHUNKYMAP_INSTALLER_DIR=$HOME/Downloads/minetest-chunkymap
 CHUNKYMAP_DEST=$HOME/chunkymap
 if [ ! -d "$HOME/Downloads" ]; then
