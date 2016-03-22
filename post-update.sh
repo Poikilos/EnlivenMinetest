@@ -29,3 +29,4 @@ if [ -f "$HOME/chunkymap/web/chunkymap.php" ]; then
 		#--no-clobber: do not overwrite existing
 	fi
 fi
+cp -f "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-on-ubuntu-from-web.sh" "$HOME/"
