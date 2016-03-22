@@ -1238,8 +1238,14 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 					//done on each draw: last_bawidget.text = 
 					pen_y += size_1em_pixel_count + padding_h;
 					
-					document.getElementById("chunkymap_table").style.visibility="hidden";
-					document.getElementById("singleimage_table").style.visibility="hidden";
+					chunkymap_table = document.getElementById("chunkymap_table");
+					if (chunkymap_table!=null) {
+						chunkymap_table.style.visibility="hidden";
+					}
+					singleimage_table = document.getElementById("singleimage_table");
+					if (singleimage_table!=null) {
+						singleimage_table.style.visibility="hidden";
+					}
 					
 					process_zoom_change();
 					draw_map();

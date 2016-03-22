@@ -19,12 +19,12 @@ fi
 #sh "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
 if [ -f "$CHUNKYMAP_DEST/update-chunkymap-installer-only.sh" ]; then
 	sh "$CHUNKYMAP_DEST/update-chunkymap-installer-only.sh"
-	#further instructions are in separate file in case updater was updated:
+	#further instructions are in separate file in case updater was updated (sleep first otherwise file won't be finished writing):
 	sleep .25
 	sh "$CHUNKYMAP_DEST/post-update.sh"
 else
 	sh "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
-	#further instructions are in separate file in case updater was updated:
+	#further instructions are in separate file in case updater was updated (sleep first otherwise file won't be finished writing):
 	sleep .25
 	sh "$CHUNKYMAP_INSTALLER_DIR/post-update.sh"
 fi
