@@ -1120,7 +1120,7 @@ class MTChunks:
                                     break
                     ins.close()
                     player_index = None
-                    this_player = None
+                    #this_player = None
                     is_changed = False
                     #(mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(file_path)
                     moved_mtime = time.gmtime()
@@ -1131,8 +1131,8 @@ class MTChunks:
                     #this_mtime_string = datetime.strftime(mtime, INTERNAL_TIME_FORMAT_STRING)
                     if file_name in self.players:
                         #this_player = self.players[file_name]
-                        if ("utc_mtime" not in this_player):
-                            #or (this_player["utc_mtime"]!=this_mtime_string):
+                        if ("utc_mtime" not in self.players[file_name]):
+                            #or (self.players[file_name]["utc_mtime"]!=this_mtime_string):
                             self.players[file_name]["utc_mtime"]=this_mtime_string
                             is_changed = True
                             #not necessarily moved--even if resaved by server, may not have moved a whole block or at all
@@ -1182,7 +1182,7 @@ class MTChunks:
 
                     #if is_enough_data:
                     #if player_name!="singleplayer":
-                    #this_player = get_dict_from_conf_file(player_dest_path,":")
+                    #self.players[file_name] = get_dict_from_conf_file(player_dest_path,":")
                     #map_player_position_tuple = None
                     saved_player_x = None
                     saved_player_y = None
