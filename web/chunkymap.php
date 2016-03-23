@@ -1519,21 +1519,47 @@ function check_world() {
 	global $world_name;
 	global $chunkymapdata_worlds_path;
 	global $auto_choose_enable;
+	$non_world_world_count = 0;
+	$world_count = 0;
+	$non_world_world_name = null;
+	$last_world_name = null;
 	
-	
-	if ($auto_choose_enable===true) {
-		if (!isset($world_name)) {
-			if ($handle = opendir($chunkymapdata_worlds_path)) {
-				while (false !== ($file_name = readdir($handle))) {
-					if (substr($file_name, 0, 1) != ".") {
-						$file_path = $chunkymapdata_worlds_path."/".$file_name;
-						if (is_dir($file_path)) {
-							$world_name=$file_name;
-							break;
+	if (!isset($world_name)) {
+		if ($handle = opendir($chunkymapdata_worlds_path)) {
+			while (false !== ($file_name = readdir($handle))) {
+				if (substr($file_name, 0, 1) != ".") {
+					$file_path = $chunkymapdata_worlds_path."/".$file_name;
+					if (is_dir($file_path)) {
+						//$world_name=$file_name;
+						//break;
+						if ($file_name!="world") {
+							$non_world_world_name = $file_name;
+							if ($auto_choose_enable===true) {
+								$world_name = $file_name;
+							}
+							$non_world_world_count++;
 						}
+						$last_world_name = $file_name;
+						$world_count++;
 					}
 				}
-				closedir($handle);
+			}
+			closedir($handle);
+		}
+		if ($world_count==1) {
+			$world_name = $last_world_name;
+		}
+		//elseif ($non_world_world_count==1) { //assumes you want the one not called world (not a great assumption)
+		//	$world_name = $non_world_world_name;
+		//}
+		else {
+			if ($auto_choose_enable===true) {
+				if ($non_world_world_name==null) {
+					$world_name = $last_world_name;
+				}
+				else {
+					$world_name = $non_world_world_name;
+				}
 			}
 		}
 	}
