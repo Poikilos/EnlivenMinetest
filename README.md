@@ -91,11 +91,11 @@ world_path
     wget https://github.com/expertmm/minetest-chunkymap/raw/master/install-chunkymap-on-ubuntu-from-web.sh
     chmod +x install-chunkymap-on-ubuntu-from-web.sh
     ./install-chunkymap-on-ubuntu-from-web.sh
-	#or later run:
-    #rm update-chunkymap-on-ubuntu-from-web.sh
-    #wget https://github.com/expertmm/minetest-chunkymap/raw/master/update-chunkymap-on-ubuntu-from-web.sh
-    #chmod +x update-chunkymap-on-ubuntu-from-web.sh
-    #./update-chunkymap-on-ubuntu-from-web.sh
+	&#35;or later run:
+    &#35;rm update-chunkymap-on-ubuntu-from-web.sh
+    &#35;wget https://github.com/expertmm/minetest-chunkymap/raw/master/update-chunkymap-on-ubuntu-from-web.sh
+    &#35;chmod +x update-chunkymap-on-ubuntu-from-web.sh
+    &#35;./update-chunkymap-on-ubuntu-from-web.sh
 	sudo python chunkymap/singleimage.py
 	sudo python chunkymap/generator.py
 	OPTION 2: IF you are using Ubuntu go to a terminal, cd to this directory,  
