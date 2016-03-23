@@ -415,7 +415,25 @@ def init_minetestinfo():
                                 print("  ...")
                             appended_count += 1
                     print("  "+singular_or_plural("entry","entries",appended_count)+" appended from "+sub_name)
-
+        exclusions_path = os.path.join( os.path.dirname(os.path.abspath(__file__)), "colors - invisible.txt")
+        exclusions_list = list()
+        if os.path.isfile(exclusions_path):
+            ins = open(this_genresult_path, 'r')
+            line = True
+            counting_number = 1
+            while line:
+                participle = "reading line "+str(counting_number)
+                line = ins.readline()
+                if line:
+                    line_strip = line.strip()
+                    if len(line_strip)>0:
+                        exclusions_list.append(line_strip)
+        else:
+            print("Missing "+exclusions_path)
+        for this_key in merged_colors.keys():
+            if this_key in exclusions_list:
+                merged_colors.remove(this_key)
+                print("Removed invisible block '"+this_key+"'")
         save_conf_from_dict(dest_colors_txt, merged_colors, assignment_operator=" ")
     else:
         print("Using colors from "+dest_colors_txt)
