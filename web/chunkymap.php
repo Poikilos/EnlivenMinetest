@@ -1086,7 +1086,7 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 							};
 				}
 				
-				fuction get_relative_mouse_point(e) {
+				function get_relative_mouse_point(e) {
 					var xOffset=Math.max(document.documentElement.scrollLeft,document.body.scrollLeft);
 					var yOffset=Math.max(document.documentElement.scrollTop,document.body.scrollTop);
 					return {
