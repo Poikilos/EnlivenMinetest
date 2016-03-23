@@ -112,6 +112,7 @@ class MTChunks:
     chunkymap_thisworld_data_path = None
     genresult_name_opener_string = "chunk_"
     min_indent = None
+    last_player_move_mtime_string = None
 
     def __init__(self):  #formerly checkpaths() in global scope
         #self.force_rerender_decachunks_enable = True
@@ -1208,6 +1209,7 @@ class MTChunks:
                         if is_moved:
                             #print("PLAYER MOVED: "+str(player_name)+" moved from "+str(map_player_position_tuple)+" to "+str(player_position_tuple))
                             if self.verbose_enable:
+                                self.last_player_move_mtime_string = this_mtime_string
                                 print("PLAYER MOVED: "+str(player_name)+" moved from "+str(saved_player_x)+","+str(saved_player_y)+","+str(saved_player_z)+" to "+str(player_x)+","+str(player_y)+","+str(player_z))
                             players_moved_count += 1
                         else:
@@ -1238,7 +1240,13 @@ class MTChunks:
         #if not self.verbose_enable:
         print("PLAYERS:")
         print("  saved: "+str(player_written_count)+" (moved:"+str(players_moved_count)+"; new:"+str(players_saved_count)+")")
-        print("  didn't move: "+str(players_didntmove_count))
+        last_move_msg = ""
+        if (players_moved_count<1):
+            if (self.last_player_move_mtime_string is not None)
+                last_move_msg = " (last move: "+self.last_player_move_mtime_string+")"
+            else:
+                last_move_msg = " (none moved lately)"
+        print("  didn't move: "+str(players_didntmove_count)+last_move_msg)
 
     def is_chunk_traversed_by_player(self, chunk_luid):
         result = False
@@ -1903,7 +1911,7 @@ class MTChunks:
             if self.refresh_players_seconds < run_wait_seconds:
                 run_wait_seconds = self.refresh_players_seconds
             print("")
-            print("Ran "+str(self.run_count)+" time(s)")
+            print("Ran "+str(self.run_count)+" time(s) for "+self.world_name)
             self.read_then_remove_signals()
             if self.loop_enable:
                 if self.refresh_players_enable:
