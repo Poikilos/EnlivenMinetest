@@ -23,6 +23,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageColor
 #mode_to_bpp dict is from Antti Haapala. <http://stackoverflow.com/questions/28913988/is-there-a-way-to-measure-the-memory-consumption-of-a-png-image>. 7 Mar 2015. 28 Feb 2016.
 mode_to_bpp = {'1':1, 'L':8, 'P':8, 'RGB':24, 'RGBA':32, 'CMYK':32, 'YCbCr':24, 'I':32, 'F':32}
 INTERNAL_TIME_FORMAT_STRING="%Y-%m-%d %H:%M:%S"
+
 #best_timer = timeit.default_timer
 #if sys.platform == "win32":
     # on Windows, the best timer is time.clock()
@@ -61,6 +62,7 @@ INTERNAL_TIME_FORMAT_STRING="%Y-%m-%d %H:%M:%S"
 
 
 class MTChunks:
+    first_mtime_string = None
     chunkymap_data_path = None
     chunkymapdata_worlds_path = None
     is_save_output_ok = None
@@ -1051,6 +1053,10 @@ class MTChunks:
             print("ERROR: Tried save_player but the players dict is not ready (self.players is None)")
 
     def check_players(self):
+        if self.first_mtime_string is None:
+            first_mtime = time.gmtime()
+            #NOTE: time.gmtime converts long timestamp to 9-long tuple
+            self.first_mtime_string = time.strftime(INTERNAL_TIME_FORMAT_STRING, first_mtime)
         print("PROCESSING PLAYERS")
         if self.players is None:
             self.players = {}
@@ -1209,8 +1215,8 @@ class MTChunks:
                         if is_moved:
                             #print("PLAYER MOVED: "+str(player_name)+" moved from "+str(map_player_position_tuple)+" to "+str(player_position_tuple))
                             if self.verbose_enable:
-                                self.last_player_move_mtime_string = this_mtime_string
                                 print("PLAYER MOVED: "+str(player_name)+" moved from "+str(saved_player_x)+","+str(saved_player_y)+","+str(saved_player_z)+" to "+str(player_x)+","+str(player_y)+","+str(player_z))
+                            self.last_player_move_mtime_string = this_mtime_string
                             players_moved_count += 1
                         else:
                             if self.verbose_enable:
@@ -1243,9 +1249,9 @@ class MTChunks:
         last_move_msg = ""
         if (players_moved_count<1):
             if (self.last_player_move_mtime_string is not None):
-                last_move_msg = " (last move: "+self.last_player_move_mtime_string+")"
+                last_move_msg = " (last any moved: "+self.last_player_move_mtime_string+")"
             else:
-                last_move_msg = " (none moved lately)"
+                last_move_msg = " (none moved since started checking "+self.first_mtime_string+")"
         print("  didn't move: "+str(players_didntmove_count)+last_move_msg)
 
     def is_chunk_traversed_by_player(self, chunk_luid):
