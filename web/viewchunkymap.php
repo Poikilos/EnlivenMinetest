@@ -17,7 +17,7 @@ error_reporting(E_ALL);
 //echo "php started...";
 
 ///// SHOW EXPIRED PLAYERS: ///////////
-$show_expired_players_enable = true; //
+$show_expired_players_enable = false; //
 ///////////////////////////////////////
 //make sure you set this here, otherwise players can override it
 
