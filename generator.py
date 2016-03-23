@@ -964,7 +964,7 @@ class MTChunks:
                     line = ins.readline()
                     if line:
                         line_lower = line.lower()
-                        if " lock " in line_lower or "/lock " in line_lower
+                        if (" lock " in line_lower) or ("/lock " in line_lower):
                             is_locked = True
                             lock_line = line
                             result = None
