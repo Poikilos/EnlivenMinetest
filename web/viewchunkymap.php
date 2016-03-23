@@ -43,6 +43,31 @@ if (is_file('chunkymap.php')) {
 	$chunks_enable=false; //(this should normally be false) if true, uses 16x16 png files instead of the 160x160 decachunks; it is slower but may have more of the map during times when new chunks are explored but before the render queue is done and the decachunk images are created from the chunk images.);
 	$visual_debug_enable=false; //if true, this renders colors based on yml files instead of drawing images (and does not echo images at all)
 	$html4_mode_enable=false;
+	$append_vars = "";
+	if (isset($x)) {
+		$append_vars.="&x=$x"
+	}
+	if (isset($z)) {
+		$append_vars.="&z=$z"
+	}
+	if (isset($zoom)) {
+		$append_vars.="&zoom=$zoom"
+	}
+	if (!isset($world_name)) {
+		if ($handle = opendir($chunkymapdata_worlds_path)) {
+			while (false !== ($file_name = readdir($handle))) {
+				if (substr($file_name, 0, 1) != ".") {
+					$file_path = $chunkymapdata_worlds_path."/".$file_name;
+					if (is_dir($file_path)) {
+						echo "<a href=\"?world_name=$file_name$append_vars\">$file_name</a>";
+					//	$world_name=$file_name;
+					//	break;
+					}
+				}
+			}
+			closedir($handle);
+		}
+	}
 	echo_chunkymap_canvas($show_player_names_enable,$decachunks_enable,$chunks_enable,$visual_debug_enable,$html4_mode_enable);
 	//echo_chunkymap_as_chunk_table(false);
 	//echo_decachunk_table();

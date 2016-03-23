@@ -6,8 +6,8 @@ if (($_SERVER['PHP_SELF'] == "chunkymap.php") or endsWith($_SERVER['PHP_SELF'],"
 	echo "<html><body style=\"font-family:calibri,arial,helvetica,sans\">This is the backend--don't call it directly. instead do include_once('chunkymap.php'); To use the map, go to <a href=\"viewchunkymap.php\">viewchunkymap.php</a> instead.</body></html>";
 }
 
-
-
+$auto_choose_enable = false;
+$auto_choose_enable = false;
 $minute=60;
 $player_file_age_expired_max_seconds=20*$minute-1;
 $player_file_age_idle_max_seconds=5*$minute-1;
@@ -1519,18 +1519,23 @@ function check_world() {
 	global $chunkymapdata_thisworld_path;
 	global $world_name;
 	global $chunkymapdata_worlds_path;
-	if (!isset($world_name)) {
-		if ($handle = opendir($chunkymapdata_worlds_path)) {
-			while (false !== ($file_name = readdir($handle))) {
-				if (substr($file_name, 0, 1) != ".") {
-					$file_path = $chunkymapdata_worlds_path."/".$file_name;
-					if (is_dir($file_path)) {
-						$world_name=$file_name;
-						break;
+	global $auto_choose_enable;
+	
+	
+	if ($auto_choose_enable===true) {
+		if (!isset($world_name)) {
+			if ($handle = opendir($chunkymapdata_worlds_path)) {
+				while (false !== ($file_name = readdir($handle))) {
+					if (substr($file_name, 0, 1) != ".") {
+						$file_path = $chunkymapdata_worlds_path."/".$file_name;
+						if (is_dir($file_path)) {
+							$world_name=$file_name;
+							break;
+						}
 					}
 				}
+				closedir($handle);
 			}
-			closedir($handle);
 		}
 	}
 	if (isset($world_name)) {
