@@ -1150,7 +1150,6 @@ class MTChunks:
                         self.players[file_name]["utc_mtime"] = this_mtime_string
                         if player_name is not None:
                             self.players[file_name]["name"] = player_name
-                        self.players[file_name] = file_name
                         is_changed = True
                     player_dest_path = None
                     if player_index is not None:
