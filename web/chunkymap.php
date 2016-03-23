@@ -1033,6 +1033,7 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 				// var handle_mousemove = function (e) {
 					// mouse_point.x = parseInt(e.clientX-my_canvas.offsetLeft);
 					// mouse_point.y = parseInt(e.clientY-my_canvas.offsetTop);
+					// mouse_point = get_relative_mouse_point(e);
 					
 					
 					// world_point = get_world_point_from_screen_point(mouse_point);
@@ -1053,8 +1054,11 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 					// }
 				// }
 				var handle_mousedown = function(e) {
-					mouse_point.x = parseInt(e.clientX-my_canvas.offsetLeft);
-					mouse_point.y = parseInt(e.clientY-my_canvas.offsetTop);
+					//var xOffset=Math.max(document.documentElement.scrollLeft,document.body.scrollLeft);
+					//var yOffset=Math.max(document.documentElement.scrollTop,document.body.scrollTop);
+					//mouse_point.x = parseInt(e.clientX+xOffset-my_canvas.offsetLeft);
+					//mouse_point.y = parseInt(e.clientY+yOffset-my_canvas.offsetTop);
+					mouse_point = get_relative_mouse_point(e);
 					is_mouse_down = true;
 					//change_widget(label0, mouse_point.x+","+mouse_point.y+" mouse down");
 				}
@@ -1082,6 +1086,15 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 							};
 				}
 				
+				fuction get_relative_mouse_point(e) {
+					var xOffset=Math.max(document.documentElement.scrollLeft,document.body.scrollLeft);
+					var yOffset=Math.max(document.documentElement.scrollTop,document.body.scrollTop);
+					return {
+					x:parseInt(e.clientX+xOffset-my_canvas.offsetLeft),
+					y:parseInt(e.clientY+yOffset-my_canvas.offsetTop)
+					}
+				}
+				
 				window.onload = function() {
 					//my_canvas = document.getElementById("myCanvas");
 					//my_canvas.onclick = function(event) {
@@ -1095,10 +1108,11 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 					my_canvas.addEventListener("mouseup", handle_mouseup, false);
 					my_canvas.addEventListener("mouseout", handle_mouseout, false);
 					my_canvas.addEventListener("mousemove", function(e) {
-						var xOffset=Math.max(document.documentElement.scrollLeft,document.body.scrollLeft);
-						var yOffset=Math.max(document.documentElement.scrollTop,document.body.scrollTop);
-						mouse_point.x = parseInt(e.clientX+xOffset-my_canvas.offsetLeft);
-						mouse_point.y = parseInt(e.clientY+yOffset-my_canvas.offsetTop);
+						//var xOffset=Math.max(document.documentElement.scrollLeft,document.body.scrollLeft);
+						//var yOffset=Math.max(document.documentElement.scrollTop,document.body.scrollTop);
+						//mouse_point.x = parseInt(e.clientX+xOffset-my_canvas.offsetLeft);
+						//mouse_point.y = parseInt(e.clientY+yOffset-my_canvas.offsetTop);
+						mouse_point = get_relative_mouse_point(e);
 						//var this_text = "on your screen: "+mouse_point.x+","+mouse_point.y+" mousemove";
 						//change_widget(label4, this_text);
 						
