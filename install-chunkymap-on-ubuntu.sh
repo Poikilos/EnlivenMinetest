@@ -79,6 +79,9 @@ chmod -x "$CHUNKYMAP_DEST/unused/chunkymap-cronjob"
 chmod -x "$CHUNKYMAP_DEST/unused/set-minutely-crontab-job.sh"
 chmod -x "$CHUNKYMAP_DEST/unused/set-minutely-players-crontab-job.sh"
 
+cp -f $HOME/chunkymap/chunkymap-generator.sh $HOME/
+chmod +x $HOME/chunkymap-generator.sh
+
 #if [ -f "$HOME/update-chunkymap-on-ubuntu-from-web.sh" ]; then
 cp -f "$HOME/chunkymap/update-chunkymap-on-ubuntu-from-web.sh" "$HOME/"
 #fi
@@ -101,7 +104,7 @@ echo "To learn more about chunkymap:"
 echo "nano $CHUNKYMAP_DEST/README.md"
 echo
 echo "To start now assuming configuration matches yours (nano $CHUNKYMAP_DEST/README.md before this):"
-echo sh minetest/util/chunkymap-generator.sh
+echo sh chunkymap/chunkymap-generator.sh
 echo
 # NOTE: colors.txt is generated now, so shouldn't be in $CHUNKYMAP_DEST until first run (first time minetestinfo.py is included by one of the other py files)
 
