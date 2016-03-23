@@ -9,14 +9,22 @@ fi
 
 #./update-chunkymap-installer-only.sh:
 cd $HOME/Downloads
-rm master.zip
+if [ -f master.zip ]; then
+  rm master.zip
+fi
 wget https://github.com/expertmm/minetest-chunkymap/archive/master.zip
-rm -f minetest-chunkymap.zip
+if [ -f minetest-chunkymap.zip ]; then
+  rm -f minetest-chunkymap.zip
+fi
 mv master.zip minetest-chunkymap.zip
-rm -Rf minetest-chunkymap-master
+if [ -d minetest-chunkymap-master ]; then
+  rm -Rf minetest-chunkymap-master
+fi
 unzip minetest-chunkymap.zip
 #mv minetest-chunkymap-master minetest-chunkymap
-rm -Rf "$CHUNKYMAP_INSTALLER_DIR"
+if [ -d "$CHUNKYMAP_INSTALLER_DIR"]; then
+  rm -Rf "$CHUNKYMAP_INSTALLER_DIR"
+fi
 mv minetest-chunkymap-master "$CHUNKYMAP_INSTALLER_DIR"
 #cd minetest-chunkymap
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh"
@@ -25,8 +33,8 @@ chmod +x "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-on-ubuntu-from-web.sh"
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu-from-web.sh"
 
 #mv -f "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh" "$HOME/Downloads/"
-mv -f "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-on-ubuntu-from-web.sh" "$HOME/Downloads/"
-mv -f "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu-from-web.sh" "$HOME/Downloads/"
+#mv -f "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-on-ubuntu-from-web.sh" "$HOME/Downloads/"
+#mv -f "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu-from-web.sh" "$HOME/Downloads/"
 
 
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh"

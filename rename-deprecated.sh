@@ -20,7 +20,7 @@ fi
 
 mv "$CHUNKYMAP_DEPRECATED_PATH/web" "$CHUNKYMAP_DEST_PATH/web"
 mv "$CHUNKYMAP_DEPRECATED_PATH/unused" "$CHUNKYMAP_DEST_PATH/unused"
-mv "$CHUNKYMAP_DEPRECATED_PATH/chunkymap-genresults" "$CHUNKYMAP_DEST_PATH/chunkymap-genresults"
+sudo mv "$CHUNKYMAP_DEPRECATED_PATH/chunkymap-genresults" "$CHUNKYMAP_DEST_PATH/chunkymap-genresults"
 mv "$CHUNKYMAP_DEPRECATED_PATH/archivedebug.py" "$CHUNKYMAP_DEST_PATH/archivedebug.py"
 mv "$CHUNKYMAP_DEPRECATED_PATH/colors-missing.txt" "$CHUNKYMAP_DEST_PATH/colors-missing.txt"
 mv "$CHUNKYMAP_DEPRECATED_PATH/chunkymap-erase-png-files-in-www-minetest-chunkymapdata.bat" "$CHUNKYMAP_DEST_PATH/erase-png-files-in-www-minetest-chunkymapdata.bat"
@@ -65,6 +65,8 @@ mv "$CHUNKYMAP_DEPRECATED_PATH/chunkymap-signals example - no player update.txt"
 mv "$CHUNKYMAP_DEPRECATED_PATH/chunkymap-signals example - prevent or cancel map refresh.txt" "$CHUNKYMAP_DEST_PATH/signals example - prevent or cancel map refresh.txt"
 mv "$CHUNKYMAP_DEPRECATED_PATH/chunkymap-signals example - stop looping.txt" "$CHUNKYMAP_DEST_PATH/signals example - stop looping.txt"
 mv "$CHUNKYMAP_DEPRECATED_PATH/chunkymap-signals example - verbose_enable True.txt" "$CHUNKYMAP_DEST_PATH/signals example - verbose_enable True.txt"
+mv "$CHUNKYMAP_DEPRECATED_PATH/chunkymap-signals example - turn on verbose.txt" "$CHUNKYMAP_DEST_PATH/signals example - verbose_enable True.txt"
 mv "$CHUNKYMAP_DEPRECATED_PATH/chunkymap-update C wamp www.bat" "$CHUNKYMAP_DEST_PATH/update C wamp www.bat"
+sudo mv "$CHUNKYMAP_DEPRECATED_PATH/chunkymap.yml" "$CHUNKYMAP_DEST_PATH/chunkymap.yml"
 
 
