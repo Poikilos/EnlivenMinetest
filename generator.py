@@ -850,7 +850,12 @@ class MTChunks:
         #print (min_indent+"generating chunky_x = " + str(min_x) + " to " + str(max_x) + " ,  chunky_z = " + str(min_z) + " to " + str(max_z))
         geometry_value_string = str(min_x)+":"+str(min_z)+"+"+str(int(max_x)-int(min_x)+1)+"+"+str(int(max_z)-int(min_z)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
         cmd_suffix = ""
-        cmd_suffix = " > \""+genresult_path+"\""
+        genresults_folder_path = os.path.join( os.path.join(os.path.dirname(os.path.abspath(__file__)), "chunkymap-genresults"), self.world_name)
+        if not os.path.isdir(genresults_folder_path):
+            os.makedirs(genresults_folder_path)
+        gen_error_path = os.path.join(genresults_folder_path, "singleimage"+gen_error_name_closer_string)
+        cmd_suffix = " 1> \""+genresult_path+"\""
+        cmd_suffix += " 2> \""+gen_error_path+"\""
         #self.mapper_id = "minetestmapper-region"
         cmd_no_out_string = python_exe_path + " \""+self.minetestmapper_py_path + "\" --region " + str(min_x) + " " + str(max_x) + " " + str(min_z) + " " + str(max_z) + " --maxheight "+str(self.mapvars["maxheight"])+" --minheight "+str(self.mapvars["minheight"])+" --pixelspernode "+str(self.mapvars["pixelspernode"])+" \""+minetestinfo.get_var("primary_world_path")+"\" \""+tmp_png_path+"\""
         cmd_string = cmd_no_out_string + cmd_suffix
@@ -951,35 +956,52 @@ class MTChunks:
                         except:
                             pass
             participle = "checking result"
-            try:
-                is_changed = this_chunk.set_from_genresult(genresult_path)
-                if is_marked_before:
-                    participle = "checking for marks"
-                    if (not is_empty_before) and this_chunk.metadata["is_empty"]:
-                        print("ERROR: chunk changed from nonempty to empty (may happen if output of mapper was not recognized)")
-                    elif this_chunk.metadata["is_empty"] and os.path.isfile(dest_png_path):
-                        print("ERROR: chunk marked empty though has data (may happen if output of mapper was not recognized)")
-                this_is_worldborder_chunk = self.is_worldborder_chunk(chunky_x, chunky_z)
-                if ("is_worldborder" not in self.chunks[chunk_luid].metadata) or this_is_worldborder_chunk != self.chunks[chunk_luid].metadata["is_worldborder"]:
-                    self.chunks[chunk_luid].metadata["is_worldborder"] = this_is_worldborder_chunk
-                    is_changed = True
+            is_locked = False
+            if os.path.isfile(gen_error_path):
+                ins = open(gen_error_path, 'r')
+                line = True
+                while line:
+                    line = ins.readline()
+                    if line:
+                        line_lower = line.lower()
+                        if " lock " in line_lower or "/lock " in line_lower
+                            is_locked = True
+                            lock_line = line
+                            result = None
+                            break
+                ins.close()
+            if not is_locked:
+                try:
+                    is_changed = this_chunk.set_from_genresult(genresult_path)
+                    if is_marked_before:
+                        participle = "checking for marks"
+                        if (not is_empty_before) and this_chunk.metadata["is_empty"]:
+                            print("ERROR: chunk changed from nonempty to empty (may happen if output of mapper was not recognized)")
+                        elif this_chunk.metadata["is_empty"] and os.path.isfile(dest_png_path):
+                            print("ERROR: chunk marked empty though has data (may happen if output of mapper was not recognized)")
+                    this_is_worldborder_chunk = self.is_worldborder_chunk(chunky_x, chunky_z)
+                    if ("is_worldborder" not in self.chunks[chunk_luid].metadata) or this_is_worldborder_chunk != self.chunks[chunk_luid].metadata["is_worldborder"]:
+                        self.chunks[chunk_luid].metadata["is_worldborder"] = this_is_worldborder_chunk
+                        is_changed = True
 
-                #chunk_yaml_path = self.get_chunk_yaml_path(chunky_x, chunky_z)
-                #self.create_chunk_folder(chunky_x, chunky_z)
-                #this_chunk.save_yaml(chunk_yaml_path)
-                #if is_changed:
-                participle = "accessing dict"
-                if not is_dict_subset(self.chunks[chunk_luid].metadata, old_meta, False):  # , True, "chunk_yaml_path")
-                    participle = "saving chunk meta"
-                    self.save_chunk_meta(chunky_x, chunky_z)
-                #print(min_indent+"(saved yaml to '"+chunk_yaml_path+"')")
-                if not self.is_save_output_ok:
-                    if os.path.isfile(genresult_path):
-                        participle = "removing "+genresult_path
-                        os.remove(genresult_path)
-            except:
-                print (min_indent+"Could not finish "+participle+" while deleting/moving output")
-                view_traceback()
+                    #chunk_yaml_path = self.get_chunk_yaml_path(chunky_x, chunky_z)
+                    #self.create_chunk_folder(chunky_x, chunky_z)
+                    #this_chunk.save_yaml(chunk_yaml_path)
+                    #if is_changed:
+                    participle = "accessing dict"
+                    if not is_dict_subset(self.chunks[chunk_luid].metadata, old_meta, False):  # , True, "chunk_yaml_path")
+                        participle = "saving chunk meta"
+                        self.save_chunk_meta(chunky_x, chunky_z)
+                    #print(min_indent+"(saved yaml to '"+chunk_yaml_path+"')")
+                    if not self.is_save_output_ok:
+                        if os.path.isfile(genresult_path):
+                            participle = "removing "+genresult_path
+                            os.remove(genresult_path)
+                except:
+                    print (min_indent+"Could not finish "+participle+" while deleting/moving output")
+                    view_traceback()
+            else:
+                print(min_indent+"database locked: "+lock_line)
         except:
             print(min_indent+"Could not finish deleting/moving temp files")
             view_traceback()
@@ -1231,7 +1253,7 @@ class MTChunks:
         return result
 
 
-    #Returns: (boolean) whether the chunk image is present on dest (rendered now or earlier)--only possible if there is chunk data at the given location
+    #Returns: (boolean) whether the chunk image is present on dest (rendered now or earlier); else None if database is locked (then re-adds it to self.todo_positions)--only possible if there is chunk data at the given location
     def check_chunk(self, chunky_x, chunky_z):
         min_indent = "  "
         result = [False,""]
@@ -1323,8 +1345,15 @@ class MTChunks:
             self.rendered_count += 1
             if not self.verbose_enable:
                 print(min_indent+chunk_luid+": "+result[1])
-            if (self._render_chunk(chunky_x, chunky_z)):
+            sub_result = self._render_chunk(chunky_x, chunky_z)
+            if (sub_result==True):
                 result[0] = True
+            elif sub_result==None:
+                result[0] = None
+                self.todo_positions.append((chunky_x, chunky_z))  #redo this one
+                print("Waiting to retry...")
+                time.sleep(.5)
+
         else:
             if self.is_chunk_rendered_on_dest(chunky_x, chunky_z):
                 result[0] = True
@@ -1370,28 +1399,30 @@ class MTChunks:
                 prev_rendered_this_session_count = self.rendered_this_session_count
                 is_present, reason_string = self.check_chunk(chunky_x, chunky_z)
 
-                if is_present:
-                    self.mapvars["total_generated_count"] += 1
-                    if chunky_x<self.mapvars["min_chunkx"]:
-                        self.mapvars["min_chunkx"]=chunky_x
-                    if chunky_x>self.mapvars["max_chunkx"]:
-                        self.mapvars["max_chunkx"]=chunky_x
-                    if chunky_z<self.mapvars["min_chunkz"]:
-                        self.mapvars["min_chunkz"]=chunky_z
-                    if chunky_z>self.mapvars["max_chunkz"]:
-                        self.mapvars["max_chunkz"]=chunky_z
-                    #end while square outline (1-chunk-thick outline) generated any png files
-                    self.save_mapvars_if_changed()
-                    prev_len = len(self.todo_positions)
-                    self._check_map_pseudorecursion_branchfrom(chunky_x, chunky_z)
-                    #must check_decachunk_containing_chunk AFTER _check_map_pseudorecursion_branchfrom so check_decachunk_containing_chunk can see if there are more to do before rendering superchunk
-                    #always check since already checks queue and doesn't render decachunk on last rendered chunk, but instead on last queued chunk in decachunk
-                    #if self.rendered_this_session_count>prev_rendered_this_session_count or self.force_rerender_decachunks_enable:
+                if (is_present is None) or is_present:
+                    if is_present:
+                        self.mapvars["total_generated_count"] += 1
+                        if chunky_x<self.mapvars["min_chunkx"]:
+                            self.mapvars["min_chunkx"]=chunky_x
+                        if chunky_x>self.mapvars["max_chunkx"]:
+                            self.mapvars["max_chunkx"]=chunky_x
+                        if chunky_z<self.mapvars["min_chunkz"]:
+                            self.mapvars["min_chunkz"]=chunky_z
+                        if chunky_z>self.mapvars["max_chunkz"]:
+                            self.mapvars["max_chunkz"]=chunky_z
+                        #end while square outline (1-chunk-thick outline) generated any png files
+                        self.save_mapvars_if_changed()
+                        prev_len = len(self.todo_positions)
+                        self._check_map_pseudorecursion_branchfrom(chunky_x, chunky_z)
+                        #must check_decachunk_containing_chunk AFTER _check_map_pseudorecursion_branchfrom so check_decachunk_containing_chunk can see if there are more to do before rendering superchunk
+                        #always check since already checks queue and doesn't render decachunk on last rendered chunk, but instead on last queued chunk in decachunk
+                        #if self.rendered_this_session_count>prev_rendered_this_session_count or self.force_rerender_decachunks_enable:
 
-                    #Now is ok to check_decachunk_containing_chunk, since does not count current index as unfinished (allow_current_chunk_enable=False):
-                    self.check_decachunk_containing_chunk(chunky_x, chunky_z)
-                    if self.verbose_enable:
-                        print(min_indent+"["+str(self.todo_index)+"] branching from "+str((chunky_x, chunky_z))+" (added "+str(len(self.todo_positions)-prev_len)+")")
+                        #Now is ok to check_decachunk_containing_chunk, since does not count current index as unfinished (allow_current_chunk_enable=False):
+                        self.check_decachunk_containing_chunk(chunky_x, chunky_z)
+                        if self.verbose_enable:
+                            print(min_indent+"["+str(self.todo_index)+"] branching from "+str((chunky_x, chunky_z))+" (added "+str(len(self.todo_positions)-prev_len)+")")
+                    #else None (database is locked) so let it be retried later
                 else:
                     #Now is ok to check_decachunk_containing_chunk, since does not count current index as unfinished (allow_current_chunk_enable=False):
                     self.check_decachunk_containing_chunk(chunky_x, chunky_z)
@@ -1402,8 +1433,8 @@ class MTChunks:
             if self.todo_index>=len(self.todo_positions):  # check again since may have branched above, making this untrue
                 self.save_mapvars_if_changed()
                 self.todo_index = -1
-                #self.todo_positions = list()  # there seems to be issues where not empty due to delayed garbage collection
-                while len(self.todo_positions) > 0 : self.todo_positions.pop()
+                self.todo_positions = list()  # there seems to be issues where not empty due to delayed garbage collection?
+                #while len(self.todo_positions) > 0 : self.todo_positions.pop()
         else:
             if self.verbose_enable:
                 print(min_indent+"(no branches)")
