@@ -14,7 +14,7 @@ if [ -f update-chunkymap-installer-only.sh ]; then
   rm update-chunkymap-installer-only.sh
 fi
 wget https://github.com/expertmm/minetest-chunkymap/raw/master/update-chunkymap-installer-only.sh
-sleep 2
+#sleep 1
 mv -f update-chunkymap-installer-only.sh $CHUNKYMAP_INSTALLER_DIR/
 #Wait to make sure nothing weirdly not finished downloading:
 cd $HOME
@@ -34,6 +34,6 @@ cd $HOME
 #else
   sh "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
   #further instructions are in separate file in case updater was updated (sleep first otherwise file won't be finished writing):
-  sleep 2
+  #sleep 2
   sh "$CHUNKYMAP_INSTALLER_DIR/post-update.sh"
 #fi
