@@ -1,1 +1,1 @@
-C:\Python27\python.exe chunkymap-regen.py
+C:\Python27\python.exe generator.py

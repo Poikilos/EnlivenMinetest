@@ -1,7 +1,7 @@
 import os
 from expertmm import *
 
-#variables to eliminate from chunkymap-regen (and manage here instead):
+#variables to eliminate from generator.py (and managed here centrally instead, so configuration is shared across minetest helper programs):
 #os_name
 #self.config (use minetestinfo.get_val instead)
 #config_name

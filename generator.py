@@ -2003,5 +2003,5 @@ if __name__ == '__main__':
         if args.no_loop:
             mtchunks.run()
         else:
-            print("To stop chunkymap-regen loop, save a line '"+stop_line+"' to '"+signal_path+"'")
+            print("To stop generator.py loop, save a line '"+stop_line+"' to '"+signal_path+"'")
             mtchunks.run_loop()

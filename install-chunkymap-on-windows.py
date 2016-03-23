@@ -181,7 +181,7 @@ if python_folder_name.lower()[:7]!="python3":
                 if os.path.isdir(installed_pillow_path):
                     downloaded_chunkymap_name="chunkymap.zip"
                     downloaded_chunkymap_path=os.path.join(downloads_path,downloaded_chunkymap_name)
-                    run_py_path="chunkymap-regen.py"
+                    run_py_path="generator.py"
                     remote_chunkymap_path="https://github.com/expertmm/minetest-chunkymap/archive/master.zip"
                     if not os.path.isfile(run_py_path):
                         if not os.path.isfile(downloaded_chunkymap_path):
@@ -189,12 +189,12 @@ if python_folder_name.lower()[:7]!="python3":
                             if os.path.isfile(downloaded_chunkymap_path):
                                 print("Successfully downloaded "+downloaded_chunkymap_name)
                             else:
-                                print("Failed to download or detect chunkymap-regen.py -- please download "+remote_chunkymap_path)
+                                print("Failed to download or detect "+run_py_path+" -- please download "+remote_chunkymap_path)
                         print("(You must right-click on "+downloaded_chunkymap_path+" then click Extract All, then you can run this file from that folder to redetect a compatible python and write that python to "+run_bat_path)
                     else:
                         print("Now you can run "+run_py_path+" using: ")
                         print("  "+sys.executable+" "+run_py_path)
-                        run_bat_path="chunkymap-regen-loop.bat"
+                        run_bat_path="chunkymap-generator.bat"
                         if os.path.isfile(run_bat_path):
                             os.remove(run_bat_path)
                         outs = open(run_bat_path, 'w')

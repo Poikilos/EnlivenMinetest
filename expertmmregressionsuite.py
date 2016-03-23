@@ -618,7 +618,7 @@ print("  (Ignoring the following independent variables:")
 print(','.join(independent_list)+")")
 
 #verbose_enable = True
-check_coord_mismatch("chunkymap-regen.py")
+check_coord_mismatch("generator.py")
 check_coord_mismatch(os.path.join("web","chunkymap.php"))
 print("Found "+str(issue_count)+" issue(s) in "+str(len(file_list))+" file(s)")
 if (issue_count>0):

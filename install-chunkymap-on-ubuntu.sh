@@ -36,8 +36,8 @@ rm "$CHUNKYMAP_DEST/install-chunkymap-on-windows.py"
 
 
 
-#cp -f "$CHUNKYMAP_INSTALLER_PATH/chunkymap-regen.py" "$CHUNKYMAP_DEST/"
-#chmod +x "$CHUNKYMAP_DEST/chunkymap-regen.py"
+#cp -f "$CHUNKYMAP_INSTALLER_PATH/generator.py" "$CHUNKYMAP_DEST/"
+#chmod +x "$CHUNKYMAP_DEST/generator.py"
 
 #cp -f "$CHUNKYMAP_INSTALLER_PATH/README.md" "$CHUNKYMAP_DEST/"
 #remove files place in dest by old version of installer script:
@@ -91,7 +91,7 @@ cp -f "$HOME/chunkymap/update-chunkymap-on-ubuntu-from-web.sh" "$HOME/"
 
 sudo apt-get install python-numpy python-pil python-leveldb
 echo ""
-echo "To see what needs to be in your $MT_MY_WEBSITE_PATH directory (if you don't use that directory, modify chunkymap-regen.py to use your directory):"
+echo "To see what needs to be in your website directory (first run minetestinfo.py, generator.py, or singleimage.py to confirms your website directory for automated copying from web folder below):"
 echo "cd $CHUNKYMAP_DEST/web"
 echo ""
 echo "To view helpful scripts:"
