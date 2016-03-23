@@ -95,20 +95,28 @@ world_path
     such as:
 ```
 	#if you have a version before 2016-03-23:
-    rm rename-deprecated.sh
+	if [ -f rename-deprecated.sh ]; then
+      rm rename-deprecated.sh
+	fi
     wget https://github.com/expertmm/minetest-chunkymap/raw/master/rename-deprecated.sh
     sudo sh rename-deprecated.sh
     
-    rm install-chunkymap-on-ubuntu-from-web.sh
+	if [ -f install-chunkymap-on-ubuntu-from-web.sh ]; then
+      rm install-chunkymap-on-ubuntu-from-web.sh
+	fi
     wget https://github.com/expertmm/minetest-chunkymap/raw/master/install-chunkymap-on-ubuntu-from-web.sh
     chmod +x install-chunkymap-on-ubuntu-from-web.sh
     ./install-chunkymap-on-ubuntu-from-web.sh
-    #or later run:
+    
+	#or later run:
     #rm update-chunkymap-on-ubuntu-from-web.sh
     #wget https://github.com/expertmm/minetest-chunkymap/raw/master/update-chunkymap-on-ubuntu-from-web.sh
     #chmod +x update-chunkymap-on-ubuntu-from-web.sh
     #./update-chunkymap-on-ubuntu-from-web.sh
+	
+	#then (shutdown minetest first then) create singleimage map:
     sudo python chunkymap/singleimage.py
+	#then start generator which will update player entries on your website (can be made anonymous--see viewchunkymap.php):
     sudo python chunkymap/generator.py
 ```
     OPTION 2: IF you are using Ubuntu go to a terminal, cd to this directory,  
@@ -127,18 +135,18 @@ world_path
     (otherwise first edit the script to fit your crontab then)
     (if you are not using /var/www/html/minetest/chunkymapdata, edit chunkymap-cronjob script to use the correct directory, then)
 ```
-    chmod +x set-minutely-crontab-job.sh && ./set-minutely-crontab-job.sh
+chmod +x set-minutely-crontab-job.sh && ./set-minutely-crontab-job.sh
 ```
 * IF you are using Linux
     * Rename viewchunkymap.php so it won't be overwritten on update if you want to modify it (or anything you want) then make a link to it on your website or share the link some other way.
 ```
-	# The commands below will work if you are using the web installer, or have done mv minetest-chunkymap-master "$HOME/Downloads/minetest-chunkymap" (and if you are using /var/www/html/minetest -- otherwise change that below)
-    MT_MY_WEBSITE_PATH=/var/www/html/minetest
-    sudo cp -f "$HOME/Downloads/minetest-chunkymap/web/chunkymap.php" "$MT_MY_WEBSITE_PATH/chunkymap.php"
-    sudo cp -f "$HOME/Downloads/minetest-chunkymap/web/viewchunkymap.php" "$MT_MY_WEBSITE_PATH/viewchunkymap.php"
-    sudo cp -R --no-clobber "$HOME/Downloads/minetest-chunkymap/web/images/*" "$MT_MY_WEBSITE_PATH/images/"
-    #--no-clobber: do not overwrite existing
-    # after you do this, the update script will do it for you if you are using /var/www/html/minetest, otherwise edit the update script before using it to get these things updated
+# The commands below will work if you are using the web installer, or have done mv minetest-chunkymap-master "$HOME/Downloads/minetest-chunkymap" (and if you are using /var/www/html/minetest -- otherwise change that below)
+MT_MY_WEBSITE_PATH=/var/www/html/minetest
+sudo cp -f "$HOME/Downloads/minetest-chunkymap/web/chunkymap.php" "$MT_MY_WEBSITE_PATH/chunkymap.php"
+sudo cp -f "$HOME/Downloads/minetest-chunkymap/web/viewchunkymap.php" "$MT_MY_WEBSITE_PATH/viewchunkymap.php"
+sudo cp -R --no-clobber "$HOME/Downloads/minetest-chunkymap/web/images/*" "$MT_MY_WEBSITE_PATH/images/"
+#--no-clobber: do not overwrite existing
+# after you do this, the update script will do it for you if you are using /var/www/html/minetest, otherwise edit the update script before using it to get these things updated
 ```
 * IF you are using Windows
     * Install Python 2.7
@@ -157,23 +165,23 @@ C:\python27\python -m pip install --upgrade pip wheel setuptools
         * numpy such as can be installed via the easy unofficial installer wheel at  
         http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy  
         then:
-		```
-        #cd to the folder where you downloaded the whl file
-            C:\python27\python -m pip install "numpy-1.10.4+mkl-cp27-cp27m-win32.whl"  
-		```
+```
+#cd to the folder where you downloaded the whl file
+C:\python27\python -m pip install "numpy-1.10.4+mkl-cp27-cp27m-win32.whl"  
+```
         (but put your specific downloaded whl file instead)  
         * Pillow (instead of PIL (Python Imaging Library) which is a pain on Windows): there is a PIL installer wheel for Python such as 2.7 here:  
         http://www.lfd.uci.edu/~gohlke/pythonlibs/  
         as suggested on http://stackoverflow.com/questions/2088304/installing-pil-python-imaging-library-in-win7-64-bits-python-2-6-4  
         then:
-		```
-            C:\python27\python -m pip install "Pillow-3.1.1-cp27-none-win32.whl"
-		```
+```
+C:\python27\python -m pip install "Pillow-3.1.1-cp27-none-win32.whl"
+```
         (but put your specific downloaded whl file instead, such as Pillow-3.1.1-cp27-none-win_amd64.whl)
         * run (or if your python executable does not reside in C:\Python27\ then first edit the file):
-		```
-        chunkymap-regen-loop.bat
-		```
+```
+chunkymap-regen-loop.bat
+```
         (all the batch does is run C:\Python27\python chunkymap-regen.py)
         (chunkymap-regen.py will ask for configuration options on first run and ask for your www root)
 
@@ -183,8 +191,8 @@ C:\python27\python -m pip install --upgrade pip wheel setuptools
 * Detect exceptions in mintestmapper (such as database locked) and do NOT mark the chunk as is_empty
 * Move the following to config dict:
 ```
-    python_exe_path
-	```
+python_exe_path
+```
 * chunkymap.php should read the size of the chunks -- see near is_file($chunk_genresult_path) in chunkymap.php
 * optionally hide player location
 * Make a method (in chunkymap.php) to echo the map as an html5 canvas (refresh players every 10 seconds, check for new map chunks every minute)
