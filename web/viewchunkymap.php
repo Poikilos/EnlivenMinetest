@@ -45,13 +45,13 @@ if (is_file('chunkymap.php')) {
 	$html4_mode_enable=false;
 	$append_vars = "";
 	if (isset($x)) {
-		$append_vars.="&x=$x"
+		$append_vars.="&x=$x";
 	}
 	if (isset($z)) {
-		$append_vars.="&z=$z"
+		$append_vars.="&z=$z";
 	}
 	if (isset($zoom)) {
-		$append_vars.="&zoom=$zoom"
+		$append_vars.="&zoom=$zoom";
 	}
 	if (!isset($world_name)) {
 		if ($handle = opendir($chunkymapdata_worlds_path)) {
