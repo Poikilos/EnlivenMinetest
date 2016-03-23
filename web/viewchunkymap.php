@@ -53,21 +53,21 @@ if (is_file('chunkymap.php')) {
 	if (isset($zoom)) {
 		$append_vars.="&zoom=$zoom";
 	}
-	if (!isset($world_name)) {
-		if ($handle = opendir($chunkymapdata_worlds_path)) {
-			while (false !== ($file_name = readdir($handle))) {
-				if (substr($file_name, 0, 1) != ".") {
-					$file_path = $chunkymapdata_worlds_path."/".$file_name;
-					if (is_dir($file_path)) {
-						echo "<a href=\"?world_name=$file_name$append_vars\">$file_name</a>";
-					//	$world_name=$file_name;
-					//	break;
-					}
-				}
-			}
-			closedir($handle);
-		}
-	}
+	// if (!isset($world_name)) {
+		// if ($handle = opendir($chunkymapdata_worlds_path)) {
+			// while (false !== ($file_name = readdir($handle))) {
+				// if (substr($file_name, 0, 1) != ".") {
+					// $file_path = $chunkymapdata_worlds_path."/".$file_name;
+					// if (is_dir($file_path)) {
+						// echo "<a href=\"?world_name=$file_name$append_vars\">$file_name</a>";
+						// //$world_name=$file_name;
+						// //break;
+					// }
+				// }
+			// }
+			// closedir($handle);
+		// }
+	// }
 	echo_chunkymap_canvas($show_player_names_enable,$decachunks_enable,$chunks_enable,$visual_debug_enable,$html4_mode_enable);
 	//echo_chunkymap_as_chunk_table(false);
 	//echo_decachunk_table();

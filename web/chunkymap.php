@@ -1482,6 +1482,7 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 	else { //not isset($world_name)
 		echo "<h4>Choose world:</h4>";
 		echo "<ul>";
+		global $chunkymapdata_worlds_path;
 		if ($chunkymapdata_handle = opendir($chunkymapdata_worlds_path)) {
 			$append_vars="&";
 			if (isset($zoom)) {
