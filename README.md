@@ -91,11 +91,13 @@ world_path
     wget https://github.com/expertmm/minetest-chunkymap/raw/master/install-chunkymap-on-ubuntu-from-web.sh
     chmod +x install-chunkymap-on-ubuntu-from-web.sh
     ./install-chunkymap-on-ubuntu-from-web.sh
-rm update-chunkymap-on-ubuntu-from-web.sh
-wget https://github.com/expertmm/minetest-chunkymap/raw/master/update-chunkymap-on-ubuntu-from-web.sh
-sleep 1
-chmod +x update-chunkymap-on-ubuntu-from-web.sh
-./update-chunkymap-on-ubuntu-from-web.sh
+	#or later run:
+    #rm update-chunkymap-on-ubuntu-from-web.sh
+    #wget https://github.com/expertmm/minetest-chunkymap/raw/master/update-chunkymap-on-ubuntu-from-web.sh
+    #chmod +x update-chunkymap-on-ubuntu-from-web.sh
+    #./update-chunkymap-on-ubuntu-from-web.sh
+	sudo python chunkymap/singleimage.py
+	sudo python chunkymap/generator.py
 	OPTION 2: IF you are using Ubuntu go to a terminal, cd to this directory,  
 	then switch user to the one that will run minetestserver
 	(since install-chunkymap-on-ubuntu.sh DOES replace "/home/owner" with current user's home [replace-with-current-user.py, which is automatically called by install, will change /home/owner to current user's directory in each script that install copies to $HOME/chunkymap])  

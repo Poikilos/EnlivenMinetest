@@ -1095,8 +1095,10 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 					my_canvas.addEventListener("mouseup", handle_mouseup, false);
 					my_canvas.addEventListener("mouseout", handle_mouseout, false);
 					my_canvas.addEventListener("mousemove", function(e) {
-						mouse_point.x = parseInt(e.clientX-my_canvas.offsetLeft);
-						mouse_point.y = parseInt(e.clientY-my_canvas.offsetTop);
+						var xOffset=Math.max(document.documentElement.scrollLeft,document.body.scrollLeft);
+						var yOffset=Math.max(document.documentElement.scrollTop,document.body.scrollTop);
+						mouse_point.x = parseInt(e.clientX+xOffset-my_canvas.offsetLeft);
+						mouse_point.y = parseInt(e.clientY+yOffset-my_canvas.offsetTop);
 						//var this_text = "on your screen: "+mouse_point.x+","+mouse_point.y+" mousemove";
 						//change_widget(label4, this_text);
 						
