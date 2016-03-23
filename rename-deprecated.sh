@@ -13,6 +13,11 @@ else
   cp -f "$CHUNKYMAP_DEPRECATED_PATH/colors.txt" "$CHUNKYMAP_DEST_PATH/colors (base).txt"
 fi
 
+if [ -d "$HOME/minetest-stuff/minetest-chunkymap" ]; then
+  #remove deprecated path:
+  rm -Rf $HOME/minetest-stuff/minetest-chunkymap
+fi
+
 mv "$CHUNKYMAP_DEPRECATED_PATH/web" "$CHUNKYMAP_DEST_PATH/web"
 mv "$CHUNKYMAP_DEPRECATED_PATH/unused" "$CHUNKYMAP_DEST_PATH/unused"
 mv "$CHUNKYMAP_DEPRECATED_PATH/chunkymap-genresults" "$CHUNKYMAP_DEST_PATH/chunkymap-genresults"

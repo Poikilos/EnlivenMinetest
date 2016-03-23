@@ -1,10 +1,6 @@
 #!/bin/sh
 cd $HOME
 MT_MY_WEBSITE_PATH=/var/www/html/minetest
-if [ -d "$HOME/minetest-stuff/minetest-chunkymap" ]; then
-  #remove deprecated path:
-  rm -Rf $HOME/minetest-stuff/minetest-chunkymap
-fi
 CHUNKYMAP_INSTALLER_PATH=$HOME/Downloads/minetest-chunkymap
 if [ ! -d "$HOME/Downloads/minetest-chunkymap" ]; then
   echo "please run install-chunkymap-on-ubuntu-from-web.sh or update-chunkymap-installer-only.sh first.";
