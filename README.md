@@ -83,7 +83,8 @@ world_path
 	* Install the git version of minetest (or otherwise install 0.4.13 or other version compatible with the map generators used by chunkymap)
 	such as:
 	#if you have a version before 2016-03-23:
-	wget 
+	wget https://github.com/expertmm/minetest-chunkymap/raw/master/rename-deprecated.sh
+	sh rename-deprecated.sh
 	
 	wget https://github.com/expertmm/minetest-chunkymap/raw/master/install-chunkymap-on-ubuntu-from-web.sh
 	chmod +x install-chunkymap-on-ubuntu-from-web.sh

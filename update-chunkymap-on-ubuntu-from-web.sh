@@ -1,14 +1,17 @@
 #!/bin/sh
 cd $HOME
-if [ -d "$HOME/minetest-stuff/minetest-chunkymap" ]; then
-  rm -Rf $HOME/minetest-stuff/minetest-chunkymap
-fi
 CHUNKYMAP_INSTALLER_DIR=$HOME/Downloads/minetest-chunkymap
 CHUNKYMAP_DEST=$HOME/chunkymap
 if [ ! -d "$HOME/Downloads" ]; then
 	mkdir "$HOME/Downloads"
 fi
 
+cd "$CHUNKYMAP_DEST"
+rm update-chunkymap-installer-only.sh
+wget https://github.com/expertmm/minetest-chunkymap/blob/master/update-chunkymap-installer-only.sh
+#Wait to make sure nothing weirdly not finished downloading:
+sleep .2
+cd $HOME
 #cd $CHUNKYMAP_INSTALLER_DIR
 #chmod +x update-chunkymap-installer-only.sh
 #cd $CHUNKYMAP_DEST
