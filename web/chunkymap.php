@@ -1092,7 +1092,7 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 					return {
 					x:parseInt(e.clientX+xOffset-my_canvas.offsetLeft),
 					y:parseInt(e.clientY+yOffset-my_canvas.offsetTop)
-					}
+					};
 				}
 				
 				window.onload = function() {
