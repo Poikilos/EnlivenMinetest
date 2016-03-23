@@ -377,6 +377,14 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 	
 	check_world();
 	
+	if ($html4_mode_enable!==true) {
+		echo '<noscript>
+ For full functionality of this site it is necessary to enable JavaScript.
+ Here are the <a href="http://www.enable-javascript.com/" target="_blank">
+ instructions how to enable JavaScript in your web browser</a>.
+</noscript>';
+	}
+	
 	if (isset($world_name)) {
 		$chunks_per_tile_x_count = 10;
 		$chunks_per_tile_z_count = 10;

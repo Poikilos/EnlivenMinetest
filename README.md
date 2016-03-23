@@ -81,6 +81,14 @@ world_path
 * If you are not using Ubuntu, first edit the installer for your distro (and please send the modified file to me [submit as new issue named such as: DISTRONAME installer except instead of DISTRONAME put the distro you made work])
 * If you are using Ubuntu
 	* Install the git version of minetest (or otherwise install 0.4.13 or other version compatible with the map generators used by chunkymap)
+	such as:
+	#if you have a version before 2016-03-23:
+	wget 
+	
+	wget https://github.com/expertmm/minetest-chunkymap/raw/master/install-chunkymap-on-ubuntu-from-web.sh
+	chmod +x install-chunkymap-on-ubuntu-from-web.sh
+	wget https://github.com/expertmm/minetest-chunkymap/raw/master/update-chunkymap-on-ubuntu-from-web.sh
+	chmod +x update-chunkymap-on-ubuntu-from-web.sh
 	OPTION 2: IF you are using Ubuntu go to a terminal, cd to this directory,  
 	then switch user to the one that will run minetestserver
 	(since install-chunkymap-on-ubuntu.sh DOES replace "/home/owner" with current user's home [replace-with-current-user.py, which is automatically called by install, will change /home/owner to current user's directory in each script that install copies to $HOME/chunkymap])  
