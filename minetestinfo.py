@@ -415,10 +415,11 @@ def init_minetestinfo():
                                 print("  ...")
                             appended_count += 1
                     print("  "+singular_or_plural("entry","entries",appended_count)+" appended from "+sub_name)
-        exclusions_path = os.path.join( os.path.dirname(os.path.abspath(__file__)), "colors - invisible.txt")
+        exclusions_name = "colors - invisible.txt"
+        exclusions_path = os.path.join( os.path.dirname(os.path.abspath(__file__)), exclusions_name)
         exclusions_list = list()
         if os.path.isfile(exclusions_path):
-            ins = open(this_genresult_path, 'r')
+            ins = open(exclusions_path, 'r')
             line = True
             counting_number = 1
             while line:
@@ -428,13 +429,18 @@ def init_minetestinfo():
                     line_strip = line.strip()
                     if len(line_strip)>0:
                         exclusions_list.append(line_strip)
+                
+            ins.close()
+            print("Listed "+str(len(exclusions_list))+" invisible blocks to exclude using '"+exclusions_name+"'.")
         else:
             print("Missing "+exclusions_path)
         for this_key in merged_colors.keys():
             if this_key in exclusions_list:
                 merged_colors.remove(this_key)
                 print("Removed invisible block '"+this_key+"'")
+        
         save_conf_from_dict(dest_colors_txt, merged_colors, assignment_operator=" ")
+        print("Finished writing "+str(len(merged_colors))+" value(s) to '"+dest_colors_txt+"'")
     else:
         print("Using colors from "+dest_colors_txt)
 
