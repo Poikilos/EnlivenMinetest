@@ -82,6 +82,22 @@ class ChunkymapOfflineRenderer:
         www_chunkymapdata_path = os.path.join(minetestinfo.get_var("www_minetest_path"), "chunkymapdata")
         www_chunkymapdata_worlds_path = os.path.join(www_chunkymapdata_path, "worlds")
         www_chunkymapdata_world_path = os.path.join(www_chunkymapdata_worlds_path, self.world_name)
+
+        is_locked = False
+        if os.path.isfile(gen_error_path):
+            ins = open(gen_error_path, 'r')
+            line = True
+            while line:
+                line = ins.readline()
+                if line:
+                    line_lower = line.lower()
+                    if " lock " in line_lower or "/lock " in line_lower
+                        is_locked = True
+                        lock_line = line
+                        result = None
+                        break
+            ins.close()
+
         if os.path.isfile(tmp_png_path):
             if not os.path.isdir(www_chunkymapdata_world_path):
                 os.makedirs(www_chunkymapdata_world_path)
@@ -122,7 +138,10 @@ class ChunkymapOfflineRenderer:
                 dest_yaml_path = os.path.join(www_chunkymapdata_world_path, dest_yaml_name)
                 mtchunk.save_yaml(dest_yaml_path)
         else:
+
             print("No image could be generated from '"+self.world_path+"'")
+            if is_locked:
+                print("(database is locked--shutdown server first or try generator.py to render chunks individually).")
 
 cmor = ChunkymapOfflineRenderer()
 cmor.RenderSingleImage()
