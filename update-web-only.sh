@@ -16,3 +16,18 @@ fi
 wget https://github.com/expertmm/minetest-chunkymap/raw/master/web/chunkymap.php
 sudo mv -f chunkymap.php $DEST_WWW_PATH/
 
+DEST_FULLNAME=$DEST_WWW_PATH/chunkymap.php
+if [ -f "$DEST_FULLNAME" ]; then
+  echo "$DEST_FULLNAME saved successfully."
+else
+  echo "FAILED to save $DEST_FULLNAME."
+fi
+
+DEST_FULLNAME=$DEST_WWW_PATH/viewchunkymap.php
+if [ -f "$DEST_FULLNAME" ]; then
+  echo "$DEST_FULLNAME saved successfully."
+else
+  echo "FAILED to save $DEST_FULLNAME."
+fi
+
+
