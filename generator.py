@@ -1242,7 +1242,7 @@ class MTChunks:
         print("  saved: "+str(player_written_count)+" (moved:"+str(players_moved_count)+"; new:"+str(players_saved_count)+")")
         last_move_msg = ""
         if (players_moved_count<1):
-            if (self.last_player_move_mtime_string is not None)
+            if (self.last_player_move_mtime_string is not None):
                 last_move_msg = " (last move: "+self.last_player_move_mtime_string+")"
             else:
                 last_move_msg = " (none moved lately)"
