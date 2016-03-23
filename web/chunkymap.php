@@ -1484,20 +1484,18 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 		echo "<ul>";
 		global $chunkymapdata_worlds_path;
 		if ($chunkymapdata_handle = opendir($chunkymapdata_worlds_path)) {
-			$append_vars="&";
+			$append_vars="";
+			if (isset($x)) {
+				$append_vars.="&x=$x";
+			}
+			if (isset($z)) {
+				$append_vars.="&z=$z";
+			}
 			if (isset($zoom)) {
-				$prefix = "";
-				if (strlen($append_vars)>0 and !endsWith($append_vars,"&")) {
-					$prefix = "&";
-				}
-				$append_vars.="$prefix"."&zoom=$zoom";
+				$append_vars.="&zoom=$zoom";
 			}
 			if (isset($chunkymap_anchor_name)) {
-				$prefix = "";
-				if (strlen($append_vars)>0) {
-					$prefix = "&";
-				}
-				$append_vars.="$prefix"."#$chunkymap_anchor_name";
+				$append_vars.="#$chunkymap_anchor_name";
 			}
 			global $chunkymap_anchor_name;
 			while (false !== ($this_world_name = readdir($chunkymapdata_handle))) {
