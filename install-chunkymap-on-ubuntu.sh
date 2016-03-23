@@ -61,7 +61,7 @@ rm "$CHUNKYMAP_DEST/install-chunkymap-on-windows.py"
 #cp -f "$CHUNKYMAP_INSTALLER_PATH/minetestmapper-expertmm.py" "$CHUNKYMAP_DEST/"
 #cp --no-clobber $CHUNKYMAP_INSTALLER_PATH/chunkymap-signals* "$CHUNKYMAP_DEST/"
 #cd "$CHUNKYMAP_INSTALLER_PATH"
-python replace-with-current-user.py  # the py file only manipulates the shell scripts that must run as root but use regular user's minetest
+python "$CHUNKYMAP_DEST/replace-with-current-user.py"  # the py file only manipulates the shell scripts that must run as root but use regular user's minetest
 # so chmod those files AFTER running the py above (since it rewrites them and therefore removes x attribute if present):
 
 
