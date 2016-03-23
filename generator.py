@@ -1227,7 +1227,14 @@ class MTChunks:
                             if self.verbose_enable:
                                 print("SAVING YAML for player '"+str(player_name)+"'")
                             players_saved_count += 1
+                            
                         save_conf_from_dict(player_dest_path, this_player, ":", save_nulls_enable=False)
+                        
+                        #prevent resaving over and over:
+                        this_player["x"] = player_x
+                        this_player["y"] = player_y
+                        this_player["z"] = player_z
+                        
                         #outs = open(player_dest_path, 'w')
                         #outs.write("id:"+file_name)
                         #if player_name is not None:
