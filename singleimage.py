@@ -84,12 +84,15 @@ class ChunkymapOfflineRenderer:
         www_chunkymapdata_world_path = os.path.join(www_chunkymapdata_worlds_path, self.world_name)
 
         is_locked = False
+        err_count = 0
         if os.path.isfile(gen_error_path):
             ins = open(gen_error_path, 'r')
             line = True
             while line:
                 line = ins.readline()
                 if line:
+                    if len(line.strip())>0:
+                        err_count += 1
                     line_lower = line.lower()
                     if (" lock " in line_lower) or ("/lock " in line_lower):
                         is_locked = True
@@ -97,7 +100,8 @@ class ChunkymapOfflineRenderer:
                         result = None
                         break
             ins.close()
-
+        if err_count<1:
+            os.remove(gen_error_path)
         if os.path.isfile(tmp_png_path):
             if not os.path.isdir(www_chunkymapdata_world_path):
                 os.makedirs(www_chunkymapdata_world_path)

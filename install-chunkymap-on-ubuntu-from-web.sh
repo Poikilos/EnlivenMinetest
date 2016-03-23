@@ -39,3 +39,6 @@ chmod +x "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu-from-web.sh"
 
 chmod +x "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh"
 sh "$CHUNKYMAP_INSTALLER_DIR/install-chunkymap-on-ubuntu.sh"
+
+cp -f "$CHUNKYMAP_INSTALLER_DIR/chunkymap-generator.sh" "$HOME/"
+chmod +x "$HOME/chunkymap-generator.sh"

@@ -1,0 +1,5 @@
+tsm_mines:dummy
+air
+ignore
+doors:hidden
+compassgps:cgpsmap_wall

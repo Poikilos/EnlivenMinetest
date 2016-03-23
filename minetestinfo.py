@@ -418,7 +418,7 @@ def init_minetestinfo():
 
         save_conf_from_dict(dest_colors_txt, merged_colors, assignment_operator=" ")
     else:
-        print("Using colors "+dest_colors_txt)
+        print("Using colors from "+dest_colors_txt)
 
 def load_world_and_mod_data():
     #if games_path =
