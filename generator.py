@@ -1123,31 +1123,34 @@ class MTChunks:
                     this_player = None
                     is_changed = False
                     #(mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(file_path)
-                    mtime = time.gmtime(os.path.getmtime(file_path))
+                    moved_mtime = time.gmtime()
+                    #mtime = time.gmtime(os.path.getmtime(file_path))
                     #NOTE: time.gmtime converts long timestamp to 9-long tuple
-                    this_mtime_string = time.strftime(INTERNAL_TIME_FORMAT_STRING, mtime)
+                    this_mtime_string = time.strftime(INTERNAL_TIME_FORMAT_STRING, moved_mtime)
                     #mtime = os.path.getmtime(file_path)
                     #this_mtime_string = datetime.strftime(mtime, INTERNAL_TIME_FORMAT_STRING)
                     if file_name in self.players:
-                        this_player = self.players[file_name]
-                        if ("utc_mtime" not in this_player) or (this_player["utc_mtime"]!=this_mtime_string):
-                            this_player["utc_mtime"]=this_mtime_string
+                        #this_player = self.players[file_name]
+                        if ("utc_mtime" not in this_player):
+                            #or (this_player["utc_mtime"]!=this_mtime_string):
+                            self.players[file_name]["utc_mtime"]=this_mtime_string
                             is_changed = True
-                        if "index" in this_player:
+                            #not necessarily moved--even if resaved by server, may not have moved a whole block or at all
+                        if "index" in self.players[file_name]:
                             player_index = self.players[file_name]["index"]
                         else:
                             player_index = self.get_new_player_index()
                             self.players[file_name]["index"] = player_index
                             is_changed = True
                     else:
-                        this_player = {}
+                        self.players[file_name] = {}
                         player_index = self.get_new_player_index()
-                        this_player["index"] = player_index
-                        this_player["playerid"] = file_name
-                        this_player["utc_mtime"] = this_mtime_string
+                        self.players[file_name]["index"] = player_index
+                        self.players[file_name]["playerid"] = file_name
+                        self.players[file_name]["utc_mtime"] = this_mtime_string
                         if player_name is not None:
-                            this_player["name"] = player_name
-                        self.players[file_name] = this_player
+                            self.players[file_name]["name"] = player_name
+                        self.players[file_name] = file_name
                         is_changed = True
                     player_dest_path = None
                     if player_index is not None:
@@ -1187,53 +1190,54 @@ class MTChunks:
                     saved_player_y = None
                     #map_player_position_tuple = saved_player_x, saved_player_y, saved_player_z
                     is_moved = False
-                    if "x" in this_player.keys():
-                        saved_player_x = float(this_player["x"])
+                    if "x" in self.players[file_name].keys():
+                        saved_player_x = float(self.players[file_name]["x"])
                         if int(saved_player_x) != int(player_x):
                             is_moved = True
                     else:
-                        this_player["x"] = player_x
+                        self.players[file_name]["x"] = player_x
                         is_moved = True
-                    if "y" in this_player.keys():
-                        saved_player_y = float(this_player["y"])
+                    if "y" in self.players[file_name].keys():
+                        saved_player_y = float(self.players[file_name]["y"])
                         if int(saved_player_y) != int(player_y):
                             is_moved = True
                     else:
-                        this_player["y"] = player_y
+                        self.players[file_name]["y"] = player_y
                         is_moved = True
-                    if "z" in this_player.keys():
-                        saved_player_z = float(this_player["z"])
+                    if "z" in self.players[file_name].keys():
+                        saved_player_z = float(self.players[file_name]["z"])
                         if int(saved_player_z) != int(player_z):
                             is_moved = True
                     else:
-                        this_player["z"] = player_z
+                        self.players[file_name]["z"] = player_z
                         is_moved = True
                     if is_moved:
                         is_changed = True
 
 
-                    #if (this_player is None) or not is_same_fvec3( map_player_position_tuple, player_position_tuple):
-                    #if (this_player is None) or (saved_player_x is None) or (saved_player_z is None) or (int(saved_player_x)!=int(player_x)) or (int(saved_player_y)!=int(player_y)) or (int(saved_player_z)!=int(player_z)):
+                    #if (self.players[file_name] is None) or not is_same_fvec3( map_player_position_tuple, player_position_tuple):
+                    #if (self.players[file_name] is None) or (saved_player_x is None) or (saved_player_z is None) or (int(saved_player_x)!=int(player_x)) or (int(saved_player_y)!=int(player_y)) or (int(saved_player_z)!=int(player_z)):
                     if is_changed:
                         # don't check y since y is elevation in minetest, don't use float since subblock position doesn't matter to map
-                        #if this_player is not None and saved_player_x is not None and saved_player_y is not None and saved_player_z is not None:
+                        #if self.players[file_name] is not None and saved_player_x is not None and saved_player_y is not None and saved_player_z is not None:
                         if is_moved:
                             #print("PLAYER MOVED: "+str(player_name)+" moved from "+str(map_player_position_tuple)+" to "+str(player_position_tuple))
                             if self.verbose_enable:
                                 print("PLAYER MOVED: "+str(player_name)+" moved from "+str(saved_player_x)+","+str(saved_player_y)+","+str(saved_player_z)+" to "+str(player_x)+","+str(player_y)+","+str(player_z))
                             self.last_player_move_mtime_string = this_mtime_string
                             players_moved_count += 1
+                            self.players[file_name]["utc_mtime"]=this_mtime_string
                         else:
                             if self.verbose_enable:
                                 print("SAVING YAML for player '"+str(player_name)+"'")
                             players_saved_count += 1
                             
-                        save_conf_from_dict(player_dest_path, this_player, ":", save_nulls_enable=False)
+                        save_conf_from_dict(player_dest_path, self.players[file_name], ":", save_nulls_enable=False)
                         
                         #prevent resaving over and over:
-                        this_player["x"] = player_x
-                        this_player["y"] = player_y
-                        this_player["z"] = player_z
+                        self.players[file_name]["x"] = player_x
+                        self.players[file_name]["y"] = player_y
+                        self.players[file_name]["z"] = player_z
                         
                         #outs = open(player_dest_path, 'w')
                         #outs.write("id:"+file_name)
