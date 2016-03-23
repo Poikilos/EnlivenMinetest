@@ -18,6 +18,14 @@ if [ -d "$HOME/minetest-stuff/minetest-chunkymap" ]; then
   rm -Rf $HOME/minetest-stuff/minetest-chunkymap
 fi
 
+rm -f "$CHUNKYMAP_DEPRECATED_PATH/chunkymap-regen.sh"
+rm -f "$CHUNKYMAP_DEPRECATED_PATH/chunkymap-regen-players.sh"
+rm -f "$CHUNKYMAP_DEPRECATED_PATH/chunkymap-cronjob"
+rm -f "$CHUNKYMAP_DEPRECATED_PATH/chunkymap-players-cronjob"
+rm -f "$CHUNKYMAP_DEPRECATED_PATH/set-minutely-players-crontab-job.sh"
+rm -f "$CHUNKYMAP_DEPRECATED_PATH/set-minutely-crontab-job.sh"
+
+
 mv "$CHUNKYMAP_DEPRECATED_PATH/web" "$CHUNKYMAP_DEST_PATH/web"
 mv "$CHUNKYMAP_DEPRECATED_PATH/unused" "$CHUNKYMAP_DEST_PATH/unused"
 sudo mv "$CHUNKYMAP_DEPRECATED_PATH/chunkymap-genresults" "$CHUNKYMAP_DEST_PATH/chunkymap-genresults"

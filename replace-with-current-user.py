@@ -9,7 +9,7 @@ filenames.append(os.path.join("unused","chunkymap-regen-players.sh"))
 filenames.append(os.path.join("unused","chunkymap-regen.sh"))
 filenames.append(os.path.join("unused","set-minutely-players-crontab-job.sh"))
 filenames.append(os.path.join("unused","set-minutely-crontab-job.sh"))
-filenames.append("chunkymap-regen-loop.sh")
+filenames.append("chunkymap-generator.sh")
 
 home_path = expanduser("~")
 home_minetest_chunkymap_path = os.path.join(home_path,"chunkymap")

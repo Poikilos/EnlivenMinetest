@@ -32,52 +32,46 @@ rm $CHUNKYMAP_DEST/*.bat
 rm "$CHUNKYMAP_DEST/install-chunkymap-on-windows.py"
 
 #region DEPRECATED
-if [ ! -d "$CHUNKYMAP_DEST" ]; then
+#if [ ! -d "$CHUNKYMAP_DEST" ]; then
 
 
 
-cp -f "$CHUNKYMAP_INSTALLER_PATH/chunkymap-regen.py" "$CHUNKYMAP_DEST/"
+#cp -f "$CHUNKYMAP_INSTALLER_PATH/chunkymap-regen.py" "$CHUNKYMAP_DEST/"
 #chmod +x "$CHUNKYMAP_DEST/chunkymap-regen.py"
 
-cp -f "$CHUNKYMAP_INSTALLER_PATH/README.md" "$CHUNKYMAP_DEST/"
+#cp -f "$CHUNKYMAP_INSTALLER_PATH/README.md" "$CHUNKYMAP_DEST/"
 #remove files place in dest by old version of installer script:
-rm -f "$CHUNKYMAP_DEST/chunkymap-regen.sh"
-rm -f "$CHUNKYMAP_DEST/chunkymap-regen-players.sh"
-rm -f "$CHUNKYMAP_DEST/chunkymap-cronjob"
-rm -f "$CHUNKYMAP_DEST/chunkymap-players-cronjob"
-rm -f "$CHUNKYMAP_DEST/set-minutely-players-crontab-job.sh"
-rm -f "$CHUNKYMAP_DEST/set-minutely-crontab-job.sh"
-#install scripts:
-cp -f "$CHUNKYMAP_INSTALLER_PATH/chunkymap-regen-loop.sh" "$CHUNKYMAP_DEST/"
+#install scripts (already done above with wildcard so commented lines below are deprecated):
+#cp -f "$CHUNKYMAP_INSTALLER_PATH/chunkymap-generator.sh" "$CHUNKYMAP_DEST/"
 #install not-recommended scripts:
-cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-regen.sh" "$CHUNKYMAP_DEST/unused/"
-cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-regen-players.sh" "$CHUNKYMAP_DEST/unused/"
-cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-cronjob" "$CHUNKYMAP_DEST/unused/"
-cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-players-cronjob" "$CHUNKYMAP_DEST/unused/"
-cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/set-minutely-players-crontab-job.sh" "$CHUNKYMAP_DEST/unused/"
-cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/set-minutely-crontab-job.sh" "$CHUNKYMAP_DEST/unused/"
-if [ ! -d "$CHUNKYMAP_DEST/web" ]; then
-	mkdir "$CHUNKYMAP_DEST/web"
-fi
-cp -Rf "$CHUNKYMAP_INSTALLER_PATH/web" "$CHUNKYMAP_DEST/"
+#cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-regen.sh" "$CHUNKYMAP_DEST/unused/"
+#cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-regen-players.sh" "$CHUNKYMAP_DEST/unused/"
+#cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-cronjob" "$CHUNKYMAP_DEST/unused/"
+#cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/chunkymap-players-cronjob" "$CHUNKYMAP_DEST/unused/"
+#cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/set-minutely-players-crontab-job.sh" "$CHUNKYMAP_DEST/unused/"
+#cp -f "$CHUNKYMAP_INSTALLER_PATH/unused/set-minutely-crontab-job.sh" "$CHUNKYMAP_DEST/unused/"
+#if [ ! -d "$CHUNKYMAP_DEST/web" ]; then
+#	mkdir "$CHUNKYMAP_DEST/web"
+#fi
+#cp -Rf "$CHUNKYMAP_INSTALLER_PATH/web" "$CHUNKYMAP_DEST/"
 
 #if [ ! -d "$CHUNKYMAP_DEST/chunkymap" ]; then
 #  mkdir "$CHUNKYMAP_DEST/chunkymap"
 #fi
-cp -f "$CHUNKYMAP_INSTALLER_PATH/minetestmapper-expertmm.py" "$CHUNKYMAP_DEST/"
-cp --no-clobber $CHUNKYMAP_INSTALLER_PATH/chunkymap-signals* "$CHUNKYMAP_DEST/"
-cd "$CHUNKYMAP_INSTALLER_PATH"
-python replace-with-current-user.py  # the py file only manipulates the minetest/util directory
+#cp -f "$CHUNKYMAP_INSTALLER_PATH/minetestmapper-expertmm.py" "$CHUNKYMAP_DEST/"
+#cp --no-clobber $CHUNKYMAP_INSTALLER_PATH/chunkymap-signals* "$CHUNKYMAP_DEST/"
+#cd "$CHUNKYMAP_INSTALLER_PATH"
+python replace-with-current-user.py  # the py file only manipulates the shell scripts that must run as root but use regular user's minetest
 # so chmod those files AFTER running the py above (since it rewrites them and therefore removes x attribute if present):
 
 
 
-fi
+#fi
 #endregion DEPRECATED
 
 
 
-chmod +x  "$CHUNKYMAP_DEST/chunkymap-regen-loop.sh"
+chmod +x  "$CHUNKYMAP_DEST/chunkymap-generator.sh"
 chmod -x "$CHUNKYMAP_DEST/unused/chunkymap-regen.sh"
 chmod -x "$CHUNKYMAP_DEST/unused/chunkymap-regen-players.sh"
 chmod -x "$CHUNKYMAP_DEST/unused/chunkymap-cronjob"
@@ -106,9 +100,9 @@ echo "To learn more about chunkymap:"
 echo "nano $CHUNKYMAP_DEST/README.md"
 echo
 echo "To start now assuming configuration matches yours (nano $CHUNKYMAP_DEST/README.md before this):"
-echo sh minetest/util/chunkymap-regen-loop.sh
+echo sh minetest/util/chunkymap-generator.sh
 echo
-# NOTE: colors.txt should ALREADY be in $HOME/minetest/util
+# NOTE: colors.txt is generated now, so shouldn't be in $CHUNKYMAP_DEST until first run (first time minetestinfo.py is included by one of the other py files)
 
 
 fi

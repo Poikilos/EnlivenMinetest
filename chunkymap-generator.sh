@@ -6,4 +6,4 @@ echo
 # -S names the socket (-t only sets the title)
 #FAILS: flock -n /var/run/chunkymap-loop.lockfile -c "screen -S chunkymapregen python /home/owner/minetest/util/chunkymap-regen.py"
 #FAILS: screen -S chunkymapregen flock -n /var/run/chunkymap-loop.lockfile -c python /home/owner/minetest/util/chunkymap-regen.py
-sudo screen -S chunkymapregen python /home/owner/minetest/util/chunkymap-regen.py
+sudo screen -S chunkymapregen python /home/owner/chunkymap/generator.py
