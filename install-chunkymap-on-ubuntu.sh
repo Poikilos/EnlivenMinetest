@@ -59,7 +59,7 @@ rm "$CHUNKYMAP_DEST/install-chunkymap-on-windows.py"
 #  mkdir "$CHUNKYMAP_DEST/chunkymap"
 #fi
 #cp -f "$CHUNKYMAP_INSTALLER_PATH/minetestmapper-expertmm.py" "$CHUNKYMAP_DEST/"
-#cp --no-clobber $CHUNKYMAP_INSTALLER_PATH/chunkymap-signals* "$CHUNKYMAP_DEST/"
+#cp --no-clobber $CHUNKYMAP_INSTALLER_PATH/signals* "$CHUNKYMAP_DEST/"
 #cd "$CHUNKYMAP_INSTALLER_PATH"
 cd $CHUNKYMAP_DEST
 python replace-with-current-user.py  # the py file only manipulates the shell scripts that must run as root but use regular user's minetest

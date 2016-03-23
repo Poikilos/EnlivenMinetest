@@ -15,12 +15,12 @@ This program comes without any warranty, to the extent permitted by applicable l
 	#Then if you are using screen and want to leave the output without terminating the process press Ctrl a d
 	#NOTE: now that loop is default, cron job scripts, which now disable loop for compatibility with new version, are ALL optional and NOT recommended
     # ( to run only once, run: python chunkymap-regen.py --no-loop true )
-* Change program options (or stop it) while looping or rendering by placing chunkymap-signals.txt in the same directory as chunkymap-regen.py (see chunkymap-signals example files)
-	* to maintain stability of  your text editor, save the file, close it, then move/copy it to the directory (or save it as something else then rename it to chunkymap-signals.txt).
+* Change program options (or stop it) while looping or rendering by placing signals.txt in the same directory as chunkymap-regen.py (see signals example files)
+	* to maintain stability of  your text editor, save the file, close it, then move/copy it to the directory (or save it as something else then rename it to signals.txt).
 	* alternatively, in *nix do something like:
-    echo "refresh_map_enable:False" > $HOME/chunkymap/chunkymap-signals.txt
+    echo "refresh_map_enable:False" > $HOME/chunkymap/signals.txt
 	sleep 15s
-	echo "loop_enable:False" > $HOME/chunkymap/chunkymap-signals.txt
+	echo "loop_enable:False" > $HOME/chunkymap/signals.txt
 	* list of signals:
 		loop_enable:True
 		loop_enable:False

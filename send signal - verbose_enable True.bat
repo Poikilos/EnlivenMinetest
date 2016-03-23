@@ -1,1 +1,1 @@
-echo verbose_enable:True > chunkymap-signals.txt
+echo verbose_enable:True > signals.txt

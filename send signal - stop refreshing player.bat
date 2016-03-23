@@ -1,1 +1,1 @@
-echo refresh_players_enable:False > chunkymap-signals.txt
+echo refresh_players_enable:False > signals.txt

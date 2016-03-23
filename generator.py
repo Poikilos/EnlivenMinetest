@@ -430,7 +430,7 @@ class MTChunks:
         return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_chunk_image_name(chunky_x, chunky_z))
 
     def get_signal_name(self):
-        return "chunkymap-signals.txt"
+        return "signals.txt"
 
     def get_signal_path(self):
         return os.path.join(os.path.dirname(os.path.abspath(__file__)), self.get_signal_name())
