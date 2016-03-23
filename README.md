@@ -83,17 +83,19 @@ world_path
 	* Install the git version of minetest (or otherwise install 0.4.13 or other version compatible with the map generators used by chunkymap)
 	such as:
 	#if you have a version before 2016-03-23:
-	rm rename-deprecated.sh
-	wget https://github.com/expertmm/minetest-chunkymap/raw/master/rename-deprecated.sh
-	sudo sh rename-deprecated.sh
+    rm rename-deprecated.sh
+    wget https://github.com/expertmm/minetest-chunkymap/raw/master/rename-deprecated.sh
+    sudo sh rename-deprecated.sh
 	
-rm install-chunkymap-on-ubuntu-from-web.sh
-wget https://github.com/expertmm/minetest-chunkymap/raw/master/install-chunkymap-on-ubuntu-from-web.sh
-chmod +x install-chunkymap-on-ubuntu-from-web.sh
-./install-chunkymap-on-ubuntu-from-web.sh
+    rm install-chunkymap-on-ubuntu-from-web.sh
+    wget https://github.com/expertmm/minetest-chunkymap/raw/master/install-chunkymap-on-ubuntu-from-web.sh
+    chmod +x install-chunkymap-on-ubuntu-from-web.sh
+    ./install-chunkymap-on-ubuntu-from-web.sh
 rm update-chunkymap-on-ubuntu-from-web.sh
 wget https://github.com/expertmm/minetest-chunkymap/raw/master/update-chunkymap-on-ubuntu-from-web.sh
+sleep 1
 chmod +x update-chunkymap-on-ubuntu-from-web.sh
+./update-chunkymap-on-ubuntu-from-web.sh
 	OPTION 2: IF you are using Ubuntu go to a terminal, cd to this directory,  
 	then switch user to the one that will run minetestserver
 	(since install-chunkymap-on-ubuntu.sh DOES replace "/home/owner" with current user's home [replace-with-current-user.py, which is automatically called by install, will change /home/owner to current user's directory in each script that install copies to $HOME/chunkymap])  

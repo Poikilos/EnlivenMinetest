@@ -5,13 +5,18 @@ CHUNKYMAP_DEST=$HOME/chunkymap
 if [ ! -d "$HOME/Downloads" ]; then
 	mkdir "$HOME/Downloads"
 fi
+if [ ! -d "$CHUNKYMAP_INSTALLER_DIR" ]; then
+	mkdir "$CHUNKYMAP_INSTALLER_DIR"
+fi
 
 cd "$CHUNKYMAP_DEST"
-rm update-chunkymap-installer-only.sh
+if [ -f update-chunkymap-installer-only.sh ]; then
+  rm update-chunkymap-installer-only.sh
+fi
 wget https://github.com/expertmm/minetest-chunkymap/blob/master/update-chunkymap-installer-only.sh
+sleep 2
 mv -f update-chunkymap-installer-only.sh $CHUNKYMAP_INSTALLER_DIR/
 #Wait to make sure nothing weirdly not finished downloading:
-sleep .2
 cd $HOME
 #cd $CHUNKYMAP_INSTALLER_DIR
 #chmod +x update-chunkymap-installer-only.sh
@@ -29,6 +34,6 @@ cd $HOME
 #else
   sh "$CHUNKYMAP_INSTALLER_DIR/update-chunkymap-installer-only.sh"
   #further instructions are in separate file in case updater was updated (sleep first otherwise file won't be finished writing):
-  sleep .2
+  sleep 2
   sh "$CHUNKYMAP_INSTALLER_DIR/post-update.sh"
 #fi

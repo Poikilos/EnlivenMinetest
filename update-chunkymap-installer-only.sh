@@ -1,8 +1,5 @@
 #!/bin/sh
 cd $HOME
-if [ -d "$HOME/minetest-stuff/minetest-chunkymap" ]; then
-  rm -Rf $HOME/minetest-stuff/minetest-chunkymap
-fi
 CHUNKYMAP_INSTALLER_DIR=$HOME/Downloads/minetest-chunkymap
 if [ ! -d "$HOME/Downloads" ]; then
 	mkdir "$HOME/Downloads"
