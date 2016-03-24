@@ -1087,16 +1087,18 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 				//}
 				
 				function get_relative_mouse_point(e) {
+					//formerly get_mouse_point
+					
 					var xOffset=Math.max(document.documentElement.scrollLeft,document.body.scrollLeft);
 					var yOffset=Math.max(document.documentElement.scrollTop,document.body.scrollTop);
-					//return {
-					//x:parseInt(e.clientX+xOffset-my_canvas.offsetLeft),
-					//y:parseInt(e.clientY+yOffset-my_canvas.offsetTop)
-					//};
 					return {
-					x:parseInt(e.clientX+xOffset),
-					y:parseInt(e.clientY+yOffset)
+					x:parseInt(e.clientX+xOffset-my_canvas.offsetLeft),
+					y:parseInt(e.clientY+yOffset-my_canvas.offsetTop)
 					};
+					//return {
+					//x:parseInt(e.clientX+xOffset),
+					//y:parseInt(e.clientY+yOffset)
+					//};
 				}
 				
 				window.onload = function() {
