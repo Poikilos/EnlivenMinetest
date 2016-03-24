@@ -117,32 +117,32 @@ chmod +x set-minutely-crontab-job.sh && ./set-minutely-crontab-job.sh
 * If you are using Ubuntu
     * Install the git version of minetest (or otherwise install 0.4.13 or other version compatible with the map generators used by chunkymap)
     such as:
-```perl
-#if you have a version before 2016-03-23:
-if [ -f rename-deprecated.sh ]; then
-  rm rename-deprecated.sh
-fi
-wget https://github.com/expertmm/minetest-chunkymap/raw/master/rename-deprecated.sh
-sudo sh rename-deprecated.sh
+	```perl
+	#if you have a version before 2016-03-23:
+	if [ -f rename-deprecated.sh ]; then
+	  rm rename-deprecated.sh
+	fi
+	wget https://github.com/expertmm/minetest-chunkymap/raw/master/rename-deprecated.sh
+	sudo sh rename-deprecated.sh
 
-if [ -f install-chunkymap-on-ubuntu-from-web.sh ]; then
-  rm install-chunkymap-on-ubuntu-from-web.sh
-fi
-wget https://github.com/expertmm/minetest-chunkymap/raw/master/install-chunkymap-on-ubuntu-from-web.sh
-chmod +x install-chunkymap-on-ubuntu-from-web.sh
-./install-chunkymap-on-ubuntu-from-web.sh
+	if [ -f install-chunkymap-on-ubuntu-from-web.sh ]; then
+	  rm install-chunkymap-on-ubuntu-from-web.sh
+	fi
+	wget https://github.com/expertmm/minetest-chunkymap/raw/master/install-chunkymap-on-ubuntu-from-web.sh
+	chmod +x install-chunkymap-on-ubuntu-from-web.sh
+	./install-chunkymap-on-ubuntu-from-web.sh
 
-#or later run:
-#rm update-chunkymap-on-ubuntu-from-web.sh
-#wget https://github.com/expertmm/minetest-chunkymap/raw/master/update-chunkymap-on-ubuntu-from-web.sh
-#chmod +x update-chunkymap-on-ubuntu-from-web.sh
-#./update-chunkymap-on-ubuntu-from-web.sh
+	#or later run:
+	#rm update-chunkymap-on-ubuntu-from-web.sh
+	#wget https://github.com/expertmm/minetest-chunkymap/raw/master/update-chunkymap-on-ubuntu-from-web.sh
+	#chmod +x update-chunkymap-on-ubuntu-from-web.sh
+	#./update-chunkymap-on-ubuntu-from-web.sh
 
-#then (shutdown minetest first then) create singleimage map:
-sudo python chunkymap/singleimage.py
-#then start generator which will update player entries on your website (can be made anonymous--see viewchunkymap.php):
-sudo python chunkymap/generator.py
-```
+	#then (shutdown minetest first then) create singleimage map:
+	sudo python chunkymap/singleimage.py
+	#then start generator which will update player entries on your website (can be made anonymous--see viewchunkymap.php):
+	sudo python chunkymap/generator.py
+	```
 
     OPTION 2: IF you are using Ubuntu go to a terminal, cd to this directory,  
     then switch user to the one that will run minetestserver
