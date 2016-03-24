@@ -25,36 +25,36 @@ screen -t chunkymapregen python $HOME/chunkymap/generator.py
     * to maintain stability of  your text editor, save the file, close it, then move/copy it to the directory (or save it as something else then rename it to signals.txt).
 	or use echo command (recommended):
 		* GNU/Linux systems do something like:
-```perl
-echo "refresh_map_enable:False" > $HOME/chunkymap/signals.txt
-sleep 15s
-echo "loop_enable:False" > $HOME/chunkymap/signals.txt
-```
+		```perl
+		echo "refresh_map_enable:False" > $HOME/chunkymap/signals.txt
+		sleep 15s
+		echo "loop_enable:False" > $HOME/chunkymap/signals.txt
+		```
 
 		* In Windows(R) command prompt do something like:
-```perl
-REM cd to the minetest-chunkymap or minetest-chunkymap-master folder you unzipped
-echo refresh_map_enable:False > signals.txt
-echo loop_enable:False > signals.txt
-```
+		```perl
+		REM cd to the minetest-chunkymap or minetest-chunkymap-master folder you unzipped
+		echo refresh_map_enable:False > signals.txt
+		echo loop_enable:False > signals.txt
+		```
 
     * list of signals:
-```YAML
-loop_enable:True
-loop_enable:False
-#verbose_enable is false for looped (default) mode and true for non-looped mode
-verbose_enable:True
-verbose_enable:False
-refresh_players_enable:True
-refresh_players_enable:False
-refresh_map_enable:True
-refresh_map_enable:False
-#rerenders chunks that were rendered in this run:
-recheck_rendered:True
-#where 1 is number of seconds (only delays first iteration--further iterations continue until refreshing player is needed):
-refresh_map_seconds:1
-#where 1 is number of seconds:
-refresh_players_seconds:1
+	```YAML
+	loop_enable:True
+	loop_enable:False
+	#verbose_enable is false for looped (default) mode and true for non-looped mode
+	verbose_enable:True
+	verbose_enable:False
+	refresh_players_enable:True
+	refresh_players_enable:False
+	refresh_map_enable:True
+	refresh_map_enable:False
+	#rerenders chunks that were rendered in this run:
+	recheck_rendered:True
+	#where 1 is number of seconds (only delays first iteration--further iterations continue until refreshing player is needed):
+	refresh_map_seconds:1
+	#where 1 is number of seconds:
+	refresh_players_seconds:1
 ```
 
         
@@ -148,26 +148,26 @@ sudo python chunkymap/generator.py
     then switch user to the one that will run minetestserver
     (since install-chunkymap-on-ubuntu.sh DOES replace "/home/owner" with current user's home [replace-with-current-user.py, which is automatically called by install, will change /home/owner to current user's directory in each script that install copies to $HOME/chunkymap])  
     then go to Terminal and run:
-```perl
-minetestserver
-```
+	```perl
+	minetestserver
+	```
 
     then when it is finished loading, press Ctrl C then run:
-```perl
-chmod +x install-chunkymap-on-ubuntu.sh && ./install-chunkymap-on-ubuntu.sh
-```
+	```perl
+	chmod +x install-chunkymap-on-ubuntu.sh && ./install-chunkymap-on-ubuntu.sh
+	```
 
 * IF you are using Linux
     * Rename viewchunkymap.php so it won't be overwritten on update if you want to modify it (or anything you want) then make a link to it on your website or share the link some other way.
-```perl
-# The commands below will work if you are using the web installer, or have done mv minetest-chunkymap-master "$HOME/Downloads/minetest-chunkymap" (and if you are using /var/www/html/minetest -- otherwise change that below)
-MT_MY_WEBSITE_PATH=/var/www/html/minetest
-sudo cp -f "$HOME/Downloads/minetest-chunkymap/web/chunkymap.php" "$MT_MY_WEBSITE_PATH/chunkymap.php"
-sudo cp -f "$HOME/Downloads/minetest-chunkymap/web/viewchunkymap.php" "$MT_MY_WEBSITE_PATH/viewchunkymap.php"
-sudo cp -R --no-clobber "$HOME/Downloads/minetest-chunkymap/web/images/*" "$MT_MY_WEBSITE_PATH/images/"
-#--no-clobber: do not overwrite existing
-# after you do this, the update script will do it for you if you are using /var/www/html/minetest, otherwise edit the update script before using it to get these things updated
-```
+	```perl
+	# The commands below will work if you are using the web installer, or have done mv minetest-chunkymap-master "$HOME/Downloads/minetest-chunkymap" (and if you are using /var/www/html/minetest -- otherwise change that below)
+	MT_MY_WEBSITE_PATH=/var/www/html/minetest
+	sudo cp -f "$HOME/Downloads/minetest-chunkymap/web/chunkymap.php" "$MT_MY_WEBSITE_PATH/chunkymap.php"
+	sudo cp -f "$HOME/Downloads/minetest-chunkymap/web/viewchunkymap.php" "$MT_MY_WEBSITE_PATH/viewchunkymap.php"
+	sudo cp -R --no-clobber "$HOME/Downloads/minetest-chunkymap/web/images/*" "$MT_MY_WEBSITE_PATH/images/"
+	#--no-clobber: do not overwrite existing
+	# after you do this, the update script will do it for you if you are using /var/www/html/minetest, otherwise edit the update script before using it to get these things updated
+	```
 
 * IF you are using Windows
     * Install Python 2.7
