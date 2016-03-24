@@ -1078,20 +1078,24 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 					draw_map();
 				}
 				
-				function getMousePos(canvas, e) {
-					var rect = canvas.getBoundingClientRect();
-					return {
-							x: e.clientX - rect.left,
-							y: e.clientY - rect.top
-							};
-				}
+				//function getMousePos(canvas, e) {
+				//	var rect = canvas.getBoundingClientRect();
+				//	return {
+				//			x: e.clientX - rect.left,
+				//			y: e.clientY - rect.top
+				//			};
+				//}
 				
 				function get_relative_mouse_point(e) {
 					var xOffset=Math.max(document.documentElement.scrollLeft,document.body.scrollLeft);
 					var yOffset=Math.max(document.documentElement.scrollTop,document.body.scrollTop);
+					//return {
+					//x:parseInt(e.clientX+xOffset-my_canvas.offsetLeft),
+					//y:parseInt(e.clientY+yOffset-my_canvas.offsetTop)
+					//};
 					return {
-					x:parseInt(e.clientX+xOffset-my_canvas.offsetLeft),
-					y:parseInt(e.clientY+yOffset-my_canvas.offsetTop)
+					x:parseInt(e.clientX+xOffset),
+					y:parseInt(e.clientY+yOffset)
 					};
 				}
 				
