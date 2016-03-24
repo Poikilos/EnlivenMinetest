@@ -1150,8 +1150,9 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 					//	draw_map();
 					//  }, false);
 					my_canvas.addEventListener("click", function(e){
+						relative_canvas_point = get_relative_mouse_point(e)
 						for (i=0; i<bawidgets.length; i++) {
-							click_if_contains(bawidgets[i], e.clientX, e.clientY);
+							click_if_contains(bawidgets[i], relative_canvas_point.x, relative_canvas_point.y);
 						}
 					});
 					//my_canvas.addEventListener(\'mousemove\', handle_mousemove, false);

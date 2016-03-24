@@ -25,6 +25,8 @@ from expertmm import *
 # SHELL SCRIPT:
 # * don't use '*' inside quotes (fails)
 # * using HOME without preceding dollar sign
+# ECMAScript:
+# * use of e.clientX e.clientY where line contains neither + or - (should use some kind of modifiers for scroll and canvas position such as in get_relative_mouse_point method)
 
 def view_traceback():
     ex_type, ex, tb = sys.exc_info()

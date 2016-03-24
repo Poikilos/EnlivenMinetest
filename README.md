@@ -10,7 +10,7 @@ This program comes without any warranty, to the extent permitted by applicable l
 * Fast HTML Canvas map with only players who moved recently
 * No mods are required--Uses Python and PHP (generator.py detects border chunks by setting a flag color as the bgcolor; distinguishes empty chunks from locked database [retries if locked])
 * generator.py can loop forever (to keeps certain runtime data to reduce drive reads & writes):
-```
+```perl
 sudo python generator.py
 #or run as user that has read & write priveleges to $HOME/chunkymap and your website's minetest folder (or website root if installing chunkymap.php there)
 #or to get back to it later with screen -r, instead install screen command (or tmux may work) then run:
@@ -24,19 +24,19 @@ screen -t chunkymapregen python $HOME/chunkymap/generator.py
     * to maintain stability of  your text editor, save the file, close it, then move/copy it to the directory (or save it as something else then rename it to signals.txt).
 	or use echo command (recommended):
 		* GNU/Linux systems do something like:
-```
+```perl
 echo "refresh_map_enable:False" > $HOME/chunkymap/signals.txt
 sleep 15s
 echo "loop_enable:False" > $HOME/chunkymap/signals.txt
 ```
 		* In Windows(R) command prompt do something like:
-```
+```perl
 REM cd to the minetest-chunkymap or minetest-chunkymap-master folder you unzipped
 echo refresh_map_enable:False > signals.txt
 echo loop_enable:False > signals.txt
 ```
     * list of signals:
-	```
+```YAML
 loop_enable:True
 loop_enable:False
 #verbose_enable is false for looped (default) mode and true for non-looped mode
@@ -52,7 +52,7 @@ recheck_rendered:True
 refresh_map_seconds:1
 #where 1 is number of seconds:
 refresh_players_seconds:1
-	```
+```
         
 
 ## Changes
@@ -68,7 +68,7 @@ This should be hard to corrupt since id is used as the indexer for the players d
 * games_path, mods_path, players_path, and other subdirectories of the major ones should not be stored in minetestmeta.yml, since otherwise the values may deviate from the parent directories when the parent directories change.
 To avoid this problem, instead derive the paths from the parent paths using your favorite language such as in the following examples:
 
-```
+```python
 	games_path = os.path.join(minetestinfo.get_var("shared_minetest_path"), "games")
     mods_path = os.path.join(minetestinfo.get_var("game_path"), "mods")
     players_path = os.path.join(minetestinfo.get_var("primary_world_path"), "players")
@@ -95,7 +95,7 @@ world_path
 		* IF you are using a distro such as Ubuntu 14.04 where first line of /etc/crontab is "m h dom mon dow user command" then if you want regular refresh of map then run:
 		(otherwise first edit the script to fit your crontab then)
 		(if you are not using /var/www/html/minetest/chunkymapdata, edit chunkymap-cronjob script to use the correct directory, then)
-```
+```perl
 chmod +x set-minutely-crontab-job.sh && ./set-minutely-crontab-job.sh
 ```
 
@@ -111,7 +111,7 @@ chmod +x set-minutely-crontab-job.sh && ./set-minutely-crontab-job.sh
 * If you are using Ubuntu
     * Install the git version of minetest (or otherwise install 0.4.13 or other version compatible with the map generators used by chunkymap)
     such as:
-```
+```perl
 #if you have a version before 2016-03-23:
 if [ -f rename-deprecated.sh ]; then
   rm rename-deprecated.sh
@@ -141,16 +141,16 @@ sudo python chunkymap/generator.py
     then switch user to the one that will run minetestserver
     (since install-chunkymap-on-ubuntu.sh DOES replace "/home/owner" with current user's home [replace-with-current-user.py, which is automatically called by install, will change /home/owner to current user's directory in each script that install copies to $HOME/chunkymap])  
     then go to Terminal and run:
-```
+```perl
 minetestserver
 ```
     then when it is finished loading, press Ctrl C then run:
-```
+```perl
 chmod +x install-chunkymap-on-ubuntu.sh && ./install-chunkymap-on-ubuntu.sh
 ```
 * IF you are using Linux
     * Rename viewchunkymap.php so it won't be overwritten on update if you want to modify it (or anything you want) then make a link to it on your website or share the link some other way.
-```
+```perl
 # The commands below will work if you are using the web installer, or have done mv minetest-chunkymap-master "$HOME/Downloads/minetest-chunkymap" (and if you are using /var/www/html/minetest -- otherwise change that below)
 MT_MY_WEBSITE_PATH=/var/www/html/minetest
 sudo cp -f "$HOME/Downloads/minetest-chunkymap/web/chunkymap.php" "$MT_MY_WEBSITE_PATH/chunkymap.php"
