@@ -715,12 +715,12 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 					//current_h = window.innerHeight;
 					current_ratio = current_w/current_h;
 					
-					//if (ctx.canvas.height<ctx.canvas.width) {
-					//	size_1em_pixel_count = Math.round(ctx.canvas.height/32);
-					//}
-					//else {
-					size_1em_pixel_count = Math.round(ctx.canvas.width/EM_PER_WIDTH_COUNT);
-					//}
+					if (ctx.canvas.height>ctx.canvas.width) {
+						size_1em_pixel_count = Math.round(ctx.canvas.height/EM_PER_WIDTH_COUNT);
+					}
+					else {
+						size_1em_pixel_count = Math.round(ctx.canvas.width/EM_PER_WIDTH_COUNT);
+					}
 					if (powered_by_label!=null) {
 						//powered_by_label.y = ctx.canvas.height-size_1em_pixel_count;
 						powered_by_label.y = size_1em_pixel_count/2;
