@@ -8,7 +8,7 @@ echo '<meta http-equiv="refresh" content="45">';
 }
 echo '
 </head>
-<body style="font-family:calibri,sans; width:100%; height:100%; margin:0; padding:0" topmargin="0" leftmargin="0" rightmargin="0" bottommargin="0">
+<body style="font-family:calibri,Droid Sans,Apple SD Gothic Neo,sans; font-size: 120%;  width:100%; height:100%; margin:0; padding:0" topmargin="0" leftmargin="0" rightmargin="0" bottommargin="0">
 ';
 
 ini_set('display_errors', 1);
