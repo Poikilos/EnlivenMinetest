@@ -38,14 +38,14 @@ except:
     BytesIO = cStringIO.StringIO
 
 
-#                                                                                                                                      
+#
 # wrapper around PIL 1.1.6 Image.save to preserve PNG metadata
 #
-# public domain, Nick Galbreath                                                                                                        
-# http://blog.client9.com/2007/08/28/python-pil-and-png-metadata-take-2.html                                                                 
-#                                                                                                                                       
+# public domain, Nick Galbreath
+# http://blog.client9.com/2007/08/28/python-pil-and-png-metadata-take-2.html
+#
 def pngsave(im, file):
-    # these can be automatically added to Image.info dict                                                                              
+    # these can be automatically added to Image.info dict
     # they are not user-added metadata
     reserved = ('interlace', 'gamma', 'dpi', 'transparency', 'aspect')
 
@@ -1023,9 +1023,9 @@ def draw_image(world,uid_to_color):
 
     # worldlimits are measured in cubes of 16x16x16
     pngminx = minx*16
-    pngmaxx = maxx*16
+    pngmaxx = maxx*16+16
     pngminz = minz*16
-    pngmaxz = maxz*16
+    pngmaxz = maxz*16+16
     pngregion=[pngminx, pngmaxx, pngminz, pngmaxz]
 
     print("Saving to: "+ args.output)

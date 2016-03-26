@@ -735,7 +735,7 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 				}
 				function process_view_change() {
 					//NOTE: this should be exactly the same math as php uses to make sure there are the same #of tiles displayed as were loaded by php
-					if (current_w>current_h) {
+					if (ctx.canvas.width>ctx.canvas.height) { //if (current_w>current_h) {
 						camera_w = (800) * (1.0/zoom);
 						camera_h = camera_w/current_ratio;
 					}

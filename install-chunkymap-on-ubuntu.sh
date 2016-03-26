@@ -72,7 +72,7 @@ python replace-with-current-user.py  # the py file only manipulates the shell sc
 
 
 
-chmod +x  "$CHUNKYMAP_DEST/chunkymap-generator.sh"
+chmod +x "$CHUNKYMAP_DEST/chunkymap-generator.sh"
 chmod -x "$CHUNKYMAP_DEST/unused/chunkymap-regen.sh"
 chmod -x "$CHUNKYMAP_DEST/unused/chunkymap-regen-players.sh"
 chmod -x "$CHUNKYMAP_DEST/unused/chunkymap-cronjob"
