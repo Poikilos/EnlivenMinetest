@@ -7,7 +7,7 @@ if os.path.isdir(minetestinfo.get_var("profile_minetest_path")):
     debug_archived_folder_name = "debug_archived"
     debug_archived_folder_path = os.path.join(minetestinfo.get_var("profile_minetest_path"), debug_archived_folder_name)
     if os.path.isfile(debug_txt_path):
-        print("NOT YET IMPLEMENTED")
+        print("NOT YET IMPLEMENTED (backup is not implemented)")
     else:
         print("There is no '"+debug_txt_path+"'")
         if os.sep=="\\":

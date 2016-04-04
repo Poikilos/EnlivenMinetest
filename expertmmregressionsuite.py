@@ -14,6 +14,8 @@ module_list.append("traceback")
 
 from expertmm import *
 
+### THE FUNCTIONS ARE USED ON minetest-chunkymap AT THE BOTTOM OF THIS SCRIPT ###
+
 #TODO: code checking such as:
 # * check for redefining member variable (missing "self.") [since python does not throw NameError on definition, only if used and not defined]
 # * check for signs in len params (such as where str(len(part1+part2)) should be str(len(part1))+part2
@@ -21,12 +23,14 @@ from expertmm import *
 # * check for use of os.dirname (should be os.path.dirname)
 # * mixing width with y (or height or z) and mixing height with x (or width)
 # PHP:
-# * using '+' next to '"' in php seperated only by whitespace (probably meant concatenate operator '.')
+# * using '+' next to doublequote or singlequote in php, adjacent or seperated only by whitespace (probably meant concatenate operator '.')
+# * using empty function (problematic since empty($value) evaluates to true when $value is zero -- empty_really in expertmm can be used instead)
 # SHELL SCRIPT:
 # * don't use '*' inside quotes (fails)
 # * using HOME without preceding dollar sign
 # ECMAScript:
 # * use of e.clientX e.clientY where line contains neither + or - (should use some kind of modifiers for scroll and canvas position such as in get_relative_mouse_point method)
+
 
 def view_traceback():
     ex_type, ex, tb = sys.exc_info()
