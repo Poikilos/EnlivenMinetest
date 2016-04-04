@@ -17,11 +17,14 @@ from expertmm import *
 ### THE FUNCTIONS ARE USED ON minetest-chunkymap AT THE BOTTOM OF THIS SCRIPT ###
 
 #TODO: code checking such as:
-# * check for redefining member variable (missing "self.") [since python does not throw NameError on definition, only if used and not defined]
-# * check for signs in len params (such as where str(len(part1+part2)) should be str(len(part1))+part2
+# ANY LANGUAGE:
+# * check for signs in len params (such as in Python where str(len(part1+part2)) should be str(len(part1))+part2
 # * check for only variable name in quotes (maybe the programmer meant to use the value)
-# * check for use of os.dirname (should be os.path.dirname)
 # * mixing width with y (or height or z) and mixing height with x (or width)
+# PYTHON:
+# * check for redefining member variable (missing "self.") [since python does not throw NameError on definition, only if used and not defined]
+# * check for use of os.dirname (should be os.path.dirname)
+# * check for methods missing 'self' as first argument name
 # PHP:
 # * using '+' next to doublequote or singlequote in php, adjacent or seperated only by whitespace (probably meant concatenate operator '.')
 # * using empty function (problematic since empty($value) evaluates to true when $value is zero -- empty_really in expertmm can be used instead)
