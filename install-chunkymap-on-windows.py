@@ -78,7 +78,7 @@ if is_detected:
 
 print("")
 answer = raw_input("Enter #of bits in your PYTHON architecture (may be different from #of bits of Windows) [blank for "+os_bits+detected_msg+"]: ")
-
+print("Attempting to update pip...")  # since display is blank for a while otherwise
 if answer is not None:
     answer = answer.strip()
     if len(answer)>0:
@@ -165,7 +165,7 @@ if python_folder_name.lower()[:7]!="python3":
                     subprocess.call(install_numpy_cmd_string)
 
             if os.path.isdir(installed_numpy_path):
-                print("Numpy was detected at '"+installed_numpy_path+"'")
+                print("Numpy was detected at '"+installed_numpy_path+"'. Checking for PIL...")
                 installed_pillow_path = os.path.join(python_Lib_site_packages_path, "PIL")
                 if not os.path.isdir(installed_pillow_path):
                     #downloaded_pillow_path = os.path.join(downloads_path, downloaded_pillow_name)
@@ -179,6 +179,7 @@ if python_folder_name.lower()[:7]!="python3":
                     if os.path.isfile(downloaded_pillow_path):
                         subprocess.call(install_pillow_cmd_string)
                 if os.path.isdir(installed_pillow_path):
+                    print("Pillow was detected at '"+installed_pillow_path+"'")
                     downloaded_chunkymap_name="chunkymap.zip"
                     downloaded_chunkymap_path=os.path.join(downloads_path,downloaded_chunkymap_name)
                     run_py_path="generator.py"
@@ -202,7 +203,7 @@ if python_folder_name.lower()[:7]!="python3":
                         outs.close()
                         print("  OR by double-clicking")
                         print("  "+run_bat_path)
-					raw_input("Press enter to exit.")
+                    raw_input("Press enter to exit.")
                 else:
                     raw_input("Cannot detect nor install "+installed_pillow_path+" so installation cannot continue. Try downloading "+downloaded_pillow_name+" to '"+downloads_path+"' then run this script again. Press enter to exit.")
             else:
