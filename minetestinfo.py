@@ -8,6 +8,8 @@ from expertmm import *
 #config_path
 #profile_path
 
+profile_path = None
+
 worldgen_mod_list = list()
 worldgen_mod_list.append("caverealms")
 worldgen_mod_list.append("ethereal")
@@ -281,6 +283,7 @@ def get_game_path_from_gameid(gameid):
 
 def init_minetestinfo():
     global dict_entries_modified_count
+    global profile_path
     if not minetestinfo.contains("www_minetest_path"):
         default_www_minetest_path = "/var/www/html/minetest"
         if os_name=="windows":
@@ -305,7 +308,7 @@ def init_minetestinfo():
 
         minetestinfo.prepare_var("www_minetest_path", default_www_minetest_path, "your web server directory (or other folder where minetest website features and data should be placed)")
 
-    profile_path = None
+
     if os_name=="windows":
         profile_path = os.environ['USERPROFILE']
     else:
@@ -354,7 +357,7 @@ def init_minetestinfo():
     colors_repos_folder_path = os.path.join(colors_folder_path, "repos")
     colors_fragments_folder_path = os.path.join(colors_folder_path, "fragments")
     head_colors_txt = os.path.join( colors_repos_folder_path, "VenessaE.txt")
-    
+
     dest_colors_txt = os.path.join( os.path.dirname(os.path.abspath(__file__)), "colors.txt")
     if not os.path.isfile(dest_colors_txt):
         print("")
@@ -430,7 +433,7 @@ def init_minetestinfo():
                     line_strip = line.strip()
                     if len(line_strip)>0:
                         exclusions_list.append(line_strip)
-                
+
             ins.close()
             print("Listed "+str(len(exclusions_list))+" invisible blocks to exclude using '"+exclusions_name+"'.")
         else:
@@ -439,7 +442,7 @@ def init_minetestinfo():
             if this_key in exclusions_list:
                 merged_colors.remove(this_key)
                 print("Removed invisible block '"+this_key+"'")
-        
+
         save_conf_from_dict(dest_colors_txt, merged_colors, assignment_operator=" ")
         print("Finished writing "+str(len(merged_colors))+" value(s) to '"+dest_colors_txt+"'")
     else:
