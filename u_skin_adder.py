@@ -348,3 +348,4 @@ def load_new_skins_from_folder(in_path):
         print("ERROR: missing meta_path (tried '"+meta_path+"')")
 
 #raw_input("Press return to exit.")
+#load_new_skins_from_folder("C:\\Users\\Owner\\ownCloud\\Pictures\\Projects\\Characters - Mine - In-Game\\Minetest Player Skins")
