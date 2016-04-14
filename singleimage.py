@@ -51,10 +51,14 @@ class ChunkymapOfflineRenderer:
         cmd_suffix = " 1> \""+genresult_path+"\""
         cmd_suffix += " 2> \""+gen_error_path+"\""
 
-        #blank since singleimage mode:
+        geometry_string = "-10000:-10000+20000+20000"
+        #VERY BIG since singleimage mode (if no geometry param, minetestmapper-numpy reverts to its default which is -2000 2000 -2000 2000):
+		region_string = "-10000 10000 -10000 10000"
+		
         #geometry_string = str(min_x)+":"+str(min_z)+"+"+str(int(max_x)-int(min_x)+1)+"+"+str(int(max_z)-int(min_z)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
-        #geometry_param = " --geometry "+geometry_string
-        geometry_param = ""
+		region_param = " --region "+region_string  # minetestmapper-numpy.py --region xmin xmax zmin zmax
+		geometry_param = " --geometry -10000:-10000+20000+20000"  # minetestmapper-expertmm.py --geometry <xmin>:<zmin>+<width>+<height>
+        limit_param = geometry_param
         #expertmm_region_string = str(min_x) + ":" + str(max_x) + "," + str(min_z) + ":" + str(max_z)
 
         #cmd_no_out_string = python_exe_path+" "+self.minetestmapper_py_path+" --bgcolor '"+self.FLAG_EMPTY_HEXCOLOR+"' --input \""+minetestinfo.get_var("primary_world_path")+"\" --geometry "+geometry_string+" --output \""+tmp_png_path+"\""
@@ -66,9 +70,10 @@ class ChunkymapOfflineRenderer:
             squote = "'"
         io_string = " --input \""+self.world_path+"\" --output \""+tmp_png_path+"\""
         if "numpy" in self.minetestmapper_py_path:
+			limit_param = region_param
             io_string = " \""+self.world_path+"\" \""+tmp_png_path+"\""
             #geometry_param = " --region " + str(min_x) + " " + str(max_x) + " " + str(min_z) + " " + str(max_z)
-        cmd_no_out_string = python_exe_path+" "+self.minetestmapper_py_path+" --bgcolor "+squote+FLAG_EMPTY_HEXCOLOR+squote+io_string
+        cmd_no_out_string = python_exe_path+" "+self.minetestmapper_py_path+" --bgcolor "+squote+FLAG_EMPTY_HEXCOLOR+squote+io_string+limit_param
         cmd_string = cmd_no_out_string + cmd_suffix
         print("")
         print("")

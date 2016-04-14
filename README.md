@@ -8,6 +8,8 @@ This program comes without any warranty, to the extent permitted by applicable l
 
 ## Features:
 * Fast HTML Canvas map with only players who moved recently
+* A virtually unlimited number of markers (with alpha for outlines etc) can be placed on the map.
+For markers with images that are 32px or below, px is scaled to pt (pt is manually determined for display type and orientation, instead of using default pt which is rather small on mobile devices such as iPhone&reg; 5c)
 * No mods are required--Uses Python and PHP (generator.py detects border chunks by setting a flag color as the bgcolor; distinguishes empty chunks from locked database [retries if locked])
 * generator.py can loop forever (to keeps certain runtime data to reduce drive reads & writes):
 ```perl
@@ -185,6 +187,7 @@ chmod +x set-minutely-crontab-job.sh && ./set-minutely-crontab-job.sh
     (the installer will automatically download and install numpy and Pillow -- see also install-on-windows-manually.md)
 
 ## Known Issues
+* var debug_adjustment = 1.345; is needed in JavaScript to resize map markers correctly to same scale as map size (for unknown reason)
 * webapp: save selected world to a config file (click world on first visit to write initial config) instead of being silently autoselected
 * Fix chunk generation and draw decachunks to canvas (so singleimage.py is not required to be run before generator.py)
 * Make pythoninfo have a pythonmeta.yml (currently the following is detected by running executable):

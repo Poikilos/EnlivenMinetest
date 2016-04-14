@@ -832,18 +832,22 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 				//size_em: size_width_keeping_aspect_this_many_em
 				function draw_markers(this_list, size_em, default_color_string) {
 					is_debug_shown = false;
+					var debug_adjustment = 1.345; //TODO: debug--why is this needed?
 					for (i=0; i<this_list.length; i++) {
 						this_marker = this_list[i];
 						screen_point = get_screen_point_from_world_coords(this_marker.x, this_marker.z);
 						var pen_x = 0;
 						var pen_y = 0;
 						var w = size_em*size_1em_pixel_count;
+						
 						if (w<zoomed_size_1pt_pixel_count) {
 							w = zoomed_size_1pt_pixel_count;
 						}
 						if (this_marker.img_enable) {
 							this_image = document.getElementById(this_marker.img_id);
-							
+							if (this_image.width>32) {
+								w = this_image.width*zoomed_size_1pt_pixel_count*debug_adjustment;
+							}
 							var h = w*(this_image.height/this_image.width);
 							ctx.drawImage(this_image, screen_point.x-w/2.0, screen_point.y-h/2.0, w, h);
 							//pen_y += h;

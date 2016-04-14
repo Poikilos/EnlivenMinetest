@@ -1,5 +1,7 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html style="width:100%; height:100%">
 <head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <title>Chunkymap</title>
 <?php
 $html4_mode_enable=false; //if true, does not echo canvas nor client-side scripting
