@@ -240,25 +240,65 @@ class MinetestInventory:
             print("ERROR in minetestinventory.write_to: name is None")
             raw_input("Press enter to continue...")
 
+
 class MinetestPlayer:
     playerid = None
-    player_args = None
+    _player_args = None
     inventories = None
     oops_list = None
 
     def __init__(self, playerid):
-        self.player_args = {}
-        self.player_args["breath"] = 11
-        self.player_args["hp"] = playerid
+        self._player_args = {}
+        self._player_args["breath"] = 11
+        self._player_args["hp"] = playerid
         if playerid is not None:
-            self.player_args["name"] = 20
-        self.player_args["pitch"] = 24.9  # not sure what range is, so using an example
-        self.player_args["position"] = "(0.0,0.0,0.0)"
-        self.player_args["version"] = 1
-        self.player_args["yaw"] = 0.0
+            self._player_args["name"] = 20
+        self._player_args["pitch"] = 24.9  # not sure what range is, so using an example
+        self._player_args["position"] = "(0.0,0.0,0.0)"
+        self._player_args["version"] = 1
+        self._player_args["yaw"] = 0.0
         self.playerid = playerid
         self.inventories = list()
+    
+    def set_pos(self, pos):
+        if (len(pos)==3):
+            self._player_args["position"] = float(pos[0])*minetest_player_pos_multiplier, float(pos[1])*minetest_player_pos_multiplier, float(pos[2])*minetest_player_pos_multiplier
+        else:
+            print("Failed to set position since length of tuple recieved is not 3: "+str(pos))
 
+    def get_pos(self):
+        result = None
+        if self._player_args is not None:
+            if "position" in self._player_args
+                element_count = len(self._player_args["position"])
+                if (element_count!=3):
+                    if element_count>1:
+                        if element_count==2:
+                            self.set_pos(self._player_args["position"][0]/minetest_player_pos_multiplier, 8.0, self._player_args["position"][1]/minetest_player_pos_multiplier)
+                            print("ERROR in get_pos: Element count "+str(element_count)+" too low (should have numbers for 3 axes) for player position, so repaired by using as x and z, resulting in "+str(self.get_pos()))
+                        else if element_count!=3:
+                                self.set_pos(self._player_args["position"][0]/minetest_player_pos_multiplier, self._player_args["position"][1]/minetest_player_pos_multiplier, self._player_args["position"][2]/minetest_player_pos_multiplier)
+                                print("ERROR in get_pos: Element count "+str(element_count)+" incorrect (should have numbers for 3 axes) for player position, so set to "+str(self.get_pos()))
+                    else:
+                        self.set_pos(0,0,0)
+                        print("ERROR in get_pos: Element count "+str(element_count)+" too low (should have numbers for 3 axes) for player position, so set to 0,0,0")
+                
+                #self._player_args["position"] = float(pos[0]), float(pos[1]), float(pos[2])
+            else:
+                self.set_pos(0,0,0)
+                print("ERROR in get_pos: Missing position in _player_args for player id "+self.get_safe_player_id_quoted()+" so setting to 0,0,0")
+        else:
+            print("ERROR in get_pos: Missing _player_args for player id "+self.get_safe_player_id_quoted()+" so setting to 0,0,0")
+            self.set_pos(0,0,0)
+        return self._player_args["position"][0]/minetest_player_pos_multiplier, self._player_args["position"][1]/minetest_player_pos_multiplier, self._player_args["position"][2]/minetest_player_pos_multiplier
+    
+    def get_safe_player_id_quoted(self):
+        result = None
+        if self.player_id is None:
+            result = "None"
+        else:
+            result = "'"+str(self.player_id)+"'"
+        return result    
     # returns how many didnt' fit in any inventory lists
     def push_item(self, item_id, qty):
         main_index = -1
@@ -279,15 +319,15 @@ class MinetestPlayer:
         return qty
 
     def save(self):
-        if "name" in self.player_args:
+        if "name" in self._player_args:
             player_path = os.path.join(players_path, self.playerid)
             self.save_as(player_path)
 
     def save_as(self, player_path):
-        if "name" in self.player_args:
+        if "name" in self._player_args:
             outs = open(player_path, 'w')
-            for this_key in self.player_args:
-                outs.write(this_key+" = "+str(self.player_args[this_key])+"\n")
+            for this_key in self._player_args:
+                outs.write(this_key+" = "+str(self._player_args[this_key])+"\n")
             outs.write("PlayerArgsEnd"+"\n")
             for inventory in self.inventories:
                 #if type(inventory) is MinetestInventory:
@@ -300,7 +340,7 @@ class MinetestPlayer:
                     outs.write(line+"\n")
             outs.close()
         else:
-            print("ERROR in minetestplayer.save: missing 'name' in player_args")
+            print("ERROR in minetestplayer.save: missing 'name' in _player_args")
 
     def load(self):
         if self.playerid is not None and len(self.playerid.strip())>0:
@@ -329,7 +369,7 @@ class MinetestPlayer:
                             if ao_index>-1:
                                 n = line[:ao_index].strip()
                                 v = line[ao_index+len(ao):].strip()
-                                self.player_args[n] = v
+                                self._player_args[n] = v
                         elif section=="(commands)":
                             width_opener = "Width "
                             list_opener = "List "
@@ -478,9 +518,9 @@ def move_storage_to_players(this_players_offline_storage_path, output_players_fo
                                     is_changed = True
                                 else:
                                     if change_player_position_enable:
-                                        minetestplayer.player_args["position"] = this_storage[this_key]
+                                        minetestplayer._player_args["position"] = this_storage[this_key]
                                         is_changed = True
-                                        print("  moved "+playerid+" to "+minetestplayer.player_args["position"])
+                                        print("  moved "+playerid+" to "+minetestplayer._player_args["position"])
                             if is_changed:
                                 minetestplayer.save_as(player_path)
                                 print("  saved '"+player_path+"'")
@@ -686,15 +726,15 @@ def set_player_names_to_file_names():
                         if os.path.isfile(sub_path):
                             player = MinetestPlayer(sub_name)
                             player.load_from_file(sub_path)
-                            if "name" in player.player_args:
-                                if player.player_args["name"] is not None:
-                                    if len(player.player_args["name"])>0:
-                                        if sub_name==player.player_args["name"]:  #purposely case sensitive especially for minetest linux version
+                            if "name" in player._player_args:
+                                if player._player_args["name"] is not None:
+                                    if len(player._player_args["name"])>0:
+                                        if sub_name==player._player_args["name"]:  #purposely case sensitive especially for minetest linux version
                                             correct_count += 1
                                         else:
                                             incorrect_count += 1
-                                            print(min_indent+"      Changing incorrect name "+player.player_args["name"]+" found in "+sub_name)
-                                            player.player_args["name"] = sub_name
+                                            print(min_indent+"      Changing incorrect name "+player._player_args["name"]+" found in "+sub_name)
+                                            player._player_args["name"] = sub_name
                                             player.save()
                                     else:
                                         print(min_indent+"      WARNING: name is blank in "+sub_path)
@@ -720,8 +760,19 @@ def set_player_names_to_file_names():
 ##    debug_log_replay_to_offline_player_storage(debug_path, players_offline_storage_path, min_date_string)
 #debug_log_replay_to_offline_player_storage(debug_txt_path, players_offline_storage_path, min_date_string)
 
-
-
+def switch_player_file_contents(player1_path, player2_path)
+    #switches everything except name
+    
+    player1 = MinetestPlayer(os.path.basename(player1_path))
+    player2 = MinetestPlayer(os.path.basename(player2_path))
+    tmp_id = player1.playerid
+    tmp_name = player1.get_name()
+    player1.set_name(player2.get_name())
+    player2.set_name(tmp_name)
+    player1.playerid=player2.playerid
+    player2.playerid=tmp_id
+    player1.save()
+    player2.save()
 
 #convert_storage_to_give_commands_DEPRECATED(players_offline_storage_path, give_path, irl_person_csv_path)
 

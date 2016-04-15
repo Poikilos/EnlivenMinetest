@@ -7,6 +7,7 @@ from expertmm import *
 #config_name
 #config_path
 #profile_path
+minetest_player_pos_multiplier = 10.0
 
 profile_path = None
 
