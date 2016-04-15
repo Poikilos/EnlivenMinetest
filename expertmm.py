@@ -588,6 +588,31 @@ def has_dups(this_list):
     return find_dup(this_list)>-1
 #region formerly pcttext.py
 
+#gets first instance of name, gets its value, then stops reading file
+def get_initial_value_from_conf(path, name, assignment_operator="="):
+    result = None
+    line_count = 0
+    if path is not None:
+        if os.path.isfile(path):
+            ins = open(path, 'r')
+            line = True
+            while line:
+                line = ins.readline()
+                line_count += 1
+                if line:
+                    ao_i=line.find(assignment_operator)
+                    if ao_i>0:  # intentionall skip when 0
+                        this_name = line[:ao_i].strip()
+                        if this_name==name:
+                            result = line[ao_i+1:].strip()  #NOTE: blank is allowed
+                            break
+            ins.close()
+        else:
+            print("ERROR in get_initial_value_from_conf: '"+str(path)+"' is not a file.")
+    else:
+        print("ERROR in get_initial_value_from_conf: path is None.")
+    return result
+
 def find_unquoted_not_commented(haystack, needle, start=0, endbefore=-1, step=1, comment_delimiter="#"):
     result = -1
 

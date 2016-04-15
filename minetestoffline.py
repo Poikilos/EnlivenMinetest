@@ -9,6 +9,8 @@ from datetime import datetime
 from expertmm import *
 from minetestinfo import *
 
+import time
+
 #C:\Users\jgustafson\Desktop\Backup\fcalocal\home\owner\.minetest\worlds\FCAGameAWorld\players
 #minetest_players_path = "C:\\Users\\jgustafson\\Desktop\\Backup\\fcalocal\\home\\owner\\.minetest\\worlds\\FCAGameAWorld\\players"
 players_path = os.path.join(minetestinfo.get_var("primary_world_path"), "players")
@@ -662,6 +664,51 @@ def player_inventory_transfer(from_playerid, to_playerid):
     to_player_path = os.path.join(players_path, to_playerid)
     to_player_givescript_path = os.path.join(give_path, to_playerid)
 
+def set_player_names_to_file_names():
+    assignment_operator = "="
+    correct_count = 0
+    incorrect_count = 0
+    #NOTE: uses global min_indent
+    line_count = 1
+    print(min_indent+"set_player_names_to_file_names:")
+    if os.path.isdir(players_path):
+        folder_path = players_path
+        print(min_indent+"  Examining players:")
+        for sub_name in os.listdir(folder_path):
+            sub_path = os.path.join(folder_path,sub_name)
+            if os.path.isfile(sub_path):
+                if (sub_name[:1]!="."):
+                    print(min_indent+"    "+sub_name)
+                    #stated_name = get_initial_value_from_conf(sub_path, "name", "=")
+                    stated_name = None
+                    line_index = 0
+                    if sub_path is not None:
+                        if os.path.isfile(sub_path):
+                            player = MinetestPlayer(sub_name)
+                            player.load_from_file(sub_path)
+                            if "name" in player.player_args:
+                                if player.player_args["name"] is not None:
+                                    if len(player.player_args["name"])>0:
+                                        if sub_name==player.player_args["name"]:  #purposely case sensitive especially for minetest linux version
+                                            correct_count += 1
+                                        else:
+                                            incorrect_count += 1
+                                            print(min_indent+"      Changing incorrect name "+player.player_args["name"]+" found in "+sub_name)
+                                            player.player_args["name"] = sub_name
+                                            player.save()
+                                    else:
+                                        print(min_indent+"      WARNING: name is blank in "+sub_path)
+                                else:
+                                    print(min_indent+"      WARNING: name not found in "+sub_path)
+                            
+                        #else:
+                        #    print(min_indent+"    ERROR in set_player_names_to_file_names: '"+str(sub_path)+"' is not a file.")
+                    else:
+                        print(min_indent+"    ERROR in set_player_names_to_file_names: path is None.")
+
+    print(min_indent+"  Summary:")  # of set_player_names_to_file_names:")
+    print(min_indent+"    "+str(correct_count)+" correct name(s)")
+    print(min_indent+"    "+str(incorrect_count)+" incorrect name(s)")
 #recover_player_files_by_content("C:\\1.RaiseDataRecovery", "C:\\Users\\jgustafson\\Desktop\\Backup\\fcalocal\\home\\owner\\.minetest\\worlds\\FCAGameAWorld\\players")
 
 ### RESTORE ITEMS FROM DEBUG.TXT:
