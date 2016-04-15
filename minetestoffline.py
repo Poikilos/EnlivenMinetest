@@ -678,7 +678,7 @@ def set_player_names_to_file_names():
             sub_path = os.path.join(folder_path,sub_name)
             if os.path.isfile(sub_path):
                 if (sub_name[:1]!="."):
-                    print(min_indent+"    "+sub_name)
+                    #print(min_indent+"    "+sub_name)
                     #stated_name = get_initial_value_from_conf(sub_path, "name", "=")
                     stated_name = None
                     line_index = 0
