@@ -1041,7 +1041,7 @@ class MTChunks:
                     #    if self.verbose_enable:
                     #        print("existing "+this_player["index"]+" is not needle "+str(index))
                 else:
-                    print("WARNING: player "+str(this_player)+" is missing index")
+                    print("WARNING: player "+this_key+":"+str(this_player)+" is missing index")
         return result
 
     def get_new_player_index(self):
