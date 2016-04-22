@@ -1034,9 +1034,14 @@ class MTChunks:
             for this_key in self.players.keys():
                 this_player = self.players[this_key]
                 if "index" in this_player:
-                    if this_player["index"]==index:
+                    if int(this_player["index"])==int(index):
                         result = True
                         break
+                    else:
+                        if self.verbose_enable:
+                            print("existing "+this_player["index"]+" is not needle "+str(index))
+                else:
+                    print("WARNING: player "+str(this_player)+" is missing index")
         return result
 
     def get_new_player_index(self):
@@ -1115,7 +1120,7 @@ class MTChunks:
                                         if (player_dict["playerid"] is not None) and (player_dict["playerid"]!=""):
                                             self.players[player_dict["playerid"]] = player_dict
                                             if self.verbose_enable:
-                                                print("Adding playerid '"+str(player_dict["playerid"])+"'")
+                                                print("Loading map entry '"+sub_name+"' for playerid '"+str(player_dict["playerid"])+"'")
                                         else:
                                             print("ERROR: no 'playerid' in chunkymap player entry '"+sub_path+"'")
                                     else:
