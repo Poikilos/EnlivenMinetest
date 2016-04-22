@@ -1040,8 +1040,8 @@ class MTChunks:
                     #else:
                     #    if self.verbose_enable:
                     #        print("existing "+this_player["index"]+" is not needle "+str(index))
-                else:
-                    print("WARNING: player "+this_key+":"+str(this_player)+" is missing index")
+                #else:
+                    #print("WARNING: player "+this_key+":"+str(this_player)+" is missing index")
         return result
 
     def get_new_player_index(self):
@@ -1297,7 +1297,7 @@ class MTChunks:
                                 print(min_indent+"PLAYER MOVED: "+str(player_name)+" moved from "+str(saved_player_x)+","+str(saved_player_y)+","+str(saved_player_z)+" to "+str(player_x)+","+str(player_y)+","+str(player_z))
                             self.last_player_move_mtime_string = this_mtime_string
                             players_moved_count += 1
-                            self.players[file_name]["utc_mtime"]=this_mtime_string
+                            self.players[file_name]["utc_mtime"] = this_mtime_string
                         else:
                             if self.verbose_enable:
                                 print(min_indent+"SAVING map entry for player '"+str(player_name)+"'")

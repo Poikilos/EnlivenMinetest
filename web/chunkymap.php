@@ -272,6 +272,9 @@ function get_markers_from_dir($chunkymap_markers_path) {
 	global $player_file_age_expired_max_seconds;
 	global $player_file_age_idle_max_seconds;
 	global $show_expired_players_enable;
+	if ($show_expired_players_enable===true) {
+		echo "show_expired_players_enable:true";
+	}
 	$markers=array();
 	$markers_count=0;
 	if (is_dir($chunkymap_markers_path)) {
@@ -289,9 +292,15 @@ function get_markers_from_dir($chunkymap_markers_path) {
 								$last_player_update_time = strtotime($marker_vars["utc_mtime"]);
 								if (time()-$last_player_update_time > $player_file_age_expired_max_seconds) {
 									$is_expired=true;
+									echo "expired<br/>"."\n";
 								}
 								elseif (time()-$last_player_update_time > $player_file_age_idle_max_seconds) {
 									$is_idle=true;
+									echo "idle<br/>"."\n";
+								}
+								else {
+									echo "not expired since ".$marker_vars["name"]."'s utc_mtime is ".DATE("Y-m-d H:i",$last_player_update_time)." <br/>"."\n";
+									echo " current date is ".DATE("Y-m-d H:i",time())." <br/>"."\n";
 								}
 								if ($is_expired===false) {
 									$markers[$markers_count]["utc_mtime"] = $marker_vars["utc_mtime"];
@@ -1348,13 +1357,14 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 						$text = $this_player["name"];
 					}
 				}
-				if ($this_player["is_expired"]===true) { //should only be used for debug
-					$img_border_style="border: 1px solid rgba(128,128,128,.5);";
-					$img_style.="opacity: 0.1; filter: alpha(opacity=10);";  //filter is for IE8 and below
-					$text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
-					$text.=" (expired)";
-				}
-				elseif ($this_player["is_idle"]===true) {
+				//if ($this_player["is_expired"]===true) { //should only be used for debug
+				//	$img_border_style="border: 1px solid rgba(128,128,128,.5);";
+				//	$img_style.="opacity: 0.1; filter: alpha(opacity=10);";  //filter is for IE8 and below
+				//	$text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
+				//	$text.=" (expired)";
+				//}
+				//elseif
+				if ($this_player["is_idle"]===true) {
 					$img_border_style="border: 1px solid rgba(128,128,128,.5);";
 					$img_style.="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
 					$text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
@@ -1400,13 +1410,14 @@ function echo_chunkymap_canvas($show_player_names_enable, $decachunks_enable, $c
 				if (isset($this_marker["name"])) {
 					$text = $this_marker["name"];
 				}
-				if ($this_marker["is_expired"]===true) { //should only be used for debug
-					$img_border_style="border: 1px solid rgba(128,128,128,.5);";
-					$img_style.="opacity: 0.1; filter: alpha(opacity=10);";  //filter is for IE8 and below
-					$text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
-					$text.=" (expired)";
-				}
-				elseif ($this_marker["is_idle"]===true) {
+				//if ($this_marker["is_expired"]===true) { //should only be used for debug
+				//	$img_border_style="border: 1px solid rgba(128,128,128,.5);";
+				//	$img_style.="opacity: 0.1; filter: alpha(opacity=10);";  //filter is for IE8 and below
+				//	$text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
+				//	$text.=" (expired)";
+				//}
+				//else
+				if ($this_marker["is_idle"]===true) {
 					$img_border_style="border: 1px solid rgba(128,128,128,.5);";
 					$img_style.="opacity: 0.4; filter: alpha(opacity=40);";  //filter is for IE8 and below
 					$text_style="color:white; opacity: 0.4; filter: alpha(opacity=40);";   //filter is for IE8 and below
