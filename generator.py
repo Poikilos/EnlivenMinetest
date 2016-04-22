@@ -1037,9 +1037,9 @@ class MTChunks:
                     if int(this_player["index"])==int(index):
                         result = True
                         break
-                    else:
-                        if self.verbose_enable:
-                            print("existing "+this_player["index"]+" is not needle "+str(index))
+                    #else:
+                    #    if self.verbose_enable:
+                    #        print("existing "+this_player["index"]+" is not needle "+str(index))
                 else:
                     print("WARNING: player "+str(this_player)+" is missing index")
         return result
@@ -1115,12 +1115,12 @@ class MTChunks:
                                 player_markers_count += 1
                                 player_dict = get_dict_from_conf_file(sub_path,":")
                                 if player_dict is not None:
-                                    player_dict["index"] = sub_name[:-4]  # repair index
+                                    player_dict["index"] = int(sub_name[:-4])  # repair index
                                     if "playerid" in player_dict:
                                         if (player_dict["playerid"] is not None) and (player_dict["playerid"]!=""):
                                             self.players[player_dict["playerid"]] = player_dict
                                             if self.verbose_enable:
-                                                print("Loading map entry '"+sub_name+"' for playerid '"+str(player_dict["playerid"])+"'")
+                                                print("Loading map entry index '"+str(player_dict["index"])+"' for playerid '"+str(player_dict["playerid"])+"'")
                                         else:
                                             print("ERROR: no 'playerid' in chunkymap player entry '"+sub_path+"'")
                                     else:
@@ -1183,7 +1183,7 @@ class MTChunks:
                             #or (self.players[file_name]["utc_mtime"]!=this_mtime_string):
                             if self.verbose_enable:
                                 print("no modified time for player '"+file_name+"' so marking for resave.")
-                            self.players[file_name]["utc_mtime"]=this_mtime_string
+                            self.players[file_name]["utc_mtime"] = this_mtime_string
                             is_changed = True
                             #not necessarily moved--even if resaved by server, may not have moved a whole block or at all
                         if "index" in self.players[file_name]:
@@ -1253,7 +1253,8 @@ class MTChunks:
                         self.players[file_name]["x"] = player_x
                         is_moved = True
                         if self.verbose_enable:
-                            print(min_indent+"No x for playerid '"+file_name+"' so marking for save.")
+                            print(min_indent+"No x for playerid '"+file_name+"' so marking for save:")
+                            print(min_indent+str(self.players[file_name]))
                     if "y" in self.players[file_name].keys():
                         saved_player_y = float(self.players[file_name]["y"])
                         if int(saved_player_y) != int(player_y):
