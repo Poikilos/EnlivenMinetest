@@ -72,7 +72,7 @@ class MTChunks:
     colors_path = None
     python_exe_path = None
     chunks = None
-    players = None  # dict with id as subscript, each containing player metadata dict
+    players = None  # dict with playerid as subscript, each containing player metadata dict
     decachunks = None
     rendered_this_session_count = None
     #force_rerender_decachunks_enable = None
@@ -89,6 +89,7 @@ class MTChunks:
 
     loop_enable = None
     verbose_enable = None
+    is_verbose_explicit = None
 
     run_count = None
     todo_positions = None  # list of tuples (locations) to render next (for fake recursion)
@@ -135,6 +136,7 @@ class MTChunks:
         self.todo_positions = list()
         self.run_count = 0
         self.verbose_enable = True
+        self.is_verbose_explicit = False
         self.loop_enable = True
         self.refresh_map_enable = False
         self.refresh_players_enable = True
@@ -1026,15 +1028,47 @@ class MTChunks:
         self.chunks[chunk_luid].save_yaml(chunk_yaml_path)
         print(min_indent+"(saved yaml to '"+chunk_yaml_path+"')")
 
-    def get_new_player_index(self):
-        result = None
+    def is_used_player_index(self, index):
+        result = False
         if self.players is not None:
-            result = 0
             for this_key in self.players.keys():
                 this_player = self.players[this_key]
                 if "index" in this_player:
-                    if this_player["index"]==result:
-                        result = this_player["index"] + 1
+                    if this_player["index"]==index:
+                        result = True
+                        break
+        return result
+
+    def get_new_player_index(self):
+        result = None
+        max_player_index = None
+        index = 0
+        try:
+            while (self.is_used_player_index(index)):
+                index += 1
+            result = index
+        except:
+            print(min_indent+"Could not finish get_new_player_index:")
+            view_traceback()
+
+        return result
+
+    def get_new_player_index_faster(self):
+        result = None
+        max_player_index = None
+        if self.players is not None:
+            for this_key in self.players.keys():
+                this_player = self.players[this_key]
+                if "index" in this_player:
+                    if (max_player_index is None) or (int(this_player["index"])>max_player_index):
+                        max_player_index = int(this_player["index"])
+                else:
+                    print("WARNING: player with playerid '"+this_key+"' has no public index (programmer or admin error)")
+        if max_player_index is not None:
+            result = max_player_index + 1
+        else:
+            result = 0
+
         return result
 
     def save_player(self, playerid):
@@ -1051,7 +1085,7 @@ class MTChunks:
                     else:
                         print("ERROR: cannot save player since missing 'index' ('index' is used for filename on map)")
                 else:
-                    print("ERROR: tried to save nonexistant player id '"+str(playerid)+"'")
+                    print("ERROR: tried to save nonexistant playerid '"+str(playerid)+"'")
             else:
                 print("ERROR: save_player(None) was attempted.")
         else:
@@ -1063,6 +1097,7 @@ class MTChunks:
             #NOTE: time.gmtime converts long timestamp to 9-long tuple
             self.first_mtime_string = time.strftime(INTERNAL_TIME_FORMAT_STRING, first_mtime)
         print("PROCESSING PLAYERS")
+        player_markers_count = 0
         if self.players is None:
             self.players = {}
             if os.path.isdir(self.chunkymap_players_path):
@@ -1072,19 +1107,27 @@ class MTChunks:
                     if os.path.isfile(sub_path):
                         if (sub_name[:1]!="."):
                             if len(sub_name)>4 and sub_name[-4:]==".yml":
+                                player_markers_count += 1
                                 player_dict = get_dict_from_conf_file(sub_path,":")
                                 if player_dict is not None:
-                                    if "id" in player_dict:
-                                        if (player_dict["id"] is not None) and (len(player_dict["id"])>0):
-                                            self.players[player_dict["id"]] = player_dict
+                                    player_dict["index"] = sub_name[:-4]  # repair index
+                                    if "playerid" in player_dict:
+                                        if (player_dict["playerid"] is not None) and (len(player_dict["playerid"])>0):
+                                            self.players[player_dict["playerid"]] = player_dict
+                                            if self.verbose_enable:
+                                                print("Adding playerid '"+str(player_dict["playerid"])+"'")
                                         else:
-                                            print("ERROR: no 'id' in chunkymap player entry '"+sub_path+"'")
+                                            print("ERROR: no 'playerid' in chunkymap player entry '"+sub_path+"'")
+                                    else:
+                                        print("WARNING: dangling player marker (no playerid) in '"+sub_path+"' so cannot be updated")
                                 else:
                                     print("ERROR: could not read any yaml values from '"+sub_path+"'")
             else:
                 os.makedirs(self.chunkymap_players_path)
                 self.deny_http_access(self.chunkymap_players_path)
-
+        if self.verbose_enable:
+            print("player_markers_count: "+str(player_markers_count))
+            #this could be huge: print("players:"+str(self.players.keys()))
         players_path = os.path.join(minetestinfo.get_var("primary_world_path"), "players")
         player_count = 0
         player_written_count = 0
@@ -1133,18 +1176,24 @@ class MTChunks:
                         #this_player = self.players[file_name]
                         if ("utc_mtime" not in self.players[file_name]):
                             #or (self.players[file_name]["utc_mtime"]!=this_mtime_string):
+                            if self.verbose_enable:
+                                print("no modified time for player '"+file_name+"' so marking for resave.")
                             self.players[file_name]["utc_mtime"]=this_mtime_string
                             is_changed = True
                             #not necessarily moved--even if resaved by server, may not have moved a whole block or at all
                         if "index" in self.players[file_name]:
                             player_index = self.players[file_name]["index"]
                         else:
+                            print(min_indent+"WARNING: missing index in yml file for playerid '"+file_name+"' so making a new one.")
                             player_index = self.get_new_player_index()
                             self.players[file_name]["index"] = player_index
                             is_changed = True
                     else:
+                        #if self.verbose_enable:
+                            #this could be huge: print(file_name+" is not in "+str(self.players.keys()))
                         self.players[file_name] = {}
                         player_index = self.get_new_player_index()
+                        print(min_indent+"Creating map entry "+str(player_index)+" for playerid '"+file_name+"'")
                         self.players[file_name]["index"] = player_index
                         self.players[file_name]["playerid"] = file_name
                         self.players[file_name]["utc_mtime"] = this_mtime_string
@@ -1155,7 +1204,7 @@ class MTChunks:
                     if player_index is not None:
                         player_dest_path = os.path.join(self.chunkymap_players_path, str(player_index)+".yml")
                     else:
-                        print("ERROR: player_index is None for '"+file_name+"' (this should never happen)")
+                        print(min_indent+"ERROR: player_index is still None for '"+file_name+"' (this should never happen), so skipped writing map entry")
                     player_x = None
                     player_y = None
                     player_z = None
@@ -1186,60 +1235,82 @@ class MTChunks:
                     #map_player_position_tuple = None
                     saved_player_x = None
                     saved_player_y = None
-                    saved_player_y = None
+                    saved_player_z = None
                     #map_player_position_tuple = saved_player_x, saved_player_y, saved_player_z
                     is_moved = False
                     if "x" in self.players[file_name].keys():
                         saved_player_x = float(self.players[file_name]["x"])
                         if int(saved_player_x) != int(player_x):
                             is_moved = True
+                            if self.verbose_enable:
+                                print(min_indent+"x changed for playerid '"+file_name+"' so marking for save.")
                     else:
                         self.players[file_name]["x"] = player_x
                         is_moved = True
+                        if self.verbose_enable:
+                            print(min_indent+"No x for playerid '"+file_name+"' so marking for save.")
                     if "y" in self.players[file_name].keys():
                         saved_player_y = float(self.players[file_name]["y"])
                         if int(saved_player_y) != int(player_y):
                             is_moved = True
+                            if self.verbose_enable:
+                                print(min_indent+"y changed for playerid '"+file_name+"' so marking for save.")
                     else:
                         self.players[file_name]["y"] = player_y
                         is_moved = True
+                        if self.verbose_enable:
+                            print(min_indent+"No y for playerid '"+file_name+"' so marking for save.")
                     if "z" in self.players[file_name].keys():
                         saved_player_z = float(self.players[file_name]["z"])
                         if int(saved_player_z) != int(player_z):
                             is_moved = True
+                            if self.verbose_enable:
+                                print(min_indent+"z changed for playerid '"+file_name+"' so marking for save.")
                     else:
                         self.players[file_name]["z"] = player_z
                         is_moved = True
+                        if self.verbose_enable:
+                            print(min_indent+"No z for playerid '"+file_name+"' so marking for save.")
                     if is_moved:
+                        if self.verbose_enable:
+                            print(min_indent+"Moved so marking as changed")
                         is_changed = True
 
 
                     #if (self.players[file_name] is None) or not is_same_fvec3( map_player_position_tuple, player_position_tuple):
                     #if (self.players[file_name] is None) or (saved_player_x is None) or (saved_player_z is None) or (int(saved_player_x)!=int(player_x)) or (int(saved_player_y)!=int(player_y)) or (int(saved_player_z)!=int(player_z)):
                     if is_changed:
+                        if self.verbose_enable:
+                            print(min_indent+player_name+" changed.")
                         # don't check y since y is elevation in minetest, don't use float since subblock position doesn't matter to map
                         #if self.players[file_name] is not None and saved_player_x is not None and saved_player_y is not None and saved_player_z is not None:
                         if is_moved:
                             #print("PLAYER MOVED: "+str(player_name)+" moved from "+str(map_player_position_tuple)+" to "+str(player_position_tuple))
                             if self.verbose_enable:
-                                print("PLAYER MOVED: "+str(player_name)+" moved from "+str(saved_player_x)+","+str(saved_player_y)+","+str(saved_player_z)+" to "+str(player_x)+","+str(player_y)+","+str(player_z))
+                                print(min_indent+"PLAYER MOVED: "+str(player_name)+" moved from "+str(saved_player_x)+","+str(saved_player_y)+","+str(saved_player_z)+" to "+str(player_x)+","+str(player_y)+","+str(player_z))
                             self.last_player_move_mtime_string = this_mtime_string
                             players_moved_count += 1
                             self.players[file_name]["utc_mtime"]=this_mtime_string
                         else:
                             if self.verbose_enable:
-                                print("SAVING YAML for player '"+str(player_name)+"'")
+                                print(min_indent+"SAVING map entry for player '"+str(player_name)+"'")
                             players_saved_count += 1
-                            
-                        save_conf_from_dict(player_dest_path, self.players[file_name], ":", save_nulls_enable=False)
-                        
-                        #prevent resaving over and over:
+
+                        #set BEFORE saving to prevent unecessary resaving on successive runs:
                         self.players[file_name]["x"] = player_x
                         self.players[file_name]["y"] = player_y
                         self.players[file_name]["z"] = player_z
-                        
+
+                        if player_dest_path is not None:
+                            if self.verbose_enable:
+                                print(min_indent+"saving '"+player_dest_path+"'")
+                            save_conf_from_dict(player_dest_path, self.players[file_name], ":", save_nulls_enable=False)
+                        else:
+                            print(min_indent+"Could not save playerid '"+file_name+"' since generating map entry path failed")
+
+
                         #outs = open(player_dest_path, 'w')
-                        #outs.write("id:"+file_name)
+                        #outs.write("playerid:"+file_name)
                         #if player_name is not None:
                         #    outs.write("name:"+player_name+"\n")  # python automatically uses correct newline for your os when you put "\n"
                         ##if player_position is not None:
@@ -1254,8 +1325,8 @@ class MTChunks:
                         #outs.close()
                         player_written_count += 1
                     else:
-                        #if self.verbose_enable:
-                            #print("DIDN'T MOVE: "+str(player_name))
+                        if self.verbose_enable:
+                            print("DIDN'T MOVE: "+str(player_name))
                         players_didntmove_count += 1
                     player_count += 1
         #if not self.verbose_enable:
@@ -1904,6 +1975,7 @@ class MTChunks:
                     elif this_key=="verbose_enable":
                         if type(signals[this_key]) is bool:
                             self.verbose_enable = signals[this_key]
+                            self.is_verbose_explicit = self.verbose_enable
                         else:
                             is_signal_ok = False
                             print("ERROR: expected true or false after colon for "+this_key)
@@ -1924,7 +1996,8 @@ class MTChunks:
     def run_loop(self):
         #self.last_run_second = best_timer()
         self.loop_enable = True
-        self.verbose_enable = False
+        if not self.is_verbose_explicit:
+            self.verbose_enable = False
         is_first_iteration = True
         while self.loop_enable:
             before_second = best_timer()
