@@ -5,7 +5,14 @@ error_reporting(E_ALL);
 if (($_SERVER['PHP_SELF'] == "chunkymap.php") or endsWith($_SERVER['PHP_SELF'],"/chunkymap.php")) {
 	echo "<html><body style=\"font-family:calibri,arial,helvetica,sans\">This is the backend--don't call it directly. instead do include_once('chunkymap.php'); To use the map, go to <a href=\"viewchunkymap.php\">viewchunkymap.php</a> instead.</body></html>";
 }
-
+//date.timezone = "UTC";
+ini_set("date.timezone", "UTC"); //seems to have to effect on wrong time returned by time() (returns UTC-5 though server is in UTC-4 and BIOS is UTC)
+date_default_timezone_set("UTC"); //seems to have to effect on wrong time returned by time() (returns UTC-5 though server is in UTC-4 and BIOS is UTC)
+//otherwise try AntonioCS's Feb 24 '15 at 17:06 edit of Gordon's Apr 9 '10 at 12:59  answer from <http://stackoverflow.com/questions/2607545/display-time-date-in-specific-timezone-using-date-function>:
+//$datetime = new DateTime; // current time = server time
+//$otherTZ  = new DateTimeZone('UTC');
+//$datetime->setTimezone($otherTZ); // calculates with new TZ now
+$to_utc_debug_value = 5*60*60; //only way to get to UTC for unknown reason
 $auto_choose_enable = false;
 $auto_choose_enable = false;
 $minute=60;
@@ -267,16 +274,31 @@ function get_javascript_int_value($this_val) {
 	return $result;
 }
 
+$show_utc_msg_enable = true;
+
 function get_markers_from_dir($chunkymap_markers_path) {
 	global $chunkymapdata_thisworld_path;
 	global $player_file_age_expired_max_seconds;
 	global $player_file_age_idle_max_seconds;
 	global $show_expired_players_enable;
+	global $to_utc_debug_value;
+	global $show_utc_msg_enable;
+	$datetime = new DateTime; // current time = server time
+	$otherTZ  = new DateTimeZone('UTC');
+	$datetime->setTimezone($otherTZ); // calculates with new TZ now
+	//date_add($datetime, date_interval_create_from_date_string('5 hours')); //does nothing for unknown reason
+	$now_timestamp = time($datetime);
+	$now_timestamp += $to_utc_debug_value; //can't get UTC any other way for unknown reason
+	if ($show_utc_msg_enable) {
+		echo "using ".DATE("Y-m-d H:i e",$now_timestamp)." as UTC<br/>"."\n";
+		$show_utc_msg_enable = false;
+	}
 	if ($show_expired_players_enable===true) {
 		echo "show_expired_players_enable:true";
 	}
 	$markers=array();
 	$markers_count=0;
+	//echo phpversion()."<br/>"."\n";
 	if (is_dir($chunkymap_markers_path)) {
 		if ($handle = opendir($chunkymap_markers_path)) {
 			while (false !== ($file_name = readdir($handle))) {
@@ -290,17 +312,18 @@ function get_markers_from_dir($chunkymap_markers_path) {
 							$is_idle=false;
 							if (isset($marker_vars["utc_mtime"])) {
 								$last_player_update_time = strtotime($marker_vars["utc_mtime"]);
-								if (time()-$last_player_update_time > $player_file_age_expired_max_seconds) {
+								
+								if ($now_timestamp-$last_player_update_time > $player_file_age_expired_max_seconds) {
 									$is_expired=true;
-									echo "expired<br/>"."\n";
+									//echo "expired<br/>"."\n";
 								}
-								elseif (time()-$last_player_update_time > $player_file_age_idle_max_seconds) {
+								elseif ($now_timestamp-$last_player_update_time > $player_file_age_idle_max_seconds) {
 									$is_idle=true;
-									echo "idle<br/>"."\n";
+									//echo "idle<br/>"."\n";
 								}
 								else {
-									echo "not expired since ".$marker_vars["name"]."'s utc_mtime is ".DATE("Y-m-d H:i",$last_player_update_time)." <br/>"."\n";
-									echo " current date is ".DATE("Y-m-d H:i",time())." <br/>"."\n";
+									//echo "not expired since ".$marker_vars["name"]."'s utc_mtime is ".DATE("Y-m-d H:i",$last_player_update_time)." <br/>"."\n";
+									//echo " current date is ".DATE("Y-m-d H:i",$now_timestamp)." <br/>"."\n";
 								}
 								if ($is_expired===false) {
 									$markers[$markers_count]["utc_mtime"] = $marker_vars["utc_mtime"];
