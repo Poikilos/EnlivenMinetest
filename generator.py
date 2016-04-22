@@ -1112,7 +1112,7 @@ class MTChunks:
                                 if player_dict is not None:
                                     player_dict["index"] = sub_name[:-4]  # repair index
                                     if "playerid" in player_dict:
-                                        if (player_dict["playerid"] is not None) and (len(player_dict["playerid"])>0):
+                                        if (player_dict["playerid"] is not None) and (player_dict["playerid"]!=""):
                                             self.players[player_dict["playerid"]] = player_dict
                                             if self.verbose_enable:
                                                 print("Adding playerid '"+str(player_dict["playerid"])+"'")
