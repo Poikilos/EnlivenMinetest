@@ -1118,6 +1118,7 @@ class MTChunks:
                                     player_dict["index"] = int(sub_name[:-4])  # repair index
                                     if "playerid" in player_dict:
                                         if (player_dict["playerid"] is not None) and (player_dict["playerid"]!=""):
+                                            player_dict["playerid"] = str(player_dict["playerid"])  # in case was detected as int, change back to string since is a name and so name string will be found as dict key when checked later
                                             self.players[player_dict["playerid"]] = player_dict
                                             if self.verbose_enable:
                                                 print("Loading map entry index '"+str(player_dict["index"])+"' for playerid '"+str(player_dict["playerid"])+"'")
