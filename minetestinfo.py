@@ -16,7 +16,7 @@ worldgen_mod_list.append("caverealms")
 worldgen_mod_list.append("ethereal")
 worldgen_mod_list.append("lapis")
 worldgen_mod_list.append("mines")
-worldgen_mod_list.append("mg")  # this delays/prevents chunk generation and sometimes crashes in 0.4.13 release (tested on Windows 10)
+worldgen_mod_list.append("mg")  # NOTE: experimental worldgen mod delays/prevents chunk generation and sometimes crashes in 0.4.13 release (tested on Windows 10)
 worldgen_mod_list.append("moretrees")
 worldgen_mod_list.append("moreores")
 #worldgen_mod_list.append("nature_classic")  # NOTE: plantlife_modpack has this and other stuff, but detecting this could help since it is unique to the modpack
@@ -287,7 +287,7 @@ def init_minetestinfo():
     global profile_path
     if not minetestinfo.contains("www_minetest_path"):
         default_www_minetest_path = "/var/www/html/minetest"
-        if os_name=="windows":
+        if not os.path.isdir(default_www_minetest_path):  # if os_name=="windows":
             default_www_minetest_path = None
             prioritized_try_paths = list()
             prioritized_try_paths.append("C:\\wamp\\www")
@@ -310,13 +310,13 @@ def init_minetestinfo():
         minetestinfo.prepare_var("www_minetest_path", default_www_minetest_path, "your web server directory (or other folder where minetest website features and data should be placed)")
 
 
-    if os_name=="windows":
+    if 'USERPROFILE' in os.environ:  # if os_name=="windows":
         profile_path = os.environ['USERPROFILE']
     else:
         profile_path = os.environ['HOME']
 
     default_profile_minetest_path = os.path.join(profile_path,".minetest")
-    if (os_name=="windows"):
+    if os.path.isdir("C:\\games\\Minetest"):  # if (os_name=="windows"):
         default_profile_minetest_path = "C:\\games\\Minetest"
     minetestinfo.prepare_var("profile_minetest_path", default_profile_minetest_path, "user minetest path containing worlds folder and debug.txt")
     if not os.path.isdir(minetestinfo.get_var("profile_minetest_path")):
@@ -329,7 +329,7 @@ def init_minetestinfo():
 
     default_shared_minetest_path = "/usr/share/games/minetest"
     try_path = "/usr/local/share/minetest"
-    if os_name == "windows":
+    if os.path.isdir("C:\\Games\\Minetest"):  # if os_name == "windows":
         default_shared_minetest_path = "C:\\Games\\Minetest"
     elif os.path.isdir(try_path):
         default_shared_minetest_path = try_path

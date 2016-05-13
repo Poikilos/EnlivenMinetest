@@ -5,10 +5,10 @@ import copy
 
 verbose_enable = False
 
-os_name = "GNU/Linux"
-if os.sep=="\\":
-    os_name = "windows"
-    print("Windows detected")
+#os_name = "GNU/Linux"
+#if os.sep=="\\":
+#    os_name = "windows"
+#    print("Windows detected")
 
 #formerly pcttext:
 #uppercase_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
