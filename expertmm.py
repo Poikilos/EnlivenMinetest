@@ -5,10 +5,11 @@ import copy
 
 verbose_enable = False
 
-#os_name = "GNU/Linux"
-#if os.sep=="\\":
-#    os_name = "windows"
-#    print("Windows detected")
+os_name = "GNU/Linux"
+if os.sep=="\\":
+    os_name = "windows"
+    print("Windows detected")
+    #TODO: deprecate os_name--still needed for detecting whether to use squote in singleimage.py (when not Windows, squote is "'" otherwise "")
 
 #formerly pcttext:
 #uppercase_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
