@@ -114,6 +114,7 @@ class ChunkymapOfflineRenderer:
                 dest_png_path = os.path.join(www_chunkymapdata_world_path, png_name)
                 if os.path.isfile(dest_png_path):
                     os.remove(dest_png_path)
+                print("Moving temp image from "+tmp_png_path+" to "+dest_png_path+"...")
                 os.rename(tmp_png_path, dest_png_path)
                 final_png_path = dest_png_path
             print("Png image saved to:")
