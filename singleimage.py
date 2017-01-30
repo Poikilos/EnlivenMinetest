@@ -115,7 +115,21 @@ class ChunkymapOfflineRenderer:
                 if os.path.isfile(dest_png_path):
                     os.remove(dest_png_path)
                 print("Moving temp image from "+tmp_png_path+" to "+dest_png_path+"...")
-                os.rename(tmp_png_path, dest_png_path)
+                
+                move_cmd_string = "mv"
+                if os_name=="windows":
+                    move_cmd_string= "move"
+                this_move_cmd_string = move_cmd_string+" \""+tmp_png_path+"\" to \""+dest_png_path+"\"..."
+                subprocess.call(this_move_cmd_string, shell=True)
+                # os.rename(tmp_png_path, dest_png_path)  # fails with the following output:
+                # Moving temp image from /home/owner/chunkymap/chunkymap-genresults/FCAGameAWorld/singleimage.png to /var/www/html/minetest/chunkymapdata/worlds/FCAGameAWorld/singleimage.png...
+                # Traceback (most recent call last):
+                #  File "chunkymap/singleimage.py", line 157, in <module>
+                #     cmor.RenderSingleImage()
+                #   File "chunkymap/singleimage.py", line 118, in RenderSingleImage
+                #     os.rename(tmp_png_path, dest_png_path)
+                # OSError: [Errno 18] Invalid cross-device link
+                
                 final_png_path = dest_png_path
             print("Png image saved to:")
             print("  "+final_png_path)
