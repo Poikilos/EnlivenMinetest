@@ -116,11 +116,12 @@ class ChunkymapOfflineRenderer:
                     os.remove(dest_png_path)
                 print("Moving temp image from "+tmp_png_path+" to "+dest_png_path+"...")
                 
-                move_cmd_string = "mv"
-                if os_name=="windows":
-                    move_cmd_string= "move"
-                this_move_cmd_string = move_cmd_string+" \""+tmp_png_path+"\" to \""+dest_png_path+"\"..."
-                subprocess.call(this_move_cmd_string, shell=True)
+                #move_cmd_string = "mv"
+                #if os_name=="windows":
+                #    move_cmd_string= "move"
+                #this_move_cmd_string = move_cmd_string+" \""+tmp_png_path+"\" to \""+dest_png_path+"\"..."
+                #subprocess.call(this_move_cmd_string, shell=True)
+                shutil.move(tmp_png_path, dest_png_path)   #avoids error below according to 
                 # os.rename(tmp_png_path, dest_png_path)  # fails with the following output:
                 # Moving temp image from /home/owner/chunkymap/chunkymap-genresults/FCAGameAWorld/singleimage.png to /var/www/html/minetest/chunkymapdata/worlds/FCAGameAWorld/singleimage.png...
                 # Traceback (most recent call last):
