@@ -1,5 +1,6 @@
 import subprocess
 import os
+import shutil
 from minetestinfo import *
 #python_exe_path is from:
 from pythoninfo import *
