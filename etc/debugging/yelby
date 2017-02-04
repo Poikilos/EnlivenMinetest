@@ -1,0 +1,93 @@
+breath = 11
+hp = 20
+name = yelby
+pitch = 12.09
+position = (-3364.43,175,526.13)
+version = 1
+yaw = 93.43
+PlayerArgsEnd
+List main 32
+Width 0
+Item default:sword_diamond
+Item default:pick_diamond
+Item mobs_animal:kitten
+Item default:sign_wall_wood 2
+Empty
+Empty
+Item compassgps:b6
+Item farming:bread 74
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+EndInventoryList
+List craft 9
+Width 3
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+Empty
+EndInventoryList
+List craftpreview 1
+Width 0
+Empty
+EndInventoryList
+List craftresult 1
+Width 0
+Empty
+EndInventoryList
+List bag1 1
+Width 0
+Empty
+EndInventoryList
+List bag2 1
+Width 0
+Empty
+EndInventoryList
+List bag3 1
+Width 0
+Empty
+EndInventoryList
+List bag4 1
+Width 0
+Empty
+EndInventoryList
+List armor 6
+Width 0
+Item 3d_armor:helmet_diamond 1 1600
+Item 3d_armor:chestplate_diamond 1 1600
+Empty
+Item 3d_armor:leggings_diamond 1 1600
+Item shields:shield_diamond 1 1600
+Item 3d_armor:boots_diamond 1 1600
+EndInventoryList
+List hunger 1
+Width 0
+Item : 16
+EndInventoryList
+EndInventory

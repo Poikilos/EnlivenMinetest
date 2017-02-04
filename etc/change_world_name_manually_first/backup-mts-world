@@ -1,0 +1,20 @@
+#!/bin/sh
+
+date_string=`date +%Y-%m-%d`
+MT_WORLDS_PATH=$HOME/.minetest/worlds
+cd $MT_WORLDS_PATH
+ls
+name_string=FCAGameAWorld-$date_string.tar.gz
+echo "Attempting to create $name_string"
+if [ ! -f "$name_string" ]
+  then
+  tar -czvf "$name_string" FCAGameAWorld
+  if [ -f "$name_string" ]
+    then
+    echo "Successfully created $MT_WORLDS_PATH/$name_string"
+  else
+    echo "Failed to create $MT_WORLDS_PATH/$name_string"
+  fi
+else
+  echo "Nothing to do. Already saved $MT_WORLDS_PATH/$name_string"
+fi
