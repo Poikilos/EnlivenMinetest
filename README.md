@@ -1,6 +1,11 @@
 # EnlivenMinetest
 Subgame for minetest with the goals of creating immersion and lessons for humanity.
 This collection of scripts includes some scripts to help install and manage your git version of Minetest Server on Ubuntu Server or various *buntu flavors (a gui distro neither required nor recommended).
+EnlivenMinetest project assists you in setting up ENLIVEN subgame and provides scripts to run it on minetestserver as current user (must be sudoer).
+
+## DISCLAIMER
+Please see included LICENSE.txt (MIT license normally)
+The original EnlivenMinetest project is found at https://github.com/expertmm/EnlivenMinetest
 
 ## How to use:
 (requires GNU/Linux System and only tested on Ubuntu Server [14.04 to 16.04] and Lubuntu [14.04 to 16.04])
@@ -37,6 +42,7 @@ Do not expect the mods from game-install-enliven-testing.sh to work. Also, do no
 * make sure always cd $HOME/Downloads before downloading stuff (double check installer script)
 * minetest_userscript_localENLIVEN_server_only.vbs logon script in network folder only works if you make C:\games\Minetest writable to Authenticated Users, in order for minetest.conf to be created via this script (feel free to offer comments on how to avoid making the entire Minetest folder writable to Authenticated Users [I haven't experimented with which of the files and subfolders can be set to do not inherit])
 * minetest_userscript_localENLIVEN_server_only.vbs does not read the recommended minetest.conf, so it echoes the lines manually. Ideally it would analyze the recommended one and change the server settings.
+* minetest_game mods and modpacks are owned by root in the end, for some reason. This may cause serious problems on your server. Change the owner to your current user.
 
 ### Known issues in mods:
 * compassgps crashes server for some players upon use--see yelby in etc/debugging (wrap sorting in "if player~=nil then...end" to avoid)
