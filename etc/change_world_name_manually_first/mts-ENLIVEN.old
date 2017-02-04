@@ -1,0 +1,3 @@
+#!/bin/sh
+#BROKEN: screen -t MinetestServer minetestserver --gameid minetest_next --draworigin --drawplayers --world FCAWorldMTNext
+screen -t MinetestServer minetestserver --gameid ENLIVEN --worldname FCAGameAWorld
