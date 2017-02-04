@@ -1,11 +1,14 @@
 # EnlivenMinetest
-Subgame for minetest with the goals of creating immersion and lessons for humanity.
+EnlivenMinetest is a subgame for minetest with the goals of providing immersion and lessons for humanity.
 This collection of scripts includes some scripts to help install and manage your git version of Minetest Server on Ubuntu Server or various *buntu flavors (a gui distro neither required nor recommended).
 EnlivenMinetest project assists you in setting up ENLIVEN subgame and provides scripts to run it on minetestserver as current user (must be sudoer).
 
-## DISCLAIMER
-Please see included LICENSE.txt (MIT license normally)
-The original EnlivenMinetest project is found at https://github.com/expertmm/EnlivenMinetest
+DISCLAIMERS:
+* Please see included LICENSE.txt (MIT license normally)
+* The original EnlivenMinetest project is found at https://github.com/expertmm/EnlivenMinetest
+* Any script code related to redis has not been successfully tested.
+* Make sure you convert your world to leveldb and place it in your server's worlds folder $HOME/.minetest/worlds/, as this set of scripts hasn't been tested with any other database nor worlds folder location, and nightly backup scripts cater to leveldb.
+
 
 ## How to use:
 (requires GNU/Linux System and only tested on Ubuntu Server [14.04 to 16.04] and Lubuntu [14.04 to 16.04])
@@ -20,11 +23,11 @@ Do not expect the mods from game-install-enliven-testing.sh to work. Also, do no
 * mts-ENLIVEN starts server (place it in $HOME normally), but requires you to FIRST CHANGE the value after worldname to the name of your world
 * Recommend your users download the minetest.conf from this folder and put it in their minetest folder for better graphics (opengl 3.0 shaders, smooth lighting)
 
-## Customization
+### Customization
 * Before using anything in the change_world_name_manually_first and subfolders, change the values of the variables in the folder name as noted before using.
 * If you have a dedicated server, the value server_dedicated = false should be changed to server_dedicated = true in your SERVER's minetest.conf in the ENLIVEN folder that the installer creates.
 
-## Security and Performance Notes
+### Security and Performance Notes
 * The installer script changes owner and group for ENLIVEN's world.mt and world.mt.1st if present to $USER
 * The included minetest.conf recommended for your clients includes the line enable_local_map_saving = true, which will cache the world locally on their machines. You can feel free to change that according to your preference.
 
@@ -35,6 +38,7 @@ Do not expect the mods from game-install-enliven-testing.sh to work. Also, do no
 * du-show-big searches your hard drive for big files, in case $HOME/.minetest/debug.txt fills your drive, or a log rotate utility fails (going into a cumulative copy loop, or not) in regard to debug.txt, filling up your drive
 * The network folder contains some stuff for networks, which is usually only useful for using Minetest in a network cafe or school.
 (The purpose of minetest_userscript_localENLIVEN_server_only.vbs is to make sure the user only uses the hostname localENLIVEN, however this only changes the default, and cannot be enforced in any way as far as I know without recompiling the client.)
+
 
 ## Known issues:
 * Installer script does not copy certain stuff to the config files due to permissions unless runs as root (the rest is designed to run as sudoer, and use sudo only as needed)
