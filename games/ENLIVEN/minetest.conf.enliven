@@ -1,0 +1,14 @@
+protector_radius = 7
+protector_pvp = true
+protector_pvp_spawn = 10
+protector_drop = true
+protector_hurt = 1
+
+default_privs = interact,shout,home
+max_users = 50
+motd = "Actions and chat messages are logged. Visit website for recipes and live map."
+disallow_empty_passwords = true
+
+#not all settings can be changed in this minetest.conf (see 
+#minetest.conf.example in THIS folder) some settings can only be changed 
+#in client's local copy of minetest.conf (see login scripts on network)
