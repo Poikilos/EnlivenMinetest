@@ -3,7 +3,8 @@ Subgame for minetest with the goals of creating immersion and lessons for humani
 This collection of scripts includes some scripts to help install and manage your git version of Minetest Server on Ubuntu Server or various *buntu flavors (a gui distro neither required nor recommended).
 
 ## How to use:
-The installer script (in the "etc/change_world_name_manually_first" folder) downloads the git versions of all of the mods to the ENLIVEN folder which will be placed in your minetest games folder (one of the two folders listed below, otherwise fails).
+(requires GNU/Linux System and only tested on Ubuntu Server [14.04 to 16.04] and Lubuntu [14.04 to 16.04])
+The installer script (in the "etc/change_world_name_manually_first" folder) downloads the git versions of all of the mods to the ENLIVEN folder which will be placed in your minetest games folder (one of the two folders listed below, otherwise fails)--but change the world name to the name of your world first.
 * (optionally) place the enliven folder in the games folder here into the games folder on your server such as:
   /usr/local/share/minetest/games/
 	(If you're not using the git version of Minetest on Ubuntu Server, try something like:
