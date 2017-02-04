@@ -45,4 +45,20 @@ Do not expect the mods from game-install-enliven-testing.sh to work. Also, do no
 * minetest_game mods and modpacks are owned by root in the end, for some reason. This may cause serious problems on your server. Change the owner to your current user.
 
 ### Known issues in mods:
-* compassgps crashes server for some players upon use--see yelby in etc/debugging (wrap sorting in "if player~=nil then...end" to avoid)
+* compassgps crashes server for some players upon use--see yelby in etc/debugging (wrap sorting in "if player~=nil then...end" in mods/compassgps/init.lua to avoid):
+```lua
+function compassgps.sort_by_distance(table,a,b,player)
+  --print("sort_by_distance a="..compassgps.pos_to_string(table[a]).." b="..pos_to_string(table[b]))
+  if player ~= nil then
+    local playerpos = player:getpos()
+    local name=player:get_player_name()
+    --return compassgps.distance3d(playerpos,table[a]) < compassgps.distance3d(playerpos,table[b])
+    if distance_function[name] then
+      return distance_function[name](playerpos,table[a]) <
+             distance_function[name](playerpos,table[b])
+    else
+      return false  --this should NEVER happen
+    end
+  end
+end --sort_by_distance
+```
