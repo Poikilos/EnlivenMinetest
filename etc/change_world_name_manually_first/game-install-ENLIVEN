@@ -1547,7 +1547,33 @@ if [ ! -d "$MTMOD_DEST_PATH" ]; then
 fi
 
 
-
+#(a trmp is just a modpack of TRMs for treasurer. At least one trm must be installed for treasurer to to anything)
+cd $HOME/Downloads
+MTMOD_DL_ZIP=file.php?id=1301
+MTMOD_SRC_ZIP=trmp_minetest_game.zip
+MTMOD_UNZ_NAME=trmp_minetest_game
+MTMOD_DEST_NAME=trmp_minetest_game
+MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+#if [ -d "$MTMOD_UNZ_NAME" ]; then
+rm -Rf $MTMOD_UNZ_NAME
+#fi
+if [ -f $MTMOD_DL_ZIP ]; then
+  rm -f $MTMOD_DL_ZIP
+fi
+if [ -f $MTMOD_SRC_ZIP ]; then
+  rm -f $MTMOD_SRC_ZIP
+fi
+if [ -d "$MTMOD_DEST_PATH" ]; then
+  sudo rm -Rf "$MTMOD_DEST_PATH"
+fi
+wget https://forum.minetest.net/download/file.php?id=1301
+mv $MTMOD_DL_ZIP "$MTMOD_SRC_ZIP"
+unzip "$MTMOD_SRC_ZIP"
+sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
+if [ ! -d "$MTMOD_DEST_PATH" ]; then
+  echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue."
+  exit 1  
+fi
 
 
 
