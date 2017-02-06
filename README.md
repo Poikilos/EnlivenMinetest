@@ -21,6 +21,10 @@ The installer script (in the "etc/change_world_name_manually_first" folder) down
 * BEFORE running game-install-enliven.sh, make sure you FIRST CHANGE the value after "MT_MYWORLD_NAME="
 Do not expect the mods from game-install-enliven-testing.sh to work. Also, do not run the file directly -- instead, paste the variables (before backup process) in game-install-enliven.sh into a terminal window, then paste the contents of game-install-enliven-test.sh
 * mts-ENLIVEN starts server (place it in $HOME normally), but requires you to FIRST CHANGE the value after worldname to the name of your world
+* If you have used cme or tsm_pyramids is your world before, fix issue where cme is required by certain mods by manually placing the folders from etc\Mods,WIP into your mods folder (this may be automated in the future), so mobs (including spawners:mummy) will be used instead.
+(There are also WIP TRMs in there to go with the ENLIVEN subgame)
+Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawners.
+(NOTE: spawners makes pyramids now, so tsm_pyramids )
 * Recommend your users download the minetest.conf from this folder and put it in their minetest folder for better graphics (opengl 3.0 shaders, smooth lighting)
 
 ### Customization
@@ -32,6 +36,10 @@ Do not expect the mods from game-install-enliven-testing.sh to work. Also, do no
 * The included minetest.conf recommended for your clients includes the line enable_local_map_saving = true, which will cache the world locally on their machines. You can feel free to change that according to your preference.
 
 
+## Changes:
+* (2017-02-06) Added optional trm_compassgps so that treasure could include a compass or map from the compassgps mod
+* (2017-02-06) Added optional mods for migrating from cme and from tsm_pyramids to spawners (should allow mods that depend on cme to be installed, and use mobs instead, though no mods in ENLIVEN are known to require cme currently)
+
 ## Naming conventions:
 * The filenames without extensions 
 * The abbreviation "mts" is for minetest server-specific scripts or variables
@@ -41,6 +49,7 @@ Do not expect the mods from game-install-enliven-testing.sh to work. Also, do no
 
 
 ## Known issues:
+* Preciousness in trm_compassgps has not been audited
 * Installer script does not copy certain stuff to the config files due to permissions unless runs as root (the rest is designed to run as sudoer, and use sudo only as needed)
 * minetestserver-update-from-git.sh usually doesn't work right. Normally just rename your minetest folder then clone it from git instead.
 * make sure always cd $HOME/Downloads before downloading stuff (double check installer script)
