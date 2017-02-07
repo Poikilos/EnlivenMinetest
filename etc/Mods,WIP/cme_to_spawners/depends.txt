@@ -1,5 +1,6 @@
 default
-spawners
+farming
 mobs
 mobs_monster
-farming
+mobs_animal
+spawners

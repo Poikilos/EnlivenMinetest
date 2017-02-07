@@ -4,7 +4,7 @@ This collection of scripts includes some scripts to help install and manage your
 EnlivenMinetest project assists you in setting up ENLIVEN subgame and provides scripts to run it on minetestserver as current user (must be sudoer).
 
 DISCLAIMERS:
-* Please see included LICENSE.txt (MIT license normally)
+* Please see included LICENSE.txt (MIT license normally). The license in the file is the fallback license for everything included where license is not otherwise specified.
 * The original EnlivenMinetest project is found at https://github.com/expertmm/EnlivenMinetest
 * Any script code related to redis has not been successfully tested.
 * Make sure you convert your world to leveldb and place it in your server's worlds folder $HOME/.minetest/worlds/, as this set of scripts hasn't been tested with any other database nor worlds folder location, and nightly backup scripts cater to leveldb.
@@ -37,6 +37,7 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 
 
 ## Changes:
+* (2017-02-06) Added installation of trmp_minetest_game to the installer script, since treasurer requires one or more trms in order to work (tested and working now on tsm_railcorridors)
 * (2017-02-06) Added optional trm_compassgps so that treasure could include a compass or map from the compassgps mod
 * (2017-02-06) Added optional mods for migrating from cme and from tsm_pyramids to spawners (should allow mods that depend on cme to be installed, and use mobs instead, though no mods in ENLIVEN are known to require cme currently)
 
