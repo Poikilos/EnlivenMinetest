@@ -1388,7 +1388,8 @@ fi
 cd $HOME/Downloads
 MTMOD_DL_ZIP=master.zip
 MTMOD_SRC_ZIP=birthstones.zip
-MTMOD_UNZ_NAME=birthstones-mod-master
+#MTMOD_UNZ_NAME=birthstones-mod-master
+MTMOD_UNZ_NAME=minetest-birthstones-master
 MTMOD_DEST_NAME=birthstones
 MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
 #if [ -d "$MTMOD_UNZ_NAME" ]; then
@@ -1400,9 +1401,11 @@ fi
 if [ -f $MTMOD_SRC_ZIP ]; then
   rm -f $MTMOD_SRC_ZIP
 fi
-wget https://github.com/Doc22/birthstones-mod/archive/master.zip
+#wget https://github.com/Doc22/birthstones-mod/archive/master.zip
+wget https://github.com/expertmm/birthstones-mod/archive/master.zip
 mv $MTMOD_DL_ZIP "$MTMOD_SRC_ZIP"
 unzip "$MTMOD_SRC_ZIP"
+sudo rm -Rf "$MTMOD_DEST_PATH"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue."
