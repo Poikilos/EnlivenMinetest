@@ -58,7 +58,16 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * minetest_userscript_localENLIVEN_server_only.vbs does not read the recommended minetest.conf, so it echoes the lines manually. Ideally it would analyze the recommended one and change the server settings.
 * minetest_game mods and modpacks are owned by root in the end, for some reason. This may cause serious problems on your server. Change the owner to your current user.
 
+## Planned Features
+* Log where bones were placed to debug.txt, possibly by way of the following chat message:
+	after the existing line:
+	minetest.set_node(pos, {name = "bones:bones", param2 = param2})
+	add the new line (not sure if the format call is really ok--it was copied from compassgps:
+	minetest.chat_send_player(player:get_player_name(), S("Bones placed at %s."):format(pos))
+
+
 ### Known issues in mods:
+* unpriveleged players can pick up spawners and then place them (and, spawners catch things on fire)
 * compassgps crashes server for some players upon use--see yelby in etc/debugging (wrap sorting in "if player~=nil then...end" in mods/compassgps/init.lua to avoid):
 ```lua
 function compassgps.sort_by_distance(table,a,b,player)
@@ -76,3 +85,38 @@ function compassgps.sort_by_distance(table,a,b,player)
   end
 end --sort_by_distance
 ```
+* And more:
+2017-02-13 18:15:32: WARNING[Main]: NodeDefManager: Ignoring CONTENT_IGNORE redefinition
+2017-02-13 18:15:32: WARNING[Main]: Field "tile_images": Deprecated; new name is "tiles".
+2017-02-13 18:15:32: WARNING[Main]: Field "metadata_name": Deprecated; use on_add and metadata callbacks
+2017-02-13 18:15:32: ERROR[Main]: get_biome_list: failed to get biome 'taiga'
+2017-02-13 18:15:32: ERROR[Main]: get_biome_list: failed to get biome 'snowy_grassland'
+2017-02-13 18:15:32: ERROR[Main]: get_biome_list: failed to get biome 'grassland'
+2017-02-13 18:15:32: ERROR[Main]: get_biome_list: failed to get biome 'coniferous_forest'
+2017-02-13 18:15:32: ERROR[Main]: get_biome_list: failed to get biome 'deciduous_forest'
+2017-02-13 18:15:32: ERROR[Main]: get_biome_list: failed to get biome 'savanna'
+2017-02-13 18:15:32: ERROR[Main]: get_biome_list: failed to get biome 'rainforest'
+2017-02-13 18:15:32: ERROR[Main]: register_ore: couldn't get all biomes 
+2017-02-13 18:15:33: WARNING[Main]: Not registering alias, item with same name is already defined: mushroom:brown_natural -> flowers:mushroom_fertile_brown
+2017-02-13 18:15:33: WARNING[Main]: Not registering alias, item with same name is already defined: mushroom:red_natural -> flowers:mushroom_fertile_red
+2017-02-13 18:15:33: WARNING[Main]: Not registering alias, item with same name is already defined: farming_plus:orange -> ethereal:orange
+2017-02-13 18:15:34: WARNING[Main]: Field "noise_threshhold": Deprecated: new name is "noise_threshold".
+2017-02-13 18:15:34: WARNING[Main]: Undeclared global variable "HUD_ENABLE_HUNGER" accessed at ...e/minetest/games/ENLIVEN/mods/hud_hunger/hud/builtin.lua:41
+2017-02-13 18:15:35: WARNING[Main]: Field "maxwear" is deprecated; replace with uses=1/maxwear
+2017-02-13 18:15:35: ACTION[Main]: [Mod] Fishing - Crabman77's (MFF team) version [1.0.0] [fishing] Loaded...
+2017-02-13 18:15:35: WARNING[Main]: Field "noise_threshhold": Deprecated: new name is "noise_threshold".
+2017-02-13 18:15:36: WARNING[Main]: Node 'light_source' value exceeds maximum, limiting to maximum: technic:forcefield
+2017-02-13 18:15:37: WARNING[Main]: Not registering alias, item with same name is already defined: tsm_pyramids:mummy -> spawners:mummy
+2017-02-13 18:15:37: WARNING[Main]: Not registering alias, item with same name is already defined: creatures:chicken -> mobs_animal:chicken
+2017-02-13 18:15:37: WARNING[Main]: Not registering alias, item with same name is already defined: creatures:sheep -> mobs_animal:sheep_white
+2017-02-13 18:15:37: WARNING[Main]: Not registering alias, item with same name is already defined: mobs_animal:sheep -> mobs_animal:sheep_white
+2017-02-13 18:15:37: WARNING[Main]: Not registering alias, item with same name is already defined: creatures:ghost -> mobs_monster:spider
+2017-02-13 18:15:37: WARNING[Main]: Not registering alias, item with same name is already defined: creatures:mummy -> spawners:mummy
+2017-02-13 18:15:37: WARNING[Main]: Not registering alias, item with same name is already defined: creatures:zombie -> mobs_monster:stone_monster
+* The following issues may be caused by having cme enabled on the server before server was updated to ENLIVEN latest (mobs only):
+2017-02-13 18:20:59: ERROR[Server]: LuaEntity name "creatures:zombie_spawner_dummy" not defined
+2017-02-13 18:21:15: WARNING[Emerge-0]: Map::getNodeMetadata(): Block not found
+2017-02-13 18:21:15: WARNING[Emerge-0]: Map::removeNodeMetadata(): Block not found
+2017-02-13 18:44:02: ACTION[Server]: thefox963 digs mesecons:wire_11010000_on at (-340,16,60)
+2017-02-13 18:44:02: WARNING[Server]: Undeclared global variable "digiline" accessed at ...es/ENLIVEN/mods/mesecons/mesecons_luacontroller/init.lua:274
+
