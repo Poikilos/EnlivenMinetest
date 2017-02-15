@@ -21,10 +21,10 @@ class ChunkymapOfflineRenderer:
     boundary_z_max = None
 
     def __init__(self):
-        boundary_x_min = -4096  #formerly -10000
-        boundary_x_max = 4096  #formerly 10000
-        boundary_z_min = -4096  #formerly -10000
-        boundary_z_max = 4096  #formerly 10000
+        self.boundary_x_min = -4096  #formerly -10000
+        self.boundary_x_max = 4096  #formerly 10000
+        self.boundary_z_min = -4096  #formerly -10000
+        self.boundary_z_max = 4096  #formerly 10000
         #NOTE: 6144*2 = 12288
         #NOTE: a 16464x16384 or 12288x12288 image fails to load in browser, but 6112x6592 works
 
@@ -54,6 +54,7 @@ class ChunkymapOfflineRenderer:
         #endregion the following is also in singleimage.py
 
     def RenderSingleImage(self):
+        
         genresults_folder_path = os.path.join( os.path.join(os.path.dirname(os.path.abspath(__file__)), "chunkymap-genresults"), self.world_name)
         if not os.path.isdir(genresults_folder_path):
             os.makedirs(genresults_folder_path)
@@ -61,7 +62,14 @@ class ChunkymapOfflineRenderer:
         gen_error_path = os.path.join(genresults_folder_path, "singleimage"+gen_error_name_closer_string)
         cmd_suffix = " 1> \""+genresult_path+"\""
         cmd_suffix += " 2> \""+gen_error_path+"\""
-
+        #if self.boundary_x_min is None:
+        #    print("ERROR: boundary_x_min is None")
+        #if self.boundary_x_max is None:
+        #    print("ERROR: boundary_x_max is None")
+        #if self.boundary_z_min is None:
+        #    print("ERROR: boundary_z_min is None")
+        #if self.boundary_z_max is None:
+        #    print("ERROR: boundary_z_max is None")
         geometry_string = str(self.boundary_x_min)+":"+str(self.boundary_z_min)+"+"+str(self.boundary_x_max-self.boundary_x_min)+"+"+str(self.boundary_z_max-self.boundary_z_min)  # "-10000:-10000+20000+20000" #2nd two params are sizes
         #VERY BIG since singleimage mode (if no geometry param, minetestmapper-numpy reverts to its default which is -2000 2000 -2000 2000):
         region_string = str(self.boundary_x_min)+" "+str(self.boundary_x_max)+" "+str(self.boundary_z_min)+" "+str(self.boundary_z_max) # "-10000 10000 -10000 10000"

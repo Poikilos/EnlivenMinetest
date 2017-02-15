@@ -203,6 +203,11 @@ python_exe_path
     * shows player location (can optionally show only first characters of name, for privacy; there is no saved setting yet, so to adjust, you must change the value of $nonprivate_name_beginning_char_count in chunkymap.php)    
     * Ghost players if they stay in one spot long enough (see $player_file_age_idle_max_seconds in chunkymap.php)
     * Hide players if they stay in one spot long enough (see $player_file_age_expired_max_seconds in chunkymap.php) avoiding logout detection, and not requiring mods
-
+* If you prefer python3 and get the error "No module named 'PIL'" try:
+```
+sudo apt-get install python3-pil
+```
+(if can't connect, see https://ubuntuforums.org/showthread.php?t=2282646 )
+	
 ## Optional:
 * chunkymap.php should read the size of the tiles automatically (currently is hard-coded)-- see near is_file($chunk_genresult_path) in chunkymap.php
