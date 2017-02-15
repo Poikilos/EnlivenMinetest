@@ -166,6 +166,7 @@ minetest.register_on_dieplayer(function(player)
 		bones_mode = "bones"
 	end
 
+	local pos = vector.round(player:getpos())
 	-- return if keep inventory set or in creative mode
 	if bones_mode == "keep" or minetest.setting_getbool("creative_mode") then
 		print(player:get_player_name() .. "'s bones do not remain since in creative_mode -- died at " .. minetest.pos_to_string(vector.round(player:getpos())))
