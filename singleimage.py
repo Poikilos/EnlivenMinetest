@@ -15,8 +15,18 @@ class ChunkymapOfflineRenderer:
     backend_string = None
     world_path = None
     world_name = None
+    boundary_x_min = None
+    boundary_x_max = None
+    boundary_z_min = None
+    boundary_z_max = None
 
     def __init__(self):
+        boundary_x_min = -4096  #formerly -10000
+        boundary_x_max = 4096  #formerly 10000
+        boundary_z_min = -4096  #formerly -10000
+        boundary_z_max = 4096  #formerly 10000
+        #NOTE: 6144*2 = 12288
+        #NOTE: a 16464x16384 or 12288x12288 image fails to load in browser, but 6112x6592 works
 
         self.backend_string = get_world_var("backend")
 
@@ -52,13 +62,13 @@ class ChunkymapOfflineRenderer:
         cmd_suffix = " 1> \""+genresult_path+"\""
         cmd_suffix += " 2> \""+gen_error_path+"\""
 
-        geometry_string = "-10000:-10000+20000+20000"
+        geometry_string = str(self.boundary_x_min)+":"+str(self.boundary_z_min)+"+"+str(self.boundary_x_max-self.boundary_x_min)+"+"+str(self.boundary_z_max-self.boundary_z_min)  # "-10000:-10000+20000+20000" #2nd two params are sizes
         #VERY BIG since singleimage mode (if no geometry param, minetestmapper-numpy reverts to its default which is -2000 2000 -2000 2000):
-        region_string = "-10000 10000 -10000 10000"
+        region_string = str(self.boundary_x_min)+" "+str(self.boundary_x_max)+" "+str(self.boundary_z_min)+" "+str(self.boundary_z_max) # "-10000 10000 -10000 10000"
         
         #geometry_string = str(min_x)+":"+str(min_z)+"+"+str(int(max_x)-int(min_x)+1)+"+"+str(int(max_z)-int(min_z)+1)  # +1 since max-min is exclusive and width must be inclusive for minetestmapper.py
         region_param = " --region "+region_string  # minetestmapper-numpy.py --region xmin xmax zmin zmax
-        geometry_param = " --geometry -10000:-10000+20000+20000"  # minetestmapper-expertmm.py --geometry <xmin>:<zmin>+<width>+<height>
+        geometry_param = " --geometry "+geometry_string # " --geometry -10000:-10000+20000+20000"  # minetestmapper-expertmm.py --geometry <xmin>:<zmin>+<width>+<height>
         limit_param = geometry_param
         #expertmm_region_string = str(min_x) + ":" + str(max_x) + "," + str(min_z) + ":" + str(max_z)
 
