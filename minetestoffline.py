@@ -10,6 +10,7 @@ from expertmm import *
 from minetestinfo import *
 
 import time
+from ast import literal_eval # as make_tuple
 
 #C:\Users\jgustafson\Desktop\Backup\fcalocal\home\owner\.minetest\worlds\FCAGameAWorld\players
 #minetest_players_path = "C:\\Users\\jgustafson\\Desktop\\Backup\\fcalocal\\home\\owner\\.minetest\\worlds\\FCAGameAWorld\\players"
@@ -24,6 +25,7 @@ min_date_string = None
 #min_date_string = "2016-03-15 12:12:00"
 DEBUG_TXT_TIME_FORMAT_STRING="%Y-%m-%d %H:%M:%S"
 is_start_now = False
+interactive_enable = False
 
 def confirm_min_date():
     global min_date_string
@@ -78,8 +80,9 @@ except:
     print("Could not finish getting world folder name.")
     view_traceback()
 try:
-    deprecated_irl_person_csv_name = world_name + " - Minetest Users - Real Names.txt"
+    deprecated_irl_person_csv_name = world_name + " - Minetest Users - Real Names.txt"  #RENAMED to:
     irl_person_csv_name = "irl_person_info.csv"
+    # C:\Users\jgustafson\Desktop\Backup\fcalocal\home\owner\.minetest\worlds\FCAGameAWorld\irl_person_info.csv
     print("")
     if os.path.isdir(minetestinfo.get_var("primary_world_path")):
         irl_person_csv_path = os.path.join(minetestinfo.get_var("primary_world_path"), irl_person_csv_name)
@@ -123,6 +126,7 @@ class MinetestInventoryItem:
         return leftover
 
     def get_item_as_inventory_line(self):
+        global interactive_enable
         result = None
         is_msg = False
         if self.name is not None:
@@ -151,8 +155,9 @@ class MinetestInventoryItem:
                 owner_msg = " owned by "+self.owner
             print("ERROR in get_item_as_inventory_line: name is None for item"+owner_msg)
             is_msg = True
-        if is_msg:
-            raw_input("Press enter to continue...")
+        if interactive_enable:
+            if is_msg:
+                raw_input("Press enter to continue...")
         return result
 
     def set_from_inventory_line(self, line):
@@ -164,7 +169,7 @@ class MinetestInventoryItem:
             parts = line.strip().split(" ")
             is_warning = False
             if (len(parts)!=2) and (len(parts)!=3) and (len(parts)!=4):
-                print("inventory has extra unknown params that will be ignored but saved: "+line)
+                print("inventory has extra unknown params that will be ignored but retained: "+line)
                 is_warning = True
             if len(parts)>=2:
                 if parts[0]=="Item":
@@ -183,8 +188,10 @@ class MinetestInventoryItem:
             else:
                 print("Failed to parse line since too few ("+len(parts)+") param(s).")
                 is_warning = True
-            if is_warning:
-                raw_input("Press enter to continue...")
+            global interactive_enable
+            if interactive_enable:
+                if is_warning:
+                    raw_input("Press enter to continue...")
         else:
             self.name = "Empty"
 
@@ -218,6 +225,7 @@ class MinetestInventory:
         return qty
 
     def write_to_stream(self, outs):
+        global interactive_enable
         if self.name is not None:
             #if self.width is not None:
             if self.width is None:
@@ -232,13 +240,15 @@ class MinetestInventory:
                 outs.write("EndInventoryList"+"\n")
             else:
                 print("ERROR in minetestinventory.write_to: items is None")
-                raw_input("Press enter to continue...")
+                if interactive_enable:
+                    raw_input("Press enter to continue...")
             #else:
             #    print("ERROR in minetestinventory.write_to: width is None")
             #    raw_input("Press enter to continue...")
         else:
             print("ERROR in minetestinventory.write_to: name is None")
-            raw_input("Press enter to continue...")
+            if interactive_enable:
+                raw_input("Press enter to continue...")
 
 
 class MinetestPlayer:
@@ -246,6 +256,7 @@ class MinetestPlayer:
     _player_args = None
     inventories = None
     oops_list = None
+    tag = None
 
     def __init__(self, playerid):
         self._player_args = {}
@@ -260,25 +271,30 @@ class MinetestPlayer:
         self.playerid = playerid
         self.inventories = list()
     
+    #Set multiplied internal pos using actual pos
     def set_pos(self, pos):
         if (len(pos)==3):
             self._player_args["position"] = float(pos[0])*minetest_player_pos_multiplier, float(pos[1])*minetest_player_pos_multiplier, float(pos[2])*minetest_player_pos_multiplier
         else:
             print("Failed to set position since length of tuple recieved is not 3: "+str(pos))
 
+    #Get actual pos from internal multiplied pos
     def get_pos(self):
         result = None
         if self._player_args is not None:
-            if "position" in self._player_args
+            if "position" in self._player_args:
+                if isinstance(self._player_args["position"], str):
+                    self._player_args["position"] = literal_eval(self._player_args["position"])
                 element_count = len(self._player_args["position"])
+                
                 if (element_count!=3):
-                    if element_count>1:
-                        if element_count==2:
-                            self.set_pos(self._player_args["position"][0]/minetest_player_pos_multiplier, 8.0, self._player_args["position"][1]/minetest_player_pos_multiplier)
-                            print("ERROR in get_pos: Element count "+str(element_count)+" too low (should have numbers for 3 axes) for player position, so repaired by using as x and z, resulting in "+str(self.get_pos()))
-                        else if element_count!=3:
-                                self.set_pos(self._player_args["position"][0]/minetest_player_pos_multiplier, self._player_args["position"][1]/minetest_player_pos_multiplier, self._player_args["position"][2]/minetest_player_pos_multiplier)
-                                print("ERROR in get_pos: Element count "+str(element_count)+" incorrect (should have numbers for 3 axes) for player position, so set to "+str(self.get_pos()))
+                    #if element_count>1:
+                    if element_count==2:
+                        self.set_pos(self._player_args["position"][0]/minetest_player_pos_multiplier, 8.0, self._player_args["position"][1]/minetest_player_pos_multiplier)
+                        print("ERROR in get_pos: Element count "+str(element_count)+" too low (should have numbers for 3 axes) for player position, so repaired by using as x and z, resulting in "+str(self.get_pos()))
+                    elif element_count>3:
+                        self.set_pos(self._player_args["position"][0]/minetest_player_pos_multiplier, self._player_args["position"][1]/minetest_player_pos_multiplier, self._player_args["position"][2]/minetest_player_pos_multiplier)
+                        print("ERROR in get_pos: Element count "+str(element_count)+" incorrect (should have numbers for 3 axes) for player position, so set to "+str(self.get_pos()))
                     else:
                         self.set_pos(0,0,0)
                         print("ERROR in get_pos: Element count "+str(element_count)+" too low (should have numbers for 3 axes) for player position, so set to 0,0,0")
@@ -760,7 +776,7 @@ def set_player_names_to_file_names():
 ##    debug_log_replay_to_offline_player_storage(debug_path, players_offline_storage_path, min_date_string)
 #debug_log_replay_to_offline_player_storage(debug_txt_path, players_offline_storage_path, min_date_string)
 
-def switch_player_file_contents(player1_path, player2_path)
+def switch_player_file_contents(player1_path, player2_path):
     #switches everything except name
     
     player1 = MinetestPlayer(os.path.basename(player1_path))

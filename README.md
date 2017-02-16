@@ -62,6 +62,8 @@ screen -t chunkymapregen python $HOME/chunkymap/generator.py
         
 
 ## Changes
+* (2017-02-16) list players by distance feature added
+* (2017-02-16) Fixed some long-standing syntax and logic errors in get_pos, and missing colons in switch_player_file_contents
 * (2016-03-22) Detect exceptions in mintestmapper (such as database locked) and do NOT mark the chunk as is_empty
 * optionally hide player location
 * (2016-03-22) Make a method (in chunkymap.php) to echo the map as an html5 canvas
@@ -187,6 +189,7 @@ chmod +x set-minutely-crontab-job.sh && ./set-minutely-crontab-job.sh
     (the installer will automatically download and install numpy and Pillow -- see also install-on-windows-manually.md)
 
 ## Known Issues
+* audit switch_player_file_contents, since had syntax errors preventing run on 2017-02-16, though hadn't worked on it for months
 * var debug_adjustment = 1.345; is needed in JavaScript to resize map markers correctly to same scale as map size (for unknown reason)
 * webapp: save selected world to a config file (click world on first visit to write initial config) instead of being silently autoselected
 * Fix chunk generation and draw decachunks to canvas (so singleimage.py is not required to be run before generator.py)
