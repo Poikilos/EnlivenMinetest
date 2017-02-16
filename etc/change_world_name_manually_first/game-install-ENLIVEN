@@ -211,7 +211,8 @@ fi
 cp "$USR_SHARE_MINETEST/games/minetest_game/minetest.conf" "$WRITEABLE_MINETEST_CONF"
 touch "$WRITEABLE_MINETEST_CONF"
 #4080 since boundaries in chunkymap/singleimage.py (to be compatible with approximate browser max image size) are -4096 to 4096
-echo "map_generation_limit = 4080" >> "$WRITEABLE_MINETEST_CONF"
+echo "map_generation_limit = 4096" >> "$WRITEABLE_MINETEST_CONF"
+#NOTE: map_generation_limit (aka world boundary, world border, or world limit) must be divisible by 64, so for example, 5000 results in invisible wall at 4928
 echo "protector_radius = 7" >> "$WRITEABLE_MINETEST_CONF"
 echo "protector_pvp = true" >> "$WRITEABLE_MINETEST_CONF"
 echo "protector_pvp_spawn = 10" >> "$WRITEABLE_MINETEST_CONF"
