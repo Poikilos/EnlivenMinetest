@@ -169,7 +169,7 @@ minetest.register_on_dieplayer(function(player)
 	local pos = vector.round(player:getpos())
 	-- return if keep inventory set or in creative mode
 	if bones_mode == "keep" or minetest.setting_getbool("creative_mode") then
-		print(player:get_player_name() .. "'s bones do not remain since in creative_mode -- died at " .. minetest.pos_to_string(vector.round(player:getpos())))
+		minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones do not remain since in creative_mode -- died at " .. minetest.pos_to_string(vector.round(player:getpos())))
 		minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s bones do not remain since in creative_mode -- died at " .. minetest.pos_to_string(pos)) --formerly ("Bones placed at %s."):format(pos)
 		return
 	end
@@ -177,7 +177,7 @@ minetest.register_on_dieplayer(function(player)
 	local player_inv = player:get_inventory()
 	if player_inv:is_empty("main") and
 		player_inv:is_empty("craft") then
-		print(player:get_player_name() .. "'s bones do not remain since inventory and craft are empty -- died at " .. minetest.pos_to_string(vector.round(player:getpos())))
+		minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones do not remain since inventory and craft are empty -- died at " .. minetest.pos_to_string(vector.round(player:getpos())))
 		minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s bones do not remain since inventory and craft are empty -- died at " .. minetest.pos_to_string(pos)) --formerly ("Bones placed at %s."):format(pos)
 		return
 	end
@@ -210,14 +210,15 @@ minetest.register_on_dieplayer(function(player)
 		player_inv:set_list("craft", {})
 
 		drop(pos, ItemStack("bones:bones"))
-		print(player:get_player_name() .. "'s bones do not remain since area is_protected -- died at " .. minetest.pos_to_string(pos))
+		
+		minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones do not remain since area is_protected -- died at " .. minetest.pos_to_string(pos))
 		minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s do not remain since area is_protected -- died at " .. minetest.pos_to_string(pos)) --formerly ("Bones placed at %s."):format(pos)
 		return
 	end
 
 	local param2 = minetest.dir_to_facedir(player:get_look_dir())
 	minetest.set_node(pos, {name = "bones:bones", param2 = param2})
-	print(player:get_player_name() .. "'s bones remain where died at " .. minetest.pos_to_string(pos))
+	minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones remain where died at " .. minetest.pos_to_string(pos))
 	minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s bones remain where died at " .. minetest.pos_to_string(pos)) --formerly ("Bones placed at %s."):format(pos)
 
 	local meta = minetest.get_meta(pos)

@@ -37,13 +37,24 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 
 
 ## Changes:
-* (2017-02-15) (change homedecor_modpack/homedecor) Add optional non-adult beverage version of homedecor in homedecor_modpack (just changes display name & variable name of Wine rack and Beer tap and beer mug, and textures for beer mug)
+* (2017-02-22) Fix protector crash (also sent to TenPlus1):
+```lua
+	if player and player:is_player() and player:get_hp() > 0 then -- ADDED THIS LINE
+         -- hurt player if protection violated
+		 
+		 -- (a bunch of code is here for processing violations) --
+		 
+	end -- ADDED THIS LINE
+	return true
+```
+* (2017-02-22) NOTE: the protector fix below was merged by TenPlus1 today
 * (2017-02-15) (change protector) Avoid crash by not allowing non-player to dig protected area (may only happen when one of the owners of an area does it--that was the crash scenario)
 		changed
 		return protector.can_dig(1, pos, player:get_player_name(), true, 1)
 		to
 		return player and protector.can_dig(1, pos, player:get_player_name(), true, 1) or false
 
+* (2017-02-15) (change homedecor_modpack/homedecor) Add optional non-adult beverage version of homedecor in homedecor_modpack (just changes display name & variable name of Wine rack and Beer tap and beer mug, and textures for beer mug)
 * (2017-02-15) (change bones) Show player (and print to server console) where died (and say bones remain or why not) -- with this addition, you can search your server log for "player's bones" where player is playername whether bones remain or not.
 * (2017-02-14) (change mobs) Added some nonviolent textures that could be used in a school to the ENLIVEN/mods folder (they can be manually installed after ENLIVEN by copying them to the same place in your games/ENLIVEN folder on your installation of Minetest)
 * (2017-02-06) Added installation of trmp_minetest_game to the installer script, since treasurer requires one or more trms in order to work (tested and working now on tsm_railcorridors)
