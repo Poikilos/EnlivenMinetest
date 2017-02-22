@@ -270,73 +270,72 @@ function minetest.is_protected(pos, digger)
 
 	-- is area protected against digger?
 	if not protector.can_dig(protector.radius, pos, digger, false, 1) then
-
 		local player = minetest.get_player_by_name(digger)
-
-		-- hurt player if protection violated
-		if protector.hurt > 0
-		and player then
-			player:set_hp(player:get_hp() - protector.hurt)
-		end
-
-		-- flip player when protection violated
-		if protector.flip
-		and player then
-
-			-- yaw + 180°
-			--local yaw = player:get_look_horizontal() + math.pi
-			local yaw = player:get_look_yaw() + math.pi
-
-			if yaw > 2 * math.pi then
-				yaw = yaw - 2 * math.pi
+		if player and player:is_player() and player:get_hp() > 0 then -- ADDED THIS LINE
+			-- hurt player if protection violated
+			if protector.hurt > 0
+			and player then
+				player:set_hp(player:get_hp() - protector.hurt)
 			end
 
-			--player:set_look_horizontal(yaw)
-			player:set_look_yaw(yaw)
+			-- flip player when protection violated
+			if protector.flip
+			and player then
 
-			-- invert pitch
-			--player:set_look_vertical(-player:get_look_vertical())
-			player:set_look_pitch(-player:get_look_pitch())
+				-- yaw + 180°
+				--local yaw = player:get_look_horizontal() + math.pi
+				local yaw = player:get_look_yaw() + math.pi
 
-			-- if digging below player, move up to avoid falling through hole
-			local pla_pos = player:getpos()
+				if yaw > 2 * math.pi then
+					yaw = yaw - 2 * math.pi
+				end
 
-			if pos.y < pla_pos.y then
+				--player:set_look_horizontal(yaw)
+				player:set_look_yaw(yaw)
 
-				player:setpos({
-					x = pla_pos.x,
-					y = pla_pos.y + 0.8,
-					z = pla_pos.z
-				})
+				-- invert pitch
+				--player:set_look_vertical(-player:get_look_vertical())
+				player:set_look_pitch(-player:get_look_pitch())
+
+				-- if digging below player, move up to avoid falling through hole
+				local pla_pos = player:getpos()
+
+				if pos.y < pla_pos.y then
+
+					player:setpos({
+						x = pla_pos.x,
+						y = pla_pos.y + 0.8,
+						z = pla_pos.z
+					})
+				end
 			end
-		end
 
-		-- drop tool/item if protection violated
-		if protector.drop == true
-		and player then
+			-- drop tool/item if protection violated
+			if protector.drop == true
+			and player then
 
-			local holding = player:get_wielded_item()
+				local holding = player:get_wielded_item()
 
-			if holding:to_string() ~= "" then
+				if holding:to_string() ~= "" then
 
-				-- take stack
-				local sta = holding:take_item(holding:get_count())
-				player:set_wielded_item(holding)
-
-				-- incase of lag, reset stack
-				minetest.after(0.1, function()
+					-- take stack
+					local sta = holding:take_item(holding:get_count())
 					player:set_wielded_item(holding)
 
-					-- drop stack
-					local obj = minetest.add_item(player:getpos(), sta)
-					if obj then
-						obj:setvelocity({x = 0, y = 5, z = 0})
-					end
-				end)
+					-- incase of lag, reset stack
+					minetest.after(0.1, function()
+						player:set_wielded_item(holding)
 
+						-- drop stack
+						local obj = minetest.add_item(player:getpos(), sta)
+						if obj then
+							obj:setvelocity({x = 0, y = 5, z = 0})
+						end
+					end)
+
+				end
 			end
 		end
-
 		return true
 	end
 
