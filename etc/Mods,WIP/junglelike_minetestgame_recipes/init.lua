@@ -3,23 +3,18 @@
 minetest.register_craft({
 	output = "moreblocks:sweeper 4",
 	recipe = {
-		{"default:grass"},
-		{"default:stick"},
+		{"default:grass_1"},
+		{"default:stick"}
 	}
 })
 
 minetest.register_craft({
-	output = "farming:seed_cotton",
 	type = "shapeless",
+	output = "farming:seed_cotton",
 	recipe = {
-		{"farming:cotton"},
-		{"farming:cotton"},
-		{"farming:cotton"},
-		{"farming:cotton"},
-		{"farming:cotton"},
-		{"farming:cotton"},
-		{"farming:cotton"},
-		{"farming:cotton"},
+		"farming:cotton","farming:cotton","farming:cotton",
+		"farming:cotton","farming:cotton","farming:cotton",
+		"farming:cotton","farming:cotton",
 	}
 })
 
@@ -30,9 +25,9 @@ minetest.register_craft({
 minetest.register_craft({
 	output = "moreblocks:rope 3",
 	recipe = {
-		{"default:grass"},
-		{"default:grass"},
-		{"default:grass"},
+		{"default:grass_1"},
+		{"default:grass_1"},
+		{"default:grass_1"}
 	}
 })
 

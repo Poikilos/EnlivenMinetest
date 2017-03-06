@@ -1,4 +1,16 @@
-minetest.override_item("dryplants:reedmace_sapling", {
+
+-- removed for balancing:
+-- minetest.override_item("dryplants:reedmace_sapling", {
+--	drop = {
+--		max_items = 1,
+--		items = {
+--			{items = {'farming:seed_cotton'}, rarity = 8},
+--			{items = {'dryplants:reedmace_sapling'}},
+--		}
+--	},
+-- })
+
+minetest.override_item("dryplants:reedmace_spikes", {
 	drop = {
 		max_items = 1,
 		items = {
@@ -7,7 +19,60 @@ minetest.override_item("dryplants:reedmace_sapling", {
 		}
 	},
 })
-
+minetest.override_item("dryplants:reedmace_top", {
+	drop = {
+		max_items = 1,
+		items = {
+			{items = {'farming:seed_cotton'}, rarity = 8},
+			{items = {'dryplants:reedmace_sapling'}},
+		}
+	},
+})
+minetest.override_item("dryplants:reedmace_height_2", {
+	drop = {
+		max_items = 1,
+		items = {
+			{items = {'farming:seed_cotton'}, rarity = 8},
+			{items = {'dryplants:reedmace_sapling'}},
+		}
+	},
+})
+minetest.override_item("dryplants:reedmace_height_3", {
+	drop = {
+		max_items = 1,
+		items = {
+			{items = {'farming:seed_cotton'}, rarity = 8},
+			{items = {'dryplants:reedmace_sapling'}},
+		}
+	},
+})
+minetest.override_item("dryplants:reedmace_height_3_spikes", {
+	drop = {
+		max_items = 1,
+		items = {
+			{items = {'farming:seed_cotton'}, rarity = 8},
+			{items = {'dryplants:reedmace_sapling'}},
+		}
+	},
+})
+minetest.override_item("dryplants:reedmace", {
+	drop = {
+		max_items = 1,
+		items = {
+			{items = {'farming:seed_cotton'}, rarity = 8},
+			{items = {'dryplants:reedmace_sapling'}},
+		}
+	},
+})
+minetest.override_item("dryplants:reedmace_bottom", {
+	drop = {
+		max_items = 1,
+		items = {
+			{items = {'farming:seed_cotton'}, rarity = 8},
+			{items = {'dryplants:reedmace_sapling'}},
+		}
+	},
+})
 -- formerly only possible using default:junglegrass
 minetest.register_craft({
 	output = "moreblocks:sweeper 4",
@@ -39,3 +104,9 @@ minetest.register_craft({
 	}
 })
 -- end
+
+
+
+
+
+
