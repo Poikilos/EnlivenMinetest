@@ -37,6 +37,7 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 
 
 ## Changes:
+* (2017-03-07) change to tenplus1's hud_hunger fork (BlockMen's has potential comparison of number to nil [crash] in hud/builtin.lua line 79, other issues, and is not maintained)
 * (2017-03-06) remove ENLIVEN's copy of protector since TenPlus1 applied the fixes in the real repo
 * (2017-03-06) remove computer-specific settings from minetest.conf (client version in this folder)
 * (2017-02-22) Fix protector crash (also sent to TenPlus1):
