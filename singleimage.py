@@ -170,6 +170,8 @@ class ChunkymapOfflineRenderer:
             if os.path.isfile(dest_jpg_path):
                 print("jpg image saved to:")
                 print("  "+dest_jpg_path)
+                os.remove(final_png_path)
+                print("removed temporary file "+final_png_path)
             else:
                 print("Could not write '"+dest_jpg_path+"'")
             if os.path.isfile(genresult_path):
