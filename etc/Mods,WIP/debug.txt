@@ -1,0 +1,70 @@
+
+
+-------------
+  Separator
+-------------
+
+2017-03-08 23:04:07: [Main]: Using world specified by --worldname on the command line
+2017-03-08 23:04:07: [Main]: Using game specified by --gameid on the command line
+2017-03-08 23:04:07: WARNING[Main]: NodeDefManager: Ignoring CONTENT_IGNORE redefinition
+2017-03-08 23:04:07: WARNING[Main]: Field "tile_images": Deprecated; new name is "tiles".
+2017-03-08 23:04:07: WARNING[Main]: Field "metadata_name": Deprecated; use on_add and metadata callbacks
+2017-03-08 23:04:07: ACTION[Main]: hb.register_hudbar: health
+2017-03-08 23:04:07: ACTION[Main]: hb.register_hudbar: breath
+2017-03-08 23:04:07: ACTION[Main]: hb.register_hudbar: sprint
+2017-03-08 23:04:07: ERROR[Main]: get_biome_list: failed to get biome 'taiga'
+2017-03-08 23:04:07: ERROR[Main]: get_biome_list: failed to get biome 'snowy_grassland'
+2017-03-08 23:04:07: ERROR[Main]: get_biome_list: failed to get biome 'grassland'
+2017-03-08 23:04:07: ERROR[Main]: get_biome_list: failed to get biome 'coniferous_forest'
+2017-03-08 23:04:07: ERROR[Main]: get_biome_list: failed to get biome 'deciduous_forest'
+2017-03-08 23:04:07: ERROR[Main]: get_biome_list: failed to get biome 'savanna'
+2017-03-08 23:04:07: ERROR[Main]: get_biome_list: failed to get biome 'rainforest'
+2017-03-08 23:04:07: ERROR[Main]: register_ore: couldn't get all biomes 
+2017-03-08 23:04:07: WARNING[Main]: Not registering alias, item with same name is already defined: mushroom:brown_natural -> flowers:mushroom_fertile_brown
+2017-03-08 23:04:07: WARNING[Main]: Not registering alias, item with same name is already defined: mushroom:red_natural -> flowers:mushroom_fertile_red
+2017-03-08 23:04:07: WARNING[Main]: Not registering alias, item with same name is already defined: farming_plus:orange -> ethereal:orange
+2017-03-08 23:04:07: WARNING[Main]: Field "noise_threshhold": Deprecated: new name is "noise_threshold".
+2017-03-08 23:04:08: ACTION[Main]: hb.register_hudbar: armor
+2017-03-08 23:04:08: WARNING[Main]: Field "maxwear" is deprecated; replace with uses=1/maxwear
+2017-03-08 23:04:08: WARNING[Main]: Field "maxwear" is deprecated; replace with uses=1/maxwear
+2017-03-08 23:04:08: ACTION[Main]: [mod fishing] Loading...
+2017-03-08 23:04:08: ACTION[Main]: [Mod] Fishing - Crabman77's (MFF team) version [1.0.0] [fishing] Loaded...
+2017-03-08 23:04:08: ACTION[Main]: hb.register_hudbar: satiation
+2017-03-08 23:04:08: WARNING[Main]: Field "noise_threshhold": Deprecated: new name is "noise_threshold".
+2017-03-08 23:04:08: WARNING[Main]: Field "noise_threshhold": Deprecated: new name is "noise_threshold".
+2017-03-08 23:04:08: WARNING[Main]: Field "noise_threshhold": Deprecated: new name is "noise_threshold".
+2017-03-08 23:04:08: WARNING[Main]: Field "noise_threshhold": Deprecated: new name is "noise_threshold".
+2017-03-08 23:04:08: WARNING[Main]: Field "noise_threshhold": Deprecated: new name is "noise_threshold".
+2017-03-08 23:04:08: WARNING[Main]: Field "noise_threshhold": Deprecated: new name is "noise_threshold".
+2017-03-08 23:04:08: WARNING[Main]: Field "noise_threshhold": Deprecated: new name is "noise_threshold".
+2017-03-08 23:04:08: WARNING[Main]: Field "noise_threshhold": Deprecated: new name is "noise_threshold".
+2017-03-08 23:04:08: WARNING[Main]: Field "noise_threshhold": Deprecated: new name is "noise_threshold".
+2017-03-08 23:04:08: WARNING[Main]: Field "noise_threshhold": Deprecated: new name is "noise_threshold".
+2017-03-08 23:04:08: ACTION[Main]: [boost_cart] Overwriting definitions of similar carts mod
+2017-03-08 23:04:08: WARNING[Main]: Node 'light_source' value exceeds maximum, limiting to maximum: technic:forcefield
+2017-03-08 23:04:08: WARNING[Main]: Field "maxwear" is deprecated; replace with uses=1/maxwear
+2017-03-08 23:04:08: WARNING[Main]: Field "maxwear" is deprecated; replace with uses=1/maxwear
+2017-03-08 23:04:08: WARNING[Main]: Field "maxwear" is deprecated; replace with uses=1/maxwear
+2017-03-08 23:04:08: WARNING[Main]: Not registering alias, item with same name is already defined: stairs:stair_marble -> building_blocks:stair_marble
+2017-03-08 23:04:08: WARNING[Main]: Not registering alias, item with same name is already defined: stairs:slab_marble -> building_blocks:slab_marble
+2017-03-08 23:04:08: WARNING[Main]: Not registering alias, item with same name is already defined: stairs:stair_tar -> building_blocks:stair_tar
+2017-03-08 23:04:08: WARNING[Main]: Not registering alias, item with same name is already defined: stairs:slab_tar -> building_blocks:slab_tar
+2017-03-08 23:04:08: WARNING[Main]: Not registering alias, item with same name is already defined: tar -> building_blocks:Tar
+2017-03-08 23:04:08: WARNING[Main]: Not registering alias, item with same name is already defined: homedecor:beer_tap -> homedecor:drink_tap
+2017-03-08 23:04:08: WARNING[Main]: Not registering alias, item with same name is already defined: tsm_pyramids:mummy -> spawners:mummy
+2017-03-08 23:04:08: WARNING[Main]: Not registering alias, item with same name is already defined: creatures:chicken -> mobs_animal:chicken
+2017-03-08 23:04:08: WARNING[Main]: Not registering alias, item with same name is already defined: creatures:sheep -> mobs_animal:sheep_white
+2017-03-08 23:04:08: WARNING[Main]: Not registering alias, item with same name is already defined: mobs_animal:sheep -> mobs_animal:sheep_white
+2017-03-08 23:04:08: WARNING[Main]: Not registering alias, item with same name is already defined: creatures:ghost -> mobs_monster:spider
+2017-03-08 23:04:08: WARNING[Main]: Not registering alias, item with same name is already defined: creatures:mummy -> spawners:mummy
+2017-03-08 23:04:08: WARNING[Main]: Not registering alias, item with same name is already defined: creatures:zombie -> mobs_monster:stone_monster
+2017-03-08 23:04:09: ACTION[Main]:         .__               __                   __   
+2017-03-08 23:04:09: ACTION[Main]:   _____ |__| ____   _____/  |_  ____   _______/  |_ 
+2017-03-08 23:04:09: ACTION[Main]:  /     \|  |/    \_/ __ \   __\/ __ \ /  ___/\   __\
+2017-03-08 23:04:09: ACTION[Main]: |  Y Y  \  |   |  \  ___/|  | \  ___/ \___ \  |  |  
+2017-03-08 23:04:09: ACTION[Main]: |__|_|  /__|___|  /\___  >__|  \___  >____  > |__|  
+2017-03-08 23:04:09: ACTION[Main]:       \/        \/     \/          \/     \/        
+2017-03-08 23:04:09: ACTION[Main]: World at [/home/owner/.minetest/worlds/FCAGameAWorld]
+2017-03-08 23:04:09: ACTION[Main]: Server for gameid="ENLIVEN" listening on 0.0.0.0:30000.
+2017-03-08 23:04:16: [Main]: INFO: signal_handler(): Ctrl-C pressed, shutting down.
+2017-03-08 23:04:16: ACTION[Main]: [fishing] Server shuts down. saving trophies table
