@@ -65,35 +65,36 @@ if [ ! -d "$MTMOD_DEST_PATH" ]; then
   exit 1  
 fi
 
-cd $HOME/Downloads
-MTMOD_DL_ZIP=master.zip
-MTMOD_SRC_ZIP=torches.zip
-MTMOD_UNZ_NAME=torches-master
-MTMOD_DEST_NAME=torches
-MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
-#if [ -d "$MTMOD_UNZ_NAME" ]; then
-rm -Rf $MTMOD_UNZ_NAME
+
+#https://forum.minetest.net/viewtopic.php?t=14359
+#This mod is part of minetest_game 0.4.15!
+#With exception of the wieldlight
+#cd $HOME/Downloads
+#MTMOD_DL_ZIP=master.zip
+#MTMOD_SRC_ZIP=torches.zip
+#MTMOD_UNZ_NAME=torches-master
+#MTMOD_DEST_NAME=torches
+#MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+##if [ -d "$MTMOD_UNZ_NAME" ]; then
+#rm -Rf $MTMOD_UNZ_NAME
+##fi
+#if [ -f $MTMOD_DL_ZIP ]; then
+#  rm -f $MTMOD_DL_ZIP
 #fi
-if [ -f $MTMOD_DL_ZIP ]; then
-  rm -f $MTMOD_DL_ZIP
-fi
-if [ -f $MTMOD_SRC_ZIP ]; then
-  rm -f $MTMOD_SRC_ZIP
-fi
-if [ -d "$MTMOD_DEST_PATH" ]; then
-  sudo rm -Rf "$MTMOD_DEST_PATH"
-fi
-wget https://github.com/BlockMen/torches/archive/master.zip
-mv $MTMOD_DL_ZIP "$MTMOD_SRC_ZIP"
-unzip "$MTMOD_SRC_ZIP"
-sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
-if [ ! -d "$MTMOD_DEST_PATH" ]; then
-  echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue."
-  exit 1  
-fi
-
-
-
+#if [ -f $MTMOD_SRC_ZIP ]; then
+#  rm -f $MTMOD_SRC_ZIP
+#fi
+#if [ -d "$MTMOD_DEST_PATH" ]; then
+#  sudo rm -Rf "$MTMOD_DEST_PATH"
+#fi
+#wget https://github.com/BlockMen/torches/archive/master.zip
+#mv $MTMOD_DL_ZIP "$MTMOD_SRC_ZIP"
+#unzip "$MTMOD_SRC_ZIP"
+#sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
+#if [ ! -d "$MTMOD_DEST_PATH" ]; then
+#  echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue."
+#  exit 1  
+#fi
 
 
 cd $HOME/Downloads
@@ -267,4 +268,26 @@ if [ ! -d "$MTMOD_DEST_PATH" ]; then
   exit 1  
 fi
 
+cd $HOME/Downloads
+MTMOD_DL_ZIP=master.zip
+MTMOD_SRC_ZIP=travelnet.zip
+MTMOD_UNZ_NAME=travelnet-master
+MTMOD_DEST_NAME=travelnet
+MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+#if [ -d "$MTMOD_UNZ_NAME" ]; then
+rm -Rf $MTMOD_UNZ_NAME
+#fi
+if [ -f $MTMOD_DL_ZIP ]; then
+  rm -f $MTMOD_DL_ZIP
+fi
+if [ -f $MTMOD_SRC_ZIP ]; then
+  rm -f $MTMOD_SRC_ZIP
+fi
+if [ -d "$MTMOD_DEST_PATH" ]; then
+  sudo rm -Rf "$MTMOD_DEST_PATH"
+fi
+wget https://github.com/Sokomine/travelnet/archive/master.zip
+mv $MTMOD_DL_ZIP "$MTMOD_SRC_ZIP"
+unzip "$MTMOD_SRC_ZIP"
+sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 
