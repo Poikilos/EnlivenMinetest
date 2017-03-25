@@ -34,6 +34,20 @@ class ChunkymapOfflineRenderer:
         self.minetestmapper_numpy_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-numpy.py")
         self.minetestmapper_custom_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-expertmm.py")
         self.minetestmapper_py_path = self.minetestmapper_numpy_path
+        
+        #region useful if version of minetestmapper.py from expertmm fork of minetest is used
+        #profile_path = None
+        #if 'USERPROFILE' in os.environ:
+        #    profile_path = os.environ['USERPROFILE']
+        #elif 'HOME' in os.environ:
+        #    profile_path = os.environ['HOME']
+        #minetest_program_path = os.path.join(profile_path, "minetest")
+        #minetest_util_path = os.path.join(minetest_program_path,"util")
+        #minetest_minetestmapper_path = os.path.join(minetest_util_path,"minetestmapper.py")
+        #if not os.path.isfile(self.minetestmapper_py_path):
+        #    self.minetestmapper_py_path = minetest_minetestmapper_path 
+        #endregion useful if version of minetestmapper.py from expertmm fork of minetest is used
+        
         #if (self.backend_string!="sqlite3"):
             # minetestmapper-numpy had trouble with leveldb but this fork has it fixed so use numpy always always instead of running the following line
             # self.minetestmapper_py_path = self.minetestmapper_custom_path
@@ -92,6 +106,9 @@ class ChunkymapOfflineRenderer:
             limit_param = region_param
             io_string = " \""+self.world_path+"\" \""+tmp_png_path+"\""
             #geometry_param = " --region " + str(min_x) + " " + str(max_x) + " " + str(min_z) + " " + str(max_z)
+            #print("Using numpy style parameters.")
+            #print("  since using "+self.minetestmapper_py_path)
+            #print()
         cmd_no_out_string = python_exe_path+" "+self.minetestmapper_py_path+" --bgcolor "+squote+FLAG_EMPTY_HEXCOLOR+squote+io_string+limit_param
         cmd_string = cmd_no_out_string + cmd_suffix
         print("")
