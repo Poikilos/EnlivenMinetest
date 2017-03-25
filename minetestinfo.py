@@ -1,4 +1,5 @@
 import os
+import datetime
 from expertmm import *
 
 #variables to eliminate from generator.py (and managed here centrally instead, so configuration is shared across minetest helper programs):
@@ -469,31 +470,23 @@ def load_world_and_mod_data():
 
     if (not minetestinfo.contains("primary_world_path")) or is_missing_world:
         print ("LOOKING FOR WORLDS IN " + minetestinfo.get_var("worlds_path"))
-        for base_path, dirnames, filenames in os.walk(minetestinfo.get_var("worlds_path")):
-            #for j in range(0,len(dirnames)):
-            #    i = len(dirnames) - 0 - 1
-            #    if dirnames[i][0] == ".":
-            #        print ("  SKIPPING "+dirnames[i])
-            #        dirnames.remove_at(i)
-            world_count = 0
-            for subdirname in dirnames:
-                #print ("  EXAMINING "+subdirname)
-                if subdirname[0]!=".":
-                    world_count += 1
-            index = 0
-            world_number = 0
-            for subdirname in dirnames:
-                print ("  "+subdirname)
-                if subdirname[0]!=".":
-                    #if (index == len(dirnames)-1):  # skip first one because the one on my computer is big
-                    if (subdirname!="world") or (world_number==(world_count-1)):
-                        default_world_path = os.path.join(base_path, subdirname) #  os.path.join(minetestinfo.get_var("worlds_path"), "try7amber")
+        folder_path=minetestinfo.get_var("worlds_path")
+        #if os.path.isdir(folder_path):
+        world_count = 0
+        index = 0
+        world_number = 0
+        for sub_name in os.listdir(folder_path):
+            sub_path = os.path.join(folder_path, sub_name)
+            if sub_name[:1]!="." and os.path.isdir(sub_path):
+                world_count += 1
+                print ("  " + sub_name + (" "*(30-len(sub_name))) + " <"+datetime.datetime.fromtimestamp(os.path.getmtime(sub_path)).strftime('%Y-%m-%d %H:%M:%S')+">")
+                if sub_name[0]!=".":
+                    if (sub_name!="world") or (world_number==(world_count-1)):
+                        if not auto_chosen_world:
+                            default_world_path = sub_path #os.path.join(base_path, sub_name) #  os.path.join(minetestinfo.get_var("worlds_path"), "try7amber")
                         auto_chosen_world = True
-                        break
                     world_number += 1
                 index += 1
-            if auto_chosen_world:
-                break
 
         if is_missing_world:
             print("MISSING WORLD '"+minetestinfo.get_var("primary_world_path")+"'")
