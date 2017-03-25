@@ -27,18 +27,25 @@ DEBUG_TXT_TIME_FORMAT_STRING="%Y-%m-%d %H:%M:%S"
 is_start_now = False
 interactive_enable = False
 
+
 def confirm_min_date():
     global min_date_string
     while min_date_string is None:
         default_min_date_string = datetime.strftime(datetime.now(), DEBUG_TXT_TIME_FORMAT_STRING)
         print("")
         print("Please enter starting date for player locations and block obtaining to be replayed (only used for inventory recovery feature).")
-        answer = raw_input("Replay Start [YYYY-MM-DD HH-mm-SS format] (blank for "+default_min_date_string+"): ")
+        try:
+            answer = raw_input("Replay Start [YYYY-MM-DD HH-mm-SS format] (blank for "+default_min_date_string+"): ")
+        except:
+            answer = input("Replay Start [YYYY-MM-DD HH-mm-SS format] (blank for "+default_min_date_string+"): ")
         if len(answer.strip())>0:
             try:
                 min_date = datetime.strptime(answer, DEBUG_TXT_TIME_FORMAT_STRING)
                 tmp_string = datetime.strftime(min_date, DEBUG_TXT_TIME_FORMAT_STRING)
-                confirm = raw_input(tmp_string+" ok [Y/n]? ")
+                try:
+                    confirm = raw_input(tmp_string+" ok [Y/n]? ")
+                except:
+                    confirm = input(tmp_string+" ok [Y/n]? ")
                 if confirm.strip().lower()=="y" or confirm.strip().lower()=="yes":
                     min_date_string = tmp_string
             except:
@@ -157,7 +164,10 @@ class MinetestInventoryItem:
             is_msg = True
         if interactive_enable:
             if is_msg:
-                raw_input("Press enter to continue...")
+                try:
+                    raw_input("Press enter to continue...")
+                except:
+                    input("Press enter to continue...")
         return result
 
     def set_from_inventory_line(self, line):
@@ -191,7 +201,10 @@ class MinetestInventoryItem:
             global interactive_enable
             if interactive_enable:
                 if is_warning:
-                    raw_input("Press enter to continue...")
+                    try:
+                        raw_input("Press enter to continue...")
+                    except:
+                        input("Press enter to continue...")
         else:
             self.name = "Empty"
 
@@ -241,14 +254,20 @@ class MinetestInventory:
             else:
                 print("ERROR in minetestinventory.write_to: items is None")
                 if interactive_enable:
-                    raw_input("Press enter to continue...")
+                    try:
+                        raw_input("Press enter to continue...")
+                    except:
+                        input("Press enter to continue...")
             #else:
             #    print("ERROR in minetestinventory.write_to: width is None")
             #    raw_input("Press enter to continue...")
         else:
             print("ERROR in minetestinventory.write_to: name is None")
             if interactive_enable:
-                raw_input("Press enter to continue...")
+                try:
+                    raw_input("Press enter to continue...")
+                except:
+                    input("Press enter to continue...")
 
 
 class MinetestPlayer:
@@ -566,10 +585,21 @@ def convert_storage_to_give_commands_DEPRECATED(this_players_offline_storage_pat
     #    load_players_offline_storage(this_players_offline_storage_path)
     while True:
         print("")
-        playerid = raw_input("Minetest Username: ")
-        real_name_string = raw_input("Real Name: ")
+        playerid = None
+        try:
+            playerid = raw_input("Minetest Username: ")
+        except:
+            playerid = input("Minetest Username: ")
+        real_name_string = None
+        try:
+            real_name_string = raw_input("Real Name: ")
+        except:
+            real_name_string = input("Real Name: ")
         identifiable_user_description = "first initial + last name + grad year"
-        identifiable_user_string = raw_input(identifiable_user_description+": ")
+        try:
+            identifiable_user_string = raw_input(identifiable_user_description+": ")
+        except:
+            identifiable_user_string = input(identifiable_user_description+": ")
         if len(playerid)>0:
             player_storage_path = os.path.join(this_players_offline_storage_path, playerid)
             if os.path.isfile(player_storage_path):
@@ -613,7 +643,10 @@ def debug_log_replay_to_offline_player_storage(debug_txt_path, this_players_offl
         min_date = datetime.strptime(min_date_string, DEBUG_TXT_TIME_FORMAT_STRING)
     print("This will only work if server is offline.")
     print("  (Using min date "+str(min_date)+")")
-    raw_input("  press enter to continue, otherwise exit this Window or Ctrl-C to terminate script in GNU/Linux systems...")
+    try:
+        raw_input("  press enter to continue, otherwise exit this Window or Ctrl-C to terminate script in GNU/Linux systems...")
+    except:
+        input("  press enter to continue, otherwise exit this Window or Ctrl-C to terminate script in GNU/Linux systems...")
     if players is None:
         load_players_offline_storage(this_players_offline_storage_path)
 
@@ -775,6 +808,8 @@ def set_player_names_to_file_names():
 ##for debug_path in debugs_list:
 ##    debug_log_replay_to_offline_player_storage(debug_path, players_offline_storage_path, min_date_string)
 #debug_log_replay_to_offline_player_storage(debug_txt_path, players_offline_storage_path, min_date_string)
+min_date_string="2016-03-21 00:00:00"
+debug_log_replay_to_offline_player_storage("C:\\Users\\jgustafson\\Desktop\\Backup\\fcalocal\\home\\owner\\.minetest\\debug 2017-03-24 stolen panels, cables, battery boxes ONLY.txt", players_offline_storage_path, min_date_string)
 
 def switch_player_file_contents(player1_path, player2_path):
     #switches everything except name
