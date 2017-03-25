@@ -62,6 +62,7 @@ screen -t chunkymapregen python $HOME/chunkymap/generator.py
         
 
 ## Changes
+* (2017-03-25) list all world folder names, and do not list subfolders (removed inaccurate use of os.walk in load_world_and_mod_data)
 * (2017-02-16) list players by distance feature added
 * (2017-02-16) Fixed some long-standing syntax and logic errors in get_pos, and missing colons in switch_player_file_contents
 * (2016-03-22) Detect exceptions in mintestmapper (such as database locked) and do NOT mark the chunk as is_empty
