@@ -115,6 +115,8 @@ class ChunkymapOfflineRenderer:
         print("")
         print("Running")
         print("    "+cmd_string)
+        print("  mapper_path: " + self.minetestmapper_py_path)
+        print("  backend: " + self.backend_string)
         print("    # (this may take a while...)")
         if os.path.isfile(tmp_png_path):
             os.remove(tmp_png_path)
