@@ -37,6 +37,9 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 
 
 ## Changes:
+* (2017-04-02) fixed issue with redundant aliases in cme_to_spawners (see Mods,WIP folder)
+* (2017-04-02) switched from kaeza to minetest-mods github repo for xban2
+* (2017-04-02) changed maximum range from 20 to 30 for forcefield (see technic/machines folder)
 * (2017-03-08) switched to hudbars, removed hud_hunger. Add line to SERVER's minetest.conf (using installer script): hubars_bar_type = statbar_modern
 * (2017-03-08) renamed the files in tenplus1's hud_hunger to use its nosprint version of lua files in hud_hunger/hunger
 * (2017-03-07) change to tenplus1's hud_hunger fork (BlockMen's has potential comparison of number to nil [crash] in hud/builtin.lua line 79, other issues, and is not maintained)

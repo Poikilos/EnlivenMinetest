@@ -3,17 +3,18 @@
 -- The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 -- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+-- NOTE: register_alias is not needed for mobs, since alias_mob calls that
 -- minetest.register_alias(name, convert_to)
 -- "This means that if the engine finds nodes with the name name in the world the node with the name convert_to is used instead. "
 -- <https://dev.minetest.net/minetest.register_alias>
-minetest.register_alias("creatures:chicken", "mobs_animal:chicken")
-minetest.register_alias("creatures:sheep", "mobs_animal:sheep_white")
-minetest.register_alias("mobs_animal:sheep", "mobs_animal:sheep_white")  -- this is to fix an earlier bug in this mod
-minetest.register_alias("creatures:ghost", "mobs_monster:spider")
-minetest.register_alias("creatures:mummy", "spawners:mummy")
+-- minetest.register_alias("creatures:chicken", "mobs_animal:chicken")
+-- minetest.register_alias("creatures:sheep", "mobs_animal:sheep_white")
+-- minetest.register_alias("mobs_animal:sheep", "mobs_animal:sheep_white")  -- this is to fix an earlier bug in this mod
+-- minetest.register_alias("creatures:ghost", "mobs_monster:spider")
+-- minetest.register_alias("creatures:mummy", "spawners:mummy")
 -- minetest.register_alias("creatures:mummy", "mobs_monster:stone_monster")
-minetest.register_alias("creatures:oerrki", "mobs_monster:oerrki")
-minetest.register_alias("creatures:zombie", "mobs_monster:stone_monster")
+-- minetest.register_alias("creatures:oerrki", "mobs_monster:oerrki")
+-- minetest.register_alias("creatures:zombie", "mobs_monster:stone_monster")
 
 mobs:alias_mob("creatures:chicken", "mobs_animal:chicken")
 mobs:alias_mob("creatures:sheep", "mobs_animal:sheep_white")

@@ -231,8 +231,9 @@ echo "load_mod_protector = true" >> $MT_MYWORLD_DIR/world.mt
 
 
 cd "$HOME/Downloads"
-MTMOD_DL_ZIP=master.tar.gz
-MTMOD_SRC_ZIP=xban2.tar.gz
+#MTMOD_DL_ZIP=master.tar.gz
+MTMOD_DL_ZIP=master.zip
+MTMOD_SRC_ZIP=xban2.zip
 #MTMOD_UNZ_NAME=minetest-xban2-master
 MTMOD_UNZ_NAME=xban2-master
 MTMOD_DEST_NAME=xban2
@@ -244,9 +245,11 @@ if [ -f $MTMOD_SRC_ZIP ]; then
   rm -f $MTMOD_SRC_ZIP
 fi
 rm -Rvf $MTMOD_UNZ_NAME
-wget https://github.com/kaeza/minetest-xban2/archive/master.tar.gz
+#wget https://github.com/kaeza/minetest-xban2/archive/master.tar.gz
+wget https://github.com/minetest-mods/xban2/archive/master.zip
 mv $MTMOD_DL_ZIP $MTMOD_SRC_ZIP
-tar -xzvf $MTMOD_SRC_ZIP
+#tar -xzvf $MTMOD_SRC_ZIP
+unzip $MTMOD_SRC_ZIP
 # As http://wiki.minetest.net/Installing_Mods specifies, a mod MUST be renamed to official name as in the official thread of the mod:
 mv $MTMOD_UNZ_NAME $MTMOD_DEST_NAME
 sudo mv $MTMOD_DEST_NAME "$MTMOD_DEST_PATH"
