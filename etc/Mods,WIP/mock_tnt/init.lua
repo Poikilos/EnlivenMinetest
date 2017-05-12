@@ -35,10 +35,10 @@ end
 -- 	sounds = default.node_sound_sand_defaults(),
 -- })
 
-minetest.register_alias("tnt:tnt", "mock_tnt:mock_tnt")
 
 -- Only when "not" to not overlap tnt mod:
 if not enable_tnt then
+	minetest.register_alias("tnt:tnt", "mock_tnt:mock_tnt")
 	minetest.register_craft({
 		output = "mock_tnt:mock_tnt",
 		recipe = {
