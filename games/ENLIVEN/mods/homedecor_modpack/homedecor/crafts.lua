@@ -2936,7 +2936,7 @@ minetest.register_craft({
 		{ "default:steel_ingot","default:steel_ingot","default:steel_ingot" }
 	},
 })
-minetest.register_alias("homedecor:beer_tap", "homedecor:drink_tap")
+-- already done in gastronomy.lua: minetest.register_alias("homedecor:beer_tap", "homedecor:drink_tap")
 
 minetest.register_craft({
 	output = "homedecor:swing",
