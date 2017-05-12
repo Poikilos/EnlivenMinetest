@@ -4,7 +4,8 @@ sudo apt-get install build-essential cmake git libirrlicht-dev libbz2-dev libget
 #above is from http://dev.minetest.net/Compiling_Minetest#Compiling_on_GNU.2FLinux
 
 #as per <https://www.digitalocean.com/community/tutorials/how-to-configure-a-redis-cluster-on-ubuntu-14-04>:
-sudo add-apt-repository ppa:chris-lea/redis-server
+#this ppa doesn't work anymore (tested 2017-04)
+#sudo add-apt-repository ppa:chris-lea/redis-server
 sudo apt-get update
 sudo apt-get install redis-server
 
