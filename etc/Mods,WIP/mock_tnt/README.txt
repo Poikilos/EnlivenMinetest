@@ -9,6 +9,7 @@ Mod for Minetest
 * Does not harm any block or entity
 
 ## Known Issues
+* when TNT is enabled, there is no crafting recipe for mock_tnt
 * also ignite gunpowder with "default:torch", "fire:permanent_flame" (minetest_game only ignites via "fire:basic_flame", "default:lava_source", "default:lava_flowing") -- for some reason torch works already but permanent_flame does not
 * Make gunpowder ignite via "building_blocks:Fireplace"
 * Make TNT ignite via neighbors "throwing:arrow_fireworks_blue", "throwing:arrow_fireworks_red"
