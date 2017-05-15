@@ -7,6 +7,29 @@ if enable_tnt == nil then
 	enable_tnt = minetest.is_singleplayer()
 end
 
+local function notify(name, retcode)
+	if(retcode == false) then
+		minetest.chat_send_player(name, "You did not suffer any ill effects.")
+	-- else
+	--  NOTE: tostring(retcode) is just a number, and debuff countdowns are automatically shown on right anyway
+	-- 	minetest.chat_send_player(name, "You temporarily suffer from "..tostring(retcode))
+	end
+end
+
+if (minetest.global_exists("playereffects")) then
+	dofile(minetest.get_modpath(minetest.get_current_modname()).."/playereffects.lua")
+end
+
+local function apply_flashbang_debuffs(player)
+	if (minetest.global_exists("playereffects")) then
+		-- see also /usr/local/share/minetest/games/ENLIVEN/mods/playereffects/examples.lua
+		local ret = playereffects.apply_effect_type("blind", 10, player)
+		notify(player:get_player_name(), ret)
+		local ret = playereffects.apply_effect_type("low_speed", 12, player)
+		notify(player:get_player_name(), ret)
+	end
+end
+
 local tnt_radius = tonumber(minetest.setting_get("tnt_radius") or 3)
 
 local function rand_pos(center, pos, radius)
@@ -61,7 +84,7 @@ if not enable_tnt then
 end
 
 
-local function add_effects(pos, radius)
+local function add_effects(pos, radius, drops)
 	minetest.add_particle({
 		pos = pos,
 		velocity = vector.new(),
@@ -91,18 +114,19 @@ local function add_effects(pos, radius)
 	-- we just dropped some items. Look at the items entities and pick
 	-- one of them to use as texture
 	local texture = "mock_tnt_blast.png" --fallback texture
-	-- local most = 0
-	-- for name, stack in pairs(drops) do
-	-- 	local count = stack:get_count()
-	-- 	if count > most then
-	-- 		most = count
-	-- 		local def = minetest.registered_nodes[name]
-	-- 		if def and def.tiles and def.tiles[1] then
-	-- 			texture = def.tiles[1]
-	-- 		end
-	-- 	end
-	-- end
-
+	if drops ~= nil then
+		local most = 0
+		for name, stack in pairs(drops) do
+			local count = stack:get_count()
+			if count > most then
+				most = count
+				local def = minetest.registered_nodes[name]
+				if def and def.tiles and def.tiles[1] then
+					texture = def.tiles[1]
+				end
+			end
+		end
+	end
 	minetest.add_particlespawner({
 		amount = 64,
 		time = 0.1,
@@ -235,6 +259,80 @@ local function UNUSED_mock_tnt_explode(pos, radius, ignore_protection, ignore_on
 	return drops, radius
 end
 
+local function eject_drops(drops, pos, radius)
+	local drop_pos = vector.new(pos)
+	for _, item in pairs(drops) do
+		local count = math.min(item:get_count(), item:get_stack_max())
+		while count > 0 do
+			local take = math.max(1,math.min(radius * radius,
+					count,
+					item:get_stack_max()))
+			rand_pos(pos, drop_pos, radius)
+			local dropitem = ItemStack(item)
+			dropitem:set_count(take)
+			local obj = minetest.add_item(drop_pos, dropitem)
+			if obj then
+				obj:get_luaentity().collect = true
+				obj:setacceleration({x = 0, y = -10, z = 0})
+				obj:setvelocity({x = math.random(-3, 3),
+						y = math.random(0, 10),
+						z = math.random(-3, 3)})
+			end
+			count = count - take
+		end
+	end
+end
+
+local function entity_physics(pos, radius, drops)
+	local objs = minetest.get_objects_inside_radius(pos, radius)
+	for _, obj in pairs(objs) do
+		local obj_pos = obj:getpos()
+		local dist = math.max(1, vector.distance(pos, obj_pos))
+
+		local damage = (4 / dist) * radius
+		if obj:is_player() then
+			-- currently the engine has no method to set
+			-- player velocity. See #2960
+			-- instead, we knock the player back 1.0 node, and slightly upwards
+			local dir = vector.normalize(vector.subtract(obj_pos, pos))
+			local moveoff = vector.multiply(dir, dist + 1.0)
+			local newpos = vector.add(pos, moveoff)
+			newpos = vector.add(newpos, {x = 0, y = 0.2, z = 0})
+			obj:setpos(newpos)
+
+			obj:set_hp(obj:get_hp() - damage)
+		else
+			local do_damage = true
+			local do_knockback = true
+			local entity_drops = {}
+			local luaobj = obj:get_luaentity()
+			local objdef = minetest.registered_entities[luaobj.name]
+
+			if objdef and objdef.on_blast then
+				do_damage, do_knockback, entity_drops = objdef.on_blast(luaobj, damage)
+			end
+
+			if do_knockback then
+				local obj_vel = obj:getvelocity()
+				obj:setvelocity(calc_velocity(pos, obj_pos,
+						obj_vel, radius * 10))
+			end
+			if do_damage then
+				if not obj:get_armor_groups().immortal then
+					obj:punch(obj, 1.0, {
+						full_punch_interval = 1.0,
+						damage_groups = {fleshy = damage},
+					}, nil)
+				end
+			end
+			for _, item in pairs(entity_drops) do
+				add_drop(drops, item)
+			end
+		end
+	end
+end
+
+
 function mock_tnt.boom(pos, def)
 	minetest.sound_play("tnt_explode", {pos = pos, gain = 1.5, max_hear_distance = 2*64})
 	minetest.set_node(pos, {name = "mock_tnt:boom"})
@@ -242,13 +340,27 @@ function mock_tnt.boom(pos, def)
 	-- 		def.ignore_on_blast)
 	-- append entity drops
 	-- local damage_radius = (radius / def.radius) * def.damage_radius
+	local drops = {}
+	local radius = def.damage_radius
 	local damage_radius = def.damage_radius
-	-- entity_physics(pos, damage_radius, drops)
-	-- if not def.disable_drops then
-	-- 	eject_drops(drops, pos, radius)
-	-- end
-	-- add_effects(pos, radius, drops)
-	add_effects(pos, damage_radius)
+	entity_physics(pos, damage_radius, drops)
+
+	local objs = minetest.get_objects_inside_radius(pos, radius)
+	for _, obj in pairs(objs) do
+		local obj_pos = obj:getpos()
+		local dist = math.max(1, vector.distance(pos, obj_pos))
+
+		local damage = (4 / dist) * radius
+		if obj:is_player() then
+			apply_flashbang_debuffs(obj)
+		end
+	end
+
+	if not def.disable_drops then
+		eject_drops(drops, pos, radius)
+	end
+	add_effects(pos, radius, drops)
+	-- add_effects_nodrops(pos, damage_radius)
 end
 
 minetest.register_node("mock_tnt:boom", {
