@@ -11,6 +11,9 @@ DISCLAIMERS:
 
 
 ## How to use:
+### Windows Client:
+Download at [axlemedia.net](http://www.axlemedia.net/index.php?htmlref=tutoring.html "Axle Media")
+### Server:
 (requires GNU/Linux System and only tested on Ubuntu Server [14.04 to 16.04] and Lubuntu [14.04 to 16.04])
 The installer script (in the "etc/change_world_name_manually_first" folder) downloads the git versions of all of the mods to the ENLIVEN folder which will be placed in your minetest games folder (one of the two folders listed below, otherwise fails)--but change the world name to the name of your world first.
 * (optionally) place the enliven folder in the games folder here into the games folder on your server such as:
