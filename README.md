@@ -30,11 +30,11 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 (NOTE: spawners makes pyramids now, so tsm_pyramids )
 * Recommend your users download the minetest.conf from this folder and put it in their minetest folder for better graphics (opengl 3.0 shaders, smooth lighting)
 
-### Customization
+#### Customization
 * Before using anything in the change_world_name_manually_first and subfolders, change the values of the variables in the folder name as noted before using.
 * If you have a dedicated server, the value server_dedicated = false should be changed to server_dedicated = true in your SERVER's minetest.conf in the ENLIVEN folder that the installer creates.
 
-### Security and Performance Notes
+#### Security and Performance Notes
 * The installer script changes owner and group for ENLIVEN's world.mt and world.mt.1st if present to $USER
 * The included minetest.conf recommended for your clients includes the line enable_local_map_saving = true, which will cache the world locally on their machines. You can feel free to change that according to your preference.
 
