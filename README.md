@@ -87,6 +87,7 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * minetest_game mods and modpacks are owned by root in the end, for some reason. This may cause serious problems on your server. Change the owner to your current user.
 
 ## Planned Features
+* Do not allow teleporting to travelnet teleporters in an area protected by protection mod (even if the source teleporter is yours), but allow teleporting to areas where you cannot modify (such as advanced area protection areas where, by default, use is allowed and modify is not). Locked travelnet will not be used by this mod--instead, this less-cumbersome change is planned.
 * Log where bones were placed to debug.txt, possibly by way of the following chat message:
 	after the existing line:
 	minetest.set_node(pos, {name = "bones:bones", param2 = param2})
