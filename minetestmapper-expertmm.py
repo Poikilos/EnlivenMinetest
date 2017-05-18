@@ -403,6 +403,8 @@ if os.path.exists(path + "sectors"):
 
 if len(xlist) == 0 or len(zlist) == 0:
     print("Data does not exist at this location.")
+    print("xlist: "+str(xlist))
+    print("zlist: "+str(zlist))
     sys.exit(1)
 
 # Get rid of doubles

@@ -9,22 +9,26 @@ from PIL import Image
 
 class ChunkymapOfflineRenderer:
 
-    minetestmapper_numpy_path = None
-    minetestmapper_custom_path = None
-    minetestmapper_py_path = None
-    backend_string = None
-    world_path = None
-    world_name = None
-    boundary_x_min = None
-    boundary_x_max = None
-    boundary_z_min = None
-    boundary_z_max = None
+    #minetestmapper_numpy_path = None
+    #minetestmapper_custom_path = None
+    #minetestmapper_py_path = None
+    #minetestmapper_bin_path = None
+    #backend_string = None
+    #world_path = None
+    #world_name = None
+    #boundary_x_min = None
+    #boundary_x_max = None
+    #boundary_z_min = None
+    #boundary_z_max = None
+    #mtm_bin_enable = None
+    #mtm_bin_dir_path = None
 
     def __init__(self):
         self.boundary_x_min = -4096  #formerly -10000
         self.boundary_x_max = 4096  #formerly 10000
         self.boundary_z_min = -4096  #formerly -10000
         self.boundary_z_max = 4096  #formerly 10000
+        self.mtm_bin_enable = False  # set below automatically if present
         #NOTE: 6144*2 = 12288
         #NOTE: a 16464x16384 or 12288x12288 image fails to load in browser, but 6112x6592 works
 
@@ -34,7 +38,10 @@ class ChunkymapOfflineRenderer:
         self.minetestmapper_numpy_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-numpy.py")
         self.minetestmapper_custom_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "minetestmapper-expertmm.py")
         self.minetestmapper_py_path = self.minetestmapper_numpy_path
-        
+        self.mtm_bin_dir_path = os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)),".."),"minetestmapper")
+        self.minetestmapper_bin_path = os.path.join(self.mtm_bin_dir_path,"minetestmapper")
+        if os.path.isfile(self.minetestmapper_bin_path):
+            self.mtm_bin_enable = True
         #region useful if version of minetestmapper.py from expertmm fork of minetest is used
         #profile_path = None
         #if 'USERPROFILE' in os.environ:
@@ -68,7 +75,7 @@ class ChunkymapOfflineRenderer:
         #endregion the following is also in singleimage.py
 
     def RenderSingleImage(self):
-        
+        dest_colors_path = os.path.join(self.mtm_bin_dir_path,"colors.txt")
         genresults_folder_path = os.path.join( os.path.join(os.path.dirname(os.path.abspath(__file__)), "chunkymap-genresults"), self.world_name)
         if not os.path.isdir(genresults_folder_path):
             os.makedirs(genresults_folder_path)
@@ -102,20 +109,30 @@ class ChunkymapOfflineRenderer:
         if os_name!="windows":
             squote = "'"
         io_string = " --input \""+self.world_path+"\" --output \""+tmp_png_path+"\""
-        if "numpy" in self.minetestmapper_py_path:
+        if (not self.mtm_bin_enable) and ("numpy" in self.minetestmapper_py_path):
             limit_param = region_param
             io_string = " \""+self.world_path+"\" \""+tmp_png_path+"\""
             #geometry_param = " --region " + str(min_x) + " " + str(max_x) + " " + str(min_z) + " " + str(max_z)
             #print("Using numpy style parameters.")
             #print("  since using "+self.minetestmapper_py_path)
             #print()
-        cmd_no_out_string = python_exe_path+" "+self.minetestmapper_py_path+" --bgcolor "+squote+FLAG_EMPTY_HEXCOLOR+squote+io_string+limit_param
+        if self.mtm_bin_enable:
+            cmd_no_out_string = self.minetestmapper_bin_path+" --colors "+dest_colors_path+" --bgcolor "+squote+FLAG_EMPTY_HEXCOLOR+squote+io_string+limit_param
+        else:
+            cmd_no_out_string = python_exe_path+" "+self.minetestmapper_py_path+" --bgcolor "+squote+FLAG_EMPTY_HEXCOLOR+squote+io_string+limit_param
         cmd_string = cmd_no_out_string + cmd_suffix
         print("")
         print("")
         print("Running")
         print("    "+cmd_string)
-        print("  mapper_path: " + self.minetestmapper_py_path)
+        if self.mtm_bin_enable:
+            if os.path.isfile(self.colors_path) and not os.path.isfile(dest_colors_path):
+                print("Copying...'"+self.colors_path+"' to  '"+dest_colors_path+"'")
+                shutil.copyfile(self.colors_path,dest_colors_path)
+            print("  mapper_path: " + self.minetestmapper_bin_path)
+        else:
+            print("  mapper_path: " + self.minetestmapper_py_path)
+        print("  colors_path: "+self.colors_path)
         print("  backend: " + self.backend_string)
         print("    # (this may take a while...)")
         if os.path.isfile(tmp_png_path):
