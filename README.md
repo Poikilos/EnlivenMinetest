@@ -37,6 +37,8 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 
 
 ## Changes:
+* (2017-05-18) Installer now available at [axlemedia.net](http://www.axlemedia.net/index.php?htmlref=tutoring.html "Axle Media") -- added project and related files for Inno Setup Compiler.
+* (2017-05-15) added mock_tnt: doesn't destroy blocks, can coexist with regular tnt mod (all tnt is replaced with mock_tnt if tnt is disabled). This mod is helpful for when multiplayer servers have tnt disabled but players have acquired 'unknown item' (tnt:tnt) as loot. The Unknown Explosive says 'unknown item' on it, as a seemless replacement :)
 * (2017-04-02) fixed issue with redundant aliases in cme_to_spawners (see Mods,WIP folder)
 * (2017-04-02) switched from kaeza to minetest-mods github repo for xban2
 * (2017-04-02) changed maximum range from 20 to 30 for forcefield (see technic/machines folder)
