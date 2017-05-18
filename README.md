@@ -70,6 +70,18 @@ screen -t chunkymapregen python $HOME/chunkymap/generator.py
 * (2016-03-22) Make a method (in chunkymap.php) to echo the map as an html5 canvas
 
 ## Developer Notes:
+* minetestinfo.py's Chunk set_from_genresult expects the following lines (such as from minetestmapper.py or minetestmapper-numpy.py):
+Result image (w=512 h=3152) will be written to C:\Users\jgustafson\Documents\GitHub\minetest-chunkymap\chunkymap-genresults\Enliven20170213v7\singleimage.png
+Drawing image
+Saving to: C:\Users\jgustafson\Documents\GitHub\minetest-chunkymap\chunkymap-genresults\Enliven20170213v7\singleimage.png
+('PNG Region: ', [-208, 304, -688, 2464])
+('pngMinX: ', '-208')
+('pngMaxZ: ', '2464')
+('Pixels PerNode: ', 1)
+('border: ', 0)
+
+where PNG Region values are left,right,top,bottom respectively.
+where required values are Result image dimensions, and PNG Region or xmin,xmax,zmin,zmax.
 * Player username privacy: check_players in generator.py intentionally makes up an index and uses that as the filename on the destination, so that ajax can update players without knowing either their id (filename of minetest player file) or display name (listed in the player file)
 (this way, only usernames can be known if chunkymap.php allows that, or the person is logged in to the server)
 Because of the feature, generator.py must prevent duplicates based on value of id in the resulting yml files (minetest player filename as id).

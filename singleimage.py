@@ -1,5 +1,6 @@
 import subprocess
 import os
+#import stat
 import shutil
 from minetestinfo import *
 #python_exe_path is from:
@@ -137,11 +138,28 @@ class ChunkymapOfflineRenderer:
         print("    # (this may take a while...)")
         if os.path.isfile(tmp_png_path):
             os.remove(tmp_png_path)
+        #subprocess.call("touch \""+tmp_png_path+"\"", shell=True)
         subprocess.call(cmd_string, shell=True)
         final_png_path = tmp_png_path
+        www_uid = None
+        www_gid = None
         www_chunkymapdata_path = os.path.join(minetestinfo.get_var("www_minetest_path"), "chunkymapdata")
         www_chunkymapdata_worlds_path = os.path.join(www_chunkymapdata_path, "worlds")
         www_chunkymapdata_world_path = os.path.join(www_chunkymapdata_worlds_path, self.world_name)
+        try:
+            www_stat = os.stat(minetestinfo.get_var("www_minetest_path"))
+            www_uid = www_stat.st_uid
+            www_gid = www_stat.st_gid
+            #import pwd
+            #www_u_name = pwd.getpwuid(uid)[0]
+            #www_g_name = pwd.getgrgid(gid)[0]
+            #import pwd
+            #import grp
+            #www_uid = pwd.getpwnam("www_data").pw_uid
+            #www_gid = grp.getgrnam("nogroup").gr_gid
+        except:
+            print("Unable to get stat on www directory \""+minetestinfo.get_var("www_minetest_path")+"\", so will not be able to automatically set owner of result jpg there. Make sure you manually set owner of singleimage.jpg in '"+www_chunkymapdata_world_path+"' to www_data user and group.")
+            print("  "+str(sys.exc_info()))
 
         is_locked = False
         err_count = 0
@@ -177,6 +195,7 @@ class ChunkymapOfflineRenderer:
                 #this_move_cmd_string = move_cmd_string+" \""+tmp_png_path+"\" to \""+dest_png_path+"\"..."
                 #subprocess.call(this_move_cmd_string, shell=True)
                 shutil.move(tmp_png_path, dest_png_path)   #avoids error below according to 
+
                 # os.rename(tmp_png_path, dest_png_path)  # fails with the following output:
                 # Moving temp image from /home/owner/chunkymap/chunkymap-genresults/FCAGameAWorld/singleimage.png to /var/www/html/minetest/chunkymapdata/worlds/FCAGameAWorld/singleimage.png...
                 # Traceback (most recent call last):
@@ -206,6 +225,9 @@ class ChunkymapOfflineRenderer:
             if os.path.isfile(dest_jpg_path):
                 print("jpg image saved to:")
                 print("  "+dest_jpg_path)
+                if www_gid is not None:
+                    os.chown(dest_jpg_path, www_uid, www_gid)
+                    print("changed owner to same as www folder")
                 os.remove(final_png_path)
                 print("removed temporary file "+final_png_path)
             else:
