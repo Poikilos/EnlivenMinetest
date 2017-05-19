@@ -28,7 +28,7 @@ Do not expect the mods from game-install-enliven-testing.sh to work. Also, do no
 (There are also WIP TRMs in there to go with the ENLIVEN subgame)
 Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawners.
 (NOTE: spawners makes pyramids now, so tsm_pyramids )
-* Recommend your users download the minetest.conf from this folder and put it in their minetest folder for better graphics (opengl 3.0 shaders, smooth lighting)
+* Recommend your users use the install-ENLIVEN.exe (Windows client) from the link above to install, otherwise installation requires a good minetest.conf downloaded such as from the winclient/launcher folder and placed in their minetest folder. The one here has better graphics (opengl 3.0 shaders, smooth lighting).
 
 #### Customization
 * Before using anything in the change_world_name_manually_first and subfolders, change the values of the variables in the folder name as noted before using.

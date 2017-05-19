@@ -54,7 +54,8 @@ MainWindow::MainWindow(QWidget *parent) :
         newProcess->setWorkingDirectory(workingDir.absolutePath());
         newProcess->start(minetestExePath);
         success_enable = true;
-        qDebug() << "launched " << minetestExePath;
+        qDebug() << "launch: " << minetestExePath;
+        qDebug() << "workingDir: " << workingDir.absolutePath();
     }
     if (success_enable) QTimer::singleShot(1000, this, &QApplication::closeAllWindows); // Qt 5
     //QApplication::closeAllWindows();
