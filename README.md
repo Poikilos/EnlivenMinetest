@@ -40,6 +40,7 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 
 
 ## Changes:
+* Released ENLIVEN 0.4.15.3
 * (2017-05-18) Installer now available at [axlemedia.net](http://www.axlemedia.net/index.php?htmlref=tutoring.html "Axle Media") -- added project and related files for Inno Setup Compiler.
 * (2017-05-15) added mock_tnt: doesn't destroy blocks, can coexist with regular tnt mod (all tnt is replaced with mock_tnt if tnt is disabled). This mod is helpful for when multiplayer servers have tnt disabled but players have acquired 'unknown item' (tnt:tnt) as loot. The Unknown Explosive says 'unknown item' on it, as a seemless replacement :)
 * (2017-04-02) fixed issue with redundant aliases in cme_to_spawners (see Mods,WIP folder)
@@ -83,6 +84,15 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 
 
 ## Known issues:
+* ENLIVEN installer should be signed via a code signing license to avoid browser warnings and possible issues with virus scanners (NOTE: Squirrel.Windows has signing available such as via:
+./src\.nuget\NuGet.exe pack .\ENLIVEN.<version>.nuspec
+squirrel --releasify .\ENLIVEN.<version>.nupkg <your code signing options here>
+* ENLIVEN/games/ENLIVEN contents should be updated (unchanged from minetest_game):
+	* game_api.txt should differentiate between ENLIVEN and minetest_game
+	* README.txt should differentiate between ENLIVEN and minetest_game
+	* settingtypes.txt should document minetest.conf settings for various mods
+	* LICENSE.txt should note correct author of header and anything else specified
+* Mods in Mods,WIP need LICENSE and README with author, and removal of default in depends.txt where not dependent on default
 * Preciousness in trm_compassgps has not been audited
 * Installer script does not copy certain stuff to the config files due to permissions unless runs as root (the rest is designed to run as sudoer, and use sudo only as needed)
 * minetestserver-update-from-git.sh usually doesn't work right. Normally just rename your minetest folder then clone it from git instead.
@@ -101,6 +111,7 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 
 
 ### Known issues in mods:
+* players can use chests (other than protected chests) in a protected area in which they aren't added to the protection node
 * unpriveleged players can pick up spawners and then place them (and, spawners catch things on fire)
 * compassgps crashes server for some players upon use--see yelby in etc/debugging (wrap sorting in "if player~=nil then...end" in mods/compassgps/init.lua to avoid):
 ```lua
