@@ -20,7 +20,14 @@ def get_version_number (filename):
         return 0,0,0,0
 
 if __name__ == '__main__':
-  import os
-  filename = os.environ["COMSPEC"]
-  this_delimiter = "."
-  print(".".join ([str (i) for i in get_version_number (filename)]))
+    import os
+    if "COMSPEC" in os.environ:
+        filename = os.environ["COMSPEC"]
+        this_delimiter = "."
+        print(str(filename) + " version:")
+        print(".".join ([str (i) for i in get_version_number (filename)]))
+    print("Running filever directly doesn't do much.\n\n#Usage:\n" +
+        "import filever\n" +
+        "parts = filever.get_version_number(filename)\n" +
+        "major,minor,subminor,revision = parts\n" +
+        "print(\".\".join([str (i) for i in parts]))\n\n")
