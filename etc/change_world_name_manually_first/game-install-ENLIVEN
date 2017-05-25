@@ -409,7 +409,8 @@ fi
 if [ -d "$MTMOD_DEST_PATH" ]; then
  rm -Rf "$MTMOD_DEST_PATH"
 fi
-wget https://github.com/minetest-technic/technic/archive/master.zip
+#wget https://github.com/minetest-technic/technic/archive/master.zip
+wget https://github.com/minetest-mods/technic/archive/master.zip
 mv $MTMOD_DL_ZIP $MTMOD_SRC_ZIP
 unzip $MTMOD_SRC_ZIP
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
@@ -1748,7 +1749,8 @@ fi
 if [ -d "$MTMOD_DEST_PATH" ]; then
   sudo rm -Rf "$MTMOD_DEST_PATH"
 fi
-wget https://github.com/Sokomine/travelnet/archive/master.zip
+#wget https://github.com/Sokomine/travelnet/archive/master.zip
+wget https://github.com/expertmm/travelnet/archive/master.zip
 mv $MTMOD_DL_ZIP "$MTMOD_SRC_ZIP"
 unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"

@@ -41,6 +41,7 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 
 ## Changes:
 * Released ENLIVEN 0.4.15.3
+* (2017-05-25) switched to expertmm fork of travelnet
 * (2017-05-18) Installer now available at [axlemedia.net](http://www.axlemedia.net/index.php?htmlref=tutoring.html "Axle Media") -- added project and related files for Inno Setup Compiler.
 * (2017-05-15) added mock_tnt: doesn't destroy blocks, can coexist with regular tnt mod (all tnt is replaced with mock_tnt if tnt is disabled). This mod is helpful for when multiplayer servers have tnt disabled but players have acquired 'unknown item' (tnt:tnt) as loot. The Unknown Explosive says 'unknown item' on it, as a seemless replacement :)
 * (2017-04-02) fixed issue with redundant aliases in cme_to_spawners (see Mods,WIP folder)
@@ -111,6 +112,8 @@ squirrel --releasify .\ENLIVEN.<version>.nupkg <your code signing options here>
 
 
 ### Known issues in mods:
+* regular doors and chests are not protected via protection block/symbol
+* homedecor doors are not protected via protection block/symbol
 * players can use chests (other than protected chests) in a protected area in which they aren't added to the protection node
 * unpriveleged players can pick up spawners and then place them (and, spawners catch things on fire)
 * compassgps crashes server for some players upon use--see yelby in etc/debugging (wrap sorting in "if player~=nil then...end" in mods/compassgps/init.lua to avoid):
