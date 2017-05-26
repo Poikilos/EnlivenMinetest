@@ -1,10 +1,9 @@
 # EnlivenMinetest
 EnlivenMinetest is a subgame for minetest with the goals of providing immersion and lessons for humanity.
-This collection of scripts includes some scripts to help install and manage your git version of Minetest Server on Ubuntu Server or various *buntu flavors (a gui distro neither required nor recommended).
-EnlivenMinetest project assists you in setting up ENLIVEN subgame and provides scripts to run it on minetestserver as current user (must be sudoer).
+https://github.com/expertmm/EnlivenMinetest
 
 DISCLAIMERS:
-* Please see included LICENSE.txt (MIT license normally). The license in the file is the fallback license for everything included where license is not otherwise specified.
+* Please see included LICENSE.txt (LGPL2.1 license normally). The license in the file is the fallback license for everything included where license is not otherwise specified.
 * The original EnlivenMinetest project is found at https://github.com/expertmm/EnlivenMinetest
 * Any script code related to redis has not been successfully tested.
 * Make sure you convert your world to leveldb and place it in your server's worlds folder $HOME/.minetest/worlds/, as this set of scripts hasn't been tested with any other database nor worlds folder location, and nightly backup scripts cater to leveldb.
@@ -12,11 +11,20 @@ DISCLAIMERS:
 
 ## How to use:
 ### Windows Client:
-Download at [axlemedia.net](http://www.axlemedia.net/index.php?htmlref=tutoring.html "Axle Media")
+Click "Releases" for the installer, which has the singleplayer and multiplayer client for ENLIVEN. 
+* alternate download site is [axlemedia.net](http://www.axlemedia.net/index.php?htmlref=tutoring.html "Axle Media")
+* you must install to C:\Games\ENLIVEN (or possibly other path without spaces, as long as you don't move the launcher) in order for ENLIVEN to run.
+ENLIVEN subgame is a subgame of Minetest
+The ENLIVEN client runs Minetest, which can be used as a client for other Minetest servers with different subgames, but has these advantages:
+* is able to be installed automatically
+* comes with high quality OpenGL graphics settings in minetest.conf for modern computers
+* is able to run ENLIVEN subgame in singleplayer mode without any changes
 ### Server:
-(requires GNU/Linux System and only tested on Ubuntu Server [14.04 to 16.04] and Lubuntu [14.04 to 16.04])
+EnlivenMinetest project assists you in setting up ENLIVEN subgame and provides scripts to run it on minetestserver as current user (must be sudoer).
+Some of the included scripts help install and manage your git version of Minetest Server on Ubuntu Server or various *buntu flavors (a gui distro neither required nor recommended for minetestserver running ENLIVEN). See also https://github.com/expertmm/minetest-chunkymap for a map non-redis servers, and some offline minetest management tools.
+(minetestserver requires GNU/Linux System -- only tested using apt on Ubuntu Server [14.04 to 16.04] and Lubuntu [14.04 to 16.04])
 The installer script (in the "etc/change_world_name_manually_first" folder) downloads the git versions of all of the mods to the ENLIVEN folder which will be placed in your minetest games folder (one of the two folders listed below, otherwise fails)--but change the world name to the name of your world first.
-* (optionally) place the enliven folder in the games folder here into the games folder on your server such as:
+* (optionally) place the ENLIVEN folder in the games folder here into the games folder on your server such as:
   /usr/local/share/minetest/games/
 	(If you're not using the git version of Minetest on Ubuntu Server, try something like:
 	/usr/share/games/minetest/games/ )
@@ -28,7 +36,7 @@ Do not expect the mods from game-install-enliven-testing.sh to work. Also, do no
 (There are also WIP TRMs in there to go with the ENLIVEN subgame)
 Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawners.
 (NOTE: spawners makes pyramids now, so tsm_pyramids )
-* Recommend your users use the install-ENLIVEN.exe (Windows client) from the link above to install, otherwise installation requires a good minetest.conf downloaded such as from the winclient/launcher folder and placed in their minetest folder. The one here has better graphics (opengl 3.0 shaders, smooth lighting).
+* Recommend your users use the binary installer (Windows client) from "Releases" at https://github.com/expertmm/EnlivenMinetest/releases or the alternate site above to install, otherwise installation requires a good minetest.conf downloaded such as from the winclient/launcher folder and placed in their minetest folder. The one here has better graphics (opengl 3.0 shaders, smooth lighting).
 
 #### Customization
 * Before using anything in the change_world_name_manually_first and subfolders, change the values of the variables in the folder name as noted before using.
@@ -103,7 +111,9 @@ squirrel --releasify .\ENLIVEN.<version>.nupkg <your code signing options here>
 * minetest_game mods and modpacks are owned by root in the end, for some reason. This may cause serious problems on your server. Change the owner to your current user.
 
 ## Planned Features
-* Do not allow teleporting to travelnet teleporters in an area protected by protection mod (even if the source teleporter is yours), but allow teleporting to areas where you cannot modify (such as advanced area protection areas where, by default, use is allowed and modify is not). Locked travelnet will not be used by this mod--instead, this less-cumbersome change is planned.
+* add NPCs (possibly mobs via https://github.com/Bremaweb/adventuretest/tree/master/mods/mobs )
+* add https://github.com/minetest-mods/smartfs ?
+* Do not allow teleporting to travelnet teleporters in an area protected from you by protection mod (even if the source teleporter is yours), but allow teleporting to areas where you cannot modify (such as advanced area protection areas where, by default, use is allowed and modify is not). Locked travelnet will not be used by this mod--instead, this less-cumbersome change is planned.
 * Log where bones were placed to debug.txt, possibly by way of the following chat message:
 	after the existing line:
 	minetest.set_node(pos, {name = "bones:bones", param2 = param2})
@@ -112,6 +122,8 @@ squirrel --releasify .\ENLIVEN.<version>.nupkg <your code signing options here>
 
 
 ### Known issues in mods:
+* Mining Drill mk3 duplication bug 
+* Technic manual is not complete. Contribute info on drills and mining? See https://github.com/minetest-mods/technic/blob/master/manual.md
 * regular doors and chests are not protected via protection block/symbol
 * homedecor doors are not protected via protection block/symbol
 * players can use chests (other than protected chests) in a protected area in which they aren't added to the protection node

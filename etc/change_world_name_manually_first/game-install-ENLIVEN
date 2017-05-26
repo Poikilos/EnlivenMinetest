@@ -1754,6 +1754,7 @@ wget https://github.com/expertmm/travelnet/archive/master.zip
 mv $MTMOD_DL_ZIP "$MTMOD_SRC_ZIP"
 unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
+sudo rm -Rf "$MTMOD_DEST_PATH/etc"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue."
   exit 1  
