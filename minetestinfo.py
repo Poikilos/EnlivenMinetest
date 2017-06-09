@@ -311,10 +311,10 @@ def init_minetestinfo():
         minetestinfo.prepare_var("www_minetest_path", default_www_minetest_path, "your web server directory (or other folder where minetest website features and data should be placed)")
 
 
-    if 'USERPROFILE' in os.environ:  # if os_name=="windows":
-        profile_path = os.environ['USERPROFILE']
-    else:
+    if 'HOME' in os.environ:  # if os_name=="windows":
         profile_path = os.environ['HOME']
+    else:
+        profile_path = os.environ['USERPROFILE']
 
     default_profile_minetest_path = os.path.join(profile_path,".minetest")
     if os.path.isdir("C:\\games\\Minetest"):  # if (os_name=="windows"):
