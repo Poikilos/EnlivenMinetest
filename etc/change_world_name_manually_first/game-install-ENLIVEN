@@ -1362,6 +1362,31 @@ if [ ! -d "$MTMOD_DEST_PATH" ]; then
 fi
 
 
+#expertmm fork of minetest-mod-metatools
+cd "$HOME/Downloads"
+MTMOD_DL_ZIP=master.zip
+MTMOD_SRC_ZIP=metatools.zip
+MTMOD_UNZ_NAME=minetest-mod-metatools-master
+MTMOD_DEST_NAME=metatools
+MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+if [ -f $MTMOD_DL_ZIP ]; then
+  rm -f $MTMOD_DL_ZIP
+fi
+if [ -f $MTMOD_SRC_ZIP ]; then
+  rm -f $MTMOD_SRC_ZIP
+fi
+rm -Rvf $MTMOD_UNZ_NAME
+wget https://github.com/expertmm/minetest-mod-metatools/archive/master.zip
+#git clone https://github.com/expertmm/minetest-mod-metatools.git
+mv $MTMOD_DL_ZIP "$MTMOD_SRC_ZIP"
+unzip "$MTMOD_SRC_ZIP"
+sudo mv -f $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
+if [ ! -d "$MTMOD_DEST_PATH" ]; then
+  echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue."
+  exit 1
+fi
+
+
 #[mod-pack] sky critters (for mobs_redo) [mobs_sky] <https://forum.minetest.net/viewtopic.php?f=9&t=12688>
 #requires mobs redo
 cd $HOME/Downloads
