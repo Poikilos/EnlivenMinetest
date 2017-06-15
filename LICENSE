@@ -1,12 +1,8 @@
-Licenses of media and source code
-LICENSE and README in this folder apply to mods that are part of minetest_game in their original form (see minetest_game-mod-list.txt).
-However, some are modified by expertmm -- see https://github.com/expertmm/EnlivenMinetest/tree/master/games/ENLIVEN/mods and https://github.com/expertmm/EnlivenMinetest/tree/master/etc/Mods%2CWIP
-
-Licenses of media (textures)
-(author, copyright holder, & license only apply to ENLIVEN where not otherwise specified--see LICENSE and README files in subfolders)
-----------------------------
+License of media (such as textures and sounds)
+----------------------------------------------
+(author, copyright holder, & license only apply where not otherwise specified--see README.md)
 Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)
-Copyright (C) 2015-2016 expertmm
+Copyright (C) 2017 expertmm
 
 You are free to:
 Share — copy and redistribute the material in any medium or format.
@@ -39,9 +35,9 @@ http://creativecommons.org/licenses/by-sa/3.0/
 
 
 License of source code
-(author, copyright holder, & license only apply to ENLIVEN where not otherwise specified--see LICENSE and README files in subfolders)
 ----------------------
-Copyright 2017 expertmm
+(author, copyright holder, & license only apply where not otherwise specified--see README.md)
+Copyright 2017 expertmm (Jacob Gustafson)
 
 GNU LESSER GENERAL PUBLIC LICENSE
                        Version 2.1, February 1999

@@ -1,16 +1,16 @@
-# EnlivenMinetest
+# ENLIVEN
 ENLIVEN is a subgame for minetest with the goals of providing immersion and lessons for humanity.
 
-The [ENLIVEN project](https://github.com/expertmm/EnlivenMinetest) (aka EnlivenMinetest) includes tools for installing and maintaining the server and client for internet and LAN use, and is being merged with minetest-chunkymap project which includes many tools and is renamed to mtanalyze. The server and client are just the Minetest server and client repackaged (or just web installer scripts in the case of the server), and therefore 100% compatible with other copies of Minetest server and client of the same version--including using other subgames, which client will download from servers as usual.
+The primary goals of the installer are to install ENLIVEN, and to automatically install Minetest with a usable minetest.conf (for improved graphics).
+
+The [ENLIVEN project](https://github.com/expertmm/EnlivenMinetest) (aka EnlivenMinetest) includes tools for installing and maintaining the server and client for internet and LAN use, and now includes the mtanalyze (formerly minetest-chunkymap) project which includes many tools including chunkymap. The server and client are just the Minetest server and client repackaged (or just web installer scripts in the case of the server), and therefore 100% compatible with other copies of Minetest server and client of the same version--including using other subgames, which client will download from servers as usual.
 
 
 DISCLAIMERS:
-* Please see included LICENSE.txt (LGPL2.1 license normally). The license in the file is the fallback license for everything included where license is not otherwise specified.
-* The original EnlivenMinetest project is found at https://github.com/expertmm/EnlivenMinetest
+* Please read the Sources and License section of this document. You must agree to the licenses mentioned in order to use and copy this program.
 * Any script code related to redis has not been successfully tested.
 * Make sure you convert your world to leveldb and place it in your server's worlds folder $HOME/.minetest/worlds/, as this set of scripts hasn't been tested with any other database nor worlds folder location, and nightly backup scripts cater to leveldb.
 
-The primary goals of the installer are to install ENLIVEN, and to automatically install Minetest with a usable minetest.conf.
 
 ## How to use:
 ### Windows Client:
