@@ -34,8 +34,8 @@ free_move = true
 hudbars_bar_type = statbar_modern
 inventory_items_animations = true
 mainmenu_last_selected_world = 2
-#optional:
-maintab_LAST = singleplayer
+#optional (maintab_LAST note: local tab was formerly called singleplayer)
+maintab_LAST = local
 menu_clouds = true
 # name = 
 optional:

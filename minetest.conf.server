@@ -1,11 +1,15 @@
 # In case user of an Enliven server wants to start their own server via the graphical user interface:
+protector_flip = true
 protector_radius = 7
 protector_pvp = true
-protector_pvp_spawn = 10
-protector_drop = true
-protector_hurt = 1
-
+#protector_pvp_spawn = 10
+#protector_drop false since can allow glitch jumping
+protector_drop = false
+protector_hurt = 3
+map_generation_limit = 5000
+#do not give fast priv for default_privs, since that can allow glitch-jumping over or through protected walls by jumping across or out of water
 default_privs = interact,shout,home
+#optional: max_users default is 15
 max_users = 50
 motd = "Actions and chat messages are logged. Recipes are in unified inventory mod. Otherwise visit the server's website for more info about mods and live map if available--if not, see http://wiki.minetest.net/Main_Page and https://github.com/minetest-technic/technic/wiki"
 disallow_empty_passwords = true
