@@ -1,3 +1,4 @@
+# address = 
 ambient_occlusion_gamma = 2.2
 anisotropic_filter = true
 cinematic = true
@@ -11,36 +12,50 @@ enable_3d_clouds = true
 enable_bumpmapping = true
 enable_clouds = true
 enable_damage = true
+#optional:
+enable_local_map_saving = true
 enable_minimap = true
+#optional:
+enable_remote_media_server = true
 enable_shaders = true
 enable_waving_leaves = true
 enable_waving_plants = true
 enable_waving_water = true
 fallback_font_shadow = 1
 fallback_font_shadow_alpha = 255
-fallback_font_size = 22
-fast_move = false
+fallback_font_size = 16
+fast_move = true
+#fixed_map_seed = 
 font_shadow = 1
 font_shadow_alpha = 255
 font_size = 16
 free_move = true
+#generate_normalmaps = true
+hudbars_bar_type = statbar_modern
 inventory_items_animations = true
 mainmenu_last_selected_world = 2
+#optional:
 maintab_LAST = singleplayer
 menu_clouds = true
+# name = 
+optional:
 menu_last_game = ENLIVEN
 mg_name = v7
 minimap_shape_round = true
 mono_font_size = 22
 noclip = true
 pause_fps_max = 20
+#optional:
 public_serverlist = true
 remote_port = 30000
+#selected_world_path = 
 server_announce = false
 server_dedicated = false
+serverlist_file = favoriteservers.txt
 serverlist_url = servers.minetest.net
 smooth_lighting = true
 texture_clean_transparent = true
+#texture_min_size = 64
 tone_mapping = true
 video_driver = opengl
 vsync = true
@@ -49,5 +64,3 @@ water_wave_length = 20.0
 water_wave_speed = 5.0
 wieldview_node_tiles = false
 wieldview_update_time = 2
-hudbars_bar_type = statbar_modern
-name = 

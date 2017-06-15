@@ -1,0 +1,11 @@
+# In case user of an Enliven server wants to start their own server via the graphical user interface:
+protector_radius = 7
+protector_pvp = true
+protector_pvp_spawn = 10
+protector_drop = true
+protector_hurt = 1
+
+default_privs = interact,shout,home
+max_users = 50
+motd = "Actions and chat messages are logged. Recipes are in unified inventory mod. Otherwise visit the server's website for more info about mods and live map if available--if not, see http://wiki.minetest.net/Main_Page and https://github.com/minetest-technic/technic/wiki"
+disallow_empty_passwords = true
