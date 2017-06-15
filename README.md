@@ -1,6 +1,8 @@
 # EnlivenMinetest
-EnlivenMinetest is a subgame for minetest with the goals of providing immersion and lessons for humanity.
-https://github.com/expertmm/EnlivenMinetest
+ENLIVEN is a subgame for minetest with the goals of providing immersion and lessons for humanity.
+
+The [ENLIVEN project](https://github.com/expertmm/EnlivenMinetest) (aka EnlivenMinetest) includes tools for installing and maintaining the server and client for internet and LAN use, and is being merged with minetest-chunkymap project which includes many tools and is renamed to mtanalyze. The server and client are just the Minetest server and client repackaged (or just web installer scripts in the case of the server), and therefore 100% compatible with other copies of Minetest server and client of the same version--including using other subgames, which client will download from servers as usual.
+
 
 DISCLAIMERS:
 * Please see included LICENSE.txt (LGPL2.1 license normally). The license in the file is the fallback license for everything included where license is not otherwise specified.
@@ -8,6 +10,7 @@ DISCLAIMERS:
 * Any script code related to redis has not been successfully tested.
 * Make sure you convert your world to leveldb and place it in your server's worlds folder $HOME/.minetest/worlds/, as this set of scripts hasn't been tested with any other database nor worlds folder location, and nightly backup scripts cater to leveldb.
 
+The primary goals of the installer are to install ENLIVEN, and to automatically install Minetest with a usable minetest.conf.
 
 ## How to use:
 ### Windows Client:
@@ -37,6 +40,9 @@ Do not expect the mods from game-install-enliven-testing.sh to work. Also, do no
 Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawners.
 (NOTE: spawners makes pyramids now, so tsm_pyramids )
 * Recommend your users use the binary installer (Windows client) from "Releases" at https://github.com/expertmm/EnlivenMinetest/releases or the alternate site above to install, otherwise installation requires a good minetest.conf downloaded such as from the winclient/launcher folder and placed in their minetest folder. The one here has better graphics (opengl 3.0 shaders, smooth lighting).
+### mtanalyze
+* mtanalyze is a set of tools including a live map for Minetest servers and singleplayer if using LevelDB
+* for more information, see README.md in mtanalyze folder.
 
 #### Customization
 * Before using anything in the change_world_name_manually_first and subfolders, change the values of the variables in the folder name as noted before using.
@@ -146,6 +152,7 @@ function compassgps.sort_by_distance(table,a,b,player)
 end --sort_by_distance
 ```
 * And more:
+```
 2017-02-13 18:15:32: WARNING[Main]: NodeDefManager: Ignoring CONTENT_IGNORE redefinition
 2017-02-13 18:15:32: WARNING[Main]: Field "tile_images": Deprecated; new name is "tiles".
 2017-02-13 18:15:32: WARNING[Main]: Field "metadata_name": Deprecated; use on_add and metadata callbacks
@@ -173,10 +180,57 @@ end --sort_by_distance
 2017-02-13 18:15:37: WARNING[Main]: Not registering alias, item with same name is already defined: creatures:ghost -> mobs_monster:spider
 2017-02-13 18:15:37: WARNING[Main]: Not registering alias, item with same name is already defined: creatures:mummy -> spawners:mummy
 2017-02-13 18:15:37: WARNING[Main]: Not registering alias, item with same name is already defined: creatures:zombie -> mobs_monster:stone_monster
+```
 * The following issues may be caused by having cme enabled on the server before server was updated to ENLIVEN latest (mobs only):
+```
 2017-02-13 18:20:59: ERROR[Server]: LuaEntity name "creatures:zombie_spawner_dummy" not defined
 2017-02-13 18:21:15: WARNING[Emerge-0]: Map::getNodeMetadata(): Block not found
 2017-02-13 18:21:15: WARNING[Emerge-0]: Map::removeNodeMetadata(): Block not found
 2017-02-13 18:44:02: ACTION[Server]: thefox963 digs mesecons:wire_11010000_on at (-340,16,60)
 2017-02-13 18:44:02: WARNING[Server]: Undeclared global variable "digiline" accessed at ...es/ENLIVEN/mods/mesecons/mesecons_luacontroller/init.lua:274
+```
 
+## Building
+* scripts and sources for recreating ENLIVEN subgame are at the EnlivenMinetest project page: https://github.com/expertmm/EnlivenMinetest
+Further steps needed to recreate:
+* extract entire zip from sfan5
+* run postinstall.bat
+* change version number in C:\Users\Owner\Documents\GitHub\EnlivenMinetest\winclient\install ENLIVEN.iss
+* change version number in C:\Users\Owner\Documents\GitHub\EnlivenMinetest\winclient\launcher-src\ENLIVEN.pro
+### additional notes
+* The recommended minetest.conf for subgame, including for server, is in the ENLIVEN subgame folder (also available at [EnlivenMinetest on GitHub](https://github.com/expertmm/EnlivenMinetest)
+
+## Sources and License
+Authors: expertmm (Jacob Gustafson)
+ENLIVEN project (aka EnlivenMinetest), including launcher (ENLIVEN application) and ENLIVEN subgame, is released under the LGPL v2.1 license (see LICENSE), except media which is released under the CC-BY-SA 3.0 license (see LICENSE). There are other exceptions to this license and authorship where specified below and in subfolders.
+Source code is available at [https://github.com/expertmm/EnlivenMinetest](https://github.com/expertmm/EnlivenMinetest).
+
+### Minetest
+Minetest is included with releases--for Minetest license, please read README.txt in Minetest's doc folder which is provided in releases.
+* Included build is sfan5's build from https://minetest.kitsunemimi.pw/builds
+  release: minetest-0.4.15-8729e7d-win64
+
+#### Changes from sfan5's build
+* removed Voxelgarden subgame
+* added minetest.conf similar to the one generated by ENLIVEN scripts for schools vbscript, except with public servers enabled
+* added files specific to ENLIVEN, including launcher (ENLIVEN application), ENLIVEN subgame (including optional child-friendly changes for schools), other files, and licenses of added files.
+
+### Qt
+Qt 5.7.0 files are under the LGPLv3 unless required by licenses in qtlicenses folder.
+Sources for Qt 5.7.0 are available via http://www.qt.io
+The following files belong to Qt 5.7.0:
+iconengines\*
+imageformats\*
+platforms\*
+translations\*
+D3Dcompiler_47.dll
+libEGL.dll
+libgcc_s_dw2-1.dll
+libGLESV2.dll
+libstdc++-6.dll
+libwinpthread-1.dll
+opengl32sw.dll
+Qt5Core.dll
+Qt5Gui.dll
+Qt5Svg.dll
+Qt5Widgets.dll
