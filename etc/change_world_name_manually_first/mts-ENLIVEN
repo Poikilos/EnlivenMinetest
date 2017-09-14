@@ -1,8 +1,0 @@
-#!/bin/sh
-#BROKEN: screen -t MinetestServer minetestserver --gameid minetest_next --draworigin --drawplayers --world FCAWorldMTNext
-#BROKEN: screen -t MinetestServer minetestserver --gameid ENLIVEN --worldname FCAGameAWorld
-#NOTE: if only title is set, screen -x must be used to resume, so use -S <name> to resume with -r <name>
-#screen -S MinetestServer minetestserver --gameid ENLIVEN --worldname FCAGameAWorld
-#screen -S MinetestServer /home/owner/minetest/bin/minetestserver --gameid ENLIVEN --worldname FCAGameAWorld
-screen -S MinetestServer $HOME/minetest/bin/minetestserver --gameid ENLIVEN --worldname FCAGameAWorld
-
