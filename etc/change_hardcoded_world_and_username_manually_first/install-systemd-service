@@ -18,7 +18,11 @@
 #   instead of User=owner
 
 #Update the unit:
-wget https://github.com/expertmm/EnlivenMinetest/raw/master/etc/change_hardcoded_username_first/mts-ENLIVEN.service
+if [ -f mts-ENLIVEN.service ]; then
+#clear old downloaded copy if exists in userspace
+rm mts-ENLIVEN.service
+fi
+wget https://github.com/expertmm/EnlivenMinetest/raw/master/etc//home/owner/Documents/GitHub/EnlivenMinetest/etc/change_hardcoded_world_and_username_manually_first/install-systemd-service/mts-ENLIVEN.service
 echo "This will only work if you are using systemd."
 sudo mv -f mts-ENLIVEN.service /etc/init.d/
 #? sudo mv -f mts-ENLIVEN.service /etc/systemd/system/
