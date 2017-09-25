@@ -1,0 +1,14 @@
+[Unit]
+description "Job that runs mts-ENLIVEN minetest server as specific user"
+After=network.target
+
+[Service]
+Type=simple
+Environment=statedir=/var/cache/mts-ENLIVEN
+ExecStartPre=/usr/bin/mkdir -p ${statedir}
+User=owner
+Group=owner
+ExecStart=/home/owner/minetest/bin/minetestserver --gameid ENLIVEN --worldname FCAGameAWorld
+
+[Install]
+WantedBy=multi-user.target
