@@ -45,6 +45,7 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * for more information, see README.md in mtanalyze folder.
 
 #### Customization
+* The farming plugin is overwritten with farming redo.
 * Before using anything in the change_world_name_manually_first and subfolders, change the values of the variables in the folder name as noted before using.
 * If you have a dedicated server, the value server_dedicated = false should be changed to server_dedicated = true in your SERVER's minetest.conf in the ENLIVEN folder that the installer creates.
 
@@ -126,6 +127,12 @@ squirrel --releasify .\ENLIVEN.<version>.nupkg <your code signing options here>
 	add the new line (not sure if the format call is really ok--it was copied from compassgps:
 	minetest.chat_send_player(player:get_player_name(), S("Bones placed at %s."):format(pos))
 
+### Potential mods to add
+* weather: https://github.com/Jeija/minetest-mod-weather ( https://forum.minetest.net/viewtopic.php?t=5245 )
+* Immersive Sounds [ambience]: https://forum.minetest.net/viewtopic.php?t=2807
+  OR technic_ambience: http://realbadangel.pl/technic_ambience.zip
+* baked clay (Ethereal NG integrates with it, mobs redo, and farming redo)
+* Updated pipeworks fork by HybridDog: https://github.com/HybridDog/pipeworks
 
 ### Known issues in mods:
 * Mining Drill mk3 duplication bug 
