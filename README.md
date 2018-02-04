@@ -124,6 +124,23 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * The network folder contains some stuff for networks, which is usually only useful for using Minetest in a network cafe or school.
 (The purpose of minetest_userscript_localENLIVEN_server_only.vbs is to make sure the user only uses the hostname localENLIVEN, however this only changes the default, and cannot be enforced in any way as far as I know without recompiling the client.)
 
+## Planned Features
+* add NPCs (possibly mobs via https://github.com/Bremaweb/adventuretest/tree/master/mods/mobs )
+* add https://github.com/minetest-mods/smartfs ?
+* Do not allow teleporting to travelnet teleporters in an area protected from you by protection mod (even if the source teleporter is yours), but allow teleporting to areas where you cannot modify (such as advanced area protection areas where, by default, use is allowed and modify is not). Locked travelnet will not be used by this mod--instead, this less-cumbersome change is planned.
+* Log where bones were placed to debug.txt, possibly by way of the following chat message:
+    after the existing line:
+    minetest.set_node(pos, {name = "bones:bones", param2 = param2})
+    add the new line (not sure if the format call is really ok--it was copied from compassgps:
+    minetest.chat_send_player(player:get_player_name(), S("Bones placed at %s."):format(pos))
+
+### Potential mods to add
+* weather: https://github.com/Jeija/minetest-mod-weather ( https://forum.minetest.net/viewtopic.php?t=5245 )
+* Immersive Sounds [ambience]: https://forum.minetest.net/viewtopic.php?t=2807
+  OR technic_ambience: http://realbadangel.pl/technic_ambience.zip
+* baked clay (Ethereal NG integrates with it, mobs redo, and farming redo)
+* Updated pipeworks fork by HybridDog: https://github.com/HybridDog/pipeworks
+
 ## Known issues:
 * ENLIVEN Windows binary release installer should be signed via a code signing license to avoid browser warnings and possible issues with virus scanners (NOTE: Squirrel.Windows has signing available such as via:
 ./src\.nuget\NuGet.exe pack .\ENLIVEN.<version>.nuspec
@@ -142,23 +159,6 @@ squirrel --releasify .\ENLIVEN.<version>.nupkg <your code signing options here>
 * minetest_userscript_localENLIVEN_server_only.vbs does not read the recommended minetest.conf, so it echoes the lines manually. Ideally it would analyze the recommended one and change the server settings.
 * minetest_game mods and modpacks are owned by root in the end, for some reason. This may cause serious problems on your server. Change the owner to your current user.
 * (minetestoffline.py) (status:closed reason:no solution) assumes name specified in file is same as id (filename)
-
-## Planned Features
-* add NPCs (possibly mobs via https://github.com/Bremaweb/adventuretest/tree/master/mods/mobs )
-* add https://github.com/minetest-mods/smartfs ?
-* Do not allow teleporting to travelnet teleporters in an area protected from you by protection mod (even if the source teleporter is yours), but allow teleporting to areas where you cannot modify (such as advanced area protection areas where, by default, use is allowed and modify is not). Locked travelnet will not be used by this mod--instead, this less-cumbersome change is planned.
-* Log where bones were placed to debug.txt, possibly by way of the following chat message:
-    after the existing line:
-    minetest.set_node(pos, {name = "bones:bones", param2 = param2})
-    add the new line (not sure if the format call is really ok--it was copied from compassgps:
-    minetest.chat_send_player(player:get_player_name(), S("Bones placed at %s."):format(pos))
-
-### Potential mods to add
-* weather: https://github.com/Jeija/minetest-mod-weather ( https://forum.minetest.net/viewtopic.php?t=5245 )
-* Immersive Sounds [ambience]: https://forum.minetest.net/viewtopic.php?t=2807
-  OR technic_ambience: http://realbadangel.pl/technic_ambience.zip
-* baked clay (Ethereal NG integrates with it, mobs redo, and farming redo)
-* Updated pipeworks fork by HybridDog: https://github.com/HybridDog/pipeworks
 
 ### Known issues in mods:
 * Mining Drill mk3 duplication bug
@@ -269,3 +269,8 @@ Qt5Core.dll
 Qt5Gui.dll
 Qt5Svg.dll
 Qt5Widgets.dll
+
+## Developer Notes
+
+### Regression Tests
+* Use of input in python, where should never be used except in expertmm.py and minetestinfo.py for first-time setup or when interactive_enable is True

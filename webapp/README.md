@@ -27,9 +27,9 @@ if (!has_setting("owner.primary_world_path")):
 
 var world_path = peek_setting("owner.primary_world_path");
 var world_name = path.basename(wp);
-p = subprocess.Popen([mts, '--gameid ENLIVEN', '--worldname ' + world_name],
-                     stdout=subprocess.PIPE);
-p.write = mts_out;
+//var mts_proc;
+//mts_proc = /*TODO: finish this*/([mts, '--gameid ENLIVEN', '--worldname ' + world_name]);
+mts_proc.write = mts_out;
 return results;
 ```
 
