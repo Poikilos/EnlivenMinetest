@@ -1,6 +1,11 @@
 #!/bin/sh
 echo "WARNING: mts-ENLIVEN script is deprecated--instead, run:"
-echo "  python3 mtsenliven.py"
+try_path="$HOME/GitHub/EnlivenMinetest/mtsenliven.py"
+if [ -f "$try_path" ]; then
+  echo "  python3 $try_path"
+else
+  echo "  python3 mtsenliven.py"
+fi
 # sleep 4
 # exit 1
 mts=minetestserver
