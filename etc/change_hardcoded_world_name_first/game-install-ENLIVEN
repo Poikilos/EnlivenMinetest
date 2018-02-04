@@ -10,7 +10,25 @@
 
 
 # * Git version uses /home/*/minetest/games and /usr/local/share/minetest/games but the latter is used for minetestserver (minetest-server package)
-
+# Known Issues:
+# * Must do the following if runs twice (run a third time to fix it):
+if [ -d /usr/share/minetest/games/ENLIVEN/mods/3d_armor/minetest-3d_armor-master ]; then
+  rm -Rf /usr/share/minetest/games/ENLIVEN/mods/3d_armor
+fi
+if [ -d /usr/share/minetest/games/ENLIVEN/mods/3d_armor/minetest-3d_armor-master ]; then
+  rm -Rf /usr/share/minetest/games/ENLIVEN/mods/3d_armor
+fi
+if [ -d /usr/share/minetest/games/ENLIVEN/mods/plantlife_modpack/plantlife_modpack-master ]; then
+  rm -Rf /usr/share/minetest/games/ENLIVEN/mods/plantlife_modpack
+fi
+Uberi=`ls /usr/share/minetest/games/ENLIVEN/mods/worldedit | grep Uberi`
+if [ ! -z "$Uberi" ]; then
+  # /usr/share/minetest/games/ENLIVEN/mods/worldedit/Uberi-Minetest-WorldEdit-3322ef9
+  rm -Rf /usr/share/minetest/games/ENLIVEN/mods/worldedit
+fi
+if [ -d /usr/share/minetest/games/ENLIVEN/mods/mesecons/mesecons-master ]; then
+  rm -Rf /usr/share/minetest/games/ENLIVEN/mods/mesecons
+fi
 
 # (Ubuntu 14.04 Trusty Tahr Server) folders were found using:
 # cd /
@@ -37,6 +55,7 @@ fi
 # intentionally skip the slash in the following line since $USR_SHARE_MINETEST already starts with one:
 MT_BACKUP_GAMES_DIR=$HOME/Backup$USR_SHARE_MINETEST/games
 MT_GAMES_DIR=$USR_SHARE_MINETEST/games
+MT_MYGAME_BAK=$USR_SHARE_MINETEST/ENLIVEN_BAK
 MT_MYGAME_NAME=ENLIVEN
 MT_MYGAME_DIR=$MT_GAMES_DIR/$MT_MYGAME_NAME
 # formerly MT_MYGAME_MODDIR:
@@ -44,6 +63,10 @@ MT_MYGAME_MODS_PATH=$MT_MYGAME_DIR/mods
 MT_MYWORLD_NAME=FCAGameAWorld
 MT_MYWORLD_DIR=$HOME/.minetest/worlds/$MT_MYWORLD_NAME
 err_txt=$HOME/err-enliven.txt
+
+
+
+
 # BACKUP THE WORLD:
 sudo chown $USER "$MT_MYWORLD_DIR/world.mt"
 sudo chown $USER "$MT_MYWORLD_DIR/world.mt.1st"
@@ -76,11 +99,12 @@ if [ ! -d "$HOME/Downloads" ]; then
 fi
 cd "$HOME/Downloads"
 
-if [ -d "$MT_MYGAME_DIR BAK" ];
+if [ -d "$MT_MYGAME_BAK" ];
 then
-  echo "already backed up $MT_MYGAME_DIR"
+  echo "already backed up to $MT_MYGAME_BAK"
 else
-  sudo mv "$MT_MYGAME_DIR" "$MT_MYGAME_DIR BAK"
+  sudo mv "$MT_MYGAME_DIR" "$MT_MYGAME_BAK"
+  sudo mkdir "$MT_MYGAME_DIR"
 fi
 
 
@@ -88,6 +112,7 @@ fi
 #sudo mkdir "$MT_MYGAME_MODS_PATH"
 if [ ! -d "$MT_MYGAME_DIR/" ]; then
   echo "ERROR: failed to create $MT_MYGAME_DIR, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 #sudo cp -R $USR_SHARE_MINETEST/games/$mtgame_name/mods/* "$MT_MYGAME_DIR/mods/"
@@ -127,6 +152,7 @@ unzip $MTMOD_SRC_ZIP
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 echo "load_mod_mobs = true" >> "$MT_MYWORLD_DIR/world.mt"
@@ -153,6 +179,7 @@ unzip $MTMOD_SRC_ZIP
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 echo "load_mod_mobs_monster = true" >> "$MT_MYWORLD_DIR/world.mt"
@@ -176,6 +203,7 @@ unzip $MTMOD_SRC_ZIP
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 echo "load_mod_mobs_animal = true" >> "$MT_MYWORLD_DIR/world.mt"
@@ -211,6 +239,7 @@ unzip $MTMOD_SRC_ZIP
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -268,6 +297,7 @@ mv $MTMOD_UNZ_NAME $MTMOD_DEST_NAME
 sudo mv $MTMOD_DEST_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -294,6 +324,7 @@ unzip $MTMOD_SRC_ZIP
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 echo "load_mod_areas = true" >> "$MT_MYWORLD_DIR/world.mt"
@@ -350,6 +381,7 @@ fi
 #sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 #if [ ! -d "$MTMOD_DEST_PATH" ]; then
 #  echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+#  cat $err_txt
 #  exit 1
 #fi
 
@@ -400,6 +432,7 @@ unzip $MTMOD_SRC_ZIP
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 echo "load_mod_unified_inventory = true" >> $MT_MYWORLD_DIR/world.mt
@@ -429,6 +462,7 @@ unzip $MTMOD_SRC_ZIP
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 echo "load_mod_technic = true" >> $MT_MYWORLD_DIR/world.mt
@@ -479,6 +513,7 @@ unzip $MTMOD_SRC_ZIP
 sudo mv -f $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 echo "load_mod_treasurer = true" >> $MT_MYWORLD_DIR/world.mt
@@ -505,6 +540,7 @@ echo "load_mod_treasurer = true" >> $MT_MYWORLD_DIR/world.mt
 #sudo mv -f $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 #if [ ! -d "$MTMOD_DEST_PATH" ]; then
 #  echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+#  cat $err_txt
 #  exit 1
 #fi
 
@@ -541,6 +577,7 @@ git clone git://repo.or.cz/minetest_hudbars.git
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -584,6 +621,7 @@ sudo mv "$MTMOD_DEST_PATH/hunger/init.lua" "$MTMOD_DEST_PATH/hunger/init_UNUSED_
 sudo mv "$MTMOD_DEST_PATH/hunger/init_(nosprint).lua" "$MTMOD_DEST_PATH/hunger/init.lua"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 # END IF no hudbars mod
@@ -617,6 +655,7 @@ git clone git://repo.or.cz/minetest_hbarmor.git
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -644,6 +683,7 @@ git clone git://repo.or.cz/minetest_hbhunger.git
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -670,6 +710,7 @@ unzip $MTMOD_SRC_ZIP
 sudo mv -f $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -694,6 +735,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -718,6 +760,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -746,6 +789,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -787,6 +831,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -810,6 +855,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -834,6 +880,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 #mv minetest-3d_armor-master minetest-3d_armor_MODPACK
@@ -869,6 +916,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -903,6 +951,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -927,6 +976,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -969,6 +1019,7 @@ unzip $MTMOD_SRC_ZIP
 sudo mv -f $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to create $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1008,6 +1059,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1048,6 +1100,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1083,6 +1136,7 @@ git clone git://repo.or.cz/tsm_mines.git
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1115,6 +1169,7 @@ git clone git://repo.or.cz/RailCorridors/tsm_railcorridors.git
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1141,6 +1196,7 @@ unzip $MTMOD_SRC_ZIP
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1167,6 +1223,7 @@ unzip $MTMOD_SRC_ZIP
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1192,6 +1249,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1243,6 +1301,7 @@ sudo mv minetest_playereffects "$MTMOD_DEST_PATH"
 #sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 #if [ ! -d "$MTMOD_DEST_PATH" ]; then
 #  echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+#  cat $err_txt
 #  exit 1
 #fi
 
@@ -1267,6 +1326,7 @@ unzip $MTMOD_SRC_ZIP
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1292,6 +1352,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv -f $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1320,12 +1381,13 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv -f $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
 # Update skins database:
 #(jq is a json processor, required for the updater bash script:)
-sudo apt-get install jq
+sudo apt-get -y install jq
 cd "$MTMOD_DEST_PATH"
 # cd u_skins  #bell07's version is a mod, not a modpack
 cd updater
@@ -1357,6 +1419,7 @@ cd updater
 #sudo mv -f $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 #if [ ! -d "$MTMOD_DEST_PATH" ]; then
 #  echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+#  cat $err_txt
 #  exit 1
 #fi
 
@@ -1381,6 +1444,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv -f $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1406,6 +1470,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv -f $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1433,6 +1498,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1460,6 +1526,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 echo "SPAWN_PYRAMIDS = true" > settings.txt
@@ -1496,6 +1563,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1526,6 +1594,7 @@ fi
 #sudo cp -f $MTMOD_UNZ_NAME/31px/* "$MTMOD_DEST_PATH/"
 #if [ ! -d "$MTMOD_DEST_PATH" ]; then
 #  echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+#  cat $err_txt
 #  exit 1
 #fi
 
@@ -1552,6 +1621,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1576,6 +1646,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1605,6 +1676,7 @@ sudo rm -Rf "$MTMOD_DEST_PATH"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1631,6 +1703,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1658,6 +1731,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1688,6 +1762,7 @@ git clone git://repo.or.cz/minetest_slimenodes.git
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1697,7 +1772,7 @@ cd $HOME/Downloads
 #MTMOD_DL_ZIP=file.php?id=6140
 MTMOD_DL_ZIP=master.zip
 MTMOD_SRC_ZIP=invhack.zip
-MTMOD_UNZ_NAME=invhack
+MTMOD_UNZ_NAME=minetest-invhack-master
 MTMOD_DEST_NAME=invhack
 MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
 #if [ -d "$MTMOD_UNZ_NAME" ]; then
@@ -1720,6 +1795,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1749,6 +1825,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1778,6 +1855,7 @@ unzip "$MTMOD_SRC_ZIP"
 sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
 
@@ -1808,10 +1886,20 @@ sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
 sudo rm -Rf "$MTMOD_DEST_PATH/etc"
 if [ ! -d "$MTMOD_DEST_PATH" ]; then
   echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
   exit 1
 fi
-
-
+echo
+echo
+echo
+echo
+echo "# remove not available on 0.4.16 stable (is only avail on 0.4.16-dev or higher)"
+echo "sudo rm -Rf /usr/share/games/minetest/games/ENLIVEN/mods/worldedit/worldedit_brush"
+echo "# optionally:"
+echo "sudo cp -R ~/GitHub/EnlivenMinetest/etc/Mods\,WIP/* $MT_MYGAME_MODS_PATH/"
+echo "# not recommended:"
+echo "sudo cp -R ~/GitHub/EnlivenMinetest/etc/Mods\,stopgap/* $MT_MYGAME_MODS_PATH/"
+echo "sudo rm -Rf $MT_MYGAME_MODS_PATH/1.nonworking"
 
 
 echo ""
