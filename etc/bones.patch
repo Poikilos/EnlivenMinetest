@@ -1,0 +1,17 @@
+diff -r /home/owner/Backup/fcalocal/usr/share/games/minetest/games/minetest_game-0.4.15-git/mods/bones/init.lua /home/owner/Backup/fcalocal/usr/share/games/minetest/games/minetest_game-0.4.15-git+enliven_patches/mods/bones/init.lua
+168a169
+> 	local pos = vector.round(player:getpos())
+170a172,173
+> 		minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones do not remain since in creative_mode -- died at " .. minetest.pos_to_string(vector.round(player:getpos())))
+> 		minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s bones do not remain since in creative_mode -- died at " .. minetest.pos_to_string(pos)) --formerly ("Bones placed at %s."):format(pos)
+176a180,181
+> 		minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones do not remain since inventory and craft are empty -- died at " .. minetest.pos_to_string(vector.round(player:getpos())))
+> 		minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s bones do not remain since inventory and craft are empty -- died at " .. minetest.pos_to_string(pos)) --formerly ("Bones placed at %s."):format(pos)
+207a213,215
+> 		
+> 		minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones do not remain since area is_protected -- died at " .. minetest.pos_to_string(pos))
+> 		minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s do not remain since area is_protected -- died at " .. minetest.pos_to_string(pos)) --formerly ("Bones placed at %s."):format(pos)
+212a221,222
+> 	minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones remain where died at " .. minetest.pos_to_string(pos))
+> 	minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s bones remain where died at " .. minetest.pos_to_string(pos)) --formerly ("Bones placed at %s."):format(pos)
+

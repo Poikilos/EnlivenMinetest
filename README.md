@@ -1,20 +1,29 @@
 # ENLIVEN
 ENLIVEN is a subgame for minetest with the goals of providing immersion and lessons for humanity.
 
-The primary goals of the installer are to install ENLIVEN, and to automatically install Minetest with a usable minetest.conf (for improved graphics).
+## Primary Features of EnlivenMinetest Project
+* Server installer for ENLIVEN on linux server (Ubuntu so far)
+* Client installer for single-player ENLIVEN, including on Windows
+* automatically install Minetest client with a usable minetest.conf (for improved graphics)
+
+## Primary Features of ENLIVEN subgame
+* birthstones, improved fork: <https://github.com/expertmm/minetest-birthstones>
+
+### Planned Features
+* trm_pyramids
+* see also EnlivenMinetest/etc/game-install-enliven-testing.sh
 
 The [ENLIVEN project](https://github.com/expertmm/EnlivenMinetest) (aka EnlivenMinetest) includes tools for installing and maintaining the server and client for internet and LAN use, and now includes the mtanalyze (formerly minetest-chunkymap) project which includes many tools including chunkymap. The server and client are just the Minetest server and client repackaged (or just web installer scripts in the case of the server), and therefore 100% compatible with other copies of Minetest server and client of the same version--including using other subgames, which client will download from servers as usual.
-
 
 DISCLAIMERS:
 * Please read the Sources and License section of this document. You must agree to the licenses mentioned in order to use and copy this program.
 * Any script code related to redis has not been successfully tested.
 * Make sure you convert your world to leveldb and place it in your server's worlds folder $HOME/.minetest/worlds/, as this set of scripts hasn't been tested with any other database nor worlds folder location, and nightly backup scripts cater to leveldb.
 
-
 ## How to use:
+
 ### Windows Client:
-Click "Releases" for the installer, which has the singleplayer and multiplayer client for ENLIVEN. 
+Click "Releases" for the installer, which has the singleplayer and multiplayer client for ENLIVEN.
 * alternate download site is [axlemedia.net](http://www.axlemedia.net/index.php?htmlref=tutoring.html "Axle Media")
 * you must install to C:\Games\ENLIVEN (or possibly other path without spaces, as long as you don't move the launcher) in order for ENLIVEN to run.
 ENLIVEN subgame is a subgame of Minetest
@@ -22,6 +31,7 @@ The ENLIVEN client runs Minetest, which can be used as a client for other Minete
 * is able to be installed automatically
 * comes with high quality OpenGL graphics settings in minetest.conf for modern computers
 * is able to run ENLIVEN subgame in singleplayer mode without any changes
+
 ### Server:
 EnlivenMinetest project assists you in setting up ENLIVEN subgame and provides scripts to run it on minetestserver as current user (must be sudoer).
 Some of the included scripts help install and manage your git version of Minetest Server on Ubuntu Server or various *buntu flavors (a gui distro neither required nor recommended for minetestserver running ENLIVEN). See also https://github.com/expertmm/minetest-chunkymap for a map non-redis servers, and some offline minetest management tools.
@@ -29,8 +39,8 @@ Some of the included scripts help install and manage your git version of Minetes
 The installer script (in the "etc/change_world_name_manually_first" folder) downloads the git versions of all of the mods to the ENLIVEN folder which will be placed in your minetest games folder (one of the two folders listed below, otherwise fails)--but change the world name to the name of your world first.
 * (optionally) place the ENLIVEN folder in the games folder here into the games folder on your server such as:
   /usr/local/share/minetest/games/
-	(If you're not using the git version of Minetest on Ubuntu Server, try something like:
-	/usr/share/games/minetest/games/ )
+    (If you're not using the git version of Minetest on Ubuntu Server, try something like:
+    /usr/share/games/minetest/games/ )
   although the installer script should create the initial version of the minetest.conf in there (NOTE: there is a different version of minetest.conf for clients, as described below)
 * BEFORE running game-install-enliven.sh, make sure you FIRST CHANGE the value after "MT_MYWORLD_NAME="
 Do not expect the mods from game-install-enliven-testing.sh to work. Also, do not run the file directly -- instead, paste the variables (before backup process) in game-install-enliven.sh into a terminal window, then paste the contents of game-install-enliven-test.sh
@@ -40,6 +50,7 @@ Do not expect the mods from game-install-enliven-testing.sh to work. Also, do no
 Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawners.
 (NOTE: spawners makes pyramids now, so tsm_pyramids )
 * Recommend your users use the binary installer (Windows client) from "Releases" at https://github.com/expertmm/EnlivenMinetest/releases or the alternate site above to install, otherwise installation requires a good minetest.conf downloaded such as from the winclient/launcher folder and placed in their minetest folder. The one here has better graphics (opengl 3.0 shaders, smooth lighting).
+
 ### mtanalyze
 * mtanalyze is a set of tools including a live map for Minetest servers and singleplayer if using LevelDB
 * for more information, see README.md in mtanalyze folder.
@@ -55,59 +66,73 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 
 
 ## Changes:
+(2018-02-03)
+* bump Python requirement to 3 (no more testing is planned to be done on python2) and use python3 binary when calling py files from scripts
+    * (chunkymap-generator.bat, pythoninfo.py) if using Windows, check for various versions of Python3 and warn if fails (no longer check for Python2)
+* (minetestinfo.py) account for Minetest 0.4.16 arch naming difference: minetest_game (from minetest-data package) becomes minetest (still check for minetest_game if minetest not present in minetest/games since 0.4.16 repack 3 via deb from Debian via Ubuntu still uses the folder name minetest_game)
+(2017-05-25)
+* switched to expertmm fork of travelnet
+(2017-05-18)
+* Installer now available at [axlemedia.net](http://www.axlemedia.net/index.php?htmlref=tutoring.html "Axle Media") -- added project and related files for Inno Setup Compiler.
+(2017-05-15)
+* added mock_tnt: doesn't destroy blocks, can coexist with regular tnt mod (all tnt is replaced with mock_tnt if tnt is disabled). This mod is helpful for when multiplayer servers have tnt disabled but players have acquired 'unknown item' (tnt:tnt) as loot. The Unknown Explosive says 'unknown item' on it, as a seemless replacement :)
+(2017-04-20)
 * Released ENLIVEN 0.4.15.3
-* (2017-05-25) switched to expertmm fork of travelnet
-* (2017-05-18) Installer now available at [axlemedia.net](http://www.axlemedia.net/index.php?htmlref=tutoring.html "Axle Media") -- added project and related files for Inno Setup Compiler.
-* (2017-05-15) added mock_tnt: doesn't destroy blocks, can coexist with regular tnt mod (all tnt is replaced with mock_tnt if tnt is disabled). This mod is helpful for when multiplayer servers have tnt disabled but players have acquired 'unknown item' (tnt:tnt) as loot. The Unknown Explosive says 'unknown item' on it, as a seemless replacement :)
-* (2017-04-02) fixed issue with redundant aliases in cme_to_spawners (see Mods,WIP folder)
-* (2017-04-02) switched from kaeza to minetest-mods github repo for xban2
-* (2017-04-02) changed maximum range from 20 to 30 for forcefield (see technic/machines folder)
-* (2017-03-08) switched to hudbars, removed hud_hunger. Add line to SERVER's minetest.conf (using installer script): hubars_bar_type = statbar_modern
-* (2017-03-08) renamed the files in tenplus1's hud_hunger to use its nosprint version of lua files in hud_hunger/hunger
-* (2017-03-07) change to tenplus1's hud_hunger fork (BlockMen's has potential comparison of number to nil [crash] in hud/builtin.lua line 79, other issues, and is not maintained)
-* (2017-03-06) remove ENLIVEN's copy of protector since TenPlus1 applied the fixes in the real repo
-* (2017-03-06) remove computer-specific settings from minetest.conf (client version in this folder)
-* (2017-02-22) Fix protector crash (also sent to TenPlus1):
+(2017-04-02)
+* changed maximum range from 20 to 30 for forcefield (see technic/machines folder)
+* switched from kaeza to minetest-mods github repo for xban2
+* fixed issue with redundant aliases in cme_to_spawners (see Mods,WIP folder)
+(2017-03-08)
+*  renamed the files in tenplus1's hud_hunger to use its nosprint version of lua files in hud_hunger/hunger
+* switched to hudbars, removed hud_hunger. Add line to SERVER's minetest.conf (using installer script): hubars_bar_type = statbar_modern
+(2017-03-07)
+* change to tenplus1's hud_hunger fork (BlockMen's has potential comparison of number to nil [crash] in hud/builtin.lua line 79, other issues, and is not maintained)
+(2017-03-06)
+* remove computer-specific settings from minetest.conf (client version in this folder)
+* remove ENLIVEN's copy of protector since TenPlus1 applied the fixes in the real repo
+(2017-02-22)
+* NOTE: the protector fix from 2017-02-15 was merged by TenPlus1 today
+* Fix protector crash (also sent to TenPlus1):
 ```lua
-	if player and player:is_player() and player:get_hp() > 0 then -- ADDED THIS LINE
+    if player and player:is_player() and player:get_hp() > 0 then -- ADDED THIS LINE
          -- hurt player if protection violated
-		 
-		 -- (a bunch of code is here for processing violations) --
-		 
-	end -- ADDED THIS LINE
-	return true
-```
-* (2017-02-22) NOTE: the protector fix below was merged by TenPlus1 today
-* (2017-02-15) (change protector) Avoid crash by not allowing non-player to dig protected area (may only happen when one of the owners of an area does it--that was the crash scenario)
-		changed
-		return protector.can_dig(1, pos, player:get_player_name(), true, 1)
-		to
-		return player and protector.can_dig(1, pos, player:get_player_name(), true, 1) or false
 
-* (2017-02-15) (change homedecor_modpack/homedecor) Add optional non-adult beverage version of homedecor in homedecor_modpack (just changes display name & variable name of Wine rack and Beer tap and beer mug, and textures for beer mug)
-* (2017-02-15) (change bones) Show player (and print to server console) where died (and say bones remain or why not) -- with this addition, you can search your server log for "player's bones" where player is playername whether bones remain or not.
-* (2017-02-14) (change mobs) Added some nonviolent textures that could be used in a school to the ENLIVEN/mods folder (they can be manually installed after ENLIVEN by copying them to the same place in your games/ENLIVEN folder on your installation of Minetest)
-* (2017-02-06) Added installation of trmp_minetest_game to the installer script, since treasurer requires one or more trms in order to work (tested and working now on tsm_railcorridors)
-* (2017-02-06) Added optional trm_compassgps so that treasure could include a compass or map from the compassgps mod
-* (2017-02-06) Added optional mods for migrating from cme and from tsm_pyramids to spawners (should allow mods that depend on cme to be installed, and use mobs instead, though no mods in ENLIVEN are known to require cme currently)
+         -- (a bunch of code is here for processing violations) --
+
+    end -- ADDED THIS LINE
+    return true
+```
+(2017-02-15)
+* (change bones) Show player (and print to server console) where died (and say bones remain or why not) -- with this addition, you can search your server log for "player's bones" where player is playername whether bones remain or not.
+* (change homedecor_modpack/homedecor) Add optional non-adult beverage version of homedecor in homedecor_modpack (just changes display name & variable name of Wine rack and Beer tap and beer mug, and textures for beer mug)
+* (change protector) Avoid crash by not allowing non-player to dig protected area (may only happen when one of the owners of an area does it--that was the crash scenario)
+        changed
+        return protector.can_dig(1, pos, player:get_player_name(), true, 1)
+        to
+        return player and protector.can_dig(1, pos, player:get_player_name(), true, 1) or false
+(2017-02-14)
+* (change mobs) Added some nonviolent textures that could be used in a school to the ENLIVEN/mods folder (they can be manually installed after ENLIVEN by copying them to the same place in your games/ENLIVEN folder on your installation of Minetest)
+(2017-02-06)
+* Added optional mods for migrating from cme and from tsm_pyramids to spawners (should allow mods that depend on cme to be installed, and use mobs instead, though no mods in ENLIVEN are known to require cme currently)
+* Added optional trm_compassgps so that treasure could include a compass or map from the compassgps mod
+* Added installation of trmp_minetest_game to the installer script, since treasurer requires one or more trms in order to work (tested and working now on tsm_railcorridors)
 
 ## Naming conventions:
-* The filenames without extensions 
+* The filenames without extensions
 * The abbreviation "mts" is for minetest server-specific scripts or variables
 * du-show-big searches your hard drive for big files, in case $HOME/.minetest/debug.txt fills your drive, or a log rotate utility fails (going into a cumulative copy loop, or not) in regard to debug.txt, filling up your drive
 * The network folder contains some stuff for networks, which is usually only useful for using Minetest in a network cafe or school.
 (The purpose of minetest_userscript_localENLIVEN_server_only.vbs is to make sure the user only uses the hostname localENLIVEN, however this only changes the default, and cannot be enforced in any way as far as I know without recompiling the client.)
 
-
 ## Known issues:
-* ENLIVEN installer should be signed via a code signing license to avoid browser warnings and possible issues with virus scanners (NOTE: Squirrel.Windows has signing available such as via:
+* ENLIVEN Windows binary release installer should be signed via a code signing license to avoid browser warnings and possible issues with virus scanners (NOTE: Squirrel.Windows has signing available such as via:
 ./src\.nuget\NuGet.exe pack .\ENLIVEN.<version>.nuspec
 squirrel --releasify .\ENLIVEN.<version>.nupkg <your code signing options here>
 * ENLIVEN/games/ENLIVEN contents should be updated (unchanged from minetest_game):
-	* game_api.txt should differentiate between ENLIVEN and minetest_game
-	* README.txt should differentiate between ENLIVEN and minetest_game
-	* settingtypes.txt should document minetest.conf settings for various mods
-	* LICENSE.txt should note correct author of header and anything else specified
+    * game_api.txt should differentiate between ENLIVEN and minetest_game
+    * README.txt should differentiate between ENLIVEN and minetest_game
+    * settingtypes.txt should document minetest.conf settings for various mods
+    * LICENSE.txt should note correct author of header and anything else specified
 * Mods in Mods,WIP need LICENSE and README with author, and removal of default in depends.txt where not dependent on default
 * Preciousness in trm_compassgps has not been audited
 * Installer script does not copy certain stuff to the config files due to permissions unless runs as root (the rest is designed to run as sudoer, and use sudo only as needed)
@@ -116,16 +141,17 @@ squirrel --releasify .\ENLIVEN.<version>.nupkg <your code signing options here>
 * minetest_userscript_localENLIVEN_server_only.vbs logon script in network folder only works if you make C:\games\Minetest writable to Authenticated Users, in order for minetest.conf to be created via this script (feel free to offer comments on how to avoid making the entire Minetest folder writable to Authenticated Users [I haven't experimented with which of the files and subfolders can be set to do not inherit])
 * minetest_userscript_localENLIVEN_server_only.vbs does not read the recommended minetest.conf, so it echoes the lines manually. Ideally it would analyze the recommended one and change the server settings.
 * minetest_game mods and modpacks are owned by root in the end, for some reason. This may cause serious problems on your server. Change the owner to your current user.
+* (minetestoffline.py) (status:closed reason:no solution) assumes name specified in file is same as id (filename)
 
 ## Planned Features
 * add NPCs (possibly mobs via https://github.com/Bremaweb/adventuretest/tree/master/mods/mobs )
 * add https://github.com/minetest-mods/smartfs ?
 * Do not allow teleporting to travelnet teleporters in an area protected from you by protection mod (even if the source teleporter is yours), but allow teleporting to areas where you cannot modify (such as advanced area protection areas where, by default, use is allowed and modify is not). Locked travelnet will not be used by this mod--instead, this less-cumbersome change is planned.
 * Log where bones were placed to debug.txt, possibly by way of the following chat message:
-	after the existing line:
-	minetest.set_node(pos, {name = "bones:bones", param2 = param2})
-	add the new line (not sure if the format call is really ok--it was copied from compassgps:
-	minetest.chat_send_player(player:get_player_name(), S("Bones placed at %s."):format(pos))
+    after the existing line:
+    minetest.set_node(pos, {name = "bones:bones", param2 = param2})
+    add the new line (not sure if the format call is really ok--it was copied from compassgps:
+    minetest.chat_send_player(player:get_player_name(), S("Bones placed at %s."):format(pos))
 
 ### Potential mods to add
 * weather: https://github.com/Jeija/minetest-mod-weather ( https://forum.minetest.net/viewtopic.php?t=5245 )
@@ -135,7 +161,7 @@ squirrel --releasify .\ENLIVEN.<version>.nupkg <your code signing options here>
 * Updated pipeworks fork by HybridDog: https://github.com/HybridDog/pipeworks
 
 ### Known issues in mods:
-* Mining Drill mk3 duplication bug 
+* Mining Drill mk3 duplication bug
 * Technic manual is not complete. Contribute info on drills and mining? See https://github.com/minetest-mods/technic/blob/master/manual.md
 * regular doors and chests are not protected via protection block/symbol
 * homedecor doors are not protected via protection block/symbol
@@ -170,7 +196,7 @@ end --sort_by_distance
 2017-02-13 18:15:32: ERROR[Main]: get_biome_list: failed to get biome 'deciduous_forest'
 2017-02-13 18:15:32: ERROR[Main]: get_biome_list: failed to get biome 'savanna'
 2017-02-13 18:15:32: ERROR[Main]: get_biome_list: failed to get biome 'rainforest'
-2017-02-13 18:15:32: ERROR[Main]: register_ore: couldn't get all biomes 
+2017-02-13 18:15:32: ERROR[Main]: register_ore: couldn't get all biomes
 2017-02-13 18:15:33: WARNING[Main]: Not registering alias, item with same name is already defined: mushroom:brown_natural -> flowers:mushroom_fertile_brown
 2017-02-13 18:15:33: WARNING[Main]: Not registering alias, item with same name is already defined: mushroom:red_natural -> flowers:mushroom_fertile_red
 2017-02-13 18:15:33: WARNING[Main]: Not registering alias, item with same name is already defined: farming_plus:orange -> ethereal:orange
@@ -204,6 +230,7 @@ Further steps needed to recreate:
 * run postinstall.bat
 * change version number in C:\Users\Owner\Documents\GitHub\EnlivenMinetest\winclient\install ENLIVEN.iss
 * change version number in C:\Users\Owner\Documents\GitHub\EnlivenMinetest\winclient\launcher-src\ENLIVEN.pro
+
 ### additional notes
 * The recommended minetest.conf for subgame, including for server, is in the ENLIVEN subgame folder (also available at [EnlivenMinetest on GitHub](https://github.com/expertmm/EnlivenMinetest)
 
@@ -217,7 +244,8 @@ Minetest is included with releases--for Minetest license, please read README.txt
 * Included build is sfan5's build from https://minetest.kitsunemimi.pw/builds
   release: minetest-0.4.15-8729e7d-win64
 
-#### Changes from sfan5's build
+#### Differences from sfan5's build
+(changed by EnlivenMinetest project)
 * removed Voxelgarden subgame
 * added minetest.conf similar to the one generated by ENLIVEN scripts for schools vbscript, except with public servers enabled
 * added files specific to ENLIVEN, including launcher (ENLIVEN application), ENLIVEN subgame (including optional child-friendly changes for schools), other files, and licenses of added files.
