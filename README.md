@@ -13,6 +13,13 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
 * trm_pyramids
 * see also EnlivenMinetest/etc/game-install-enliven-testing.sh
 
+#### Shell Script Deprecation Process
+##### Goals
+* Remove anything running as root, by running as user in web server group
+
+##### Finished
+* etc/change_hardcoded_world_name_first/mts-ENLIVEN deprecated by mtsenliven.py
+
 The [ENLIVEN project](https://github.com/expertmm/EnlivenMinetest) (aka EnlivenMinetest) includes tools for installing and maintaining the server and client for internet and LAN use, and now includes the mtanalyze (formerly minetest-chunkymap) project which includes many tools including chunkymap. The server and client are just the Minetest server and client repackaged (or just web installer scripts in the case of the server), and therefore 100% compatible with other copies of Minetest server and client of the same version--including using other subgames, which client will download from servers as usual.
 
 DISCLAIMERS:
@@ -64,6 +71,8 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * The installer script changes owner and group for ENLIVEN's world.mt and world.mt.1st if present to $USER
 * The included minetest.conf recommended for your clients includes the line enable_local_map_saving = true, which will cache the world locally on their machines. You can feel free to change that according to your preference.
 
+## Changes to minetestmapper-numpy
+* fix exception while trying to recover from exception (see `Could not finish writing r`)
 
 ## Changes:
 (2018-02-03)

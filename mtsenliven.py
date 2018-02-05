@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+# runs minetestserver using the paths defined by minetestinfo
+
 import os
 from mtanalyze.minetestinfo import *
 import subprocess, signal
@@ -36,5 +39,6 @@ while True:
     if output == '' and process.poll() is not None:
         break
     if output:
-        print(output.strip())
+        # output is bytes
+        print(output.decode("utf-8").strip())  # works on python2 or 3
     rc = process.poll()
