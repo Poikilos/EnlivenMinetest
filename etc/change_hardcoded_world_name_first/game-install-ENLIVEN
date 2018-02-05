@@ -11,16 +11,6 @@
 
 # * Git version uses /home/*/minetest/games and /usr/local/share/minetest/games but the latter is used for minetestserver (minetest-server package)
 # Known Issues:
-# * Must do the following if runs twice (run a third time to fix it):
-if [ -d /usr/share/minetest/games/ENLIVEN/mods/3d_armor/minetest-3d_armor-master ]; then
-  rm -Rf /usr/share/minetest/games/ENLIVEN/mods/3d_armor
-fi
-if [ -d /usr/share/minetest/games/ENLIVEN/mods/3d_armor/minetest-3d_armor-master ]; then
-  rm -Rf /usr/share/minetest/games/ENLIVEN/mods/3d_armor
-fi
-if [ -d /usr/share/minetest/games/ENLIVEN/mods/plantlife_modpack/plantlife_modpack-master ]; then
-  rm -Rf /usr/share/minetest/games/ENLIVEN/mods/plantlife_modpack
-fi
 Uberi=`ls /usr/share/minetest/games/ENLIVEN/mods/worldedit | grep Uberi`
 if [ ! -z "$Uberi" ]; then
   # /usr/share/minetest/games/ENLIVEN/mods/worldedit/Uberi-Minetest-WorldEdit-3322ef9
@@ -748,6 +738,9 @@ MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
 if [ -d "$MTMOD_UNZ_NAME" ]; then
   rm -Rf "$MTMOD_UNZ_NAME"
 fi
+if [ -d "$MTMOD_DEST_PATH" ]; then
+  rm -Rf "$MTMOD_DEST_PATH"
+fi
 if [ -f "$MTMOD_DL_ZIP" ]; then
   rm -f "$MTMOD_DL_ZIP"
 fi
@@ -867,6 +860,9 @@ MTMOD_DEST_NAME=3d_armor
 MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
 if [ -d "$MTMOD_UNZ_NAME" ]; then
   rm -Rf "$MTMOD_UNZ_NAME"
+fi
+if [ -d "$MTMOD_DEST_PATH" ]; then
+  rm -Rf "$MTMOD_DEST_PATH"
 fi
 if [ -f "$MTMOD_DL_ZIP" ]; then
   rm -f "$MTMOD_DL_ZIP"
