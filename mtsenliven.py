@@ -31,14 +31,43 @@ process = subprocess.Popen(
     [mts, '--gameid', game_id, '--worldname', wn],
     stdout=subprocess.PIPE
 )
-
+msg_flags = ["WARNING[Server]: ", "ACTION[Server]: "]
+msg_lists = {}  # where flag is key
+for flag in msg_flags:
+    msg_lists[flag] = []
 # see https://www.endpoint.com/blog/2015/01/28/getting-realtime-output-
 # using-python
 while True:
-    output = process.stdout.readline()
-    if output == '' and process.poll() is not None:
+    try:
+        output_original = process.stdout.readline()
+        if output_original == '' and process.poll() is not None:
+            break
+        if output_original:
+            output = output_original.decode("utf-8")
+                    # works on python2 or 3
+            output_strip = output.strip()
+            # (output_original is bytes)
+            show_enable = True
+            found_flag = None
+            f_i = None
+            for flag in msg_flags:
+            # such as '2018-02-06 21:08:06: WARNING[Server]: Deprecated call to get_look_yaw, use get_look_horizontal instead'
+            # or 2018-02-06 21:08:05: ACTION[Server]: [playereffects] Wrote playereffects data into /home/owner/.minetest/worlds/FCAGameAWorld/playereffects.mt.
+                f_i = output.find(flag)
+                if f_i >= 0:
+                    found_flag = flag
+                    break
+            if found_flag:
+                sub_msg = output[f_i+len(flag):].strip()
+                if sub_msg in msg_lists[found_flag]
+                    show_enable = False
+                else:
+                    msg_lists[found_flag].append(sub_msg)
+            if show_enable:
+                print(output_strip)
+                if found_flag is not None:
+                    print("[ mtsenliven.py ] INFO: this is the last"
+                          " time the message above will be shown")
+        rc = process.poll()
+    except KeyboardInterrupt:
         break
-    if output:
-        # output is bytes
-        print(output.decode("utf-8").strip())  # works on python2 or 3
-    rc = process.poll()

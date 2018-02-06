@@ -1936,7 +1936,7 @@ if [ -d "$PATCHES_PATH" ]; then
   if [ -z "$TRY_DIFF" ]; then
     sudo cp -f $MODIFIED_PATH "$MT_MYGAME_DIR/mods/bones/"
   else
-    echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known"
+    echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version (this is not a problem if you ran the patcher more than once)."
   fi
   BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/homedecor_modpack/homedecor/gastronomy.lua
   MODIFIED_PATH=$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/gastronomy.lua
@@ -1947,7 +1947,7 @@ if [ -d "$PATCHES_PATH" ]; then
   if [ -z "$TRY_DIFF" ]; then
     sudo cp -f $MODIFIED_PATH "$MTMOD_DEST_PATH/"
   else
-    echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known"
+    echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version (this is not a problem if you ran the patcher more than once)."
   fi
   BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/homedecor_modpack/homedecor/crafts.lua
   MODIFIED_PATH=$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/crafts.lua
@@ -1957,13 +1957,14 @@ if [ -d "$PATCHES_PATH" ]; then
   if [ -z "$TRY_DIFF" ]; then
     sudo cp -f $MODIFIED_PATH "$MTMOD_DEST_PATH/"
   else
-    echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known"
+    echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version (this is not a problem if you ran the patcher more than once)."
   fi
   if [ -d "$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/models" ]; then
     # deprecated, but copy in case gets un-deprecated
-    cp -f "$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/models/*" "$MTMOD_DEST_PATH/models/"
+    cp -f $PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/models/* "$MTMOD_DEST_PATH/models/"
   fi
-  cp -f "$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/textures/*" "$MTMOD_DEST_PATH/textures/"
+  # NOTE: quotes don't work with wildcard
+  cp -f $PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/textures/* "$MTMOD_DEST_PATH/textures/"
 else
   echo "did not find $PATCHES_PATH, so skipped automatic patching which is partially implemented"
 fi
