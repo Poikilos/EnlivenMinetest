@@ -537,13 +537,15 @@ minetest.register_craft({
         recipe = "homedecor:skylight_frosted",
 })
 
+-- Various colors of shutters
+
 minetest.register_craft( {
-	output = "homedecor:shutter 2",
-	recipe = {
+        output = "homedecor:shutter_oak 2",
+        recipe = {
 		{ "group:stick", "group:stick" },
 		{ "group:stick", "group:stick" },
 		{ "group:stick", "group:stick" },
-	},
+        },
 })
 
 minetest.register_craft({
@@ -551,6 +553,201 @@ minetest.register_craft({
         recipe = "homedecor:shutter_oak",
         burntime = 30,
 })
+
+--
+
+minetest.register_craft( {
+	type = "shapeless",
+        output = "homedecor:shutter_black 4",
+        recipe = {
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"dye:black"
+        },
+})
+
+minetest.register_craft({
+        type = "fuel",
+        recipe = "homedecor:shutter_black",
+        burntime = 30,
+})
+
+--
+
+minetest.register_craft( {
+	type = "shapeless",
+        output = "homedecor:shutter_dark_grey 4",
+        recipe = {
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"dye:dark_grey"
+        },
+})
+
+minetest.register_craft({
+        type = "fuel",
+        recipe = "homedecor:shutter_dark_grey",
+        burntime = 30,
+})
+
+--
+
+minetest.register_craft( {
+	type = "shapeless",
+        output = "homedecor:shutter_grey 4",
+        recipe = {
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"dye:grey"
+        },
+})
+
+minetest.register_craft({
+        type = "fuel",
+        recipe = "homedecor:shutter_grey",
+        burntime = 30,
+})
+
+--
+
+minetest.register_craft( {
+	type = "shapeless",
+        output = "homedecor:shutter_white 4",
+        recipe = {
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"dye:white"
+        },
+})
+
+minetest.register_craft({
+        type = "fuel",
+        recipe = "homedecor:shutter_white",
+        burntime = 30,
+})
+
+--
+
+minetest.register_craft( {
+	type = "shapeless",
+        output = "homedecor:shutter_mahogany 4",
+	recipe = {
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"dye:brown"
+	},
+})
+
+minetest.register_craft({
+	type = "fuel",
+	recipe = "homedecor:shutter_mahogany",
+	burntime = 30,
+})
+minetest.register_craft( {
+	type = "shapeless",
+        output = "homedecor:shutter_red 4",
+	recipe = {
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"dye:red"
+	},
+})
+
+minetest.register_craft({
+	type = "fuel",
+	recipe = "homedecor:shutter_red",
+	burntime = 30,
+})
+
+minetest.register_craft( {
+	type = "shapeless",
+        output = "homedecor:shutter_yellow 4",
+	recipe = {
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"dye:yellow"
+	},
+})
+
+minetest.register_craft({
+	type = "fuel",
+	recipe = "homedecor:shutter_yellow",
+	burntime = 30,
+})
+
+--
+
+minetest.register_craft( {
+	type = "shapeless",
+        output = "homedecor:shutter_forest_green 4",
+        recipe = {
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"dye:dark_green"
+        },
+})
+
+minetest.register_craft({
+        type = "fuel",
+        recipe = "homedecor:shutter_forest_green",
+        burntime = 30,
+})
+
+--
+
+minetest.register_craft( {
+	type = "shapeless",
+        output = "homedecor:shutter_light_blue 4",
+	recipe = {
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"unifieddyes:light_blue"
+	},
+})
+
+minetest.register_craft({
+	type = "fuel",
+	recipe = "homedecor:shutter_light_blue",
+	burntime = 30,
+})
+
+minetest.register_craft( {
+	type = "shapeless",
+        output = "homedecor:shutter_violet 4",
+	recipe = {
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"homedecor:shutter_oak",
+		"dye:violet"
+	},
+})
+
+minetest.register_craft({
+	type = "fuel",
+	recipe = "homedecor:shutter_violet",
+	burntime = 30,
+})
+
+--
 
 minetest.register_craft( {
         output = "homedecor:drawer_small",
@@ -1298,7 +1495,15 @@ minetest.register_craft( {
 -- other types of fences
 
 minetest.register_craft( {
-	output = "homedecor:fence_wrought_iron_2 4",
+	output = "homedecor:fence_wrought_iron_2 2",
+	recipe = {
+		{ "homedecor:pole_wrought_iron", "default:iron_lump" },
+		{ "homedecor:pole_wrought_iron", "default:iron_lump" },
+	},
+})
+
+minetest.register_craft( {
+	output = "homedecor:fence_wrought_iron_2 2",
 	recipe = {
 		{ "homedecor:pole_wrought_iron", "default:iron_lump" },
 		{ "homedecor:pole_wrought_iron", "default:iron_lump" },
@@ -2219,29 +2424,30 @@ minetest.register_craft( {
 
 -- bathroom/kitchen tiles
 
-minetest.register_craft( {
-		output = "homedecor:bathroom_tiles_light 4",
-		recipe = {
-			{ "group:marble", "group:marble", "" },
-			{ "group:marble", "group:marble", "dye:white" }
-		},
-})
+local color_pairings = {
+	{ "grey",		"white",		"1" },
+	{ "dark_grey",	"white",		"2" },
+	{ "black",		"white",		"3" },
+	{ "black",		"dark_grey",	"4" },
+	{ "red",		"white",		"red" },
+	{ "green",		"white",		"green" },
+	{ "blue",		"white",		"blue" },
+	{ "yellow",		"white",		"yellow" },
+	{ "brown",		"white",		"tan" }
+}
 
-minetest.register_craft( {
-		output = "homedecor:bathroom_tiles_medium 4",
-		recipe = {
-			{ "group:marble", "group:marble", "" },
-			{ "group:marble", "group:marble", "dye:grey" }
-		},
-})
-
-minetest.register_craft( {
-		output = "homedecor:bathroom_tiles_dark 4",
-		recipe = {
-			{ "group:marble", "group:marble", "" },
-			{ "group:marble", "group:marble", "dye:dark_grey" }
-		},
-})
+for i in ipairs(color_pairings) do
+	local dye1 = color_pairings[i][1]
+	local dye2 = color_pairings[i][2]
+	local result = color_pairings[i][3]
+	minetest.register_craft( {
+		    output = "homedecor:tiles_"..result.." 2",
+		    recipe = {
+				{ "group:marble", "dye:"..dye1 },
+				{ "group:marble", "dye:"..dye2 }
+		    },
+	})
+end
 
 -- misc electrical
 
@@ -2467,21 +2673,39 @@ minetest.register_craft( {
         },
 })
 
-minetest.register_craft( {
-	output = "homedecor:bed_regular",
-	recipe = {
-		{ "group:stick", "", "group:stick" },
-		{ "wool:white", "wool:white", "wool:white" },
-		{ "group:wood", "", "group:wood" },
-	},
-})
+local bedcolors = {
+	{ "red", "red"},
+	{ "orange", "orange" },
+	{ "yellow", "yellow"},
+	{ "green", "dark_green"},
+	{ "blue", "blue"},
+	{ "violet", "violet"},
+	{ "pink", "pink"},
+	{ "darkgrey", "dark_grey"},
+	{ "brown", "brown" },
+}
 
-minetest.register_craft( {
-	output = "homedecor:bed_kingsize",
-	recipe = {
-		{ "homedecor:bed_regular", "homedecor:bed_regular" }
-	},
-})
+for c in ipairs(bedcolors) do
+	local color = bedcolors[c][1]
+	local woolcolor = bedcolors[c][2]
+
+	minetest.register_craft( {
+		output = "homedecor:bed_"..color.."_regular",
+		recipe = {
+			{ "group:stick", "", "group:stick" },
+			{ "wool:white", "wool:"..woolcolor, "wool:"..woolcolor },
+			{ "group:wood", "", "group:wood" },
+		},
+	})
+
+	minetest.register_craft( {
+		output = "homedecor:bed_"..color.."_kingsize",
+		recipe = {
+			{ "homedecor:bed_"..color.."_regular", "homedecor:bed_"..color.."_regular" }
+		},
+	})
+
+end
 
 minetest.register_craft( {
         output = "homedecor:bottle_green",
@@ -2821,6 +3045,7 @@ minetest.register_craft({
 })
 minetest.register_alias("homedecor:wine_rack", "homedecor:drink_rack")
 
+
 local picture_dyes = {
 	{"dye:brown", "dye:green"}, -- the figure sitting by the tree, wielding a pick
 	{"dye:green", "dye:blue"}	-- the "family photo"
@@ -2836,14 +3061,18 @@ for i in ipairs(picture_dyes) do
 	})
 end
 
-minetest.register_craft({
-	output = "homedecor:desk_lamp 2",
-	recipe = {
-		{ "", "default:steel_ingot", "homedecor:glowlight_small_cube" },
-		{ "", "homedecor:steel_strip", "" },
-		{ "homedecor:plastic_sheeting", "homedecor:copper_wire", "homedecor:plastic_sheeting" },
-	},
-})
+local dlamp_colors = { "red","blue","green","violet" }
+
+for _, color in ipairs(dlamp_colors) do
+	minetest.register_craft({
+		output = "homedecor:desk_lamp_"..color,
+		recipe = {
+			{ "", "homedecor:steel_strip", "homedecor:glowlight_small_cube" },
+			{ "", "homedecor:copper_wire", "" },
+			{ "homedecor:plastic_sheeting", "dye:"..color, "homedecor:plastic_sheeting" },
+		},
+	})
+end
 
 minetest.register_craft({
 	output = "homedecor:hanging_lantern 2",
@@ -3016,28 +3245,10 @@ minetest.register_craft({
 })
 
 minetest.register_craft({
-	output = "homedecor:stained_glass 3",
+	output = "homedecor:stained_glass",
 	recipe = {
 		{"", "dye:blue", ""},
-		{"dye:red", "xpanes:pane_flat", "dye:green"},
-		{"", "dye:yellow", ""},
-	},
-})
-
-minetest.register_craft({
-	output = "homedecor:stained_glass 2",
-	recipe = {
-		{"", "dye:blue", ""},
-		{"dye:red", "cottages:glass_pane_side", "dye:green"},
-		{"", "dye:yellow", ""},
-	},
-})
-
-minetest.register_craft({
-	output = "homedecor:stained_glass 2",
-	recipe = {
-		{"", "dye:blue", ""},
-		{"dye:red", "cottages:glass_pane", "dye:green"},
+		{"dye:red", "xpanes:pane", "dye:green"},
 		{"", "dye:yellow", ""},
 	},
 })

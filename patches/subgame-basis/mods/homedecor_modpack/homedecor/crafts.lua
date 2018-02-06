@@ -2705,14 +2705,13 @@ minetest.register_craft({
 })
 
 minetest.register_craft({
-	output = "homedecor:drink_tap",
+	output = "homedecor:beer_tap",
 	recipe = {
 		{ "group:stick","default:steel_ingot","group:stick" },
 		{ "homedecor:kitchen_faucet","default:steel_ingot","homedecor:kitchen_faucet" },
 		{ "default:steel_ingot","default:steel_ingot","default:steel_ingot" }
 	},
 })
--- already done in gastronomy.lua: minetest.register_alias("homedecor:beer_tap", "homedecor:drink_tap")
 
 minetest.register_craft({
 	output = "homedecor:swing",
@@ -2812,14 +2811,13 @@ minetest.register_craft({
 })
 
 minetest.register_craft({
-	output = "homedecor:drink_rack",
+	output = "homedecor:wine_rack",
 	recipe = {
 		{ "homedecor:4_bottles_brown", "group:wood", "homedecor:4_bottles_brown" },
 		{ "homedecor:4_bottles_brown", "group:wood", "homedecor:4_bottles_brown" },
 		{ "homedecor:4_bottles_brown", "group:wood", "homedecor:4_bottles_brown" },
 	},
 })
-minetest.register_alias("homedecor:wine_rack", "homedecor:drink_rack")
 
 local picture_dyes = {
 	{"dye:brown", "dye:green"}, -- the figure sitting by the tree, wielding a pick

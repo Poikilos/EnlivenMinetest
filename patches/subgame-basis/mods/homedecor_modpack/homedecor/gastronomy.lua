@@ -87,8 +87,8 @@ homedecor.register("4_bottles_multi", {
 })
 
 local wine_cbox = homedecor.nodebox.slab_z(-0.75)
-homedecor.register("drink_rack", {
-	description = S("Drink rack"),
+homedecor.register("wine_rack", {
+	description = S("Wine rack"),
 	mesh = "homedecor_wine_rack.obj",
 	tiles = {
 		"homedecor_generic_wood_red.png",
@@ -120,8 +120,8 @@ homedecor.register("dartboard", {
 	sounds = default.node_sound_wood_defaults(),
 })
 
-homedecor.register("drink_tap", {
-	description = S("drink tap"),
+homedecor.register("beer_tap", {
+	description = S("Beer tap"),
 	mesh = "homedecor_beer_taps.obj",
 	tiles = {
 		"homedecor_generic_metal_bright.png",
@@ -139,23 +139,22 @@ homedecor.register("drink_tap", {
 
 		local wieldname = itemstack:get_name()
 		if wieldname == "vessels:drinking_glass" then
-			if inv:room_for_item("main", "homedecor:drink_mug 1") then
+			if inv:room_for_item("main", "homedecor:beer_mug 1") then
 				itemstack:take_item()
 				clicker:set_wielded_item(itemstack)
-				inv:add_item("main", "homedecor:drink_mug 1")
+				inv:add_item("main", "homedecor:beer_mug 1")
 				minetest.chat_send_player(clicker:get_player_name(),
-						S("Ahh, a nice cold drink - look in your inventory for it!"))
+						S("Ahh, a frosty cold beer - look in your inventory for it!"))
 			else
 				minetest.chat_send_player(clicker:get_player_name(),
-						S("No room in your inventory to add a drink mug!"))
+						S("No room in your inventory to add a beer mug!"))
 			end
 		end
 	end
 })
-minetest.register_alias("homedecor:beer_tap", "homedecor:drink_tap")
 
 minetest.register_craft({
-	output = "homedecor:drink_tap",
+	output = "homedecor:beer_tap",
 	recipe = {
 		{ "group:stick","default:steel_ingot","group:stick" },
 		{ "homedecor:kitchen_faucet","default:steel_ingot","homedecor:kitchen_faucet" },
@@ -168,8 +167,8 @@ local beer_cbox = {
 	fixed = { -5/32, -8/16, -9/32 , 7/32, -2/16, 1/32 }
 }
 
-homedecor.register("drink_mug", {
-	description = S("Drink mug"),
+homedecor.register("beer_mug", {
+	description = S("Beer mug"),
 	drawtype = "mesh",
 	mesh = "homedecor_beer_mug.obj",
 	tiles = { "homedecor_beer_mug.png" },
@@ -197,7 +196,6 @@ homedecor.register("drink_mug", {
 		end
 	end
 })
-minetest.register_alias("homedecor:beer_mug", "homedecor:drink_mug")
 
 local svm_cbox = {
 	type = "fixed",
