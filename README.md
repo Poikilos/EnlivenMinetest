@@ -75,6 +75,14 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * fix exception while trying to recover from exception (see `Could not finish writing r`)
 
 ## Changes:
+(2018-02-06)
+* refactored file structure
+  * renamed games/ENLIVEN to patches/subgame
+  * moved etc/Mods* to patches/mods*
+* updated mod lists for 0.4.16
+  * added
+  * moved nyancat to patches/subgame/minetest_game-deprecated-mods-list.txt
+    (wiki.minetest.net/Nyan_Cat says if you want it back, copy it from 0.4.15)
 (2018-02-03)
 * bump Python requirement to 3 (no more testing is planned to be done on python2) and use python3 binary when calling py files from scripts
     * (chunkymap-generator.bat, pythoninfo.py) if using Windows, check for various versions of Python3 and warn if fails (no longer check for Python2)

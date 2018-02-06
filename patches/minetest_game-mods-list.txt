@@ -1,4 +1,5 @@
 beds
+binoculars
 boats
 bones
 bucket
@@ -6,13 +7,15 @@ carts
 creative
 default
 doors
+dungeon_loot
 dye
 farming
 fire
 flowers
 give_initial_stuff
 killme
-nyancat
+map
+player_api
 screwdriver
 sethome
 sfinv

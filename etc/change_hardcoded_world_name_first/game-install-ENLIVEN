@@ -1888,19 +1888,30 @@ fi
 echo
 echo
 echo
+echo "adding the following necessary integration mods:"
+ls ~/GitHub/EnlivenMinetest/patches/mods-integration/
+sudo cp -R ~/GitHub/EnlivenMinetest/patches/mods-integration/* "$MT_MYGAME_MODS_PATH/"
+echo
+echo "adding the following multiplayer mods:"
+ls ~/GitHub/EnlivenMinetest/patches/mods-multiplayer/
+sudo cp -R ~/GitHub/EnlivenMinetest/patches/mods-multiplayer/* "$MT_MYGAME_MODS_PATH/"
 echo
 echo "# remove not available on 0.4.16 stable (is only avail on 0.4.16-dev or higher)"
 echo "sudo rm -Rf /usr/share/games/minetest/games/ENLIVEN/mods/worldedit/worldedit_brush"
-echo "# optionally:"
-echo "sudo cp -R ~/GitHub/EnlivenMinetest/etc/Mods\,WIP/* $MT_MYGAME_MODS_PATH/"
 echo "# not recommended:"
-echo "sudo cp -R ~/GitHub/EnlivenMinetest/etc/Mods\,stopgap/* $MT_MYGAME_MODS_PATH/"
+echo "sudo cp -R ~/GitHub/EnlivenMinetest/patches/mods-stopgap/* $MT_MYGAME_MODS_PATH/"
 echo "sudo rm -Rf $MT_MYGAME_MODS_PATH/1.nonworking"
 
 
-echo ""
-echo ""
-echo ""
+echo
+echo
+echo "adding non-manual patches to subgame (vs minetest_game and downloaded mods):"
+sudo cp -f ~/GitHub/EnlivenMinetest/patches/subgame/* "$MT_MYGAME_DIR/"
+sudo cp -f ~/GitHub/EnlivenMinetest/patches/subgame/menu/* "$MT_MYGAME_DIR/menu/"
+sudo cp -f ~/GitHub/EnlivenMinetest/patches/subgame/mods/mobs/textures/* "$MT_MYGAME_DIR/mods/mobs/textures/"
+sudo cp -f ~/GitHub/EnlivenMinetest/patches/subgame/mods/mobs_monster/textures/* "$MT_MYGAME_DIR/mods/mobs_monster/textures/"
+echo "mods affected: mobs"
+echo
 echo "#### $MT_MYWORLD_DIR/world.mt: ####"
 cat "$MT_MYWORLD_DIR/world.mt"
 echo "### end $MT_MYWORLD_DIR/world.mt ##"
@@ -1920,19 +1931,13 @@ echo "  ban: allows /ban ip and /unban ip (and /whitelist add player and /whitel
 echo "  kick: allows /kick player"
 echo "  privs: allows grant and revoke commands"
 echo "  delprotect: circumvents protector blocks, including allowing removing them"
+echo "  invhack: editing player inventories as moderator"
 echo ""
-echo "Also remember to:"
-echo "  nano $MT_MYGAME_MODS_PATH/teleporter/config.lua"
-echo "  #then change:"
-echo "  teleporter.requires_pairing = true"
-echo "  # also see other lines in this script that wouldn't echo as non-root"
-echo "  #otherwise people can type any coordinates for destination (approaching infinite distance)!"
+echo "  * for invhack, remember to do: /giveme invhack:tool"
 echo "  * uncomment columns in lapis mod"
-echo "  * set number = 0 or number = {min=0, max=0} in cme since only using cme for creatures:*_spawner nodes and for compatibility with old worlds"
-echo "  * remember to /grant yourself invhack and then /giveme invhack:tool for editing player inventories as moderator"
 echo "  * Make sure client (server done already above) minetest.conf has secure.trusted_mods = advanced_npc"
 echo "  * Make sure writable minetest conf was successfully written"
-echo "  over /usr/local/share/minetest/games/enliven/minetest.conf with:"
+echo "    over /usr/local/share/minetest/games/enliven/minetest.conf with:"
 echo "protector_radius = 7"
 echo "protector_pvp = true"
 echo "protector_pvp_spawn = 10"
