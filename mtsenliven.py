@@ -59,7 +59,7 @@ while True:
                     break
             if found_flag:
                 sub_msg = output[f_i+len(flag):].strip()
-                if sub_msg in msg_lists[found_flag]
+                if sub_msg in msg_lists[found_flag]:
                     show_enable = False
                 else:
                     msg_lists[found_flag].append(sub_msg)
