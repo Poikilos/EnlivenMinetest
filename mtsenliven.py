@@ -82,8 +82,7 @@ def print_unique_only(output, err_flag=False):
     if show_enable:
         print(output_strip)
         if found_flag is not None:
-            print("[ mtsenliven.py ] INFO: this is the last"
-                  " time the message above will be shown")
+            print("  [ mtsenliven.py ] previous msg will be repressed")
 
 def process_msg(bstring):
     output = bstring
