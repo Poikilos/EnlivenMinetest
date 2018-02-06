@@ -29,6 +29,9 @@ print("Using world_name: " + wn)
 print()
 process = None
 try:
+    # get both stdout and stderr (see
+    # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-
+    # stderr-using-python-subprocess-module/)
     process = subprocess.Popen(
         [mts, '--gameid', game_id, '--worldname', wn],
         stdout=subprocess.PIPE,
@@ -48,7 +51,7 @@ for flag in msg_flags:
 
 def print_unique_only(output):
     output_strip = output.strip()
-    # (output_original is bytes)
+    # (out_bytes is bytes)
     show_enable = True
     found_flag = None
     f_i = None
@@ -79,16 +82,17 @@ def process_msg(bstring):
 
 while True:
     try:
-        output_original = process.stdout.readline()
-        err_original = process.stderr.readline()
-        if (output_original == '') and \
-           (err_original == '') and \
+        # out_bytes = process.stdout.readline()
+        # err_bytes = process.stderr.readline()
+        out_bytes, err_bytes = p.communicate()
+        if (out_bytes == '') and \
+           (err_bytes == '') and \
            (process.poll() is not None):
             break
-        if output_original:
-            process_msg(output_original)
-        if err_original:
-            process_msg(err_original)
+        if out_bytes:
+            process_msg(out_bytes)
+        if err_bytes:
+            process_msg(err_bytes)
         rc = process.poll()
     except KeyboardInterrupt:
         break
