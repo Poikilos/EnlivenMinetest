@@ -1928,34 +1928,42 @@ if [ -d "$PATCHES_PATH" ]; then
   echo "mods affected: mobs mobs_monsters"
   PATCHED_FLAG=""
   BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/bones/init.lua
+  MODIFIED_PATH=$PATCHES_PATH/subgame/mods/bones/init.lua
   MTMOD_DEST_NAME=bones
   MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/bones
   TARGET_PATH=$MTMOD_DEST_PATH/init.lua
   TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"
   if [ -z "$TRY_DIFF" ]; then
-    sudo cp -f $BASIS_PATH "$MT_MYGAME_DIR/mods/bones/"
+    sudo cp -f $MODIFIED_PATH "$MT_MYGAME_DIR/mods/bones/"
   else
     echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known"
   fi
   BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/homedecor_modpack/homedecor/gastronomy.lua
+  MODIFIED_PATH=$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/gastronomy.lua
   TARGET_PATH=$MT_MYGAME_MODS_PATH/homedecor_modpack/homedecor/gastronomy.lua
   MTMOD_DEST_NAME=homedecor_modpack
   MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/homedecor_modpack/homedecor
   TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"  
   if [ -z "$TRY_DIFF" ]; then
-    sudo cp -f $TARGET_PATH "$MTMOD_DEST_PATH/"
+    sudo cp -f $MODIFIED_PATH "$MTMOD_DEST_PATH/"
   else
     echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known"
   fi
   BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/homedecor_modpack/homedecor/crafts.lua
+  MODIFIED_PATH=$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/crafts.lua
   TARGET_PATH=$MT_MYGAME_MODS_PATH/homedecor_modpack/homedecor/crafts.lua
   MTMOD_DEST_NAME=homedecor_modpack
   TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"  
   if [ -z "$TRY_DIFF" ]; then
-    sudo cp -f $TARGET_PATH "$MTMOD_DEST_PATH/"
+    sudo cp -f $MODIFIED_PATH "$MTMOD_DEST_PATH/"
   else
     echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known"
   fi
+  if [ -d "$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/models" ]; then
+    # deprecated, but copy in case gets un-deprecated
+    cp -f "$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/models/*" "$MTMOD_DEST_PATH/models/"
+  fi
+  cp -f "$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/textures/*" "$MTMOD_DEST_PATH/textures/"
 else
   echo "did not find $PATCHES_PATH, so skipped automatic patching which is partially implemented"
 fi
