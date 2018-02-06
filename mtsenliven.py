@@ -72,7 +72,7 @@ def print_unique_only(output):
                   " time the message above will be shown")
 
 def process_msg(bstring):
-    output = output_original.decode("utf-8")
+    output = bstring.decode("utf-8")
             # works on python2 or 3
     print_unique_only(output)
 
