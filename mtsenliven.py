@@ -84,7 +84,7 @@ while True:
     try:
         # out_bytes = process.stdout.readline()
         # err_bytes = process.stderr.readline()
-        out_bytes, err_bytes = p.communicate()
+        out_bytes, err_bytes = process.communicate()
         if (out_bytes == '') and \
            (err_bytes == '') and \
            (process.poll() is not None):
