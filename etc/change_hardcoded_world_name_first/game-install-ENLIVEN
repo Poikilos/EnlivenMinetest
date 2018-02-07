@@ -1749,7 +1749,7 @@ remove_mod u_skins
 PATCH_SKINS_MOD_NAME="skinsdb"  # used further down too!
 add_zipped_mod $PATCH_SKINS_MOD_NAME skinsdb-master https://github.com/minetest-mods/skinsdb/archive/master.zip
 if [ ! -z "$MATCHING_MODS_BEFORE" ]; then
-  echo "Removed $MATCHING_MODS_BEFORE then installed $PATCH_SKINS_MOD_NAME"
+  echo "Removed $MATCHING_MODS_BEFORE then installed $PATCH_SKINS_MOD_NAME (this output is shown on purpose)"
 fi
 # Update skins database (WARNING: skin numbering affects chosen player skin):
 # (jq is a json processor, required for the updater bash script:)
@@ -1793,7 +1793,7 @@ if [ -d "$SUB_PATH" ]; then
   echo "removing original $SUB_PATH/character_*..."
   rm -Rf $SUB_PATH/character_*  # cannot have quotes if using wildcards
 fi
-sudo cp -f $PATCHES_PATH/mods-multiplayer/$PATCH_SKINS_MOD_NAME/$SUB_NAME "$SUB_PATH"
+sudo cp -f $PATCHES_PATH/mods-multiplayer/$PATCH_SKINS_MOD_NAME/$SUB_NAME/* "$SUB_PATH"
 if [ ! -d "$SUB_PATH" ]; then
   echo "ERROR: failed to install expertmm's skins to $SUB_PATH, so cannot continue." > $err_txt
   cat $err_txt
@@ -1808,7 +1808,7 @@ if [ -d "$SUB_PATH" ]; then
   echo "removing original $SUB_PATH/character_*..."
   rm -Rf $SUB_PATH/character_*  # cannot have quotes if using wildcards
 fi
-sudo cp -f $PATCHES_PATH/mods-multiplayer/$PATCH_SKINS_MOD_NAME/$SUB_NAME "$SUB_PATH"
+sudo cp -f $PATCHES_PATH/mods-multiplayer/$PATCH_SKINS_MOD_NAME/$SUB_NAME/* "$SUB_PATH"
 if [ ! -d "$SUB_PATH" ]; then
   echo "ERROR: failed to install expertmm's skins to $SUB_PATH, so cannot continue." > $err_txt
   cat $err_txt
