@@ -5,7 +5,7 @@
 #   shuts down properly (makes sure all processes finish) according to
 #   dr4Ke on
 #   https://forum.minetest.net/viewtopic.php?f=11&t=13138&start=50
-
+key_exit_msg = "SIGINT should shut down server safely...\n"
 import os
 from mtanalyze.minetestinfo import *
 try:
@@ -86,6 +86,7 @@ def print_unique_only(output, err_flag=False):
     found_flag = None
     f_i = None
     always_show_enable = False
+    msg_msg = "previous message"
     for flag in unique_flags:
         if flag in output:
             always_show_enable = True
@@ -102,6 +103,7 @@ def print_unique_only(output, err_flag=False):
             for wrap in non_unique_wraps:
                 if wrap["opener"] in sub_msg and wrap["closer"] in sub_msg:
                     sub_msg = wrap["opener"] + "..." + wrap["closer"]
+                    msg_msg = "similar messages"
                     break
             if sub_msg in msg_lists[found_flag]:
                 show_enable = False
@@ -110,7 +112,8 @@ def print_unique_only(output, err_flag=False):
     if show_enable:
         print(output_strip)
         if found_flag is not None:
-            print("  [ mtsenliven.py ] previous msg will be suppressed")
+            print("  [ mtsenliven.py ] " + msg_msg
+                  + " will be suppressed")
 
 def process_msg(bstring):
     output = bstring
@@ -139,7 +142,7 @@ def reader(pipe, q):
         finally:
             q.put(None)
     except KeyboardInterrupt:
-        print("[ mtsenliven.py ] SIGINT should shut down server safely")
+        print("[ mtsenliven.py ] " + key_exit_msg)
         pass
 
 q = Queue()
@@ -159,7 +162,7 @@ try:
                 pass
             process_msg("%s: %s" % (s, l))
 except KeyboardInterrupt:
-    print("[ mtsenliven.py ] SIGINT should shut down server safely")
+    print("[ mtsenliven.py ] " + key_exit_msg)
     pass
 
 exit(0)
@@ -180,6 +183,6 @@ while True:
             # process_msg(err_bytes)
         rc = process.poll()
     except KeyboardInterrupt:
-        print("[ mtsenliven.py ] SIGINT should shut down server safely")
+        print("[ mtsenliven.py ] " + key_exit_msg)
         break
 # process.kill()

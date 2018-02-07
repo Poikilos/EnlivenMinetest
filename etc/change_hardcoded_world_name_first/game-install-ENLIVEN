@@ -80,11 +80,12 @@ MT_MYWORLD_NAME=FCAGameAWorld
 MT_MYWORLD_DIR=$HOME/.minetest/worlds/$MT_MYWORLD_NAME
 err_txt=$HOME/err-enliven.txt
 # see also https://www.shellscript.sh/functions.html
-add_regular_mod()
+
+add_zipped_mod()
 {
   cd $HOME/Downloads
-  MTMOD_UNZ_NAME=$1
-  MTMOD_DEST_NAME=$2
+  MTMOD_DEST_NAME=$1
+  MTMOD_UNZ_NAME=$2
   URL=$3
   MTMOD_SRC_ZIP=$MTMOD_DEST_NAME.zip
   MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
@@ -110,6 +111,51 @@ add_regular_mod()
     echo "  added as $MTMOD_DEST_PATH"
   fi
 }
+
+add_git_clone_mod()
+{
+  cd $HOME/Downloads
+  MTMOD_DEST_NAME=$1
+  MTMOD_UNZ_NAME=$2
+  URL=$3
+  MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+  if [ ! -z "`ls | grep $MTMOD_UNZ_NAME`" ]; then  # works with wildcard in variable
+    rm -Rf $MTMOD_UNZ_NAME
+  fi
+  if [ -d "$MTMOD_DEST_PATH" ]; then
+    sudo rm -Rf "$MTMOD_DEST_PATH"
+  fi
+  git clone $URL
+  sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
+  sudo rm -Rf "$MTMOD_DEST_PATH/etc"
+  if [ ! -d "$MTMOD_DEST_PATH" ]; then
+    echo "  ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+    cat $err_txt
+    sleep 3
+    exit 1
+  else
+    echo "  added as $MTMOD_DEST_PATH"
+  fi
+}
+
+remove_mod()
+{
+  cd $HOME/Downloads
+  MTMOD_DEST_NAME=$1
+  MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+  if [ -d "$MTMOD_DEST_PATH" ]; then
+    sudo rm -Rf "$MTMOD_DEST_PATH"
+  fi
+  if [ -d "$MTMOD_DEST_PATH" ]; then
+    echo "  ERROR in remove_mod: failed to remove $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+    cat $err_txt
+    sleep 3
+    exit 1
+  else
+    echo "  removed $MTMOD_DEST_PATH"
+  fi
+}
+
 #endregion paste this part into terminal to get some great environment variables
 
 
@@ -1481,7 +1527,7 @@ if [ -f $MTMOD_SRC_ZIP ]; then
   rm $MTMOD_SRC_ZIP
 fi
 rm -Rvf $MTMOD_UNZ_NAME
-wget https://github.com/Uberi/MineTest-WorldEdit/zipball/master
+#wget https://github.com/Uberi/MineTest-WorldEdit/zipball/master
 mv $MTMOD_DL_ZIP "$MTMOD_SRC_ZIP"
 unzip "$MTMOD_SRC_ZIP"
 if [ -d "$MTMOD_DEST_PATH" ]; then
@@ -1495,17 +1541,21 @@ if [ ! -d "$MTMOD_DEST_PATH" ]; then
   exit 1
 fi
 
+# add_zipped_mod worldedit Uberi-Minetest-WorldEdit-* https://github.com/Uberi/MineTest-WorldEdit/zipball/master
+# add_zipped_mod worldedit Minetest-WorldEdit-* https://github.com/Uberi/MineTest-WorldEdit/zipball/master
+add_git_clone_mod worldedit Uberi-Minetest-WorldEdit https://github.com/Uberi/Minetest-WorldEdit.git
 
 #MarkBu's ambience/ambiance ambient sounds (burli on https://forum.minetest.net/viewtopic.php?f=9&t=14814 )
-#add_regular_mod ambianceplus-master ambianceplus https://github.com/MarkuBu/ambianceplus/archive/master.zip
+#add_zipped_mod ambianceplus ambianceplus-master https://github.com/MarkuBu/ambianceplus/archive/master.zip
 
 # tenplus1's ambience/ambiance ambient sounds (fork linked at original's thread at https://forum.minetest.net/viewtopic.php?f=11&t=2807&start=275 )
-add_regular_mod ambience-master ambience https://github.com/tenplus1/ambience/archive/master.zip
+add_zipped_mod ambience ambience-master https://github.com/tenplus1/ambience/archive/master.zip
 # expertmm fork of LeMagnesium's minetest-mod-metatools
-add_regular_mod minetest-mod-metatools-master metatools https://github.com/expertmm/minetest-mod-metatools/archive/master.zip
+add_zipped_mod metatools minetest-mod-metatools-master https://github.com/expertmm/minetest-mod-metatools/archive/master.zip
 #[mod-pack] sky critters (for mobs_redo) [mobs_sky] <https://forum.minetest.net/viewtopic.php?f=9&t=12688>
 #requires mobs redo
-add_regular_mod mobs_sky-master mobs_sky https://github.com/blert2112/mobs_sky/archive/master.zip
+add_zipped_mod mobs_sky mobs_sky-master https://github.com/blert2112/mobs_sky/archive/master.zip
+
 # forum_url: https://forum.minetest.net/viewtopic.php?f=11&t=13857
 # description:
 # * REPLACES pyramids.
@@ -1516,36 +1566,51 @@ add_regular_mod mobs_sky-master mobs_sky https://github.com/blert2112/mobs_sky/a
 #   * spawners_env: appears in Dungeons and Temples (the pink stone ones); spawns hostile mobs; has small chance of spawning a spawner
 #   * spawners_mobs: spawns non-hostile mobs
 #   * spawners_ores: spawns ores
-add_regular_mod minetest_gamers-spawners-* spawners https://bitbucket.org/minetest_gamers/spawners/get/master.zip
+add_zipped_mod spawners minetest_gamers-spawners-* https://bitbucket.org/minetest_gamers/spawners/get/master.zip
+MTMOD_DEST_NAME=spawners/spawners_ores
+MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+if [ -d "$MTMOD_DEST_PATH" ]; then
+  echo "removing $MTMOD_DEST_NAME..."
+  sudo rm -Rf "$MTMOD_DEST_PATH"
+else
+  echo "ERROR: could not find $MTMOD_DEST_PATH for removal, so cancelling ENLIVEN install"
+  sleep 3
+  exit 1
+fi
+if [ -d "$MTMOD_DEST_PATH" ]; then
+  echo "ERROR: could not remove $MTMOD_DEST_PATH for removal, so cancelling ENLIVEN install"
+  sleep 3
+  exit 1
+fi
 echo "SPAWN_PYRAMIDS = true" > settings.txt
 echo "SPAWNERS_GENERATE = true" >> settings.txt
 echo "CHESTS_GENERATE = true" >> settings.txt
 sudo mv settings.txt "$MTMOD_DEST_PATH/"
 echo "NOTE: in spawners, only SPAWNERS_GENERATE or CHESTS_GENERATE, not both (SPAWNERS_GENERATE overrides) spawn in world for now. See thread for updated info: https://forum.minetest.net/viewtopic.php?f=11&t=13857&start=25"
 echo "see also expertmm's game-install-enliven-testing-SPAWNERS_BOTH_DEBUG.txt"
-add_regular_mod playeranim-master playeranim https://github.com/minetest-mods/playeranim/archive/master.zip
+
 # forum_url: https://forum.minetest.net/viewtopic.php?t=12189
 # description: Adds animations to the players' head
-add_regular_mod playeranim-master playeranim https://github.com/minetest-mods/playeranim/archive/master.zip
-add_regular_mod homedecor_modpack-master homedecor_modpack https://github.com/minetest-mods/homedecor_modpack/archive/master.zip
+add_zipped_mod playeranim playeranim-master https://github.com/minetest-mods/playeranim/archive/master.zip
+add_zipped_mod homedecor_modpack homedecor_modpack-master https://github.com/minetest-mods/homedecor_modpack/archive/master.zip
 # expertmm fork of a rather non-maintained mod--forum link is at https://forum.minetest.net/viewtopic.php?id=3663
 # (original mod was at https://github.com/Doc22/birthstones-mod/archive/master.zip)
-add_regular_mod minetest-birthstones-master birthstones https://github.com/expertmm/minetest-birthstones/archive/master.zip
-add_regular_mod bakedclay-master bakedclay https://github.com/tenplus1/bakedclay/archive/master.zip
+add_zipped_mod birthstones minetest-birthstones-master https://github.com/expertmm/minetest-birthstones/archive/master.zip
+add_zipped_mod bakedclay bakedclay-master https://github.com/tenplus1/bakedclay/archive/master.zip
 # https://forum.minetest.net/viewtopic.php?f=11&t=12440&p=310915#p310915
 # wget https://forum.minetest.net/download/file.php?id=6140
 # forum link file.php?id=6140 changed, so use salahzar's GitHub upload instead:
-add_regular_mod minetest-invhack-master invhack https://github.com/salahzar/minetest-invhack/archive/master.zip
-add_regular_mod unifieddyes-master unifieddyes https://github.com/minetest-mods/unifieddyes/archive/master.zip
+add_zipped_mod invhack minetest-invhack-master https://github.com/salahzar/minetest-invhack/archive/master.zip
+add_zipped_mod unifieddyes unifieddyes-master https://github.com/minetest-mods/unifieddyes/archive/master.zip
 #Sokomine's original version has no security ( https://forum.minetest.net/viewtopic.php?id=4877 )
 #  https://github.com/Sokomine/travelnet/archive/master.zip
-add_regular_mod travelnet-master travelnet https://github.com/expertmm/travelnet/archive/master.zip
-add_regular_mod anvil-master anvil https://github.com/minetest-mods/anvil/archive/master.zip
-add_regular_mod sling-master sling https://github.com/minetest-mods/sling/archive/master.zip
+add_zipped_mod travelnet travelnet-master https://github.com/expertmm/travelnet/archive/master.zip
+add_zipped_mod anvil anvil-master https://github.com/minetest-mods/anvil/archive/master.zip
+add_zipped_mod sling sling-master https://github.com/minetest-mods/sling/archive/master.zip
 #REPLACES PilzAdam's, modified by kaeza, maintained by VenessaE; FORMERLY in homedecor_modpack
 #forum post: https://forum.minetest.net/viewtopic.php?t=13762
 # kaeza's signs_lib (forked from PilzAdam's and TheXYZ's code) was moved here from: https://github.com/kaeza/minetest-signs_lib-extrafonts/archive/master.zip
-add_regular_mod signs_lib-master signs_lib https://github.com/minetest-mods/signs_lib/archive/master.zip
+add_zipped_mod signs_lib signs_lib-master https://github.com/minetest-mods/signs_lib/archive/master.zip
 # EXTRA FONTS PACK for signs_lib DOESN'T SEEM TO WORK IN MULTIPLAYER, and is unwieldy to use:
 #cd $HOME/Downloads
 #MTMOD_DL_ZIP=master.zip
@@ -1576,63 +1641,6 @@ add_regular_mod signs_lib-master signs_lib https://github.com/minetest-mods/sign
 #  sleep 3
 #  exit 1
 #fi
-
-
-# NOTE: a skin database is at http://minetest.fensta.bplaced.net/
-# bell07's 2016 (FORK of Krock's fork of dmonty's) u_skins (u_skins is a skin GUI that works with unified_inventory, whereas other skin GUIs often use inventory++)
-# Krock's is outdated and has remaining bugs such as in updater: wget https://github.com/SmallJoker/minetest-u_skinsdb/archive/master.zip
-# bell07's no longer exists
-# wget https://github.com/bell07/minetest-u_skinsdb/archive/master.zip
-add_regular_mod minetest-u_skinsdb-master u_skinsdb https://github.com/dmonty2/minetest-u_skinsdb/archive/master.zip
-# Update skins database (WARNING: skin numbering affects chosen player skin):
-# (jq is a json processor, required for the updater bash script:)
-# sudo apt-get -y install jq
-# cd "$MTMOD_DEST_PATH"
-# cd u_skins  #bell07's version is a mod, not a modpack
-# cd updater
-# NOTE:
-# Only download entire skins database if you
-# REALLY, REALLY MEAN IT:
-# ./update_skins_db.sh
-# (note, bell07 has the fixed bash script, but the python3 script is still bugged as of 2016-01-29, and includes a .NET assembly that seems to only work for Windows (has meta directory not found error on mono for Linux)
-# REMOVE EXISTING SKINS AND ONLY ADD expertmm skins:
-cd "$HOME/Downloads"
-MTMOD_SRC_ZIP=u_skins.zip
-MTMOD_UNZ_NAME=minetest-u_skinsdb-master
-MTMOD_DEST_NAME=u_skins
-MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
-if [ -f $MTMOD_SRC_ZIP ]; then
-  rm -f $MTMOD_SRC_ZIP
-fi
-wget -O $MTMOD_SRC_ZIP https://github.com/expertmm/minetest-u_skinsdb/archive/master.zip
-rm -Rvf $MTMOD_UNZ_NAME
-unzip "$MTMOD_SRC_ZIP"
-SUB_NAME="u_skins/textures"  # include u_skins since u_skins/u_skins IS THE MOD in the modpack
-SUB_PATH="$MTMOD_DEST_PATH/$SUB_NAME"
-if [ -d "$SUB_PATH" ]; then
-  echo "removing original $SUB_PATH..."
-  rm -Rf "$SUB_PATH"
-fi
-sudo mv -f $MTMOD_UNZ_NAME/$SUB_NAME "$SUB_PATH"
-if [ ! -d "$SUB_PATH" ]; then
-  echo "ERROR: failed to install expertmm's skins to $SUB_PATH, so cannot continue." > $err_txt
-  cat $err_txt
-  sleep 3
-  exit 1
-fi
-SUB_NAME="u_skins/meta"  # include u_skins since u_skins/u_skins IS THE MOD in the modpack
-SUB_PATH="$MTMOD_DEST_PATH/$SUB_NAME"
-if [ -d "$SUB_PATH" ]; then
-  echo "removing original $SUB_PATH..."
-  rm -Rf "$SUB_PATH"
-fi
-sudo mv -f $MTMOD_UNZ_NAME/$SUB_NAME "$SUB_PATH"
-if [ ! -d "$SUB_PATH" ]; then
-  echo "ERROR: failed to install expertmm's skins to $SUB_PATH, so cannot continue." > $err_txt
-  cat $err_txt
-  sleep 3
-  exit 1
-fi
 
 cd $HOME/Downloads
 MTMOD_DL_ZIP=master.zip
@@ -1725,6 +1733,37 @@ if [ ! -d "$MTMOD_DEST_PATH" ]; then
   exit 1
 fi
 
+
+# NOTE: a skin database is at http://minetest.fensta.bplaced.net/
+# bell07's 2016 (FORK of Krock's fork of dmonty's) u_skins (u_skins is a skin GUI that works with unified_inventory, whereas other skin GUIs often use inventory++)
+# Krock's is outdated and has remaining bugs such as in updater: wget https://github.com/SmallJoker/minetest-u_skinsdb/archive/master.zip
+# bell07's no longer exists
+# wget https://github.com/bell07/minetest-u_skinsdb/archive/master.zip
+# add_zipped_mod u_skins minetest-u_skinsdb-master https://github.com/dmonty2/minetest-u_skinsdb/archive/master.zip
+#add_zipped_mod u_skins minetest-u_skinsdb-master https://github.com/dmonty2/minetest-u_skinsdb/archive/master.zip
+# add_zipped_mod skinsdb minetest-u_skinsdb-master https://github.com/dmonty2/minetest-u_skinsdb/archive/master.zip
+# forked and is now a part of minetest-mods thanks to bell07
+MATCHING_MODS_BEFORE="`ls $MT_MYGAME_MODS_PATH | grep skin`"
+remove_mod u_skinsdb
+remove_mod u_skins
+PATCH_SKINS_MOD_NAME="skinsdb"  # used further down too!
+add_zipped_mod $PATCH_SKINS_MOD_NAME skinsdb-master https://github.com/minetest-mods/skinsdb/archive/master.zip
+if [ ! -z "$MATCHING_MODS_BEFORE" ]; then
+  echo "Removed $MATCHING_MODS_BEFORE then installed $PATCH_SKINS_MOD_NAME"
+fi
+# Update skins database (WARNING: skin numbering affects chosen player skin):
+# (jq is a json processor, required for the updater bash script:)
+# sudo apt-get -y install jq
+# cd "$MTMOD_DEST_PATH"
+# cd u_skins  #bell07's version is a mod, not a modpack
+# cd updater
+# NOTE:
+# Only download entire skins database if you
+# REALLY, REALLY MEAN IT:
+# ./update_skins_db.sh
+# (note, bell07 has the fixed bash script, but the python3 script is still bugged as of 2016-01-29, and includes a .NET assembly that seems to only work for Windows (has meta directory not found error on mono for Linux)
+# PATCH FURTHER DOWN WILL REMOVE EXISTING SKINS AND ONLY ADD EnlivenMinetest skins from patches folder
+
 echo
 echo
 echo
@@ -1737,11 +1776,51 @@ if [ -d "$PATCHES_PATH" ]; then
   ls $PATCHES_PATH/mods-multiplayer/
   sudo cp -R $PATCHES_PATH/mods-multiplayer/* "$MT_MYGAME_MODS_PATH/"
   echo "adding non-manual patches to subgame (vs minetest_game and downloaded mods):"
+  echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
   sudo cp -f $PATCHES_PATH/subgame/* "$MT_MYGAME_DIR/"
+  echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
   sudo cp -f $PATCHES_PATH/subgame/menu/* "$MT_MYGAME_DIR/menu/"
+  echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
   sudo cp -f $PATCHES_PATH/subgame/mods/mobs/textures/* "$MT_MYGAME_DIR/mods/mobs/textures/"
+  echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
   sudo cp -f $PATCHES_PATH/subgame/mods/mobs_monster/textures/* "$MT_MYGAME_DIR/mods/mobs_monster/textures/"
-  echo "mods affected: mobs mobs_monsters"
+
+# REMOVE EXISTING SKINS AND ONLY ADD expertmm skins:
+MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$PATCH_SKINS_MOD_NAME
+SUB_NAME="textures"  # include u_skins since u_skins/u_skins IS THE MOD in the modpack
+SUB_PATH="$MTMOD_DEST_PATH/$SUB_NAME"
+if [ -d "$SUB_PATH" ]; then
+  echo "removing original $SUB_PATH/character_*..."
+  rm -Rf $SUB_PATH/character_*  # cannot have quotes if using wildcards
+fi
+sudo cp -f $PATCHES_PATH/mods-multiplayer/$PATCH_SKINS_MOD_NAME/$SUB_NAME "$SUB_PATH"
+if [ ! -d "$SUB_PATH" ]; then
+  echo "ERROR: failed to install expertmm's skins to $SUB_PATH, so cannot continue." > $err_txt
+  cat $err_txt
+  sleep 3
+  exit 1
+else
+  echo "installed expertmm's skins to $SUB_PATH"
+fi
+SUB_NAME="meta"  # include u_skins since u_skins/u_skins IS THE MOD in the modpack
+SUB_PATH="$MTMOD_DEST_PATH/$SUB_NAME"
+if [ -d "$SUB_PATH" ]; then
+  echo "removing original $SUB_PATH/character_*..."
+  rm -Rf $SUB_PATH/character_*  # cannot have quotes if using wildcards
+fi
+sudo cp -f $PATCHES_PATH/mods-multiplayer/$PATCH_SKINS_MOD_NAME/$SUB_NAME "$SUB_PATH"
+if [ ! -d "$SUB_PATH" ]; then
+  echo "ERROR: failed to install expertmm's skins to $SUB_PATH, so cannot continue." > $err_txt
+  cat $err_txt
+  sleep 3
+  exit 1
+else
+  echo "installed metadata for expertmm's skins to $SUB_PATH"
+fi
+
+
+
+  echo "mods affected: mobs mobs_monsters $PATCH_SKINS_MOD_NAME"
   PATCHED_FLAG=""
   BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/bones/init.lua
   MODIFIED_PATH=$PATCHES_PATH/subgame/mods/bones/init.lua
@@ -1751,6 +1830,7 @@ if [ -d "$PATCHES_PATH" ]; then
   TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"
   if [ -z "$TRY_DIFF" ]; then
     sudo cp -f $MODIFIED_PATH "$MT_MYGAME_DIR/mods/bones/"
+    echo "done attempting to patch $MTMOD_DEST_PATH/"
   else
     echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version (this is not a problem if you ran the patcher more than once)."
   fi
@@ -1762,6 +1842,7 @@ if [ -d "$PATCHES_PATH" ]; then
   TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"
   if [ -z "$TRY_DIFF" ]; then
     sudo cp -f $MODIFIED_PATH "$MTMOD_DEST_PATH/"
+    echo "done attempting to patch $MTMOD_DEST_PATH/"
   else
     echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version (this is not a problem if you ran the patcher more than once)."
   fi
@@ -1772,6 +1853,7 @@ if [ -d "$PATCHES_PATH" ]; then
   TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"
   if [ -z "$TRY_DIFF" ]; then
     sudo cp -f $MODIFIED_PATH "$MTMOD_DEST_PATH/"
+    echo "done attempting to patch $MTMOD_DEST_PATH/"
   else
     echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version (this is not a problem if you ran the patcher more than once)."
   fi
@@ -1781,15 +1863,15 @@ if [ -d "$PATCHES_PATH" ]; then
   fi
   # NOTE: quotes don't work with wildcard
   cp -f $PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/textures/* "$MTMOD_DEST_PATH/textures/"
+  echo "# not recommended:"
+  echo "sudo cp -Rf $PATCHES_PATH/mods-stopgap/* $MT_MYGAME_MODS_PATH/"
+  echo "sudo rm -Rf $MT_MYGAME_MODS_PATH/1.nonworking"
 else
   echo "did not find $PATCHES_PATH, so skipped automatic patching which is partially implemented"
 fi
 echo
 echo "# remove not available on 0.4.16 stable (is only avail on 0.4.16-dev or higher)"
 echo "sudo rm -Rf /usr/share/games/minetest/games/ENLIVEN/mods/worldedit/worldedit_brush"
-echo "# not recommended:"
-echo "sudo cp -R $PATCHES_PATH/mods-stopgap/* $MT_MYGAME_MODS_PATH/"
-echo "sudo rm -Rf $MT_MYGAME_MODS_PATH/1.nonworking"
 echo
 echo
 echo
