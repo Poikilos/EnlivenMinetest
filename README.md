@@ -10,13 +10,19 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
 * birthstones, improved fork: <https://github.com/expertmm/minetest-birthstones>
 
 ### Planned Features
-* trm_pyramids
 * see also EnlivenMinetest/etc/game-install-enliven-testing.sh
+
+#### Possible Additions
+* https://github.com/minetest-mods/woodcutting/archive/master.zip
+  (sneek click to start auto-harvest tree, sneak again to cancel)
+* subterrane: fork of Caverealms, but is just an API and needs other mods to generate anything
+* craftguide
+* privilegeareas: Privileges granted depending on areas -- https://github.com/minetest-mods/privilegeareas/archive/master.zip
+
 
 #### Shell Script Deprecation Process
 ##### Goals
 * Remove anything running as root, by running as user in web server group
-
 ##### Finished
 * etc/change_hardcoded_world_name_first/mts-ENLIVEN deprecated by mtsenliven.py
 
@@ -75,6 +81,15 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * fix exception while trying to recover from exception (see `Could not finish writing r`)
 
 ## Changes:
+(2018-02-08)
+* trm_pyramids added (partial code in game-install-ENLIVEN completed)
+  (a required treasure table so tsm_pyramids can provide treasure in pyramids)
+* switched links to use minetest-mods' versions of:
+  * throwing (now is an api only so ENLIVEN also installs minetest-mods/throwing_arrows)
+  * pipeworks
+* added anvil mod
+* added sling mod (throw any item or stack using sling--accounts for multiplayer)
+
 (2018-02-06)
 * refactored file structure
   * renamed games/ENLIVEN to patches/subgame

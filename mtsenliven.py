@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
 # runs minetestserver using the paths defined by minetestinfo
+# NOTE: SIGINT (as opposed to KILL) makes sure minetest server
+#   shuts down properly (makes sure all processes finish) according to
+#   dr4Ke on
+#   https://forum.minetest.net/viewtopic.php?f=11&t=13138&start=50
 
 import os
 from mtanalyze.minetestinfo import *
@@ -60,29 +64,53 @@ for flag in msg_flags:
 # see https://www.endpoint.com/blog/2015/01/28/getting-realtime-output-
 # using-python
 
+non_unique_wraps = []
+non_unique_wraps.append(
+    {
+        "opener":"active block modifiers took ",
+        "closer":"ms (longer than 200ms)"
+    }
+)
+
+unique_flags = [
+    "leaves game",
+    "joins game"
+]
+
 def print_unique_only(output, err_flag=False):
     output_strip = output.strip()
+    u_prefix = "active block modifiers took "
+    u_suffix = "ms (longer than 200ms)"
     # (out_bytes is bytes)
     show_enable = True
     found_flag = None
     f_i = None
-    for flag in msg_flags:
-    # such as '2018-02-06 21:08:06: WARNING[Server]: Deprecated call to get_look_yaw, use get_look_horizontal instead'
-    # or 2018-02-06 21:08:05: ACTION[Server]: [playereffects] Wrote playereffects data into /home/owner/.minetest/worlds/FCAGameAWorld/playereffects.mt.
-        f_i = output.find(flag)
-        if f_i >= 0:
-            found_flag = flag
-            break
-    if found_flag:
-        sub_msg = output[f_i+len(flag):].strip()
-        if sub_msg in msg_lists[found_flag]:
-            show_enable = False
-        else:
-            msg_lists[found_flag].append(sub_msg)
+    always_show_enable = False
+    for flag in unique_flags:
+        if flag in output:
+            always_show_enable = True
+    if not always_show_enable:
+        for flag in msg_flags:
+        # such as '2018-02-06 21:08:06: WARNING[Server]: Deprecated call to get_look_yaw, use get_look_horizontal instead'
+        # or 2018-02-06 21:08:05: ACTION[Server]: [playereffects] Wrote playereffects data into /home/owner/.minetest/worlds/FCAGameAWorld/playereffects.mt.
+            f_i = output.find(flag)
+            if f_i >= 0:
+                found_flag = flag
+                break
+        if found_flag:
+            sub_msg = output[f_i+len(flag):].strip()
+            for wrap in non_unique_wraps:
+                if wrap["opener"] in sub_msg and wrap["closer"] in sub_msg:
+                    sub_msg = wrap["opener"] + "..." + wrap["closer"]
+                    break
+            if sub_msg in msg_lists[found_flag]:
+                show_enable = False
+            else:
+                msg_lists[found_flag].append(sub_msg)
     if show_enable:
         print(output_strip)
         if found_flag is not None:
-            print("  [ mtsenliven.py ] previous msg will be repressed")
+            print("  [ mtsenliven.py ] previous msg will be suppressed")
 
 def process_msg(bstring):
     output = bstring
@@ -104,28 +132,35 @@ def process_msg(bstring):
 # see jfs's answer on https://stackoverflow.com/questions/31833897/python-read-from-subprocess-stdout-and-stderr-separately-while-preserving-order
 def reader(pipe, q):
     try:
-        with pipe:
-            for line in iter(pipe.readline, b''):
-                q.put((pipe, line))
-    finally:
-        q.put(None)
+        try:
+            with pipe:
+                for line in iter(pipe.readline, b''):
+                    q.put((pipe, line))
+        finally:
+            q.put(None)
+    except KeyboardInterrupt:
+        print("[ mtsenliven.py ] SIGINT should shut down server safely")
+        pass
 
 q = Queue()
 Thread(target=reader, args=[process.stdout, q]).start()
 Thread(target=reader, args=[process.stderr, q]).start()
-
-for _ in range(2):
-    for source, line in iter(q.get, None):
-        # print "%s: %s" % (source, line),
-        s = source
-        l = line
-        # NOTE: source is a string such as "<_io.BufferedReader name=5>"
-        try:
-            l = line.decode("utf-8")
-        except:
-            # this should never happen but doesn't matter anyway
-            pass
-        process_msg("%s: %s" % (s, l))
+try:
+    for _ in range(2):
+        for source, line in iter(q.get, None):
+            # print "%s: %s" % (source, line),
+            s = source
+            l = line
+            # NOTE: source is a string such as "<_io.BufferedReader name=5>"
+            try:
+                l = line.decode("utf-8")
+            except:
+                # this should never happen but doesn't matter anyway
+                pass
+            process_msg("%s: %s" % (s, l))
+except KeyboardInterrupt:
+    print("[ mtsenliven.py ] SIGINT should shut down server safely")
+    pass
 
 exit(0)
 
@@ -145,5 +180,6 @@ while True:
             # process_msg(err_bytes)
         rc = process.poll()
     except KeyboardInterrupt:
+        print("[ mtsenliven.py ] SIGINT should shut down server safely")
         break
 # process.kill()

@@ -3,4 +3,4 @@ farming
 mobs
 mobs_monster
 mobs_animal
-spawners_mobs
+spawners
