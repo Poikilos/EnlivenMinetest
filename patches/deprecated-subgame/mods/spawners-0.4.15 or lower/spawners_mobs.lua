@@ -203,8 +203,9 @@ function spawners.create(mob_name, mod_prefix, size, offset, mesh, texture, nigh
 				max_items = 1,
 				items = {
 					--{items = {"spawners:"..mod_prefix.."_"..mob_name.."_spawner"}, rarity = 20}
-					{items = {"default:diamond", "default:iron"}, rarity = 20}
-					{items = {"default:diamond"}, rarity = 1}
+					{items = {"default:iron_lump", "default:diamond", "default:diamond"}, rarity = 7},
+					{items = {"default:iron_lump", "default:diamond"}, rarity = 2},
+					{items = { "default:diamond"}, rarity = 1}
 				}
 			},
 			on_construct = function(pos)
@@ -243,8 +244,9 @@ function spawners.create(mob_name, mod_prefix, size, offset, mesh, texture, nigh
 				max_items = 1,
 				items = {
 					--{items = {"spawners:"..mod_prefix.."_"..mob_name.."_spawner"}, rarity = 20}
-					{items = {"default:diamond", "default:iron"}, rarity = 20}
-					{items = {"default:diamond"}, rarity = 1}
+					{items = {"default:iron_lump", "default:diamond", "default:diamond"}, rarity = 7},
+					{items = {"default:iron_lump", "default:diamond"}, rarity = 2},
+					{items = { "default:diamond"}, rarity = 1}
 				}
 			},
 		})
@@ -268,8 +270,9 @@ function spawners.create(mob_name, mod_prefix, size, offset, mesh, texture, nigh
 				max_items = 1,
 				items = {
 					-- {items = {"spawners:"..mod_prefix.."_"..mob_name.."_spawner"}, rarity = 20}
-					{items = {"default:diamond", "default:iron"}, rarity = 20}
-					{items = {"default:diamond"}, rarity = 1}
+					{items = {"default:iron_lump", "default:diamond", "default:diamond"}, rarity = 7},
+					{items = {"default:iron_lump", "default:diamond"}, rarity = 2},
+					{items = { "default:diamond"}, rarity = 1}
 				}
 			},
 			on_construct = function(pos)
@@ -304,8 +307,9 @@ function spawners.create(mob_name, mod_prefix, size, offset, mesh, texture, nigh
 				max_items = 1,
 				items = {
 					-- {items = {"spawners:"..mod_prefix.."_"..mob_name.."_spawner"}, rarity = 20}
-					{items = {"default:diamond", "default:iron"}, rarity = 20}
-					{items = {"default:diamond"}, rarity = 1}
+					{items = {"default:iron_lump", "default:diamond", "default:diamond"}, rarity = 7},
+					{items = {"default:iron_lump", "default:diamond"}, rarity = 2},
+					{items = { "default:diamond"}, rarity = 1}
 				}
 			},
 			on_construct = function(pos)
