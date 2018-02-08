@@ -13,6 +13,16 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
 * see also EnlivenMinetest/etc/game-install-enliven-testing.sh
 
 #### Possible Additions
+* SWITCH from GunshipPenguin's sprint to minetest-mods' hbsprint (which optionally uses hudbars, hbhunger, and player_monoids)
+  https://github.com/minetest-mods/hbsprint.git
+* SWITCH from tsm_chests_dungeon to loot or dungeon_loot (loot is maintained by minetest-mods; tsm generates treasure from trm treasure lists using treasurer)
+  https://github.com/minetest-mods/loot.git
+  settings:
+  * loot_vaults - Set to true to enable loot vault generation.
+  * loot_dungeons - Set to true to enable loot generation in dungeons.
+* SWITCH from farming redo to minetest-mods crops <https://github.com/minetest-mods/crops/archive/master.zip>
+* add but remove fire (flint and steel)?
+  https://github.com/xisd/trmp_Pack.git
 * https://github.com/minetest-mods/woodcutting/archive/master.zip
   (sneek click to start auto-harvest tree, sneak again to cancel)
 * subterrane: fork of Caverealms, but is just an API and needs other mods to generate anything
@@ -85,10 +95,16 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * trm_pyramids added (partial code in game-install-ENLIVEN completed)
   (a required treasure table so tsm_pyramids can provide treasure in pyramids)
 * switched links to use minetest-mods' versions of:
-  * throwing (now is an api only so ENLIVEN also installs minetest-mods/throwing_arrows)
+  * unified_inventory
+  * throwing (& added throwing_arrows since now throwing is an API only)
   * pipeworks
+  * moreores
+  * biome_lib
+  * plantlife_modpack
 * added anvil mod
-* added sling mod (throw any item or stack using sling--accounts for multiplayer)
+* added sling mod: (throw any item or stack using sling--accounts for multiplayer)
+* added tsm_chests_dungeon mod (adds chests to the default dungeons) -- https://forum.minetest.net/viewtopic.php?f=9&t=17005
+
 
 (2018-02-06)
 * refactored file structure
@@ -174,6 +190,9 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * Updated pipeworks fork by HybridDog: https://github.com/HybridDog/pipeworks
 
 ## Known issues:
+* install whatever mod allows making a sign to see awards
+* use player_monoids instead of playereffects for mock_tnt?
+* pyramids have empty chests (still?): possibly fork spawners so pyramids use treasurer like Wuzzy's fork of pyramids does: <https://forum.minetest.net/viewtopic.php?f=9&t=10336>
 * ENLIVEN Windows binary release installer should be signed via a code signing license to avoid browser warnings and possible issues with virus scanners (NOTE: Squirrel.Windows has signing available such as via:
 ./src\.nuget\NuGet.exe pack .\ENLIVEN.<version>.nuspec
 squirrel --releasify .\ENLIVEN.<version>.nupkg <your code signing options here>

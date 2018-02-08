@@ -38,13 +38,14 @@ minetest.register_alias("tsm_pyramids:spawner_mummy", "spawners_mobs:spawners_mo
 minetest.register_alias("tsm_pyramids:spawn_egg", "spawners_mobs:mummy")
 -- mummy entity
 minetest.register_alias("tsm_pyramids:mummy", "spawners_mobs:mummy")
+-- matched 1,2,3 with eye,men,sun by looking at old non-modpack version:
 -- deco stone 1
-minetest.register_alias("tsm_pyramids:deco_stone1", "spawners_mobs:deco_stone_bird")
+minetest.register_alias("tsm_pyramids:deco_stone1", "spawners_mobs:deco_stone_eye")
 -- deco stone 2
-minetest.register_alias("tsm_pyramids:deco_stone2", "spawners_mobs:deco_stone_eye")
+minetest.register_alias("tsm_pyramids:deco_stone2", "spawners_mobs:deco_stone_men")
 -- deco stone 3
-minetest.register_alias("tsm_pyramids:deco_stone3", "spawners_mobs:deco_stone_men")
+minetest.register_alias("tsm_pyramids:deco_stone3", "spawners_mobs:deco_stone_sun")
 -- deco trap
 minetest.register_alias("tsm_pyramids:trap", "moreblocks:trap_sandstone")
 -- deco trap 2
-minetest.register_alias("tsm_pyramids:trap_2", "moreblocks:trap_desert_stone")
+minetest.register_alias("tsm_pyramids:trap_2", "moreblocks:trap_sandstone")

@@ -11,3 +11,11 @@
 mobs:alias_mob("spawners:mummy", "spawners_mobs:mummy")
 mobs:alias_mob("spawners:bunny_evil", "spawners_mobs:bunny_evil")
 mobs:alias_mob("spawners:uruk_hai", "spawners_mobs:uruk_hai")
+minetest.register_alias("spawners:spawners_mummy_spawner_env", "spawners_mobs:spawners_mobs_mummy_spawner")
+-- matched 1,2,3 with eye,men,sun by looking at old non-modpack version:
+minetest.register_alias("spawners:deco_stone1", "spawners_mobs:deco_stone_eye")
+minetest.register_alias("spawners:deco_stone2", "spawners_mobs:deco_stone_men")
+minetest.register_alias("spawners:deco_stone3", "spawners_mobs:deco_stone_sun")
+minetest.register_alias("spawners:trap", "moreblocks:trap_sandstone")
+minetest.register_alias("spawners:trap_2", "moreblocks:trap_sandstone")
+
