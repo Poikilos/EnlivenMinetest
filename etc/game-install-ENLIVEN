@@ -19,11 +19,21 @@
 # ISSUES:
 # * ERROR[Main]: Singleplayer mode says following mods could not be found: 3d_armor areas mobs mobs_animal mobs_monster protector technic treasurer unified_inventory xban2
 sudo echo "starting ENLIVEN installer script..."
+
+
+## this space was intentinally left blank
+
+
+
+
+
+
+
 #region paste this part into terminal to get some great environment variables
 if [ "$0" = "-bash" ]; then
-  echo "you must have pasted this into terminal, so assuming REPO_PATH"
   REPO_PATH="$HOME/GitHub/EnlivenMinetest"
-  echo "$REPO_PATH"
+  echo "You must have pasted this into terminal, so assuming REPO_PATH:"
+  echo "  $REPO_PATH"
 else
   SCRIPT=$(readlink -f "$0")
   # Absolute path this script is in, thus /home/user/bin
@@ -78,11 +88,42 @@ MT_BACKUP_GAMES_DIR=$HOME/Backup$USR_SHARE_MINETEST/games
 MT_GAMES_DIR=$USR_SHARE_MINETEST/games
 MT_MYGAME_BAK=$USR_SHARE_MINETEST/ENLIVEN_BAK
 MT_MYGAME_NAME=ENLIVEN
-MT_MYGAME_DIR=$MT_GAMES_DIR/$MT_MYGAME_NAME
+MT_MYGAME_DIR="$MT_GAMES_DIR/$MT_MYGAME_NAME"
 # formerly MT_MYGAME_MODDIR:
-MT_MYGAME_MODS_PATH=$MT_MYGAME_DIR/mods
-MT_MYWORLD_NAME=FCAGameAWorld
-MT_MYWORLD_DIR=$HOME/.minetest/worlds/$MT_MYWORLD_NAME
+MT_MYGAME_MODS_PATH="$MT_MYGAME_DIR/mods"
+MT_WORLDS_DIR="$HOME/.minetest/worlds"
+MT_DEFAULT_WORLD_NAME="`ls $MT_WORLDS_DIR | grep --max-count=1 -v world`"  # aka -m 1 (no '=' sign in that case)
+MT_MYWORLD_NAME="$MT_DEFAULT_WORLD_NAME"
+if [ -z "$MT_MYWORLD_NAME" ]; then
+  if [ ! -z "`ls $MT_WORLDS_DIR | grep --max-count=1 -v world`" ]; then
+    MT_MYWORLD_NAME=world
+    echo "Could not find any worlds other than $MT_MYWORLD_NAME"
+  else
+    echo "Could not find any worlds"
+  fi
+  echo "Please enter a world (name only--must be in )"
+  read MT_MYWORLD_NAME
+else
+  echo "Please enter a world [blank for $MT_DEFAULT_WORLD_NAME]: "
+  read MT_MYWORLD_NAME
+  if [ -z "$MT_MYWORLD_NAME" ]; then
+    MT_MYWORLD_NAME="$MT_DEFAULT_WORLD_NAME"
+  fi
+fi
+if [ ! -d "$MT_WORLDS_DIR/$MT_MYWORLD_NAME" ]; then
+    echo "  ERROR: failed to find world path, so cannot continue." > $err_txt
+    cat $err_txt
+    echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
+    sleep 1
+    echo " 3..."
+    sleep 1
+    echo " 2..."
+    sleep 1
+    echo " 1..."
+    sleep 1
+fi
+MT_MYWORLD_DIR=$MT_WORLDS_DIR/$MT_MYWORLD_NAME
+echo "Using world at $MT_MYWORLD_DIR"
 WORLD_MT_PATH=$MT_MYWORLD_DIR/world.mt
 err_txt=$HOME/err-enliven.txt
 # see also https://www.shellscript.sh/functions.html
@@ -216,6 +257,8 @@ remove_mod()
 
 
 
+
+## this space was intentinally left blank
 
 
 if [ -d /tmp/local_mts_user ]; then
@@ -606,10 +649,16 @@ if [ -d "$MTMOD_DEST_PATH" ]; then
   sleep 1
   exit 1
 fi
+#defaults are:
+#SPAWN_PYRAMIDS = false
+#SPAWNERS_GENERATE = true
+#CHESTS_GENERATE = false
+MTMOD_DEST_NAME=spawners/spawners_env
+MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
 echo "SPAWN_PYRAMIDS = true" > settings.txt
 echo "SPAWNERS_GENERATE = true" >> settings.txt
 echo "CHESTS_GENERATE = true" >> settings.txt
-sudo mv settings.txt "$MTMOD_DEST_PATH/"
+sudo mv settings.txt "$MTMOD_DEST_PATH/"  # formerly $MT_MYGAME_MODS_PATH/spawners/
 echo "NOTE: in spawners, only SPAWNERS_GENERATE or CHESTS_GENERATE, not both (SPAWNERS_GENERATE overrides) spawn in world for now. See thread for updated info: https://forum.minetest.net/viewtopic.php?f=11&t=13857&start=25"
 echo "see also expertmm's game-install-enliven-testing-SPAWNERS_BOTH_DEBUG.txt"
 
@@ -849,13 +898,13 @@ fi
   cp -f $PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/textures/* "$MTMOD_DEST_PATH/textures/"
   echo "# not recommended:"
   echo "sudo cp -Rf $PATCHES_PATH/mods-stopgap/* $MT_MYGAME_MODS_PATH/"
-  echo "sudo rm -Rf $MT_MYGAME_MODS_PATH/1.nonworking"
+  echo "sudo rm -Rf $MT_MYGAME_MODS_PATH/1.nonworking  # leftovers from deprecated ENLIVEN installer"
 else
   echo "did not find $PATCHES_PATH, so skipped automatic patching which is partially implemented"
 fi
 echo
 echo "# remove not available on 0.4.16 stable (is only avail on 0.4.16-dev or higher)"
-echo "sudo rm -Rf /usr/share/games/minetest/games/ENLIVEN/mods/worldedit/worldedit_brush"
+sudo rm -Rf $MT_MYGAME_MODS_PATH/worldedit/worldedit_brush
 echo
 echo
 echo
