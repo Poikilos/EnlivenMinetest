@@ -162,3 +162,46 @@ if [ ! -d "$MT_MYGAME_MODS_PATH/hudbars" ]; then
     sudo rm -Rvf "$MT_MYGAME_MODS_PATH/hud_hunger"
     fi
 fi
+
+
+MTMOD_SRC_ZIP=treasurer0.2.0.zip
+MTMOD_UNZ_NAME=treasurer
+MTMOD_DEST_NAME=treasurer
+MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+if [ -f "tsm_gift_example" ]; then
+  rm "tsm_gift_example"
+fi
+if [ -d "tsm_gift_example" ]; then
+  rm -Rf "tsm_gift_example"
+fi
+if [ -d "tsm_chests_example" ]; then
+  rm -Rf "tsm_chests_example"
+fi
+if [ -d "trm_default_example" ]; then
+  rm -Rf "trm_default_example"
+fi
+if [ -d "tsm_default_example" ]; then
+  rm -Rf "tsm_default_example"
+fi
+if [ ! -z "`ls | grep $MTMOD_UNZ_NAME`" ]; then  # works with wildcard in variable
+  rm -Rf $MTMOD_UNZ_NAME
+fi
+if [ -f "$MTMOD_SRC_ZIP" ]; then
+  rm -f "$MTMOD_SRC_ZIP"
+fi
+wget -O $MTMOD_SRC_ZIP http://axlemedia.net/abiyahh/users/Wuzzy/downloads/treasurer0.2.0.zip
+unzip $MTMOD_SRC_ZIP
+sudo mv -f $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
+if [ ! -d "$MTMOD_DEST_PATH" ]; then
+  echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+  cat $err_txt
+  echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
+  sleep 1
+  echo " 3..."
+  sleep 1
+  echo " 2..."
+  sleep 1
+  echo " 1..."
+  sleep 1
+  exit 1
+fi
