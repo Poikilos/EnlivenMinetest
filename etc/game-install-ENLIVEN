@@ -28,9 +28,13 @@ sudo echo "starting ENLIVEN installer script..."
 
 
 
-
 #region paste this part into terminal to get some great environment variables
-if [ "$0" = "-bash" ]; then
+shell_name="bash"
+err_txt=$HOME/err-enliven.txt
+# doesn't work if equal: [ $0 = *"$shell_name"* ]
+# could be -bash or bash
+#if [ "$0" = "-bash" ]; then
+if [[ $0 == *"$shell_name"* ]]; then
   REPO_PATH="$HOME/GitHub/EnlivenMinetest"
   echo "You must have pasted this into terminal, so assuming REPO_PATH:"
   echo "  $REPO_PATH"
@@ -94,20 +98,40 @@ MT_MYGAME_MODS_PATH="$MT_MYGAME_DIR/mods"
 MT_WORLDS_DIR="$HOME/.minetest/worlds"
 MT_DEFAULT_WORLD_NAME="`ls $MT_WORLDS_DIR | grep --max-count=1 -v world`"  # aka -m 1 (no '=' sign in that case)
 MT_MYWORLD_NAME="$MT_DEFAULT_WORLD_NAME"
-if [ -z "$MT_MYWORLD_NAME" ]; then
+if [ -z "$MT_DEFAULT_WORLD_NAME" ]; then
   if [ ! -z "`ls $MT_WORLDS_DIR | grep --max-count=1 -v world`" ]; then
     MT_MYWORLD_NAME=world
     echo "Could not find any worlds other than $MT_MYWORLD_NAME"
   else
     echo "Could not find any worlds"
   fi
-  echo "Please enter a world (name only--must be in )"
-  read MT_MYWORLD_NAME
+  #if [ "$0" = "-bash" ]; then
+  if [[ $0 == *"$shell_name"* ]]; then
+    REPO_PATH="$HOME/GitHub/EnlivenMinetest"
+    MT_MYWORLD_NAME="world"
+    echo "You must have pasted this into terminal, so assuming MT_MYWORLD_NAME:"
+    echo "  $MT_MYWORLD_NAME"
+    echo "Press Ctrl C to cancel, otherwise $MT_MYWORLD_NAME will be used..."
+    sleep 1
+    echo " 3..."
+    sleep 1
+    echo " 2..."
+    sleep 1
+    echo " 1..."
+  else
+    read -p "Please enter a world (name only--must be in $MT_WORLDS_DIR): " MT_MYWORLD_NAME
+  fi
 else
-  echo "Please enter a world [blank for $MT_DEFAULT_WORLD_NAME]: "
-  read MT_MYWORLD_NAME
-  if [ -z "$MT_MYWORLD_NAME" ]; then
+  if [[ $0 == *"$shell_name"* ]]; then
+    REPO_PATH="$HOME/GitHub/EnlivenMinetest"
     MT_MYWORLD_NAME="$MT_DEFAULT_WORLD_NAME"
+    echo "You must have pasted this into terminal, so assuming MT_MYWORLD_NAME:"
+    echo "  $MT_MYWORLD_NAME"
+  else
+    read -p "Please enter a world [blank for $MT_DEFAULT_WORLD_NAME]: " MT_MYWORLD_NAME
+    if [ -z "$MT_MYWORLD_NAME" ]; then
+      MT_MYWORLD_NAME="$MT_DEFAULT_WORLD_NAME"
+    fi
   fi
 fi
 if [ ! -d "$MT_WORLDS_DIR/$MT_MYWORLD_NAME" ]; then
@@ -125,7 +149,6 @@ fi
 MT_MYWORLD_DIR=$MT_WORLDS_DIR/$MT_MYWORLD_NAME
 echo "Using world at $MT_MYWORLD_DIR"
 WORLD_MT_PATH=$MT_MYWORLD_DIR/world.mt
-err_txt=$HOME/err-enliven.txt
 # see also https://www.shellscript.sh/functions.html
 
 add_zip_mod()
@@ -159,9 +182,11 @@ add_zip_mod()
     if [ -d "$MTMOD_UNZ_NAME/etc" ]; then
       rm -Rf "$MTMOD_UNZ_NAME/etc"
     fi
+    if [ -f "$MTMOD_UNZ_NAME/screenshot.png" ]; then
+      rm -f "$MTMOD_UNZ_NAME/screenshot.png"
+    fi
+    sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
   fi
-  sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
-  sudo rm -Rf "$MTMOD_DEST_PATH/etc"
   if [ ! -d "$MTMOD_DEST_PATH" ]; then
     echo "  ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
     cat $err_txt
@@ -204,9 +229,11 @@ add_git_mod()
     if [ -d "$MTMOD_UNZ_NAME/etc" ]; then
       rm -Rf "$MTMOD_UNZ_NAME/etc"
     fi
+    if [ -f "$MTMOD_UNZ_NAME/screenshot.png" ]; then
+      rm -f "$MTMOD_UNZ_NAME/screenshot.png"
+    fi
+    sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
   fi
-  sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
-  sudo rm -Rf "$MTMOD_DEST_PATH/etc"
   if [ ! -d "$MTMOD_DEST_PATH" ]; then
     echo "  ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
     cat $err_txt
@@ -735,7 +762,9 @@ add_git_mod slimenodes minetest_slimenodes http://repo.or.cz/minetest_slimenodes
 # MTMOD_DL_ZIP=file.php?id=1301
 # Copied to GitHub by ClockGen (I posted the link below on the forum page)
 # wget -O $MTMOD_SRC_ZIP https://forum.minetest.net/download/file.php?id=1301
-add_git_mod trmp_minetest_game trmp_minetest_game https://github.com/ClockGen/trmp_minetest_game.git
+#add_git_mod trmp_minetest_game trmp_minetest_game https://github.com/ClockGen/trmp_minetest_game.git
+#fixed version with correct dye list for 0.4.16 (submitted pull request to ClockGen 2018-02-08):
+add_git_mod trmp_minetest_game trmp_minetest_game https://github.com/expertmm/trmp_minetest_game.git
 
 # NOTE: tsm_chests_dungeon supercedes dungeon_loot:
 if [ -d "$MT_MYGAME_MODS_PATH/dungeon_loot" ]; then

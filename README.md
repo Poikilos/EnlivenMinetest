@@ -11,8 +11,25 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
 
 ### Planned Features
 * see also EnlivenMinetest/etc/game-install-enliven-testing.sh
+* slimenodes fork with buckets and recipes (craft from glue or animal hide)
+* https://github.com/minetest-mods/sounding_line (machine block that measures depth of water under it)
+* https://github.com/minetest-mods/tutor
+* https://github.com/minetest-mods/lightning
+* https://github.com/minetest-mods/chat_anticurse
+* https://github.com/minetest-mods/cozy (sitting and laying down player animations)--compare with emote
+* https://github.com/minetest-mods/mywalls (more wall styles; brick & stone brick walls)
+* https://github.com/minetest-mods/mymasonhammer (cut stairs & ladders in blocks)
 
 #### Possible Additions
+* SWITCH testing mod for furniture to minetest-mods version:
+  https://github.com/minetest-mods/ts_furniture
+* SWITCH to https://github.com/minetest-mods/inspector (from metatools mod)
+  https://github.com/minetest-mods/inspector
+* SWITCH to frame: "non-laggy item frame"--& make mod to alias-out the existing (homedecor?) ones in ENLIVEN
+  https://github.com/minetest-mods/frame
+* SWITCH to mob-engine (based on cme) by minetest-mods team
+  https://github.com/minetest-mods/mob-engine
+  https://forum.minetest.net/viewtopic.php?t=17106
 * SWITCH from GunshipPenguin's sprint to minetest-mods' hbsprint (which optionally uses hudbars, hbhunger, and player_monoids)
   https://github.com/minetest-mods/hbsprint.git
 * SWITCH from tsm_chests_dungeon to loot or dungeon_loot (loot is maintained by minetest-mods; tsm generates treasure from trm treasure lists using treasurer)
@@ -21,6 +38,11 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
   * loot_vaults - Set to true to enable loot vault generation.
   * loot_dungeons - Set to true to enable loot generation in dungeons.
 * SWITCH from farming redo to minetest-mods crops <https://github.com/minetest-mods/crops/archive/master.zip>
+  (works with farming from minetest_game)
+  "pumpkins, melons and potatoes are obtainable. The rest currently isn't." -sofar <https://forum.minetest.net/viewtopic.php?p=303059#p303059>
+  so probably a trm_crops mod should be created
+* timer: "A persistent timer class that can be restarted after server shutdown"
+  https://github.com/minetest-mods/timer
 * add but remove fire (flint and steel)?
   https://github.com/xisd/trmp_Pack.git
 * https://github.com/minetest-mods/woodcutting/archive/master.zip
@@ -28,7 +50,31 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
 * subterrane: fork of Caverealms, but is just an API and needs other mods to generate anything
 * craftguide
 * privilegeareas: Privileges granted depending on areas -- https://github.com/minetest-mods/privilegeareas/archive/master.zip
+* castle_farming: floor&wall animal hide mats, straw bales, and straw training dummy
+  https://github.com/minetest-mods/castle_farming
+* mapfix: fixes flow and light issues
+  https://github.com/minetest-mods/mapfix
+* maptools: admin pickaxe and admin blocks&items to control building, movement, and light; also permanent fire, fake fire, and igniters
+  https://github.com/minetest-mods/maptools
+  https://forum.minetest.net/viewtopic.php?f=11&t=1882
+* worldedge: wrap world as if it is a sphere
+  https://github.com/minetest-mods/worldedge
+* stamina: hunger-based stamina
+  https://github.com/minetest-mods/stamina
+* myroofs: sloped roofs in red, green, and dark gray--compare with existing (homedecor?) roofs in ENLIVEN
+  https://github.com/minetest-mods/myroofs
+* https://github.com/minetest-mods/BobBlocks (light poles and settable damaging traps)
+* https://github.com/xisd/trmp_Pack (but only the mods from it mods matching ENLIVEN mods)
+  (NOT the same as [trm_pack by Wuzzy](https://forum.minetest.net/viewtopic.php?pid=113052#p113052), which has mostly stuff from weird mods or stuff already in trmp_minetest_game)
 
+##### low-pri
+* https://github.com/minetest-mods/pontoons (brown blocks with x that can be placed parallel with water's surface by right-clicking water)
+* https://github.com/minetest-mods/trash_can (wood trash can and green dumpster)
+* https://github.com/minetest-mods/armor_monoid (an api for creating multipliers for damage types)
+* https://github.com/minetest-mods/breadcrumbs (special sign: right-click sign to see stream of particles to previous sign)
+* https://github.com/minetest-mods/round_trunks
+* https://github.com/minetest-mods/mywoodslopes
+* make fork of trmp_minetest_game that has random wear for tools (see <https://forum.minetest.net/viewtopic.php?p=120285&sid=0ece6da0fc44facebc9d1f044bb033d5#p120285> for setting properties)
 
 #### Shell Script Deprecation Process
 ##### Goals
@@ -91,6 +137,8 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * fix exception while trying to recover from exception (see `Could not finish writing r`)
 
 ## Changes:
+(2018-02-07)
+* forked trm_minetest_game to use proper dye list (submitted pull request to ClockGen since his is the only known git version of Wuzzy's which was on the [official treasurer thread](https://forum.minetest.net/viewtopic.php?t=7292))
 (2018-02-08)
 * trm_pyramids added (partial code in game-install-ENLIVEN completed)
   (a required treasure table so tsm_pyramids can provide treasure in pyramids)
@@ -190,6 +238,27 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * Updated pipeworks fork by HybridDog: https://github.com/HybridDog/pipeworks
 
 ## Known issues:
+* worlds made with older version of enliven use Echoes' throwing, so the following differences must be fixed possibly with a new mod:
+  * Old throwing items that are not in throwing_arrows:
+    * throwing:arrow_steel
+    * throwing:arrow_obsidian
+    * throwing:arrow_diamond
+    * throwing:arrow_fireworks_blue
+    * throwing:arrow_fireworks_red
+    * throwing:arrow_torch
+  * Old throwing items that are also in new throwing_arrows:
+    * throwing:arrow_stone
+    * throwing:arrow_gold
+    * throwing:arrow_build
+    * throwing:arrow_teleport
+  * New minetest-mods/throwing_arrows which uses minetest-mods/throwing:
+    * Item throwing:arrow 99
+    * Item throwing:arrow_build 99
+    * Item throwing:arrow_dig 99
+    * Item throwing:arrow_drop 99
+    * Item throwing:arrow_fire 99
+    * Item throwing:arrow_gold 99
+    * Item throwing:arrow_teleport 99
 * install whatever mod allows making a sign to see awards
 * use player_monoids instead of playereffects for mock_tnt?
 * pyramids have empty chests (still?): possibly fork spawners so pyramids use treasurer like Wuzzy's fork of pyramids does: <https://forum.minetest.net/viewtopic.php?f=9&t=10336>
