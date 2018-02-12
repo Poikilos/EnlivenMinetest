@@ -66,8 +66,15 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
 * https://github.com/minetest-mods/BobBlocks (light poles and settable damaging traps)
 * https://github.com/xisd/trmp_Pack (but only the mods from it mods matching ENLIVEN mods)
   (NOT the same as [trm_pack by Wuzzy](https://forum.minetest.net/viewtopic.php?pid=113052#p113052), which has mostly stuff from weird mods or stuff already in trmp_minetest_game)
+* mg: has villages, and is now maintained by minetest-mods
+  https://github.com/minetest-mods/mg.git
+* emote:
+  https://github.com/minetest-mods/emote.git
+* vote:
+  https://github.com/minetest-mods/vote.git
 
 ##### low-pri
+* drawers: https://github.com/minetest-mods/drawers.git
 * https://github.com/minetest-mods/pontoons (brown blocks with x that can be placed parallel with water's surface by right-clicking water)
 * https://github.com/minetest-mods/trash_can (wood trash can and green dumpster)
 * https://github.com/minetest-mods/armor_monoid (an api for creating multipliers for damage types)
@@ -75,10 +82,14 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
 * https://github.com/minetest-mods/round_trunks
 * https://github.com/minetest-mods/mywoodslopes
 * make fork of trmp_minetest_game that has random wear for tools (see <https://forum.minetest.net/viewtopic.php?p=120285&sid=0ece6da0fc44facebc9d1f044bb033d5#p120285> for setting properties)
+* character_creator: https://forum.minetest.net/viewtopic.php?f=11&t=13138
+* diet, but maybe add hunger monoid when simple carbs are eaten & make hunger monoid cumulatively reduce satiation (instead of using diet):
+  https://github.com/minetest-mods/diet.git
+* make new decor nodes (in order of priority first): corner closed and/or open curtains (for curtains on each window both touching corner) electric range, couch
 
-#### Shell Script Deprecation Process
+#### Root Script Deprecation Process
 ##### Goals
-* Remove anything running as root, by running as user in web server group
+* Remove anything running as root, by running as user in web server group, or as name (unpriveleged) user who also runs (minetestserver and) a node.js app
 ##### Finished
 * etc/change_hardcoded_world_name_first/mts-ENLIVEN deprecated by mtsenliven.py
 
