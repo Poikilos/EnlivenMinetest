@@ -605,7 +605,8 @@ cd "$HOME/Downloads"
 echo "Installing AntumMT's modernized fork of Kilarin's compassgps (NOT TeTpaAka, nor Echo, nor PilzAdam compass) <https://forum.minetest.net/viewtopic.php?t=9373>"
 echo "Installing AntumMT's modernized fork of Kilarin's compassgps (NOT TeTpaAka, nor Echo, nor PilzAdam compass) <https://forum.minetest.net/viewtopic.php?t=9373>" >> compassgps.txt
 # https://github.com/Kilarin/compassgps.git
-add_git_mod compassgps mod-compassgps https://github.com/AntumMT/mod-compassgps.git
+#add_git_mod compassgps mod-compassgps https://github.com/AntumMT/mod-compassgps.git
+add_git_mod compassgps compassgps https://github.com/expertmm/compassgps.git
 
 # author="ShadowNinja"
 # forum_url="https://forum.minetest.net/viewtopic.php?id=8434"
