@@ -24,7 +24,28 @@ sudo echo "starting ENLIVEN installer script..."
 ## this space was intentinally left blank
 
 
-
+if [ ! -f "`command -v minetestmapper`" ]; then
+  if [ -f "`command -v apt`" ]; then
+    sudo apt install libgd-dev libsqlite3-dev libleveldb-dev libhiredis-dev libpq-dev
+  else
+    if [ -f "`command -v pacman`" ]; then
+      pacman -Syyu --noconfirm gd sqlite leveldb hiredis postgresql #postgresql-libs
+    fi
+  fi
+  cd ~/Downloads
+  if [ -d minetestmapper ]; then
+    rm -Rf minetestmapper
+  fi
+  git clone https://github.com/minetest/minetestmapper.git
+  cd minetestmapper
+  cmake . -DENABLE_LEVELDB=1
+  make -j2
+  if [ -f minetestmapper ]; then
+    sudo cp -f minetestmapper /usr/local/bin/
+  else
+    echo "FAILED to compile minetestmapper--python version will be used"
+  fi
+fi
 
 
 
