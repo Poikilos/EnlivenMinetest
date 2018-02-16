@@ -776,7 +776,9 @@ add_git_mod farming farming https://github.com/tenplus1/farming.git
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=10423"
 # Wuzzy's slimenodes mod (only available via /give command).
 # web view: http://repo.or.cz/w/minetest_slimenodes.git
-add_git_mod slimenodes minetest_slimenodes http://repo.or.cz/minetest_slimenodes.git
+# add_git_mod slimenodes minetest_slimenodes http://repo.or.cz/minetest_slimenodes.git
+# use expertmm fork instead:
+add_git_mod slimenodes slimenodes https://github.com/expertmm/slimenodes.git
 
 # treasurer forum post here: https://forum.minetest.net/viewtopic.php?t=7292
 # (this trmp is linked from there)
