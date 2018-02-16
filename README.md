@@ -144,10 +144,9 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * The installer script changes owner and group for ENLIVEN's world.mt and world.mt.1st if present to $USER
 * The included minetest.conf recommended for your clients includes the line enable_local_map_saving = true, which will cache the world locally on their machines. You can feel free to change that according to your preference.
 
-## Changes to minetestmapper-numpy
-* fix exception while trying to recover from exception (see `Could not finish writing r`)
-
 ## Changes:
+(2018-02-15)
+* moved mappers to <https://github.com/expertmm/minetestmapper-python>
 (2018-02-07)
 * forked trm_minetest_game to use proper dye list (submitted pull request to ClockGen since his is the only known git version of Wuzzy's which was on the [official treasurer thread](https://forum.minetest.net/viewtopic.php?t=7292))
 (2018-02-08)
