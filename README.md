@@ -248,6 +248,7 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * Updated pipeworks fork by HybridDog: https://github.com/HybridDog/pipeworks
 
 ## Known issues:
+* spawners to spawners modpack transitional mod included here does not transition dungeon spawners such as `spawners:mobs_stone_monster_spawner_waiting` (in private test world near (?, -1458, -12)
 * worlds made with older version of enliven use Echoes' throwing, so the following differences must be fixed possibly with a new mod:
   * Old throwing items that are not in throwing_arrows:
     * throwing:arrow_steel
