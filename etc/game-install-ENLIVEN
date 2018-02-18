@@ -26,7 +26,7 @@ sudo echo "starting ENLIVEN installer script..."
 
 if [ ! -f "`command -v minetestmapper`" ]; then
   if [ -f "`command -v apt`" ]; then
-    sudo apt install libgd-dev libsqlite3-dev libleveldb-dev libhiredis-dev libpq-dev
+    sudo apt -y install libgd-dev libsqlite3-dev libleveldb-dev libhiredis-dev libpq-dev
   else
     if [ -f "`command -v pacman`" ]; then
       pacman -Syyu --noconfirm gd sqlite leveldb hiredis postgresql #postgresql-libs
@@ -361,7 +361,9 @@ then
   echo "already backed up to $MT_MYGAME_BAK"
 else
   sudo mv "$MT_MYGAME_DIR" "$MT_MYGAME_BAK"
-  sudo mkdir "$MT_MYGAME_DIR"
+  if [ ! -d "$MT_MYGAME_DIR" ]; then
+    sudo mkdir "$MT_MYGAME_DIR"
+  fi
 fi
 
 
@@ -494,18 +496,24 @@ sudo mv -f LICENSE "$MTMOD_DEST_PATH/"
 cd ..
 rmdir "$MTMOD_UNZ_NAME"
 
+add_git_mod hbsprint hbsprint https://github.com/minetest-mods/hbsprint.git
+add_git_mod armor_monoid armor_monoid https://github.com/minetest-mods/armor_monoid.git
+
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=11153&hilit=hunger"
 # description="Wuzzy's hudbars (no builtin bars; used by sprint, hbhunger, and hbarmor)"
-add_git_mod hudbars minetest_hudbars git://repo.or.cz/minetest_hudbars.git
+# not git://repo.or.cz/minetest_hudbars.git
+#TODO? add_git_mod hudbars minetest_hudbars http://repo.or.cz/minetest_hudbars.git
 
 # author="Wuzzy"
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=11153&hilit=hunger"
-add_git_mod hbarmor minetest_hbarmor git://repo.or.cz/minetest_hbarmor.git
+# not git://repo.or.cz/minetest_hbarmor.git
+#TODO? add_git_mod hbarmor minetest_hbarmor http://repo.or.cz/minetest_hbarmor.git
 
 # author="Wuzzy
 # description="hbhunger for hudbars"
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=11153&hilit=hunger"
-add_git_mod hbhunger minetest_hbhunger git://repo.or.cz/minetest_hbhunger.git
+# not git://repo.or.cz/minetest_hbhunger.git
+#TODO? add_git_mod hbhunger minetest_hbhunger http://repo.or.cz/minetest_hbhunger.git
 
 add_git_mod moreblocks moreblocks https://github.com/minetest-mods/moreblocks.git
 add_git_mod pipeworks pipeworks https://github.com/minetest-mods/pipeworks.git
@@ -554,6 +562,11 @@ remove_mod helicopter
 add_git_mod biome_lib biome_lib https://github.com/minetest-mods/biome_lib.git
 add_git_mod moretrees moretrees https://github.com/minetest-mods/moretrees.git
 add_git_mod 3d_armor minetest-3d_armor https://github.com/stujones11/minetest-3d_armor.git
+#TODO 0.5 version??: https://github.com/stujones11/minetest-3d_armor/archive/MT_0.5.0-dev.zip
+# Git 1.7.10 need `--single-branch` option to prevent getting all branches (see https://stackoverflow.com/questions/1911109/how-to-clone-a-specific-git-branch)
+#git clone -b MT_0.5.0-dev --single-branch https://git@github.com/stujones11/minetest-3d_armor.git
+#see also 0.5 branch https://github.com/stujones11/minetest-3d_armor/tree/MT_0.5.0-dev
+#"stable" version is at https://github.com/stujones11/minetest-3d_armor/archive/version-0.4.11.zip
 
 #mv minetest-3d_armor-master minetest-3d_armor_MODPACK
 #sudo mv minetest-3d_armor_MODPACK/wieldview $MT_MYGAME_MODS_PATH/wieldview
@@ -581,7 +594,7 @@ add_git_mod caverealms minetest-caverealms https://github.com/HeroOfTheWinds/min
 add_git_mod moreores moreores https://github.com/minetest-mods/moreores.git
 
 # forum_url="https://forum.minetest.net/viewtopic.php?f=9&t=9650"
-add_git_mod sprint sprint https://github.com/GunshipPenguin/sprint.git
+#TODO? add_git_mod sprint sprint https://github.com/GunshipPenguin/sprint.git
 
 #the following is NOT needed, since one of the mods above adds the home gui and home permission (but no /home or /sethome command)
 #if [ -f "master.zip" ]; then
@@ -825,7 +838,7 @@ if [ ! -z "$MATCHING_MODS_BEFORE" ]; then
 fi
 # Update skins database (WARNING: skin numbering affects chosen player skin):
 # (jq is a json processor, required for the updater bash script:)
-# sudo apt-get -y install jq
+# sudo apt -y install jq
 # cd "$MTMOD_DEST_PATH"
 # cd u_skins  #bell07's version is a mod, not a modpack
 # cd updater
@@ -967,10 +980,10 @@ echo "### end $WORLD_MT_PATH ##"
 echo ""
 echo ""
 echo ""
-#echo "Remember, if you are using Better HUD + Hunger, add the values for the new meat to hunger.lua"
-#echo "--see <https://forum.minetest.net/viewtopic.php?f=11&t=9917&hilit=mobs>"
-echo "NOTE: hud_hunger/hunger/food.lua now comes with values for food from mobs."
-#hud_hunger now includes mobs food (see /usr/local/share/minetest/games/enliven/mods/hud_hunger/hunger/food.lua )
+##echo "Remember, if you are using Better HUD + Hunger, add the values for the new meat to hunger.lua"
+##echo "--see <https://forum.minetest.net/viewtopic.php?f=11&t=9917&hilit=mobs>"
+#echo "NOTE: hud_hunger/hunger/food.lua now comes with values for food from mobs."
+##hud_hunger now includes mobs food (see /usr/local/share/minetest/games/enliven/mods/hud_hunger/hunger/food.lua )
 echo ""
 echo "NOW MAKE SURE YOU EDIT $MT_MYGAME_MODS_PATH/protector/init.lua near line 325 to block comment ( --[[ then afterward --]]) the on_rightclick registration (since protection block right-clicked by its owner crashes server)"
 echo "Then make sure you login, REMEMBERING to put a password in second box, then logout then:"

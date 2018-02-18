@@ -17,6 +17,8 @@ rmdir /usr/local/doc
 rmdir /usr/local/unix
 rmdir /usr/local/fonts
 sudo rm -Rf /usr/local/mods
+sudo rm -Rf /usr/local/games/minimal
+sudo rm -Rf /usr/local/games/minetest_game
 sudo rmdir /usr/local/textures
 sudo rmdir /usr/local/doc
 sudo rmdir /usr/local/fonts
