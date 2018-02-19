@@ -37,10 +37,10 @@ sudo rmdir /usr/local/unix
 sudo rmdir /usr/local/builtin/*
 sudo rmdir /usr/local/builtin
 if [ -f "`command -v update-desktop-database`" ]; then
-  echo "updating desktop database as per https://aur.archlinux.org/minetest-git.git"
+  echo "updating desktop database as per https://aur.archlinux.org/cgit/aur.git/tree/PKGBUILD?h=minetest-git"
   update-desktop-database &>/dev/null && update-desktop-database -q
 fi
 if [ -f "`command -v gtk-update-icon-cache`" ]; then
-  echo "updating gtk icon cache as per https://aur.archlinux.org/minetest-git.git"
+  echo "updating gtk icon cache as per https://aur.archlinux.org/cgit/aur.git/tree/PKGBUILD?h=minetest-git"
   gtk-update-icon-cache &>/dev/null && gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
 fi

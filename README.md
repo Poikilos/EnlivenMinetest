@@ -10,40 +10,25 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
 * birthstones, improved fork: <https://github.com/expertmm/minetest-birthstones>
 
 ### Planned Features
+* maintain a table of short descriptions of mods
 * see also EnlivenMinetest/etc/game-install-enliven-testing.sh
-* slimenodes fork with buckets and recipes (craft from glue or animal hide)
-* https://github.com/minetest-mods/sounding_line (machine block that measures depth of water under it)
+* slimenodes fork: make glue replaceable with animal hide
 * https://github.com/minetest-mods/tutor
-* https://github.com/minetest-mods/lightning
 * https://github.com/minetest-mods/chat_anticurse
-* https://github.com/minetest-mods/cozy (sitting and laying down player animations)--compare with emote
-* https://github.com/minetest-mods/mywalls (more wall styles; brick & stone brick walls)
-* https://github.com/minetest-mods/mymasonhammer (cut stairs & ladders in blocks)
+* https://github.com/minetest-mods/cozy (sitting and laying down player animations)--compare with emote https://github.com/minetest-mods/emote.git
 
 #### Possible Additions
-* SWITCH testing mod for furniture to minetest-mods version:
-  https://github.com/minetest-mods/ts_furniture
-* SWITCH to https://github.com/minetest-mods/inspector (from metatools mod)
+* make a ruins mod that generates ruins with: statues, mese, stone with chipped paint or paintings, tan shale blocks with and without engravings
+* SWITCH to https://github.com/minetest-mods/inspector (instead of metatools mod)
   https://github.com/minetest-mods/inspector
 * SWITCH to frame: "non-laggy item frame"--& make mod to alias-out the existing (homedecor?) ones in ENLIVEN
   https://github.com/minetest-mods/frame
 * SWITCH to mob-engine (based on cme) by minetest-mods team
   https://github.com/minetest-mods/mob-engine
   https://forum.minetest.net/viewtopic.php?t=17106
-* SWITCH from GunshipPenguin's sprint to minetest-mods' hbsprint (which optionally uses hudbars, hbhunger, and player_monoids)
-  https://github.com/minetest-mods/hbsprint.git
-* SWITCH from tsm_chests_dungeon to loot or dungeon_loot (loot is maintained by minetest-mods; tsm generates treasure from trm treasure lists using treasurer)
-  https://github.com/minetest-mods/loot.git
-  settings:
-  * loot_vaults - Set to true to enable loot vault generation.
-  * loot_dungeons - Set to true to enable loot generation in dungeons.
-* SWITCH from farming redo to minetest-mods crops <https://github.com/minetest-mods/crops/archive/master.zip>
-  (works with farming from minetest_game)
-  "pumpkins, melons and potatoes are obtainable. The rest currently isn't." -sofar <https://forum.minetest.net/viewtopic.php?p=303059#p303059>
-  so probably a trm_crops mod should be created
 * timer: "A persistent timer class that can be restarted after server shutdown"
   https://github.com/minetest-mods/timer
-* add but remove fire (flint and steel)?
+* add modpack but remove fire items (flint and steel?) from:
   https://github.com/xisd/trmp_Pack.git
 * https://github.com/minetest-mods/woodcutting/archive/master.zip
   (sneek click to start auto-harvest tree, sneak again to cancel)
@@ -59,19 +44,15 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
   https://forum.minetest.net/viewtopic.php?f=11&t=1882
 * worldedge: wrap world as if it is a sphere
   https://github.com/minetest-mods/worldedge
-* stamina: hunger-based stamina
-  https://github.com/minetest-mods/stamina
 * myroofs: sloped roofs in red, green, and dark gray--compare with existing (homedecor?) roofs in ENLIVEN
   https://github.com/minetest-mods/myroofs
 * https://github.com/minetest-mods/BobBlocks (light poles and settable damaging traps)
 * https://github.com/xisd/trmp_Pack (but only the mods from it mods matching ENLIVEN mods)
   (NOT the same as [trm_pack by Wuzzy](https://forum.minetest.net/viewtopic.php?pid=113052#p113052), which has mostly stuff from weird mods or stuff already in trmp_minetest_game)
-* mg: has villages, and is now maintained by minetest-mods
-  https://github.com/minetest-mods/mg.git
-* emote:
-  https://github.com/minetest-mods/emote.git
-* vote:
-  https://github.com/minetest-mods/vote.git
+* weather: https://github.com/Jeija/minetest-mod-weather ( https://forum.minetest.net/viewtopic.php?t=5245 )
+* baked clay (Ethereal NG integrates with it, mobs redo, and farming redo)
+* Updated pipeworks fork by HybridDog: https://github.com/HybridDog/pipeworks
+
 
 ##### low-pri
 * drawers: https://github.com/minetest-mods/drawers.git
@@ -86,6 +67,9 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
 * diet, but maybe add hunger monoid when simple carbs are eaten & make hunger monoid cumulatively reduce satiation (instead of using diet):
   https://github.com/minetest-mods/diet.git
 * make new decor nodes (in order of priority first): corner closed and/or open curtains (for curtains on each window both touching corner) electric range, couch
+* possibly replace Immersive Sounds [ambience]: https://forum.minetest.net/viewtopic.php?t=2807
+  with technic_ambience: http://realbadangel.pl/technic_ambience.zip
+* dungeon_loot (but "loot" mod should already cover that with default settings)
 
 #### Root Script Deprecation Process
 ##### Goals
@@ -145,11 +129,35 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * The included minetest.conf recommended for your clients includes the line enable_local_map_saving = true, which will cache the world locally on their machines. You can feel free to change that according to your preference.
 
 ## Changes:
-(2018-02-15)
+### (2018-02-18)
+* switched to FaceDeer's fork of caverealms which is integrated with mapgen v7's perlin noise and therefore with its biomes
+* added:
+  * lightning
+  * mywalls (more wall styles; brick & stone brick walls)
+  * mymasonhammer (cut stairs & ladders in blocks)
+  * sounding_line (machine block that measures depth of water under it)
+* switched from spawners to Wuzzy's tsm_pyramids and minetest-mods' loot (was already using trm_pyramids anyway which didn't seem to work with spawners' pyramids)
+* add https://github.com/minetest-mods/ts_furniture
+* add vote
+* add stamina: hunger-based stamina https://github.com/minetest-mods/stamina
+* SWITCH from tsm_chests_dungeon to loot (loot is maintained by minetest-mods; tsm generates treasure from trm treasure lists using treasurer)
+  https://github.com/minetest-mods/loot.git
+  settings (for world.mt):
+  * loot_vaults - Set to true to enable loot vault generation (default false)
+  * loot_dungeons - Set to true to enable loot generation in dungeons (default true)
+* SWITCH from farming redo to minetest-mods crops <https://github.com/minetest-mods/crops/archive/master.zip>
+  (works with farming from minetest_game)
+  "pumpkins, melons and potatoes are obtainable. The rest currently isn't." -sofar <https://forum.minetest.net/viewtopic.php?p=303059#p303059>
+  so probably a trm_crops mod should be created
+### (2018-02-17)
+* switched to minetest-mods hbsprint (which optionally uses hudbars, hbhunger, and player_monoids) https://github.com/minetest-mods/hbsprint.git
+  * removed all other huds and hud mods until compatibility can be determined (they were causing health and food system to not work at all)
+    * formerly used GunshipPenguin's sprint
+### (2018-02-15)
 * moved mappers to <https://github.com/expertmm/minetestmapper-python>
-(2018-02-07)
+### (2018-02-07)
 * forked trm_minetest_game to use proper dye list (submitted pull request to ClockGen since his is the only known git version of Wuzzy's which was on the [official treasurer thread](https://forum.minetest.net/viewtopic.php?t=7292))
-(2018-02-08)
+### (2018-02-08)
 * trm_pyramids added (partial code in game-install-ENLIVEN completed)
   (a required treasure table so tsm_pyramids can provide treasure in pyramids)
 * switched links to use minetest-mods' versions of:
@@ -162,9 +170,7 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * added anvil mod
 * added sling mod: (throw any item or stack using sling--accounts for multiplayer)
 * added tsm_chests_dungeon mod (adds chests to the default dungeons) -- https://forum.minetest.net/viewtopic.php?f=9&t=17005
-
-
-(2018-02-06)
+### (2018-02-06)
 * refactored file structure
   * renamed games/ENLIVEN to patches/subgame
   * moved etc/Mods* to patches/mods*
@@ -172,31 +178,31 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
   * added
   * moved nyancat to patches/subgame/minetest_game-deprecated-mods-list.txt
     (wiki.minetest.net/Nyan_Cat says if you want it back, copy it from 0.4.15)
-(2018-02-03)
+### (2018-02-03)
 * bump Python requirement to 3 (no more testing is planned to be done on python2) and use python3 binary when calling py files from scripts
     * (chunkymap-generator.bat, pythoninfo.py) if using Windows, check for various versions of Python3 and warn if fails (no longer check for Python2)
 * (minetestinfo.py) account for Minetest 0.4.16 arch naming difference: minetest_game (from minetest-data package) becomes minetest (still check for minetest_game if minetest not present in minetest/games since 0.4.16 repack 3 via deb from Debian via Ubuntu still uses the folder name minetest_game)
-(2017-05-25)
+### (2017-05-25)
 * switched to expertmm fork of travelnet
-(2017-05-18)
+### (2017-05-18)
 * Installer now available at [axlemedia.net](http://www.axlemedia.net/index.php?htmlref=tutoring.html "Axle Media") -- added project and related files for Inno Setup Compiler.
-(2017-05-15)
+### (2017-05-15)
 * added mock_tnt: doesn't destroy blocks, can coexist with regular tnt mod (all tnt is replaced with mock_tnt if tnt is disabled). This mod is helpful for when multiplayer servers have tnt disabled but players have acquired 'unknown item' (tnt:tnt) as loot. The Unknown Explosive says 'unknown item' on it, as a seemless replacement :)
-(2017-04-20)
+### (2017-04-20)
 * Released ENLIVEN 0.4.15.3
-(2017-04-02)
+### (2017-04-02)
 * changed maximum range from 20 to 30 for forcefield (see technic/machines folder)
 * switched from kaeza to minetest-mods github repo for xban2
 * fixed issue with redundant aliases in cme_to_spawners (see Mods,WIP folder)
-(2017-03-08)
+### (2017-03-08)
 *  renamed the files in tenplus1's hud_hunger to use its nosprint version of lua files in hud_hunger/hunger
 * switched to hudbars, removed hud_hunger. Add line to SERVER's minetest.conf (using installer script): hubars_bar_type = statbar_modern
-(2017-03-07)
+### (2017-03-07)
 * change to tenplus1's hud_hunger fork (BlockMen's has potential comparison of number to nil [crash] in hud/builtin.lua line 79, other issues, and is not maintained)
-(2017-03-06)
+### (2017-03-06)
 * remove computer-specific settings from minetest.conf (client version in this folder)
 * remove ENLIVEN's copy of protector since TenPlus1 applied the fixes in the real repo
-(2017-02-22)
+### (2017-02-22)
 * NOTE: the protector fix from 2017-02-15 was merged by TenPlus1 today
 * Fix protector crash (also sent to TenPlus1):
 ```lua
@@ -208,7 +214,7 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
     end -- ADDED THIS LINE
     return true
 ```
-(2017-02-15)
+### (2017-02-15)
 * (change bones) Show player (and print to server console) where died (and say bones remain or why not) -- with this addition, you can search your server log for "player's bones" where player is playername whether bones remain or not.
 * (change homedecor_modpack/homedecor) Add optional non-adult beverage version of homedecor in homedecor_modpack (just changes display name & variable name of Wine rack and Beer tap and beer mug, and textures for beer mug)
 * (change protector) Avoid crash by not allowing non-player to dig protected area (may only happen when one of the owners of an area does it--that was the crash scenario)
@@ -216,9 +222,9 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
         return protector.can_dig(1, pos, player:get_player_name(), true, 1)
         to
         return player and protector.can_dig(1, pos, player:get_player_name(), true, 1) or false
-(2017-02-14)
+### (2017-02-14)
 * (change mobs) Added some nonviolent textures that could be used in a school to the ENLIVEN/mods folder (they can be manually installed after ENLIVEN by copying them to the same place in your games/ENLIVEN folder on your installation of Minetest)
-(2017-02-06)
+### (2017-02-06)
 * Added optional mods for migrating from cme and from tsm_pyramids to spawners (should allow mods that depend on cme to be installed, and use mobs instead, though no mods in ENLIVEN are known to require cme currently)
 * Added optional trm_compassgps so that treasure could include a compass or map from the compassgps mod
 * Added installation of trmp_minetest_game to the installer script, since treasurer requires one or more trms in order to work (tested and working now on tsm_railcorridors)
@@ -240,14 +246,9 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
     add the new line (not sure if the format call is really ok--it was copied from compassgps:
     minetest.chat_send_player(player:get_player_name(), S("Bones placed at %s."):format(pos))
 
-### Potential mods to add
-* weather: https://github.com/Jeija/minetest-mod-weather ( https://forum.minetest.net/viewtopic.php?t=5245 )
-* Immersive Sounds [ambience]: https://forum.minetest.net/viewtopic.php?t=2807
-  OR technic_ambience: http://realbadangel.pl/technic_ambience.zip
-* baked clay (Ethereal NG integrates with it, mobs redo, and farming redo)
-* Updated pipeworks fork by HybridDog: https://github.com/HybridDog/pipeworks
-
 ## Known issues:
+* neither type of shears work on mobs redo sheep--though mobs:shears (Steel Shears) are supposed to via right-click: https://github.com/tenplus1/mobs_redo
+* tsm_railcorridors only has cobwebs if mobs_monster is installed (but I may want to switch to minetest-mods' mob-engine https://github.com/minetest-mods/mob-engine.git which is a fork of cme)
 * spawners to spawners modpack transitional mod included here does not transition dungeon spawners such as `spawners:mobs_stone_monster_spawner_waiting` (in private test world near (?, -1458, -12)
 * worlds made with older version of enliven use Echoes' throwing, so the following differences must be fixed possibly with a new mod:
   * Old throwing items that are not in throwing_arrows:
