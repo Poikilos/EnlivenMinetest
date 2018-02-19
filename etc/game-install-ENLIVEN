@@ -167,7 +167,8 @@ add_zip_mod()
     sudo rm -Rf "$MTMOD_DEST_PATH"
   fi
   wget -O $MTMOD_SRC_ZIP $URL
-  unzip "$MTMOD_SRC_ZIP"
+  unzip -q "$MTMOD_SRC_ZIP"
+  #-q: quiet
   if [ -d "$MTMOD_UNZ_NAME" ]; then
     # outer case is for safety in case variable is blank or something
     if [ -d "$MTMOD_UNZ_NAME/.git" ]; then
@@ -212,6 +213,7 @@ add_git_mod()
     rm -Rf $MTMOD_UNZ_NAME
   fi
   if [ -d "$MTMOD_DEST_PATH" ]; then
+    echo "removing old MTMOD_DEST_PATH"
     sudo rm -Rf "$MTMOD_DEST_PATH"
   fi
   git clone $URL
@@ -402,11 +404,8 @@ sudo cp -Rf $USR_SHARE_MINETEST/games/$mtgame_name/* "$MT_MYGAME_DIR/"
 # description="(must be logged in to forum to download release version at https://forum.minetest.net/download/file.php?id=5282)"
 # author="TenPlus1"
 add_git_mod mobs mobs_redo https://github.com/tenplus1/mobs_redo.git
-echo "load_mod_mobs = true" >> "$WORLD_MT_PATH"
 add_git_mod mobs_monster mobs_monster https://github.com/tenplus1/mobs_monster.git
-echo "load_mod_mobs_monster = true" >> "$WORLD_MT_PATH"
 add_git_mod mobs_animal mobs_animal https://github.com/tenplus1/mobs_animal.git
-echo "load_mod_mobs_animal = true" >> "$WORLD_MT_PATH"
 
 add_git_mod sounding_line sounding_line https://github.com/minetest-mods/sounding_line.git
 add_git_mod lightning lightning https://github.com/minetest-mods/lightning.git
@@ -445,16 +444,16 @@ echo "secure.trusted_mods = advanced_npc" >> "$WRITEABLE_MINETEST_CONF"
 echo "server_dedicated = false" >> "$WRITEABLE_MINETEST_CONF"
 echo "hudbars_bar_type = statbar_modern" >> "$WRITEABLE_MINETEST_CONF"  #TODO: remove this after fully deprecated
 sudo mv -f $HOME/minetest.conf "$USR_SHARE_MINETEST/games/$MT_MYGAME_NAME/minetest.conf"
-echo "load_mod_protector = true" >> "$WORLD_MT_PATH"
+#echo "load_mod_protector = true" >> "$WORLD_MT_PATH"
 
 #formerly https://github.com/kaeza/minetest-xban2/archive/master.tar.gz
 add_git_mod xban2 xban2 https://github.com/minetest-mods/xban2.git
-echo "load_mod_xban2 = true" >> "$WORLD_MT_PATH"
+#echo "load_mod_xban2 = true" >> "$WORLD_MT_PATH"
 
 echo "Installing ShadowNinja's <https://forum.minetest.net/viewtopic.php?t=7239>"
 echo "Installing ShadowNinja's <https://forum.minetest.net/viewtopic.php?t=7239>" >> $MTMOD_SRC_ZIP.txt
 add_git_mod areas areas https://github.com/ShadowNinja/areas.git
-echo "load_mod_areas = true" >> "$WORLD_MT_PATH"
+#echo "load_mod_areas = true" >> "$WORLD_MT_PATH"
 
 
 if [ -f "$MT_MYGAME_DIR/game.conf.1st" ]; then
@@ -473,14 +472,14 @@ minetestserver --gameid list
 echo ""
 
 add_git_mod unified_inventory unified_inventory https://github.com/minetest-mods/unified_inventory.git
-echo "load_mod_unified_inventory = true" >> "$WORLD_MT_PATH"
+#echo "load_mod_unified_inventory = true" >> "$WORLD_MT_PATH"
 
 add_git_mod technic technic https://github.com/minetest-mods/technic.git
 # load technic/technic:
-echo "load_mod_technic = true" >> "$WORLD_MT_PATH"
+#echo "load_mod_technic = true" >> "$WORLD_MT_PATH"
 
 add_git_mod treasurer minetest_treasurer http://repo.or.cz/minetest_treasurer.git
-echo "load_mod_treasurer = true" >> "$WORLD_MT_PATH"
+#echo "load_mod_treasurer = true" >> "$WORLD_MT_PATH"
 
 cd "$HOME/Downloads"
 MTMOD_DEST_NAME=trm_pyramids
@@ -585,10 +584,7 @@ add_git_mod 3d_armor minetest-3d_armor https://github.com/stujones11/minetest-3d
 #sudo mv minetest-3d_armor_MODPACK/wieldview $MT_MYGAME_MODS_PATH/wieldview
 #sudo mv minetest-3d_armor_MODPACK/3d_armor $MT_MYGAME_MODS_PATH/3d_armor
 #sudo mv minetest-3d_armor_MODPACK/shields $MT_MYGAME_MODS_PATH/shields
-#echo "load_mod_wieldview = true" >> "$WORLD_MT_PATH"
-echo "load_mod_3d_armor = true" >> "$WORLD_MT_PATH"
-#echo "load_mod_shields = true" >> "$WORLD_MT_PATH"
-#echo "load_mod_technic_armor = false" >> "$WORLD_MT_PATH"
+# NOTE: load_mod is not a thing for subgames (all mods in subgame are loaded if subgame is loaded)
 #add_git_mod caverealms minetest-caverealms https://github.com/HeroOfTheWinds/minetest-caverealms
 echo "Installing FaceDeer's v7-biome-integrated fork of HeroOfTheWinds' caverealms"
 add_git_mod caverealms minetest-caverealms https://github.com/FaceDeer/minetest-caverealms.git
@@ -824,8 +820,8 @@ add_zip_mod signs_lib signs_lib-master https://github.com/minetest-mods/signs_li
 
 #add_git_mod farming farming https://github.com/tenplus1/farming.git
 remove_mod farming
-sudo cp -R $USR_SHARE_MINETEST/games/$mtgame_name/farming $MT_MYGAME_MODS_PATH/
-cp -Rf asdf
+sudo cp -R $USR_SHARE_MINETEST/games/$mtgame_name/mods/farming $MT_MYGAME_MODS_PATH/
+#cp -Rf asdf
 
 add_git_mod vote vote https://github.com/minetest-mods/vote.git
 add_git_mod stamina stamina https://github.com/minetest-mods/stamina
