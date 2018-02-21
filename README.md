@@ -129,6 +129,9 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * The included minetest.conf recommended for your clients includes the line enable_local_map_saving = true, which will cache the world locally on their machines. You can feel free to change that according to your preference.
 
 ## Changes:
+### (2018-02-19)
+* added ropes
+* added digilines (I just found out it is used by technic and pipeworks)
 ### (2018-02-18)
 * switched to FaceDeer's fork of caverealms which is integrated with mapgen v7's perlin noise and therefore with its biomes
 * added:
@@ -247,7 +250,8 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
     minetest.chat_send_player(player:get_player_name(), S("Bones placed at %s."):format(pos))
 
 ## Known issues:
-* neither type of shears work on mobs redo sheep--though mobs:shears (Steel Shears) are supposed to via right-click: https://github.com/tenplus1/mobs_redo
+* Player is halfway into ground when using 0.5.0 due to unknown mod (does not happen in minetest_game)--still happens after removing: hbsprint
+* when using transitional mods included with EnlivenMinetest, neither type of shears work on mobs redo sheep--though mobs:shears (Steel Shears) are supposed to via right-click: https://github.com/tenplus1/mobs_redo
 * tsm_railcorridors only has cobwebs if mobs_monster is installed (but I may want to switch to minetest-mods' mob-engine https://github.com/minetest-mods/mob-engine.git which is a fork of cme)
 * spawners to spawners modpack transitional mod included here does not transition dungeon spawners such as `spawners:mobs_stone_monster_spawner_waiting` (in private test world near (?, -1458, -12)
 * worlds made with older version of enliven use Echoes' throwing, so the following differences must be fixed possibly with a new mod:
