@@ -667,15 +667,15 @@ echo "Installing Uberi's worldedit..."
 add_git_mod worldedit Minetest-WorldEdit https://github.com/Uberi/Minetest-WorldEdit.git
 
 #MarkBu's ambience/ambiance ambient sounds (burli on https://forum.minetest.net/viewtopic.php?f=9&t=14814 )
-#add_zip_mod ambianceplus ambianceplus-master https://github.com/MarkuBu/ambianceplus/archive/master.zip
+#add_git_mod ambianceplus ambianceplus https://github.com/MarkuBu/ambianceplus.git
 
 # tenplus1's ambience/ambiance ambient sounds (fork linked at original's thread at https://forum.minetest.net/viewtopic.php?f=11&t=2807&start=275 )
-add_zip_mod ambience ambience-master https://github.com/tenplus1/ambience/archive/master.zip
+add_git_mod ambience ambience https://github.com/tenplus1/ambience.git
 # expertmm fork of LeMagnesium's minetest-mod-metatools
-add_zip_mod metatools minetest-mod-metatools-master https://github.com/expertmm/minetest-mod-metatools/archive/master.zip
+add_git_mod metatools minetest-mod-metatools https://github.com/expertmm/minetest-mod-metatools.git
 #[mod-pack] sky critters (for mobs_redo) [mobs_sky] <https://forum.minetest.net/viewtopic.php?f=9&t=12688>
 #requires mobs redo
-add_zip_mod mobs_sky mobs_sky-master https://github.com/blert2112/mobs_sky/archive/master.zip
+add_git_mod mobs_sky mobs_sky https://github.com/blert2112/mobs_sky.git
 
 spawners_enable="false"
 if [ "$spawners_enable" = "true" ]; then
@@ -784,26 +784,26 @@ fi
 
 # forum_url: https://forum.minetest.net/viewtopic.php?t=12189
 # description: Adds animations to the players' head
-add_zip_mod playeranim playeranim-master https://github.com/minetest-mods/playeranim/archive/master.zip
-add_zip_mod homedecor_modpack homedecor_modpack-master https://github.com/minetest-mods/homedecor_modpack/archive/master.zip
+add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git
+add_git_mod homedecor_modpack homedecor_modpack https://github.com/minetest-mods/homedecor_modpack.git
 # expertmm fork of a rather non-maintained mod--forum link is at https://forum.minetest.net/viewtopic.php?id=3663
 # (original mod was at https://github.com/Doc22/birthstones-mod/archive/master.zip)
-add_zip_mod birthstones minetest-birthstones-master https://github.com/expertmm/minetest-birthstones/archive/master.zip
-add_zip_mod bakedclay bakedclay-master https://github.com/tenplus1/bakedclay/archive/master.zip
+add_git_mod birthstones minetest-birthstones https://github.com/expertmm/minetest-birthstones.git
+add_git_mod bakedclay bakedclay https://github.com/tenplus1/bakedclay.git
 # https://forum.minetest.net/viewtopic.php?f=11&t=12440&p=310915#p310915
 # wget https://forum.minetest.net/download/file.php?id=6140
 # forum link file.php?id=6140 changed, so use salahzar's GitHub upload instead:
-add_zip_mod invhack minetest-invhack-master https://github.com/salahzar/minetest-invhack/archive/master.zip
-add_zip_mod unifieddyes unifieddyes-master https://github.com/minetest-mods/unifieddyes/archive/master.zip
+add_git_mod invhack minetest-invhack https://github.com/salahzar/minetest-invhack.git
+add_git_mod unifieddyes unifieddyes https://github.com/minetest-mods/unifieddyes.git
 #Sokomine's original version has no security ( https://forum.minetest.net/viewtopic.php?id=4877 )
 #  https://github.com/Sokomine/travelnet/archive/master.zip
-add_zip_mod travelnet travelnet-master https://github.com/expertmm/travelnet/archive/master.zip
-add_zip_mod anvil anvil-master https://github.com/minetest-mods/anvil/archive/master.zip
-add_zip_mod sling sling-master https://github.com/minetest-mods/sling/archive/master.zip
+add_git_mod travelnet travelnet https://github.com/expertmm/travelnet.git
+add_git_mod anvil anvil https://github.com/minetest-mods/anvil.git
+add_git_mod sling sling https://github.com/minetest-mods/sling.git
 #REPLACES PilzAdam's, modified by kaeza, maintained by VenessaE; FORMERLY in homedecor_modpack
 #forum post: https://forum.minetest.net/viewtopic.php?t=13762
 # kaeza's signs_lib (forked from PilzAdam's and TheXYZ's code) was moved here from: https://github.com/kaeza/minetest-signs_lib-extrafonts/archive/master.zip
-add_zip_mod signs_lib signs_lib-master https://github.com/minetest-mods/signs_lib/archive/master.zip
+add_git_mod signs_lib signs_lib https://github.com/minetest-mods/signs_lib.git
 # EXTRA FONTS PACK for signs_lib DOESN'T SEEM TO WORK IN MULTIPLAYER, and is unwieldy to use:
 #cd $HOME/Downloads
 #MTMOD_DL_ZIP=master.zip
@@ -867,12 +867,12 @@ else
     sleep 1
     exit 1
   fi
+  add_git_mod crops crops https://github.com/minetest-mods/crops
 fi
 
 add_git_mod vote vote https://github.com/minetest-mods/vote.git
 #add_git_mod stamina stamina https://github.com/minetest-mods/stamina
 remove_mod stamina
-add_git_mod crops crops https://github.com/minetest-mods/crops
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=10423"
 # Wuzzy's slimenodes mod (only available via /give command).
 # web view: http://repo.or.cz/w/minetest_slimenodes.git
@@ -900,15 +900,14 @@ add_git_mod digilines digilines https://github.com/minetest-mods/digilines.git
 # Krock's is outdated and has remaining bugs such as in updater: wget https://github.com/SmallJoker/minetest-u_skinsdb/archive/master.zip
 # bell07's no longer exists
 # wget https://github.com/bell07/minetest-u_skinsdb/archive/master.zip
-# add_zip_mod u_skins minetest-u_skinsdb-master https://github.com/dmonty2/minetest-u_skinsdb/archive/master.zip
-#add_zip_mod u_skins minetest-u_skinsdb-master https://github.com/dmonty2/minetest-u_skinsdb/archive/master.zip
-# add_zip_mod skinsdb minetest-u_skinsdb-master https://github.com/dmonty2/minetest-u_skinsdb/archive/master.zip
+# add_git_mod u_skins minetest-u_skinsdb https://github.com/dmonty2/minetest-u_skinsdb.git
+# add_git_mod skinsdb minetest-u_skinsdb https://github.com/dmonty2/minetest-u_skinsdb.git
 # forked and is now a part of minetest-mods thanks to bell07
 MATCHING_MODS_BEFORE="`ls $MT_MYGAME_MODS_PATH | grep skin`"
 remove_mod u_skinsdb
 remove_mod u_skins
 PATCH_SKINS_MOD_NAME="skinsdb"  # used further down too!
-add_zip_mod $PATCH_SKINS_MOD_NAME skinsdb-master https://github.com/minetest-mods/skinsdb/archive/master.zip
+add_git_mod $PATCH_SKINS_MOD_NAME skinsdb https://github.com/minetest-mods/skinsdb.git
 if [ ! -z "$MATCHING_MODS_BEFORE" ]; then
   echo "Removed $MATCHING_MODS_BEFORE then installed $PATCH_SKINS_MOD_NAME (this output is shown on purpose)"
 fi
