@@ -76,13 +76,13 @@ if [ -d "$try_path" ]; then
   # Arch linux
   USR_SHARE_MINETEST="$try_path"
 fi
-if [ ! -d "$USR_SHARE_MINETEST" ]; then
-  # IF git version is installed and regular one is NOT:
+#if [ ! -d "$USR_SHARE_MINETEST" ]; then
+  # IF git version is installed
   try_path="/usr/local/share/minetest"
   if [ -d "$try_path" ]; then
     USR_SHARE_MINETEST="$try_path"
   fi
-fi
+#fi
 # UNUSED (unknown use): MT_GAMES_DIR=$HOME/.minetest/mods
 # intentionally skip the slash in the following line since $USR_SHARE_MINETEST already starts with one:
 MT_BACKUP_GAMES_DIR=$HOME/Backup$USR_SHARE_MINETEST/games
