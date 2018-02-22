@@ -23,7 +23,11 @@ if [ -f "`command -v apt`" ]; then
   sudo apt -y install libncurses5-dev libgettextpo-dev doxygen libspatialindex-dev libpq-dev postgresql-server-dev-all
   # added libpq-dev postgresql-server-dev-all (or specific version) are BOTH needed for PostgreSQL development as per https://stackoverflow.com/questions/13920383/findpostgresql-cmake-wont-work-on-ubuntu
   # if you skip the above, the below says missing: GetText, Curses, ncurses, Redis, SpatialIndex, Doxygen
-  sudo apt -y install -y git build-essential libirrlicht-dev libgettextpo0 libfreetype6-dev cmake libbz2-dev libpng12-dev libjpeg8-dev libxxf86vm-dev libgl1-mesa-dev libsqlite3-dev libogg-dev libvorbis-dev libopenal-dev libcurl4-openssl-dev libluajit-5.1-dev liblua5.1-0-dev libleveldb-dev
+  sudo apt -y install git build-essential libirrlicht-dev libgettextpo0 libfreetype6-dev cmake libbz2-dev libxxf86vm-dev libgl1-mesa-dev libsqlite3-dev libogg-dev libvorbis-dev libopenal-dev libcurl4-openssl-dev libluajit-5.1-dev liblua5.1-0-dev libleveldb-dev
+  # Ubuntu Xenial:
+  sudo apt -y install libpng12-dev libjpeg8-dev
+  # Debian:
+  sudo apt -y install libpng-dev libjpeg-dev
 elif [ -f "`command -v pacman`" ]; then
   sudo pacman -R --noconfirm minetest-server
   sudo pacman -R --noconfirm minetest
