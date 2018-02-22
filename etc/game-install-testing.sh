@@ -65,8 +65,6 @@ add_git_mod special_picks special_picks https://github.com/cx384/special_picks.g
 # no longer needed since ENLIVEN main branch now uses expertmm travelnet:
 # add_git_mod travelnet travelnet https://github.com/Sokomine/travelnet.git
 
-add_git_mod mg mg https://github.com/minetest-mods/mg.git
-
 #used by mg_villages fork by Sokomine
 add_git_mod handle_schematics handle_schematics https://github.com/Sokomine/handle_schematics.git
 # mg_villages no longer needed (?) since minetest-mods now maintains an mg with villages
