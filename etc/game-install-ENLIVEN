@@ -10,7 +10,9 @@
 
 # * Git version uses /home/*/minetest/games and /usr/local/share/minetest/games but the latter is used for minetestserver (minetest-server package)
 
-
+if [ "$1" = "version_0_5_enable" ]; then
+  version_0_5_enable="true"
+fi
 # (Ubuntu 14.04 Trusty Tahr Server) folders were found using:
 # cd /
 # sudo find -name 'worlds' (worlds folder is in $HOME/.minetest)
@@ -80,6 +82,7 @@ fi
   # IF git version is installed
   try_path="/usr/local/share/minetest"
   if [ -d "$try_path" ]; then
+    version_0_5_enable="true"
     USR_SHARE_MINETEST="$try_path"
   fi
 #fi
@@ -200,6 +203,10 @@ add_zip_mod()
   else
     echo "  added as $MTMOD_DEST_PATH"
   fi
+  cd
+  if [ -d GitHub/EnlivenMinetest ]; then
+    cd GitHub/EnlivenMinetest
+  fi
 }
 
 add_git_mod()
@@ -208,6 +215,7 @@ add_git_mod()
   MTMOD_DEST_NAME=$1
   MTMOD_UNZ_NAME=$2
   URL=$3
+  BRANCH=$4
   MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
   if [ ! -z "`ls | grep $MTMOD_UNZ_NAME`" ]; then  # works with wildcard in variable
     rm -Rf $MTMOD_UNZ_NAME
@@ -216,7 +224,12 @@ add_git_mod()
     echo "removing old $MTMOD_DEST_PATH"
     sudo rm -Rf "$MTMOD_DEST_PATH"
   fi
-  git clone $URL
+  if [ ! -z "$BRANCH" ]; then
+    echo "Cloning $BRANCH branch..."
+    git clone -b $BRANCH --single-branch $URL
+  else
+    git clone $URL
+  fi
   if [ -d "$MTMOD_UNZ_NAME" ]; then
     # outer case is for safety in case variable is blank or something
     if [ -d "$MTMOD_UNZ_NAME/.git" ]; then
@@ -249,6 +262,10 @@ add_git_mod()
   else
     echo "  [ + ] added as $MTMOD_DEST_PATH"
   fi
+  cd
+  if [ -d GitHub/EnlivenMinetest ]; then
+    cd GitHub/EnlivenMinetest
+  fi
 }
 
 remove_mod()
@@ -275,6 +292,10 @@ remove_mod()
     fi
   else
     echo "  [ - ] already not present: $MTMOD_DEST_PATH"
+  fi
+  cd
+  if [ -d GitHub/EnlivenMinetest ]; then
+    cd GitHub/EnlivenMinetest
   fi
 }
 
@@ -395,26 +416,7 @@ if [ -d "$USR_SHARE_MINETEST/games/minetest" ]; then
 fi
 sudo cp -Rf $USR_SHARE_MINETEST/games/$mtgame_name/* "$MT_MYGAME_DIR/"
 
-#wget https://github.com/BlockMen/cme/releases/download/v2.3/cme-2_3-BlockMen.zip
-#unzip cme-2_3-BlockMen.zip
-#sudo mv cme "$MT_MYGAME_MODS_PATH/cme"
 
-# description="(must be logged in to forum to download release version at https://forum.minetest.net/download/file.php?id=5282)"
-# author="TenPlus1"
-add_git_mod mobs mobs_redo https://github.com/tenplus1/mobs_redo.git
-add_git_mod mobs_monster mobs_monster https://github.com/tenplus1/mobs_monster.git
-add_git_mod mobs_animal mobs_animal https://github.com/tenplus1/mobs_animal.git
-
-add_git_mod sounding_line sounding_line https://github.com/minetest-mods/sounding_line.git
-add_git_mod lightning lightning https://github.com/minetest-mods/lightning.git
-add_git_mod mywalls mywalls https://github.com/minetest-mods/mywalls.git
-add_git_mod mymasonhammer mymasonhammer https://github.com/minetest-mods/mymasonhammer.git
-add_git_mod ts_furniture ts_furniture https://github.com/minetest-mods/ts_furniture.git
-
-# forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=9376"
-# author="tenplus1"
-# description="not the original 2012 protector or 2012 fork of 2012 protector; must be logged in to download protector.zip release version at https://forum.minetest.net/download/file.php?id=5046"
-add_git_mod protector protector https://github.com/tenplus1/protector.git
 
 #sudo su -
 #WRITEABLE_MINETEST_CONF=$USR_SHARE_MINETEST/games/$MT_MYGAME_NAME/minetest.conf
@@ -441,15 +443,11 @@ echo "disallow_empty_passwords = true" >> "$WRITEABLE_MINETEST_CONF"
 echo "secure.trusted_mods = advanced_npc" >> "$WRITEABLE_MINETEST_CONF"
 echo "server_dedicated = false" >> "$WRITEABLE_MINETEST_CONF"
 echo "hudbars_bar_type = statbar_modern" >> "$WRITEABLE_MINETEST_CONF"  #TODO: remove this after fully deprecated
+echo "sprint_speed = 2.25" >> "$WRITEABLE_MINETEST_CONF"  # default is 1.3
+echo "sprint_jump = 1.25" >> "$WRITEABLE_MINETEST_CONF"  # default is 1.1
+echo "sprint_stamina_drain = 1" >> "$WRITEABLE_MINETEST_CONF"  # default is 2
+
 sudo mv -f $HOME/minetest.conf "$USR_SHARE_MINETEST/games/$MT_MYGAME_NAME/minetest.conf"
-
-#formerly https://github.com/kaeza/minetest-xban2/archive/master.tar.gz
-add_git_mod xban2 xban2 https://github.com/minetest-mods/xban2.git
-
-echo "Installing ShadowNinja's <https://forum.minetest.net/viewtopic.php?t=7239>"
-echo "Installing ShadowNinja's <https://forum.minetest.net/viewtopic.php?t=7239>" >> $MTMOD_SRC_ZIP.txt
-add_git_mod areas areas https://github.com/ShadowNinja/areas.git
-
 
 if [ -f "$MT_MYGAME_DIR/game.conf.1st" ]; then
   echo "Already backed up $MT_MYGAME_DIR/game.conf to $MT_MYGAME_DIR/game.conf.1st"
@@ -463,218 +461,52 @@ sudo mv -f "$HOME/game.conf" "$MT_MYGAME_DIR/game.conf"
 #sudo nano "$MT_MYGAME_DIR/game.conf"
 echo ""
 echo "You should see $MT_MYGAME_NAME in the list below if the game was configured properly:"
-minetestserver --gameid list
+if [ -f "`command -v minetestserver`" ]; then
+  minetestserver --gameid list
+elif [ -f "`command -v minetest`" ]; then
+  minetest --gameid list
+else
+  echo "WARNING: neither minetestserver nor minetest is in the system path"
+fi
 echo ""
 
-add_git_mod unified_inventory unified_inventory https://github.com/minetest-mods/unified_inventory.git
 
-add_git_mod technic technic https://github.com/minetest-mods/technic.git
-
-add_git_mod treasurer minetest_treasurer http://repo.or.cz/minetest_treasurer.git
-
-cd "$HOME/Downloads"
-MTMOD_DEST_NAME=trm_pyramids
-MTMOD_UNZ_NAME=trm_pyramids
-MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
-if [ ! -z "`ls | grep $MTMOD_UNZ_NAME`" ]; then  # works with wildcard in variable
-  rm -Rf "$MTMOD_UNZ_NAME"
-fi
-mkdir "$MTMOD_UNZ_NAME"
-cd "$MTMOD_UNZ_NAME"
-wget https://github.com/MinetestForFun/server-minetestforfun/raw/master/mods/trm_pyramids/depends.txt
-wget https://github.com/MinetestForFun/server-minetestforfun/raw/master/mods/trm_pyramids/init.lua
-wget https://github.com/MinetestForFun/server-minetestforfun/raw/master/mods/trm_pyramids/more_trms.lua
-wget https://github.com/MinetestForFun/server-minetestforfun/blob/master/LICENSE
-if [ -d "$MTMOD_DEST_PATH" ]; then
-  sudo rm -Rf "$MTMOD_DEST_PATH"
-fi
-sudo mkdir "$MTMOD_DEST_PATH"
-sudo mv -f depends.txt "$MTMOD_DEST_PATH/"
-sudo mv -f init.lua "$MTMOD_DEST_PATH/"
-sudo mv -f more_trms.lua "$MTMOD_DEST_PATH/"
-sudo mv -f LICENSE "$MTMOD_DEST_PATH/"
-cd ..
-rmdir "$MTMOD_UNZ_NAME"
-
-# forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=11153&hilit=hunger"
-# description="Wuzzy's hudbars (no builtin bars; used by sprint, hbhunger, and hbarmor)"
-# not git://repo.or.cz/minetest_hudbars.git
-add_git_mod hudbars minetest_hudbars http://repo.or.cz/minetest_hudbars.git
-
-# forum_url="https://forum.minetest.net/viewtopic.php?f=9&t=9650"
-#TODO? add_git_mod sprint sprint https://github.com/GunshipPenguin/sprint.git
-
-remove_mod sprint
-remove_mod hudbars
-#remove_mod hbsprint
-add_git_mod hbsprint hbsprint https://github.com/minetest-mods/hbsprint.git
-add_git_mod armor_monoid armor_monoid https://github.com/minetest-mods/armor_monoid.git
-
-
-# author="Wuzzy"
-# forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=11153&hilit=hunger"
-# not git://repo.or.cz/minetest_hbarmor.git
-add_git_mod hbarmor minetest_hbarmor http://repo.or.cz/minetest_hbarmor.git
-
-# author="Wuzzy
-# description="hbhunger for hudbars"
-# forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=11153&hilit=hunger"
-# not git://repo.or.cz/minetest_hbhunger.git
-#TODO? add_git_mod hbhunger minetest_hbhunger http://repo.or.cz/minetest_hbhunger.git
-
-add_git_mod moreblocks moreblocks https://github.com/minetest-mods/moreblocks.git
-add_git_mod pipeworks pipeworks https://github.com/minetest-mods/pipeworks.git
-add_git_mod plantlife_modpack plantlife_modpack https://github.com/minetest-mods/plantlife_modpack.git
-
-# forum_url="https://forum.minetest.net/viewtopic.php?f=9&t=12368"
-# description="Installing Napiophelios's lapis fork since has blocks, but minetest-mods has a version as well, with dye (not used): https://forum.minetest.net/viewtopic.php?f=9&t=11287"
-add_git_mod lapis LapisLazuli https://github.com/Napiophelios/LapisLazuli.git
-echo "patching lapis (Napiophelios's fork) to enable columns..."
-cd $HOME/Downloads
-if [ -f "init.lua" ]; then
-  sudo rm init.lua
-fi
-MTMOD_DEST_NAME=lapis
-MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
-head -3 "$MTMOD_DEST_PATH/init.lua" > init.lua
-if [ -f "$MTMOD_DEST_PATH/init.lua" ]; then
-  if [ ! -f "$MTMOD_DEST_PATH/columns_enabled" ]; then
-    # cat starting at line after head command above to not skip any
-    # lines, in case later version changes position of lines
-    echo 'dofile(minetest.get_modpath("lapis").."/columns.lua")' >> init.lua
-    tail -n +4 "$MTMOD_DEST_PATH/init.lua" >> init.lua
-    echo "true" > "columns_enabled"
-    sudo mv -f columns_enabled "$MTMOD_DEST_PATH/"
-    sudo mv -f init.lua "$MTMOD_DEST_PATH/"
-    echo "PATCHED $MTMOD_DEST_PATH/init.lua to enable columns"
-  else
-    echo "WARNING: not enabling columns since $MTMOD_DEST_PATH/columns_enabled file exists"
-  fi
-else
-  echo "FAILED to patch lapis since no $MTMOD_DEST_PATH/init.lua"
-  echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
-  sleep 1
-  echo " 3..."
-  sleep 1
-  echo " 2..."
-  sleep 1
-  echo " 1..."
-  sleep 1
-  exit 1
-fi
-
-echo "not installing helicopter--crashes 0.4.14-git, but was updated on 2017-06-08 and was not tested since then"
-# add_git_mod helicopter helicopter https://github.com/SokolovPavel/helicopter.git
-remove_mod helicopter
-add_git_mod biome_lib biome_lib https://github.com/minetest-mods/biome_lib.git
-add_git_mod moretrees moretrees https://github.com/minetest-mods/moretrees.git
-add_git_mod 3d_armor minetest-3d_armor https://github.com/stujones11/minetest-3d_armor.git
-#TODO 0.5 version??:
-# Git 1.7.10 need `--single-branch` option to prevent getting all branches (see https://stackoverflow.com/questions/1911109/how-to-clone-a-specific-git-branch)
-#git clone -b MT_0.5.0-dev --single-branch https://git@github.com/stujones11/minetest-3d_armor.git
-#see also 0.5 branch https://github.com/stujones11/minetest-3d_armor/tree/MT_0.5.0-dev
-#"stable" version is at https://github.com/stujones11/minetest-3d_armor/archive/version-0.4.11.zip
-#add_zip_mod 3d_armor minetest-3d_armor-MT_0.5.0-dev https://github.com/stujones11/minetest-3d_armor/archive/MT_0.5.0-dev.zip
-
-#mv minetest-3d_armor-master minetest-3d_armor_MODPACK
-#sudo mv minetest-3d_armor_MODPACK/wieldview $MT_MYGAME_MODS_PATH/wieldview
-#sudo mv minetest-3d_armor_MODPACK/3d_armor $MT_MYGAME_MODS_PATH/3d_armor
-#sudo mv minetest-3d_armor_MODPACK/shields $MT_MYGAME_MODS_PATH/shields
-# NOTE: load_mod is not a thing for subgames (all mods in subgame are loaded if subgame is loaded)
-#add_git_mod caverealms minetest-caverealms https://github.com/HeroOfTheWinds/minetest-caverealms
-# FaceDeer's caverealms REQUIRES subterrane:
-add_git_mod subterrane subterrane https://github.com/minetest-mods/subterrane.git
-echo "Installing FaceDeer's v7-biome-integrated fork of HeroOfTheWinds' caverealms"
-add_git_mod caverealms minetest-caverealms https://github.com/FaceDeer/minetest-caverealms.git
-#if [ -f "master.zip" ]; then
-  #rm master.zip
-#fi
-#wget https://github.com/Splizard/minetest-mod-snow/archive/master.zip
-#mv master.zip snow.zip
-#unzip snow.zip
-#mv minetest-mod-snow-master snow
-#sudo mv snow "$MT_MYGAME_MODS_PATH/snow"
-# (since snow prevents server 0.4.13 git 2016-02-16 from starting):
-#sudo mv $MT_MYGAME_MODS_PATH/snow $HOME/Downloads/snow
-
-# formerly https://github.com/Calinou/moreores.git
-add_git_mod moreores moreores https://github.com/minetest-mods/moreores.git
-
-#the following is NOT needed, since one of the mods above adds the home gui and home permission (but no /home or /sethome command)
-#if [ -f "master.zip" ]; then
-  #rm master.zip
-#fi
-#wget https://github.com/cornernote/minetest-home_gui/archive/master.zip
-#mv master.zip minetest-home_gui.zip
-#unzip minetest-home_gui.zip
-#sudo mv minetest-home_gui-master/home_gui "$MT_MYGAME_MODS_PATH/home_gui"
-
-#echo "snow:snow 255 255 255" >> $HOME/minetest/util/colors.txt
-#echo "snow:snow_block 255 255 255" >> $HOME/minetest/util/colors.txt
-#echo "snow:ice 144 217 234" >> $HOME/minetest/util/colors.txt
-
-#sh chunkymap/install-ubuntu.sh
-
-add_git_mod mesecons mesecons https://github.com/minetest-mods/mesecons
-############ REQUIRES MESECONS ############
-##### NEEDED since carts in minetest_game added much of this functionality but not yet startstoprail nor detectorrail #####
-#See also carts plus, a fork of carts (the PilzAdam one later added to minetest_game) https://github.com/Kilarin/minetest-mod-carts-plus which adds touring rails, a hand break, switching, and view locking
-#NOTE: boost_cart has handbrake (back key), Rail junction switching with the 'right-left' walking keys
-#So either install this mod or do (less functionality):
-#minetest.register_alias("boost_cart:detectorrail", "carts:rail")
-#minetest.register_alias("boost_cart:startstoprail", "carts:powerrail")
-#-- carts:brakerail
-#-- carts:cart
-#-- carts:powerrail
-#-- carts:rail
-# forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=10172&hilit=boost+cart"
-add_git_mod boost_cart boost_cart https://github.com/SmallJoker/boost_cart.git
-echo "Installing minetest-mods' (NOT MinetestForFun's PvP fork of Echoes91's, NOT Echoes91's Throwing enhanced NOT PilzAdam's NOT Jeija's) Throwing <https://forum.minetest.net/viewtopic.php?f=11&t=11437>"
-add_git_mod throwing throwing https://github.com/minetest-mods/throwing.git
-add_git_mod throwing_arrows throwing_arrows https://github.com/minetest-mods/throwing_arrows.git
-remove_mod tsm_mines
-remove_mod tsm_railcorridors
-
-#add_git_mod tsm_mines tsm_mines http://repo.or.cz/tsm_mines.git
-#add_git_mod tsm_railcorridors tsm_railcorridors http://repo.or.cz/RailCorridors/tsm_railcorridors.git
-
-echo "Installing Minetestforfun's (NOT wulfsdad's) fishing <https://forum.minetest.net/viewtopic.php?f=11&t=13659>"
-echo "Installing Minetestforfun's (NOT wulfsdad's) fishing <https://forum.minetest.net/viewtopic.php?f=11&t=13659>" >> fishing.txt
-add_git_mod fishing fishing https://github.com/MinetestForFun/fishing.git
-
-cd "$HOME/Downloads"
-echo "Installing AntumMT's modernized fork of Kilarin's compassgps (NOT TeTpaAka, nor Echo, nor PilzAdam compass) <https://forum.minetest.net/viewtopic.php?t=9373>"
-echo "Installing AntumMT's modernized fork of Kilarin's compassgps (NOT TeTpaAka, nor Echo, nor PilzAdam compass) <https://forum.minetest.net/viewtopic.php?t=9373>" >> compassgps.txt
-# https://github.com/Kilarin/compassgps.git
-#add_git_mod compassgps mod-compassgps https://github.com/AntumMT/mod-compassgps.git
-add_git_mod compassgps compassgps https://github.com/expertmm/compassgps.git
-
-# author="ShadowNinja"
-# forum_url="https://forum.minetest.net/viewtopic.php?id=8434"
-add_git_mod whitelist whitelist https://github.com/ShadowNinja/whitelist.git
-
-add_git_mod playereffects minetest_playereffects http://repo.or.cz/minetest_playereffects.git
-
-# Byakuren. <https://forum.minetest.net/viewtopic.php?f=9&t=13941>.
-# add_git_mod monoidal_effects monoidal_effects https://github.com/minetest-mods/monoidal_effects.git
-# monoidal_effects by Byakuren [raymoo on GitHub] is deprecated by player_monoids by Byakuren [raymoo on GitHub] +playereffects by Wuzzy
-# according to the author https://forum.minetest.net/viewtopic.php?t=13941
-add_git_mod player_monoids player_monoids https://github.com/minetest-mods/player_monoids.git
-
+#region UTILITY MODS
+# https://forum.minetest.net/viewtopic.php?f=11&t=12440&p=310915#p310915
+# wget https://forum.minetest.net/download/file.php?id=6140
+# file.php?id=6140 forum dl changed, so use salahzar's GitHub upload instead:
+add_git_mod invhack minetest-invhack https://github.com/salahzar/minetest-invhack.git
 # add_zip_mod worldedit Uberi-Minetest-WorldEdit-* https://github.com/Uberi/MineTest-WorldEdit/zipball/master
 # add_zip_mod worldedit Minetest-WorldEdit-* https://github.com/Uberi/MineTest-WorldEdit/zipball/master
 echo "Installing Uberi's worldedit..."
 add_git_mod worldedit Minetest-WorldEdit https://github.com/Uberi/Minetest-WorldEdit.git
-
-#MarkBu's ambience/ambiance ambient sounds (burli on https://forum.minetest.net/viewtopic.php?f=9&t=14814 )
-#add_git_mod ambianceplus ambianceplus https://github.com/MarkuBu/ambianceplus.git
-
-# tenplus1's ambience/ambiance ambient sounds (fork linked at original's thread at https://forum.minetest.net/viewtopic.php?f=11&t=2807&start=275 )
-add_git_mod ambience ambience https://github.com/tenplus1/ambience.git
-# expertmm fork of LeMagnesium's minetest-mod-metatools
+# metatools: expertmm fork of LeMagnesium's minetest-mod-metatools
 add_git_mod metatools minetest-mod-metatools https://github.com/expertmm/minetest-mod-metatools.git
-#[mod-pack] sky critters (for mobs_redo) [mobs_sky] <https://forum.minetest.net/viewtopic.php?f=9&t=12688>
-#requires mobs redo
+# forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=9376"
+# author="tenplus1"
+# description="not the original 2012 protector or 2012 fork of 2012 protector; must be logged in to download protector.zip release version at https://forum.minetest.net/download/file.php?id=5046"
+add_git_mod protector protector https://github.com/tenplus1/protector.git
+#formerly https://github.com/kaeza/minetest-xban2/archive/master.tar.gz
+add_git_mod xban2 xban2 https://github.com/minetest-mods/xban2.git
+echo "Installing ShadowNinja's <https://forum.minetest.net/viewtopic.php?t=7239>"
+echo "Installing ShadowNinja's <https://forum.minetest.net/viewtopic.php?t=7239>" >> $MTMOD_SRC_ZIP.txt
+add_git_mod areas areas https://github.com/ShadowNinja/areas.git
+# author="ShadowNinja"
+# forum_url="https://forum.minetest.net/viewtopic.php?id=8434"
+add_git_mod whitelist whitelist https://github.com/ShadowNinja/whitelist.git
+add_git_mod vote vote https://github.com/minetest-mods/vote.git
+#endregion UTILITY MODS
+
+#region MOB AND WORLDGEN MODS
+#wget https://github.com/BlockMen/cme/releases/download/v2.3/cme-2_3-BlockMen.zip
+#unzip cme-2_3-BlockMen.zip
+#sudo mv cme "$MT_MYGAME_MODS_PATH/cme"
+# description="(must be logged in to forum to download release version at https://forum.minetest.net/download/file.php?id=5282)"
+# author="TenPlus1"
+add_git_mod mobs mobs_redo https://github.com/tenplus1/mobs_redo.git
+add_git_mod mobs_monster mobs_monster https://github.com/tenplus1/mobs_monster.git
+add_git_mod mobs_animal mobs_animal https://github.com/tenplus1/mobs_animal.git
+# mobs_sky: (requires mobs redo) [mod-pack] sky critters (for mobs_redo) [mobs_sky] <https://forum.minetest.net/viewtopic.php?f=9&t=12688>
 add_git_mod mobs_sky mobs_sky https://github.com/blert2112/mobs_sky.git
 
 spawners_enable="false"
@@ -727,6 +559,7 @@ if [ "$spawners_enable" = "true" ]; then
     #CHESTS_GENERATE = false
     MTMOD_DEST_NAME=spawners/spawners_env
     MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+    cd /tmp
     echo "SPAWN_PYRAMIDS = true" > settings.txt
     echo "SPAWNERS_GENERATE = true" >> settings.txt
     echo "CHESTS_GENERATE = false" >> settings.txt
@@ -752,6 +585,7 @@ if [ "$spawners_enable" = "true" ]; then
 else
   remove_mod tsm_chests_dungeon
   remove_mod spawners
+  # tsm_pyramids: NOTE: results in "tsm_pyramids:mummy" not defined
   add_git_mod tsm_pyramids tsm_pyramids http://repo.or.cz/minetest_pyramids/tsm_pyramids.git
   add_git_mod loot loot https://github.com/minetest-mods/loot.git
   # TEST LOOT: use seed "BigIdea" (without mg mod installed) then:
@@ -782,18 +616,185 @@ else
   #   * 1252,6.5,-847
 fi
 
-# forum_url: https://forum.minetest.net/viewtopic.php?t=12189
-# description: Adds animations to the players' head
-add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git
-add_git_mod homedecor_modpack homedecor_modpack https://github.com/minetest-mods/homedecor_modpack.git
-# expertmm fork of a rather non-maintained mod--forum link is at https://forum.minetest.net/viewtopic.php?id=3663
-# (original mod was at https://github.com/Doc22/birthstones-mod/archive/master.zip)
+add_git_mod treasurer minetest_treasurer http://repo.or.cz/minetest_treasurer.git
+
+cd "$HOME/Downloads"
+MTMOD_DEST_NAME=trm_pyramids
+MTMOD_UNZ_NAME=trm_pyramids
+MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+if [ ! -z "`ls | grep $MTMOD_UNZ_NAME`" ]; then  # works with wildcard in variable
+  rm -Rf "$MTMOD_UNZ_NAME"
+fi
+mkdir "$MTMOD_UNZ_NAME"
+cd "$MTMOD_UNZ_NAME"
+wget https://github.com/MinetestForFun/server-minetestforfun/raw/master/mods/trm_pyramids/depends.txt
+wget https://github.com/MinetestForFun/server-minetestforfun/raw/master/mods/trm_pyramids/init.lua
+wget https://github.com/MinetestForFun/server-minetestforfun/raw/master/mods/trm_pyramids/more_trms.lua
+wget https://github.com/MinetestForFun/server-minetestforfun/blob/master/LICENSE
+if [ -d "$MTMOD_DEST_PATH" ]; then
+  sudo rm -Rf "$MTMOD_DEST_PATH"
+fi
+sudo mkdir "$MTMOD_DEST_PATH"
+sudo mv -f depends.txt "$MTMOD_DEST_PATH/"
+sudo mv -f init.lua "$MTMOD_DEST_PATH/"
+sudo mv -f more_trms.lua "$MTMOD_DEST_PATH/"
+sudo mv -f LICENSE "$MTMOD_DEST_PATH/"
+cd ..
+rmdir "$MTMOD_UNZ_NAME"
+if [ ! -z "`ls "$MTMOD_DEST_PATH"`" ]; then
+  echo "  [ + ] added as $MTMOD_DEST_PATH"
+else
+  echo "  [ ! ] failed to install files to $MTMOD_DEST_PATH"
+  sleep 4
+fi
+
+add_git_mod moreblocks moreblocks https://github.com/minetest-mods/moreblocks.git
+# plantlife_modpack: includes bushes:* with fruit and fruit recipes
+add_git_mod plantlife_modpack plantlife_modpack https://github.com/minetest-mods/plantlife_modpack.git
+
+# forum_url="https://forum.minetest.net/viewtopic.php?f=9&t=12368"
+# description="Installing Napiophelios's lapis fork since has blocks, but minetest-mods has a version as well, with dye (not used): https://forum.minetest.net/viewtopic.php?f=9&t=11287"
+add_git_mod lapis LapisLazuli https://github.com/Napiophelios/LapisLazuli.git
+echo "patching lapis (Napiophelios's fork) to enable columns..."
+cd $HOME/Downloads
+if [ -f "init.lua" ]; then
+  sudo rm init.lua
+fi
+MTMOD_DEST_NAME=lapis
+MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+head -3 "$MTMOD_DEST_PATH/init.lua" > init.lua
+if [ -f "$MTMOD_DEST_PATH/init.lua" ]; then
+  if [ ! -f "$MTMOD_DEST_PATH/columns_enabled" ]; then
+    # cat starting at line after head command above to not skip any
+    # lines, in case later version changes position of lines
+    echo 'dofile(minetest.get_modpath("lapis").."/columns.lua")' >> init.lua
+    tail -n +4 "$MTMOD_DEST_PATH/init.lua" >> init.lua
+    echo "true" > "columns_enabled"
+    sudo mv -f columns_enabled "$MTMOD_DEST_PATH/"
+    sudo mv -f init.lua "$MTMOD_DEST_PATH/"
+    echo "PATCHED $MTMOD_DEST_PATH/init.lua to enable columns"
+  else
+    echo "WARNING: not enabling columns since $MTMOD_DEST_PATH/columns_enabled file exists"
+  fi
+else
+  echo "FAILED to patch lapis since no $MTMOD_DEST_PATH/init.lua"
+  echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
+  sleep 1
+  echo " 3..."
+  sleep 1
+  echo " 2..."
+  sleep 1
+  echo " 1..."
+  sleep 1
+  exit 1
+fi
+
+echo "not installing helicopter--crashes 0.4.14-git, but was updated on 2017-06-08 and was not tested since then"
+# add_git_mod helicopter helicopter https://github.com/SokolovPavel/helicopter.git
+add_git_mod biome_lib biome_lib https://github.com/minetest-mods/biome_lib.git
+add_git_mod moretrees moretrees https://github.com/minetest-mods/moretrees.git
+
+# in order of dependency (also, clicking armor in unified inventory crashes the game without technic installed since checks radation):
+add_git_mod mesecons mesecons https://github.com/minetest-mods/mesecons
+add_git_mod pipeworks pipeworks https://github.com/minetest-mods/pipeworks.git
+add_git_mod technic technic https://github.com/minetest-mods/technic.git
+
+# NOTE: load_mod is not a thing for subgames (all mods in subgame are loaded if subgame is loaded)
+#add_git_mod caverealms minetest-caverealms https://github.com/HeroOfTheWinds/minetest-caverealms
+# FaceDeer's caverealms REQUIRES subterrane:
+add_git_mod subterrane subterrane https://github.com/minetest-mods/subterrane.git
+echo "Installing FaceDeer's v7-biome-integrated fork of HeroOfTheWinds' caverealms"
+add_git_mod caverealms minetest-caverealms https://github.com/FaceDeer/minetest-caverealms.git
+#if [ -f "master.zip" ]; then
+  #rm master.zip
+#fi
+#wget https://github.com/Splizard/minetest-mod-snow/archive/master.zip
+#mv master.zip snow.zip
+#unzip snow.zip
+#mv minetest-mod-snow-master snow
+#sudo mv snow "$MT_MYGAME_MODS_PATH/snow"
+# (since snow prevents server 0.4.13 git 2016-02-16 from starting):
+#sudo mv $MT_MYGAME_MODS_PATH/snow $HOME/Downloads/snow
+
+# formerly https://github.com/Calinou/moreores.git
+add_git_mod moreores moreores https://github.com/minetest-mods/moreores.git
+#the following is NOT needed, since one of the mods above adds the home gui and home permission (but no /home or /sethome command)
+#if [ -f "master.zip" ]; then
+  #rm master.zip
+#fi
+#wget https://github.com/cornernote/minetest-home_gui/archive/master.zip
+#mv master.zip minetest-home_gui.zip
+#unzip minetest-home_gui.zip
+#sudo mv minetest-home_gui-master/home_gui "$MT_MYGAME_MODS_PATH/home_gui"
+#echo "snow:snow 255 255 255" >> $HOME/minetest/util/colors.txt
+#echo "snow:snow_block 255 255 255" >> $HOME/minetest/util/colors.txt
+#echo "snow:ice 144 217 234" >> $HOME/minetest/util/colors.txt
+#sh chunkymap/install-ubuntu.sh
+remove_mod tsm_mines
+remove_mod tsm_railcorridors
+#add_git_mod tsm_mines tsm_mines http://repo.or.cz/tsm_mines.git
+#add_git_mod tsm_railcorridors tsm_railcorridors http://repo.or.cz/RailCorridors/tsm_railcorridors.git
+
+
+############ BOOST CARTS REQUIRES MESECONS ############
+##### NEEDED since carts in minetest_game added much of this functionality but not yet startstoprail nor detectorrail #####
+#See also carts plus, a fork of carts (the PilzAdam one later added to minetest_game) https://github.com/Kilarin/minetest-mod-carts-plus which adds touring rails, a hand break, switching, and view locking
+#NOTE: boost_cart has handbrake (back key), Rail junction switching with the 'right-left' walking keys
+#So either install this mod or do (less functionality):
+#minetest.register_alias("boost_cart:detectorrail", "carts:rail")
+#minetest.register_alias("boost_cart:startstoprail", "carts:powerrail")
+#-- carts:brakerail
+#-- carts:cart
+#-- carts:powerrail
+#-- carts:rail
+# forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=10172&hilit=boost+cart"
+# birthstones: expertmm fork of a rather non-maintained mod--forum link is at https://forum.minetest.net/viewtopic.php?id=3663 (original mod was at https://github.com/Doc22/birthstones-mod.git)
 add_git_mod birthstones minetest-birthstones https://github.com/expertmm/minetest-birthstones.git
 add_git_mod bakedclay bakedclay https://github.com/tenplus1/bakedclay.git
-# https://forum.minetest.net/viewtopic.php?f=11&t=12440&p=310915#p310915
-# wget https://forum.minetest.net/download/file.php?id=6140
-# forum link file.php?id=6140 changed, so use salahzar's GitHub upload instead:
-add_git_mod invhack minetest-invhack https://github.com/salahzar/minetest-invhack.git
+add_git_mod magma_conduits magma_conduits https://github.com/FaceDeer/magma_conduits.git
+# dynamic_liquid: makes suspended source blocks move down until supported--therefore improves the underground especially when using mods like magma_conduits
+add_git_mod dynamic_liquid dynamic_liquid https://github.com/minetest-mods/dynamic_liquid.git
+#endregion MOB AND WORLDGEN MODS
+
+
+
+#region NON-WORLDGEN NODE/ITEM MODS
+add_git_mod boost_cart boost_cart https://github.com/SmallJoker/boost_cart.git
+echo "Installing minetest-mods' (NOT MinetestForFun's PvP fork of Echoes91's, NOT Echoes91's Throwing enhanced NOT PilzAdam's NOT Jeija's) Throwing <https://forum.minetest.net/viewtopic.php?f=11&t=11437>"
+add_git_mod throwing throwing https://github.com/minetest-mods/throwing.git
+add_git_mod throwing_arrows throwing_arrows https://github.com/minetest-mods/throwing_arrows.git
+echo "Installing Minetestforfun's (NOT wulfsdad's) fishing <https://forum.minetest.net/viewtopic.php?f=11&t=13659>"
+echo "Installing Minetestforfun's (NOT wulfsdad's) fishing <https://forum.minetest.net/viewtopic.php?f=11&t=13659>" >> fishing.txt
+add_git_mod fishing fishing https://github.com/MinetestForFun/fishing.git
+cd "$HOME/Downloads"
+echo "Installing AntumMT's modernized fork of Kilarin's compassgps (NOT TeTpaAka, nor Echo, nor PilzAdam compass) <https://forum.minetest.net/viewtopic.php?t=9373>"
+echo "Installing AntumMT's modernized fork of Kilarin's compassgps (NOT TeTpaAka, nor Echo, nor PilzAdam compass) <https://forum.minetest.net/viewtopic.php?t=9373>" >> compassgps.txt
+# https://github.com/Kilarin/compassgps.git
+#add_git_mod compassgps mod-compassgps https://github.com/AntumMT/mod-compassgps.git
+add_git_mod compassgps compassgps https://github.com/expertmm/compassgps.git
+
+remove_mod helicopter
+add_git_mod sounding_line sounding_line https://github.com/minetest-mods/sounding_line.git
+add_git_mod mywalls mywalls https://github.com/minetest-mods/mywalls.git
+add_git_mod mymasonhammer mymasonhammer https://github.com/minetest-mods/mymasonhammer.git
+add_git_mod ts_furniture ts_furniture https://github.com/minetest-mods/ts_furniture.git
+# Git 1.7.10 need `--single-branch` option to prevent getting all branches (see https://stackoverflow.com/questions/1911109/how-to-clone-a-specific-git-branch)
+#git clone -b MT_0.5.0-dev --single-branch https://git@github.com/stujones11/minetest-3d_armor.git
+#see also 0.5 branch https://github.com/stujones11/minetest-3d_armor/tree/MT_0.5.0-dev
+#"stable" version is at https://github.com/stujones11/minetest-3d_armor/archive/version-0.4.11.zip
+#add_zip_mod 3d_armor minetest-3d_armor-MT_0.5.0-dev https://github.com/stujones11/minetest-3d_armor/archive/MT_0.5.0-dev.zip
+# git clone -b MT_0.5.0-dev --single-branch https://git@github.com/stujones11/minetest-3d_armor.git
+if [ "version_0_5_enable" = "true" ]; then
+  add_git_mod 3d_armor minetest-3d_armor https://github.com/stujones11/minetest-3d_armor.git "MT_0.5.0-dev"
+else
+  add_git_mod 3d_armor minetest-3d_armor https://github.com/stujones11/minetest-3d_armor.git
+fi
+#mv minetest-3d_armor-master minetest-3d_armor_MODPACK
+#sudo mv minetest-3d_armor_MODPACK/wieldview $MT_MYGAME_MODS_PATH/wieldview
+#sudo mv minetest-3d_armor_MODPACK/3d_armor $MT_MYGAME_MODS_PATH/3d_armor
+#sudo mv minetest-3d_armor_MODPACK/shields $MT_MYGAME_MODS_PATH/shields
+
+add_git_mod homedecor_modpack homedecor_modpack https://github.com/minetest-mods/homedecor_modpack.git
 add_git_mod unifieddyes unifieddyes https://github.com/minetest-mods/unifieddyes.git
 #Sokomine's original version has no security ( https://forum.minetest.net/viewtopic.php?id=4877 )
 #  https://github.com/Sokomine/travelnet/archive/master.zip
@@ -804,43 +805,6 @@ add_git_mod sling sling https://github.com/minetest-mods/sling.git
 #forum post: https://forum.minetest.net/viewtopic.php?t=13762
 # kaeza's signs_lib (forked from PilzAdam's and TheXYZ's code) was moved here from: https://github.com/kaeza/minetest-signs_lib-extrafonts/archive/master.zip
 add_git_mod signs_lib signs_lib https://github.com/minetest-mods/signs_lib.git
-# EXTRA FONTS PACK for signs_lib DOESN'T SEEM TO WORK IN MULTIPLAYER, and is unwieldy to use:
-#cd $HOME/Downloads
-#MTMOD_DL_ZIP=master.zip
-#MTMOD_SRC_ZIP=minetest-signs_lib-extrafonts.zip
-#MTMOD_UNZ_NAME=minetest-signs_lib-extrafonts-master
-#MTMOD_DEST_NAME=signs_lib/textures
-#MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
-#if [ ! -z "`ls | grep $MTMOD_UNZ_NAME`" ]; then  # works with wildcard in variable
-#  rm -Rf $MTMOD_UNZ_NAME
-#fi
-#if [ -f $MTMOD_DL_ZIP ]; then
-#  rm -f $MTMOD_DL_ZIP
-#fi
-#if [ -f $MTMOD_SRC_ZIP ]; then
-#  rm -f $MTMOD_SRC_ZIP
-#fi
-#if [ -d "$MTMOD_DEST_PATH" ]; then
-#  sudo rm -Rf "$MTMOD_DEST_PATH"
-#fi
-#wget https://github.com/kaeza/minetest-signs_lib-extrafonts/archive/master.zip
-#mv $MTMOD_DL_ZIP "$MTMOD_SRC_ZIP"
-#unzip "$MTMOD_SRC_ZIP"
-##sudo cp -f $MTMOD_UNZ_NAME/15px/* "$MTMOD_DEST_PATH/"
-#sudo cp -f $MTMOD_UNZ_NAME/31px/* "$MTMOD_DEST_PATH/"
-#if [ ! -d "$MTMOD_DEST_PATH" ]; then
-#  echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
-#  cat $err_txt
-#  echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
-#  sleep 1
-#  echo " 3..."
-#  sleep 1
-#  echo " 2..."
-#  sleep 1
-#  echo " 1..."
-#  sleep 1
-#  exit 1
-#fi
 
 farming_redo_enable="false"
 if [ -f "$MT_MYWORLD_DIR/farming_redo_enable" ]; then
@@ -869,19 +833,15 @@ else
   fi
   add_git_mod crops crops https://github.com/minetest-mods/crops
 fi
-
-add_git_mod vote vote https://github.com/minetest-mods/vote.git
-#add_git_mod stamina stamina https://github.com/minetest-mods/stamina
-remove_mod stamina
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=10423"
 # Wuzzy's slimenodes mod (only available via /give command).
 # web view: http://repo.or.cz/w/minetest_slimenodes.git
 # add_git_mod slimenodes minetest_slimenodes http://repo.or.cz/minetest_slimenodes.git
 # use expertmm fork instead:
 add_git_mod slimenodes slimenodes https://github.com/expertmm/slimenodes.git
-add_git_mod magma_conduits magma_conduits https://github.com/FaceDeer/magma_conduits.git
-# dynamic_liquid: makes suspended source blocks move down until supported--therefore improves the underground especially when using mods like magma_conduits
-add_git_mod dynamic_liquid dynamic_liquid https://github.com/minetest-mods/dynamic_liquid.git
+# ropes: adds rope spools that are mounted to the side or bottom of a node and can be cut with any choppy tool while someone lower is climbing; doesn't lower into protected areas; also has rope ladders
+add_git_mod ropes ropes https://github.com/minetest-mods/ropes.git
+add_git_mod digilines digilines https://github.com/minetest-mods/digilines.git
 # treasurer forum post here: https://forum.minetest.net/viewtopic.php?t=7292
 # (this trmp is linked from there)
 #(a trmp is just a modpack of TRMs for treasurer. At least one trm must be installed for treasurer to to anything)
@@ -891,10 +851,52 @@ add_git_mod dynamic_liquid dynamic_liquid https://github.com/minetest-mods/dynam
 #add_git_mod trmp_minetest_game trmp_minetest_game https://github.com/ClockGen/trmp_minetest_game.git
 #fixed version with correct dye list for 0.4.16 (submitted pull request to ClockGen 2018-02-08):
 add_git_mod trmp_minetest_game trmp_minetest_game https://github.com/expertmm/trmp_minetest_game.git
-# ropes: adds rope spools that are mounted to the side or bottom of a node and can be cut with any choppy tool while someone lower is climbing; doesn't lower into protected areas; also has rope ladders
-add_git_mod ropes ropes https://github.com/minetest-mods/ropes.git
-add_git_mod digilines digilines https://github.com/minetest-mods/digilines.git
+#endregion NON-WORLDGEN NODE/ITEM MODS
 
+#region PLAYER UX MODS
+add_git_mod lightning lightning https://github.com/minetest-mods/lightning.git
+add_git_mod unified_inventory unified_inventory https://github.com/minetest-mods/unified_inventory.git
+
+# Byakuren. <https://forum.minetest.net/viewtopic.php?f=9&t=13941>.
+# add_git_mod monoidal_effects monoidal_effects https://github.com/minetest-mods/monoidal_effects.git
+# monoidal_effects by Byakuren [raymoo on GitHub] is deprecated by player_monoids by Byakuren [raymoo on GitHub] +playereffects by Wuzzy
+# according to the author https://forum.minetest.net/viewtopic.php?t=13941
+add_git_mod player_monoids player_monoids https://github.com/minetest-mods/player_monoids.git
+
+# forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=11153&hilit=hunger"
+# description="Wuzzy's hudbars (no builtin bars; used by sprint, hbhunger, and hbarmor)"
+# not git://repo.or.cz/minetest_hudbars.git
+add_git_mod hudbars minetest_hudbars http://repo.or.cz/minetest_hudbars.git
+
+# forum_url="https://forum.minetest.net/viewtopic.php?f=9&t=9650"
+#TODO? add_git_mod sprint sprint https://github.com/GunshipPenguin/sprint.git
+
+remove_mod sprint
+#remove_mod hudbars
+#remove_mod hbsprint
+# NOTE: hbsprint bar is on auto-hide by default
+add_git_mod hbsprint hbsprint https://github.com/minetest-mods/hbsprint.git
+add_git_mod armor_monoid armor_monoid https://github.com/minetest-mods/armor_monoid.git
+
+# author="Wuzzy"
+# forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=11153&hilit=hunger"
+# not git://repo.or.cz/minetest_hbarmor.git
+add_git_mod hbarmor minetest_hbarmor http://repo.or.cz/minetest_hbarmor.git
+# author="Wuzzy
+# description="hbhunger for hudbars"
+# forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=11153&hilit=hunger"
+# not git://repo.or.cz/minetest_hbhunger.git
+add_git_mod hbhunger minetest_hbhunger http://repo.or.cz/minetest_hbhunger.git
+add_git_mod playereffects minetest_playereffects http://repo.or.cz/minetest_playereffects.git
+#MarkBu's ambience/ambiance ambient sounds (burli on https://forum.minetest.net/viewtopic.php?f=9&t=14814 )
+#add_git_mod ambianceplus ambianceplus https://github.com/MarkuBu/ambianceplus.git
+# tenplus1's ambience/ambiance ambient sounds (fork linked at original's thread at https://forum.minetest.net/viewtopic.php?f=11&t=2807&start=275 )
+add_git_mod ambience ambience https://github.com/tenplus1/ambience.git
+# forum_url: https://forum.minetest.net/viewtopic.php?t=12189
+# description: Adds animations to the players' head
+add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git
+#add_git_mod stamina stamina https://github.com/minetest-mods/stamina
+remove_mod stamina
 # NOTE: a skin database is at http://minetest.fensta.bplaced.net/
 # bell07's 2016 (FORK of Krock's fork of dmonty's) u_skins (u_skins is a skin GUI that works with unified_inventory, whereas other skin GUIs often use inventory++)
 # Krock's is outdated and has remaining bugs such as in updater: wget https://github.com/SmallJoker/minetest-u_skinsdb/archive/master.zip
@@ -923,6 +925,9 @@ fi
 # ./update_skins_db.sh
 # (note, bell07 has the fixed bash script, but the python3 script is still bugged as of 2016-01-29, and includes a .NET assembly that seems to only work for Windows (has meta directory not found error on mono for Linux)
 # PATCH FURTHER DOWN WILL REMOVE EXISTING SKINS AND ONLY ADD EnlivenMinetest skins from patches folder
+#endregion PLAYER UX MODS
+
+
 
 echo
 echo
@@ -1044,8 +1049,14 @@ else
   echo "did not find $PATCHES_PATH, so skipped automatic patching which is partially implemented"
 fi
 echo
-echo "# remove not available on 0.4.16 stable (is only avail on 0.4.16-dev or higher)"
-sudo rm -Rf $MT_MYGAME_MODS_PATH/worldedit/worldedit_brush
+if [ "$version_0_5_enable" != "true" ]; then
+  echo "# remove not available on 0.4.16 stable (is only avail on 0.4.16-dev or higher)"
+  sudo rm -Rf $MT_MYGAME_MODS_PATH/worldedit/worldedit_brush
+else
+  if [ -d "$MT_MYGAME_MODS_PATH/worldedit/worldedit_brush" ]; then
+    echo "worldedit_brush (minetest 0.5+ only) is enabled."
+  fi
+fi
 echo
 echo
 echo
@@ -1088,4 +1099,9 @@ echo "disallow_empty_passwords = true"
 echo ""
 echo "#not all settings can be changed in this minetest.conf (see minetest.conf.example in THIS folder)"
 echo "#some settings can only be changed in client's local copy of minetest.conf (see or login scripts in network)"
-
+if [ "$version_0_5_enable" = "true" ]; then
+  echo "The 0.5 version of mods was installed."
+else
+  echo "The non-0.5 version of mods was installed (if you have installed a development version of minetest to /usr/share such as via an AUR package, you must instead run:"
+  echo "./game-install-ENLIVEN version_0_5_enable"
+fi

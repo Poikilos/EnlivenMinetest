@@ -205,3 +205,41 @@ if [ ! -d "$MTMOD_DEST_PATH" ]; then
   sleep 1
   exit 1
 fi
+
+# EXTRA FONTS PACK for signs_lib DOESN'T SEEM TO WORK IN MULTIPLAYER, and is unwieldy to use:
+#cd $HOME/Downloads
+#MTMOD_DL_ZIP=master.zip
+#MTMOD_SRC_ZIP=minetest-signs_lib-extrafonts.zip
+#MTMOD_UNZ_NAME=minetest-signs_lib-extrafonts-master
+#MTMOD_DEST_NAME=signs_lib/textures
+#MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+#if [ ! -z "`ls | grep $MTMOD_UNZ_NAME`" ]; then  # works with wildcard in variable
+#  rm -Rf $MTMOD_UNZ_NAME
+#fi
+#if [ -f $MTMOD_DL_ZIP ]; then
+#  rm -f $MTMOD_DL_ZIP
+#fi
+#if [ -f $MTMOD_SRC_ZIP ]; then
+#  rm -f $MTMOD_SRC_ZIP
+#fi
+#if [ -d "$MTMOD_DEST_PATH" ]; then
+#  sudo rm -Rf "$MTMOD_DEST_PATH"
+#fi
+#wget https://github.com/kaeza/minetest-signs_lib-extrafonts/archive/master.zip
+#mv $MTMOD_DL_ZIP "$MTMOD_SRC_ZIP"
+#unzip "$MTMOD_SRC_ZIP"
+##sudo cp -f $MTMOD_UNZ_NAME/15px/* "$MTMOD_DEST_PATH/"
+#sudo cp -f $MTMOD_UNZ_NAME/31px/* "$MTMOD_DEST_PATH/"
+#if [ ! -d "$MTMOD_DEST_PATH" ]; then
+#  echo "ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+#  cat $err_txt
+#  echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
+#  sleep 1
+#  echo " 3..."
+#  sleep 1
+#  echo " 2..."
+#  sleep 1
+#  echo " 1..."
+#  sleep 1
+#  exit 1
+#fi
