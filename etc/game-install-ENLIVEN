@@ -204,9 +204,9 @@ add_zip_mod()
     echo "  added as $MTMOD_DEST_PATH"
   fi
   cd
-  if [ -d GitHub/EnlivenMinetest ]; then
-    cd GitHub/EnlivenMinetest
-  fi
+  #if [ -d GitHub/EnlivenMinetest ]; then
+  #  cd GitHub/EnlivenMinetest
+  #fi
 }
 
 add_git_mod()
@@ -264,9 +264,9 @@ if [ ! -d "$MTMOD_DEST_PATH" ] || [ "$update_enable" = "true" ]; then
     echo "  [ + ] added as $MTMOD_DEST_PATH"
   fi
   cd
-  if [ -d GitHub/EnlivenMinetest ]; then
-    cd GitHub/EnlivenMinetest
-  fi
+  #if [ -d GitHub/EnlivenMinetest ]; then
+  #  cd GitHub/EnlivenMinetest
+  #fi
 else
   echo " [ ~ ] skipped existing $MTMOD_DEST_PATH"
 fi
@@ -298,9 +298,9 @@ remove_mod()
     echo "  [ - ] already not present: $MTMOD_DEST_PATH"
   fi
   cd
-  if [ -d GitHub/EnlivenMinetest ]; then
-    cd GitHub/EnlivenMinetest
-  fi
+  #if [ -d GitHub/EnlivenMinetest ]; then
+  #  cd GitHub/EnlivenMinetest
+  #fi
 }
 
 #endregion paste this part into terminal to get some great environment variables
@@ -440,6 +440,10 @@ echo "protector_pvp = true" >> "$WRITEABLE_MINETEST_CONF"
 echo "protector_pvp_spawn = 10" >> "$WRITEABLE_MINETEST_CONF"
 echo "protector_drop = false" >> "$WRITEABLE_MINETEST_CONF"
 echo "protector_hurt = 3" >> "$WRITEABLE_MINETEST_CONF"
+echo "#optional:" >> "$WRITEABLE_MINETEST_CONF"
+echo "map_generation_limit = 5000" >> "$WRITEABLE_MINETEST_CONF"
+echo "#only for worldedge mod:" >> "$WRITEABLE_MINETEST_CONF"
+echo "world_edge = 5000" >> "$WRITEABLE_MINETEST_CONF"
 echo "default_privs = interact,shout,home" >> "$WRITEABLE_MINETEST_CONF"
 echo "max_users = 50" >> "$WRITEABLE_MINETEST_CONF"
 echo "motd = \"Actions and chat messages are logged. Use inventory to see recipes (use web for live map if available).\""  >> "$WRITEABLE_MINETEST_CONF"
@@ -449,7 +453,7 @@ echo "server_dedicated = false" >> "$WRITEABLE_MINETEST_CONF"
 echo "hudbars_bar_type = statbar_modern" >> "$WRITEABLE_MINETEST_CONF"  #TODO: remove this after fully deprecated
 echo "sprint_speed = 2.25" >> "$WRITEABLE_MINETEST_CONF"  # default is 1.3
 echo "sprint_jump = 1.25" >> "$WRITEABLE_MINETEST_CONF"  # default is 1.1
-echo "sprint_stamina_drain = 1" >> "$WRITEABLE_MINETEST_CONF"  # default is 2
+echo "sprint_stamina_drain = .5" >> "$WRITEABLE_MINETEST_CONF"  # default is 2
 sudo mv -f $HOME/minetest.conf "$USR_SHARE_MINETEST/games/$MT_MYGAME_NAME/minetest.conf"
 
 if [ -f "$MT_MYGAME_DIR/game.conf.1st" ]; then
@@ -503,6 +507,7 @@ add_git_mod vote vote https://github.com/minetest-mods/vote.git
 #endregion UTILITY MODS
 
 #region MOB AND WORLDGEN MODS
+add_git_mod worldedge worldedge https://github.com/minetest-mods/worldedge.git
 #wget https://github.com/BlockMen/cme/releases/download/v2.3/cme-2_3-BlockMen.zip
 #unzip cme-2_3-BlockMen.zip
 #sudo mv cme "$MT_MYGAME_MODS_PATH/cme"
@@ -735,10 +740,10 @@ add_git_mod moreores moreores https://github.com/minetest-mods/moreores.git
 #echo "snow:snow_block 255 255 255" >> $HOME/minetest/util/colors.txt
 #echo "snow:ice 144 217 234" >> $HOME/minetest/util/colors.txt
 #sh chunkymap/install-ubuntu.sh
-remove_mod tsm_mines
-remove_mod tsm_railcorridors
-#add_git_mod tsm_mines tsm_mines http://repo.or.cz/tsm_mines.git
-#add_git_mod tsm_railcorridors tsm_railcorridors http://repo.or.cz/RailCorridors/tsm_railcorridors.git
+#remove_mod tsm_mines
+#remove_mod tsm_railcorridors
+add_git_mod tsm_mines tsm_mines http://repo.or.cz/tsm_mines.git
+add_git_mod tsm_railcorridors tsm_railcorridors http://repo.or.cz/RailCorridors/tsm_railcorridors.git
 
 
 ############ BOOST CARTS REQUIRES MESECONS ############
@@ -756,6 +761,7 @@ remove_mod tsm_railcorridors
 # birthstones: expertmm fork of a rather non-maintained mod--forum link is at https://forum.minetest.net/viewtopic.php?id=3663 (original mod was at https://github.com/Doc22/birthstones-mod.git)
 add_git_mod birthstones minetest-birthstones https://github.com/expertmm/minetest-birthstones.git
 add_git_mod bakedclay bakedclay https://github.com/tenplus1/bakedclay.git
+add_git_mod quartz quartz https://github.com/minetest-mods/quartz
 add_git_mod magma_conduits magma_conduits https://github.com/FaceDeer/magma_conduits.git
 # dynamic_liquid: makes suspended source blocks move down until supported--therefore improves the underground especially when using mods like magma_conduits
 add_git_mod dynamic_liquid dynamic_liquid https://github.com/minetest-mods/dynamic_liquid.git
@@ -769,11 +775,11 @@ echo "Installing minetest-mods' (NOT MinetestForFun's PvP fork of Echoes91's, NO
 add_git_mod throwing throwing https://github.com/minetest-mods/throwing.git
 add_git_mod throwing_arrows throwing_arrows https://github.com/minetest-mods/throwing_arrows.git
 echo "Installing Minetestforfun's (NOT wulfsdad's) fishing <https://forum.minetest.net/viewtopic.php?f=11&t=13659>"
-echo "Installing Minetestforfun's (NOT wulfsdad's) fishing <https://forum.minetest.net/viewtopic.php?f=11&t=13659>" >> fishing.txt
+echo "Installing Minetestforfun's (NOT wulfsdad's) fishing <https://forum.minetest.net/viewtopic.php?f=11&t=13659>" > ~/Downloads/fishing.txt
 add_git_mod fishing fishing https://github.com/MinetestForFun/fishing.git
 cd "$HOME/Downloads"
 echo "Installing AntumMT's modernized fork of Kilarin's compassgps (NOT TeTpaAka, nor Echo, nor PilzAdam compass) <https://forum.minetest.net/viewtopic.php?t=9373>"
-echo "Installing AntumMT's modernized fork of Kilarin's compassgps (NOT TeTpaAka, nor Echo, nor PilzAdam compass) <https://forum.minetest.net/viewtopic.php?t=9373>" >> compassgps.txt
+echo "Installing AntumMT's modernized fork of Kilarin's compassgps (NOT TeTpaAka, nor Echo, nor PilzAdam compass) <https://forum.minetest.net/viewtopic.php?t=9373>" > ~/Downloads/compassgps.txt
 # https://github.com/Kilarin/compassgps.git
 #add_git_mod compassgps mod-compassgps https://github.com/AntumMT/mod-compassgps.git
 add_git_mod compassgps compassgps https://github.com/expertmm/compassgps.git
@@ -856,7 +862,17 @@ add_git_mod digilines digilines https://github.com/minetest-mods/digilines.git
 #add_git_mod trmp_minetest_game trmp_minetest_game https://github.com/ClockGen/trmp_minetest_game.git
 #fixed version with correct dye list for 0.4.16 (submitted pull request to ClockGen 2018-02-08):
 add_git_mod trmp_minetest_game trmp_minetest_game https://github.com/expertmm/trmp_minetest_game.git
+
+#forum_url = "http://minetest.org/forum/viewtopic.php?f=11&t=4870&sid=3ccbe3a667c6201075fc475ef7dc7cea"
+#see also minetest-mods version:
+add_git_mod awards awards https://github.com/minetest-mods/awards.git
+add_git_mod awards_board awards_board https://github.com/xisd/awards_board.git
 #endregion NON-WORLDGEN NODE/ITEM MODS
+
+
+
+
+
 
 #region PLAYER UX MODS
 add_git_mod lightning lightning https://github.com/minetest-mods/lightning.git
@@ -888,8 +904,8 @@ add_git_mod armor_monoid armor_monoid https://github.com/minetest-mods/armor_mon
 # not git://repo.or.cz/minetest_hbarmor.git
 add_git_mod hbarmor minetest_hbarmor http://repo.or.cz/minetest_hbarmor.git
 # author="Wuzzy
-# description="hbhunger for hudbars"
-# forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=11153&hilit=hunger"
+# description="hbhunger for hudbars https://forum.minetest.net/viewtopic.php?f=11&t=11153&hilit=hunger"
+# forum_url="https://forum.minetest.net/viewtopic.php?f=9&t=11336"
 # not git://repo.or.cz/minetest_hbhunger.git
 add_git_mod hbhunger minetest_hbhunger http://repo.or.cz/minetest_hbhunger.git
 add_git_mod playereffects minetest_playereffects http://repo.or.cz/minetest_playereffects.git
@@ -1049,7 +1065,7 @@ fi
   cp -f $PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/textures/* "$MTMOD_DEST_PATH/textures/"
   echo "# not recommended:"
   echo "sudo cp -Rf $PATCHES_PATH/mods-stopgap/* $MT_MYGAME_MODS_PATH/"
-  echo "sudo rm -Rf $MT_MYGAME_MODS_PATH/1.nonworking  # leftovers from deprecated ENLIVEN installer"
+  #echo "sudo rm -Rf $MT_MYGAME_MODS_PATH/1.nonworking  # leftovers from deprecated ENLIVEN installer"
 else
   echo "did not find $PATCHES_PATH, so skipped automatic patching which is partially implemented"
 fi

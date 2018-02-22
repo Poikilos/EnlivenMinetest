@@ -129,6 +129,9 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * The included minetest.conf recommended for your clients includes the line enable_local_map_saving = true, which will cache the world locally on their machines. You can feel free to change that according to your preference.
 
 ## Changes:
+### (2018-02-21)
+* (installer now tries to detect 0.5.0 then install "MT_0.5.0-dev" branch of 3d armor) fix player halfway into ground when using 0.5.0 with main branch after installing 3d_armor (must use `MT_0.5.0-dev` branch)
+* added worldedge mod (teleports you when you hit the edge of the map)
 ### (2018-02-19)
 * added ropes
 * added digilines (I just found out it is used by technic and pipeworks)
@@ -250,7 +253,30 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
     minetest.chat_send_player(player:get_player_name(), S("Bones placed at %s."):format(pos))
 
 ## Known issues:
-* Player is halfway into ground when using 0.5.0 due to unknown mod (does not happen in minetest_game)--still happens after removing: hbsprint
+* minetestserver git installer doesn't take into account that minetest_game is NOT updated automatically and must overwrite existing one (should be /usr/local/share/minetest/games/minetest_game --tested on Ubuntu 17.10 Artful)
+* missing nodes if switched world from older version (such as 0.4.15-git):
+  * nyancat:nyancat_rainbow (make transitional mod that makes node but not worldgen, and always install it? for now is fixed by stopgap mod)
+  * homedecor:bed_black_regular
+  * homedecor:bed_white_regular
+  * tsm_mines and tsm_railcorridors not tested with mapgen v7 (with other ENLIVEN mods)
+* make a use for the following items:
+  * cavestuff:desert_pebble_1
+  * cavestuff:pebble_1
+  * trunks:apple_tree_trunkroot
+  * trunks:beech_trunkroot
+  * default:sign_wall_wood
+  * trunks:birch_trunkroot
+  * trunks:fir_trunkroot
+  * trunks:jungletreeroot
+  * trunks:oak_trunkroot
+  * trunks:palm_trunkroot
+  * trunks:pine_treeroot
+  * trunks:rubber_tree_trunk_emptyroot
+  * trunks:rubber_tree_trunkroot
+  * trunks:sequoia_trunkroot
+  * trunks:spruce_trunkroot
+  * trunks:treeroot
+  * trunks:twig_1 (can make twig blocks so far)
 * when using transitional mods included with EnlivenMinetest, neither type of shears work on mobs redo sheep--though mobs:shears (Steel Shears) are supposed to via right-click: https://github.com/tenplus1/mobs_redo
 * tsm_railcorridors only has cobwebs if mobs_monster is installed (but I may want to switch to minetest-mods' mob-engine https://github.com/minetest-mods/mob-engine.git which is a fork of cme)
 * spawners to spawners modpack transitional mod included here does not transition dungeon spawners such as `spawners:mobs_stone_monster_spawner_waiting` (in private test world near (?, -1458, -12)
