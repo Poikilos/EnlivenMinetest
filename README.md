@@ -28,11 +28,10 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
   https://forum.minetest.net/viewtopic.php?t=17106
 * timer: "A persistent timer class that can be restarted after server shutdown"
   https://github.com/minetest-mods/timer
-* add modpack but remove fire items (flint and steel?) from:
-  https://github.com/xisd/trmp_Pack.git
-* https://github.com/minetest-mods/woodcutting/archive/master.zip
-  (sneek click to start auto-harvest tree, sneak again to cancel)
-* subterrane: fork of Caverealms, but is just an API and needs other mods to generate anything
+* https://github.com/xisd/trmp_Pack (but only the mods from it mods matching ENLIVEN mods)
+  (NOT the same as [trm_pack by Wuzzy](https://forum.minetest.net/viewtopic.php?pid=113052#p113052), which has mostly stuff from weird mods or stuff already in trmp_minetest_game)
+  * add modpack but remove fire items (flint and steel?)
+  * https://github.com/xisd/trmp_Pack.git
 * craftguide
 * privilegeareas: Privileges granted depending on areas -- https://github.com/minetest-mods/privilegeareas/archive/master.zip
 * castle_farming: floor&wall animal hide mats, straw bales, and straw training dummy
@@ -42,23 +41,18 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
 * maptools: admin pickaxe and admin blocks&items to control building, movement, and light; also permanent fire, fake fire, and igniters
   https://github.com/minetest-mods/maptools
   https://forum.minetest.net/viewtopic.php?f=11&t=1882
-* worldedge: wrap world as if it is a sphere
-  https://github.com/minetest-mods/worldedge
 * myroofs: sloped roofs in red, green, and dark gray--compare with existing (homedecor?) roofs in ENLIVEN
   https://github.com/minetest-mods/myroofs
-* https://github.com/minetest-mods/BobBlocks (light poles and settable damaging traps)
-* https://github.com/xisd/trmp_Pack (but only the mods from it mods matching ENLIVEN mods)
-  (NOT the same as [trm_pack by Wuzzy](https://forum.minetest.net/viewtopic.php?pid=113052#p113052), which has mostly stuff from weird mods or stuff already in trmp_minetest_game)
-* weather: https://github.com/Jeija/minetest-mod-weather ( https://forum.minetest.net/viewtopic.php?t=5245 )
 * baked clay (Ethereal NG integrates with it, mobs redo, and farming redo)
 * Updated pipeworks fork by HybridDog: https://github.com/HybridDog/pipeworks
 
 
 ##### low-pri
+* (forum replies report lag) weather: https://github.com/Jeija/minetest-mod-weather ( https://forum.minetest.net/viewtopic.php?t=5245 )
+* https://github.com/minetest-mods/BobBlocks (blocks that look like they have single-color LED panel on each side, light poles, and settable damaging traps)
 * drawers: https://github.com/minetest-mods/drawers.git
 * https://github.com/minetest-mods/pontoons (brown blocks with x that can be placed parallel with water's surface by right-clicking water)
 * https://github.com/minetest-mods/trash_can (wood trash can and green dumpster)
-* https://github.com/minetest-mods/armor_monoid (an api for creating multipliers for damage types)
 * https://github.com/minetest-mods/breadcrumbs (special sign: right-click sign to see stream of particles to previous sign)
 * https://github.com/minetest-mods/round_trunks
 * https://github.com/minetest-mods/mywoodslopes
@@ -129,14 +123,21 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * The included minetest.conf recommended for your clients includes the line enable_local_map_saving = true, which will cache the world locally on their machines. You can feel free to change that according to your preference.
 
 ## Changes:
+### (2018-02-23)
+* added woodcutting https://github.com/minetest-mods/woodcutting.git
+  (sneek click to start auto-harvest tree, sneak again to cancel)
+  NOT same as Jeija's timber mod
 ### (2018-02-21)
 * (installer now tries to detect 0.5.0 then install "MT_0.5.0-dev" branch of 3d armor) fix player halfway into ground when using 0.5.0 with main branch after installing 3d_armor (must use `MT_0.5.0-dev` branch)
 * added worldedge mod (teleports you when you hit the edge of the map)
+  https://github.com/minetest-mods/worldedge
 ### (2018-02-19)
 * added ropes
 * added digilines (I just found out it is used by technic and pipeworks)
+* added armor_monoid (found out it is used by 3d_armor!): an api for creating multipliers for damage types
 ### (2018-02-18)
 * switched to FaceDeer's fork of caverealms which is integrated with mapgen v7's perlin noise and therefore with its biomes
+* subterrane: fork of Caverealms, but is just an API and needs other mods to generate anything (required by FaceDeer's fork of caverealms)
 * added:
   * lightning
   * mywalls (more wall styles; brick & stone brick walls)

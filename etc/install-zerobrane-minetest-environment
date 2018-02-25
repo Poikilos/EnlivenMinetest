@@ -40,7 +40,7 @@ cd "$zb_tmp_name"
 unzip ../$dl_name
 cd ..
 sudo cp -Rf $zb_tmp_name/* "$share_path/"
-echo "You must close ZeroBrain Studio if already for this to take effect."
+echo "You must close ZeroBrain Studio (if open) for this to take effect."
 echo
 echo
 echo "(For each project) after opening your lua file, click:"

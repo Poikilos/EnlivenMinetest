@@ -41,13 +41,6 @@ if [ ! -d "$MT_MYGAME_MODS_PATH" ]; then
   exit 1
 fi
 
-#https://forum.minetest.net/viewtopic.php?t=14359
-#This mod is part of minetest_game 0.4.15!
-#TODO: With exception of the wieldlight
-#add_git_mod torches torches https://github.com/BlockMen/torches.git
-
-# This mod is part of minetest_game 0.4.15!
-# add_git_mod moresnow moresnow https://github.com/Sokomine/moresnow
 
 echo "Installing adrido's (NOT MasterGollum's which is incompatible with moreblocks) darkage..."
 #linked from MasterGollum's: https://forum.minetest.net/viewtopic.php?id=3213
@@ -61,9 +54,6 @@ add_git_mod advanced_npc advanced_npc https://github.com/hkzorman/advanced_npc.g
 
 #forum post (special_picks by cx384): https://forum.minetest.net/viewtopic.php?f=11&t=9574
 add_git_mod special_picks special_picks https://github.com/cx384/special_picks.git
-
-# no longer needed since ENLIVEN main branch now uses expertmm travelnet:
-# add_git_mod travelnet travelnet https://github.com/Sokomine/travelnet.git
 
 #used by mg_villages fork by Sokomine
 add_git_mod handle_schematics handle_schematics https://github.com/Sokomine/handle_schematics.git

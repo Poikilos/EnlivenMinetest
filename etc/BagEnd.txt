@@ -1,0 +1,7 @@
+Seed: BagEnd
+Mapgen limit (in map_meta.txt): 6144
+NE +,,+ = desert
+NW -,,+ = cave
+SW -,,- = tropical
+SE +,,- = ice
+

@@ -243,3 +243,14 @@ fi
 #  sleep 1
 #  exit 1
 #fi
+
+#https://forum.minetest.net/viewtopic.php?t=14359
+#This mod is part of minetest_game 0.4.15!
+#TODO: With exception of the wieldlight
+#add_git_mod torches torches https://github.com/BlockMen/torches.git
+
+# This mod is part of minetest_game 0.4.15!
+# add_git_mod moresnow moresnow https://github.com/Sokomine/moresnow
+
+# no longer needed since ENLIVEN main branch now uses expertmm travelnet:
+# add_git_mod travelnet travelnet https://github.com/Sokomine/travelnet.git

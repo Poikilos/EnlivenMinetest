@@ -12,11 +12,15 @@ except NameError:
 try:
     from git import Repo
 except:
-    print("You do not have temperusb installed.\n"
+    print("You do not have gitpython installed.\n"
           "Please run the following commands in terminal\n"
-          " (if in Windows first cd C:\Python27 [or your Python folder],\n"
-          " but if in *nix-like environment first \"sudo su -\"\n"
-          " then if no pip, install python-pip/python2-pip/python3-pip"
+          "For installing Python in Windows, the most usable option\n"
+          " is CUSTOM install, then change System Path to\n"
+          " 'install to hard drive'"
+          " (otherwise first cd C:\Python27 [or your Python folder],\n"
+          " but if in *nix-like environment first 'su -', and if no\n"
+          " pip, use your software manager to install:\n"
+          "   python-pip or python2-pip or python3-pip)\n"
           "python -m pip install --upgrade pip\n"
           "python -m pip install --upgrade pip wheel\n"
           "python -m pip install gitpython\n")
@@ -62,7 +66,7 @@ if not os.path.isdir(USR_SHARE_MINETEST):
         print("Minetest could not be found in any known location. Try installing minetest or compiling from source or editing value of USR_SHARE_MINETEST in this script. Script ended early.")
         input("press enter to close...")
         exit(3)
-    
+
 
 MT_GAMES_DIR = os.path.join(USR_SHARE_MINETEST,"games")
 MT_MYGAME_NAME = "subgametest"

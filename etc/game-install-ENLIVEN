@@ -23,6 +23,9 @@ fi
 # * ERROR[Main]: Singleplayer mode says following mods could not be found: 3d_armor areas mobs mobs_animal mobs_monster protector technic treasurer unified_inventory xban2
 sudo echo "starting ENLIVEN installer script..."
 
+
+
+
 ## this space was intentionally left blank
 
 
@@ -34,8 +37,8 @@ err_txt=$HOME/err-enliven.txt
 # doesn't work if equal: [ $0 = *"$shell_name"* ]
 # could be -bash or bash
 #if [ "$0" = "-bash" ]; then
-#'[[' doesn't work in debian, so:
-if [ $0 == *"$shell_name"* ]; then
+#'[[' doesn't work in debian
+if [[ $0 == *"$shell_name"* ]]; then
   REPO_PATH="$HOME/GitHub/EnlivenMinetest"
   echo "You must have pasted this into terminal, so assuming REPO_PATH:"
   echo "  $REPO_PATH"
@@ -98,7 +101,7 @@ MT_MYGAME_DIR="$MT_GAMES_DIR/$MT_MYGAME_NAME"
 # formerly MT_MYGAME_MODDIR:
 MT_MYGAME_MODS_PATH="$MT_MYGAME_DIR/mods"
 MT_WORLDS_DIR="$HOME/.minetest/worlds"
-MT_DEFAULT_WORLD_NAME="`ls $MT_WORLDS_DIR | grep --max-count=1 -v world`"  # aka -m 1 (no '=' sign in that case)
+MT_DEFAULT_WORLD_NAME="`ls $MT_WORLDS_DIR | grep -v tar.gz | grep --max-count=1 -v world`"  # aka -m 1 (no '=' sign in that case)
 MT_MYWORLD_NAME="$MT_DEFAULT_WORLD_NAME"
 if [ -z "$MT_DEFAULT_WORLD_NAME" ]; then
   if [ ! -z "`ls $MT_WORLDS_DIR | grep --max-count=1 -v world`" ]; then
@@ -108,25 +111,34 @@ if [ -z "$MT_DEFAULT_WORLD_NAME" ]; then
     echo "Could not find any worlds"
   fi
   #if [ "$0" = "-bash" ]; then
-#'[[' doesn't work in debian, so:
-  if [ $0 == *"$shell_name"* ]; then
+#'[[' doesn't work in debian:
+  if [[ $0 == *"$shell_name"* ]]; then
     REPO_PATH="$HOME/GitHub/EnlivenMinetest"
     MT_MYWORLD_NAME="world"
     echo "You must have pasted this into terminal, so assuming MT_MYWORLD_NAME:"
     echo "  $MT_MYWORLD_NAME"
     echo "Press Ctrl C to cancel, otherwise $MT_MYWORLD_NAME will be used..."
-    sleep 1
-    echo " 3..."
-    sleep 1
-    echo " 2..."
+    #sleep 1
+    #echo " 3..."
+    #sleep 1
+    #echo " 2..."
     sleep 1
     echo " 1..."
+    sleep 1
   else
     read -p "Please enter a world (name only--must be in $MT_WORLDS_DIR): " MT_MYWORLD_NAME
+    #$MT_DEFAULT_WORLD_NAME
+    echo using "$MT_MYWORLD_NAME"
+    #echo " 3..."
+    #sleep 1
+    #echo " 2..."
+    sleep 1
+    echo " 1..."
+    sleep 1
   fi
 else
-  #'[[' doesn't work in debian, so:
-  if [ $0 == *"$shell_name"* ]; then
+  #'[[' doesn't work in debian:
+  if [[ $0 == *"$shell_name"* ]]; then
     REPO_PATH="$HOME/GitHub/EnlivenMinetest"
     MT_MYWORLD_NAME="$MT_DEFAULT_WORLD_NAME"
     echo "You must have pasted this into terminal, so assuming MT_MYWORLD_NAME:"
@@ -134,6 +146,13 @@ else
   else
     ls $MT_WORLDS_DIR
     read -p "Please enter a world [blank for $MT_DEFAULT_WORLD_NAME]: " MT_MYWORLD_NAME
+    #$MT_DEFAULT_WORLD_NAME
+    echo using "$MT_MYWORLD_NAME"
+    echo " 3..."
+    sleep 1
+    echo " 2..."
+    sleep 1
+    echo " 1..."
     if [ -z "$MT_MYWORLD_NAME" ]; then
       MT_MYWORLD_NAME="$MT_DEFAULT_WORLD_NAME"
     fi
@@ -233,6 +252,7 @@ if [ ! -d "$MTMOD_DEST_PATH" ] || [ "$update_enable" = "true" ]; then
     echo "Cloning $BRANCH branch..."
     git clone -b $BRANCH --single-branch $URL
   else
+    echo "Cloning main branch since no branch specified: $BRANCH"
     git clone $URL
   fi
   if [ -d "$MTMOD_UNZ_NAME" ]; then
@@ -306,6 +326,10 @@ remove_mod()
   #  cd GitHub/EnlivenMinetest
   #fi
 }
+#echo "MT_MYGAME_MODS_PATH: $MT_MYGAME_MODS_PATH"
+echo "MT_MYGAME_DIR: $MT_MYGAME_DIR"
+echo "MT_WORLDS_DIR: $MT_WORLDS_DIR"
+echo "MT_MYWORLD_NAME: $MT_MYWORLD_NAME"
 
 #endregion paste this part into terminal to get some great environment variables
 
@@ -812,9 +836,11 @@ add_git_mod ts_furniture ts_furniture https://github.com/minetest-mods/ts_furnit
 #"stable" version is at https://github.com/stujones11/minetest-3d_armor/archive/version-0.4.11.zip
 #add_zip_mod 3d_armor minetest-3d_armor-MT_0.5.0-dev https://github.com/stujones11/minetest-3d_armor/archive/MT_0.5.0-dev.zip
 # git clone -b MT_0.5.0-dev --single-branch https://git@github.com/stujones11/minetest-3d_armor.git
-if [ "version_0_5_enable" = "true" ]; then
+if [ "$version_0_5_enable" = "true" ]; then
+  echo "  trying to get 3d_armor 0.5.0-dev branch..."
   add_git_mod 3d_armor minetest-3d_armor https://github.com/stujones11/minetest-3d_armor.git "MT_0.5.0-dev"
 else
+  echo "  trying to get 3d_armor main branch..."
   add_git_mod 3d_armor minetest-3d_armor https://github.com/stujones11/minetest-3d_armor.git
 fi
 #mv minetest-3d_armor-master minetest-3d_armor_MODPACK
@@ -914,6 +940,7 @@ remove_mod sprint
 #remove_mod hbsprint
 # NOTE: hbsprint bar is on auto-hide by default (world.mt can set hudbars_autohide_stamina to true or false)
 add_git_mod hbsprint hbsprint https://github.com/minetest-mods/hbsprint.git
+# armor_monoid: an api for creating multipliers for damage types (used by 3d_armor)
 add_git_mod armor_monoid armor_monoid https://github.com/minetest-mods/armor_monoid.git
 
 # author="Wuzzy"
@@ -931,8 +958,12 @@ add_git_mod playereffects minetest_playereffects http://repo.or.cz/minetest_play
 # tenplus1's ambience/ambiance ambient sounds (fork linked at original's thread at https://forum.minetest.net/viewtopic.php?f=11&t=2807&start=275 )
 add_git_mod ambience ambience https://github.com/tenplus1/ambience.git
 # forum_url: https://forum.minetest.net/viewtopic.php?t=12189
-# description: Adds animations to the players' head
-add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git
+# description: ISSUE ON 0.5.0: player halfway into ground; Adds animations to the players' head
+if [ "$version_0_5_enable" != "true" ]; then
+  # doesn't work with 0.5.0-dev as of Feb 2018--see pull request by expertmm:
+  add_git_mod playeranim playeranim https://github.com/expertmm/playeranim.git
+  # add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git
+fi
 #add_git_mod stamina stamina https://github.com/minetest-mods/stamina
 remove_mod stamina
 # NOTE: a skin database is at http://minetest.fensta.bplaced.net/
@@ -963,6 +994,8 @@ fi
 # ./update_skins_db.sh
 # (note, bell07 has the fixed bash script, but the python3 script is still bugged as of 2016-01-29, and includes a .NET assembly that seems to only work for Windows (has meta directory not found error on mono for Linux)
 # PATCH FURTHER DOWN WILL REMOVE EXISTING SKINS AND ONLY ADD EnlivenMinetest skins from patches folder
+# woodcutting: sneek click to start auto-harvest tree, sneak again to cancel
+add_git_mod woodcutting woodcutting https://github.com/minetest-mods/woodcutting.git
 #endregion PLAYER UX MODS
 
 
