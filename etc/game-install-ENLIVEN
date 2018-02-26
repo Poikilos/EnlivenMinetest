@@ -1082,7 +1082,15 @@ fi
     sudo cp -f $MODIFIED_PATH "$MT_MYGAME_DIR/mods/bones/"
     echo "done attempting to patch $MTMOD_DEST_PATH/"
   else
-    echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version (this is not a problem if you ran the patcher more than once)."
+    BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/bones/init-0.5.0-dev.lua
+    TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"
+    if [ -z "$TRY_DIFF" ]; then
+      sudo cp -f $MODIFIED_PATH "$MT_MYGAME_DIR/mods/bones/init.lua"
+      echo "patched $MT_MYGAME_DIR/mods/bones/init.lua"
+    else
+      TRY_DONE_DIFF="`diff $MODIFIED_PATH $TARGET_PATH`"
+      echo "ALREADY patched $MTMOD_DEST_NAME."
+    fi
   fi
   BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/homedecor_modpack/homedecor/gastronomy.lua
   MODIFIED_PATH=$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/gastronomy.lua
