@@ -538,7 +538,7 @@ add_git_mod vote vote https://github.com/minetest-mods/vote.git
 #region MOB AND WORLDGEN MODS
 # forum_url="https://forum.minetest.net/viewtopic.php?id=7263"
 # TESTED: with mg, tsm_railcorridors sometimes have chests with loot (using seed BagEnd; /teleport 188,-304.5,-120)
-add_git_mod mg mg https://github.com/minetest-mods/mg.git
+#add_git_mod mg mg https://github.com/minetest-mods/mg.git
 add_git_mod worldedge worldedge https://github.com/minetest-mods/worldedge.git
 #wget https://github.com/BlockMen/cme/releases/download/v2.3/cme-2_3-BlockMen.zip
 #unzip cme-2_3-BlockMen.zip
