@@ -483,6 +483,11 @@ echo "hudbars_bar_type = statbar_modern" >> "$WRITEABLE_MINETEST_CONF"  #TODO: r
 echo "sprint_speed = 2.25" >> "$WRITEABLE_MINETEST_CONF"  # default is 1.3
 echo "sprint_jump = 1.25" >> "$WRITEABLE_MINETEST_CONF"  # default is 1.1
 echo "sprint_stamina_drain = .5" >> "$WRITEABLE_MINETEST_CONF"  # default is 2
+if [ "$version_0_5_enable" = "true" ]; then
+  echo "player_model_version = default_character_v3" >> "$WRITEABLE_MINETEST_CONF"  # used by playeranim and ts_furniture
+else
+  echo "player_model_version = default_character_v2" >> "$WRITEABLE_MINETEST_CONF"  # used by playeranim and ts_furniture
+fi
 sudo mv -f $HOME/minetest.conf "$USR_SHARE_MINETEST/games/$MT_MYGAME_NAME/minetest.conf"
 
 if [ -f "$MT_MYGAME_DIR/game.conf.1st" ]; then
@@ -960,9 +965,12 @@ add_git_mod ambience ambience https://github.com/tenplus1/ambience.git
 # forum_url: https://forum.minetest.net/viewtopic.php?t=12189
 # description: ISSUE ON 0.5.0: player halfway into ground; Adds animations to the players' head
 if [ "$version_0_5_enable" != "true" ]; then
-  # doesn't work with 0.5.0-dev as of Feb 2018--see pull request by expertmm:
+  # see
   add_git_mod playeranim playeranim https://github.com/expertmm/playeranim.git
   # add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git
+else
+  #must also set player_model_version = default_character_v3 in minetest.conf (see above for when set in subgame folder's minetest.conf)
+  add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git "v5.0"
 fi
 #add_git_mod stamina stamina https://github.com/minetest-mods/stamina
 remove_mod stamina
@@ -1104,7 +1112,7 @@ fi
     echo "done attempting to patch $MTMOD_DEST_PATH/"
   else
     if [ -z `diff $MODIFIED_PATH $TARGET_PATH` ];  then
-      echo "ALREADY patched $MTMOD_DEST_NAME with $MODIFIED_PATH"
+      echo "ALREADY patched $TARGET_PATH with $MODIFIED_PATH"
     else
       echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version."
     fi
@@ -1118,7 +1126,11 @@ fi
     sudo cp -f $MODIFIED_PATH "$MTMOD_DEST_PATH/"
     echo "done attempting to patch $MTMOD_DEST_PATH/"
   else
-    echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version (this is not a problem if you ran the patcher more than once)."
+    if [ -z `diff $MODIFIED_PATH $TARGET_PATH` ];  then
+      echo "ALREADY patched $TARGET_PATH with $MODIFIED_PATH"
+    else
+      echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version."
+    fi
   fi
   if [ -d "$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/models" ]; then
     # deprecated, but copy in case gets un-deprecated
