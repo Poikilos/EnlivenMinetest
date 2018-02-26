@@ -1090,7 +1090,7 @@ fi
       echo "patched $MT_MYGAME_DIR/mods/bones/init.lua"
     else
       TRY_DONE_DIFF="`diff $MODIFIED_PATH $TARGET_PATH`"
-      echo "ALREADY patched $MTMOD_DEST_NAME with $BASIS_PATH."
+      echo "ALREADY patched $MTMOD_DEST_NAME with $MODIFIED_PATH."
     fi
   fi
   BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/homedecor_modpack/homedecor/gastronomy.lua
@@ -1103,7 +1103,11 @@ fi
     sudo cp -f $MODIFIED_PATH "$MTMOD_DEST_PATH/"
     echo "done attempting to patch $MTMOD_DEST_PATH/"
   else
-    echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version (this is not a problem if you ran the patcher more than once)."
+    if [ -z `diff $MODIFIED_PATH $TARGET_PATH` ];  then
+      echo "ALREADY patched $MTMOD_DEST_NAME with $MODIFIED_PATH"
+    else
+      echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version."
+    fi
   fi
   BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/homedecor_modpack/homedecor/crafts.lua
   MODIFIED_PATH=$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/crafts.lua
