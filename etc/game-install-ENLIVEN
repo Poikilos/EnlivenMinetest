@@ -10,6 +10,15 @@
 
 # * Git version uses /home/*/minetest/games and /usr/local/share/minetest/games but the latter is used for minetestserver (minetest-server package)
 # * Arch stable version uses /usr/share/minetest/
+if [ "$1" = "--help" ]; then
+  echo "This script installs ENLIVEN subgame for minetest. It uses individual git repositories, so please only run this once so as not to exceed their bandwidth."
+  echo "Usage:"
+  echo
+  echo "version_0_5_enable=<value> (where value is true or false): forces 0.5 (if not specified, this script uses 0.5 versions of mods if minetest is at /usr/local/share/minetest)"
+  echo
+  echo "local_enable=<value> (where value is true or false): forces /usr/local/share/minetest (if not specified, script detects minetest but if exists both in /usr/share/ and /usr/local/share, prefers /usr/local/share/minetest)"
+  echo
+fi
 if [ "$1" = "version_0_5_enable=true" ]; then
   version_0_5_enable="true"
 elif [ "$2" = "version_0_5_enable=true" ]; then
@@ -116,7 +125,9 @@ if [ "$local_enable" != "false" ]; then
   # IF git version is installed
   try_path="/usr/local/share/minetest"
   if [ -d "$try_path" ]; then
-    #version_0_5_enable="true"
+    if [ -z "$version_0_5_enable" ]; then
+      version_0_5_enable="true"
+    fi
     USR_SHARE_MINETEST="$try_path"
   fi
 fi
@@ -183,6 +194,9 @@ else
     ls $MT_WORLDS_DIR
     read -p "Please enter a world [blank for $MT_DEFAULT_WORLD_NAME]: " MT_MYWORLD_NAME
     #$MT_DEFAULT_WORLD_NAME
+    if [ -z "$MT_MYWORLD_NAME" ]; then
+      MT_MYWORLD_NAME=$MT_DEFAULT_WORLD_NAME
+    fi
     echo using "$MT_MYWORLD_NAME"
     echo " 3..."
     sleep 1
@@ -440,8 +454,15 @@ if [ -f "$WORLD_MT_PATH" ]; then
   sudo chgrp `cat /tmp/local_mts_user` "$WORLD_MT_PATH"
 fi
 echo "gameid = $MT_MYGAME_NAME" > "$WORLD_MT_PATH"
-
+if [ "`grep -q "backend" "$WORLD_MT_PATH"`" -eq 0 ]; then
+  echo "has no backend"
+fi
 echo "backend = leveldb" >> "$WORLD_MT_PATH"
+echo "teleport_perms_to_build = false" >> "$WORLD_MT_PATH"
+echo "teleport_perms_to_configure = false" >> "$WORLD_MT_PATH"
+echo "teleport_requires_pairing = true" >> "$WORLD_MT_PATH"
+echo "teleport_pairing_check_radius = 2" >> "$WORLD_MT_PATH"
+echo "teleport_default_coordinates = 0,0,0" >> "$WORLD_MT_PATH"
 
 #MT_MYGAME_DIR (a Minetest "game") is the equivalent of a Minecraft modpack, however, in this case it is actually a collection of mods and modpacks, either of which can be in the mods folder
 
@@ -558,7 +579,7 @@ add_git_mod invhack minetest-invhack https://github.com/salahzar/minetest-invhac
 echo "Installing Uberi's worldedit..."
 add_git_mod worldedit Minetest-WorldEdit https://github.com/Uberi/Minetest-WorldEdit.git
 # metatools: expertmm fork of LeMagnesium's minetest-mod-metatools
-add_git_mod metatools minetest-mod-metatools https://github.com/expertmm/minetest-mod-metatools.git
+add_git_mod metatools minetest-mod-metatools https://github.com/poikilos/minetest-mod-metatools.git
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=9376"
 # author="tenplus1"
 # description="not the original 2012 protector or 2012 fork of 2012 protector; must be logged in to download protector.zip release version at https://forum.minetest.net/download/file.php?id=5046"
@@ -841,7 +862,7 @@ add_git_mod tsm_railcorridors tsm_railcorridors http://repo.or.cz/RailCorridors/
 #-- carts:rail
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=10172&hilit=boost+cart"
 # birthstones: expertmm fork of a rather non-maintained mod--forum link is at https://forum.minetest.net/viewtopic.php?id=3663 (original mod was at https://github.com/Doc22/birthstones-mod.git)
-add_git_mod birthstones minetest-birthstones https://github.com/expertmm/minetest-birthstones.git
+add_git_mod birthstones minetest-birthstones https://github.com/poikilos/minetest-birthstones.git
 add_git_mod bakedclay bakedclay https://github.com/tenplus1/bakedclay.git
 add_git_mod quartz quartz https://github.com/minetest-mods/quartz
 add_git_mod magma_conduits magma_conduits https://github.com/FaceDeer/magma_conduits.git
@@ -864,7 +885,7 @@ echo "Installing AntumMT's modernized fork of Kilarin's compassgps (NOT TeTpaAka
 echo "Installing AntumMT's modernized fork of Kilarin's compassgps (NOT TeTpaAka, nor Echo, nor PilzAdam compass) <https://forum.minetest.net/viewtopic.php?t=9373>" > ~/Downloads/compassgps.txt
 # https://github.com/Kilarin/compassgps.git
 #add_git_mod compassgps mod-compassgps https://github.com/AntumMT/mod-compassgps.git
-add_git_mod compassgps compassgps https://github.com/expertmm/compassgps.git
+add_git_mod compassgps compassgps https://github.com/poikilos/compassgps.git
 
 remove_mod helicopter
 add_git_mod sounding_line sounding_line https://github.com/minetest-mods/sounding_line.git
@@ -893,7 +914,7 @@ add_git_mod homedecor_modpack homedecor_modpack https://github.com/minetest-mods
 add_git_mod unifieddyes unifieddyes https://github.com/minetest-mods/unifieddyes.git
 #Sokomine's original version has no security ( https://forum.minetest.net/viewtopic.php?id=4877 )
 #  https://github.com/Sokomine/travelnet/archive/master.zip
-add_git_mod travelnet travelnet https://github.com/expertmm/travelnet.git
+add_git_mod travelnet travelnet https://github.com/poikilos/travelnet.git
 add_git_mod anvil anvil https://github.com/minetest-mods/anvil.git
 add_git_mod sling sling https://github.com/minetest-mods/sling.git
 #REPLACES PilzAdam's, modified by kaeza, maintained by VenessaE; FORMERLY in homedecor_modpack
@@ -933,7 +954,7 @@ fi
 # web view: http://repo.or.cz/w/minetest_slimenodes.git
 # add_git_mod slimenodes minetest_slimenodes http://repo.or.cz/minetest_slimenodes.git
 # use expertmm fork instead:
-add_git_mod slimenodes slimenodes https://github.com/expertmm/slimenodes.git
+add_git_mod slimenodes slimenodes https://github.com/poikilos/slimenodes.git
 # ropes: adds rope spools that are mounted to the side or bottom of a node and can be cut with any choppy tool while someone lower is climbing; doesn't lower into protected areas; also has rope ladders
 add_git_mod ropes ropes https://github.com/minetest-mods/ropes.git
 add_git_mod digilines digilines https://github.com/minetest-mods/digilines.git
@@ -945,7 +966,7 @@ add_git_mod digilines digilines https://github.com/minetest-mods/digilines.git
 # wget -O $MTMOD_SRC_ZIP https://forum.minetest.net/download/file.php?id=1301
 #add_git_mod trmp_minetest_game trmp_minetest_game https://github.com/ClockGen/trmp_minetest_game.git
 #fixed version with correct dye list for 0.4.16 (submitted pull request to ClockGen 2018-02-08):
-add_git_mod trmp_minetest_game trmp_minetest_game https://github.com/expertmm/trmp_minetest_game.git
+add_git_mod trmp_minetest_game trmp_minetest_game https://github.com/poikilos/trmp_minetest_game.git
 
 #forum_url = "http://minetest.org/forum/viewtopic.php?f=11&t=4870&sid=3ccbe3a667c6201075fc475ef7dc7cea"
 #see also minetest-mods version:
@@ -1002,7 +1023,7 @@ add_git_mod ambience ambience https://github.com/tenplus1/ambience.git
 # description: ISSUE ON 0.5.0: player halfway into ground; Adds animations to the players' head
 if [ "$version_0_5_enable" != "true" ]; then
   # see
-  add_git_mod playeranim playeranim https://github.com/expertmm/playeranim.git
+  add_git_mod playeranim playeranim https://github.com/poikilos/playeranim.git
   # add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git
 else
   #must also set player_model_version = default_character_v3 in minetest.conf (see above for when set in subgame folder's minetest.conf)

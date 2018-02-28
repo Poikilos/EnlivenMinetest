@@ -7,7 +7,7 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
 * automatically install Minetest client with a usable minetest.conf (for improved graphics)
 
 ## Primary Features of ENLIVEN subgame
-* birthstones, improved fork: <https://github.com/expertmm/minetest-birthstones>
+* birthstones, improved fork: <https://github.com/poikilos/minetest-birthstones>
 
 ### Planned Features
 * maintain a table of short descriptions of mods
@@ -71,7 +71,7 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
 ##### Finished
 * etc/change_hardcoded_world_name_first/mts-ENLIVEN deprecated by mtsenliven.py
 
-The [ENLIVEN project](https://github.com/expertmm/EnlivenMinetest) (aka EnlivenMinetest) includes tools for installing and maintaining the server and client for internet and LAN use, and now includes the mtanalyze (formerly minetest-chunkymap) project which includes many tools including chunkymap. The server and client are just the Minetest server and client repackaged (or just web installer scripts in the case of the server), and therefore 100% compatible with other copies of Minetest server and client of the same version--including using other subgames, which client will download from servers as usual.
+The [ENLIVEN project](https://github.com/poikilos/EnlivenMinetest) (aka EnlivenMinetest) includes tools for installing and maintaining the server and client for internet and LAN use, and now includes the mtanalyze (formerly minetest-chunkymap) project which includes many tools including chunkymap. The server and client are just the Minetest server and client repackaged (or just web installer scripts in the case of the server), and therefore 100% compatible with other copies of Minetest server and client of the same version--including using other subgames, which client will download from servers as usual.
 
 DISCLAIMERS:
 * Please read the Sources and License section of this document. You must agree to the licenses mentioned in order to use and copy this program.
@@ -92,7 +92,7 @@ The ENLIVEN client runs Minetest, which can be used as a client for other Minete
 
 ### Server:
 EnlivenMinetest project assists you in setting up ENLIVEN subgame and provides scripts to run it on minetestserver as current user (must be sudoer).
-Some of the included scripts help install and manage your git version of Minetest Server on Ubuntu Server or various *buntu flavors (a gui distro neither required nor recommended for minetestserver running ENLIVEN). See also https://github.com/expertmm/minetest-chunkymap for a map non-redis servers, and some offline minetest management tools.
+Some of the included scripts help install and manage your git version of Minetest Server on Ubuntu Server or various *buntu flavors (a gui distro neither required nor recommended for minetestserver running ENLIVEN). See also https://github.com/poikilos/minetest-chunkymap for a map non-redis servers, and some offline minetest management tools.
 (minetestserver requires GNU/Linux System -- only tested using apt on Ubuntu Server [14.04 to 16.04] and Lubuntu [14.04 to 16.04])
 The installer script (in the "etc/change_world_name_manually_first" folder) downloads the git versions of all of the mods to the ENLIVEN folder which will be placed in your minetest games folder (one of the two folders listed below, otherwise fails)--but change the world name to the name of your world first.
 * (optionally) place the ENLIVEN folder in the games folder here into the games folder on your server such as:
@@ -107,7 +107,7 @@ Do not expect the mods from game-install-enliven-testing.sh to work. Also, do no
 (There are also WIP TRMs in there to go with the ENLIVEN subgame)
 Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawners.
 (NOTE: spawners makes pyramids now, so tsm_pyramids )
-* Recommend your users use the binary installer (Windows client) from "Releases" at https://github.com/expertmm/EnlivenMinetest/releases or the alternate site above to install, otherwise installation requires a good minetest.conf downloaded such as from the winclient/launcher folder and placed in their minetest folder. The one here has better graphics (opengl 3.0 shaders, smooth lighting).
+* Recommend your users use the binary installer (Windows client) from "Releases" at https://github.com/poikilos/EnlivenMinetest/releases or the alternate site above to install, otherwise installation requires a good minetest.conf downloaded such as from the winclient/launcher folder and placed in their minetest folder. The one here has better graphics (opengl 3.0 shaders, smooth lighting).
 
 ### mtanalyze
 * mtanalyze is a set of tools including a live map for Minetest servers and singleplayer if using LevelDB
@@ -161,7 +161,7 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
   * removed all other huds and hud mods until compatibility can be determined (they were causing health and food system to not work at all)
     * formerly used GunshipPenguin's sprint
 ### (2018-02-15)
-* moved mappers to <https://github.com/expertmm/minetestmapper-python>
+* moved mappers to <https://github.com/poikilos/minetestmapper-python>
 ### (2018-02-07)
 * forked trm_minetest_game to use proper dye list (submitted pull request to ClockGen since his is the only known git version of Wuzzy's which was on the [official treasurer thread](https://forum.minetest.net/viewtopic.php?t=7292))
 ### (2018-02-08)
@@ -387,7 +387,7 @@ end --sort_by_distance
 ```
 
 ## Building
-* scripts and sources for recreating ENLIVEN subgame are at the EnlivenMinetest project page: https://github.com/expertmm/EnlivenMinetest
+* scripts and sources for recreating ENLIVEN subgame are at the EnlivenMinetest project page: https://github.com/poikilos/EnlivenMinetest
 Further steps needed to recreate:
 * extract entire zip from sfan5
 * run postinstall.bat
@@ -395,12 +395,12 @@ Further steps needed to recreate:
 * change version number in C:\Users\Owner\Documents\GitHub\EnlivenMinetest\winclient\launcher-src\ENLIVEN.pro
 
 ### additional notes
-* The recommended minetest.conf for subgame, including for server, is in the ENLIVEN subgame folder (also available at [EnlivenMinetest on GitHub](https://github.com/expertmm/EnlivenMinetest)
+* The recommended minetest.conf for subgame, including for server, is in the ENLIVEN subgame folder (also available at [EnlivenMinetest on GitHub](https://github.com/poikilos/EnlivenMinetest)
 
 ## Sources and License
 Authors: expertmm (Jacob Gustafson)
 ENLIVEN project (aka EnlivenMinetest), including launcher (ENLIVEN application) and ENLIVEN subgame, is released under the LGPL v2.1 license (see LICENSE), except media which is released under the CC-BY-SA 3.0 license (see LICENSE). There are other exceptions to this license and authorship where specified below and in subfolders.
-Source code is available at [https://github.com/expertmm/EnlivenMinetest](https://github.com/expertmm/EnlivenMinetest).
+Source code is available at [https://github.com/poikilos/EnlivenMinetest](https://github.com/poikilos/EnlivenMinetest).
 
 ### Minetest
 Minetest is included with releases--for Minetest license, please read README.txt in Minetest's doc folder which is provided in releases.

@@ -168,8 +168,8 @@ input("press enter to close...")
 #git clone https://github.com/tenplus1/mobs_monster.git
 #git clone https://github.com/tenplus1/mobs_npc.git
 #but not:
-#git clone https://github.com/expertmm/minetest-minigamer.git
-#git clone https://github.com/expertmm/minetest-birthstones.git
+#git clone https://github.com/poikilos/minetest-minigamer.git
+#git clone https://github.com/poikilos/minetest-birthstones.git
 
 #Repo.clone_from(git_url, repo_dir)
 
