@@ -10,10 +10,39 @@
 
 # * Git version uses /home/*/minetest/games and /usr/local/share/minetest/games but the latter is used for minetestserver (minetest-server package)
 # * Arch stable version uses /usr/share/minetest/
-
-if [ "$1" = "version_0_5_enable" ]; then
+if [ "$1" = "version_0_5_enable=true" ]; then
   version_0_5_enable="true"
+elif [ "$2" = "version_0_5_enable=true" ]; then
+  version_0_5_enable="true"
+elif [ "$1" = "version_0_5_enable=false" ]; then
+  version_0_5_enable="false"
+elif [ "$2" = "version_0_5_enable=false" ]; then
+  version_0_5_enable="false"
 fi
+if [ "$1" = "local_enable=true" ]; then
+  local_enable="true"
+elif [ "$2" = "local_enable=true" ]; then
+  local_enable="true"
+elif [ "$1" = "local_enable=false" ]; then
+  local_enable="false"
+elif [ "$2" = "local_enable=false" ]; then
+  local_enable="false"
+fi
+echo
+echo
+if [ ! -z "$version_0_5_enable" ];then
+  echo "force version_0_5_enable: $version_0_5_enable"
+fi
+if [ ! -z "$local_enable" ];then
+  echo "force local_enable: $local_enable"
+fi
+echo
+echo "3..."
+sleep 1
+echo "2..."
+sleep 1
+echo "1..."
+sleep 1
 # (Ubuntu 14.04 Trusty Tahr Server) folders were found using:
 # cd /
 # sudo find -name 'worlds' (worlds folder is in $HOME/.minetest)
@@ -83,14 +112,21 @@ if [ -d "$try_path" ]; then
   # Arch linux
   USR_SHARE_MINETEST="$try_path"
 fi
-#if [ ! -d "$USR_SHARE_MINETEST" ]; then
+if [ "$local_enable" != "false" ]; then
   # IF git version is installed
   try_path="/usr/local/share/minetest"
   if [ -d "$try_path" ]; then
-    version_0_5_enable="true"
+    #version_0_5_enable="true"
     USR_SHARE_MINETEST="$try_path"
   fi
-#fi
+fi
+echo "USR_SHARE_MINETEST: $USR_SHARE_MINETEST"
+echo "3..."
+sleep 1
+echo "2..."
+sleep 1
+echo "1..."
+sleep 1
 # UNUSED (unknown use): MT_GAMES_DIR=$HOME/.minetest/mods
 # intentionally skip the slash in the following line since $USR_SHARE_MINETEST already starts with one:
 MT_BACKUP_GAMES_DIR=$HOME/Backup$USR_SHARE_MINETEST/games

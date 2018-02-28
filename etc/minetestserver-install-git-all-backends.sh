@@ -75,7 +75,13 @@ git pull --all
 cd ..
 # heavily modified from forum url above due to hints from AUR files obtained via git clone https://aur.archlinux.org/minetest-git-leveldb.git
 echo "ENABLE_CURSES enables server-side terminal via --terminal option"
-cmake . -DENABLE_GETTEXT=on -DENABLE_CURSES=on -DENABLE_FREETYPE=on -DENABLE_LEVELDB=on -DENABLE_CURL=on -DENABLE_GETTEXT=on -DENABLE_REDIS=on -DENABLE_POSTGRESQL=on -DRUN_IN_PLACE=off -DCMAKE_BUILD_TYPE=Release -DBUILD_SERVER=on -DBUILD_CLIENT=off
+build_what="-DBUILD_SERVER=on -DBUILD_CLIENT=off"
+if [ "$1" = "both" ]; then
+  build_what="-DBUILD_SERVER=on -DBUILD_CLIENT=on"
+elif [ "$1" = "client" ]; then
+  build_what="-DBUILD_SERVER=off -DBUILD_CLIENT=on"
+fi
+cmake . -DENABLE_GETTEXT=on -DENABLE_CURSES=on -DENABLE_FREETYPE=on -DENABLE_LEVELDB=on -DENABLE_CURL=on -DENABLE_GETTEXT=on -DENABLE_REDIS=on -DENABLE_POSTGRESQL=on -DRUN_IN_PLACE=off -DCMAKE_BUILD_TYPE=Release $build_what
 # NOTE: as long as -DRUN_IN_PLACE=off, above installs correctly without -DCMAKE_INSTALL_PREFIX=/usr which for some reason is used by https://aur.archlinux.org/minetest-git.git
 #  -DCMAKE_BUILD_TYPE=Release as per https://aur.archlinux.org/minetest-git.git
 make -j$(nproc)
