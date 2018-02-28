@@ -1022,9 +1022,9 @@ add_git_mod ambience ambience https://github.com/tenplus1/ambience.git
 # forum_url: https://forum.minetest.net/viewtopic.php?t=12189
 # description: ISSUE ON 0.5.0: player halfway into ground; Adds animations to the players' head
 if [ "$version_0_5_enable" != "true" ]; then
-  # see
-  add_git_mod playeranim playeranim https://github.com/poikilos/playeranim.git
-  # add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git
+  # see https://github.com/minetest-mods/playeranim/issues/14 (fixed)
+  # add_git_mod playeranim playeranim https://github.com/poikilos/playeranim.git
+  add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git
 else
   #must also set player_model_version = default_character_v3 in minetest.conf (see above for when set in subgame folder's minetest.conf)
   add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git "v5.0"
