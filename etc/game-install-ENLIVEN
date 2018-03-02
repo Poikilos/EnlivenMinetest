@@ -695,10 +695,11 @@ if [ "$spawners_enable" = "true" ]; then
     else
       add_git_mod tsm_chests_dungeon minetest_tsm_chests_dungeon http://repo.or.cz/minetest_tsm_chests_dungeon.git
     fi
+
 else
   remove_mod tsm_chests_dungeon
   remove_mod spawners
-  # tsm_pyramids: NOTE: results in "tsm_pyramids:mummy" not defined
+  # tsm_pyramids: NOTE: results in "tsm_pyramids:mummy" not defined, but xisd fork allows configuring mummy so MAY NEED spawners_mobs:mummy (or original pyramids mod?)
   add_git_mod tsm_pyramids tsm_pyramids http://repo.or.cz/minetest_pyramids/tsm_pyramids.git
   add_git_mod loot loot https://github.com/minetest-mods/loot.git
   # TEST LOOT: use seed "BigIdea" (without mg mod installed) then:
@@ -1260,3 +1261,4 @@ else
   echo "./game-install-ENLIVEN version_0_5_enable"
 fi
 echo "(used $MT_MINETEST_GAME_PATH as base)"
+echo "spawners_enable: $spawners_enable"
