@@ -70,7 +70,13 @@ fi
 git clone https://github.com/minetest/minetest.git
 git pull --all  # see https://forum.minetest.net/viewtopic.php?f=42&t=3837&start=125#p306449
 cd minetest/games
-git clone https://github.com/minetest/minetest_game.git
+if [ ! -d minetest_game ]; then
+  git clone https://github.com/minetest/minetest_game.git
+else
+  cd minetest_game
+  git pull --all
+  cd ..
+fi
 git pull --all
 cd ..
 # heavily modified from forum url above due to hints from AUR files obtained via git clone https://aur.archlinux.org/minetest-git-leveldb.git

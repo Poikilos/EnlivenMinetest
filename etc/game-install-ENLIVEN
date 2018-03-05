@@ -7,7 +7,10 @@
 #First make sure all folders in $HOME/.minetest are created (I am not sure whether this is required!):
 # minetestserver
 # Mods were found at https://forum.minetest.net/viewforum.php?f=11
-
+CONFIGS_PATH="$HOME/.config/EnlivenMinetest"
+if [ ! -d "$CONFIGS_PATH" ]; then
+  mkdir -p "$CONFIGS_PATH"
+fi
 # * Git version uses /home/*/minetest/games and /usr/local/share/minetest/games but the latter is used for minetestserver (minetest-server package)
 # * Arch stable version uses /usr/share/minetest/
 if [ "$1" = "--help" ]; then
@@ -37,21 +40,24 @@ elif [ "$1" = "local_enable=false" ]; then
 elif [ "$2" = "local_enable=false" ]; then
   local_enable="false"
 fi
-echo
-echo
-if [ ! -z "$version_0_5_enable" ];then
-  echo "force version_0_5_enable: $version_0_5_enable"
+if [ -f "$CONFIGS_PATH/local_enable" ]; then
+  local_enable=$(head -n 1 $CONFIGS_PATH/local_enable)
 fi
-if [ ! -z "$local_enable" ];then
-  echo "force local_enable: $local_enable"
+if [ -f "$CONFIGS_PATH/version_0_5_enable" ]; then
+  version_0_5_enable=$(head -n 1 $CONFIGS_PATH/version_0_5_enable)
 fi
-echo
-echo "3..."
-sleep 1
-echo "2..."
-sleep 1
-echo "1..."
-sleep 1
+if [ -z "$local_enable" ]; then
+  echo "$local_enable" > "$CONFIGS_PATH/local_enable"
+fi
+if [ -z "$version_0_5_enable" ]; then
+  echo "$version_0_5_enable" > "$CONFIGS_PATH/version_0_5_enable"
+fi
+#echo "3..."
+#sleep 1
+#echo "2..."
+#sleep 1
+#echo "1..."
+#sleep 1
 # (Ubuntu 14.04 Trusty Tahr Server) folders were found using:
 # cd /
 # sudo find -name 'worlds' (worlds folder is in $HOME/.minetest)
@@ -102,6 +108,8 @@ if [ ! -d "$PATCHES_PATH" ]; then
   PATCHES_PATH="../patches"
 fi
 if [ ! -d "$PATCHES_PATH" ]; then
+  echo
+  echo
   echo "ERROR: could not find patches such as in $PATCHES_PATH"
   echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
   sleep 1
@@ -114,7 +122,6 @@ if [ ! -d "$PATCHES_PATH" ]; then
   exit 1
 fi
 # NOTE: minetest mods (other than 0.4.16 client-side mods) are ALWAYS ONLY installed on server, unless you need them for singleplayer
-mtgame_name="minetest_game"
 USR_SHARE_MINETEST=/usr/share/games/minetest
 try_path="/usr/share/minetest"
 if [ -d "$try_path" ]; then
@@ -131,13 +138,14 @@ if [ "$local_enable" != "false" ]; then
     USR_SHARE_MINETEST="$try_path"
   fi
 fi
-echo "USR_SHARE_MINETEST: $USR_SHARE_MINETEST"
-echo "3..."
-sleep 1
-echo "2..."
-sleep 1
-echo "1..."
-sleep 1
+mtgame_name="minetest_game"
+MT_MINETEST_GAME_PATH=$USR_SHARE_MINETEST/games/$mtgame_name
+#echo "3..."
+#sleep 1
+#echo "2..."
+#sleep 1
+#echo "1..."
+#sleep 1
 # UNUSED (unknown use): MT_GAMES_DIR=$HOME/.minetest/mods
 # intentionally skip the slash in the following line since $USR_SHARE_MINETEST already starts with one:
 MT_BACKUP_GAMES_DIR=$HOME/Backup$USR_SHARE_MINETEST/games
@@ -224,6 +232,42 @@ MT_MYWORLD_DIR=$MT_WORLDS_DIR/$MT_MYWORLD_NAME
 echo "Using world at $MT_MYWORLD_DIR"
 WORLD_MT_PATH=$MT_MYWORLD_DIR/world.mt
 # see also https://www.shellscript.sh/functions.html
+
+reinstall_mt_game() {
+  if [ "$MT_MINETEST_GAME_PATH" = "/usr/local/share/minetest/games/minetest_game" ]; then
+    SRC_MT="$HOME/minetest"
+    if [ -d "$HOME/Downloads/minetest/games/minetest_game" ]; then
+      SRC_MT="$HOME/Downloads/minetest"
+    fi
+    if [ -d "$SRC_MT" ]; then
+      SRC_MT_GAME="$SRC_MT/games/minetest_game"
+      cd $SRC_MT_GAME
+      echo "updating $SRC_MT_GAME..."
+      git pull
+      cd
+      sudo rm -Rf "$MT_MINETEST_GAME_PATH"
+      sudo cp -R "$SRC_MT_GAME" "$USR_SHARE_MINETEST/games/"
+      if [ -d "$USR_SHARE_MINETEST/games/minetest_game" ]; then
+        echo "successfully recreated $USR_SHARE_MINETEST/games/minetest_game"
+      else
+        echo "  ERROR: failed to create $USR_SHARE_MINETEST/games/minetest_game, so cannot continue." > $err_txt
+        cat $err_txt
+        echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
+        sleep 1
+        echo " 3..."
+        sleep 1
+        echo " 2..."
+        sleep 1
+        echo " 1..."
+        sleep 1
+      fi
+    else
+      echo "ERROR: refusing to reinstall minetest_game since missing sources (not at $HOME/minetest/games/minetest_game nor $HOME/Downloads/minetest/games/minetest_game"
+    fi
+  else
+    echo "ERROR: refusing to reinstall minetest_game to packaged dir: $MT_MINETEST_GAME_PATH"
+  fi
+}
 
 add_zip_mod()
 {
@@ -377,9 +421,28 @@ remove_mod()
   #fi
 }
 #echo "MT_MYGAME_MODS_PATH: $MT_MYGAME_MODS_PATH"
-echo "MT_MYGAME_DIR: $MT_MYGAME_DIR"
-echo "MT_WORLDS_DIR: $MT_WORLDS_DIR"
-echo "MT_MYWORLD_NAME: $MT_MYWORLD_NAME"
+echo
+echo
+echo "To preconfigure, write true or false to files in $CONFIGS_PATH named:"
+echo "  local_enable"
+echo "  version_0_5_enable"
+echo
+echo "Using following configuration:"
+if [ -z "$version_0_5_enable" ]; then
+  echo "  version_0_5_enable: (auto--set this var before pasting region into terminal)"
+else
+  echo "  version_0_5_enable: $version_0_5_enable"
+fi
+if [ -z "$local_enable" ]; then
+  echo "  local_enable: (auto--set this var before pasting region into terminal)"
+else
+  echo "local_enable: $local_enable"
+fi
+echo "  USR_SHARE_MINETEST: $USR_SHARE_MINETEST"
+echo "  MT_MYGAME_DIR: $MT_MYGAME_DIR"
+echo "  MT_WORLDS_DIR: $MT_WORLDS_DIR"
+echo "  MT_MYWORLD_NAME: $MT_MYWORLD_NAME"
+echo "  MT_MINETEST_GAME_PATH: $MT_MINETEST_GAME_PATH"
 
 #endregion paste this part into terminal to get some great environment variables
 
@@ -482,7 +545,6 @@ else
   fi
 fi
 
-
 #sudo mkdir "$MT_MYGAME_DIR"
 #sudo mkdir "$MT_MYGAME_MODS_PATH"
 if [ ! -d "$MT_MYGAME_DIR/" ]; then
@@ -499,11 +561,6 @@ if [ ! -d "$MT_MYGAME_DIR/" ]; then
   exit 1
 fi
 #sudo cp -R $USR_SHARE_MINETEST/games/$mtgame_name/mods/* "$MT_MYGAME_DIR/mods/"
-if [ -d "$USR_SHARE_MINETEST/games/minetest" ]; then
-  # Arch linux
-  mtgame_name="minetest"
-fi
-MT_MINETEST_GAME_PATH=$USR_SHARE_MINETEST/games/$mtgame_name
 sudo cp -Rf $MT_MINETEST_GAME_PATH/* "$MT_MYGAME_DIR/"
 
 
@@ -617,7 +674,7 @@ spawners_enable="true"
 if [ "$spawners_enable" = "true" ]; then
   # forum_url: https://forum.minetest.net/viewtopic.php?f=11&t=13857
     # description:
-    # * REPLACES pyramids.
+    # * NO LONGER REPLACES pyramids.
     # * Works with mobs_redo and creatures.
     # * optionally makes use of fire (in minetest_game; only uses fire:flint_and_steel), mobs, creatures, bones, xpanes (now part of minetest_game)
     # * only RECIPES require fake_fire and xpanes
@@ -695,6 +752,8 @@ if [ "$spawners_enable" = "true" ]; then
     else
       add_git_mod tsm_chests_dungeon minetest_tsm_chests_dungeon http://repo.or.cz/minetest_tsm_chests_dungeon.git
     fi
+  # NOTE: spawners no longer adds pyramids, so:
+  add_git_mod tsm_pyramids tsm_pyramids http://repo.or.cz/minetest_pyramids/tsm_pyramids.git
 
 else
   remove_mod tsm_chests_dungeon
