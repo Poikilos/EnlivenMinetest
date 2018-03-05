@@ -227,6 +227,7 @@ if [ ! -d "$MT_WORLDS_DIR/$MT_MYWORLD_NAME" ]; then
     sleep 1
     echo " 1..."
     sleep 1
+    exit 1
 fi
 MT_MYWORLD_DIR=$MT_WORLDS_DIR/$MT_MYWORLD_NAME
 echo "Using world at $MT_MYWORLD_DIR"
@@ -260,6 +261,7 @@ reinstall_mt_game() {
         sleep 1
         echo " 1..."
         sleep 1
+        exit 1
       fi
     else
       echo "ERROR: refusing to reinstall minetest_game since missing sources (not at $HOME/minetest/games/minetest_game nor $HOME/Downloads/minetest/games/minetest_game"
@@ -317,6 +319,7 @@ add_zip_mod()
     sleep 1
     echo " 1..."
     sleep 1
+    exit 1
   else
     echo "  added as $MTMOD_DEST_PATH"
   fi
@@ -1232,6 +1235,7 @@ fi
       echo "ALREADY patched $TARGET_PATH with $MODIFIED_PATH"
     else
       echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version."
+      sleep 4
     fi
   fi
   BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/homedecor_modpack/homedecor/crafts.lua
@@ -1247,6 +1251,7 @@ fi
       echo "ALREADY patched $TARGET_PATH with $MODIFIED_PATH"
     else
       echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version."
+      sleep 4
     fi
   fi
   if [ -d "$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/models" ]; then
