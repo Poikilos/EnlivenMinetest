@@ -670,6 +670,7 @@ add_git_mod worldedge worldedge https://github.com/minetest-mods/worldedge.git
 add_git_mod mobs mobs_redo https://github.com/tenplus1/mobs_redo.git
 add_git_mod mobs_monster mobs_monster https://github.com/tenplus1/mobs_monster.git
 add_git_mod mobs_animal mobs_animal https://github.com/tenplus1/mobs_animal.git
+add_git_mod mob_horse mob_horse https://github.com/tenplus1/mob_horse.git
 # mobs_sky: (requires mobs redo) [mod-pack] sky critters (for mobs_redo) [mobs_sky] <https://forum.minetest.net/viewtopic.php?f=9&t=12688>
 add_git_mod mobs_sky mobs_sky https://github.com/blert2112/mobs_sky.git
 
