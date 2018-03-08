@@ -460,7 +460,6 @@ echo "  MT_MINETEST_GAME_PATH: $MT_MINETEST_GAME_PATH"
 
 
 
-
 if [ ! -f "`command -v minetestmapper`" ]; then
   if [ -f "`command -v apt`" ]; then
     sudo apt -y install libgd-dev libsqlite3-dev libleveldb-dev libhiredis-dev libpq-dev
@@ -524,6 +523,7 @@ if [ "`grep -q "backend" "$WORLD_MT_PATH"`" -eq 0 ]; then
   echo "has no backend"
 fi
 echo "backend = leveldb" >> "$WORLD_MT_PATH"
+echo "player_backend = sqlite3" >> "$WORLD_MT_PATH"
 echo "teleport_perms_to_build = false" >> "$WORLD_MT_PATH"
 echo "teleport_perms_to_configure = false" >> "$WORLD_MT_PATH"
 echo "teleport_requires_pairing = true" >> "$WORLD_MT_PATH"
@@ -1333,3 +1333,17 @@ else
 fi
 echo "(used $MT_MINETEST_GAME_PATH as base)"
 echo "spawners_enable: $spawners_enable"
+
+if [ command -v "blender" ]; then
+  if [ ! -f "" ]; then
+    cd ~
+    if [ ! -d Downloads ]; then
+      mkdir Downloads
+    fi
+    cd Downloads
+    git clone https://github.com/minetest/B3DExport.git
+    echo "WARNING: you have to manually install $HOME/Downloads/B3DExport/B3DExport.py using Blender's File Menu, User Preferences, Add-ons, 'Install Add-on from File...', press OK, then check the 'Import-Export B3D' box in the Add-ons list, then Save User Settings"
+    sleep 3
+    cd
+  fi
+fi
