@@ -123,6 +123,8 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * The included minetest.conf recommended for your clients includes the line enable_local_map_saving = true, which will cache the world locally on their machines. You can feel free to change that according to your preference.
 
 ## Changes:
+### (2018-03-08)
+* added technic_armor since is now in separate repo
 ### (2018-03-06)
 * added mob_horse
 ### (2018-02-23)
