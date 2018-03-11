@@ -38,6 +38,7 @@ if [ "$1" = "--help" ]; then
   echo
   echo "local_enable=<value> (where value is true or false): forces /usr/local/share/minetest (if not specified, script detects minetest but if exists both in /usr/share/ and /usr/local/share, prefers /usr/local/share/minetest)"
   echo
+  exit 0
 fi
 if [ "$1" = "version_0_5_enable=true" ]; then
   version_0_5_enable="true"
@@ -1334,7 +1335,8 @@ fi
 echo "(used $MT_MINETEST_GAME_PATH as base)"
 echo "spawners_enable: $spawners_enable"
 
-if [ command -v "blender" ]; then
+if [ -f `command -v "blender"` ]; then
+  BLENDER_CURRENT_VERSION=`blender --version | cut -d " " -f 2`
   if [ ! -f "" ]; then
     cd ~
     if [ ! -d Downloads ]; then
