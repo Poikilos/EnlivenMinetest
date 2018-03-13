@@ -936,6 +936,7 @@ add_git_mod quartz quartz https://github.com/minetest-mods/quartz
 add_git_mod magma_conduits magma_conduits https://github.com/FaceDeer/magma_conduits.git
 # dynamic_liquid: makes suspended source blocks move down until supported--therefore improves the underground especially when using mods like magma_conduits
 add_git_mod dynamic_liquid dynamic_liquid https://github.com/minetest-mods/dynamic_liquid.git
+add_git_mod mapfix mapfix https://github.com/minetest-mods/mapfix
 #endregion MOB AND WORLDGEN MODS
 
 

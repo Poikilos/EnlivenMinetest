@@ -1,8 +1,6 @@
 -- Minetest 0.4 mod: bones
 -- See README.txt for licensing and other information.
 
-bones = {}
-
 local function is_owner(pos, name)
 	local owner = minetest.get_meta(pos):get_string("owner")
 	if owner == "" or owner == name or minetest.check_player_privs(name, "protection_bypass") then
@@ -70,12 +68,6 @@ minetest.register_node("bones:bones", {
 	on_metadata_inventory_take = function(pos, listname, index, stack, player)
 		local meta = minetest.get_meta(pos)
 		if meta:get_inventory():is_empty("main") then
-			local inv = player:get_inventory()
-			if inv:room_for_item("main", {name = "bones:bones"}) then
-				inv:add_item("main", {name = "bones:bones"})
-			else
-				minetest.add_item(pos, "bones:bones")
-			end
 			minetest.remove_node(pos)
 		end
 	end,
@@ -167,19 +159,6 @@ local drop = function(pos, itemstack)
 	end
 end
 
-local player_inventory_lists = { "main", "craft" }
-bones.player_inventory_lists = player_inventory_lists
-
-local function is_all_empty(player_inv)
-	for _, list_name in ipairs(player_inventory_lists) do
-		if not player_inv:is_empty(list_name) then
-			return false
-		end
-	end
-	return true
-end
-
-
 minetest.register_on_dieplayer(function(player)
 
 	local bones_mode = minetest.settings:get("bones_mode") or "bones"
@@ -187,24 +166,20 @@ minetest.register_on_dieplayer(function(player)
 		bones_mode = "bones"
 	end
 
-	local enable_bones_logging = minetest.settings:get_bool("enable_bones_logging")
-	local enable_bones_chat_msg = minetest.settings:get_bool("enable_bones_chat_msg")
-	
 	local pos = vector.round(player:getpos())
 	-- return if keep inventory set or in creative mode
 	if bones_mode == "keep" or (creative and creative.is_enabled_for
 			and creative.is_enabled_for(player:get_player_name())) then
-		if enable_bones_logging then
-			minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones do not remain since player has creative -- died at " .. minetest.pos_to_string(vector.round(player:getpos())))
-		end
-		if enable_bones_chat_msg then
-			minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s bones do not remain since player has creative -- died at " .. minetest.pos_to_string(pos))
-		end
+		minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones do not remain since in creative_mode -- died at " .. minetest.pos_to_string(vector.round(player:getpos())))
+		minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s bones do not remain since in creative_mode -- died at " .. minetest.pos_to_string(pos)) --formerly ("Bones placed at %s."):format(pos)
 		return
 	end
 
 	local player_inv = player:get_inventory()
-	if is_all_empty(player_inv) then
+	if player_inv:is_empty("main") and
+		player_inv:is_empty("craft") then
+		minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones do not remain since inventory and craft are empty -- died at " .. minetest.pos_to_string(vector.round(player:getpos())))
+		minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s bones do not remain since inventory and craft are empty -- died at " .. minetest.pos_to_string(pos)) --formerly ("Bones placed at %s."):format(pos)
 		return
 	end
 
@@ -222,46 +197,48 @@ minetest.register_on_dieplayer(function(player)
 	end
 
 	if bones_mode == "drop" then
-		for _, list_name in ipairs(player_inventory_lists) do
-			for i = 1, player_inv:get_size(list_name) do
-				drop(pos, player_inv:get_stack(list_name, i))
-			end
-			player_inv:set_list(list_name, {})
+
+		-- drop inventory items
+		for i = 1, player_inv:get_size("main") do
+			drop(pos, player_inv:get_stack("main", i))
 		end
+		player_inv:set_list("main", {})
+
+		-- drop crafting grid items
+		for i = 1, player_inv:get_size("craft") do
+			drop(pos, player_inv:get_stack("craft", i))
+		end
+		player_inv:set_list("craft", {})
+
 		drop(pos, ItemStack("bones:bones"))
 		
-		if enable_bones_logging then
-			minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones do not remain since cannot place bones here -- died at " .. minetest.pos_to_string(pos))
-		end
-		if enable_bones_chat_msg then
-			minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s do not remain since cannot place bones here -- died at " .. minetest.pos_to_string(pos))
-		end
+		minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones do not remain since area is_protected -- died at " .. minetest.pos_to_string(pos))
+		minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s do not remain since area is_protected -- died at " .. minetest.pos_to_string(pos)) --formerly ("Bones placed at %s."):format(pos)
 		return
 	end
 
 	local param2 = minetest.dir_to_facedir(player:get_look_dir())
 	minetest.set_node(pos, {name = "bones:bones", param2 = param2})
-	if enable_bones_logging then
-		minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones remain where died at " .. minetest.pos_to_string(pos))
-	end
-	if enable_bones_chat_msg then
-		minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s bones remain where died at " .. minetest.pos_to_string(pos))
-	end
+	minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones remain where died at " .. minetest.pos_to_string(pos))
+	minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s bones remain where died at " .. minetest.pos_to_string(pos)) --formerly ("Bones placed at %s."):format(pos)
+
 	local meta = minetest.get_meta(pos)
 	local inv = meta:get_inventory()
 	inv:set_size("main", 8 * 4)
+	inv:set_list("main", player_inv:get_list("main"))
 
-	for _, list_name in ipairs(player_inventory_lists) do
-		for i = 1, player_inv:get_size(list_name) do
-			local stack = player_inv:get_stack(list_name, i)
-			if inv:room_for_item("main", stack) then
-				inv:add_item("main", stack)
-			else -- no space left
-				drop(pos, stack)
-			end
+	for i = 1, player_inv:get_size("craft") do
+		local stack = player_inv:get_stack("craft", i)
+		if inv:room_for_item("main", stack) then
+			inv:add_item("main", stack)
+		else
+			--drop if no space left
+			drop(pos, stack)
 		end
-		player_inv:set_list(list_name, {})
 	end
+
+	player_inv:set_list("main", {})
+	player_inv:set_list("craft", {})
 
 	meta:set_string("formspec", bones_formspec)
 	meta:set_string("owner", player_name)

@@ -123,6 +123,10 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * The included minetest.conf recommended for your clients includes the line enable_local_map_saving = true, which will cache the world locally on their machines. You can feel free to change that according to your preference.
 
 ## Changes:
+### (2018-03-13)
+* added mapfix mod since dynamic_liquid makes one block create a whole pond if set high above ground
+* removed mapfix due to [improvements to minetest](https://github.com/minetest/minetest/issues/2767)
+* removed dynamic_liquid since it makes oceans deplete as they go into caves (see <https://forum.minetest.net/viewtopic.php?t=16485>)
 ### (2018-03-08)
 * added technic_armor since is now in separate repo
 ### (2018-03-06)
