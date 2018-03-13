@@ -179,7 +179,6 @@ local function is_all_empty(player_inv)
 	return true
 end
 
-
 minetest.register_on_dieplayer(function(player)
 
 	local bones_mode = minetest.settings:get("bones_mode") or "bones"
@@ -189,8 +188,8 @@ minetest.register_on_dieplayer(function(player)
 
 	local enable_bones_logging = minetest.settings:get_bool("enable_bones_logging")
 	local enable_bones_chat_msg = minetest.settings:get_bool("enable_bones_chat_msg")
-	
 	local pos = vector.round(player:getpos())
+
 	-- return if keep inventory set or in creative mode
 	if bones_mode == "keep" or (creative and creative.is_enabled_for
 			and creative.is_enabled_for(player:get_player_name())) then
@@ -205,6 +204,12 @@ minetest.register_on_dieplayer(function(player)
 
 	local player_inv = player:get_inventory()
 	if is_all_empty(player_inv) then
+		if enable_bones_logging then
+			minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones do not remain since player has no items -- died at " .. minetest.pos_to_string(vector.round(player:getpos())))
+		end
+		if enable_bones_chat_msg then
+			minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s bones do not remain since player has no items -- died at " .. minetest.pos_to_string(pos))
+		end
 		return
 	end
 
@@ -229,24 +234,27 @@ minetest.register_on_dieplayer(function(player)
 			player_inv:set_list(list_name, {})
 		end
 		drop(pos, ItemStack("bones:bones"))
-		
+
 		if enable_bones_logging then
 			minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones do not remain since cannot place bones here -- died at " .. minetest.pos_to_string(pos))
 		end
 		if enable_bones_chat_msg then
 			minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s do not remain since cannot place bones here -- died at " .. minetest.pos_to_string(pos))
 		end
+
 		return
 	end
 
 	local param2 = minetest.dir_to_facedir(player:get_look_dir())
 	minetest.set_node(pos, {name = "bones:bones", param2 = param2})
+
 	if enable_bones_logging then
 		minetest.log("action", "[bones] " .. player:get_player_name() .. "'s bones remain where died at " .. minetest.pos_to_string(pos))
 	end
 	if enable_bones_chat_msg then
 		minetest.chat_send_player(player:get_player_name(), player:get_player_name() .. "'s bones remain where died at " .. minetest.pos_to_string(pos))
 	end
+
 	local meta = minetest.get_meta(pos)
 	local inv = meta:get_inventory()
 	inv:set_size("main", 8 * 4)

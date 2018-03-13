@@ -935,13 +935,14 @@ add_git_mod bakedclay bakedclay https://github.com/tenplus1/bakedclay.git
 add_git_mod quartz quartz https://github.com/minetest-mods/quartz
 add_git_mod magma_conduits magma_conduits https://github.com/FaceDeer/magma_conduits.git
 # dynamic_liquid: makes suspended source blocks move down until supported--therefore improves the underground especially when using mods like magma_conduits
-add_git_mod dynamic_liquid dynamic_liquid https://github.com/minetest-mods/dynamic_liquid.git
-add_git_mod mapfix mapfix https://github.com/minetest-mods/mapfix
+remove_mod dynamic_liquid
+#add_git_mod dynamic_liquid dynamic_liquid https://github.com/minetest-mods/dynamic_liquid.git
 #endregion MOB AND WORLDGEN MODS
 
 
 
 #region NON-WORLDGEN NODE/ITEM MODS
+#add_git_mod mapfix mapfix https://github.com/minetest-mods/mapfix
 add_git_mod boost_cart boost_cart https://github.com/SmallJoker/boost_cart.git
 echo "Installing minetest-mods' (NOT MinetestForFun's PvP fork of Echoes91's, NOT Echoes91's Throwing enhanced NOT PilzAdam's NOT Jeija's) Throwing <https://forum.minetest.net/viewtopic.php?f=11&t=11437>"
 add_git_mod throwing throwing https://github.com/minetest-mods/throwing.git
