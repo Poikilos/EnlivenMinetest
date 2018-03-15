@@ -832,6 +832,7 @@ fi
 add_git_mod moreblocks moreblocks https://github.com/minetest-mods/moreblocks.git
 # plantlife_modpack: includes bushes:* with fruit and fruit recipes
 add_git_mod plantlife_modpack plantlife_modpack https://github.com/minetest-mods/plantlife_modpack.git
+add_git_mod bushes_soil bushes_soil https://github.com/poikilos/bushes_soil.git
 
 # forum_url="https://forum.minetest.net/viewtopic.php?f=9&t=12368"
 # description="Installing Napiophelios's lapis fork since has blocks, but minetest-mods has a version as well, with dye (not used): https://forum.minetest.net/viewtopic.php?f=9&t=11287"
