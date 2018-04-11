@@ -40,9 +40,28 @@ if [ -d "$HOME/Downloads/minetest" ]; then
     if [ -d "$MY_SUBGAME_PATH" ]; then
       echo "updating "
       sudo rsync -rtv "$HOME/Downloads/minetest/games/minetest_game/mods/" "$MY_SUBGAME_PATH/mods/"
+      if [ -d "$MY_SUBGAME_PATH/mods/tsm_chests_dungeon" ]; then
+        echo "REMOVING dungeon_loot since tsm_chests_dungeon is installed (even though more than one should work now since https://github.com/minetest/minetest/issues/6590 is resolved, dungeon_loot would be redundant in this case)..."
+        sudo rm -Rf "$MY_SUBGAME_PATH/mods/dungeon_loot"
+      fi
     else
       echo "skipping update of components from minetest_game since does not exist: "
       echo "  $MY_SUBGAME_PATH"
+    fi
+    echo "patching bones (this will not be needed after https://github.com/minetest/minetest_game/pull/2082 is merged)..."
+    if [ -d "$MY_SUBGAME_PATH/mods/bones" ]; then
+      cd "$MY_SUBGAME_PATH/mods/bones"
+      if [ -f init.bak ]; then
+        sudo rm init.bak
+      fi
+      if [ -f init.1st ]; then
+        sudo rm init.1st
+      fi
+      sudo mv init.lua init.bak
+      sudo wget https://github.com/poikilos/minetest_game/raw/master/mods/bones/init.lua
+      cd "$HOME/Downloads"
+    else
+      echo "ERROR: missing '$MY_SUBGAME_PATH/mods/bones'"
     fi
   else
     echo "WARNING: could not find $MT_GAMES_DIR/minetest_game"
