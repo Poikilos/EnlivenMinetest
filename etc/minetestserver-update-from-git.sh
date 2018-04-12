@@ -60,6 +60,18 @@ if [ -d "$HOME/Downloads/minetest" ]; then
       sudo mv init.lua init.bak
       sudo wget https://github.com/poikilos/minetest_game/raw/master/mods/bones/init.lua
       cd "$HOME/Downloads"
+      if [ ! -d farming ]; then
+        git clone https://github.com/tenplus1/farming.git
+      else
+        cd farming
+        git pull
+        cd ..
+      fi
+      sudo rm -Rf "$MY_SUBGAME_PATH/mods/farming"
+      sudo cp -Rf farming "$MY_SUBGAME_PATH/mods/"
+      sudo rm -Rf "$MY_SUBGAME_PATH/mods/farming/.git"
+      sudo rm "$MY_SUBGAME_PATH/mods/farming/screenshot.png"
+      sudo rm "$MY_SUBGAME_PATH/mods/farming/.gitignore"
     else
       echo "ERROR: missing '$MY_SUBGAME_PATH/mods/bones'"
     fi
