@@ -30,27 +30,27 @@ if [ -d "$HOME/Downloads/minetest" ]; then
   #git fetch
   #git checkout HEAD games/minetest_game
   sudo make install
-
-  MT_GAMES_DIR="/usr/local/share/minetest/games"
+  USR_SHARE_MINETEST="/usr/local/share/minetest"
+  MT_GAMES_DIR="$USR_SHARE_MINETEST/games"
   if [ -d "$MT_GAMES_DIR/minetest_game" ]; then
     if [ ! -d "$MT_GAMES_DIR/minetest_game" ]; then
       sudo mkdir -p "$MT_GAMES_DIR/minetest_game"
     fi
-    MY_SUBGAME_PATH="$MT_GAMES_DIR/ENLIVEN"
-    if [ -d "$MY_SUBGAME_PATH" ]; then
+    MT_MYGAME_DIR="$MT_GAMES_DIR/ENLIVEN"
+    if [ -d "$MT_MYGAME_DIR" ]; then
       echo "updating "
-      sudo rsync -rtv "$HOME/Downloads/minetest/games/minetest_game/mods/" "$MY_SUBGAME_PATH/mods/"
-      if [ -d "$MY_SUBGAME_PATH/mods/tsm_chests_dungeon" ]; then
+      sudo rsync -rtv "$HOME/Downloads/minetest/games/minetest_game/mods/" "$MT_MYGAME_DIR/mods/"
+      if [ -d "$MT_MYGAME_DIR/mods/tsm_chests_dungeon" ]; then
         echo "REMOVING dungeon_loot since tsm_chests_dungeon is installed (even though more than one should work now since https://github.com/minetest/minetest/issues/6590 is resolved, dungeon_loot would be redundant in this case)..."
-        sudo rm -Rf "$MY_SUBGAME_PATH/mods/dungeon_loot"
+        sudo rm -Rf "$MT_MYGAME_DIR/mods/dungeon_loot"
       fi
     else
       echo "skipping update of components from minetest_game since does not exist: "
-      echo "  $MY_SUBGAME_PATH"
+      echo "  $MT_MYGAME_DIR"
     fi
     echo "patching bones (this will not be needed after https://github.com/minetest/minetest_game/pull/2082 is merged)..."
-    if [ -d "$MY_SUBGAME_PATH/mods/bones" ]; then
-      cd "$MY_SUBGAME_PATH/mods/bones"
+    if [ -f "$MT_MYGAME_DIR/mods/bones/init.lua" ]; then
+      cd "$MT_MYGAME_DIR/mods/bones"
       if [ -f init.bak ]; then
         sudo rm init.bak
       fi
@@ -67,13 +67,13 @@ if [ -d "$HOME/Downloads/minetest" ]; then
         git pull
         cd ..
       fi
-      sudo rm -Rf "$MY_SUBGAME_PATH/mods/farming"
-      sudo cp -Rf farming "$MY_SUBGAME_PATH/mods/"
-      sudo rm -Rf "$MY_SUBGAME_PATH/mods/farming/.git"
-      sudo rm "$MY_SUBGAME_PATH/mods/farming/screenshot.png"
-      sudo rm "$MY_SUBGAME_PATH/mods/farming/.gitignore"
+      sudo rm -Rf "$MT_MYGAME_DIR/mods/farming"
+      sudo cp -Rf farming "$MT_MYGAME_DIR/mods/"
+      sudo rm -Rf "$MT_MYGAME_DIR/mods/farming/.git"
+      sudo rm "$MT_MYGAME_DIR/mods/farming/screenshot.png"
+      sudo rm "$MT_MYGAME_DIR/mods/farming/.gitignore"
     else
-      echo "ERROR: missing '$MY_SUBGAME_PATH/mods/bones'"
+      echo "ERROR: missing '$MT_MYGAME_DIR/mods/bones/init.lua'"
     fi
   else
     echo "WARNING: could not find $MT_GAMES_DIR/minetest_game"
