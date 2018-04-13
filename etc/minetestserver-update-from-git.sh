@@ -32,11 +32,11 @@ if [ -d "$HOME/Downloads/minetest" ]; then
   sudo make install
   USR_SHARE_MINETEST="/usr/local/share/minetest"
   MT_GAMES_DIR="$USR_SHARE_MINETEST/games"
+  MT_MYGAME_DIR="$MT_GAMES_DIR/ENLIVEN"
   if [ -d "$MT_GAMES_DIR/minetest_game" ]; then
     if [ ! -d "$MT_GAMES_DIR/minetest_game" ]; then
       sudo mkdir -p "$MT_GAMES_DIR/minetest_game"
     fi
-    MT_MYGAME_DIR="$MT_GAMES_DIR/ENLIVEN"
     if [ -d "$MT_MYGAME_DIR" ]; then
       echo "updating "
       sudo rsync -rtv "$HOME/Downloads/minetest/games/minetest_game/mods/" "$MT_MYGAME_DIR/mods/"
