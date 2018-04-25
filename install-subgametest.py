@@ -21,9 +21,9 @@ except:
           " but if in *nix-like environment first 'su -', and if no\n"
           " pip, use your software manager to install:\n"
           "   python-pip or python2-pip or python3-pip)\n"
-          "python -m pip install --upgrade pip\n"
-          "python -m pip install --upgrade pip wheel\n"
-          "python -m pip install gitpython\n")
+          "sudo python2 -m pip install --upgrade pip\n"
+          "sudo python2 -m pip install --upgrade pip wheel"
+          "sudo python -m pip install gitpython\n")
           #Possible commands:
           # pkg install -y python3-pip python2-pip
           # apt-get install -y python3-pip python2-pip

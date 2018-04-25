@@ -4,10 +4,10 @@ try:
     from win32api import GetFileVersionInfo, LOWORD, HIWORD
 except:
     print("you need to install win32api such as with the command:")
-    print("python -m pip install --upgrade pip")
-    print("python -m pip install pypiwin32")
+    print("sudo python2 -m pip install --upgrade pip")
+    print("sudo python -m pip install pypiwin32")
     exit(1)
-    
+
     from win32api import GetFileVersionInfo, LOWORD, HIWORD
 
 def get_version_number (filename):
