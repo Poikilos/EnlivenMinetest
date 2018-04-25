@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 2017 expertmm. License:
+# Copyright 2017 poikilos. License:
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 # The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -639,7 +639,7 @@ add_git_mod invhack minetest-invhack https://github.com/salahzar/minetest-invhac
 # add_zip_mod worldedit Minetest-WorldEdit-* https://github.com/Uberi/MineTest-WorldEdit/zipball/master
 echo "Installing Uberi's worldedit..."
 add_git_mod worldedit Minetest-WorldEdit https://github.com/Uberi/Minetest-WorldEdit.git
-# metatools: expertmm fork of LeMagnesium's minetest-mod-metatools
+# metatools: poikilos fork of LeMagnesium's minetest-mod-metatools
 add_git_mod metatools minetest-mod-metatools https://github.com/poikilos/minetest-mod-metatools.git
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=9376"
 # author="tenplus1"
@@ -731,7 +731,7 @@ if [ "$spawners_enable" = "true" ]; then
     echo "CHESTS_GENERATE = false" >> settings.txt
     sudo mv settings.txt "$MTMOD_DEST_PATH/"  # formerly $MT_MYGAME_MODS_PATH/spawners/, now is spawners/spawners_env/
     echo "NOTE: in spawners, only SPAWNERS_GENERATE or CHESTS_GENERATE, not both (chests seem to override) spawn in world for now. See thread for updated info: https://forum.minetest.net/viewtopic.php?f=11&t=13857&start=25"
-    echo "see also expertmm's game-install-enliven-testing-SPAWNERS_BOTH_DEBUG.txt"
+    echo "see also poikilos's game-install-enliven-testing-SPAWNERS_BOTH_DEBUG.txt"
 
     # dungeon_loot is part of default game, but I haven't created loot tables for this subgame yet, so remove:
     remove_mod "dungeon_loot"
@@ -930,7 +930,7 @@ add_git_mod tsm_railcorridors tsm_railcorridors http://repo.or.cz/RailCorridors/
 #-- carts:powerrail
 #-- carts:rail
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=10172&hilit=boost+cart"
-# birthstones: expertmm fork of a rather non-maintained mod--forum link is at https://forum.minetest.net/viewtopic.php?id=3663 (original mod was at https://github.com/Doc22/birthstones-mod.git)
+# birthstones: poikilos fork of a rather non-maintained mod--forum link is at https://forum.minetest.net/viewtopic.php?id=3663 (original mod was at https://github.com/Doc22/birthstones-mod.git)
 add_git_mod birthstones minetest-birthstones https://github.com/poikilos/minetest-birthstones.git
 add_git_mod bakedclay bakedclay https://github.com/tenplus1/bakedclay.git
 add_git_mod quartz quartz https://github.com/minetest-mods/quartz
@@ -1026,7 +1026,7 @@ fi
 # Wuzzy's slimenodes mod (only available via /give command).
 # web view: http://repo.or.cz/w/minetest_slimenodes.git
 # add_git_mod slimenodes minetest_slimenodes http://repo.or.cz/minetest_slimenodes.git
-# use expertmm fork instead:
+# use poikilos fork instead:
 add_git_mod slimenodes slimenodes https://github.com/poikilos/slimenodes.git
 # ropes: adds rope spools that are mounted to the side or bottom of a node and can be cut with any choppy tool while someone lower is climbing; doesn't lower into protected areas; also has rope ladders
 add_git_mod ropes ropes https://github.com/minetest-mods/ropes.git
@@ -1159,7 +1159,7 @@ if [ -d "$PATCHES_PATH" ]; then
   echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
   sudo cp -f $PATCHES_PATH/subgame/mods/mobs_monster/textures/* "$MT_MYGAME_DIR/mods/mobs_monster/textures/"
 
-# REMOVE EXISTING SKINS AND ONLY ADD expertmm skins:
+# REMOVE EXISTING SKINS AND ONLY ADD poikilos skins:
 MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$PATCH_SKINS_MOD_NAME
 SUB_NAME="textures"  # include u_skins since u_skins/u_skins IS THE MOD in the modpack
 SUB_PATH="$MTMOD_DEST_PATH/$SUB_NAME"
@@ -1169,7 +1169,7 @@ if [ -d "$SUB_PATH" ]; then
 fi
 sudo cp -f $PATCHES_PATH/mods-multiplayer/$PATCH_SKINS_MOD_NAME/$SUB_NAME/* "$SUB_PATH"
 if [ ! -d "$SUB_PATH" ]; then
-  echo "ERROR: failed to install expertmm's skins to $SUB_PATH, so cannot continue." > $err_txt
+  echo "ERROR: failed to install poikilos's skins to $SUB_PATH, so cannot continue." > $err_txt
   cat $err_txt
   echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
   sleep 1
@@ -1181,7 +1181,7 @@ if [ ! -d "$SUB_PATH" ]; then
   sleep 1
   exit 1
 else
-  echo "installed expertmm's skins to $SUB_PATH"
+  echo "installed poikilos's skins to $SUB_PATH"
 fi
 SUB_NAME="meta"  # include u_skins since u_skins/u_skins IS THE MOD in the modpack
 SUB_PATH="$MTMOD_DEST_PATH/$SUB_NAME"
@@ -1191,7 +1191,7 @@ if [ -d "$SUB_PATH" ]; then
 fi
 sudo cp -f $PATCHES_PATH/mods-multiplayer/$PATCH_SKINS_MOD_NAME/$SUB_NAME/* "$SUB_PATH"
 if [ ! -d "$SUB_PATH" ]; then
-  echo "ERROR: failed to install expertmm's skins to $SUB_PATH, so cannot continue." > $err_txt
+  echo "ERROR: failed to install poikilos's skins to $SUB_PATH, so cannot continue." > $err_txt
   cat $err_txt
   echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
   sleep 1
@@ -1203,7 +1203,7 @@ if [ ! -d "$SUB_PATH" ]; then
   sleep 1
   exit 1
 else
-  echo "installed metadata for expertmm's skins to $SUB_PATH"
+  echo "installed metadata for poikilos's skins to $SUB_PATH"
 fi
 
 

@@ -38,7 +38,7 @@ elif [ -f "`command -v pacman`" ]; then
 elif [ -f "`command -v dnf`" ]; then
   sudo dnf -y remove minetest-server
   sudo dnf -y remove minetest
-  #see expertmm post at https://forum.minetest.net/viewtopic.php?f=42&t=3837&start=125
+  #see poikilos post at https://forum.minetest.net/viewtopic.php?f=42&t=3837&start=125
   sudo dnf -y install -y gcc-c++ freetype-devel spatialindex-devel postgresql-devel doxygen irrlicht-devel gettext freetype cmake bzip2-devel libpng libjpeg-turbo libXxf86vm mesa-libGLU libsqlite3x-devel libogg-devel libvorbis-devel openal-devel curl-devel luajit-devel lua-devel leveldb-devel ncurses-devel redis hiredis-devel gmp-devel
   cd
   #git clone https://github.com/minetest/minetest.git

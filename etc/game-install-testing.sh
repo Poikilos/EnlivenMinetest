@@ -1,6 +1,6 @@
 echo "Installing Enliven TESTING patch (run this after game-install-enliven.sh)"
 echo "* You have to manually paste the environment variable settings from the beginning of game-install-enliven.sh here, so you have them."
-echo "* Only install these mods if you know what you are doing! These mods may become part of enliven later, but are not thoroughly tested for stability and compatibility. Thanks, expertmm."
+echo "* Only install these mods if you know what you are doing! These mods may become part of enliven later, but are not thoroughly tested for stability and compatibility. Thanks, poikilos."
 echo "Known issues:"
 echo "* advanced_npc: 0.4.15 git (Jan 2017) has error with advanced_npc even with secure.enable_security = false ()"
 echo "* torches: removes ceiling torches"

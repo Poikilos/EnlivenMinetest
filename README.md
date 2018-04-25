@@ -198,7 +198,7 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
     * (chunkymap-generator.bat, pythoninfo.py) if using Windows, check for various versions of Python3 and warn if fails (no longer check for Python2)
 * (minetestinfo.py) account for Minetest 0.4.16 arch naming difference: minetest_game (from minetest-data package) becomes minetest (still check for minetest_game if minetest not present in minetest/games since 0.4.16 repack 3 via deb from Debian via Ubuntu still uses the folder name minetest_game)
 ### (2017-05-25)
-* switched to expertmm fork of travelnet
+* switched to poikilos fork of travelnet
 ### (2017-05-18)
 * Installer now available at [axlemedia.net](http://www.axlemedia.net/index.php?htmlref=tutoring.html "Axle Media") -- added project and related files for Inno Setup Compiler.
 ### (2017-05-15)
@@ -406,7 +406,7 @@ Further steps needed to recreate:
 * The recommended minetest.conf for subgame, including for server, is in the ENLIVEN subgame folder (also available at [EnlivenMinetest on GitHub](https://github.com/poikilos/EnlivenMinetest)
 
 ## Sources and License
-Authors: expertmm (Jacob Gustafson)
+Authors: poikilos (Jake Gustafson)
 ENLIVEN project (aka EnlivenMinetest), including launcher (ENLIVEN application) and ENLIVEN subgame, is released under the LGPL v2.1 license (see LICENSE), except media which is released under the CC-BY-SA 3.0 license (see LICENSE). There are other exceptions to this license and authorship where specified below and in subfolders.
 Source code is available at [https://github.com/poikilos/EnlivenMinetest](https://github.com/poikilos/EnlivenMinetest).
 
@@ -444,4 +444,4 @@ Qt5Widgets.dll
 ## Developer Notes
 
 ### Regression Tests
-* Use of input in python, where should never be used except in expertmm.py and minetestinfo.py for first-time setup or when interactive_enable is True
+* Use of input in python, where should never be used except in poikilos.py and minetestinfo.py for first-time setup or when interactive_enable is True

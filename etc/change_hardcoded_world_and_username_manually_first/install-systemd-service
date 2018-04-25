@@ -23,7 +23,7 @@ if [ -f mts-ENLIVEN.service ]; then
 #clear old downloaded copy if exists in userspace
 rm mts-ENLIVEN.service
 fi
-wget https://github.com/expertmm/EnlivenMinetest/raw/master/etc/change_hardcoded_world_and_username_manually_first/mts-ENLIVEN.service
+wget https://github.com/poikilos/EnlivenMinetest/raw/master/etc/change_hardcoded_world_and_username_manually_first/mts-ENLIVEN.service
 echo "This will only work if you are using systemd."
 sudo mv -f mts-ENLIVEN.service /etc/systemd/system/
 #sudo chmod +x /etc/systemd/system/mts-ENLIVEN.service

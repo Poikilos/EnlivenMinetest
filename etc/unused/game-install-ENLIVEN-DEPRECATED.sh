@@ -252,5 +252,5 @@ fi
 # This mod is part of minetest_game 0.4.15!
 # add_git_mod moresnow moresnow https://github.com/Sokomine/moresnow
 
-# no longer needed since ENLIVEN main branch now uses expertmm travelnet:
+# no longer needed since ENLIVEN main branch now uses poikilos travelnet:
 # add_git_mod travelnet travelnet https://github.com/Sokomine/travelnet.git

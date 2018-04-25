@@ -4,4 +4,4 @@ This Minetest mod was created to repair worlds that have materials from dynamic_
 
 Authors of source code
 ----------------------
-expertmm (github.com/expertmm)
+poikilos (github.com/poikilos)

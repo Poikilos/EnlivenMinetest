@@ -4,7 +4,7 @@ This mod provides a transition from spawners (old non-modpack version) in case o
 
 Authors of source code
 ----------------------
-expertmm (github.com/expertmm)
+poikilos (github.com/poikilos)
 
 Authors of media (textures)
 ---------------------------

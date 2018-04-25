@@ -11,7 +11,7 @@ Craft 8 "Cotton" (farming:cotton, formerly default:string) into Cotton Seed (cot
 
 Authors of source code
 ----------------------
-expertmm (github.com/expertmm)
+poikilos (github.com/poikilos)
 
 
 Authors of media (textures)

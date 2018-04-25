@@ -4,7 +4,7 @@ This mod provides a transition from cme (Creatures Mob Engine) so you can use "s
 
 Authors of source code
 ----------------------
-expertmm (github.com/expertmm)
+poikilos (github.com/poikilos)
 
 Authors of media (textures)
 ---------------------------

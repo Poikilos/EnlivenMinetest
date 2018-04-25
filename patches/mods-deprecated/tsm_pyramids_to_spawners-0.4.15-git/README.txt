@@ -4,7 +4,7 @@ This mod provides a transition from tsm_pyramids so you can use "spawners" mod i
 
 Authors of source code
 ----------------------
-expertmm (github.com/expertmm)
+poikilos (github.com/poikilos)
 
 Authors of media (textures)
 ---------------------------

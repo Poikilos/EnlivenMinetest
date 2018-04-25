@@ -17,7 +17,7 @@ Reedmace sometimes drops cotton seeds
 
 Authors of source code
 ----------------------
-expertmm (github.com/expertmm)
+poikilos (github.com/poikilos)
 
 Authors of media (textures)
 ---------------------------

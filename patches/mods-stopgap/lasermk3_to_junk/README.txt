@@ -21,7 +21,7 @@ Mod dependencies: slimenodes, technic
 
 Authors of source code
 ----------------------
-expertmm (github.com/expertmm)
+poikilos (github.com/poikilos)
 
 Authors of media (textures)
 ---------------------------

@@ -25,7 +25,7 @@ if [ -d "$HOME/Downloads/minetest" ]; then
   make -j$(nproc)
   #cd games; git pull; make -j$(nproc)
   #git config global user.email ""
-  #git config global user.name "expertmm"
+  #git config global user.name "poikilos"
   #git pull https://github.com/minetest/minetest_game.git
   #git fetch
   #git checkout HEAD games/minetest_game
