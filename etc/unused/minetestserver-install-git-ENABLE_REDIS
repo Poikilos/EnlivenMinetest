@@ -1,3 +1,4 @@
+#!/bin/bash
 #sudo apt-get install libncurses5-dev libgettextpo-dev doxygen libspatialindex-dev lua-redis-dev gettext
 
 sudo apt-get install build-essential cmake git libirrlicht-dev libbz2-dev libgettextpo-dev libfreetype6-dev libpng12-dev libjpeg8-dev libxxf86vm-dev libgl1-mesa-dev libsqlite3-dev libogg-dev libvorbis-dev libopenal-dev libhiredis-dev libcurl3-dev

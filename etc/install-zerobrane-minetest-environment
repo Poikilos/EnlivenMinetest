@@ -1,7 +1,8 @@
+#!/bin/bash
 dls_path="$HOME/Downloads"
 dl_name="MinetestIDEvers1(dot)0.zip"
 dl_path="$dls_path/$dl_name"
-if [ ! if "" ]; then
+if [ ! -f "$dl_path" ]; then
   echo "ERROR: Nothing done since you must first download $dl_name from"
   echo "  https://forum.minetest.net/viewtopic.php?f=14&t=12923"
   echo "  such that it exists as $dl_path"
@@ -21,6 +22,7 @@ if [ -d "$try_path/api" ]; then
 elif [ ! -d "$share_path" ]; then
   echo "Neither $share_path nor $try_path was found."
   echo "  Make sure ZeroBrane is installed, or modify share_path in this script."
+  echo "  https://studio.zerobrane.com/support"
   echo "Press Ctrl C to cancel otherwise this terminal will exit..."
   echo "3..."
   sleep 1

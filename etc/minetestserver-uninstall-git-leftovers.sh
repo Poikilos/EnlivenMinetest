@@ -1,3 +1,4 @@
+#!/bin/bash
 if [ ! -f "install_manifest.txt" ]; then
   echo "missing install_manifest.txt, cannot uninstall unless you properly run cmake source and are running this script from the base repo directory"
   exit 1

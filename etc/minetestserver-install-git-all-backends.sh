@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #this is the recommended script for servers
 #remove non-git version first:
 if [ -f "`command -v apt`" ]; then
@@ -7,7 +7,7 @@ fi
 echo "This script compiles AND installs minetestserver (NOT run-in-place, but rather system-wide) with leveldb, redis, and defaults postgresql, doxygen, sqlite3"
 echo
 echo
-echo "If you want to install the client on your server (not normal practice), change -DBUILD_CLIENT=FALSE to -DBUILD_CLIENT=TRUE before continuing this script."
+echo "If you want to install the client on your server (not normal practice), add client or both param when calling this script."
 echo "Removing the non-git (packaged) version first (Press Ctrl C  to cancel)..."
 sleep 1
 echo "3..."
@@ -66,8 +66,11 @@ if [ -d minetest ]; then
   sleep 1
   echo "1..."
   sleep 1
+  #cd minetest
+else
+  git clone https://github.com/minetest/minetest.git
 fi
-git clone https://github.com/minetest/minetest.git
+#cd minetest
 git pull --all  # see https://forum.minetest.net/viewtopic.php?f=42&t=3837&start=125#p306449
 cd minetest/games
 if [ ! -d minetest_game ]; then
