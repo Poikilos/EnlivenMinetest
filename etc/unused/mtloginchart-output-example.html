@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>mtloginchart</title>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport">
+</head>
+<body>
+<div id="outputArea">loading...</div>
+<canvas id="myCanvas" width="100" height="1540"
+style="border:1px solid #c3c3c3;">
+Your browser does not support the canvas element.
+</canvas>
+<script>
+var hour_count = 24;
+var hour_width = 60;  // 60 pixels per hour
+var player_name_width = 100;
+var players = [];
+var stats_html = "";
+var time_area_width = hour_width*hour_count;
+var canvas_w = player_name_width + time_area_width;
+stats_html += '<div>' + hour_count + "hrs * " + hour_width + "px = " + time_area_width + '</div>'
+stats_html += '<div>' + time_area_width + "px + " + player_name_width + "px player name = " + canvas_w + 'px canvas width</div>'
+var outputE = document.getElementById("outputArea");
+players[0] = {};
+players[0].login_time = "16:20:03"
+players[0].logout_time = "16:28:45"
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+ctx.fillStyle = "#FF0000";
+ctx.fillRect(0,0,150,75);
+ctx.moveTo(0,0);
+ctx.lineTo(200,100);
+ctx.stroke();
+</script>
+</body>
+</html>
