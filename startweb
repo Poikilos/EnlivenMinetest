@@ -14,7 +14,7 @@ fi
 
 #js app.js
 if [ -f "`command -v node`" ]; then
-  screen -S EnlivenMinetest node app.js
+  screen -S EnlivenMinetest node server.js
 else
-  screen -S EnlivenMinetest js app.js
+  screen -S EnlivenMinetest js server.js
 fi

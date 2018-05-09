@@ -14,7 +14,7 @@ fi
 
 #js app.js
 if [ -f "`command -v node`" ]; then
-  node app.js
+  node server.js
 else
-  js app.js
+  js server.js
 fi
