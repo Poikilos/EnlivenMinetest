@@ -1,0 +1,22 @@
+2018-04-25 13:08:48: [Main]: Using world specified by --worldname on the command line
+2018-04-25 13:08:49: [Main]: [playereffects] inactive_effects = {
+        poikilos = {
+
+        },
+        poikilos2 = {
+
+        }
+}
+2018-04-25 13:08:52: WARNING[Main]: Not registering alias, item with same name is already defined: homedecor:beer_mug -> homedecor_ua:drink_mug
+        .__               __                   __
+  _____ |__| ____   _____/  |_  ____   _______/  |_
+ /     \|  |/    \_/ __ \   __\/ __ \ /  ___/\   __\
+|  Y Y  \  |   |  \  ___/|  | \  ___/ \___ \  |  |
+|__|_|  /__|___|  /\___  >__|  \___  >____  > |__|
+      \/        \/     \/          \/     \/
+2018-04-25 13:08:52: ACTION[Main]: World at [/home/owner/.minetest/worlds/FCAWorldB]
+2018-04-25 13:10:13: ACTION[Server]: [playereffects] Autosaving mod data to playereffects.mt ...
+2018-04-25 13:10:13: ACTION[Server]: [playereffects] Wrote playereffects data into /home/owner/.minetest/worlds/FCAWorldB/playereffects.mt.
+2018-04-25 15:33:31: ACTION[Server]: poikilos2 [192.212.65.236] joins game. 
+2018-04-25 15:33:31: ACTION[Server]: poikilos2 joins game. List of players: poikilos poikilos2
+2018-04-25 15:33:31: ACTION[Server]: poikilos2 leaves game. List of players: poikilos
