@@ -10,6 +10,7 @@ see <https://stackoverflow.com/questions/18543047/mocha-monitor-application-outp
 ## Developer Notes
 
 ### Things webapp should deprecate
+* mtanalyze/web
 * /home/owner/GitHub/EnlivenMinetest/etc/change_hardcoded_world_name_first/eauth
   * shell script which contains only `nano ~/.minetest/worlds/FCAGameAWorld/auth.txt`
 * mts-ENLIVEN and mtsenliven.py (run minetestserver with selected game and world)

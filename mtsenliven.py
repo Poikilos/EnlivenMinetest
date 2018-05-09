@@ -57,10 +57,10 @@ except:
           " minetest-server package or compiling from git instructions"
           " on minetest.net")
     exit(1)
-msg_flags = ["WARNING[Server]: ", "ACTION[Server]: "]
-msg_lists = {}  # where flag is key
-for flag in msg_flags:
-    msg_lists[flag] = []
+msgprefix_flags = ["WARNING[Server]: ", "ACTION[Server]: "]
+msgprefix_lists = {}  # where flag is key
+for flag in msgprefix_flags:
+    msgprefix_lists[flag] = []
 # see https://www.endpoint.com/blog/2015/01/28/getting-realtime-output-
 # using-python
 
@@ -91,7 +91,7 @@ def print_unique_only(output, err_flag=False):
         if flag in output:
             always_show_enable = True
     if not always_show_enable:
-        for flag in msg_flags:
+        for flag in msgprefix_flags:
         # such as '2018-02-06 21:08:06: WARNING[Server]: Deprecated call to get_look_yaw, use get_look_horizontal instead'
         # or 2018-02-06 21:08:05: ACTION[Server]: [playereffects] Wrote playereffects data into /home/owner/.minetest/worlds/FCAGameAWorld/playereffects.mt.
             f_i = output.find(flag)
@@ -105,10 +105,10 @@ def print_unique_only(output, err_flag=False):
                     sub_msg = wrap["opener"] + "..." + wrap["closer"]
                     msg_msg = "similar messages"
                     break
-            if sub_msg in msg_lists[found_flag]:
+            if sub_msg in msgprefix_lists[found_flag]:
                 show_enable = False
             else:
-                msg_lists[found_flag].append(sub_msg)
+                msgprefix_lists[found_flag].append(sub_msg)
     if show_enable:
         print(output_strip)
         if found_flag is not None:
