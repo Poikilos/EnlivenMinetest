@@ -5,7 +5,6 @@ var tz_offset = 240; //subtract this from server time to get local time; 4hrs is
 //var selected_date_s = null;
 //selected_date_s = "2018-05-08";
 
-
 var express = require('express'),
 //var exphbs  = require("express-handlebars");
 //	exphbs  = require('../../'); // "express-handlebars"
