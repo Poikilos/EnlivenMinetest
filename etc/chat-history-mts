@@ -1,2 +1,0 @@
-#!/bin/sh
-grep $HOME/.minetest/debug.txt | grep CHAT

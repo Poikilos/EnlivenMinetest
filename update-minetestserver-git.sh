@@ -57,15 +57,23 @@ if [ -d "$HOME/Downloads/minetest" ]; then
       if [ -f init.1st ]; then
         sudo rm init.1st
       fi
-      sudo mv init.lua init.bak
-      sudo wget https://github.com/poikilos/minetest_game/raw/master/mods/bones/init.lua
+      sudo mv -f init.lua init.bak
+      sudo wget -O init.lua https://github.com/poikilos/minetest_game/raw/master/mods/bones/init.lua
       cd "$HOME/Downloads"
+      if [ ! -d mods ]; then
+        mkdir mods
+      fi
+      cd mods
       if [ ! -d farming ]; then
-        git clone https://github.com/tenplus1/farming.git
+        if [ -d ../farming ]; then
+          mv ../farming ./
+        else
+          git clone https://github.com/tenplus1/farming.git
+        fi
       else
         cd farming
         git pull
-        cd ..
+        cd ../..
       fi
       sudo rm -Rf "$MT_MYGAME_DIR/mods/farming"
       sudo cp -Rf farming "$MT_MYGAME_DIR/mods/"

@@ -123,6 +123,26 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * The included minetest.conf recommended for your clients includes the line enable_local_map_saving = true, which will cache the world locally on their machines. You can feel free to change that according to your preference.
 
 ## Changes:
+### (2018-05-10)
+* moved fully working scripts from etc to root of repo
+* renamed:
+```bash
+mv game-install-ENLIVEN install-ENLIVEN.sh
+mv game-install-ENLIVEN-testing.sh patch-ENLIVEN-testing.sh #(formerly game-install-enliven-testing.sh)
+mv minetestserver-install-git-all-backends.sh install-minetestserver-git-all-backends.sh
+mv minetestserver-uninstall-git-leftovers.sh uninstall-minetestserver-git-leftovers.sh
+mv minetestserver-uninstall-git.sh uninstall-minetestserver-git.sh
+mv minetestserver-update-from-git.sh update-minetestserver-git.sh
+mv noscreen noscreen-startweb.sh
+mv startweb startweb.sh
+mv stop-mts stop-mts.sh
+mv archive-mts-debug archive-minetest-debug.sh
+mv chat-history-mts chat-history-minetest.sh
+mv du-show-big du-show-big.sh
+mv mounter mounter.sh
+mv unmounter unmounter.sh
+```
+* replaced uninstall-minetestserver-git.sh with uninstall-minetestserver-git.py (the shell script version was functionally identical to uninstall-minetestserver-git-leftovers.sh)
 ### (2018-03-13)
 * added mapfix mod since dynamic_liquid makes one block create a whole pond if set high above ground
 * removed mapfix due to [improvements to minetest](https://github.com/minetest/minetest/issues/2767)
@@ -332,7 +352,8 @@ squirrel --releasify .\ENLIVEN.<version>.nupkg <your code signing options here>
 * (minetestoffline.py) (status:closed reason:no solution) assumes name specified in file is same as id (filename)
 
 ### Known issues in mods:
-* Mining Drill mk3 duplication bug
+* Crafting wool with dark green dye makes green wool (should make dark green), therefore making pool table is impossible.
+  see https://github.com/minetest/minetest_game/issues/1940
 * Technic manual is not complete. Contribute info on drills and mining? See https://github.com/minetest-mods/technic/blob/master/manual.md
 * regular doors and chests are not protected via protection block/symbol
 * homedecor doors are not protected via protection block/symbol

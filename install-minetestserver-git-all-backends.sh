@@ -8,7 +8,9 @@ echo "This script compiles AND installs minetestserver (NOT run-in-place, but ra
 echo
 echo
 echo "If you want to install the client on your server (not normal practice), add client or both param when calling this script."
+#if [ -f "`command -v minetest`" ]; then
 echo "Removing the non-git (packaged) version first (Press Ctrl C  to cancel)..."
+#fi
 sleep 1
 echo "3..."
 sleep 1
@@ -57,39 +59,58 @@ if [ ! -d "Downloads" ]; then
    mkdir Downloads
 fi
 cd Downloads
-if [ -d minetest ]; then
-  echo "ERROR: Nothing done since 'minetest' already exists in `pwd`--delete it before cloning, or run the included update script to update."
-  echo "Ctrl C or this window will exit..."
-  echo "3..."
-  sleep 1
-  echo "2..."
-  sleep 1
-  echo "1..."
-  sleep 1
+#if [ -d minetest ]; then
+  #echo "ERROR: Nothing done since 'minetest' already exists in `pwd`--delete it before cloning, or run the included update script to update."
+  #echo "Ctrl C or this window will exit..."
+  #echo "3..."
+  #sleep 1
+  #echo "2..."
+  #sleep 1
+  #echo "1..."
+  #sleep 1
   #cd minetest
-else
+#else
+if [ ! -d minetest ]; then
   git clone https://github.com/minetest/minetest.git
+  cd minetest
+else
+  cd minetest
+  echo "updating: `pwd`"
+  git pull  # --all  # see https://forum.minetest.net/viewtopic.php?f=42&t=3837&start=125#p306449
 fi
-#cd minetest
-git pull --all  # see https://forum.minetest.net/viewtopic.php?f=42&t=3837&start=125#p306449
-cd minetest/games
+cd games
 if [ ! -d minetest_game ]; then
   git clone https://github.com/minetest/minetest_game.git
 else
   cd minetest_game
-  git pull --all
+  echo "updating: `pwd`"
+  git pull  # --all
   cd ..
 fi
-git pull --all
+#(does nothing since currently in games folder) git pull --all
+#echo "in: `pwd`"
 cd ..
+#echo "in: `pwd`"
+#echo "..."
+#sleep 10
 # heavily modified from forum url above due to hints from AUR files obtained via git clone https://aur.archlinux.org/minetest-git-leveldb.git
 echo "ENABLE_CURSES enables server-side terminal via --terminal option"
 build_what="-DBUILD_SERVER=on -DBUILD_CLIENT=off"
 if [ "$1" = "both" ]; then
   build_what="-DBUILD_SERVER=on -DBUILD_CLIENT=on"
+  echo "Building minetest and minetestserver (only)..."
 elif [ "$1" = "client" ]; then
   build_what="-DBUILD_SERVER=off -DBUILD_CLIENT=on"
+  echo "Building minetest CLIENT (only)..."
+else
+  echo "Building minetestserver..."
 fi
+echo "3..."
+sleep 1
+echo "2..."
+sleep 1
+echo "1..."
+sleep 1
 cmake . -DENABLE_GETTEXT=on -DENABLE_CURSES=on -DENABLE_FREETYPE=on -DENABLE_LEVELDB=on -DENABLE_CURL=on -DENABLE_GETTEXT=on -DENABLE_REDIS=on -DENABLE_POSTGRESQL=on -DRUN_IN_PLACE=off -DCMAKE_BUILD_TYPE=Release $build_what
 # NOTE: as long as -DRUN_IN_PLACE=off, above installs correctly without -DCMAKE_INSTALL_PREFIX=/usr which for some reason is used by https://aur.archlinux.org/minetest-git.git
 #  -DCMAKE_BUILD_TYPE=Release as per https://aur.archlinux.org/minetest-git.git
