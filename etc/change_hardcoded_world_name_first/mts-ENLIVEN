@@ -25,5 +25,8 @@ fi
 # NOTE: if only title is set, screen -x must be used to resume, so use -S <name> to resume with -r <name>
 # screen -S MinetestServer minetestserver --gameid ENLIVEN --worldname FCAGameAWorld
 # screen -S MinetestServer /home/owner/minetest/bin/minetestserver --gameid ENLIVEN --worldname FCAGameAWorld
-screen -S MinetestServer $mts --gameid ENLIVEN --worldname FCAGameAWorld
-
+MT_MYWORLD_NAME="FCAWorldB"
+screen -S MinetestServer $mts --gameid ENLIVEN --worldname $MT_MYWORLD_NAME
+if [ ! -d "$HOME/.minetest/worlds/" ]; then
+  echo "ERROR: missing $HOME/.minetest/worlds/$MT_MYWORLD_NAME"
+fi

@@ -14,6 +14,17 @@
 
 # ISSUES:
 # * ERROR[Main]: Singleplayer mode says following mods could not be found: 3d_armor areas mobs mobs_animal mobs_monster protector technic treasurer unified_inventory xban2
+# * update git discarding local changes:
+#   (see https://stackoverflow.com/questions/4157189/git-pull-while-ignoring-local-changes)
+#   git fetch --all
+#   git reset --hard origin/master
+#   git pull
+#   #"even works when u have committed ur local changes, but still u want to revert" -agsachin
+#
+#   #git reset --hard
+#   #git pull
+#   #git clean -xdf
+#   #-f remove untracked files, -d remove untracked directories, -x remove untracked OR ignored
 sudo echo "starting ENLIVEN installer script..."
 
 
