@@ -48,6 +48,7 @@ if [ ! -f minetestenv.rc ]; then
   sleep 1
   exit 1
 fi
+source minetestenv.rc
 #endregion paste this part into terminal to get some great environment variables
 
 
