@@ -272,6 +272,12 @@ app.get('/get-players', function (req, res) {
 	 res.send(JSON.stringify(players));
 });
 
+app.get('/announce', function (req, res) {
+	console.log(JSON.stringify(req));
+	res.setHeader('Content-Type', 'text/plain');
+	res.send("");
+}
+
 app.get('/', function (req, res) {
 	var ret = "";
 	ret += '<html><body style="font-family:calibri,sans">';
