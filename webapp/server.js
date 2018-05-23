@@ -272,11 +272,19 @@ app.get('/get-players', function (req, res) {
 	 res.send(JSON.stringify(players));
 });
 
+var last_announce_string = "none";
+
+app.get('/last-announce', function (req, res) {
+	res.setHeader('Content-Type', 'text/plain');
+	res.send(last_announce_string);
+});
+
 app.get('/announce', function (req, res) {
-	console.log(JSON.stringify(req));
+	last_announce_string = JSON.stringify(req);
+	console.log(last_announce_string);
 	res.setHeader('Content-Type', 'text/plain');
 	res.send("");
-}
+});
 
 app.get('/', function (req, res) {
 	var ret = "";
