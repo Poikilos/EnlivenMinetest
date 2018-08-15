@@ -4,12 +4,28 @@
 if [ -f "`command -v apt`" ]; then
   sudo apt update
 fi
+msg="Installing minetestserver ONLY (no param specified). If you want to install the client on your server (not normal practice) or are on a computer with a graphical desktop, add client or both param when calling this script."
+warnings=""
+if [ "$1" = "both" ]; then
+  msg="Installing minetest client AND server (param specified: both)."
+elif [ "$1" = "client" ]; then
+  msg="Installing minetest client ONLY (param specified: client)."
+else
+  if [ ! -z "$XDG_CURRENT_DESKTOP" ]; then
+    warnings="WARNING: Detected $XDG_CURRENT_DESKTOP...you probably meant to install client or both (use client or both param after this script)"
+  fi
+fi
 echo "This script compiles AND installs minetestserver (NOT run-in-place, but rather system-wide) with leveldb, redis, and defaults postgresql, doxygen, sqlite3"
 echo
 echo
-echo "If you want to install the client on your server (not normal practice), add client or both param when calling this script."
+echo $msg
+echo $warnings
+if [ ! -z "$warnings" ]; then
+  echo "You may want to cancel and correct warnings above..."
+  sleep 2
+fi
 #if [ -f "`command -v minetest`" ]; then
-echo "Removing the non-git (packaged) version first (Press Ctrl C  to cancel)..."
+echo "* trying to remove any non-git (packaged) version first (Press Ctrl C  to cancel)..."
 #fi
 sleep 1
 echo "3..."
@@ -19,7 +35,7 @@ sleep 1
 echo "1..."
 sleep 1
 echo
-if [ -f "`command -v apt`" ]; then
+if [ `which apt` ]; then
   sudo apt -y remove minetest-server
   sudo apt -y remove minetest
   sudo apt -y install libncurses5-dev libgettextpo-dev doxygen libspatialindex-dev libpq-dev postgresql-server-dev-all
@@ -30,14 +46,14 @@ if [ -f "`command -v apt`" ]; then
   sudo apt -y install libpng12-dev libjpeg8-dev
   # Debian:
   sudo apt -y install libpng-dev libjpeg-dev
-elif [ -f "`command -v pacman`" ]; then
+elif [ `which pacman` ]; then
   sudo pacman -R --noconfirm minetest-server
   sudo pacman -R --noconfirm minetest
   echo "detected arch-based distro (tested only on antergos)..."
   # NOTE: the regular packages include headers on arch-based distros:
   sudo pacman -Syyu --noconfirm git spatialindex postgresql-libs doxygen postgresql-libs hiredis redis irrlicht gettext freetype2 bzip2 libpng libjpeg-turbo libxxf86vm mesa glu sqlite libogg libvorbis openal curl luajit leveldb ncurses redis hiredis gmp
   #can't find equivalent to libjpeg8-dev libxxf86vm-dev mesa sqlite libogg vorbis
-elif [ -f "`command -v dnf`" ]; then
+elif [ `which dnf` ]; then
   sudo dnf -y remove minetest-server
   sudo dnf -y remove minetest
   #see poikilos post at https://forum.minetest.net/viewtopic.php?f=42&t=3837&start=125
@@ -52,6 +68,16 @@ elif [ -f "`command -v dnf`" ]; then
   #sudo make install
   #minetest
   # echo -e "\n\n\e[1;33mYou can run Minetest again by typing \"minetest\" in a terminal or selecting it in an applications menu.\nYou can install mods in ~/.minetest/mods, too.\e[0m"
+else
+  echo "WARNING: cannot remove packaged version, because your package manager is not known by this script."
+  echo "Press Ctrl C to cancel, or wait to continue anyway..."
+  sleep 1
+  echo "3..."
+  sleep 1
+  echo "2..."
+  sleep 1
+  echo "1..."
+  sleep 1
 fi
 
 cd

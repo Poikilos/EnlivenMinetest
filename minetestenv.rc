@@ -1,4 +1,4 @@
- 
+
 CONFIGS_PATH="$HOME/.config/EnlivenMinetest"
 if [ ! -d "$CONFIGS_PATH" ]; then
   mkdir -p "$CONFIGS_PATH"
@@ -15,35 +15,26 @@ if [ "$1" = "--help" ]; then
   echo
   exit 0
 fi
-if [ "$1" = "version_0_5_enable=true" ]; then
-  version_0_5_enable="true"
-elif [ "$2" = "version_0_5_enable=true" ]; then
-  version_0_5_enable="true"
-elif [ "$1" = "version_0_5_enable=false" ]; then
-  version_0_5_enable="false"
-elif [ "$2" = "version_0_5_enable=false" ]; then
-  version_0_5_enable="false"
-fi
+
+#NOTE: version_0_5_enable is now detected further down instead of being specified
+#if [ "$1" = "version_0_5_enable=true" ]; then
+#  version_0_5_enable="true"
+#elif [ "$2" = "version_0_5_enable=true" ]; then
+#  version_0_5_enable="true"
+#elif [ "$1" = "version_0_5_enable=false" ]; then
+#  version_0_5_enable="false"
+#elif [ "$2" = "version_0_5_enable=false" ]; then
+#  version_0_5_enable="false"
+#fi
+
 if [ "$1" = "local_enable=true" ]; then
   local_enable="true"
-elif [ "$2" = "local_enable=true" ]; then
-  local_enable="true"
+#elif [ "$2" = "local_enable=true" ]; then
+#  local_enable="true"
 elif [ "$1" = "local_enable=false" ]; then
+#  local_enable="false"
+#elif [ "$2" = "local_enable=false" ]; then
   local_enable="false"
-elif [ "$2" = "local_enable=false" ]; then
-  local_enable="false"
-fi
-if [ -f "$CONFIGS_PATH/local_enable" ]; then
-  local_enable=$(head -n 1 $CONFIGS_PATH/local_enable)
-fi
-if [ -f "$CONFIGS_PATH/version_0_5_enable" ]; then
-  version_0_5_enable=$(head -n 1 $CONFIGS_PATH/version_0_5_enable)
-fi
-if [ -z "$local_enable" ]; then
-  echo "$local_enable" > "$CONFIGS_PATH/local_enable"
-fi
-if [ -z "$version_0_5_enable" ]; then
-  echo "$version_0_5_enable" > "$CONFIGS_PATH/version_0_5_enable"
 fi
 #echo "3..."
 #sleep 1
@@ -108,12 +99,29 @@ if [ "$local_enable" != "false" ]; then
   # IF git version is installed
   try_path="/usr/local/share/minetest"
   if [ -d "$try_path" ]; then
-    if [ -z "$version_0_5_enable" ]; then
-      version_0_5_enable="true"
-    fi
+    #if [ -z "$version_0_5_enable" ]; then
+    #  version_0_5_enable="true"
+    #fi
     USR_SHARE_MINETEST="$try_path"
   fi
 fi
+version_0_5_enable="false"
+if [ -d "$USR_SHARE_MINETEST/games/minetest_game/mods/player_api" ]; then
+  version_0_5_enable="true"
+fi
+if [ -f "$CONFIGS_PATH/local_enable" ]; then
+  local_enable=$(head -n 1 $CONFIGS_PATH/local_enable)
+fi
+if [ -f "$CONFIGS_PATH/version_0_5_enable" ]; then
+  version_0_5_enable=$(head -n 1 $CONFIGS_PATH/version_0_5_enable)
+fi
+if [ -z "$local_enable" ]; then
+  echo "$local_enable" > "$CONFIGS_PATH/local_enable"
+fi
+if [ -z "$version_0_5_enable" ]; then
+  echo "$version_0_5_enable" > "$CONFIGS_PATH/version_0_5_enable"
+fi
+
 mtgame_name="minetest_game"
 MT_MINETEST_GAME_PATH=$USR_SHARE_MINETEST/games/$mtgame_name
 #echo "3..."
