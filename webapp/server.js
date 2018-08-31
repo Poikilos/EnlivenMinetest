@@ -281,9 +281,9 @@ app.get('/last-announce', function (req, res) {
 
 app.get('/announce', function (req, res) {
 	last_announce_string = JSON.stringify(req.body);
-	console.log(last_announce_string);
+	console.log("announce got:"+last_announce_string);
 	res.setHeader('Content-Type', 'text/plain');
-	res.send("");
+	res.send();
 });
 
 app.get('/', function (req, res) {
