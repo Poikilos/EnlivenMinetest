@@ -202,10 +202,20 @@ echo "hudbars_bar_type = statbar_modern" >> "$WRITEABLE_MINETEST_CONF"  #TODO: r
 echo "sprint_speed = 2.25" >> "$WRITEABLE_MINETEST_CONF"  # default is 1.3
 echo "sprint_jump = 1.25" >> "$WRITEABLE_MINETEST_CONF"  # default is 1.1
 echo "sprint_stamina_drain = .5" >> "$WRITEABLE_MINETEST_CONF"  # default is 2
+echo "bones_position_message = true" >> "$WRITEABLE_MINETEST_CONF"  # default is false--this is for client-side chat message (server-side logging always on though)
+#no longer needed since these mods check for player_api to determine whether v3 model is used:
 if [ "$version_0_5_enable" = "true" ]; then
-  echo "player_model_version = default_character_v3" >> "$WRITEABLE_MINETEST_CONF"  # used by playeranim and ts_furniture
+#  echo "player_model_version = default_character_v3" >> "$WRITEABLE_MINETEST_CONF"  # used by playeranim
+   echo "using version 5 branch of mods..."
 else
-  echo "player_model_version = default_character_v2" >> "$WRITEABLE_MINETEST_CONF"  # used by playeranim and ts_furniture
+#  echo "player_model_version = default_character_v2" >> "$WRITEABLE_MINETEST_CONF"  # used by playeranim
+   echo "using stable (minetest 0.4) branch of mods..."
+   echo "3..."
+   sleep 1
+   echo "2..."
+   sleep 1
+   echo "1..."
+   sleep 1
 fi
 sudo mv -f $HOME/minetest.conf "$USR_SHARE_MINETEST/games/$MT_MYGAME_NAME/minetest.conf"
 
@@ -245,7 +255,7 @@ add_git_mod metatools minetest-mod-metatools https://github.com/poikilos/minetes
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=9376"
 # author="tenplus1"
 # description="not the original 2012 protector or 2012 fork of 2012 protector; must be logged in to download protector.zip release version at https://forum.minetest.net/download/file.php?id=5046"
-add_git_mod protector protector https://github.com/tenplus1/protector.git
+add_git_mod protector protector https://notabug.org/TenPlus1/protector.git
 #formerly https://github.com/kaeza/minetest-xban2/archive/master.tar.gz
 add_git_mod xban2 xban2 https://github.com/minetest-mods/xban2.git
 echo "Installing ShadowNinja's <https://forum.minetest.net/viewtopic.php?t=7239>"
@@ -269,12 +279,13 @@ add_git_mod worldedge worldedge https://github.com/minetest-mods/worldedge.git
 #sudo mv cme "$MT_MYGAME_MODS_PATH/cme"
 # description="(must be logged in to forum to download release version at https://forum.minetest.net/download/file.php?id=5282)"
 # author="TenPlus1"
-add_git_mod mobs mobs_redo https://github.com/tenplus1/mobs_redo.git
-add_git_mod mobs_monster mobs_monster https://github.com/tenplus1/mobs_monster.git
-add_git_mod mobs_animal mobs_animal https://github.com/tenplus1/mobs_animal.git
-add_git_mod mob_horse mob_horse https://github.com/tenplus1/mob_horse.git
+add_git_mod mobs mobs_redo https://notabug.org/TenPlus1/mobs_redo.git
+add_git_mod mobs_monster mobs_monster https://notabug.org/TenPlus1/mobs_monster.git
+add_git_mod mobs_animal mobs_animal https://notabug.org/TenPlus1/mobs_animal.git
+add_git_mod mob_horse mob_horse https://notabug.org/tenplus1/mob_horse.git
 # mobs_sky: (requires mobs redo) [mod-pack] sky critters (for mobs_redo) [mobs_sky] <https://forum.minetest.net/viewtopic.php?f=9&t=12688>
-add_git_mod mobs_sky mobs_sky https://github.com/blert2112/mobs_sky.git
+# add_git_mod mobs_sky mobs_sky https://github.com/blert2112/mobs_sky.git
+add_git_mod mobs_sky mobs_sky https://github.com/poikilos/mobs_sky.git
 
 spawners_enable="true"
 if [ "$spawners_enable" = "true" ]; then
@@ -533,7 +544,7 @@ add_git_mod tsm_railcorridors tsm_railcorridors http://repo.or.cz/RailCorridors/
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=10172&hilit=boost+cart"
 # birthstones: poikilos fork of a rather non-maintained mod--forum link is at https://forum.minetest.net/viewtopic.php?id=3663 (original mod was at https://github.com/Doc22/birthstones-mod.git)
 add_git_mod birthstones minetest-birthstones https://github.com/poikilos/minetest-birthstones.git
-add_git_mod bakedclay bakedclay https://github.com/tenplus1/bakedclay.git
+add_git_mod bakedclay bakedclay https://notabug.org/tenplus1/bakedclay.git
 add_git_mod quartz quartz https://github.com/minetest-mods/quartz
 add_git_mod magma_conduits magma_conduits https://github.com/FaceDeer/magma_conduits.git
 # dynamic_liquid: makes suspended source blocks move down until supported--therefore improves the underground especially when using mods like magma_conduits
@@ -602,7 +613,7 @@ else
 fi
 if [ "$farming_redo_enable" = "true" ]; then
   remove_mod crops
-  add_git_mod farming farming https://github.com/tenplus1/farming.git
+  add_git_mod farming farming https://notabug.org/tenplus1/farming.git
 else
   remove_mod farming
   sudo cp -R $USR_SHARE_MINETEST/games/$mtgame_name/mods/farming $MT_MYGAME_MODS_PATH/
@@ -645,7 +656,9 @@ add_git_mod trmp_minetest_game trmp_minetest_game https://github.com/poikilos/tr
 #forum_url = "http://minetest.org/forum/viewtopic.php?f=11&t=4870&sid=3ccbe3a667c6201075fc475ef7dc7cea"
 #see also minetest-mods version:
 add_git_mod awards awards https://github.com/minetest-mods/awards.git
-add_git_mod awards_board awards_board https://github.com/xisd/awards_board.git
+#xisd is GONE from GitHub:
+#add_git_mod awards_board awards_board https://github.com/xisd/awards_board.git
+add_git_mod awards_board awards_board https://gitlab.com/poikilos/awards_board.git
 #endregion NON-WORLDGEN NODE/ITEM MODS
 
 
@@ -692,7 +705,7 @@ add_git_mod playereffects minetest_playereffects http://repo.or.cz/minetest_play
 #MarkBu's ambience/ambiance ambient sounds (burli on https://forum.minetest.net/viewtopic.php?f=9&t=14814 )
 #add_git_mod ambianceplus ambianceplus https://github.com/MarkuBu/ambianceplus.git
 # tenplus1's ambience/ambiance ambient sounds (fork linked at original's thread at https://forum.minetest.net/viewtopic.php?f=11&t=2807&start=275 )
-add_git_mod ambience ambience https://github.com/tenplus1/ambience.git
+add_git_mod ambience ambience https://notabug.org/tenplus1/ambience.git
 # forum_url: https://forum.minetest.net/viewtopic.php?t=12189
 # description: ISSUE ON 0.5.0: player halfway into ground; Adds animations to the players' head
 if [ "$version_0_5_enable" != "true" ]; then
@@ -810,28 +823,29 @@ fi
 
 
   echo "mods affected: mobs mobs_monsters $PATCH_SKINS_MOD_NAME"
-  PATCHED_FLAG=""
-  BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/bones/init.lua
-  MODIFIED_PATH=$PATCHES_PATH/subgame/mods/bones/init.lua
-  MTMOD_DEST_NAME=bones
-  MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/bones
-  TARGET_PATH=$MTMOD_DEST_PATH/init.lua
-  TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"
-  if [ -z "$TRY_DIFF" ]; then
-    sudo cp -f $MODIFIED_PATH "$MT_MYGAME_DIR/mods/bones/"
-    echo "done attempting to patch $MTMOD_DEST_PATH/ with $MODIFIED_PATH"
-  else
-    BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/bones/init-0.5.0-dev.lua
-    MODIFIED_PATH=$PATCHES_PATH/subgame/mods/bones/init-0.5.0-dev.lua
-    TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"
-    if [ -z "$TRY_DIFF" ]; then
-      sudo cp -f $MODIFIED_PATH "$MT_MYGAME_DIR/mods/bones/init.lua"
-      echo "patched $MT_MYGAME_DIR/mods/bones/init.lua"
-    else
-      TRY_DONE_DIFF="`diff $MODIFIED_PATH $TARGET_PATH`"
-      echo "ALREADY patched $MTMOD_DEST_NAME with $MODIFIED_PATH."
-    fi
-  fi
+  # poikilos bones PR was merged with minetest_game, so below is not needed
+  #PATCHED_FLAG=""
+  #BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/bones/init.lua
+  #MODIFIED_PATH=$PATCHES_PATH/subgame/mods/bones/init.lua
+  #MTMOD_DEST_NAME=bones
+  #MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/bones
+  #TARGET_PATH=$MTMOD_DEST_PATH/init.lua
+  #TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"
+  #if [ -z "$TRY_DIFF" ]; then
+  #  sudo cp -f $MODIFIED_PATH "$MT_MYGAME_DIR/mods/bones/"
+  #  echo "done attempting to patch $MTMOD_DEST_PATH/ with $MODIFIED_PATH"
+  #else
+  #  BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/bones/init-0.5.0-dev.lua
+  #  MODIFIED_PATH=$PATCHES_PATH/subgame/mods/bones/init-0.5.0-dev.lua
+  #  TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"
+  #  if [ -z "$TRY_DIFF" ]; then
+  #    sudo cp -f $MODIFIED_PATH "$MT_MYGAME_DIR/mods/bones/init.lua"
+  #    echo "patched $MT_MYGAME_DIR/mods/bones/init.lua"
+  #  else
+  #    TRY_DONE_DIFF="`diff $MODIFIED_PATH $TARGET_PATH`"
+  #    echo "ALREADY patched $MTMOD_DEST_NAME with $MODIFIED_PATH."
+  #  fi
+  #fi
   #homedecor: see homedecor_ua (underage) instead ABOVE
   #BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/homedecor_modpack/homedecor/gastronomy.lua
   #MODIFIED_PATH=$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/gastronomy.lua
@@ -939,7 +953,7 @@ fi
 echo "(used $MT_MINETEST_GAME_PATH as base)"
 echo "spawners_enable: $spawners_enable"
 
-if [ -f `command -v "blender"` ]; then
+if [ -f "`command -v blender`" ]; then
   BLENDER_CURRENT_VERSION=`blender --version | cut -d " " -f 2`
   if [ ! -f "" ]; then
     cd ~
