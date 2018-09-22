@@ -113,6 +113,27 @@ if [ -f "$MT_MYWORLD_DIR/world.mt" ]; then
   mv -f "$MT_MYWORLD_DIR/world.mt" "$MT_MYWORLD_DIR/world.mt.bak"
 fi
 
+
+
+
+#process conf file (account for spaces around equal sign and variable names containing name of other variable name)
+shopt -s extglob
+configfile="$WORLD_MT_PATH" # set the actual path name of your (DOS or Unix) config file
+tr -d '\r' < $configfile > $configfile.unix
+while IFS='= ' read -r lhs rhs
+do
+    if [[ ! $lhs =~ ^\ *# && -n $lhs ]]; then
+        rhs="${rhs%%\#*}"    # Del in line right comments
+        rhs="${rhs%%*( )}"   # Del trailing spaces
+        rhs="${rhs%\"*}"     # Del opening string quotes 
+        rhs="${rhs#\"*}"     # Del closing string quotes 
+        declare world_mt_var_$lhs="$rhs"
+    fi
+done < $configfile.unix
+
+
+
+
 # REMAKE world.mt
 cd
 if [ -f "$WORLD_MT_PATH" ]; then
@@ -121,11 +142,16 @@ if [ -f "$WORLD_MT_PATH" ]; then
   sudo chgrp `cat /tmp/local_mts_user` "$WORLD_MT_PATH"
 fi
 echo "gameid = $MT_MYGAME_NAME" > "$WORLD_MT_PATH"
-if [ "`grep -q "backend" "$WORLD_MT_PATH"`" -eq 0 ]; then
-  echo "has no backend"
+#if ! grep -q "backend =" "$WORLD_MT_PATH"; then
+if [ -z "$world_mt_var_backend" ]; then
+  echo "has no backend, setting leveldb..."
+  echo "backend = leveldb" >> "$WORLD_MT_PATH"
 fi
-echo "backend = leveldb" >> "$WORLD_MT_PATH"
-echo "player_backend = sqlite3" >> "$WORLD_MT_PATH"
+#if ! grep -q "backend" "$WORLD_MT_PATH"; then
+if [ -z "$world_mt_var_player_backend" ]; then
+ echo "has no player_backend, setting sqlite3..."
+ echo "player_backend = sqlite3" >> "$WORLD_MT_PATH"
+fi
 echo "teleport_perms_to_build = false" >> "$WORLD_MT_PATH"
 echo "teleport_perms_to_configure = false" >> "$WORLD_MT_PATH"
 echo "teleport_requires_pairing = true" >> "$WORLD_MT_PATH"
@@ -667,6 +693,8 @@ add_git_mod awards_board awards_board https://gitlab.com/poikilos/awards_board.g
 
 
 #region PLAYER UX MODS
+echo "Adding TenPlus1's money (BARTER-ONLY fork of kotolegokot's minetest-mod-money):"
+add_git_mod money money https://notabug.org/TenPlus1/money
 add_git_mod lightning lightning https://github.com/minetest-mods/lightning.git
 add_git_mod unified_inventory unified_inventory https://github.com/minetest-mods/unified_inventory.git
 
@@ -928,8 +956,8 @@ echo ""
 echo "  * for invhack, remember to do: /giveme invhack:tool"
 echo "  * uncomment columns in lapis mod"
 echo "  * Make sure client (server done already above) minetest.conf has secure.trusted_mods = advanced_npc"
-echo "  * Make sure writable minetest conf was successfully written"
-echo "    over $MT_MYGAME_DIR/minetest.conf with (NOTE: protector_drop is deprecated):"
+#echo "  * Make sure writable minetest conf was successfully written"
+#echo "    over $MT_MYGAME_DIR/minetest.conf with (NOTE: protector_drop is deprecated):"
 echo "protector_radius = 7"
 echo "protector_pvp = true"
 echo "protector_pvp_spawn = 10"
@@ -952,6 +980,12 @@ else
 fi
 echo "(used $MT_MINETEST_GAME_PATH as base)"
 echo "spawners_enable: $spawners_enable"
+echo
+echo "As for world.mt, the following WORLD_MT_PATH was used: $WORLD_MT_PATH"
+echo "  content:"
+cat "$WORLD_MT_PATH"
+echo
+echo
 
 if [ -f "`command -v blender`" ]; then
   BLENDER_CURRENT_VERSION=`blender --version | cut -d " " -f 2`

@@ -26,7 +26,28 @@ fi
 # screen -S MinetestServer minetestserver --gameid ENLIVEN --worldname FCAGameAWorld
 # screen -S MinetestServer /home/owner/minetest/bin/minetestserver --gameid ENLIVEN --worldname FCAGameAWorld
 MT_MYWORLD_NAME="FCAWorldB"
-screen -S MinetestServer $mts --gameid ENLIVEN --worldname $MT_MYWORLD_NAME
-if [ ! -d "$HOME/.minetest/worlds/" ]; then
-  echo "ERROR: missing $HOME/.minetest/worlds/$MT_MYWORLD_NAME"
+MT_MYWORLD_DIR="$HOME/.minetest/worlds/$MT_MYWORLD_NAME"
+WORLD_MT_PATH="$MT_MYWORLD_DIR/world.mt"
+if [ ! -d "$MT_MYWORLD_DIR" ]; then
+  echo "ERROR: Nothing to do since missing $MT_MYWORLD_DIR"
+  exit 1
 fi
+if grep -q "backend =" "$WORLD_MT_PATH"; then
+  echo "backends:"
+  cat $WORLD_MT_PATH | grep backend
+else
+  if [ -d "$MT_MYWORLD_DIR/map.db" ]; then
+    echo "ERROR: Nothing to do since map.db was found but there is no backend specified in $WORLD_MT_PATH:"
+    cat "$WORLD_MT_PATH"
+    exit 1
+  else
+    cat "WARNING: no backend specified in $WORLD_MT_PATH"
+    echo "3..."
+    sleep 1
+    echo "2..."
+    sleep 1
+    echo "1..."
+    sleep 1
+  fi
+fi
+screen -S MinetestServer $mts --gameid ENLIVEN --worldname $MT_MYWORLD_NAME

@@ -9,8 +9,8 @@ if [ "$1" = "--help" ]; then
   echo "This script installs ENLIVEN subgame for minetest. It uses individual git repositories, so please only run this once so as not to exceed their bandwidth."
   echo "Usage:"
   echo
-  echo "version_0_5_enable=<value> (where value is true or false): forces 0.5 (if not specified, this script uses 0.5 versions of mods if minetest is at /usr/local/share/minetest)"
-  echo
+  #echo "version_0_5_enable=<value> (where value is true or false): forces 0.5 (if not specified, this script uses 0.5 versions of mods if minetest is at /usr/local/share/minetest)"
+  #echo
   echo "local_enable=<value> (where value is true or false): forces /usr/local/share/minetest (if not specified, script detects minetest but if exists both in /usr/share/ and /usr/local/share, prefers /usr/local/share/minetest)"
   echo
   exit 0
@@ -112,15 +112,15 @@ fi
 if [ -f "$CONFIGS_PATH/local_enable" ]; then
   local_enable=$(head -n 1 $CONFIGS_PATH/local_enable)
 fi
-if [ -f "$CONFIGS_PATH/version_0_5_enable" ]; then
-  version_0_5_enable=$(head -n 1 $CONFIGS_PATH/version_0_5_enable)
-fi
+#if [ -f "$CONFIGS_PATH/version_0_5_enable" ]; then
+#  version_0_5_enable=$(head -n 1 $CONFIGS_PATH/version_0_5_enable)
+#fi
 if [ -z "$local_enable" ]; then
   echo "$local_enable" > "$CONFIGS_PATH/local_enable"
 fi
-if [ -z "$version_0_5_enable" ]; then
-  echo "$version_0_5_enable" > "$CONFIGS_PATH/version_0_5_enable"
-fi
+#if [ -z "$version_0_5_enable" ]; then
+#  echo "$version_0_5_enable" > "$CONFIGS_PATH/version_0_5_enable"
+#fi
 
 mtgame_name="minetest_game"
 MT_MINETEST_GAME_PATH=$USR_SHARE_MINETEST/games/$mtgame_name
@@ -330,10 +330,12 @@ if [ ! -d "$MTMOD_DEST_PATH" ] || [ "$update_enable" = "true" ]; then
     sudo rm -Rf "$MTMOD_DEST_PATH"
   fi
   if [ ! -z "$BRANCH" ]; then
-    echo "Cloning $BRANCH branch..."
+    echo "BRANCH: Cloning $BRANCH branch..."
+    echo "git clone -b $BRANCH --single-branch $URL"
     git clone -b $BRANCH --single-branch $URL
   else
-    echo "Cloning main branch since no branch specified: $BRANCH"
+    #echo "Cloning main branch since no branch specified: $BRANCH"
+    echo "git clone $URL"
     git clone $URL
   fi
   if [ -d "$MTMOD_UNZ_NAME" ]; then
@@ -412,14 +414,14 @@ echo
 echo
 echo "To preconfigure, write true or false to files in $CONFIGS_PATH named:"
 echo "  local_enable"
-echo "  version_0_5_enable"
+#echo "  version_0_5_enable"
 echo
 echo "Using following configuration:"
-if [ -z "$version_0_5_enable" ]; then
-  echo "  version_0_5_enable: (auto--set this var before pasting region into terminal)"
-else
-  echo "  version_0_5_enable: $version_0_5_enable"
-fi
+#if [ -z "$version_0_5_enable" ]; then
+#  echo "  version_0_5_enable: (auto--set this var before pasting region into terminal)"
+#else
+echo "  version_0_5_enable: $version_0_5_enable"
+#fi
 if [ -z "$local_enable" ]; then
   echo "  local_enable: (auto--set this var before pasting region into terminal)"
 else

@@ -8,13 +8,36 @@ if [ -d ~/Applications/EnlivenMinetest/webapp ]; then
   cd ~/Applications/EnlivenMinetest/webapp
 elif [ -d ~/Documents/EnlivenMinetest/webapp ]; then
   cd ~/Documents/GitHub/EnlivenMinetest/webapp
-else
+elif [ -d ~/GitHub/EnlivenMinetest/webapp ]; then
   cd ~/GitHub/EnlivenMinetest/webapp
+elif [ -d webapp ]; then
+  cd webapp
+else
+  echo "FAILED to find webapp directory in EnlivenMinetest"
+fi
+
+node_bin="echo"
+if [ `which node` ]; then
+  node_bin="node"
+  echo "detected node.js command: $node_bin"
+elif [ `which js` ]; then
+  node_bin="js"
+  echo "detected node.js command: $node_bin"
+else
+  echo "ERROR: Nothing to do since could not find a node or js command!"
+  exit 1
 fi
 
 #js app.js
-if [ -f "`command -v node`" ]; then
-  screen -S EnlivenMinetest node server.js
+if [ ` which screen` ]; then
+  screen -S EnlivenMinetest $node_bin server.js
 else
-  screen -S EnlivenMinetest js server.js
+  echo "WARNING: no screen command so running directly in this session..."
+  echo "3..."
+  sleep 1
+  echo "2..."
+  sleep 1
+  echo "1..."
+  sleep 1
+  $node_bin server.js
 fi
