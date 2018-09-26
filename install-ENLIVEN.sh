@@ -125,8 +125,8 @@ do
     if [[ ! $lhs =~ ^\ *# && -n $lhs ]]; then
         rhs="${rhs%%\#*}"    # Del in line right comments
         rhs="${rhs%%*( )}"   # Del trailing spaces
-        rhs="${rhs%\"*}"     # Del opening string quotes 
-        rhs="${rhs#\"*}"     # Del closing string quotes 
+        rhs="${rhs%\"*}"     # Del opening string quotes
+        rhs="${rhs#\"*}"     # Del closing string quotes
         declare world_mt_var_$lhs="$rhs"
     fi
 done < $configfile.unix
@@ -399,7 +399,9 @@ if [ "$spawners_enable" = "true" ]; then
       add_git_mod tsm_chests_dungeon minetest_tsm_chests_dungeon http://repo.or.cz/minetest_tsm_chests_dungeon.git
     fi
   # NOTE: spawners no longer adds pyramids, so:
-  add_git_mod tsm_pyramids tsm_pyramids http://repo.or.cz/minetest_pyramids/tsm_pyramids.git
+  # add_git_mod tsm_pyramids tsm_pyramids http://repo.or.cz/minetest_pyramids/tsm_pyramids.git
+  # Wuzzy's doesn't account for 5.0.0-dev yet (nodeupdate is now minetest.check_for_falling) so use custom fork:
+  add_git_mod tsm_pyramids tsm_pyramids https://github.com/poikilos/tsm_pyramids.git
 
 else
   remove_mod tsm_chests_dungeon
