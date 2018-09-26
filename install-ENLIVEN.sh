@@ -224,7 +224,7 @@ echo "motd = \"Actions and chat messages are logged. Use inventory to see recipe
 echo "disallow_empty_passwords = true" >> "$WRITEABLE_MINETEST_CONF"
 echo "secure.trusted_mods = advanced_npc" >> "$WRITEABLE_MINETEST_CONF"
 echo "server_dedicated = false" >> "$WRITEABLE_MINETEST_CONF"
-echo "hudbars_bar_type = statbar_modern" >> "$WRITEABLE_MINETEST_CONF"  #TODO: remove this after fully deprecated
+#echo "hudbars_bar_type = statbar_modern" >> "$WRITEABLE_MINETEST_CONF"  #TODO: remove this after fully deprecated
 echo "sprint_speed = 2.25" >> "$WRITEABLE_MINETEST_CONF"  # default is 1.3
 echo "sprint_jump = 1.25" >> "$WRITEABLE_MINETEST_CONF"  # default is 1.1
 echo "sprint_stamina_drain = .5" >> "$WRITEABLE_MINETEST_CONF"  # default is 2
@@ -707,16 +707,20 @@ add_git_mod player_monoids player_monoids https://github.com/minetest-mods/playe
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=11153&hilit=hunger"
 # description="Wuzzy's hudbars (no builtin bars; used by sprint, hbhunger, and hbarmor)"
 # not git://repo.or.cz/minetest_hudbars.git
-add_git_mod hudbars minetest_hudbars http://repo.or.cz/minetest_hudbars.git
+# add_git_mod hudbars minetest_hudbars http://repo.or.cz/minetest_hudbars.git
+# hudbars doesn't work with 5.0.0-dev so instead revert to GunshipPenguin sprint
+# and use hunger_ng where hudbars is optional
+# TODO: find non-hudbars armor for hud [maybe strength, not wear like hbarmor):
 
 # forum_url="https://forum.minetest.net/viewtopic.php?f=9&t=9650"
-#TODO? add_git_mod sprint sprint https://github.com/GunshipPenguin/sprint.git
+add_git_mod sprint sprint https://github.com/GunshipPenguin/sprint.git
+#remove_mod sprint
+add_git_mod hunger_ng hunger_ng https://gitlab.com/4w/hunger_ng.git
 
-remove_mod sprint
-#remove_mod hudbars
-#remove_mod hbsprint
+remove_mod hudbars
+remove_mod hbsprint
 # NOTE: hbsprint bar is on auto-hide by default (world.mt can set hudbars_autohide_stamina to true or false)
-add_git_mod hbsprint hbsprint https://github.com/minetest-mods/hbsprint.git
+#add_git_mod hbsprint hbsprint https://github.com/minetest-mods/hbsprint.git
 # armor_monoid: an api for creating multipliers for damage types (used by 3d_armor)
 add_git_mod armor_monoid armor_monoid https://github.com/minetest-mods/armor_monoid.git
 

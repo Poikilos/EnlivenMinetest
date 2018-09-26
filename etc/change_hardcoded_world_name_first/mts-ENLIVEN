@@ -51,3 +51,4 @@ else
   fi
 fi
 screen -S MinetestServer $mts --gameid ENLIVEN --worldname $MT_MYWORLD_NAME
+
