@@ -283,7 +283,16 @@ add_git_mod metatools minetest-mod-metatools https://github.com/poikilos/minetes
 # description="not the original 2012 protector or 2012 fork of 2012 protector; must be logged in to download protector.zip release version at https://forum.minetest.net/download/file.php?id=5046"
 add_git_mod protector protector https://notabug.org/TenPlus1/protector.git
 #formerly https://github.com/kaeza/minetest-xban2/archive/master.tar.gz
-add_git_mod xban2 xban2 https://github.com/minetest-mods/xban2.git
+#add_git_mod xban2 xban2 https://github.com/minetest-mods/xban2.git
+remove_mod xban2
+
+#https://forum.minetest.net/viewtopic.php?t=10823
+echo "Installing Advanced Ban, so make sure your server is whitelisted (otherwise use xban2)!"
+echo "(whitelist + xban is recommended, so that you get true user access control."
+echo "If you have a mechanism to automatically whitelist people, you'll probably"
+echo "want to have no priveleges by default, and have an in-game mechanism to get them)"
+add_git_mod advancedban advancedban https://github.com/srifqi/advancedban
+
 echo "Installing ShadowNinja's <https://forum.minetest.net/viewtopic.php?t=7239>"
 echo "Installing ShadowNinja's <https://forum.minetest.net/viewtopic.php?t=7239>" >> $MTMOD_SRC_ZIP.txt
 # areas: ShadowNinja rewrite of node ownership
