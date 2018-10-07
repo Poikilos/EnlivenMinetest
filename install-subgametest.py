@@ -21,9 +21,9 @@ except:
           " but if in *nix-like environment first 'su -', and if no\n"
           " pip, use your software manager to install:\n"
           "   python-pip or python2-pip or python3-pip)\n"
-          "sudo python2 -m pip install --upgrade pip\n"
-          "sudo python2 -m pip install --upgrade pip wheel"
-          "sudo python -m pip install gitpython\n")
+          "sudo python3 -m pip install --upgrade pip\n"
+          "sudo python3 -m pip install --upgrade pip wheel\n"
+          "sudo python3 -m pip install gitpython\n")
           #Possible commands:
           # pkg install -y python3-pip python2-pip
           # apt-get install -y python3-pip python2-pip
@@ -39,13 +39,15 @@ except:
 import os
 import shutil
 import sys
-from winclient.forwardfilesync import *
+from forwardfilesync import *
 
 profile_path = None
-if 'HOME' in os.environ:  # if os_name=="windows":
+if 'HOME' in os.environ:  # if os.name=="windows":
     profile_path = os.environ['HOME']
 else:
     profile_path = os.environ['USERPROFILE']
+
+
 
 if not os.path.isdir(profile_path):
     print("")
@@ -54,7 +56,31 @@ if not os.path.isdir(profile_path):
     input("press enter to close")
     exit(2)
 
-USR_SHARE_MINETEST="/usr/share/games/minetest"
+configs_path = os.path.join(profile_path, ".config")
+if os.name == "windows":
+    base_path = os.path.join(profile_path, "AppData")
+    configs_path = os.path.join(base_path, "Local")
+
+CONFIG_PATH = os.path.join(configs_path, "EnlivenMinetest")
+if not os.path.isdir(CONFIG_PATH):
+    os.makedirs(CONFIG_PATH)
+
+#NOTE: not using /var/cache
+caches_path = os.path.join(CONFIG_PATH, "cache")
+RELEASES_PATH = os.path.join(caches_path, "releases")
+GIT_REPOS_PATH = os.path.join(caches_path, "git")
+GIT_BRANCHES_PATH = os.path.join(caches_path, "git-branches")
+
+if not os.path.isdir(RELEASES_PATH):
+    os.makedirs(RELEASES_PATH)
+
+if not os.path.isdir(GIT_REPOS_PATH):
+    os.makedirs(GIT_REPOS_PATH)
+
+if not os.path.isdir(GIT_BRANCHES_PATH):
+    os.makedirs(GIT_BRANCHES_PATH)
+
+USR_SHARE_MINETEST = "/usr/share/games/minetest"
 if not os.path.isdir(USR_SHARE_MINETEST):
     if os.path.isdir("/usr/local/share/minetest"):
         #IF git version is installed:
@@ -72,7 +98,10 @@ MT_GAMES_DIR = os.path.join(USR_SHARE_MINETEST,"games")
 MT_MYGAME_NAME = "subgametest"
 MT_MYGAME_DIR=os.path.join(MT_GAMES_DIR,MT_MYGAME_NAME)
 
-folder_path = os.path.join(MT_GAMES_DIR, "minetest_game")
+mtg_game_name = "minetest_game"
+MTG_PATH = os.path.join(MT_GAMES_DIR, mtg_game_name)
+folder_path = MTG_PATH
+MTG_MODS_PATH = os.path.join(MTG_PATH, "mods")
 
 if not os.path.isdir(folder_path):
     print("Could not find \"" + folder_path + "\". Script ended early.")
@@ -136,30 +165,43 @@ MTMOD_DEST_PATH = os.path.join(MT_MYGAME_MODS_PATH, MTMOD_DEST_NAME)
 #                shutil.rmtree(dst_path)
 
 
-if not os.path.isdir(os.path.join(profile_path,"Downloads")):
-    os.makedirs(os.path.join(profile_path,"Downloads"))
-
-if not os.path.isdir(os.path.join(profile_path,"Downloads")):
-    print("Cannot create " + os.path.join(profile_path,"Downloads") + " so cannot continue.")
+if not os.path.isdir(GIT_REPOS_PATH):
+    print("Cannot create " + GIT_REPOS_PATH + " so cannot continue.")
     input("press enter to close...")
     exit(8)
 
+# TODO: actually install something (from spreadsheet maybe)
+
+mtg_mods_list = list()
+folder_path = MTG_MODS_PATH
+if os.path.isdir(folder_path):
+    for sub_name in os.listdir(folder_path):
+        sub_path = os.path.join(folder_path, sub_name)
+        if sub_name[:1]!="." and os.path.isdir(sub_path):
+            mtg_mods_list.append(sub_name)
+
 mods_installed_list = list()
+mods_added_list = list()
 
-TMP_DIR=os.path.join(os.path.join(profile_path,"Downloads"),"minetest-mods")
-
-if not os.path.isdir(TMP_DIR):
-    os.makedirs(TMP_DIR)
-
-if not os.path.isdir(TMP_DIR):
-    print("Cannot create " + TMP_DIR + " so cannot continue.")
-    input("press enter to close...")
-    exit(9)
-
+folder_path = MT_MYGAME_MODS_PATH
+if os.path.isdir(folder_path):
+    for sub_name in os.listdir(folder_path):
+        sub_path = os.path.join(folder_path, sub_name)
+        if sub_name[:1]!="." and os.path.isdir(sub_path):
+            mods_installed_list.append(sub_name)
+            if sub_name not in mtg_mods_list:
+                mods_added_list.append(sub_name)
+else:
+    print("Missing '" + folder_path + "'")
 
 print("")
 print("")
-print("Installed " + str(len(mods_installed_list)) + " mod(s).")
+print("Installed " + str(len(mods_installed_list)) + " mod(s)" +
+      " (" + str(len(mtg_mods_list)) + " from " + mtg_game_name + ").")
+if len(mods_added_list) > 0:
+    print("Added:")
+    for mod_name in mods_added_list:
+        print("  - " + mod_name)
 print("")
 input("press enter to close...")
 #cd $TMP_DIR

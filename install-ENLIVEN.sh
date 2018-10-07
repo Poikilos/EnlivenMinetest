@@ -44,15 +44,18 @@ if [ ! -f minetestenv.rc ]; then
   fi
 fi
 if [ ! -f minetestenv.rc ]; then
-  echo "ERROR: Nothing done since missing minetestenv.rc (must be in same directory)"
-  sleep 1
+  echo "ERROR: Nothing done since missing minetestenv.rc (must be in same directory). Press Ctrl-C or allow this session to exit."
+  sleep 5
   exit 1
 fi
 source minetestenv.rc
 #endregion paste this part into terminal to get some great environment variables
 
 
-
+if [ -f "$MOD_LIST" ]; then
+  rm -f "$MOD_LIST"
+fi
+ls "$MT_MINETEST_GAME_PATH/mods" > "$MOD_LIST"
 
 
 
@@ -63,11 +66,20 @@ source minetestenv.rc
 
 
 if [ ! -f "`command -v minetestmapper`" ]; then
+  echo "getting minetestmapper..."
   if [ -f "`command -v apt`" ]; then
     sudo apt -y install libgd-dev libsqlite3-dev libleveldb-dev libhiredis-dev libpq-dev
   else
-    if [ -f "`command -v pacman`" ]; then
-      pacman -Syyu --noconfirm gd sqlite leveldb hiredis postgresql #postgresql-libs
+    if [ -f "`command -v dnf`" ]; then
+      echo "installing deps for minetestmapper via dnf..."
+      sudo dnf -y install gd-devel sqlite-devel leveldb-devel hiredis-devel postgresql-devel
+    else
+      if [ -f "`command -v pacman`" ]; then
+        echo "installing deps for minetestmapper via pacman..."
+        sudo pacman -Syyu --noconfirm gd sqlite leveldb hiredis postgresql #postgresql-libs
+      else
+        echo "ERROR: packager is unknown--manually get deps (gd-devel sqlite-devel leveldb-devel hiredis-devel postgresql-devel) then run again."
+      fi
     fi
   fi
   cd ~/Downloads
@@ -99,6 +111,7 @@ if [ -f "$MT_MYWORLD_DIR/world.mt.1st" ]; then
 fi
 if [ ! -d "$MT_MYGAME_DIR" ]; then
   sudo mkdir "$MT_MYGAME_DIR"
+  show_changes="false"
 else
   # workaround bug in earlier version of installer
   sudo chown -R `cat /tmp/local_mts_user` "$MT_MYGAME_DIR"
@@ -152,11 +165,15 @@ if [ -z "$world_mt_var_player_backend" ]; then
  echo "has no player_backend, setting sqlite3..."
  echo "player_backend = sqlite3" >> "$WORLD_MT_PATH"
 fi
-echo "teleport_perms_to_build = false" >> "$WORLD_MT_PATH"
-echo "teleport_perms_to_configure = false" >> "$WORLD_MT_PATH"
-echo "teleport_requires_pairing = true" >> "$WORLD_MT_PATH"
-echo "teleport_pairing_check_radius = 2" >> "$WORLD_MT_PATH"
-echo "teleport_default_coordinates = 0,0,0" >> "$WORLD_MT_PATH"
+
+#only for BadCommand's teleporter mod https://forum.minetest.net/viewtopic.php?id=2149 (NOT for travelnet) but probably should go in minetest.conf in subgame's directory, not in world.mt
+#if [ -d "$MT_MYGAME_MODS_PATH" ]; then
+#  echo "teleport_perms_to_build = false" >> "$WORLD_MT_PATH"
+#  echo "teleport_perms_to_configure = false" >> "$WORLD_MT_PATH"
+#  echo "teleport_requires_pairing = true" >> "$WORLD_MT_PATH"
+#  echo "teleport_pairing_check_radius = 2" >> "$WORLD_MT_PATH"
+#  echo "teleport_default_coordinates = 0,0,0" >> "$WORLD_MT_PATH"
+#fi
 
 #MT_MYGAME_DIR (a Minetest "game") is the equivalent of a Minecraft modpack, however, in this case it is actually a collection of mods and modpacks, either of which can be in the mods folder
 
@@ -225,9 +242,19 @@ echo "disallow_empty_passwords = true" >> "$WRITEABLE_MINETEST_CONF"
 echo "secure.trusted_mods = advanced_npc" >> "$WRITEABLE_MINETEST_CONF"
 echo "server_dedicated = false" >> "$WRITEABLE_MINETEST_CONF"
 #echo "hudbars_bar_type = statbar_modern" >> "$WRITEABLE_MINETEST_CONF"  #TODO: remove this after fully deprecated
+
+#region sprint settings only for hbsprint (NOT GunshipPenguin sprint)
 echo "sprint_speed = 2.25" >> "$WRITEABLE_MINETEST_CONF"  # default is 1.3
 echo "sprint_jump = 1.25" >> "$WRITEABLE_MINETEST_CONF"  # default is 1.1
 echo "sprint_stamina_drain = .5" >> "$WRITEABLE_MINETEST_CONF"  # default is 2
+#endregion sprint settings only for hbsprint (NOT GunshipPenguin sprint)
+#TODO: possibly fork and do pull request for configuring GunshipPenguin sprint's hard-coded variables in init.lua:
+#SPRINT_METHOD = 1
+#SPRINT_SPEED = 1.8
+#SPRINT_JUMP = 1.1
+#SPRINT_STAMINA = 20
+#SPRINT_TIMEOUT = 0.5 --Only used if SPRINT_METHOD = 0
+
 echo "bones_position_message = true" >> "$WRITEABLE_MINETEST_CONF"  # default is false--this is for client-side chat message (server-side logging always on though)
 #no longer needed since these mods check for player_api to determine whether v3 model is used:
 if [ "$version_0_5_enable" = "true" ]; then
@@ -450,17 +477,18 @@ add_git_mod treasurer minetest_treasurer http://repo.or.cz/minetest_treasurer.gi
 
 cd "$HOME/Downloads"
 MTMOD_DEST_NAME=trm_pyramids
-MTMOD_UNZ_NAME=trm_pyramids
+MTMOD_GOT_NAME=trm_pyramids
 MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
-if [ ! -z "`ls | grep $MTMOD_UNZ_NAME`" ]; then  # works with wildcard in variable
-  rm -Rf "$MTMOD_UNZ_NAME"
+if [ ! -z "`ls | grep $MTMOD_GOT_NAME`" ]; then  # works with wildcard in variable
+  rm -Rf "$MTMOD_GOT_NAME"
 fi
-mkdir "$MTMOD_UNZ_NAME"
-cd "$MTMOD_UNZ_NAME"
+mkdir "$MTMOD_GOT_NAME"
+cd "$MTMOD_GOT_NAME"
 wget https://github.com/MinetestForFun/server-minetestforfun/raw/master/mods/trm_pyramids/depends.txt
 wget https://github.com/MinetestForFun/server-minetestforfun/raw/master/mods/trm_pyramids/init.lua
 wget https://github.com/MinetestForFun/server-minetestforfun/raw/master/mods/trm_pyramids/more_trms.lua
 wget https://github.com/MinetestForFun/server-minetestforfun/blob/master/LICENSE
+echo "trm_pyramids" >> "$MOD_LIST"
 if [ -d "$MTMOD_DEST_PATH" ]; then
   sudo rm -Rf "$MTMOD_DEST_PATH"
 fi
@@ -470,7 +498,7 @@ sudo mv -f init.lua "$MTMOD_DEST_PATH/"
 sudo mv -f more_trms.lua "$MTMOD_DEST_PATH/"
 sudo mv -f LICENSE "$MTMOD_DEST_PATH/"
 cd ..
-rmdir "$MTMOD_UNZ_NAME"
+rmdir "$MTMOD_GOT_NAME"
 if [ ! -z "`ls "$MTMOD_DEST_PATH"`" ]; then
   echo "  [ + ] added as $MTMOD_DEST_PATH"
 else
@@ -634,7 +662,9 @@ add_git_mod homedecor_modpack homedecor_modpack https://github.com/minetest-mods
 add_git_mod unifieddyes unifieddyes https://github.com/minetest-mods/unifieddyes.git
 #Sokomine's original version has no security ( https://forum.minetest.net/viewtopic.php?id=4877 )
 #  https://github.com/Sokomine/travelnet/archive/master.zip
-add_git_mod travelnet travelnet https://github.com/poikilos/travelnet.git
+# add_git_mod travelnet travelnet https://github.com/poikilos/travelnet.git
+# for now, manually get branch with sound (until Sokomine merges it--in addition, also check what else I may have manually merged thats not yet in his):
+add_git_mod travelnet travelnet https://github.com/poikilos/travelnet restore_sound
 add_git_mod anvil anvil https://github.com/minetest-mods/anvil.git
 add_git_mod sling sling https://github.com/minetest-mods/sling.git
 #REPLACES PilzAdam's, modified by kaeza, maintained by VenessaE; FORMERLY in homedecor_modpack
@@ -801,10 +831,12 @@ echo
 if [ -d "$PATCHES_PATH" ]; then
   echo "adding the following necessary integration mods:"
   ls $PATCHES_PATH/mods-integration/
+  ls $PATCHES_PATH/mods-integration | grep -v debug >> "$MOD_LIST"
   sudo cp -R $PATCHES_PATH/mods-integration/* "$MT_MYGAME_MODS_PATH/"
   echo
   echo "adding the following multiplayer mods:"
   ls $PATCHES_PATH/mods-multiplayer/
+  ls $PATCHES_PATH/mods-multiplayer/ | grep -v skinsdb >> "$MOD_LIST"
   sudo cp -R $PATCHES_PATH/mods-multiplayer/* "$MT_MYGAME_MODS_PATH/"
   echo "adding non-manual patches to subgame (vs minetest_game and downloaded mods):"
   echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
@@ -934,6 +966,14 @@ fi
   #echo "sudo rm -Rf $MT_MYGAME_MODS_PATH/1.nonworking  # leftovers from deprecated ENLIVEN installer"
 else
   echo "did not find $PATCHES_PATH, so skipped automatic patching which is partially implemented"
+  echo "continuing anyway unless Ctrl-C is pressed..."
+  echo 1
+  echo "3..."
+  echo 1
+  echo "2..."
+  echo 1
+  echo "1..."
+  echo 1
 fi
 echo
 if [ "$version_0_5_enable" != "true" ]; then
@@ -1010,9 +1050,28 @@ if [ -f "`command -v blender`" ]; then
       mkdir Downloads
     fi
     cd Downloads
-    git clone https://github.com/minetest/B3DExport.git
-    echo "WARNING: you have to manually install $HOME/Downloads/B3DExport/B3DExport.py using Blender's File Menu, User Preferences, Add-ons, 'Install Add-on from File...', press OK, then check the 'Import-Export B3D' box in the Add-ons list, then Save User Settings"
+    if [ ! -d "B3DExport" ]; then
+      git clone https://github.com/minetest/B3DExport.git
+    else
+      cd "B3DExport"
+      git pull
+      cd ..
+    fi
+    echo "NOTICE: For B3DExport from Blender you must manually install $HOME/Downloads/B3DExport/B3DExport.py using Blender's File Menu, User Preferences, Add-ons, 'Install Add-on from File...', press OK, then check the 'Import-Export B3D' box in the Add-ons list, then Save User Settings"
     sleep 3
     cd
   fi
 fi
+echo "Hopefully <https://github.com/minetest-mods/technic/issues/448> is fixed by the time you try this, otherwise you'll have to patch /usr/local/share/minetest/games/ENLIVEN/mods/technic/technic/machines/register/extractor_recipes.lua manually using workaround at <https://github.com/minetest/minetest/issues/6513>."
+echo
+ls $MT_MYGAME_MODS_PATH > "$CONFIG_PATH/actual_mod_list.txt"
+sort "$MOD_LIST" > "$CONFIG_PATH/mod_list_sorted.txt"
+if [ ! -z "`diff "$CONFIG_PATH/mod_list_sorted.txt" "$CONFIG_PATH/actual_mod_list.txt"`" ]; then
+  echo "Any failures to install will be listed below."
+  diff "$CONFIG_PATH/mod_list_sorted.txt" "$CONFIG_PATH/actual_mod_list.txt"
+fi
+if [ ! -d "$MT_MYGAME_MODS_PATH/dungeon_loot" ]; then
+  echo "No mod loot for dungeon_loot (nor forks of worldgen mods which should use it) are in ENLIVEN, so dungeon_loot from $mtgame_name is removed by this script for now (treasurer and relevant trm_* mods are used instead)."
+fi
+echo
+echo

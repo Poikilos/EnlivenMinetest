@@ -1,8 +1,23 @@
 
-CONFIGS_PATH="$HOME/.config/EnlivenMinetest"
-if [ ! -d "$CONFIGS_PATH" ]; then
-  mkdir -p "$CONFIGS_PATH"
+CONFIG_PATH="$HOME/.config/EnlivenMinetest"
+if [ ! -d "$CONFIG_PATH" ]; then
+  mkdir -p "$CONFIG_PATH"
 fi
+RELEASES_PATH="$CONFIG_PATH/cache/releases"
+if [ ! -d "$RELEASES_PATH" ]; then
+  mkdir -p "$RELEASES_PATH"
+fi
+GIT_REPOS_PATH="$CONFIG_PATH/cache/git"
+if [ ! -d "$GIT_REPOS_PATH" ]; then
+  mkdir -p "$GIT_REPOS_PATH"
+fi
+GIT_BRANCHES_PATH="$CONFIG_PATH/cache/git-branches"
+if [ ! -d "$GIT_BRANCHES_PATH" ]; then
+  mkdir -p "$GIT_BRANCHES_PATH"
+fi
+
+MOD_LIST="$CONFIG_PATH/mod_list.txt"
+
 # * Git version uses /home/*/minetest/games and /usr/local/share/minetest/games but the latter is used for minetestserver (minetest-server package)
 # * Arch stable version uses /usr/share/minetest/
 if [ "$1" = "--help" ]; then
@@ -49,6 +64,7 @@ err_txt=$HOME/err-enliven.txt
 # could be -bash or bash
 #if [ "$0" = "-bash" ]; then
 #'[[' doesn't work in debian
+show_changes="true"
 if [[ $0 == *"$shell_name"* ]]; then
   REPO_PATH="$HOME/GitHub/EnlivenMinetest"
   echo "You must have pasted this into terminal, so assuming REPO_PATH:"
@@ -57,10 +73,14 @@ else
   SCRIPT=$(readlink -f "$0")
   # Absolute path this script is in, thus /home/user/bin
   SCRIPTPATH=$(dirname "$SCRIPT")
-  REPO_PATH=$(dirname "$SCRIPTPATH")
+  REPO_PATH="$SCRIPTPATH"
+  #formerly, this script was in a subdir:
+  #REPO_PATH=$(dirname "$SCRIPTPATH")
 fi
 
 PATCHES_PATH="$REPO_PATH/patches"
+echo "PATCHES_PATH: $PATCHES_PATH"
+sleep 10
 
 if [ ! -d "$PATCHES_PATH" ]; then
   # maybe moved somewhere or this code was pasted
@@ -109,17 +129,17 @@ version_0_5_enable="false"
 if [ -d "$USR_SHARE_MINETEST/games/minetest_game/mods/player_api" ]; then
   version_0_5_enable="true"
 fi
-if [ -f "$CONFIGS_PATH/local_enable" ]; then
-  local_enable=$(head -n 1 $CONFIGS_PATH/local_enable)
+if [ -f "$CONFIG_PATH/local_enable" ]; then
+  local_enable=$(head -n 1 $CONFIG_PATH/local_enable)
 fi
-#if [ -f "$CONFIGS_PATH/version_0_5_enable" ]; then
-#  version_0_5_enable=$(head -n 1 $CONFIGS_PATH/version_0_5_enable)
+#if [ -f "$CONFIG_PATH/version_0_5_enable" ]; then
+#  version_0_5_enable=$(head -n 1 $CONFIG_PATH/version_0_5_enable)
 #fi
 if [ -z "$local_enable" ]; then
-  echo "$local_enable" > "$CONFIGS_PATH/local_enable"
+  echo "$local_enable" > "$CONFIG_PATH/local_enable"
 fi
 #if [ -z "$version_0_5_enable" ]; then
-#  echo "$version_0_5_enable" > "$CONFIGS_PATH/version_0_5_enable"
+#  echo "$version_0_5_enable" > "$CONFIG_PATH/version_0_5_enable"
 #fi
 
 mtgame_name="minetest_game"
@@ -136,6 +156,7 @@ MT_BACKUP_GAMES_DIR=$HOME/Backup$USR_SHARE_MINETEST/games
 MT_GAMES_DIR=$USR_SHARE_MINETEST/games
 MT_MYGAME_BAK=$USR_SHARE_MINETEST/ENLIVEN_BAK
 MT_MYGAME_NAME=ENLIVEN
+#$PREFIX/minetest/games/ENLIVEN:
 MT_MYGAME_DIR="$MT_GAMES_DIR/$MT_MYGAME_NAME"
 # formerly MT_MYGAME_MODDIR:
 MT_MYGAME_MODS_PATH="$MT_MYGAME_DIR/mods"
@@ -143,11 +164,18 @@ MT_WORLDS_DIR="$HOME/.minetest/worlds"
 MT_DEFAULT_WORLD_NAME="`ls $MT_WORLDS_DIR | grep -v tar.gz | grep --max-count=1 -v world`"  # aka -m 1 (no '=' sign in that case)
 MT_MYWORLD_NAME="$MT_DEFAULT_WORLD_NAME"
 if [ -z "$MT_DEFAULT_WORLD_NAME" ]; then
-  if [ ! -z "`ls $MT_WORLDS_DIR | grep --max-count=1 -v world`" ]; then
-    MT_MYWORLD_NAME=world
-    echo "Could not find any worlds other than $MT_MYWORLD_NAME"
+  #if [ -z "`ls $MT_WORLDS_DIR | grep --max-count=1 -v world`" ]; then
+  new_worlds="`ls $MT_WORLDS_DIR | grep --max-count=1 -v '^world$'`"
+  if [ ! -z "$new_worlds" ]; then
+  # anchors (`^` and `$`) ensure only exact match, so name containing world is not counted as a match
+  # see also <https://stackoverflow.com/questions/4709912/how-to-make-grep-only-match-if-the-entire-line-matches>
+    MT_MYWORLD_NAME="$new_worlds"
   else
-    echo "Could not find any worlds"
+    if [ -d "$MT_WORLDS_DIR/world" ]; then
+      echo "Could not find any new worlds in $MT_WORLDS_DIR so using '$MT_MYWORLD_NAME'"
+    else
+      echo "Could not find any worlds in $MT_WORLDS_DIR"
+    fi
   fi
   #if [ "$0" = "-bash" ]; then
 #'[[' doesn't work in debian:
@@ -165,7 +193,7 @@ if [ -z "$MT_DEFAULT_WORLD_NAME" ]; then
     echo " 1..."
     sleep 1
   else
-    read -p "Please enter a world (name only--must be in $MT_WORLDS_DIR): " MT_MYWORLD_NAME
+    read -e -p "Please enter a world (name only--must be in $MT_WORLDS_DIR): " -i "$MT_MYWORLD_NAME" MT_MYWORLD_NAME
     #$MT_DEFAULT_WORLD_NAME
     echo using "$MT_MYWORLD_NAME"
     #echo " 3..."
@@ -257,106 +285,153 @@ reinstall_mt_game() {
 
 add_zip_mod()
 {
-  cd $HOME/Downloads
+  cd $RELEASES_PATH
   MTMOD_DEST_NAME=$1
-  MTMOD_UNZ_NAME=$2
+  MTMOD_GOT_NAME=$2
   URL=$3
   MTMOD_SRC_ZIP=$MTMOD_DEST_NAME.zip
-  MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
-  if [ ! -z "`ls | grep $MTMOD_UNZ_NAME`" ]; then  # works with wildcard in variable
-    rm -Rf $MTMOD_UNZ_NAME
+  if [ ! -z "`ls | grep $MTMOD_GOT_NAME`" ]; then  # works with wildcard in variable
+    rm -Rf $MTMOD_GOT_NAME
   fi
   if [ -f $MTMOD_SRC_ZIP ]; then
     rm -f $MTMOD_SRC_ZIP
   fi
-  if [ -d "$MTMOD_DEST_PATH" ]; then
-    sudo rm -Rf "$MTMOD_DEST_PATH"
-  fi
   wget -O $MTMOD_SRC_ZIP $URL
   unzip -q "$MTMOD_SRC_ZIP"
-  #-q: quiet
-  if [ -d "$MTMOD_UNZ_NAME" ]; then
-    # outer case is for safety in case variable is blank or something
-    if [ -d "$MTMOD_UNZ_NAME/.git" ]; then
-      rm -Rf "$MTMOD_UNZ_NAME/.git"
-    fi
-    if [ -f "$MTMOD_UNZ_NAME/.gitignore" ]; then
-      rm -Rf "$MTMOD_UNZ_NAME/.gitignore"
-    fi
-    # remove etc to make users downloading mods faster:
-    if [ -d "$MTMOD_UNZ_NAME/etc" ]; then
-      rm -Rf "$MTMOD_UNZ_NAME/etc"
-    fi
-    if [ -f "$MTMOD_UNZ_NAME/screenshot.png" ]; then
-      rm -f "$MTMOD_UNZ_NAME/screenshot.png"
-    fi
-    sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
-  fi
-  if [ ! -d "$MTMOD_DEST_PATH" ]; then
-    echo "  ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
-    cat $err_txt
-    echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
-    sleep 1
-    echo " 3..."
-    sleep 1
-    echo " 2..."
-    sleep 1
-    echo " 1..."
-    sleep 1
-    exit 1
-  else
-    echo "  added as $MTMOD_DEST_PATH"
-  fi
-  cd
-  #if [ -d GitHub/EnlivenMinetest ]; then
-  #  cd GitHub/EnlivenMinetest
-  #fi
+  add_mod_from_here $MTMOD_DEST_NAME $MTMOD_GOT_NAME
 }
 
 add_git_mod()
 {
-  cd $HOME/Downloads
+  cd $GIT_REPOS_PATH
   MTMOD_DEST_NAME=$1
-  MTMOD_UNZ_NAME=$2
+  MTMOD_GOT_NAME=$2
   URL=$3
   BRANCH=$4
+  if [ ! -z "$BRANCH" ]; then
+    cd $GIT_BRANCHES_PATH
+    if [ ! -d "$BRANCH" ]; then
+      mkdir "$BRANCH"
+    fi
+    cd "$BRANCH"
+  fi
+  if [ ! -d "$MTMOD_GOT_NAME" ]; then
+    if [ ! -z "$BRANCH" ]; then
+      echo "BRANCH: Cloning $BRANCH branch..."
+      echo "git clone -b $BRANCH --single-branch $URL"
+      git clone -b $BRANCH --single-branch $URL
+    else
+      #echo "Cloning main branch since no branch specified: $BRANCH"
+      echo "git clone $URL"
+      git clone $URL
+    fi
+  else
+    cd $MTMOD_GOT_NAME
+    git pull
+    cd ..
+  fi
+  add_mod_from_here $MTMOD_DEST_NAME $MTMOD_GOT_NAME
+}
+
+add_mod_from_here()
+{
+  MTMOD_DEST_NAME=$1
+  MTMOD_GOT_NAME=$2
+  if [ ! -f "$MOD_LIST" ]; then touch "$MOD_LIST"; fi
+  echo "$MTMOD_DEST_NAME" >> "$MOD_LIST"
   MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+  if [ -z "$MTMOD_DEST_NAME" ]; then
+    echo "ERROR: nothing done since add_mod_from_here FAILED to receive 'MTMOD_DEST_NAME' (1st param)--this session will exit unless you press Ctrl-C to cancel script..."
+    sleep 1
+    echo "4..."
+    sleep 1
+    echo "3..."
+    sleep 1
+    echo "2..."
+    sleep 1
+    echo "1..."
+    sleep 1
+    exit 1
+  fi
+  if [ -z "$MTMOD_GOT_NAME" ]; then
+    echo "ERROR: nothing done since add_mod_from_here FAILED to receive 'MTMOD_GOT_NAME' which is the exact downloaded or unzipped folder name (2nd param)--this session will exit unless you press Ctrl-C to cancel script..."
+    sleep 1
+    echo "4..."
+    sleep 1
+    echo "3..."
+    sleep 1
+    echo "2..."
+    sleep 1
+    echo "1..."
+    sleep 1
+    exit 1
+  fi
 if [ ! -d "$MTMOD_DEST_PATH" ] || [ "$update_enable" = "true" ]; then
-  if [ ! -z "`ls | grep $MTMOD_UNZ_NAME`" ]; then  # works with wildcard in variable
-    rm -Rf $MTMOD_UNZ_NAME
+  if [ ! -d "$MTMOD_GOT_NAME" ]; then
+    echo "ERROR: nothing done since add_mod_from_here FAILED to find '$MTMOD_GOT_NAME'--this session will exit unless you press Ctrl-C to cancel script..."
+    sleep 1
+    echo "4..."
+    sleep 1
+    echo "3..."
+    sleep 1
+    echo "2..."
+    sleep 1
+    echo "1..."
+    sleep 1
+    exit 1
   fi
   if [ -d "$MTMOD_DEST_PATH" ]; then
-    echo "removing old $MTMOD_DEST_PATH"
-    sudo rm -Rf "$MTMOD_DEST_PATH"
-  fi
-  if [ ! -z "$BRANCH" ]; then
-    echo "BRANCH: Cloning $BRANCH branch..."
-    echo "git clone -b $BRANCH --single-branch $URL"
-    git clone -b $BRANCH --single-branch $URL
-  else
-    #echo "Cloning main branch since no branch specified: $BRANCH"
-    echo "git clone $URL"
-    git clone $URL
-  fi
-  if [ -d "$MTMOD_UNZ_NAME" ]; then
-    # outer case is for safety in case variable is blank or something
-    if [ -d "$MTMOD_UNZ_NAME/.git" ]; then
-      rm -Rf "$MTMOD_UNZ_NAME/.git"
+    if [ ! -f "`command -v rsync`" ]; then
+      echo "removing old $MTMOD_DEST_PATH"
+      sudo rm -Rf "$MTMOD_DEST_PATH"
+      if [ -d "$MTMOD_DEST_PATH" ]; then
+        echo "FAILED to remove '$MTMOD_DEST_PATH'--this session will exit unless you press Ctrl-C to cancel script..."
+        sleep 1
+        echo "4..."
+        sleep 1
+        echo "3..."
+        sleep 1
+        echo "2..."
+        sleep 1
+        echo "1..."
+        sleep 1
+        exit 1
+      fi
     fi
-    if [ -f "$MTMOD_UNZ_NAME/.gitignore" ]; then
-      rm -Rf "$MTMOD_UNZ_NAME/.gitignore"
+  fi
+  if [ -d "$MTMOD_GOT_NAME" ]; then
+    # outer case is for safety in case variable is blank or something
+    if [ ! -f "`command -v rsync`" ]; then
+      sudo cp -R $MTMOD_GOT_NAME "$MTMOD_DEST_PATH"
+      if [ "$show_changes" != "false" ]; then
+        echo "$MTMOD_DEST_PATH"
+      fi
+    else
+      if [ ! -d "$MTMOD_DEST_PATH" ]; then
+        sudo mkdir -p "$MTMOD_DEST_PATH"
+      fi
+      if [ "$show_changes" != "false" ]; then
+        #sudo rsync -rtv "$MTMOD_GOT_NAME/" "$MTMOD_DEST_PATH"
+        sudo rsync -zvc "$MTMOD_GOT_NAME/" "$MTMOD_DEST_PATH" --dry-run | grep -v '\.git' | grep -v '\./' | grep -v 'screenshot\.png' | grep -v received | grep -v 'DRY RUN'
+      fi
+      sudo rsync -rt "$MTMOD_GOT_NAME/" "$MTMOD_DEST_PATH"
+    fi
+    if [ -d "$MTMOD_DEST_PATH/.git" ]; then
+      sudo rm -Rf "$MTMOD_DEST_PATH/.git"
+    fi
+    if [ -f "$MTMOD_DEST_PATH/.gitignore" ]; then
+      sudo rm -Rf "$MTMOD_DEST_PATH/.gitignore"
     fi
     # remove etc to make users downloading mods faster:
-    if [ -d "$MTMOD_UNZ_NAME/etc" ]; then
-      rm -Rf "$MTMOD_UNZ_NAME/etc"
+    if [ -d "$MTMOD_DEST_PATH/etc" ]; then
+      sudo rm -Rf "$MTMOD_DEST_PATH/etc"
     fi
-    if [ -f "$MTMOD_UNZ_NAME/screenshot.png" ]; then
-      rm -f "$MTMOD_UNZ_NAME/screenshot.png"
+    if [ -f "$MTMOD_DEST_PATH/screenshot.png" ]; then
+      sudo rm -f "$MTMOD_DEST_PATH/screenshot.png"
     fi
-    sudo mv $MTMOD_UNZ_NAME "$MTMOD_DEST_PATH"
   fi
   if [ ! -d "$MTMOD_DEST_PATH" ]; then
-    echo "  ERROR: failed to unzip $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+    echo "  ERROR: failed to get $MTMOD_DEST_PATH, so cannot continue." > $err_txt
     cat $err_txt
     echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
     sleep 1
@@ -412,7 +487,7 @@ remove_mod()
 #echo "MT_MYGAME_MODS_PATH: $MT_MYGAME_MODS_PATH"
 echo
 echo
-echo "To preconfigure, write true or false to files in $CONFIGS_PATH named:"
+echo "To preconfigure, write true or false to files in $CONFIG_PATH named:"
 echo "  local_enable"
 #echo "  version_0_5_enable"
 echo
@@ -432,3 +507,8 @@ echo "  MT_MYGAME_DIR: $MT_MYGAME_DIR"
 echo "  MT_WORLDS_DIR: $MT_WORLDS_DIR"
 echo "  MT_MYWORLD_NAME: $MT_MYWORLD_NAME"
 echo "  MT_MINETEST_GAME_PATH: $MT_MINETEST_GAME_PATH"
+if [ ! -f "`command -v rsync`" ]; then
+  echo
+  echo "The 'rsync' command was not found. Installing rsync will reduce writes to drive if you run install methods (as all use add_mod_from_here) more than once for the same mod."
+  echo
+fi
