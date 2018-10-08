@@ -123,6 +123,13 @@ Otherwise just install everything EXCEPT cme_to_spawners & tsm_pyramids_to_spawn
 * The included minetest.conf recommended for your clients includes the line enable_local_map_saving = true, which will cache the world locally on their machines. You can feel free to change that according to your preference.
 
 ## Changes:
+### (2018-10-07)
+* fixed lapis patching logic
+### (2018-10-06)
+* fixed issue with not detecting pacman for installing minetestmapper deps
+* cache repos for install as update (reduce download bandwidth and drive writes)
+* further reduce drive writes with rsync
+* use updated travelnet
 ### (2018-05-10)
 * moved fully working scripts from etc to root of repo
 * renamed:

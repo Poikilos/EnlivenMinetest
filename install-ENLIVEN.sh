@@ -513,6 +513,17 @@ add_git_mod bushes_soil bushes_soil https://github.com/poikilos/bushes_soil.git
 
 # forum_url="https://forum.minetest.net/viewtopic.php?f=9&t=12368"
 # description="Installing Napiophelios's lapis fork since has blocks, but minetest-mods has a version as well, with dye (not used): https://forum.minetest.net/viewtopic.php?f=9&t=11287"
+MTMOD_DEST_NAME=lapis
+MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+if [ -f "$MTMOD_DEST_PATH/columns_enabled" ]; then
+  if [ "$update_enable" = "true" ]; then
+    sudo rm -f "$MTMOD_DEST_PATH/columns_enabled"
+    echo "removing flag file $MTMOD_DEST_PATH/columns_enable since updating (preparing for re-patch)"
+    # remove, because the file will no longer be patched if it is redownloaded (so patching must occur again)
+  else
+    echo "found flag file $MTMOD_DEST_PATH/columns_enable (leaving there since not updating, to prevent re-patching)"
+  fi
+fi
 add_git_mod lapis LapisLazuli https://github.com/Napiophelios/LapisLazuli.git
 echo "patching lapis (Napiophelios's fork) to enable columns..."
 cd $HOME/Downloads
@@ -521,9 +532,9 @@ if [ -f "init.lua" ]; then
 fi
 MTMOD_DEST_NAME=lapis
 MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
-head -3 "$MTMOD_DEST_PATH/init.lua" > init.lua
 if [ -f "$MTMOD_DEST_PATH/init.lua" ]; then
   if [ ! -f "$MTMOD_DEST_PATH/columns_enabled" ]; then
+    head -2 "$MTMOD_DEST_PATH/init.lua" > init.lua
     # cat starting at line after head command above to not skip any
     # lines, in case later version changes position of lines
     echo 'dofile(minetest.get_modpath("lapis").."/columns.lua")' >> init.lua
@@ -533,7 +544,7 @@ if [ -f "$MTMOD_DEST_PATH/init.lua" ]; then
     sudo mv -f init.lua "$MTMOD_DEST_PATH/"
     echo "PATCHED $MTMOD_DEST_PATH/init.lua to enable columns"
   else
-    echo "WARNING: not enabling columns since $MTMOD_DEST_PATH/columns_enabled file exists"
+    echo "WARNING: not enabling columns in $MTMOD_DEST_PATH/init.lua since already patched as indicated by the presence of '$MTMOD_DEST_PATH/columns_enabled' flag file."
   fi
 else
   echo "FAILED to patch lapis since no $MTMOD_DEST_PATH/init.lua"
@@ -768,12 +779,14 @@ add_git_mod armor_monoid armor_monoid https://github.com/minetest-mods/armor_mon
 # author="Wuzzy"
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=11153&hilit=hunger"
 # not git://repo.or.cz/minetest_hbarmor.git
-add_git_mod hbarmor minetest_hbarmor http://repo.or.cz/minetest_hbarmor.git
+# add_git_mod hbarmor minetest_hbarmor http://repo.or.cz/minetest_hbarmor.git
+remove_mod hbarmor
 # author="Wuzzy
 # description="hbhunger for hudbars https://forum.minetest.net/viewtopic.php?f=11&t=11153&hilit=hunger"
 # forum_url="https://forum.minetest.net/viewtopic.php?f=9&t=11336"
 # not git://repo.or.cz/minetest_hbhunger.git
-add_git_mod hbhunger minetest_hbhunger http://repo.or.cz/minetest_hbhunger.git
+# add_git_mod hbhunger minetest_hbhunger http://repo.or.cz/minetest_hbhunger.git
+remove_mod hbhunger
 add_git_mod playereffects minetest_playereffects http://repo.or.cz/minetest_playereffects.git
 #MarkBu's ambience/ambiance ambient sounds (burli on https://forum.minetest.net/viewtopic.php?f=9&t=14814 )
 #add_git_mod ambianceplus ambianceplus https://github.com/MarkuBu/ambianceplus.git
