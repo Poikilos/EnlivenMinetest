@@ -1089,5 +1089,18 @@ if [ ! -d "$MT_MYGAME_MODS_PATH/dungeon_loot" ]; then
   echo "No mod loot for dungeon_loot (nor forks of worldgen mods which should use it) are in ENLIVEN, so dungeon_loot from $mtgame_name is removed by this script for now (treasurer and relevant trm_* mods are used instead)."
 fi
 echo "INSTALLED t4im's technic FOR RECENT PATCH FOR corrected depends.txt..."
+echo "You must manually fix crash in awards unless it has been fixed:"
+echo "see also <https://github.com/rubenwardy/awards/issues/59>"
+echo "in $MT_MYGAME_MODS_PATH/awards/src/api_triggers.lua"
+echo "change:"
+echo "assert(player and player.is_player and player:is_player() and key)"
+echo "to:"
+echo "    if (player and player.is_player and player:is_player() and key) then"
+echo "later, put:"
+echo "    end"
+echo "before:"
+echo "  end"
+echo
+echo "  awards[\"notify_\" .. tname] = tdef.notify"
 echo
 echo

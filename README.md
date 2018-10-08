@@ -17,6 +17,11 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
 * https://github.com/minetest-mods/chat_anticurse
 * https://github.com/minetest-mods/cozy (sitting and laying down player animations)--compare with emote https://github.com/minetest-mods/emote.git
 
+#### node.js server manager
+* capture log
+  * do not store redundant messages such as hunger_ng debug mode (see <https://pastebin.com/dDBg40vf>) or saving playereffects
+  * detect restarts (even if no 'separator'--see <https://pastebin.com/Jv3vkhFA>)
+
 #### Possible Additions
 * make a ruins mod that generates ruins with: statues, mese, stone with chipped paint or paintings, tan shale blocks with and without engravings
 * SWITCH to https://github.com/minetest-mods/inspector (instead of metatools mod)
