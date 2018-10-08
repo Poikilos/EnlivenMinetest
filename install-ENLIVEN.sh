@@ -567,7 +567,9 @@ add_git_mod moretrees moretrees https://github.com/minetest-mods/moretrees.git
 # in order of dependency (also, clicking armor in unified inventory crashes the game without technic installed since checks radation):
 add_git_mod mesecons mesecons https://github.com/minetest-mods/mesecons
 add_git_mod pipeworks pipeworks https://github.com/minetest-mods/pipeworks.git
-add_git_mod technic technic https://github.com/minetest-mods/technic.git
+#add_git_mod technic technic https://github.com/minetest-mods/technic.git
+add_git_mod technic technic https://github.com/t4im/technic.git
+
 add_git_mod technic_armor technic_armor https://github.com/stujones11/technic_armor.git
 # NOTE: load_mod is not a thing for subgames (all mods in subgame are loaded if subgame is loaded)
 #add_git_mod caverealms minetest-caverealms https://github.com/HeroOfTheWinds/minetest-caverealms
@@ -1086,5 +1088,6 @@ fi
 if [ ! -d "$MT_MYGAME_MODS_PATH/dungeon_loot" ]; then
   echo "No mod loot for dungeon_loot (nor forks of worldgen mods which should use it) are in ENLIVEN, so dungeon_loot from $mtgame_name is removed by this script for now (treasurer and relevant trm_* mods are used instead)."
 fi
+echo "INSTALLED t4im's technic FOR RECENT PATCH FOR corrected depends.txt..."
 echo
 echo
