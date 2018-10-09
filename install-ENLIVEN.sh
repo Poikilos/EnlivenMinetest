@@ -789,7 +789,11 @@ remove_mod hbarmor
 # not git://repo.or.cz/minetest_hbhunger.git
 # add_git_mod hbhunger minetest_hbhunger http://repo.or.cz/minetest_hbhunger.git
 remove_mod hbhunger
+
 add_git_mod playereffects minetest_playereffects http://repo.or.cz/minetest_playereffects.git
+#fork with less output (only writes save message if minetest is in verbose mode):
+add_git_mod playereffects playereffects https://github.com/sys4-fr/playereffects
+
 #MarkBu's ambience/ambiance ambient sounds (burli on https://forum.minetest.net/viewtopic.php?f=9&t=14814 )
 #add_git_mod ambianceplus ambianceplus https://github.com/MarkuBu/ambianceplus.git
 # tenplus1's ambience/ambiance ambient sounds (fork linked at original's thread at https://forum.minetest.net/viewtopic.php?f=11&t=2807&start=275 )
