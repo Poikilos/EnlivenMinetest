@@ -818,7 +818,11 @@ MATCHING_MODS_BEFORE="`ls $MT_MYGAME_MODS_PATH | grep skin`"
 remove_mod u_skinsdb
 remove_mod u_skins
 PATCH_SKINS_MOD_NAME="skinsdb"  # used further down too!
-add_git_mod $PATCH_SKINS_MOD_NAME skinsdb https://github.com/minetest-mods/skinsdb.git
+#players are 1 block below ground in skinsdb for Minetest 0.4.* stable...
+#add_git_mod $PATCH_SKINS_MOD_NAME skinsdb https://github.com/minetest-mods/skinsdb.git
+#so get 0.5 branch from fork...
+add_git_mod $PATCH_SKINS_MOD_NAME skinsdb https://github.com/bell07/skinsdb.git mt_0_5_dev
+
 if [ ! -z "$MATCHING_MODS_BEFORE" ]; then
   echo "Removed $MATCHING_MODS_BEFORE then installed $PATCH_SKINS_MOD_NAME (this output is shown on purpose)"
 fi

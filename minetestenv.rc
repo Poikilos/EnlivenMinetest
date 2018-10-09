@@ -524,7 +524,7 @@ echo "  version_0_5_enable: $version_0_5_enable"
 if [ -z "$local_enable" ]; then
   echo "  local_enable: (auto--set this var before pasting region into terminal)"
 else
-  echo "local_enable: $local_enable"
+  echo "  local_enable: $local_enable"
 fi
 echo "  USR_SHARE_MINETEST: $USR_SHARE_MINETEST"
 echo "  MT_MYGAME_DIR: $MT_MYGAME_DIR"
