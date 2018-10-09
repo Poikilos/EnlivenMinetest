@@ -852,16 +852,16 @@ echo
 echo
 echo
 if [ -d "$PATCHES_PATH" ]; then
-  echo "[  +  ] adding the following necessary integration mods (included):"
+  echo "  [ + ] adding the following necessary integration mods (included):"
   ls $PATCHES_PATH/mods-integration/
   ls $PATCHES_PATH/mods-integration | grep -v debug >> "$MOD_LIST"
   sudo cp -R $PATCHES_PATH/mods-integration/* "$MT_MYGAME_MODS_PATH/"
   echo
-  echo "[  +  ] adding the following multiplayer mods (included):"
+  echo "  [ + ] adding the following multiplayer mods (included):"
   ls $PATCHES_PATH/mods-multiplayer/
   ls $PATCHES_PATH/mods-multiplayer/ | grep -v skinsdb >> "$MOD_LIST"
   sudo cp -R $PATCHES_PATH/mods-multiplayer/* "$MT_MYGAME_MODS_PATH/"
-  echo "[  /  ] patching mobs..."
+  echo "  [ / ] patching mobs..."
   echo "adding non-manual patches to subgame (vs minetest_game and downloaded mods):"
   echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
   sudo cp -f $PATCHES_PATH/subgame/* "$MT_MYGAME_DIR/"
@@ -872,7 +872,7 @@ if [ -d "$PATCHES_PATH" ]; then
   echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
   sudo cp -f $PATCHES_PATH/subgame/mods/mobs_monster/textures/* "$MT_MYGAME_DIR/mods/mobs_monster/textures/"
 
-echo "[  /  ] patching skins for skinsdb..."
+echo "  [ / ] patching skins for skinsdb..."
 # REMOVE EXISTING SKINS AND ONLY ADD poikilos skins:
 MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$PATCH_SKINS_MOD_NAME
 SUB_NAME="textures"  # include u_skins since u_skins/u_skins IS THE MOD in the modpack
@@ -1002,7 +1002,7 @@ else
 fi
 echo
 if [ "$version_0_5_enable" != "true" ]; then
-  echo "[  -  ] removing worldedit's worldedit_brush since not compatible with 0.4.* stable (detected)"
+  echo "  [ - ] removing worldedit's worldedit_brush since not compatible with 0.4.* stable (detected)"
   sudo rm -Rf $MT_MYGAME_MODS_PATH/worldedit/worldedit_brush
 else
   if [ -d "$MT_MYGAME_MODS_PATH/worldedit/worldedit_brush" ]; then
