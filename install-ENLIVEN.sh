@@ -848,15 +848,16 @@ echo
 echo
 echo
 if [ -d "$PATCHES_PATH" ]; then
-  echo "adding the following necessary integration mods:"
+  echo "[  +  ] adding the following necessary integration mods (included):"
   ls $PATCHES_PATH/mods-integration/
   ls $PATCHES_PATH/mods-integration | grep -v debug >> "$MOD_LIST"
   sudo cp -R $PATCHES_PATH/mods-integration/* "$MT_MYGAME_MODS_PATH/"
   echo
-  echo "adding the following multiplayer mods:"
+  echo "[  +  ] adding the following multiplayer mods (included):"
   ls $PATCHES_PATH/mods-multiplayer/
   ls $PATCHES_PATH/mods-multiplayer/ | grep -v skinsdb >> "$MOD_LIST"
   sudo cp -R $PATCHES_PATH/mods-multiplayer/* "$MT_MYGAME_MODS_PATH/"
+  echo "[  /  ] patching mobs..."
   echo "adding non-manual patches to subgame (vs minetest_game and downloaded mods):"
   echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
   sudo cp -f $PATCHES_PATH/subgame/* "$MT_MYGAME_DIR/"
@@ -867,6 +868,7 @@ if [ -d "$PATCHES_PATH" ]; then
   echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
   sudo cp -f $PATCHES_PATH/subgame/mods/mobs_monster/textures/* "$MT_MYGAME_DIR/mods/mobs_monster/textures/"
 
+echo "[  /  ] patching skins for skinsdb..."
 # REMOVE EXISTING SKINS AND ONLY ADD poikilos skins:
 MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$PATCH_SKINS_MOD_NAME
 SUB_NAME="textures"  # include u_skins since u_skins/u_skins IS THE MOD in the modpack
@@ -916,7 +918,7 @@ fi
 
 
 
-  echo "mods affected: mobs mobs_monsters $PATCH_SKINS_MOD_NAME"
+  #echo "mods affected: mobs mobs_monsters $PATCH_SKINS_MOD_NAME"
   # poikilos bones PR was merged with minetest_game, so below is not needed
   #PATCHED_FLAG=""
   #BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/bones/init.lua
@@ -981,7 +983,7 @@ fi
   # NOTE: quotes don't work with wildcard
   #cp -f $PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/textures/* "$MTMOD_DEST_PATH/textures/"
   echo "# not recommended:"
-  echo "sudo cp -Rf $PATCHES_PATH/mods-stopgap/* $MT_MYGAME_MODS_PATH/"
+  echo "# sudo cp -Rf $PATCHES_PATH/mods-stopgap/* $MT_MYGAME_MODS_PATH/"
   #echo "sudo rm -Rf $MT_MYGAME_MODS_PATH/1.nonworking  # leftovers from deprecated ENLIVEN installer"
 else
   echo "did not find $PATCHES_PATH, so skipped automatic patching which is partially implemented"
@@ -996,11 +998,11 @@ else
 fi
 echo
 if [ "$version_0_5_enable" != "true" ]; then
-  echo "# remove not available on 0.4.16 stable (is only avail on 0.4.16-dev or higher)"
+  echo "[  -  ] removing worldedit's worldedit_brush since not compatible with 0.4.* stable (detected)"
   sudo rm -Rf $MT_MYGAME_MODS_PATH/worldedit/worldedit_brush
 else
   if [ -d "$MT_MYGAME_MODS_PATH/worldedit/worldedit_brush" ]; then
-    echo "worldedit_brush (minetest 0.5+ only) is enabled."
+    echo "* worldedit_brush (5.0.0-dev+ only, detected) is enabled."
   fi
 fi
 echo
