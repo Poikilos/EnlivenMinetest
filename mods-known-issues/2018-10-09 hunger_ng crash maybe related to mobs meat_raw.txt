@@ -1,0 +1,10 @@
+2018-10-09 15:58:32: ACTION[Server]: redacted digs default:stone_with_coal at (386,-1382,6)
+2018-10-09 15:58:32: ACTION[Server]: redacted uses mobs:meat_raw, pointing at [nothing]
+2018-10-09 15:58:33: ACTION[Main]: Server: Shutting down
+2018-10-09 15:58:33: ACTION[Main]: [playereffects] Server shuts down. Rescuing data into playereffects.mt
+2018-10-09 15:58:33: ACTION[Main]: [playereffects] Wrote playereffects data into /home/owner/.minetest/worlds/FCAWorldB/playereffects.mt.
+2018-10-09 15:58:33: ACTION[Main]: [fishing] Server shuts down. saving trophies table
+2018-10-09 15:58:37: ERROR[Main]: ServerError: AsyncErr: ServerThread::run Lua: Runtime error from mod 'mobs' in callback item_OnUse(): ...test/games/ENLIVEN/mods/hunger_ng/system/register_on.lua:90: attempt to perform arithmetic on local 'player_timestamp' (a nil value)
+2018-10-09 15:58:37: ERROR[Main]: stack traceback:
+2018-10-09 15:58:37: ERROR[Main]:       ...test/games/ENLIVEN/mods/hunger_ng/system/register_on.lua:90: in function 'callback'
+2018-10-09 15:58:37: ERROR[Main]:       /usr/local/share/minetest/builtin/game/item.lua:464: in function </usr/local/share/minetest/builtin/game/item.lua:462>

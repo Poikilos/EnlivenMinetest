@@ -258,10 +258,12 @@ echo "sprint_stamina_drain = .5" >> "$WRITEABLE_MINETEST_CONF"  # default is 2
 echo "bones_position_message = true" >> "$WRITEABLE_MINETEST_CONF"  # default is false--this is for client-side chat message (server-side logging always on though)
 #no longer needed since these mods check for player_api to determine whether v3 model is used:
 if [ "$version_0_5_enable" = "true" ]; then
-#  echo "player_model_version = default_character_v3" >> "$WRITEABLE_MINETEST_CONF"  # used by playeranim
+#  echo "player_model_version = default_character_v3" >> "$WRITEABLE_MINETEST_CONF"  # formerly used by playeranim
+   echo "playeranim.model_version = MTG_4_Nov_2017" >> "$WRITEABLE_MINETEST_CONF"  # used by playeranim
    echo "using version 5 branch of mods..."
 else
-#  echo "player_model_version = default_character_v2" >> "$WRITEABLE_MINETEST_CONF"  # used by playeranim
+#  echo "player_model_version = default_character_v2" >> "$WRITEABLE_MINETEST_CONF"  # formerly used by playeranim
+   echo "playeranim.model_version = MTG_4_Jun_2017" >> "$WRITEABLE_MINETEST_CONF"  # used by playeranim
    echo "using stable (minetest 0.4) branch of mods..."
    echo "3..."
    sleep 1
@@ -798,16 +800,21 @@ add_git_mod playereffects playereffects https://github.com/sys4-fr/playereffects
 #add_git_mod ambianceplus ambianceplus https://github.com/MarkuBu/ambianceplus.git
 # tenplus1's ambience/ambiance ambient sounds (fork linked at original's thread at https://forum.minetest.net/viewtopic.php?f=11&t=2807&start=275 )
 add_git_mod ambience ambience https://notabug.org/tenplus1/ambience.git
+
+
 # forum_url: https://forum.minetest.net/viewtopic.php?t=12189
-# description: ISSUE ON 0.5.0: player halfway into ground; Adds animations to the players' head
-if [ "$version_0_5_enable" != "true" ]; then
+# description: ISSUE ON 0.5.0: player halfway into ground--see minetest.conf setting above for fix; Adds animations to the players' head
+add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git
+#if [ "$version_0_5_enable" != "true" ]; then
   # see https://github.com/minetest-mods/playeranim/issues/14 (fixed)
   # add_git_mod playeranim playeranim https://github.com/poikilos/playeranim.git
-  add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git
-else
+  #add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git "v5.0"
+  #branch was merged, so checking out branch (above) is no longer needed (just config--see minetest.conf model setting above and
+  #<asdf>).
+#else
   #must also set player_model_version = default_character_v3 in minetest.conf (see above for when set in subgame folder's minetest.conf)
-  add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git "v5.0"
-fi
+#  add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git
+#fi
 #add_git_mod stamina stamina https://github.com/minetest-mods/stamina
 remove_mod stamina
 # NOTE: a skin database is at http://minetest.fensta.bplaced.net/
@@ -822,10 +829,13 @@ MATCHING_MODS_BEFORE="`ls $MT_MYGAME_MODS_PATH | grep skin`"
 remove_mod u_skinsdb
 remove_mod u_skins
 PATCH_SKINS_MOD_NAME="skinsdb"  # used further down too!
-#players are 1 block below ground in skinsdb for Minetest 0.4.* stable...
-#add_git_mod $PATCH_SKINS_MOD_NAME skinsdb https://github.com/minetest-mods/skinsdb.git
-#so get 0.5 branch from fork...
-add_git_mod $PATCH_SKINS_MOD_NAME skinsdb https://github.com/bell07/skinsdb.git mt_0_5_dev
+if [ "$version_0_5_enable" = "true" ]; then
+  #players are 1 block below ground in skinsdb for Minetest 0.4.* stable...
+  #so get 0.5 branch from fork...
+  add_git_mod $PATCH_SKINS_MOD_NAME skinsdb https://github.com/bell07/skinsdb.git mt_0_5_dev
+else
+  add_git_mod $PATCH_SKINS_MOD_NAME skinsdb https://github.com/minetest-mods/skinsdb.git
+fi
 
 if [ ! -z "$MATCHING_MODS_BEFORE" ]; then
   echo "Removed $MATCHING_MODS_BEFORE then installed $PATCH_SKINS_MOD_NAME (this output is shown on purpose)"
