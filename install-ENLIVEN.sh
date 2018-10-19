@@ -1124,5 +1124,5 @@ echo
 echo "  awards[\"notify_\" .. tname] = tdef.notify"
 echo
 echo "* there is no armor bar at this time since hudbars is not being used (not used due to issue where overlaps the new 5.0.0-dev hud)"
-echo "* You may consider changing $MT_MYGAME_MODS_PATH/mods/technic/technic/config.lua so that flashlight is enabled (may incur some lag)"
+echo "* You may consider changing $MT_MYGAME_MODS_PATH/technic/technic/config.lua so that flashlight is enabled (may incur some lag)"
 echo
