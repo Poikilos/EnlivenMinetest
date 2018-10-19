@@ -216,12 +216,16 @@ sudo cp -Rf $MT_MINETEST_GAME_PATH/* "$MT_MYGAME_DIR/"
 #sudo su -
 #WRITEABLE_MINETEST_CONF=$USR_SHARE_MINETEST/games/$MT_MYGAME_NAME/minetest.conf
 WRITEABLE_MINETEST_CONF=$HOME/minetest.conf
+#rm -f "$HOME/minetest.conf"
 rm -f "$HOME/minetest.conf"
 if [ ! -f "$USR_SHARE_MINETEST/games/$MT_MYGAME_NAME/minetest.conf" ]; then
   sudo cp "$USR_SHARE_MINETEST/games/$mtgame_name/minetest.conf" "$USR_SHARE_MINETEST/games/$MT_MYGAME_NAME/minetest.conf.1st"
 fi
-cp "$USR_SHARE_MINETEST/games/$mtgame_name/minetest.conf" "$WRITEABLE_MINETEST_CONF"
-touch "$WRITEABLE_MINETEST_CONF"
+if [ -f "$USR_SHARE_MINETEST/games/$mtgame_name/minetest.conf" ]; then
+  cp -f "$USR_SHARE_MINETEST/games/$mtgame_name/minetest.conf" "$WRITEABLE_MINETEST_CONF"
+else
+  touch "$WRITEABLE_MINETEST_CONF"
+fi
 #4080 since boundaries in chunkymap/singleimage.py (to be compatible with approximate browser max image size) are -4096 to 4096
 echo "map_generation_limit = 4096" >> "$WRITEABLE_MINETEST_CONF"
 #NOTE: map_generation_limit (aka world boundary, world border, or world limit) must be divisible by 64, so for example, 5000 results in invisible wall at 4928
@@ -257,6 +261,7 @@ echo "sprint_stamina_drain = .5" >> "$WRITEABLE_MINETEST_CONF"  # default is 2
 
 echo "bones_position_message = true" >> "$WRITEABLE_MINETEST_CONF"  # default is false--this is for client-side chat message (server-side logging always on though)
 #no longer needed since these mods check for player_api to determine whether v3 model is used:
+#TODO: below must go in the one in the subgame folder!
 if [ "$version_0_5_enable" = "true" ]; then
 #  echo "player_model_version = default_character_v3" >> "$WRITEABLE_MINETEST_CONF"  # formerly used by playeranim
    echo "playeranim.model_version = MTG_4_Nov_2017" >> "$WRITEABLE_MINETEST_CONF"  # used by playeranim
@@ -272,7 +277,7 @@ else
    echo "1..."
    sleep 1
 fi
-sudo mv -f $HOME/minetest.conf "$USR_SHARE_MINETEST/games/$MT_MYGAME_NAME/minetest.conf"
+sudo mv -f $WRITEABLE_MINETEST_CONF "$USR_SHARE_MINETEST/games/$MT_MYGAME_NAME/minetest.conf"
 
 if [ -f "$MT_MYGAME_DIR/game.conf.1st" ]; then
   echo "Already backed up $MT_MYGAME_DIR/game.conf to $MT_MYGAME_DIR/game.conf.1st"

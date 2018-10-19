@@ -23,10 +23,12 @@ hudbars_bar_type = statbar_modern
 sprint_speed = 2.25
 sprint_jump = 1.25
 sprint_stamina_drain = .5
-player_model_version = default_character_v3
+#player_model_version = default_character_v3
+#playeranim.model_version = MTG_4_Jun_2017
+playeranim.model_version = MTG_4_Nov_2017
 
-#not all settings can be changed in this minetest.conf (see 
-#minetest.conf.example in THIS folder) some settings can only be changed 
+#not all settings can be changed in this minetest.conf (see
+#minetest.conf.example in THIS folder) some settings can only be changed
 #in client's local copy of minetest.conf (see login scripts on network)
 enable_bones_logging = true
 enable_bones_chat_msg = true
