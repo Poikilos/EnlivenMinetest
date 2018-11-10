@@ -26,6 +26,8 @@ if [ ! -z "$warnings" ]; then
 fi
 #if [ -f "`command -v minetest`" ]; then
 echo "* trying to remove any non-git (packaged) version first (Press Ctrl C  to cancel)..."
+luajit_path="/usr/include/luajit-2.1"
+ext_lua=""
 #fi
 sleep 1
 echo "3..."
@@ -44,6 +46,17 @@ if [ `which apt` ]; then
   sudo apt -y install git build-essential libirrlicht-dev libgettextpo0 libfreetype6-dev cmake libbz2-dev libxxf86vm-dev libgl1-mesa-dev libsqlite3-dev libogg-dev libvorbis-dev libopenal-dev libcurl4-openssl-dev libluajit-5.1-dev liblua5.1-0-dev libleveldb-dev
   # Ubuntu Xenial:
   sudo apt -y install libpng12-dev libjpeg8-dev
+  # Nov 2018 or later Minetestserver:
+  # sudo apt -y install liblua5.3-dev  # still missing lua.h after this
+  # so see "-DLUA_INCLUDE_DIR" below instead
+  #luajit_path="/usr/include/lua5.1"
+  if [ -d "$luajit_path" ]; then
+    ext_lua=" -DLUA_INCLUDE_DIR=$luajit_path"
+  else
+    echo "WARNING: may not be able to find lua.h on Debian-based system on 2018+ versions of minetest if you do not have the packaged version of luajit installed in the '$luajit_path' directory..."
+    sleep 2
+  fi
+
   # Debian:
   sudo apt -y install libpng-dev libjpeg-dev
 elif [ `which pacman` ]; then
@@ -131,13 +144,14 @@ elif [ "$1" = "client" ]; then
 else
   echo "Building minetestserver..."
 fi
+
 echo "3..."
 sleep 1
 echo "2..."
 sleep 1
 echo "1..."
 sleep 1
-cmake . -DENABLE_GETTEXT=on -DENABLE_CURSES=on -DENABLE_FREETYPE=on -DENABLE_LEVELDB=on -DENABLE_CURL=on -DENABLE_GETTEXT=on -DENABLE_REDIS=on -DENABLE_POSTGRESQL=on -DRUN_IN_PLACE=off -DCMAKE_BUILD_TYPE=Release $build_what
+cmake .$ext_lua -DENABLE_GETTEXT=on -DENABLE_CURSES=on -DENABLE_FREETYPE=on -DENABLE_LEVELDB=on -DENABLE_CURL=on -DENABLE_GETTEXT=on -DENABLE_REDIS=on -DENABLE_POSTGRESQL=on -DRUN_IN_PLACE=off -DCMAKE_BUILD_TYPE=Release $build_what
 # NOTE: as long as -DRUN_IN_PLACE=off, above installs correctly without -DCMAKE_INSTALL_PREFIX=/usr which for some reason is used by https://aur.archlinux.org/minetest-git.git
 #  -DCMAKE_BUILD_TYPE=Release as per https://aur.archlinux.org/minetest-git.git
 make -j$(nproc)
