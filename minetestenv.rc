@@ -436,8 +436,10 @@ if [ ! -d "$MTMOD_DEST_PATH" ] || [ "$update_enable" = "true" ]; then
       fi
       if [ "$show_changes" != "false" ]; then
         #sudo rsync -rtv "$MTMOD_GOT_NAME/" "$MTMOD_DEST_PATH"
+        echo "  * preview of changes (before actual sync):"
         sudo rsync -zvc "$MTMOD_GOT_NAME/" "$MTMOD_DEST_PATH" --dry-run | grep -v '\.git' | grep -v '\./' | grep -v 'screenshot\.png' | grep -v received | grep -v 'DRY RUN'
       fi
+      echo "  * synchronizing..."
       sudo rsync -rt "$MTMOD_GOT_NAME/" "$MTMOD_DEST_PATH"
     fi
     if [ -d "$MTMOD_DEST_PATH/.git" ]; then
