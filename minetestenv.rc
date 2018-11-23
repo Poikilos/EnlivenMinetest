@@ -1,19 +1,59 @@
 
 CONFIG_PATH="$HOME/.config/EnlivenMinetest"
+CACHE_PATH="$HOME/.cache/EnlivenMinetest"
 if [ ! -d "$CONFIG_PATH" ]; then
   mkdir -p "$CONFIG_PATH"
 fi
-RELEASES_PATH="$CONFIG_PATH/cache/releases"
+if [ ! -d "$CACHE_PATH" ]; then
+  mkdir -p "$CACHE_PATH"
+fi
+
+RELEASES_PATH="$CACHE_PATH/releases"
+if [ -d "$CONFIG_PATH/cache/releases" ]; then
+  # upgrade/remove cache from older versions of this script
+  if [ ! -d "$CACHE_PATH/releases" ]; then
+    mv "$CONFIG_PATH/cache/releases" "$CACHE_PATH/"
+    echo "upgraded cache from older version of this script (moved to $RELEASES_PATH)"
+  else
+    rm -Rf "$CONFIG_PATH/cache/releases"
+    echo "removed redundant cache from older version of this script: $CONFIG_PATH/cache/releases"
+  fi
+fi
 if [ ! -d "$RELEASES_PATH" ]; then
   mkdir -p "$RELEASES_PATH"
 fi
-GIT_REPOS_PATH="$CONFIG_PATH/cache/git"
+
+GIT_REPOS_PATH="$CACHE_PATH/git"
+if [ -d "$CONFIG_PATH/cache/git" ]; then
+  if [ ! -d "$CACHE_PATH/git" ]; then
+    mv "$CONFIG_PATH/cache/git" "$CACHE_PATH/"
+    echo "upgraded cache from older version of this script (moved to $GIT_REPOS_PATH)"
+  else
+    rm -Rf "$CONFIG_PATH/cache/git"
+    echo "removed redundant cache from older version of this script: $CONFIG_PATH/cache/git"
+  fi
+fi
+
 if [ ! -d "$GIT_REPOS_PATH" ]; then
   mkdir -p "$GIT_REPOS_PATH"
 fi
-GIT_BRANCHES_PATH="$CONFIG_PATH/cache/git-branches"
+GIT_BRANCHES_PATH="$CACHE_PATH/git-branches"
+if [ -d "$CONFIG_PATH/cache/git-branches" ]; then
+  # upgrade/remove cache from older versions of this script
+  if [ ! -d "$CACHE_PATH/git-branches" ]; then
+    mv "$CONFIG_PATH/cache/git-branches" "$CACHE_PATH/"
+    echo "upgraded cache from older version of this script (moved to $GIT_BRANCHES_PATH)"
+  else
+    rm -Rf "$CONFIG_PATH/cache/git-branches"
+    echo "removed redundant cache from older version of this script: $CONFIG_PATH/cache/git-branches"
+  fi
+fi
 if [ ! -d "$GIT_BRANCHES_PATH" ]; then
   mkdir -p "$GIT_BRANCHES_PATH"
+fi
+
+if [ -d "$CONFIG_PATH/cache" ]; then
+  rmdir "$CONFIG_PATH/cache"
 fi
 
 MOD_LIST="$CONFIG_PATH/mod_list.txt"
