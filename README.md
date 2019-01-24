@@ -7,7 +7,7 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
 * automatically install Minetest client with a usable minetest.conf (for improved graphics)
 
 ## Primary Features of ENLIVEN subgame
-* birthstones, improved fork: <https://github.com/poikilos/minetest-birthstones>
+* birthstones, improved fork: <https://github.com/poikilos/birthstones>
 
 ### Planned Features
 * maintain a table of short descriptions of mods

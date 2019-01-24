@@ -628,7 +628,7 @@ add_git_mod tsm_railcorridors tsm_railcorridors http://repo.or.cz/RailCorridors/
 #-- carts:rail
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=10172&hilit=boost+cart"
 # birthstones: poikilos fork of a rather non-maintained mod--forum link is at https://forum.minetest.net/viewtopic.php?id=3663 (original mod was at https://github.com/Doc22/birthstones-mod.git)
-add_git_mod birthstones minetest-birthstones https://github.com/poikilos/minetest-birthstones.git
+add_git_mod birthstones birthstones https://github.com/poikilos/minetest-birthstones.git
 add_git_mod bakedclay bakedclay https://notabug.org/tenplus1/bakedclay.git
 add_git_mod quartz quartz https://github.com/minetest-mods/quartz
 add_git_mod magma_conduits magma_conduits https://github.com/FaceDeer/magma_conduits.git
