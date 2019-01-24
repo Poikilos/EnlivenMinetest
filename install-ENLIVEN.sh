@@ -311,7 +311,7 @@ add_git_mod invhack minetest-invhack https://github.com/salahzar/minetest-invhac
 echo "Installing Uberi's worldedit..."
 add_git_mod worldedit Minetest-WorldEdit https://github.com/Uberi/Minetest-WorldEdit.git
 # metatools: poikilos fork of LeMagnesium's minetest-mod-metatools
-add_git_mod metatools minetest-mod-metatools https://github.com/poikilos/minetest-mod-metatools.git
+add_git_mod metatools metatools https://github.com/poikilos/metatools.git
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=9376"
 # author="tenplus1"
 # description="not the original 2012 protector or 2012 fork of 2012 protector; must be logged in to download protector.zip release version at https://forum.minetest.net/download/file.php?id=5046"
