@@ -37,7 +37,7 @@ sleep 1
 echo "1..."
 sleep 1
 echo
-if [ `which apt` ]; then
+if [ -f "`command -v apt`" ]; then
   sudo apt -y remove minetest-server
   sudo apt -y remove minetest
   sudo apt -y install libncurses5-dev libgettextpo-dev doxygen libspatialindex-dev libpq-dev postgresql-server-dev-all
@@ -59,14 +59,14 @@ if [ `which apt` ]; then
 
   # Debian:
   sudo apt -y install libpng-dev libjpeg-dev
-elif [ `which pacman` ]; then
+elif [ -f "`command -v pacman`" ]; then
   sudo pacman -R --noconfirm minetest-server
   sudo pacman -R --noconfirm minetest
   echo "detected arch-based distro (tested only on antergos)..."
   # NOTE: the regular packages include headers on arch-based distros:
   sudo pacman -Syyu --noconfirm git spatialindex postgresql-libs doxygen postgresql-libs hiredis redis irrlicht gettext freetype2 bzip2 libpng libjpeg-turbo libxxf86vm mesa glu sqlite libogg libvorbis openal curl luajit leveldb ncurses redis hiredis gmp
   #can't find equivalent to libjpeg8-dev libxxf86vm-dev mesa sqlite libogg vorbis
-elif [ `which dnf` ]; then
+elif [ -f "`command -v dnf`" ]; then
   sudo dnf -y remove minetest-server
   sudo dnf -y remove minetest
   #see poikilos post at https://forum.minetest.net/viewtopic.php?f=42&t=3837&start=125
