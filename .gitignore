@@ -1,3 +1,7 @@
 *.pyc
 *.kate-swp
 /nohup.out
+/webapp/linux-minetest-kit.zip
+/webapp/linux-minetest-kit
+/webapp/screenshots
+/webapp/program.log
