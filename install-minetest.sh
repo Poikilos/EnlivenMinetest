@@ -1,11 +1,84 @@
 #!/bin/bash
-#this is the recommended script for servers
-#remove non-git version first:
-if [ -f "`command -v apt`" ]; then
-  sudo apt update
-fi
+# The git repo ONLY includes the core engine: http://localhost:3000/minetest/minetest.git
+# The build kit should be used, & has "patched Irrlicht, the new LuaJit, built-in LevelDB and Snappy support, Bucket Game, Bucket City, Wonder World, the schems collection, and other pieces"
 msg="Installing minetestserver ONLY (no param specified). If you want to install the client on your server (not normal practice) or are on a computer with a graphical desktop, add client or both param when calling this script."
 warnings=""
+enable_postgres=false
+enable_redis=false
+MAKEDEBUG=false
+TIDYUP=true
+postgresql_line="-DENABLE_POSTGRESQL=0"
+redis_line="-DENABLE_REDIS=0"
+server_line="-DBUILD_SERVER=1"
+client_line="-DBUILD_CLIENT=1"
+#build_what="-DBUILD_SERVER=1 -DBUILD_CLIENT=1"
+
+for var in "$@"
+do
+  if [ "$var" == "--remove-release" ]; then
+    if [ ! -f git_flag ]; then
+      if [ -d minetest ]; then
+        rm -fr minetest
+      fi
+    fi
+  fi
+done
+
+force_enable_server=false
+force_enable_client=false
+
+for var in "$@"
+do
+  if [ "$var" == "--postgres" ]; then
+    enable_postgres=true
+    postgresql_line="-DENABLE_POSTGRESQL=1"
+  elif [ "$var" == "--redis" ]; then
+    enable_redis=true
+    redis_line="-DENABLE_REDIS=1"
+  elif [ "$var" == "--server" ]; then
+    server_line="-DBUILD_SERVER=1"
+    if [ "$force_enable_client" = "false" ]; then
+      client_line="-DBUILD_CLIENT=0"
+    fi
+    force_enable_server=true
+    #build_what="-DBUILD_SERVER=on -DBUILD_CLIENT=off"
+  elif [ "$var" == "--client" ]; then
+    if [ "$force_enable_server" = "false" ]; then
+      server_line="-DBUILD_SERVER=0"
+    fi
+    client_line="-DBUILD_CLIENT=1"
+    force_enable_client=true
+    #build_what="-DBUILD_SERVER=off -DBUILD_CLIENT=on"
+  elif [ "$var" == "--no-tidyup" ]; then
+    TIDYUP=false
+  elif [ "$var" == "--git" ]; then
+    touch git_flag
+    if [ ! -d minetest ]; then
+      git clone http://localhost:3000/minetest/minetest.git
+    else
+      cd minetest
+      git pull
+      cd ..
+    fi
+  elif [ "$var" == "--debug" ]; then
+    MAKEDEBUG=true
+  fi
+done
+
+echo "Backends:"
+echo "* leveldb (by default)"
+echo "* sqlite3 (by default)"
+if [ "$enable_redis" = "true" ]; then
+  echo "* redis"
+else
+  echo "  (skipping redis--not used by default in this version)"
+fi
+if [ "$enable_postgres" = "true" ]; then
+  echo "* postgres"
+else
+  echo "  (skipping postgresql--not used by default in this version)"
+fi
+
 if [ "$1" = "both" ]; then
   msg="Installing minetest client AND server (param specified: both)."
 elif [ "$1" = "client" ]; then
@@ -15,76 +88,13 @@ else
     warnings="WARNING: Detected $XDG_CURRENT_DESKTOP...you probably meant to install client or both (use client or both param after this script)"
   fi
 fi
-echo "This script compiles AND installs minetestserver (NOT run-in-place, but rather system-wide) with leveldb, redis, and defaults postgresql, doxygen, sqlite3"
-echo
-echo
 echo $msg
 echo $warnings
+echo
+echo
 if [ ! -z "$warnings" ]; then
   echo "You may want to cancel and correct warnings above..."
-  sleep 2
-fi
-#if [ -f "`command -v minetest`" ]; then
-echo "* trying to remove any non-git (packaged) version first (Press Ctrl C  to cancel)..."
-luajit_path="/usr/include/luajit-2.1"
-ext_lua=""
-#fi
-sleep 1
-echo "3..."
-sleep 1
-echo "2..."
-sleep 1
-echo "1..."
-sleep 1
-echo
-if [ -f "`command -v apt`" ]; then
-  sudo apt -y remove minetest-server
-  sudo apt -y remove minetest
-  sudo apt -y install libncurses5-dev libgettextpo-dev doxygen libspatialindex-dev libpq-dev postgresql-server-dev-all
-  # added libpq-dev postgresql-server-dev-all (or specific version) are BOTH needed for PostgreSQL development as per https://stackoverflow.com/questions/13920383/findpostgresql-cmake-wont-work-on-ubuntu
-  # if you skip the above, the below says missing: GetText, Curses, ncurses, Redis, SpatialIndex, Doxygen
-  sudo apt -y install git build-essential libirrlicht-dev libgettextpo0 libfreetype6-dev cmake libbz2-dev libxxf86vm-dev libgl1-mesa-dev libsqlite3-dev libogg-dev libvorbis-dev libopenal-dev libcurl4-openssl-dev libluajit-5.1-dev liblua5.1-0-dev libleveldb-dev
-  # Ubuntu Xenial:
-  sudo apt -y install libpng12-dev libjpeg8-dev
-  # Nov 2018 or later Minetestserver:
-  # sudo apt -y install liblua5.3-dev  # still missing lua.h after this
-  # so see "-DLUA_INCLUDE_DIR" below instead
-  #luajit_path="/usr/include/lua5.1"
-  if [ -d "$luajit_path" ]; then
-    ext_lua=" -DLUA_INCLUDE_DIR=$luajit_path"
-  else
-    echo "WARNING: may not be able to find lua.h on Debian-based system on 2018+ versions of minetest if you do not have the packaged version of luajit installed in the '$luajit_path' directory..."
-    sleep 2
-  fi
-
-  # Debian:
-  sudo apt -y install libpng-dev libjpeg-dev
-elif [ -f "`command -v pacman`" ]; then
-  sudo pacman -R --noconfirm minetest-server
-  sudo pacman -R --noconfirm minetest
-  echo "detected arch-based distro (tested only on antergos)..."
-  # NOTE: the regular packages include headers on arch-based distros:
-  sudo pacman -Syyu --noconfirm git spatialindex postgresql-libs doxygen postgresql-libs hiredis redis irrlicht gettext freetype2 bzip2 libpng libjpeg-turbo libxxf86vm mesa glu sqlite libogg libvorbis openal curl luajit leveldb ncurses redis hiredis gmp
-  #can't find equivalent to libjpeg8-dev libxxf86vm-dev mesa sqlite libogg vorbis
-elif [ -f "`command -v dnf`" ]; then
-  sudo dnf -y remove minetest-server
-  sudo dnf -y remove minetest
-  #see poikilos post at https://forum.minetest.net/viewtopic.php?f=42&t=3837&start=125
-  sudo dnf -y install -y gcc-c++ freetype-devel spatialindex-devel postgresql-devel doxygen irrlicht-devel gettext freetype cmake bzip2-devel libpng libjpeg-turbo libXxf86vm mesa-libGLU libsqlite3x-devel libogg-devel libvorbis-devel openal-devel curl-devel luajit-devel lua-devel leveldb-devel ncurses-devel redis hiredis-devel gmp-devel
-  cd
-  #git clone https://github.com/minetest/minetest.git
-  #cd minetest/games
-  #git clone https://github.com/minetest/minetest_game.git
-  #cd ..
-  #cmake . -DENABLE_GETTEXT=1 -DENABLE_FREETYPE=1 -DENABLE_LEVELDB=1 -DENABLE_REDIS=1 -DENABLE_POSTGRESQL=1
-  #make -j$(nproc)
-  #sudo make install
-  #minetest
-  # echo -e "\n\n\e[1;33mYou can run Minetest again by typing \"minetest\" in a terminal or selecting it in an applications menu.\nYou can install mods in ~/.minetest/mods, too.\e[0m"
-else
-  echo "WARNING: cannot remove packaged version, because your package manager is not known by this script."
-  echo "Press Ctrl C to cancel, or wait to continue anyway..."
-  sleep 1
+  echo "(If you do not press Ctrl C, install will continue anyway)"
   echo "3..."
   sleep 1
   echo "2..."
@@ -109,6 +119,31 @@ cd Downloads
   #sleep 1
   #cd minetest
 #else
+zip_name="linux-minetest-kit.zip"
+extracted_name="linux-minetest-kit"
+wget -O $zip_name https://downloads.minetest.org/$zip_name
+if [ ! -f "$zip_name" ]; then
+  echo "ERROR: Nothing done since $zip_name could not be downloaded."
+  exit 1
+fi
+
+unzip -u "$zip_name"
+# -o  overwrite non-interactively
+# -u  update files, create if necessary
+
+if [ ! -d "$extracted_name" ]; then
+  echo "ERROR: Nothing done since after extracting $zip_name, there is"
+  echo "  still no directory: $extracted_name"
+  exit 2
+fi
+
+cd "$extracted_name"
+
+bash -e mtcompile-libraries.sh build >& libraries.log
+bash -e mtcompile-program.sh build >& program.log
+
+exit 0
+
 if [ ! -d minetest ]; then
   git clone https://github.com/minetest/minetest.git
   cd minetest
@@ -172,3 +207,4 @@ echo "  sudo xargs rm < install_manifest.txt"
 echo "  # as per http://irc.minetest.net/minetest/2015-08-06"
 # based on https://forum.minetest.net/viewtopic.php?f=42&t=3837 (below)
 # sudo apt-get install -y git build-essential libirrlicht-dev libgettextpo0 libfreetype6-dev cmake libbz2-dev libpng12-dev libjpeg8-dev libxxf86vm-dev libgl1-mesa-dev libsqlite3-dev libogg-dev libvorbis-dev libopenal-dev libcurl4-openssl-dev libluajit-5.1-dev liblua5.1-0-dev libleveldb-dev; cd; git clone https://github.com/minetest/minetest.git; cd minetest/games; git clone https://github.com/minetest/minetest_game.git; cd ..; cmake . -DENABLE_GETTEXT=1 -DENABLE_FREETYPE=1 -DENABLE_LEVELDB=1; make -j$(nproc); sudo make install; minetest; echo -e "\n\n\e[1;33mYou can run Minetest again by typing \"minetest\" in a terminal or selecting it in an applications menu.\nYou can install mods in ~/.minetest/mods, too.\e[0m"
+

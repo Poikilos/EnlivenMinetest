@@ -476,5 +476,10 @@ Qt5Widgets.dll
 
 ## Developer Notes
 
+### minetest.org build speeds
+* Intel i7-4770K
+  * libraries ~3m
+  * program ~4m
+
 ### Regression Tests
 * Use of input in python, where should never be used except in poikilos.py and minetestinfo.py for first-time setup or when interactive_enable is True
