@@ -10,6 +10,7 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
 * birthstones, improved fork: <https://github.com/poikilos/birthstones>
 
 ### Planned Features
+There are several Minetest mods I'm considering fixing, and several ideas I may implement. For more information and status, see my [Minetest Kanboard](https://poikilos.dyndns.org/kanboard/?controller=BoardViewController&action=readonly&token=f214530d2f1294d90279631ce66b2e8b8569c6f15faf3773086476158bc8).
 * maintain a table of short descriptions of mods
 * see also EnlivenMinetest/etc/game-install-enliven-testing.sh
 * slimenodes fork: make glue replaceable with animal hide; disable jump or reduce bouncy value, otherwise bouncing gets higher indefinitely
