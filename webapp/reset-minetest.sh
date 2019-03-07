@@ -26,6 +26,10 @@ echo "  (see libraries.log in case of any errors)"
 echo "done."
 echo
 echo "Run the following manually:"
-echo "  cd '$extracted_name' && bash -e mtcompile-program.sh build >& program.log"
+if [ -f "$extracted_name/mtcompile-program.pl" ]; then
+  echo "  cd '$extracted_name' && perl mtcompile-program.pl build >& program.log"
+else
+  echo "  cd '$extracted_name' && bash -e mtcompile-program.sh build >& program.log"
+fi
 echo
 echo
