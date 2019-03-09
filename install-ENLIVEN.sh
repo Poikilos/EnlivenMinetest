@@ -682,9 +682,9 @@ add_git_mod homedecor_modpack homedecor_modpack https://github.com/minetest-mods
 add_git_mod unifieddyes unifieddyes https://github.com/minetest-mods/unifieddyes.git
 #Sokomine's original version has no security ( https://forum.minetest.net/viewtopic.php?id=4877 )
 #  https://github.com/Sokomine/travelnet/archive/master.zip
-# add_git_mod travelnet travelnet https://github.com/poikilos/travelnet.git
-# for now, manually get branch with sound (until Sokomine merges it--in addition, also check what else I may have manually merged thats not yet in his):
-add_git_mod travelnet travelnet https://github.com/poikilos/travelnet restore_sound
+# manually get branch with sound:
+# MERGED: add_git_mod travelnet travelnet https://github.com/poikilos/travelnet restore_sound
+add_git_mod travelnet travelnet https://github.com/Sokomine/travelnet.git
 add_git_mod anvil anvil https://github.com/minetest-mods/anvil.git
 add_git_mod sling sling https://github.com/minetest-mods/sling.git
 #REPLACES PilzAdam's, modified by kaeza, maintained by VenessaE; FORMERLY in homedecor_modpack
