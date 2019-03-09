@@ -17,6 +17,12 @@ There are several improvements I may implement in new or existing mods. For more
 * https://github.com/minetest-mods/tutor
 * https://github.com/minetest-mods/chat_anticurse
 * https://github.com/minetest-mods/cozy (sitting and laying down player animations)--compare with emote https://github.com/minetest-mods/emote.git
+* switch back to github.com/Sokomine/travelnet:
+  * My pull request for sounds was merged
+    (<https://github.com/Sokomine/travelnet/pull/34#event-2192005251>).
+  * Upstream (Sokomine) version now uses sounds by default.
+  * pandorabox-io's protection check was also merged
+    (<https://github.com/Sokomine/travelnet/commit/b168efc6c4cc0cc648dfb49ca17f0072decac114>).
 
 #### node.js server manager
 * capture log
