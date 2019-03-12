@@ -445,6 +445,10 @@ if [ "$spawners_enable" = "true" ]; then
   # add_git_mod tsm_pyramids tsm_pyramids http://repo.or.cz/minetest_pyramids/tsm_pyramids.git
   # Wuzzy's doesn't account for 5.0.0-dev yet (nodeupdate is now minetest.check_for_falling) so use custom fork:
   add_git_mod tsm_pyramids tsm_pyramids https://github.com/poikilos/tsm_pyramids.git
+  # NOTE: consider using https://framagit.org/xisd-minetest/tsm_pyramid.git (WARNING: may require CME)
+  # but first see if there are any updates to https://repo.or.cz/minetest_pyramids/tsm_pyramids.git
+  # (WARNING: uses nodeupdate [not minetest.check_for_falling], so only compatible with minetest.org release
+  # see nodes.lua; human readable url: http://repo.or.cz/w/minetest_pyramids/tsm_pyramids.git)
 
 else
   remove_mod tsm_chests_dungeon

@@ -301,6 +301,8 @@ mv unmounter unmounter.sh
     minetest.chat_send_player(player:get_player_name(), S("Bones placed at %s."):format(pos))
 
 ## Known issues:
+* The tsm_pyramids fork by xisd is available again at <https://framagit.org/xisd-minetest/tsm_pyramid> (xisd had deleted his GitHub account).
+  Compare to https://github.com/poikilos/tsm_pyramids and see whether that repo can be deleted.
 * minetestserver git installer doesn't take into account that minetest_game is NOT updated automatically and must overwrite existing one (should be /usr/local/share/minetest/games/minetest_game --tested on Ubuntu 17.10 Artful)
 * missing nodes if switched world from older version (such as 0.4.15-git):
   * nyancat:nyancat_rainbow (make transitional mod that makes node but not worldgen, and always install it? for now is fixed by stopgap mod)
