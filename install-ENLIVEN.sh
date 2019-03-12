@@ -747,9 +747,12 @@ add_git_mod trmp_minetest_game trmp_minetest_game https://github.com/poikilos/tr
 #forum_url = "http://minetest.org/forum/viewtopic.php?f=11&t=4870&sid=3ccbe3a667c6201075fc475ef7dc7cea"
 #see also minetest-mods version:
 add_git_mod awards awards https://github.com/minetest-mods/awards.git
-#xisd is GONE from GitHub:
-#add_git_mod awards_board awards_board https://github.com/xisd/awards_board.git
-add_git_mod awards_board awards_board https://gitlab.com/poikilos/awards_board.git
+# xisd is GONE from GitHub:
+# add_git_mod awards_board awards_board https://github.com/xisd/awards_board.git
+# poikilos/awards_board is DELETED from GitLab (due to exposed e-mail address
+# --e-mail anonymizing handn't been implemented by GitLab yet, but is now):
+# add_git_mod awards_board awards_board https://gitlab.com/poikilos/awards_board.git
+add_git_mod awards_board awards_board https://framagit.org/xisd-minetest/awards_board.git
 #endregion NON-WORLDGEN NODE/ITEM MODS
 
 
