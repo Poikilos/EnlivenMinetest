@@ -1,13 +1,15 @@
-#!/bin/bash -e
+#!/bin/bash
 zip_name=linux-minetest-kit.zip
 extracted_name=linux-minetest-kit
 in_use_name=minetest
-running=`ps ax | grep -v grep | grep $in_use_name | wc -l`
-if [ $running -gt 0 ]; then
-  echo "killing minetest processes..."
-  killall $in_use_name
-fi
-wget -O $zip_name https://downloads.minetest.org/$zip_name || exit 1
+#not reliable with bash -e (if not running, check throws error):
+#running=`ps ax | grep -v grep | grep $in_use_name | wc -l`
+#if [ $running -gt 0 ]; then
+#  echo "killing minetest processes..."
+#  killall $in_use_name
+#fi
+url=https://downloads.minetest.org
+wget -O $zip_name $url/$zip_name || echo "no $zip_name at $url" && exit 1
 if [ -d "$extracted_name" ]; then
   if [ "`ls -lR $extracted_name/minetest/bin/*.png | wc -l`" -gt 0 ]; then
     if [ ! -d screenshots ]; then mkdir screenshots; fi
