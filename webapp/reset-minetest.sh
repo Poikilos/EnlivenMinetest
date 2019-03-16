@@ -9,16 +9,22 @@ in_use_name=minetest
 #  killall $in_use_name
 #fi
 url=https://downloads.minetest.org
-wget -O $zip_name $url/$zip_name || echo "no $zip_name at $url" && exit 1
+
+customDie () {
+    echo "$1"
+    exit 1
+}
+
+wget -O $zip_name $url/$zip_name || customDie "no $zip_name at $url"
 if [ -d "$extracted_name" ]; then
   if [ "`ls -lR $extracted_name/minetest/bin/*.png | wc -l`" -gt 0 ]; then
     if [ ! -d screenshots ]; then mkdir screenshots; fi
     # NOTE: system-wide install of minetest puts screenshots in ~/ (cwd)
-    mv $extracted_name/minetest/bin/*.png screenshots/ || exit 2
+    mv $extracted_name/minetest/bin/*.png screenshots/ || customDie "can't move screenshots from $extracted_name/minetest/bin/*.png"
   fi
-  rm -Rf "$extracted_name" || exit 3
+  rm -Rf "$extracted_name" || customDie "can't remove $extracted_name"
 fi
-unzip -u $zip_name || exit 4
+unzip -u $zip_name || customDie "Can't unzip $zip_name"
 cd "$extracted_name"
 echo "compiling libraries..."
 bash -e mtcompile-libraries.sh build >& libraries.log
