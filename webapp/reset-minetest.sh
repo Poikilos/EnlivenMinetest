@@ -11,6 +11,7 @@ in_use_name=minetest
 url=https://downloads.minetest.org
 
 customDie () {
+    echo "ERROR: Cannot continue since"
     echo "$1"
     exit 1
 }
@@ -33,9 +34,17 @@ echo "  (see libraries.log in case of any errors)"
 #bash -e mtcompile-program.sh build >& program.log
 echo "done."
 echo
-echo "Run the following manually:"
+echo
+echo
+echo
+echo
+echo "Check libraries.log for errors, then..."
+echo "- Run the following manually:"
 if [ -f "$extracted_name/mtcompile-program.pl" ]; then
-  echo "  cd '$extracted_name' && perl mtcompile-program.pl build >& program.log"
+  echo "  cd '$extracted_name'"
+  echo "  perl mtcompile-program.pl build >& program.log"
+  echo "  # OR (server only):"
+  echo "  perl mtcompile-program.pl build --server >& program.log"
 else
   echo "  cd '$extracted_name' && bash -e mtcompile-program.sh build >& program.log"
 fi
