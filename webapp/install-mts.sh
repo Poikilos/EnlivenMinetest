@@ -6,7 +6,19 @@ if [ ! -d "$flag_dir" ]; then
     exit 1
 fi
 cd "$extracted_name"
+extra_options=""
+if [ "@$1" = "@--client" ]; then
+    extra_options="--client"
+fi
+flag_icon="$HOME/Desktop/org.minetest.minetest.desktop"
 flag_file="minetest/bin/minetestserver"
+if [ -f "$flag_icon" ]; then
+    extra_options="--client"
+    echo "automatically adding --client to compile since detected"
+    echo "'$flag_icon'--press Ctrl C to cancel..."
+    flag_file="minetest/bin/minetest"
+    sleep 2
+fi
 #if [ -f "$flag_file" ]; then
     #rm -f "$flag_file"
 #fi
@@ -20,11 +32,11 @@ else
     if [ -f "mtcompile-program.pl" ]; then
         # perl mtcompile-program.pl build >& program.log
         echo "Compiling via perl..."
-        perl mtcompile-program.pl build --server >& program.log
+        perl mtcompile-program.pl build --server $extra_options >& program.log
     else
         # NOTE: no pl in $extracted_name, assuming bash:
         echo "Compiling via bash..."
-        bash -e mtcompile-program.sh build >& program.log
+        bash -e mtcompile-program.sh build --server $extra_options >& program.log
     fi
 fi
 if [ ! -f "$flag_file" ]; then
@@ -39,6 +51,11 @@ if [ -f "$flag_file" ]; then
     echo "ERROR: not complete since can't move old '$flag_file'"
     exit 1
 fi
+if [ ! -d minetest ]; then
+    echo "ERROR: can't install since missing `pwd`/minetest"
+    exit 1
+fi
+echo "Installing minetest to '$HOME'..."
 rsync -rt minetest $HOME
 if [ ! -f "$flag_file" ]; then
     echo "ERROR: not complete--couldn't create '$flag_file'"
