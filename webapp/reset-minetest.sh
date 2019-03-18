@@ -15,16 +15,20 @@ customDie () {
     echo "$1"
     exit 1
 }
-
-wget -O $zip_name $url/$zip_name || customDie "no $zip_name at $url"
 if [ -d "$extracted_name" ]; then
+  if [ "`ls -lR screenshots/*.png | wc -l`" -gt 0 ]; then
+    mv screenshots/*.png ~/ || customDie "can't move screenshots from $extracted_name/minetest/bin/*.png"
+    rmdir --ignore-fail-on-non-empty screenshots
+  fi
   if [ "`ls -lR $extracted_name/minetest/bin/*.png | wc -l`" -gt 0 ]; then
-    if [ ! -d screenshots ]; then mkdir screenshots; fi
+    # if [ ! -d screenshots ]; then mkdir screenshots; fi
     # NOTE: system-wide install of minetest puts screenshots in ~/ (cwd)
-    mv $extracted_name/minetest/bin/*.png screenshots/ || customDie "can't move screenshots from $extracted_name/minetest/bin/*.png"
+    mv $extracted_name/minetest/bin/*.png ~/ || customDie "can't move screenshots from $extracted_name/minetest/bin/*.png"
   fi
   rm -Rf "$extracted_name" || customDie "can't remove $extracted_name"
 fi
+
+wget -O $zip_name $url/$zip_name || customDie "no $zip_name at $url"
 unzip -u $zip_name || customDie "Can't unzip $zip_name"
 cd "$extracted_name"
 echo "compiling libraries..."
@@ -38,15 +42,9 @@ echo
 echo
 echo
 echo
+cd ..
 echo "Check libraries.log for errors, then..."
 echo "- Run the following manually:"
-if [ -f "$extracted_name/mtcompile-program.pl" ]; then
-  echo "  cd '$extracted_name'"
-  echo "  perl mtcompile-program.pl build >& program.log"
-  echo "  # OR (server only):"
-  echo "  perl mtcompile-program.pl build --server >& program.log"
-else
-  echo "  cd '$extracted_name' && bash -e mtcompile-program.sh build >& program.log"
-fi
+echo "  install.sh"
 echo
 echo

@@ -8,7 +8,8 @@ fi
 dst="$HOME/EnlivenMinetest/webapp/linux-minetest-kit/minetest/games"
 echo "transferring to $dst..."
 rsync -rt WIP/ENLIVEN $dst
-dst="192.168.1.5:/home/owner/git/EnlivenMinetest/webapp/linux-minetest-kit/minetest/games"
+#OLD: dst="192.168.1.5:/home/owner/git/EnlivenMinetest/webapp/linux-minetest-kit/minetest/games"
+dst="192.168.1.5:$HOME/minetest/games"
 echo "transferring to $dst..."
 rsync -rt WIP/ENLIVEN $dst
 echo "Done."
