@@ -16,9 +16,11 @@ if [ -f "$flag_file" ]; then
 fi
 if [ -f "mtcompile-program.pl" ]; then
     # perl mtcompile-program.pl build >& program.log
+    echo "Compiling via perl..."
     perl mtcompile-program.pl build --server >& program.log
 else
     # NOTE: no pl in $extracted_name, assuming bash:
+    echo "Compiling via bash..."
     bash -e mtcompile-program.sh build >& program.log
 fi
 if [ ! -f "$flag_file" ]; then
@@ -45,14 +47,28 @@ if [ ! -d "$flag_dir" ]; then
 fi
 if [ ! -d "$HOME/games/ENLIVEN" ]; then
     cp -R "$flag_dir" "$HOME/games/ENLIVEN"
-    echo
+    echo "name = ENLIVEN" > "$HOME/games/ENLIVEN/game.conf"
 else
-    rsync -rt "$flag_dir/mods/coderbuild/" "$HOME/games/ENLIVEN/mods/coderbuild"
-    rsync -rt "$flag_dir/mods/codercore/" "$HOME/games/ENLIVEN/mods/codercore"
-    rsync -rt "$flag_dir/mods/coderedit/" "$HOME/games/ENLIVEN/mods/coderedit"
-    rsync -rt "$flag_dir/mods/coderfood/" "$HOME/games/ENLIVEN/mods/coderfood"
-    rsync -rt "$flag_dir/mods/codermobs/" "$HOME/games/ENLIVEN/mods/codermobs"
-    rsync -rt "$flag_dir/mods/decorpack/" "$HOME/games/ENLIVEN/mods/decorpack"
-    rsync -rt "$flag_dir/mods/mtmachines/" "$HOME/games/ENLIVEN/mods/mtmachines"
+    mod_name=coderbuild
+    echo "updating $mod_name..."
+    rsync -rt "$flag_dir/mods/$mod_name" "$HOME/games/ENLIVEN/mods"
+    mod_name=codercore
+    echo "updating $mod_name..."
+    rsync -rt "$flag_dir/mods/$mod_name" "$HOME/games/ENLIVEN/mods"
+    mod_name=coderedit
+    echo "updating $mod_name..."
+    rsync -rt "$flag_dir/mods/$mod_name" "$HOME/games/ENLIVEN/mods"
+    mod_name=coderfood
+    echo "updating $mod_name..."
+    rsync -rt "$flag_dir/mods/$mod_name" "$HOME/games/ENLIVEN/mods"
+    mod_name=codermobs
+    echo "updating $mod_name..."
+    rsync -rt "$flag_dir/mods/$mod_name" "$HOME/games/ENLIVEN/mods"
+    mod_name=decorpack
+    echo "updating $mod_name..."
+    rsync -rt "$flag_dir/mods/$mod_name" "$HOME/games/ENLIVEN/mods"
+    mod_name=mtmachines
+    echo "updating $mod_name..."
+    rsync -rt "$flag_dir/mods/$mod_name" "$HOME/games/ENLIVEN/mods"
     # cp -f "$flag_dir/mods/LICENSE" "$HOME/games/ENLIVEN/mods/LICENSE"
 fi
