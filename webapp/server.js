@@ -25,6 +25,7 @@ var express = require('express'),
 const os = require('os');
 var formidable = require('formidable')
 var querystring = require("querystring");  // built-in
+var mv = require('mv');
 // var util = require('util')
 
 var app = express();
@@ -56,7 +57,10 @@ var unique_flags = [
 //#endregion derived from mtsenliven.py
 
 function regeneratePaths() {
-	skinDir = minetestPath + "/games/ENLIVEN/mods/codercore/coderskins/textures";
+	skinDir = minetestPath + "/games/Bucket_Game/mods/codercore/coderskins/textures";
+	if (fs.existsSync( minetestPath + "/games/ENLIVEN")) {
+		skinDir = minetestPath + "/games/ENLIVEN/mods/codercore/coderskins/textures";
+	}
 	console.log("skinDir: \"" + skinDir + "\"");
 }
 
@@ -354,11 +358,14 @@ app.post('/set-skin', function (req, res){
 				var originalPath = files.userFile.path;
 				console.log("trying to rename " + files.userFile.path
 							+ " to " + directPath);
-				fs.rename(files.userFile.path, directPath, function(err) {
+				// NOTE: rename does not work if tmp is on different device (common)
+				mv(files.userFile.path, directPath, function(err) {
+				// fs.rename(files.userFile.path, directPath, function(err) {
 					if (err) {
 						msg = "Failed to rename " + originalPath
 							  + " to " + directPath;
 						console.log(msg);
+						console.log(JSON.stringify(err));
 						msg += "<br/>\n";
 						//next(err);
 // TODO: why does next above show:

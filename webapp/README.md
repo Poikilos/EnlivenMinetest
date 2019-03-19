@@ -63,7 +63,7 @@ fi
 cd "$target_dir"
 npm init
 #except changed jade to pug
-npm install express static-favicon morgan cookie-parser body-parser debug pug passport passport-local mongoose formidable
+npm install express static-favicon morgan cookie-parser body-parser debug pug passport passport-local mongoose formidable mv
 #NOTE: multiparty has streaming like busboy, but is non-trivial to implement
 ```
 
