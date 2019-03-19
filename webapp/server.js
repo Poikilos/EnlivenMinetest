@@ -343,6 +343,8 @@ app.post('/set-skin', function (req, res){
         // TODO: make sure my_file and project_id values are present
         if (files.userFile != undefined) {
 			var originalPath = files.userFile.path;
+			console.log("trying to rename " + files.userFile.path
+						+ " to " + directPath);
 			fs.rename(files.userFile.path, directPath, function(err) {
 				if (err) {
 					msg = "Failed to rename " + originalPath
@@ -385,7 +387,7 @@ app.get('/', function (req, res) {
 	if (req.query.date) selected_date_s = req.query.date
 	if (req.query.msg != undefined) {
 		ret += "<br/>\n";
-		ret += "<b>" + querystring.parse(msg) + "</b><br>\n";
+		ret += "<b>" + querystring.parse(req.query.msg) + "</b><br>\n";
 		ret += "<br/>\n";
 	}
 	ret += "assuming minetestserver ran as: " + os.homedir() + "<br/>\n";
