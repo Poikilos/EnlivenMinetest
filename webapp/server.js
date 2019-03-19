@@ -335,13 +335,13 @@ app.post('/set-skin', function (req, res){
 	//(OldCoder, 2019)
 	var directPath = "";
 	var indirectPath = "";
-	var destName = "";
+	var destNameNoExt = "";
 	var msg = "Uploading...";
     form.parse(req, function(err, fields, files) {
         if (err) next(err);
-		destName = destName = "player_" + fields.userName;
-        directPath = skinDir + "/" + destName + ".png";
-        indirectPath = skinDir + "/" + destName + ".skin";
+		destNameNoExt = destNameNoExt = "player_" + fields.userName;
+        directPath = skinDir + "/" + destNameNoExt + ".png";
+        indirectPath = skinDir + "/" + destNameNoExt + ".skin";
         // TODO: make sure my_file and project_id values are present
         if (files.userFile != undefined) {
 			var originalPath = files.userFile.path;
@@ -355,9 +355,9 @@ app.post('/set-skin', function (req, res){
 					next(err);
 				}
 				else {
-					fs.writeFile(indirectPath, destName, function(err, data) {
+					fs.writeFile(indirectPath, destNameNoExt + ".skin", function(err, data) {
 					  if (err) console.log(err);
-					  console.log("Successfully wrote " + destName
+					  console.log("Successfully wrote " + destNameNoExt
 								  + " to "+indirectPath+".");
 					});
 				}
