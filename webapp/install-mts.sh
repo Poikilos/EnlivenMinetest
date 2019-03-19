@@ -56,7 +56,7 @@ if [ ! -d minetest ]; then
     exit 1
 fi
 echo "Installing minetest to '$HOME'..."
-rsync -rt minetest $HOME
+rsync -rt minetest/ $HOME/minetest
 if [ ! -f "$dest_flag_file" ]; then
     echo "ERROR: not complete--couldn't create '$dest_flag_file'"
     exit 1
@@ -67,6 +67,7 @@ if [ ! -d "$flag_dir" ]; then
     exit 1
 fi
 if [ ! -d "$HOME/minetest/games/ENLIVEN" ]; then
+    echo "Copying $flag_dir to $HOME/minetest/games/ENLIVEN..."
     cp -R "$flag_dir" "$HOME/minetest/games/ENLIVEN"
     echo "name = ENLIVEN" > "$HOME/minetest/games/ENLIVEN/game.conf"
 else

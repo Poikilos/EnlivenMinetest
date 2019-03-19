@@ -19,6 +19,9 @@ npm install
 ## Planned Features
 * Replace the "write" (stdout) method of the minetestserver process (see
   <https://stackoverflow.com/questions/18543047/mocha-monitor-application-output>)
+* parse Lua mods
+  - show armor strengths
+* list mods (only additional ones vs basis such as Bucket_Game)
 
 ## Developer Notes
 

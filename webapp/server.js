@@ -58,9 +58,10 @@ var unique_flags = [
 
 function regeneratePaths() {
 	skinDir = minetestPath + "/games/Bucket_Game/mods/codercore/coderskins/textures";
-	if (fs.existsSync( minetestPath + "/games/ENLIVEN")) {
-		skinDir = minetestPath + "/games/ENLIVEN/mods/codercore/coderskins/textures";
-	}
+	//doesn't work due to bug:
+	//if (fs.existsSync( minetestPath + "/games/ENLIVEN")) {
+		//skinDir = minetestPath + "/games/ENLIVEN/mods/codercore/coderskins/textures";
+	//}
 	console.log("skinDir: \"" + skinDir + "\"");
 }
 
