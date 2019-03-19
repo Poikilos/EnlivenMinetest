@@ -55,12 +55,22 @@ if [ ! -d minetest ]; then
     echo "ERROR: can't install since missing `pwd`/minetest"
     exit 1
 fi
-echo "Installing minetest to '$HOME'..."
-rsync -rt minetest/ $HOME/minetest
-if [ ! -f "$dest_flag_file" ]; then
-    echo "ERROR: not complete--couldn't create '$dest_flag_file'"
-    exit 1
+try_dest="/tank/local/owner/minetest"
+if [ -d "$try_dest" ]; then
+    echo "Installing minetest as symlink '$HOME/minetest' pointing to '$try_dest'..."
+    rsync -rt minetest/ $try_dest
+    if [ ! -d "$HOME/minetest" ]; then
+        ln -s $try_dest $HOME/minetest
+    fi
+else
+    echo "Installing minetest to '$HOME'..."
+    rsync -rt minetest/ $HOME/minetest
+    if [ ! -f "$dest_flag_file" ]; then
+        echo "ERROR: not complete--couldn't create '$dest_flag_file'"
+        exit 1
+    fi
 fi
+
 flag_dir="$HOME/minetest/games/Bucket_Game"
 if [ ! -d "$flag_dir" ]; then
     echo "ERROR: missing $flag_dir"
