@@ -308,7 +308,7 @@ app.get('/skin-form', function (req, res) {
 	ret += '<html><body style="font-family:calibri,sans">'+"\n";
 	ret += '<form action="/set-skin" method="post" enctype="multipart/form-data">'+"\n";
 	ret += 'User Name (case-sensitive): <input type="text" name="userName" id="userName">'+"\n";
-	ret += 'Select image to upload:'+"\n";
+	ret += 'Select a png image to upload:'+"\n";
 	ret += '<input type="file" name="userFile" id="userFile">'+"\n";
 	ret += '<input type="submit" value="Upload Image" name="submit">'+"\n";
 	ret += '</form>'+"\n";
@@ -355,9 +355,10 @@ app.post('/set-skin', function (req, res){
 					next(err);
 				}
 				else {
-					fs.writeFile(indirectPath + ".png", destNameNoExt + ".skin", function(err, data) {
+					var thisData = indirectPath + ".png";
+					fs.writeFile(thisData, indirectPath, function(err, data) {
 					  if (err) console.log(err);
-					  console.log("Successfully wrote " + destNameNoExt
+					  console.log("Successfully wrote " + thisData
 								  + " to "+indirectPath+".");
 					});
 				}
