@@ -1,13 +1,28 @@
 # EnlivenMinetest webapp
 EnlivenMinetest Node.js webapp for web management of minetest
-* Must run as same user as minetestserver, and neither as root
+* Must run as same user as minetestserver, and neither should be root!
 
-Uses passport
-see <https://code.tutsplus.com/tutorials/authenticating-nodejs-applications-with-passport--cms-21619>
+## Install
+* Using Terminal, cd to your EnlivenMinetest/webapp diretory, then:
+```bash
+npm install
+```
 
-Replaces the "write" (stdout) method of the minetest process:
-see <https://stackoverflow.com/questions/18543047/mocha-monitor-application-output>
+## Usage
+* start like:
+  `node server.js`
+* then it will listen on port 3000
+* change skin at localhost:3000/skin-form
+* for security, no overwrite is allowed
+
+
+## Planned Features
+* Replace the "write" (stdout) method of the minetestserver process (see
+  <https://stackoverflow.com/questions/18543047/mocha-monitor-application-output>)
+
 ## Developer Notes
+
+* Uses passport (see <https://code.tutsplus.com/tutorials/authenticating-nodejs-applications-with-passport--cms-21619>
 
 ### Things webapp should deprecate
 * mtanalyze/web
@@ -48,8 +63,8 @@ fi
 cd "$target_dir"
 npm init
 #except changed jade to pug
-npm install express static-favicon morgan cookie-parser body-parser debug pug passport passport-local mongoose
-
+npm install express static-favicon morgan cookie-parser body-parser debug pug passport passport-local mongoose formidable
+#NOTE: multiparty has streaming like busboy, but is non-trivial to implement
 ```
 
 ### Old (Unused)

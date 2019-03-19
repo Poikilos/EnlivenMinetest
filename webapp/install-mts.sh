@@ -43,12 +43,12 @@ if [ ! -f "$flag_file" ]; then
     echo "ERROR: Build did not complete--missing '$flag_file'"
     exit 1
 fi
-flag_file="$HOME/minetest/bin/minetestserver"
-if [ -f "$flag_file" ]; then
-    mv -f "$flag_file" "$flag_file.bak"
+dest_flag_file="$HOME/$flag_file"
+if [ -f "$dest_flag_file" ]; then
+    mv -f "$dest_flag_file" "$dest_flag_file.bak"
 fi
-if [ -f "$flag_file" ]; then
-    echo "ERROR: not complete since can't move old '$flag_file'"
+if [ -f "$dest_flag_file" ]; then
+    echo "ERROR: not complete since can't move old '$dest_flag_file'"
     exit 1
 fi
 if [ ! -d minetest ]; then
@@ -57,8 +57,8 @@ if [ ! -d minetest ]; then
 fi
 echo "Installing minetest to '$HOME'..."
 rsync -rt minetest $HOME
-if [ ! -f "$flag_file" ]; then
-    echo "ERROR: not complete--couldn't create '$flag_file'"
+if [ ! -f "$dest_flag_file" ]; then
+    echo "ERROR: not complete--couldn't create '$dest_flag_file'"
     exit 1
 fi
 flag_dir="$HOME/minetest/games/Bucket_Game"

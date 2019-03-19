@@ -1,5 +1,13 @@
 'use strict';
+// Howto: see README.md
 
+//function getUserHome() {
+	//return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+//}
+
+
+const profilePath = require('os').homedir();
+var skinDir = profilePath + "/minetest/games/ENLIVEN/mods/codercore/coderskins/textures";
 var tz_offset = 240; //subtract this from server time to get local time; 4hrs is 240; 5hrs is 300
 //TODO: handle tz_offset not divisible by 60
 //var selected_date_s = null;
@@ -14,6 +22,10 @@ var express = require('express'),
 	fs = require('fs'),
 	readlines = require('n-readlines');
 const os = require('os');
+var formidable = require('formidable')
+var querystring = require("querystring");  // built-in
+// var util = require('util')
+
 var app = express();
 //app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 //app.set('view engine', 'handlebars');
@@ -267,6 +279,8 @@ function read_log() {
 	}
 }
 
+
+
 app.get('/get-players', function (req, res) {
 	res.setHeader('Content-Type', 'application/json');
 	 res.send(JSON.stringify(players));
@@ -286,6 +300,71 @@ app.get('/announce', function (req, res) {
 	res.send();
 });
 
+
+
+app.get('/skin-form', function (req, res) {
+	var ret = "";
+	ret += '<html><body style="font-family:calibri,sans">'+"\n";
+	ret += '<form action="/set-skin" method="post" enctype="multipart/form-data">'+"\n";
+	ret += 'User Name (case-sensitive): <input type="text" name="userName" id="userName">'+"\n";
+	ret += 'Select image to upload:'+"\n";
+	ret += '<input type="file" name="upload" id="upload">'+"\n";
+	ret += '<input type="submit" value="Upload Image" name="submit">'+"\n";
+	ret += '</form>'+"\n";
+	ret += '</body></html>';
+	res.send(ret);
+	//res.render('home');
+});
+
+
+//using express & formidable:
+app.post('/set-skin', function (req, res){
+    var form = new formidable.IncomingForm();
+	// from coderskins/readme.txt:
+	//To install  a specific skin  for a specific player,  name the PNG file
+	//to be used as follows:
+		  //player_NAME.png
+	//where NAME is  the player's in-game nick.  Then copy the PNG file into
+	//the mod's "textures" directory.
+	//The PNG file should be  a standard  Minetest 64x32 or  Minecraft 64x64
+	//"skin" file.
+	//Or, if you prefer,  create a text file, in the mod's "textures" direc-
+	//tory with a similar filename:
+		  //player_NAME.skin
+	//(OldCoder, 2019)
+	var directPath = "";
+	var indirectPath = "";
+	var msg = "Uploading...";
+    form.parse(req, function(err, fields, files) {
+        if (err) next(err);
+        directPath = skinDir + "/player_" + fields.userName + ".png";
+        indirectPath = skinDir + "/player_" + fields.userName + ".skin";
+        // TODO: make sure my_file and project_id values are present
+        var originalPath = files.my_file.path;
+        fs.rename(files.my_file.path, directPath, function(err) {
+            if (err) {
+				msg = "Failed to rename " + originalPath
+						    + " to " + directPath + "<br/>\n";
+				console.log(msg);
+				next(err);
+			}
+            res.end();
+        });
+    });
+    //form.on('fileBegin', function (name, file){
+        ////file.path = __dirname + '/uploads/' + file.name;
+        //// file.path = skinDir + "/" + file.name;
+        //// manual_path = "player_" +
+    //});
+    form.on('file', function (name, file){
+		msg = 'Uploaded ' + file.name + "<br/>\n";
+        console.log(msg);
+    });
+    //res.sendFile(__dirname + '/index.html');
+    res.redirect("/?msg=" + querystring.stringify(msg));
+});
+
+
 app.get('/', function (req, res) {
 	var ret = "";
 	ret += '<html><body style="font-family:calibri,sans">';
@@ -298,6 +377,11 @@ app.get('/', function (req, res) {
 	//
 	var selected_date_s = null;
 	if (req.query.date) selected_date_s = req.query.date
+	if (req.query.msg != undefined) {
+		ret += "<br/>\n";
+		ret += "<b>" + querystring.parse(msg) + "</b><br>\n";
+		ret += "<br/>\n";
+	}
 	ret += "assuming minetestserver ran as: " + os.homedir() + "<br/>\n";
 	ret += "timezone (tz_offset/60*-1): " + (Math.floor(tz_offset/60)*-1) + '<span name="tzArea" id="tzArea"></span><br/>\n';
 	ret += 'date: <span id="dateArea" name="dateArea">' + selected_date_s + '</span><br/>'+"\n";
@@ -339,5 +423,5 @@ var server = app.listen(3000, function () {
 	var port = server.address().port;
 	console.log("reading log...");
 	read_log();
-	console.log("EnlivenMinetest webapp listening at http://%s:%s", host, port);
+	console.log("EnlivenMinetest webapp is listening at http://%s:%s", host, port);
 });
