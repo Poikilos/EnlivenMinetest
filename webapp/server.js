@@ -355,7 +355,7 @@ app.post('/set-skin', function (req, res){
 					next(err);
 				}
 				else {
-					var thisData = indirectPath + ".png";
+					var thisData = destNameNoExt + ".png";
 					fs.writeFile(thisData, indirectPath, function(err, data) {
 					  if (err) console.log(err);
 					  console.log("Successfully wrote " + thisData
