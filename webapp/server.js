@@ -387,7 +387,21 @@ app.get('/', function (req, res) {
 	if (req.query.date) selected_date_s = req.query.date
 	if (req.query.msg != undefined) {
 		ret += "<br/>\n";
-		ret += "<b>" + querystring.parse(req.query.msg) + "</b><br>\n";
+
+		//ret += "<b>" + querystring.parse(req.query.msg) + "</b><br>\n";
+		// line above causes:
+		//TypeError: Cannot convert object to primitive value
+		//at /home/owner/git/EnlivenMinetest/webapp/server.js:390:16
+		//at Layer.handle [as handle_request] (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/layer.js:95:5)
+		//at next (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/route.js:137:13)
+		//at Route.dispatch (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/route.js:112:3)
+		//at Layer.handle [as handle_request] (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/layer.js:95:5)
+		//at /home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/index.js:281:22
+		//at Function.process_params (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/index.js:335:12)
+		//at next (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/index.js:275:10)
+		//at expressInit (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/middleware/init.js:40:5)
+		//at Layer.handle [as handle_request] (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/layer.js:95:5)
+
 		ret += "<br/>\n";
 	}
 	ret += "assuming minetestserver ran as: " + os.homedir() + "<br/>\n";
