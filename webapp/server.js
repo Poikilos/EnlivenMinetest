@@ -335,11 +335,13 @@ app.post('/set-skin', function (req, res){
 	//(OldCoder, 2019)
 	var directPath = "";
 	var indirectPath = "";
+	var destName = "";
 	var msg = "Uploading...";
     form.parse(req, function(err, fields, files) {
         if (err) next(err);
-        directPath = skinDir + "/player_" + fields.userName + ".png";
-        indirectPath = skinDir + "/player_" + fields.userName + ".skin";
+		destName = destName = "player_" + fields.userName;
+        directPath = skinDir + "/" + destName + ".png";
+        indirectPath = skinDir + "/" + destName + ".skin";
         // TODO: make sure my_file and project_id values are present
         if (files.userFile != undefined) {
 			var originalPath = files.userFile.path;
@@ -348,9 +350,16 @@ app.post('/set-skin', function (req, res){
 			fs.rename(files.userFile.path, directPath, function(err) {
 				if (err) {
 					msg = "Failed to rename " + originalPath
-								+ " to " + directPath + "<br/>\n";
+						  + " to " + directPath + "<br/>\n";
 					console.log(msg);
 					next(err);
+				}
+				else {
+					fs.writeFile(indirectPath, destName, function(err, data) {
+					  if (err) console.log(err);
+					  console.log("Successfully wrote " + destName
+								  + " to "+indirectPath+".");
+					});
 				}
 				res.end();
 			});
@@ -387,7 +396,6 @@ app.get('/', function (req, res) {
 	if (req.query.date) selected_date_s = req.query.date
 	if (req.query.msg != undefined) {
 		ret += "<br/>\n";
-
 		//ret += "<b>" + querystring.parse(req.query.msg) + "</b><br>\n";
 		// line above causes:
 		//TypeError: Cannot convert object to primitive value
