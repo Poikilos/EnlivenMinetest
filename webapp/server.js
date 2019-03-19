@@ -2,457 +2,529 @@
 // Howto: see README.md
 
 //function getUserHome() {
-	//return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+    //return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
 //}
 
-var tz_offset = 240; //subtract this from server time to get local time; 4hrs is 240; 5hrs is 300
-// TODO: handle tz_offset not divisible by 60
-// var selected_date_s = null;
-// selected_date_s = "2018-05-08";
+var tzOffsetMinutes = 240; //subtract this from server time to get local time; 4hrs is 240; 5hrs is 300
+// TODO: handle tzOffsetMinutes not divisible by 60
+// var selectedDateStr = null;
+// selectedDateStr = "2018-05-08";
 
-var express = require('express'),
+const express = require('express'),
+    multer = require('multer'),
 // var exphbs  = require("express-handlebars");
 // exphbs  = require('../../'); // "express-handlebars"
-	cookieParser = require('cookie-parser'),
-	bodyParser = require('body-parser'),
-	//session = require('express-session'),
-	fs = require('fs'),
-	readlines = require('n-readlines');
+    cookieParser = require('cookie-parser'),
+    bodyParser = require('body-parser'),
+    //session = require('express-session'),
+    fs = require('fs'),
+    readlines = require('n-readlines');
 const os = require('os');
-var formidable = require('formidable')
-var querystring = require("querystring");  // built-in
-var mv = require('mv');
-// TODO: var config = require(storage_path + '/config.js') // config file contains all tokens and other private info
+//var formidable = require('formidable');
+const querystring = require("querystring");  // built-in
+// TODO: var config = require(storagePath + '/config.js') // config file contains all tokens and other private info
 // var fun = require('./functions.js'); // functions file contains our non-app-specific functions including those for our Passport and database work
 var mt = require('./minetestinfo.js'); // functions file contains our non-app-specific functions including those for our Passport and database work
-
 
 // var util = require('util')
 
 var app = express();
+app.set('view engine', 'ejs');
+// see https://medium.com/@TheJesseLewis/how-to-make-a-basic-html-form-file-upload-using-multer-in-an-express-node-js-app-16dac2476610
+const port = process.env.PORT || 64638;
+app.use(bodyParser.urlencoded({extended:false}));  // handle body requests
+app.use(bodyParser.json());  // make JSON work
+app.use('/public', express.static(__dirname + '/public'));
+
 //app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 //app.set('view engine', 'handlebars');
 var players = [];
-var player_indices = {};
-var play_dates = [];
+var playerIndices = {};
+var activityDates = [];
 //see https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/Introduction
-var prev_line = null;
+var previousLine = null;
 
 //#region derived from mtsenliven.py
-var msgprefix_flags = ["WARNING[Server]: ", "ACTION[Server]: "]
-var msgprefix_lists = {}  // where flag is key
-var mf_len = msgprefix_flags.length;
-for (var mf_i=0; mf_i<mf_len; mf_i++) {
-	msgprefix_lists[msgprefix_flags[mf_i]] = [];
+var msgPrefixFlags = ["WARNING[Server]: ", "ACTION[Server]: "]
+var msgPrefixLists = {}  // where flag is key
+var mfLen = msgPrefixFlags.length;
+for (var mfIndex=0; mfIndex<mfLen; mfIndex++) {
+    msgPrefixLists[msgPrefixFlags[mfIndex]] = [];
 }
 
-var non_unique_wraps = [];
-non_unique_wraps.push({
-	"opener":"active block modifiers took ",
-	"closer":"ms (longer than 200ms)"
+var nonUniqueWraps = [];
+nonUniqueWraps.push({
+    "opener":"active block modifiers took ",
+    "closer":"ms (longer than 200ms)"
 });
-var unique_flags = [
-	"leaves game",
-	"joins game"
+var uniqueFlags = [
+    "leaves game",
+    "joins game"
 ];
 //#endregion derived from mtsenliven.py
+const skinStorage = multer.diskStorage({
+    // see https://medium.com/@TheJesseLewis/how-to-make-a-basic-html-form-file-upload-using-multer-in-an-express-node-js-app-16dac2476610
+    destination: function(req, file, next) {
+        next(null, mt.skinsPath());  // or something like './public/photo-storage'
+    },
+    limits: {
+        fileSize: 1*1024*1024  // in bytes
+    },
 
+    // Change filename
+    filename: function(req, file, next) {
+        const ext = "png";
+        // var errMsg = null;
+        console.log("* Checking name...");
+        if (!req.body.userName) {
+            return next(new Error("userName is missing"));
+        }
+        else if (req.body.userName.length < 1) {
+            return next(new Error("userName is blank."));
+        }
+        if (file.size < 1)  {
+            return next(new Error("image not selected"));
+        }
 
-function process_logline(line, line_number) {
-	//selected_date_s
-	//TODO: use store_unique_log_data instead of this function
-	var player_name = null;
-	var verb = "";
-	var time_s = "";
-	var date_s = "";
-	var player_ip = null;
-	const time_start_i = 11;
-	var uf_len = unique_flags.length;
-	mf_len = msgprefix_flags.length;
-	var verb_i = -1;
-	var verb_number = -1;
-	var msgprefix_i = -1;
-	var msgprefix_number = -1;
-	var msgprefix = null;
-	var index_msg = "";
-	for (var mf_i=0; mf_i<mf_len; mf_i++) {
-		msgprefix_i = line.indexOf(msgprefix_flags[mf_i]);
-		if (msgprefix_i > -1) {
-			msgprefix_number = mf_i;
-			msgprefix = msgprefix_flags[mf_i];
-			break;
-		}
-	}
-	var skip_date_enable = false;
-	for (var uf_i=0; uf_i<uf_len; uf_i++) {
-		verb_i = line.indexOf(unique_flags[uf_i]);
-		if (verb_i > -1) {
-			verb_number = uf_i;
-			verb = unique_flags[uf_i];
-			date_s = line.substring(0,10).trim();
-			//if (selected_date_s==null || selected_date_s==date_s) {
-				//console.log("(verbose message in process_logline) using '" + date_s + "' since selected '"+selected_date_s+"'");
-				time_s = line.substring(time_start_i, time_start_i+8);
-				//console.log("using time "+time_s);
-				if (msgprefix!=null) {
-					player_name = line.substring(msgprefix_i+msgprefix.length, verb_i).trim();
-					var ip_flag = " [";
-					var ip_i = player_name.indexOf(ip_flag);
-					if (ip_i > -1) {
-						player_ip = player_name.substring(ip_i+ip_flag.length, player_name.length-1);
-						player_name = player_name.substring(0,ip_i);
-					}
-				}
-				else {
-					player_name = "&lt;missing msgprefix&rt;";
-				}
-			//}
-			//else {
-			//	skip_date_enable = true;
-				//console.log("WARNING in process_logline: skipping '" + date_s + "' since not '"+selected_date_s+"'");
-			//}
-			break;
-		}
-	}
-	var index = -1;  // player index
-	if (player_name != null) {
-		if (player_name.length > 0) {
-			if (player_indices.hasOwnProperty(player_name)) {
-				index = player_indices[player_name];
-				index_msg = "cached ";
-			}
-			else {
-				index = players.length;
-				//players.push({});
-				players[index] = {};
-				players[index].display_name = player_name;
-				player_indices[player_name] = index;
-				//console.log("created new index "+index);
-			}
-		}
-		else {
-			console.log("WARNING in process_logline: zero-length player name");
-		}
-	}
-	if (index<0 && (verb=="leaves game"||verb=="joins game")) {
-		console.log("(ERROR in process_logline) " + index_msg +
-		            "index was '"+index+"' but date was present '" +
-		            date_s + "' for '"+line+"' (no player found, but" +
-		            "verb is a player verb).");
-	}
-	var play_date_enable = false;
-	if (verb == "leaves game") {
-		if (index > -1) {
-			var play_i = -1;
-			if (!players[index].hasOwnProperty("plays")) {
-				players[index].plays = {};
-			}
-			if (!players[index].plays.hasOwnProperty(date_s)) {
-				//leave login time blank--player must have logged in before the available part of the log began
-				players[index].plays[date_s] = [];
-				players[index].plays[date_s].push({});
-				play_i = 0;
-			}
-			else {
-				if (players[index].plays[date_s].length==0) players[index].plays[date_s].push({});
-				play_i = players[index].plays[date_s].length - 1;
-				if (players[index].plays[date_s][play_i].hasOwnProperty("logout_time")) {
-					//If last entry is incomplete, start a new one:
-					players[index].plays[date_s].push({});
-					play_i++;
-				}
-			}
-			players[index].plays[date_s][play_i].logout_time = time_s;
-			play_date_enable = true;
-		}
-	}
-	else if (verb == "joins game") {
-		if (index > -1) {
-			if (player_ip!=null) {
-				players[index].player_ip = player_ip;
-				var play_i = -1;
-				if (!players[index].hasOwnProperty("plays")) {
-					players[index].plays = {};
-				}
-				if (!players[index].plays.hasOwnProperty(date_s)) {
-					players[index].plays[date_s] = [];
-					play_i = 0;
-				}
-				else play_i = players[index].plays[date_s].length;
-				players[index].plays[date_s].push({});
-				//console.log(verb+" on "+date_s+" (length "+players[index].plays[date_s].length+") play "+play_i+"+1 for player ["+index+"] "+player_name+"...");
-				players[index].plays[date_s][play_i].login_time = time_s;
-				play_date_enable = true;
-			}
-			// else redundant (server writes " joins game " again
-			// and shows list of players instead of ip).
-			//TODO: else analyze list of players to confirm in case player logged in all day
-		}
-	}
-	if (play_date_enable) {
-		if (date_s.length>0) {
-			if (play_dates.indexOf(date_s) < 0) {
-				play_dates.push(date_s);
-			}
-		}
-	}
-}
+        //if (errMsg === null) {
+        var directName = "player_" + req.body.userName + '.' + ext;
+        console.log("* Renaming '" + file + "' to " + directName);
+        next(null, directName);
+        //}
+        //else {
+            //console.log(errMsg);
+            //next(new Error(errMsg));
+        //}
+        // const ext = file.mimetype.split('/')[1];
+        // next(null, file.fieldname + '-' + Date.now() + '.'+ext);
+    }
+});
+// see https://medium.com/@bmshamsnahid/nodejs-file-upload-using-multer-3a904516f6d2
+const skinUpload = multer({
+    storage: skinStorage,
 
-function store_unique_log_data(output, line_number, err_flag=false) {
-	var ret = "";
-	var output_strip = output.trim();
-	var u_prefix = "active block modifiers took ";
-	var u_suffix = "ms (longer than 200ms)";
-	// (out_bytes is bytes)
-	var show_enable = true;
-	var found_flag = null;
-	var f_i = null;
-	var always_show_enable = false;
-	var msg_msg = "previous message";
-	var uf_len = unique_flags.length;
-	for (var uf_i=0; uf_i<uf_len; uf_i++) {
-		if (output.includes(unique_flags[uf_i])) {
-			always_show_enable = true;
-		}
-	}
-	if (!always_show_enable) {
-		var mf_len = msgprefix_flags.length;
-		for (var mf_i=0; mf_i<mf_len; mf_i++) {
-			// such as '2018-02-06 21:08:06: WARNING[Server]: Deprecated call to get_look_yaw, use get_look_horizontal instead'
-			// or 2018-02-06 21:08:05: ACTION[Server]: [playereffects] Wrote playereffects data into /home/owner/.minetest/worlds/FCAGameAWorld/playereffects.mt.
-			f_i = output.find(msgprefix_flags[mf_i]);
-			if (f_i >= 0) {
-				found_flag = msgprefix_flags[mf_i];
-				break;
-			}
-		}
-		if (found_flag!=null) {
-			var sub_msg = output.substring(f_i+flag.length).trim();
-			var nuw_len = non_unique_wraps.length;
-			for (var nuw_i=0; nuw_i<nuw_len; nuw_i++) {
-			//for (wrap in non_unique_wraps) {
-				var wrap = non_unique_wraps[nuw_i];
-				if (sub_msg.includes(wrap["opener"]) && sub_msg.includes(wrap["closer"])) {
-					sub_msg = wrap["opener"] + "..." + wrap["closer"];
-					msg_msg = "similar messages";
-					break;
-				}
-			}
-			if (msgprefix_lists[found_flag].indexOf(sub_msg) > -1) {
-				show_enable = false;
-			}
-			else {
-				msgprefix_lists[found_flag].push(sub_msg);
-			}
-		}
-	}
-	if (show_enable) {
-		ret = output_strip;
-		if (found_flag != null) {
-			ret += "\n  [ EnlivenMinetest ] " + msg_msg + " will be suppressed";
-		}
-	}
-	return ret;
-}
+    fileFilter: function(req, file, next) {
+        const ext = "png";
+        console.log("filtering...");
+        var errMsg = null;
+        // NOTE: return with error aborts the upload.
+        if (!file) {
+            errMsg = "You did not select a file.";
+            req.fileValidationError = errMsg;
+            return next(new Error(errMsg));  // next(null, false, new Error(errMsg))
+        }
+        else if (file.size < 1) {
+            errMsg = "Empty file.";
+            req.fileValidationError = errMsg;
+            return next(new Error(errMsg));
+        }
 
-function read_log() {
-	if (players==null) players = [];
-	if (player_indices==null) player_indices = {};
-	// os.homedir() + "/.minetest/debug_archived/2018/05/08.txt",
-	// var log_paths = [os.homedir() + "/.minetest/debug.txt"];
-	var log_paths = [os.homedir() + "/minetest/bin/debug.txt"];
-	var lp_len = log_paths.length;
-	for (var lp_i=0; lp_i<lp_len; lp_i++) {
-		var this_log_path = log_paths[lp_i];
-		console.log("EnlivenMinetest webapp reading '" + this_log_path + "'...");
-		var line_number = 1;
-		if (fs.existsSync(this_log_path)) {
-			//uses n-readlines package: see https://stackoverflow.com/questions/34223065/read-lines-synchronously-from-file-in-node-js
-			var liner = new readlines(this_log_path);
-			var next = true;
-			while (next) {
-				next = liner.next();
-				if (next!=false) {
-					process_logline(next.toString('ascii'), line_number);
-					line_number++;
-				}
-			}
-		}
-		else {
-			console.log("WARNING: file not found: '" + this_log_path + "' (listing actual archived log folders is not yet implemented, so this is a hard-coded demo folder only on poikilos' server)");
-		}
-	}
-}
-
-app.get('/skin-form', function (req, res) {
-	var ret = "";
-	ret += '<html><body style="font-family:calibri,sans">'+"\n";
-	ret += '<form action="/set-skin" method="post" enctype="multipart/form-data">'+"\n";
-	ret += 'User Name (case-sensitive): <input type="text" name="userName" id="userName">'+"\n";
-	ret += 'Select a png image to upload:'+"\n";
-	ret += '<input type="file" name="userFile" id="userFile">'+"\n";
-	ret += '<input type="submit" value="Upload Image" name="submit">'+"\n";
-	ret += '</form>'+"\n";
-	ret += '</body></html>';
-	res.send(ret);
-	//res.render('home');
+        if (!file.mimetype.startsWith('image/')) {
+            errMsg = "* ERROR: file type " + file.mimetype
+                        + " is not supported";
+            req.fileValidationError = errMsg;
+            return next(new Error(errMsg));
+        }
+        if (errMsg === null) {
+            var directName = "player_" + req.body.userName + '.' + ext;
+            console.log("* " + file.mimetype + " '" + file + "' uploaded...");
+            // set player skin name to new file name:
+            mt.setSkin(req.body.userName, directName);
+            // TODO: allow setSkin output to res
+            next(null, true);
+        } else {
+            console.log(errMsg);
+            return next(new Error(errMsg));
+        }
+    }
 });
 
+function processLogLine(line, lineNumber) {
+    //selectedDateStr
+    //TODO: use storeUniqueLogData instead of this function
+    var playerName = null;
+    var verb = "";
+    var timeStr = "";
+    var dateStr = "";
+    var playerIP = null;
+    const timeStartInt = 11;
+    var ufLen = uniqueFlags.length;
+    mfLen = msgPrefixFlags.length;
+    var verbIndex = -1;
+    var verbNumber = -1;
+    var msgPrefixIndex = -1;
+    var msgPrefixNumber = -1;
+    var msgprefix = null;
+    var indexMsg = "";
+    for (var mfIndex=0; mfIndex<mfLen; mfIndex++) {
+        msgPrefixIndex = line.indexOf(msgPrefixFlags[mfIndex]);
+        if (msgPrefixIndex > -1) {
+            msgPrefixNumber = mfIndex;
+            msgprefix = msgPrefixFlags[mfIndex];
+            break;
+        }
+    }
+    var skipDateEnable = false;
+    for (var ufIndex=0; ufIndex<ufLen; ufIndex++) {
+        verbIndex = line.indexOf(uniqueFlags[ufIndex]);
+        if (verbIndex > -1) {
+            verbNumber = ufIndex;
+            verb = uniqueFlags[ufIndex];
+            dateStr = line.substring(0,10).trim();
+            //if (selectedDateStr==null || selectedDateStr==dateStr) {
+                //console.log("(verbose message in processLogLine) using '" + dateStr + "' since selected '"+selectedDateStr+"'");
+                timeStr = line.substring(timeStartInt, timeStartInt+8);
+                //console.log("using time "+timeStr);
+                if (msgprefix!=null) {
+                    playerName = line.substring(msgPrefixIndex+msgprefix.length, verbIndex).trim();
+                    var ipFlag = " [";
+                    var ipIndex = playerName.indexOf(ipFlag);
+                    if (ipIndex > -1) {
+                        playerIP = playerName.substring(ipIndex+ipFlag.length, playerName.length-1);
+                        playerName = playerName.substring(0, ipIndex);
+                    }
+                }
+                else {
+                    playerName = "&lt;missing msgprefix&rt;";
+                }
+            //}
+            //else {
+            //  skipDateEnable = true;
+                //console.log("WARNING in processLogLine: skipping '" + dateStr + "' since not '"+selectedDateStr+"'");
+            //}
+            break;
+        }
+    }
+    var index = -1;  // player index
+    if (playerName != null) {
+        if (playerName.length > 0) {
+            if (playerIndices.hasOwnProperty(playerName)) {
+                index = playerIndices[playerName];
+                indexMsg = "cached ";
+            }
+            else {
+                index = players.length;
+                //players.push({});
+                players[index] = {};
+                players[index].displayName = playerName;
+                playerIndices[playerName] = index;
+                //console.log("created new index "+index);
+            }
+        }
+        else {
+            console.log("WARNING in processLogLine: zero-length player name");
+        }
+    }
+    if (index<0 && (verb=="leaves game"||verb=="joins game")) {
+        console.log("(ERROR in processLogLine) " + indexMsg +
+                    "index was '"+index+"' but date was present '" +
+                    dateStr + "' for '"+line+"' (no player found, but" +
+                    "verb is a player verb).");
+    }
+    var playDateEnable = false;
+    if (verb == "leaves game") {
+        if (index > -1) {
+            var playIndex = -1;
+            if (!players[index].hasOwnProperty("plays")) {
+                players[index].plays = {};
+            }
+            if (!players[index].plays.hasOwnProperty(dateStr)) {
+                //leave login time blank--player must have logged in before the available part of the log began
+                players[index].plays[dateStr] = [];
+                players[index].plays[dateStr].push({});
+                playIndex = 0;
+            }
+            else {
+                if (players[index].plays[dateStr].length==0) players[index].plays[dateStr].push({});
+                playIndex = players[index].plays[dateStr].length - 1;
+                if (players[index].plays[dateStr][playIndex].hasOwnProperty("logoutTime")) {
+                    //If last entry is incomplete, start a new one:
+                    players[index].plays[dateStr].push({});
+                    playIndex++;
+                }
+            }
+            players[index].plays[dateStr][playIndex].logoutTime = timeStr;
+            playDateEnable = true;
+        }
+    }
+    else if (verb == "joins game") {
+        if (index > -1) {
+            if (playerIP!=null) {
+                players[index].playerIP = playerIP;
+                var playIndex = -1;
+                if (!players[index].hasOwnProperty("plays")) {
+                    players[index].plays = {};
+                }
+                if (!players[index].plays.hasOwnProperty(dateStr)) {
+                    players[index].plays[dateStr] = [];
+                    playIndex = 0;
+                }
+                else playIndex = players[index].plays[dateStr].length;
+                players[index].plays[dateStr].push({});
+                //console.log(verb+" on "+dateStr+" (length "+players[index].plays[dateStr].length+") play "+playIndex+"+1 for player ["+index+"] "+playerName+"...");
+                players[index].plays[dateStr][playIndex].loginTime = timeStr;
+                playDateEnable = true;
+            }
+            // else redundant (server writes " joins game " again
+            // and shows list of players instead of ip).
+            //TODO: else analyze list of players to confirm in case player logged in all day
+        }
+    }
+    if (playDateEnable) {
+        if (dateStr.length>0) {
+            if (activityDates.indexOf(dateStr) < 0) {
+                activityDates.push(dateStr);
+            }
+        }
+    }
+}
 
-//using express & formidable:
-app.post('/set-skin', function (req, res){
-    var form = new formidable.IncomingForm();
-	// from coderskins/readme.txt:
-	//To install  a specific skin  for a specific player,  name the PNG file
-	//to be used as follows:
-		  //player_NAME.png
-	//where NAME is  the player's in-game nick.  Then copy the PNG file into
-	//the mod's "textures" directory.
-	//The PNG file should be  a standard  Minetest 64x32 or  Minecraft 64x64
-	//"skin" file.
-	//Or, if you prefer,  create a text file, in the mod's "textures" direc-
-	//tory with a similar filename:
-		  //player_NAME.skin
-	//(OldCoder, 2019)
-	var directPath = "";
-	var indirectPath = "";
-	var destNameNoExt = "";
-	var msg = "Uploading...";
-    form.parse(req, function(err, fields, files) {
-        if (err) next(err);
-		destNameNoExt = destNameNoExt = "player_" + fields.userName;
-        directPath = mt.skinDir() + "/" + destNameNoExt + ".png";
-        indirectPath = mt.skinDir() + "/" + destNameNoExt + ".skin";
-        // TODO: make sure my_file and userName values are present
-        if (files.hasOwnProperty('userFile')) {
-			if (fields.hasOwnProperty('userName')) {
-				var originalPath = files.userFile.path;
-				console.log("trying to rename " + files.userFile.path
-							+ " to " + directPath);
-				// NOTE: rename does not work if tmp is on different device (common)
-				mv(files.userFile.path, directPath, function(err) {
-				// fs.rename(files.userFile.path, directPath, function(err) {
-					if (err) {
-						msg = "Failed to rename " + originalPath
-							  + " to " + directPath;
-						console.log(msg);
-						console.log(JSON.stringify(err));
-						msg += "<br/>\n";
-						//next(err);
-// TODO: why does next above show:
-//ReferenceError: next is not defined
-    //at /home/owner/git/EnlivenMinetest/webapp/server.js:355:6
-    //at FSReqWrap.oncomplete (fs.js:135:15)
+function storeUniqueLogData(output, lineNumber, errFlag=false) {
+    var ret = "";
+    var outputTrim = output.trim();
+    var uPrefix = "active block modifiers took ";
+    var uSuffix = "ms (longer than 200ms)";
+    // (outBytes is bytes)
+    var showEnable = true;
+    var foundFlag = null;
+    var fIndex = null;
+    var alwaysShowEnable = false;
+    var msgMsg = "previous message";
+    var ufLen = uniqueFlags.length;
+    for (var ufIndex=0; ufIndex<ufLen; ufIndex++) {
+        if (output.includes(uniqueFlags[ufIndex])) {
+            alwaysShowEnable = true;
+        }
+    }
+    if (!alwaysShowEnable) {
+        var mfLen = msgPrefixFlags.length;
+        for (var mfIndex=0; mfIndex<mfLen; mfIndex++) {
+            // such as '2018-02-06 21:08:06: WARNING[Server]: Deprecated call to get_look_yaw, use get_look_horizontal instead'
+            // or 2018-02-06 21:08:05: ACTION[Server]: [playereffects] Wrote playereffects data into /home/owner/.minetest/worlds/FCAGameAWorld/playereffects.mt.
+            fIndex = output.find(msgPrefixFlags[mfIndex]);
+            if (fIndex >= 0) {
+                foundFlag = msgPrefixFlags[mfIndex];
+                break;
+            }
+        }
+        if (foundFlag!=null) {
+            var subMsg = output.substring(fIndex+flag.length).trim();
+            var nUWLen = nonUniqueWraps.length;
+            for (var nUWIndex=0; nUWIndex<nUWLen; nUWIndex++) {
+            //for (wrap in nonUniqueWraps) {
+                var wrap = nonUniqueWraps[nUWIndex];
+                if (subMsg.includes(wrap["opener"]) && subMsg.includes(wrap["closer"])) {
+                    subMsg = wrap["opener"] + "..." + wrap["closer"];
+                    msgMsg = "similar messages";
+                    break;
+                }
+            }
+            if (msgPrefixLists[foundFlag].indexOf(subMsg) > -1) {
+                showEnable = false;
+            }
+            else {
+                msgPrefixLists[foundFlag].push(subMsg);
+            }
+        }
+    }
+    if (showEnable) {
+        ret = outputTrim;
+        if (foundFlag != null) {
+            ret += "\n  [ EnlivenMinetest ] " + msgMsg + " will be suppressed";
+        }
+    }
+    return ret;
+}
 
-					}
-					else {
-						var thisData = destNameNoExt + ".png";
-						fs.writeFile(indirectPath, thisData, function(err, data) {
-						  if (err) console.log(err);
-						  console.log("Successfully wrote " + thisData
-									  + " to "+indirectPath+".");
-						});
-					}
-					res.end();
-				});
-			}
-			else {
-				console.log("userName is undefined.");
-			}
-		}
-		else {
-			console.log("userFile is undefined.");
-		}
+function readLog() {
+    if (players==null) players = [];
+    if (playerIndices==null) playerIndices = {};
+    // os.homedir() + "/.minetest/debug_archived/2018/05/08.txt",
+    // var logPaths = [os.homedir() + "/.minetest/debug.txt"];
+    var logPaths = [os.homedir() + "/minetest/bin/debug.txt"];
+    var lpLen = logPaths.length;
+    for (var lpIndex=0; lpIndex<lpLen; lpIndex++) {
+        var thisLogPath = logPaths[lpIndex];
+        console.log("EnlivenMinetest webapp reading '" + thisLogPath + "'...");
+        var lineNumber = 1;
+        if (fs.existsSync(thisLogPath)) {
+            //uses n-readlines package: see https://stackoverflow.com/questions/34223065/read-lines-synchronously-from-file-in-node-js
+            var readLines = new readlines(thisLogPath);
+            var nextLine = true;
+            while (nextLine) {
+                nextLine = readLines.next();
+                if (nextLine!=false) {
+                    processLogLine(nextLine.toString('ascii'), lineNumber);
+                    lineNumber++;
+                }
+            }
+        }
+        else {
+            console.log("WARNING: file not found: '" + thisLogPath + "' (listing actual archived log folders is not yet implemented, so this is a hard-coded demo folder only on poikilos' server)");
+        }
+    }
+}
+
+app.get('/skin-upload-form', function(req, res, next) {
+    //var ending = "";
+    //ending += '<a href="/">Back to Main Site</a><br/>' + "\n";
+    ////ending += '<a href="/skin-upload-form">Back to Upload</a><br/>' + "\n";
+    //ending += '</body></html>';
+    //res.write('<html><body style="font-family:calibri,sans">'+"\n");
+    //res.write('<form action="/upload-skin" method="post" enctype="multipart/form-data">'+"\n");
+    //res.write('User Name (case-sensitive): <input type="text" name="userName" id="userName">'+"\n");
+    //res.write('Select a png image to upload:'+"\n");
+    //res.write('<input type="file" name="userFile" id="userFile">'+"\n");
+    //res.write('<input type="submit" value="Upload Image" name="submit">'+"\n");
+    //res.write('</form>'+"\n");
+    //res.end(ending);
+    var msg = "";
+    res.render('pages/skin-upload-form', {
+        msg: msg
     });
-    //form.on('fileBegin', function (name, file){
-        ////file.path = __dirname + '/uploads/' + file.name;
-        //// file.path = skinDir + "/" + file.name;
-        //// manual_path = "player_" +
-    //});
-    form.on('file', function (name, file){
-		msg = 'Uploaded ' + file.name + "<br/>\n";
-        console.log(msg);
+});
+app.get('/skin-selection-form', function(req, res, next) {
+    var msg = "";
+    res.render('pages/skin-selection-form', {
+        msg: msg,
+        skinFileNames: mt.selectableSkinFileNames()
     });
-    //res.sendFile(__dirname + '/index.html');
-    res.redirect("/?msg=" + querystring.stringify(msg));
 });
 
 
-app.get('/', function (req, res) {
-	var ret = "";
-	ret += '<html><body style="font-family:calibri,sans">';
-	// Whenever server starts the following is logged
-	// (see also etc/example-input.txt):
-	//
-	//-------------
-	//  Separator
-	//-------------
-	//
-	var selected_date_s = null;
-	if (req.query.date) selected_date_s = req.query.date
-	if (req.query.msg != undefined) {
-		ret += "<br/>\n";
-		//ret += "<b>" + querystring.parse(req.query.msg) + "</b><br>\n";
-		// line above causes:
-		//TypeError: Cannot convert object to primitive value
-		//at /home/owner/git/EnlivenMinetest/webapp/server.js:390:16
-		//at Layer.handle [as handle_request] (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/layer.js:95:5)
-		//at next (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/route.js:137:13)
-		//at Route.dispatch (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/route.js:112:3)
-		//at Layer.handle [as handle_request] (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/layer.js:95:5)
-		//at /home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/index.js:281:22
-		//at Function.process_params (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/index.js:335:12)
-		//at next (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/index.js:275:10)
-		//at expressInit (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/middleware/init.js:40:5)
-		//at Layer.handle [as handle_request] (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/layer.js:95:5)
+// see "new way" of handling multer errors: https://github.com/expressjs/multer#error-handling
+var singleSkinUpload = skinUpload.single('userFile');
+app.post('/upload-skin', function(req, res) {
+    singleSkinUpload(req, res, function(err) {
+        if (err instanceof multer.MulterError) {
+            // A Multer error occurred when uploading.
+            res.render('multer error', { error: err });
+            //res.render('pages/result', {
+                //msg: "An error occurred in processing the form: " + err,
+            //});
+        } else if (err) {
+            // An unknown error occurred when uploading.
+            res.render('unknown error', { error: err });
+            //res.render('pages/result', {
+                //msg: "An error occurred in processing: " + err,
+            //});
+        }
+        else {
+            // var ending = "";
+            var msg = "";
+            // ending += '<a href="/">Back to Main Site</a><br/>' + "\n";
+            // ending += '<a href="/skin-upload-form">Back to Upload</a><br/>' + "\n";
+            // ending += '</body></html>';
+            // res.write('<html>');
+            // res.write('<body style="font-family:calibri,sans">');
+            if (!req.fileValidationError) {
+                // res.write('<p>Complete!</p>');
+                msg = "Complete!";
+            }
+            else {
+                msg = req.fileValidationError;
+                // res.write('<p>' + req.fileValidationError + '</p>');
+            }
+            //res.end(ending);
+            res.render('pages/result', {
+                msg: msg
+            });
+        }
+    })
+});
 
-		ret += "<br/>\n";
-	}
-	ret += "Server must restart for uploaded skins to take effect.<br/>\n";
-	ret += "assuming minetestserver ran as: " + os.homedir() + "<br/>\n";
-	ret += "timezone (tz_offset/60*-1): " + (Math.floor(tz_offset/60)*-1) + '<span name="tzArea" id="tzArea"></span><br/>\n';
-	ret += 'date: <span id="dateArea" name="dateArea">' + selected_date_s + '</span><br/>'+"\n";
-	//ret += 'var play_dates = [];';
-	var pdLength = 0;
-	if (play_dates != null) pdLength = play_dates.length;
-	for (var pd_i = 0; pd_i < pdLength; pd_i++) {
-		//ret += 'play_dates.push("' + play_dates[pd_i] + '");';
-		if (selected_date_s!=play_dates[pd_i]) {
-			ret += '<a href="?date='+play_dates[pd_i]+'">'+play_dates[pd_i]+'</a> ';
-		}
-		else {
-			ret += play_dates[pd_i]+' ';
-		}
-	}
-	//if (selected_date_s==null) {
-		//ret += '<a href="?date=2018-05-08">2018-05-08</a>';
-	//}
-	//see ~/.minetest/debug.txt
-	//and logs archived by EnlivenMinetest:
-	//~/.minetest/debug_archived/2018/05/08.txt
-	ret += `
-<div style="color:gray" id="statusArea"></div>
-<canvas id="myCanvas" width="100" height="1540"> <!--style="border:1px solid #c3c3c3;">-->
-Your browser does not support the canvas element.
-</canvas>
-<div style="color:gray" id="outputArea">loading...</div>
-<script src="js/main.js"></script>`;
-	ret += '</body></html>';
-	res.send(ret);
-	//res.render('home');
+app.get('/select-skin', function(req, res, next) {
+    mt.setSkin(req.query.userName, req.query.skinFileName);
+    res.render('pages/result', {
+        msg: "Complete."
+    });
+});
+
+
+app.get('/', function(req, res, next) {
+    //var ret = "";
+
+    //res.write('<html>');
+    //res.write('<body style="font-family:calibri,sans">');
+    // Whenever server starts the following is logged
+    // (see also etc/example-input.txt):
+    //
+    //-------------
+    //  Separator
+    //-------------
+    //
+    var selectedDateStr = null;
+    var msg = "";
+    if (req.query.date) selectedDateStr = req.query.date
+    if (req.query.msg != undefined) {
+        //res.write("<br/>");
+        //res.write("<b>" + querystring.parse(req.query.msg) + "</b><br>\n");
+        // line above causes:
+        //TypeError: Cannot convert object to primitive value
+        //at /home/owner/git/EnlivenMinetest/webapp/server.js:390:16
+        //at Layer.handle [as handle_request] (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/layer.js:95:5)
+        //at next (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/route.js:137:13)
+        //at Route.dispatch (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/route.js:112:3)
+        //at Layer.handle [as handle_request] (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/layer.js:95:5)
+        //at /home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/index.js:281:22
+        //at Function.process_params (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/index.js:335:12)
+        //at next (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/index.js:275:10)
+        //at expressInit (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/middleware/init.js:40:5)
+        //at Layer.handle [as handle_request] (/home/owner/git/EnlivenMinetest/webapp/node_modules/express/lib/router/layer.js:95:5)
+
+        //res.write("<br/>");
+    }
+    //res.write('<p><a href="/skin-upload-form">Upload Skin</a></p>');
+    //res.write("<h3>Server info</h3>");
+    //res.write("<ul>");
+    //res.write("<li>assuming minetestserver ran as: " + os.homedir() + "</li>");
+    //res.write("<li>timezone (tzOffsetMinutes/60*-1): " + (Math.floor(tzOffsetMinutes/60)*-1) + '<span name="tzArea" id="tzArea"></span>' + "</li>");
+    //res.write('<li>date: <span id="dateArea" name="dateArea">' + ((selectedDateStr!=null)?selectedDateStr:"not selected") + '</span>' + "</li>");
+    //res.write('var activityDates = [];');
+    var pdLength = 0;
+    if (activityDates != null) pdLength = activityDates.length;
+    var logDates = [];
+    for (var pdIndex = 0; pdIndex < pdLength; pdIndex++) {
+        //res.write('activityDates.push("' + activityDates[pdIndex] + '");');
+        if (selectedDateStr!=activityDates[pdIndex]) {
+            //res.write('<a href="?date='+activityDates[pdIndex]+'">'+activityDates[pdIndex]+'</a> ');
+            logDates.push( { date:activityDates[pdIndex], active:true});
+        }
+        else {
+            logDates.push( { date:activityDates[pdIndex], active:false});
+            //res.write(activityDates[pdIndex]+' ');
+        }
+    }
+    //if (selectedDateStr==null) {
+        //res.write('<a href="?date=2018-05-08">2018-05-08</a>');
+    //}
+    //see ~/.minetest/debug.txt
+    //and logs archived by EnlivenMinetest:
+    //~/.minetest/debug_archived/2018/05/08.txt
+    //res.write('</body></html>');
+    //res.end('</body></html>');
+    //res.render('home');
+
+    res.render('pages/index', {
+        msg: msg,
+        serverUser: os.homedir(),
+        tzOffset: (Math.floor(tzOffsetMinutes/60)*-1),
+        selectedDate: ((selectedDateStr!=null)?selectedDateStr:"not selected"),
+        logDates: logDates
+    });
 });
 
 
 
-var server = app.listen(64638, function () {
-	// 8123 is default for Minecraft DynMap
-	// 64638 spells 'minet' on a telephone keypad, but 6463, 6472 is already Discord RPC server
-	//console.log('express-handlebars example server listening on: 3000');
-	var host = server.address().address;
-	var port = server.address().port;
-	console.log("server address:");
-	console.log(JSON.stringify(server.address()));
-	console.log("reading log...");
-	read_log();
-	console.log("EnlivenMinetest webapp is listening at http://%s:%s", host, port);
+var server = app.listen(port, function () {
+    // 8123 is default for Minecraft DynMap
+    // 64638 spells 'minet' on a telephone keypad, but 6463, 6472 is already Discord RPC server
+    //console.log('express-handlebars example server listening on: ' + port);
+    var host = server.address().address;
+    var port = server.address().port;
+    console.log("server address:");
+    console.log(JSON.stringify(server.address()));
+    console.log("reading log...");
+    readLog();
+    console.log("EnlivenMinetest webapp is listening at http://%s:%s", host, port);
 });

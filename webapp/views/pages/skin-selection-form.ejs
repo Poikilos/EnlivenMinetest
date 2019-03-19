@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+</head>
+<body class="container">
+
+<header>
+    <% include ../partials/header %>
+</header>
+
+<main>
+<div class="row">
+    <div class="col-sm-8">
+        <div class="jumbotron">
+            <h1>EnlivenMinetest</h1>
+            <p>Choose Skin.</p>
+            <h2>&nbsp;<!--result--></h2>
+            <p><%= msg %></p>
+        </div>
+        <div>
+        <form action="/select-skin" method="post" enctype="multipart/form-data">
+            <div>User Name (case-sensitive): <input type="text" name="userName" id="userName"></div>
+            <!--<div><input type="hidden" name="skinFileName" id="skinFileName"></div>-->
+            <!--<div><input type="submit" value="Select" name="submit"></div>-->
+        </form>
+        </div>
+        <div id="setSkinResult"></div>
+        <script type="text/javascript">
+            function setSkin(skinFileName) {
+                if ((skinFileName != undefined) && (skinFileName.length>0)) {
+                    var userName = document.getElementById("userName").value;
+                    if (userName.length>0) {
+                        document.getElementById("setSkinResult").innerHTML="You chose " + skinFileName + "...";
+                        location.href = "/select-skin?userName="+userName+"&skinFileName="+skinFileName;
+                    }
+                    else {
+                        alert("You must enter your username in the box first.");
+                    }
+                }
+                else {
+                    alert("No skin was specified.");
+                }
+            };
+        </script>
+        <div>
+            <% skinFileNames.forEach(function(skinFileName) { %>
+                <a id="<%= skinFileName %>" href="javascript:setSkin('<%= skinFileName %>')"><img alt="<%= skinFileName %>" src="public/skins/<%= skinFileName %>"/></a>
+            <% }); %>
+            </script>
+        </div>
+    </div>
+
+    <div class="col-sm-4">
+        <div class="well">
+            <h3>Links:</h3>
+            <p><a href="https://poikilos.dyndns.org">Server Page</a></p>
+        </div>
+    </div>
+
+</div>
+</main>
+
+<footer>
+    <% include ../partials/footer %>
+</footer>
+
+</body>
+</html>

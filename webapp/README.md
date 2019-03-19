@@ -12,11 +12,16 @@ EnlivenMinetest Node.js webapp for web management of minetest
 npm install
 ```
 
+## Features
+* upload skin
+
 ## Usage
 * start like:
   `node server.js`
-* then it will listen on port 3000
-* change skin at localhost:3000/skin-form
+* public/skins will be created automatically. To force updating skins
+  during startup, delete the public/skins directory if already exists
+  and is outdated.
+* In browser, go to http://localhost:64638
 * for security, no overwrite is allowed
 
 
@@ -35,6 +40,8 @@ npm install
   not `RUN_IN_PLACE`
 * choose minetest worlds directory separately from bin in case
   not `RUN_IN_PLACE`
+* try https://github.com/timbuchwaldt/node-async-fileupload
+* try nodemon (automatically reloads changed js)
 
 ## Developer Notes
 
@@ -80,7 +87,7 @@ fi
 cd "$target_dir"
 npm init
 #except changed jade to pug
-npm install express static-favicon morgan cookie-parser body-parser debug pug passport passport-local mongoose formidable mv
+npm install express static-favicon morgan cookie-parser body-parser debug pug passport passport-local mongoose multer mv
 #NOTE: multiparty has streaming like busboy, but is non-trivial to implement
 ```
 

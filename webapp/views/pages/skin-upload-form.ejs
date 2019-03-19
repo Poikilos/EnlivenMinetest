@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+</head>
+<body class="container">
+
+<header>
+    <% include ../partials/header %>
+</header>
+
+<main>
+<div class="row">
+    <div class="col-sm-8">
+        <div class="jumbotron">
+            <h1>EnlivenMinetest</h1>
+            <p>Upload Skin.</p>
+            <h2>&nbsp;<!--result--></h2>
+            <p><%= msg %></p>
+        </div>
+        <div>
+            <form action="/upload-skin" method="post" enctype="multipart/form-data">
+                <div>User Name (case-sensitive): <input type="text" name="userName" id="userName"></div>
+                <div>Select a png image to upload: <input type="file" name="userFile" id="userFile"></div>
+                <div><input type="submit" value="Upload Image" name="submit"></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-sm-4">
+        <div class="well">
+            <h3>Links:</h3>
+            <p><a href="https://poikilos.dyndns.org">Server Page</a></p>
+        </div>
+    </div>
+
+</div>
+</main>
+
+<footer>
+    <% include ../partials/footer %>
+</footer>
+
+</body>
+</html>
