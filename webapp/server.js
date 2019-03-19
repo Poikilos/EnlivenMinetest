@@ -255,7 +255,8 @@ function read_log() {
 	if (players==null) players = [];
 	if (player_indices==null) player_indices = {};
 	// os.homedir() + "/.minetest/debug_archived/2018/05/08.txt",
-	var log_paths = [os.homedir() + "/.minetest/debug.txt"];
+	// var log_paths = [os.homedir() + "/.minetest/debug.txt"];
+	var log_paths = [os.homedir() + "/minetest/bin/debug.txt"];
 	var lp_len = log_paths.length;
 	for (var lp_i=0; lp_i<lp_len; lp_i++) {
 		var this_log_path = log_paths[lp_i];
@@ -308,7 +309,7 @@ app.get('/skin-form', function (req, res) {
 	ret += '<form action="/set-skin" method="post" enctype="multipart/form-data">'+"\n";
 	ret += 'User Name (case-sensitive): <input type="text" name="userName" id="userName">'+"\n";
 	ret += 'Select image to upload:'+"\n";
-	ret += '<input type="file" name="upload" id="upload">'+"\n";
+	ret += '<input type="file" name="userFile" id="userFile">'+"\n";
 	ret += '<input type="submit" value="Upload Image" name="submit">'+"\n";
 	ret += '</form>'+"\n";
 	ret += '</body></html>';
@@ -340,16 +341,21 @@ app.post('/set-skin', function (req, res){
         directPath = skinDir + "/player_" + fields.userName + ".png";
         indirectPath = skinDir + "/player_" + fields.userName + ".skin";
         // TODO: make sure my_file and project_id values are present
-        var originalPath = files.my_file.path;
-        fs.rename(files.my_file.path, directPath, function(err) {
-            if (err) {
-				msg = "Failed to rename " + originalPath
-						    + " to " + directPath + "<br/>\n";
-				console.log(msg);
-				next(err);
-			}
-            res.end();
-        });
+        if (files.userFile != undefined) {
+			var originalPath = files.userFile.path;
+			fs.rename(files.userFile.path, directPath, function(err) {
+				if (err) {
+					msg = "Failed to rename " + originalPath
+								+ " to " + directPath + "<br/>\n";
+					console.log(msg);
+					next(err);
+				}
+				res.end();
+			});
+		}
+		else {
+			console.log("userFile is undefined.");
+		}
     });
     //form.on('fileBegin', function (name, file){
         ////file.path = __dirname + '/uploads/' + file.name;
@@ -421,6 +427,8 @@ var server = app.listen(3000, function () {
 	//console.log('express-handlebars example server listening on: 3000');
 	var host = server.address().address;
 	var port = server.address().port;
+	console.log("server address:");
+	console.log(JSON.stringify(server.address()));
 	console.log("reading log...");
 	read_log();
 	console.log("EnlivenMinetest webapp is listening at http://%s:%s", host, port);
