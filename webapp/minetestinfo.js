@@ -14,9 +14,8 @@ exports.skinDir = function () {
     return skinDir;
 }
 
-
 exports.regeneratePaths = function () {
-    exports.skinDir = exports.minetestPath + "/games/Bucket_Game/mods/codercore/coderskins/textures";
+    skinDir = minetestPath + "/games/Bucket_Game/mods/codercore/coderskins/textures";
     if (fs.existsSync( minetestPath + "/games/ENLIVEN")) {
 	skinDir = minetestPath + "/games/ENLIVEN/mods/codercore/coderskins/textures";
     }
