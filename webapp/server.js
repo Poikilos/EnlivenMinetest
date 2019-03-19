@@ -5,10 +5,6 @@
 	//return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
 //}
 
-
-const profilePath = require('os').homedir();
-var minetestPath = profilePath + "/minetest";  // TODO: differs from .minetest if not RUN_IN_PLACE
-var skinDir = "";
 var tz_offset = 240; //subtract this from server time to get local time; 4hrs is 240; 5hrs is 300
 // TODO: handle tz_offset not divisible by 60
 // var selected_date_s = null;
@@ -26,6 +22,11 @@ const os = require('os');
 var formidable = require('formidable')
 var querystring = require("querystring");  // built-in
 var mv = require('mv');
+// TODO: var config = require(storage_path + '/config.js') // config file contains all tokens and other private info
+// var fun = require('./functions.js'); // functions file contains our non-app-specific functions including those for our Passport and database work
+var mt = require('./minetestinfo.js'); // functions file contains our non-app-specific functions including those for our Passport and database work
+
+
 // var util = require('util')
 
 var app = express();
@@ -56,14 +57,6 @@ var unique_flags = [
 ];
 //#endregion derived from mtsenliven.py
 
-function regeneratePaths() {
-	skinDir = minetestPath + "/games/Bucket_Game/mods/codercore/coderskins/textures";
-	//doesn't work due to bug:
-	//if (fs.existsSync( minetestPath + "/games/ENLIVEN")) {
-		//skinDir = minetestPath + "/games/ENLIVEN/mods/codercore/coderskins/textures";
-	//}
-	console.log("skinDir: \"" + skinDir + "\"");
-}
 
 function process_logline(line, line_number) {
 	//selected_date_s
@@ -291,29 +284,6 @@ function read_log() {
 	}
 }
 
-
-
-app.get('/get-players', function (req, res) {
-	res.setHeader('Content-Type', 'application/json');
-	 res.send(JSON.stringify(players));
-});
-
-var last_announce_string = "none";
-
-app.get('/last-announce', function (req, res) {
-	res.setHeader('Content-Type', 'text/plain');
-	res.send(last_announce_string);
-});
-
-app.get('/announce', function (req, res) {
-	last_announce_string = JSON.stringify(req.body);
-	console.log("announce got:"+last_announce_string);
-	res.setHeader('Content-Type', 'text/plain');
-	res.send();
-});
-
-
-
 app.get('/skin-form', function (req, res) {
 	var ret = "";
 	ret += '<html><body style="font-family:calibri,sans">'+"\n";
@@ -351,8 +321,8 @@ app.post('/set-skin', function (req, res){
     form.parse(req, function(err, fields, files) {
         if (err) next(err);
 		destNameNoExt = destNameNoExt = "player_" + fields.userName;
-        directPath = skinDir + "/" + destNameNoExt + ".png";
-        indirectPath = skinDir + "/" + destNameNoExt + ".skin";
+        directPath = mt.skinDir() + "/" + destNameNoExt + ".png";
+        indirectPath = mt.skinDir() + "/" + destNameNoExt + ".skin";
         // TODO: make sure my_file and userName values are present
         if (files.hasOwnProperty('userFile')) {
 			if (fields.hasOwnProperty('userName')) {
@@ -474,13 +444,10 @@ Your browser does not support the canvas element.
 
 
 
-var server = app.listen(3000, function () {
+var server = app.listen(64638, function () {
+	// 8123 is default for Minecraft DynMap
+	// 64638 spells 'minet' on a telephone keypad, but 6463, 6472 is already Discord RPC server
 	//console.log('express-handlebars example server listening on: 3000');
-	var thisMinetest = "/tank/local/owner/minetest";
-	if (fs.existsSync(thisMinetest)) {
-		minetestPath = thisMinetest;
-	}
-	regeneratePaths();
 	var host = server.address().address;
 	var port = server.address().port;
 	console.log("server address:");

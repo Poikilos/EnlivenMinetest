@@ -1,5 +1,6 @@
 # ENLIVEN
 ENLIVEN is a subgame for minetest with the goals of providing immersion and lessons for humanity.
+(see also webapp/README.md)
 
 ## Primary Features of EnlivenMinetest Project
 * Server installer for ENLIVEN on linux server (Ubuntu so far)
@@ -13,7 +14,7 @@ ENLIVEN is a subgame for minetest with the goals of providing immersion and less
 There are several improvements I may implement in new or existing mods. For more information and status, see my [Minetest Kanboard](https://poikilos.dyndns.org/kanboard/?controller=BoardViewController&action=readonly&token=f214530d2f1294d90279631ce66b2e8b8569c6f15faf3773086476158bc8).
 * maintain a table of short descriptions of mods
 * see also EnlivenMinetest/etc/game-install-enliven-testing.sh
-* slimenodes fork: make glue replaceable with animal hide; disable jump or reduce bouncy value, otherwise bouncing gets higher indefinitely
+* (resolved: glue can be made from saplings [from upstream]) slimenodes fork: make glue replaceable with animal hide; disable jump or reduce bouncy value, otherwise bouncing gets higher indefinitely
 * https://github.com/minetest-mods/tutor
 * https://github.com/minetest-mods/chat_anticurse
 * https://github.com/minetest-mods/cozy (sitting and laying down player animations)--compare with emote https://github.com/minetest-mods/emote.git

@@ -1,6 +1,10 @@
 # EnlivenMinetest webapp
 EnlivenMinetest Node.js webapp for web management of minetest
-* Must run as same user as minetestserver, and neither should be root!
+* Before using this webapp, make sure you have installed minetest to
+  $HOME/minetest with the RUN_IN_PLACE option (this option is true by
+  default in Final Minetest builds). In the future, this webapp should
+  ask you which minetest to use.
+* Must run as same user as minetestserver, and neither should be root.
 
 ## Install
 * Using Terminal, cd to your EnlivenMinetest/webapp diretory, then:
@@ -17,11 +21,20 @@ npm install
 
 
 ## Planned Features
+(~=optional)
 * Replace the "write" (stdout) method of the minetestserver process (see
   <https://stackoverflow.com/questions/18543047/mocha-monitor-application-output>)
 * parse Lua mods
   - show armor strengths
 * list mods (only additional ones vs basis such as Bucket_Game)
+* store config file in ~/.config/EnlivenMinetest/webapp.json
+* allow user to choose path of minetestserver on first run
+  * (~) detect location of minetestserver (based on running executable
+    maybe, or which is most recent in expected directories)
+* choose minetest games directory separately from bin in case
+  not `RUN_IN_PLACE`
+* choose minetest worlds directory separately from bin in case
+  not `RUN_IN_PLACE`
 
 ## Developer Notes
 
@@ -53,6 +66,7 @@ return results;
 ```
 
 ### Development Log
+(for changelog, see CHANGELOG.md)
 ```bash
 #!/bin/sh
 sudo apt update
