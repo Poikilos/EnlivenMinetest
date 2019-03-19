@@ -57,6 +57,7 @@ var unique_flags = [
 
 function regeneratePaths() {
 	skinDir = minetestPath + "/games/ENLIVEN/mods/codercore/coderskins/textures";
+	console.log("skinDir: \"" + skinDir + "\"");
 }
 
 function process_logline(line, line_number) {
@@ -348,8 +349,8 @@ app.post('/set-skin', function (req, res){
         directPath = skinDir + "/" + destNameNoExt + ".png";
         indirectPath = skinDir + "/" + destNameNoExt + ".skin";
         // TODO: make sure my_file and userName values are present
-        if (files.userFile != undefined) {
-			if (userName != undefined) {
+        if (files.hasOwnProperty('userFile')) {
+			if (fields.hasOwnProperty('userName')) {
 				var originalPath = files.userFile.path;
 				console.log("trying to rename " + files.userFile.path
 							+ " to " + directPath);
