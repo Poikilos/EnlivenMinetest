@@ -43,9 +43,11 @@
                 }
             };
         </script>
-        <div>
+        <div style="width: 100%; overflow: hidden;">
             <% skinFileNames.forEach(function(skinFileName) { %>
-                <a id="<%= skinFileName %>" href="javascript:setSkin('<%= skinFileName %>')"><img alt="<%= skinFileName %>" src="public/skins/<%= skinFileName %>"/></a>
+                <div style="width:128pt; border-style:solid; border-width:0pt; border-bottom-width:2pt; border-color:lightgray; margin-bottom:10pt">
+                <a id="<%= skinFileName %>" href="javascript:setSkin('<%= skinFileName %>')"><img style="width:128pt;height:auto" alt="<%= skinFileName %>" src="public/skins/<%= skinFileName %>"/><br/><%= skinFileName %></a>
+                <br/>&nbsp;</div>
             <% }); %>
             </script>
         </div>
