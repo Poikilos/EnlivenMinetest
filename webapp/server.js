@@ -7,15 +7,16 @@
 
 
 const profilePath = require('os').homedir();
-var skinDir = profilePath + "/minetest/games/ENLIVEN/mods/codercore/coderskins/textures";
+var minetestPath = profilePath + "/minetest";  // TODO: differs from .minetest if not RUN_IN_PLACE
+var skinDir = "";
 var tz_offset = 240; //subtract this from server time to get local time; 4hrs is 240; 5hrs is 300
-//TODO: handle tz_offset not divisible by 60
-//var selected_date_s = null;
-//selected_date_s = "2018-05-08";
+// TODO: handle tz_offset not divisible by 60
+// var selected_date_s = null;
+// selected_date_s = "2018-05-08";
 
 var express = require('express'),
-//var exphbs  = require("express-handlebars");
-//	exphbs  = require('../../'); // "express-handlebars"
+// var exphbs  = require("express-handlebars");
+// exphbs  = require('../../'); // "express-handlebars"
 	cookieParser = require('cookie-parser'),
 	bodyParser = require('body-parser'),
 	//session = require('express-session'),
@@ -53,6 +54,10 @@ var unique_flags = [
 	"joins game"
 ];
 //#endregion derived from mtsenliven.py
+
+function regeneratePaths() {
+	skinDir = minetestPath + "/games/ENLIVEN/mods/codercore/coderskins/textures";
+}
 
 function process_logline(line, line_number) {
 	//selected_date_s
@@ -342,28 +347,39 @@ app.post('/set-skin', function (req, res){
 		destNameNoExt = destNameNoExt = "player_" + fields.userName;
         directPath = skinDir + "/" + destNameNoExt + ".png";
         indirectPath = skinDir + "/" + destNameNoExt + ".skin";
-        // TODO: make sure my_file and project_id values are present
+        // TODO: make sure my_file and userName values are present
         if (files.userFile != undefined) {
-			var originalPath = files.userFile.path;
-			console.log("trying to rename " + files.userFile.path
-						+ " to " + directPath);
-			fs.rename(files.userFile.path, directPath, function(err) {
-				if (err) {
-					msg = "Failed to rename " + originalPath
-						  + " to " + directPath + "<br/>\n";
-					console.log(msg);
-					next(err);
-				}
-				else {
-					var thisData = destNameNoExt + ".png";
-					fs.writeFile(indirectPath, thisData, function(err, data) {
-					  if (err) console.log(err);
-					  console.log("Successfully wrote " + thisData
-								  + " to "+indirectPath+".");
-					});
-				}
-				res.end();
-			});
+			if (userName != undefined) {
+				var originalPath = files.userFile.path;
+				console.log("trying to rename " + files.userFile.path
+							+ " to " + directPath);
+				fs.rename(files.userFile.path, directPath, function(err) {
+					if (err) {
+						msg = "Failed to rename " + originalPath
+							  + " to " + directPath;
+						console.log(msg);
+						msg += "<br/>\n";
+						//next(err);
+// TODO: why does next above show:
+//ReferenceError: next is not defined
+    //at /home/owner/git/EnlivenMinetest/webapp/server.js:355:6
+    //at FSReqWrap.oncomplete (fs.js:135:15)
+
+					}
+					else {
+						var thisData = destNameNoExt + ".png";
+						fs.writeFile(indirectPath, thisData, function(err, data) {
+						  if (err) console.log(err);
+						  console.log("Successfully wrote " + thisData
+									  + " to "+indirectPath+".");
+						});
+					}
+					res.end();
+				});
+			}
+			else {
+				console.log("userName is undefined.");
+			}
 		}
 		else {
 			console.log("userFile is undefined.");
@@ -450,6 +466,11 @@ Your browser does not support the canvas element.
 
 var server = app.listen(3000, function () {
 	//console.log('express-handlebars example server listening on: 3000');
+	var thisMinetest = "/tank/local/owner/minetest";
+	if (fs.existsSync(thisMinetest)) {
+		minetestPath = thisMinetest;
+	}
+	regeneratePaths();
 	var host = server.address().address;
 	var port = server.address().port;
 	console.log("server address:");
