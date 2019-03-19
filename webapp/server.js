@@ -438,6 +438,7 @@ app.get('/', function (req, res) {
 
 		ret += "<br/>\n";
 	}
+	ret += "Server must restart for uploaded skins to take effect.<br/>\n";
 	ret += "assuming minetestserver ran as: " + os.homedir() + "<br/>\n";
 	ret += "timezone (tz_offset/60*-1): " + (Math.floor(tz_offset/60)*-1) + '<span name="tzArea" id="tzArea"></span><br/>\n';
 	ret += 'date: <span id="dateArea" name="dateArea">' + selected_date_s + '</span><br/>'+"\n";
