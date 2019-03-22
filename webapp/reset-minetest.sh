@@ -1,4 +1,9 @@
 #!/bin/bash
+echo
+echo
+echo
+echo "Starting cleanup and library rebuild..."
+date
 zip_name=linux-minetest-kit.zip
 extracted_name=linux-minetest-kit
 in_use_name=minetest

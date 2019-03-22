@@ -1,4 +1,10 @@
 #!/bin/bash
+echo
+echo
+echo
+echo "Starting install..."
+date
+echo "Checking if program is compiled..."
 extracted_name=linux-minetest-kit
 flag_dir="$extracted_name/mtsrc"
 if [ ! -d "$flag_dir" ]; then
@@ -6,9 +12,11 @@ if [ ! -d "$flag_dir" ]; then
     exit 1
 fi
 pushd "$extracted_name"
+enable_client=false
 extra_options=""
 if [ "@$1" = "@--client" ]; then
     extra_options="--client"
+    enable_client=true
 fi
 flag_icon="$HOME/Desktop/org.minetest.minetest.desktop"
 flag_file="minetest/bin/minetestserver"
@@ -26,9 +34,17 @@ fi
     #echo "ERROR: Nothing done since can't remove old '$flag_file'"
     #exit 1
 #fi
+enable_compile=true
 if [ -d minetest ]; then
-    echo "using existing minetest..."
-else
+    enable_compile=false
+    if [ "@$enable_client" = "@true" ]; then
+        if [ ! -f minetest/bin/minetest ]; then
+            enable_compile=true
+            echo "Recompiling since client was not built before..."
+        fi
+    fi
+fi
+if [ "@$enable_compile" = "@true" ]; then
     if [ -f "mtcompile-program.pl" ]; then
         # perl mtcompile-program.pl build >& program.log
         echo "Compiling via perl..."
@@ -38,6 +54,8 @@ else
         echo "Compiling via bash..."
         bash -e mtcompile-program.sh build --server $extra_options >& program.log
     fi
+else
+    echo "using existing minetest..."
 fi
 if [ ! -f "$flag_file" ]; then
     echo "ERROR: Build did not complete--missing '$flag_file'"
