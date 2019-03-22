@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+</head>
+<body class="container">
+
+<header>
+    <% include ../partials/header %>
+</header>
+
+<main>
+<div class="row">
+    <div class="col-sm-8">
+        <div class="jumbotron">
+            <h1>EnlivenMinetest</h1>
+            <p>Getting Started.</p>
+            <h2>&nbsp;<!--result--></h2>
+            <p><%= msg %></p>
+        </div>
+        <div>
+
+<h2>Vegetable Farming</h2>
+<ul>
+<li>Super glow glass allows plants to grow without sunlight</li>
+<li>Grass sometimes yields wheat seeds</li>
+<li>Plants in the wild may be vegetables that you can eat or replant to multiply them.</li>
+</ul>
+<h2>Animal Farming</h2>
+<ul>
+<li>Keep feeding the correct food to an animal to tame it.</li>
+<li>A nametag names a tamed animal.</li>
+<li>A Mob Protection Rune prevents an animal from being killed.</li>
+<li>There is a known issue with animals despawning: see <a href="https://github.com/poikilos/EnlivenMinetest/issues/3">Neutral Mobs Despawn Frequently</a> issue on GitHub.com/EnlivenMinetest to track this issue.</li>
+</ul>
+<h2>Protecting Your Builds and Items</h2>
+<ul>
+<li>Protector blocks protect your area from other players</li>
+<li>You can add other players to your protection block by name.</li>
+<li>Protected chests &amp; doors: Anyone who is on the protection block can use them.</li>
+<li>Locked chests &amp; doors: Only the person who placed them can use them, unless a key is made and given to another player (use skeleton key on a locked target to change the skeleton into a key for the target you're opening).</li>
+<li>Your bones hold your items when you die. After one hour, other players can take the items.</li>
+<li><b>Moderators</b> may not be able to recover your items regarding unprotected areas or items, since proving ownership or where items ended up may be difficult or impossible. Always make sure anything you want to keep is protected.</li>
+</ul>
+<h2>Issues</h2>
+<b>Only if your server uses ENLIVEN</b>, report issues at <a href="https://github.com/poikilos/EnlivenMinetest/issues">github.com/poikilos/EnlivenMinetest/issues</a> and include a screenshot (F12 saves screenshot to the minetest/bin folder). You can often show what node the item is by pointing at it and turning on the debug screen with F5. Otherwise, report them to a moderator of your server (if you report it to a moderator first, the issue is likely to be resolved faster).
+
+        </div>
+    </div>
+</div>
+</main>
+
+<footer>
+    <% include ../partials/footer %>
+</footer>
+
+</body>
+</html>
