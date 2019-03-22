@@ -365,6 +365,11 @@ function readLog() {
     }
 }
 
+app.get('/modding', function(req, res, next) {
+    res.render('pages/modding', {
+        msg: "",
+    });
+});
 app.get('/skin-upload-form', function(req, res, next) {
     //var ending = "";
     //ending += '<a href="/">Back to Main Site</a><br/>' + "\n";

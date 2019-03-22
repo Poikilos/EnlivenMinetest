@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+</head>
+<body class="container">
+
+<header>
+    <% include ../partials/header %>
+</header>
+
+<main>
+<div class="row">
+    <div class="col-sm-8">
+        <div class="jumbotron">
+            <h1>EnlivenMinetest</h1>
+            <p>Modding.</p>
+            <h2>&nbsp;<!--result--></h2>
+            <p><%= msg %></p>
+        </div>
+        <div>
+<h2>Resources</h2>
+<ul>
+    <li><a href="https://git.minetest.org/minetest/minetest/src/branch/master/doc/lua_api.txt">doc/lua_api.txt</a> on minetest.org (drastically improved over the original github version)</li>
+</ul>
+<h3>Historical Resources</h3>
+(may only apply to minetest.net (same as GitHub.com/minetest) releases which have a heavily changed API without backward compatibility)
+<ul>
+    <li><a href="https://rubenwardy.com/minetest_modding_book/en/index.html">The Minetest Modding Book</a> on rubenwardy.com</li>
+</ul>
+<h2>Tips</h2>
+* In singleplayer, you have the `privs` privilege. You can give yourself
+  all privileges by typing: "/grant singleplayer all" (The same can be
+  done with your own username if you are hosting a world).
+* You can test small pieces of code using the "Run Lua" and "Formspec
+  Tester" features of the CoderEdit or WorldEdit GUI if you have the
+  privilege.
+
+<h2>Common Items for Moderators to Spawn</h2>
+<pre>
+glass default:obsidian_glass
+glass moreblocks:wood_tile
+glass technic:concrete
+stairs:stair_wood stairs:stair_desert_stonebrick
+stairs:stair_wood stairs:stair_desert_stonebrick
+stairs:stair_wood stairs:stair_goldblock
+stairs:stair_lapis_brick
+
+mossycobble lapis:lapis_brick
+
+mesecons_lightstone:lightstone_red_off
+mesecons_torch:mesecon_torch_on
+wool:white
+technic:stainless_steel_block
+
+lapis:base_lazurite_block
+
+#white seams:
+lapis:column_lazurite_brick
+lapis:base_lazurite_brick
+
+#subtle seams:
+lapis:column_lapis_brick
+lapis:base_lapis_brick
+
+lapis:base_lapis_block
+lapis:column_lapis_block
+default:fence_aspen_wood
+</pre>
+        </div>
+    </div>
+</div>
+</main>
+
+<footer>
+    <% include ../partials/footer %>
+</footer>
+
+</body>
+</html>

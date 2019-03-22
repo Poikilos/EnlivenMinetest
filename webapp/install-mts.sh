@@ -5,6 +5,7 @@ if [ ! -d "$flag_dir" ]; then
     echo "ERROR: missing $flag_dir"
     exit 1
 fi
+enliven_path=".."
 cd "$extracted_name"
 extra_options=""
 if [ "@$1" = "@--client" ]; then
@@ -104,3 +105,5 @@ else
     rsync -rt "$flag_dir/mods/$mod_name" "$HOME/minetest/games/ENLIVEN/mods"
     # cp -f "$flag_dir/mods/LICENSE" "$HOME/minetest/games/ENLIVEN/mods/LICENSE"
 fi
+rsync -rt "$enliven_path/patches/subgame/menu/" "$HOME/minetest/games/ENLIVEN/menu"
+rsync -rt "$enliven_path/patches/Bucket_Game-patched/" "$HOME/minetest/games/ENLIVEN"

@@ -657,6 +657,7 @@ echo "Installing AntumMT's modernized fork of Kilarin's compassgps (NOT TeTpaAka
 echo "Installing AntumMT's modernized fork of Kilarin's compassgps (NOT TeTpaAka, nor Echo, nor PilzAdam compass) <https://forum.minetest.net/viewtopic.php?t=9373>" > ~/Downloads/compassgps.txt
 # https://github.com/Kilarin/compassgps.git
 #add_git_mod compassgps mod-compassgps https://github.com/AntumMT/mod-compassgps.git
+# TODO: rebase from Kilarin's version (merged AntumMT's fix and my readme clarifications) & use good texture for inventory
 add_git_mod compassgps compassgps https://github.com/poikilos/compassgps.git
 
 remove_mod helicopter
