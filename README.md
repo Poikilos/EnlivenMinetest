@@ -18,57 +18,10 @@ There are several improvements I may implement in new or existing mods. For more
 * https://github.com/minetest-mods/chat_anticurse
 * https://github.com/minetest-mods/cozy (sitting and laying down player animations)--compare with emote https://github.com/minetest-mods/emote.git
 
-#### Possible Additions
-* make a ruins mod that generates ruins with: statues, mese, stone with chipped paint or paintings, tan shale blocks with and without engravings
-* SWITCH to https://github.com/minetest-mods/inspector (instead of metatools mod)
-  https://github.com/minetest-mods/inspector
-* SWITCH to frame: "non-laggy item frame"--& make mod to alias-out the existing (homedecor?) ones in ENLIVEN
-  https://github.com/minetest-mods/frame
-* SWITCH to mob-engine (based on cme) by minetest-mods team
-  https://github.com/minetest-mods/mob-engine
-  https://forum.minetest.net/viewtopic.php?t=17106
-* timer: "A persistent timer class that can be restarted after server shutdown"
-  https://github.com/minetest-mods/timer
-* https://github.com/xisd/trmp_Pack (but only the mods from it mods matching ENLIVEN mods)
-  (NOT the same as [trm_pack by Wuzzy](https://forum.minetest.net/viewtopic.php?pid=113052#p113052), which has mostly stuff from weird mods or stuff already in trmp_minetest_game)
-  * add modpack but remove fire items (flint and steel?)
-  * https://github.com/xisd/trmp_Pack.git
-* craftguide
-* privilegeareas: Privileges granted depending on areas -- https://github.com/minetest-mods/privilegeareas/archive/master.zip
-* castle_farming: floor&wall animal hide mats, straw bales, and straw training dummy
-  https://github.com/minetest-mods/castle_farming
-* mapfix: fixes flow and light issues
-  https://github.com/minetest-mods/mapfix
-* maptools: admin pickaxe and admin blocks&items to control building, movement, and light; also permanent fire, fake fire, and igniters
-  https://github.com/minetest-mods/maptools
-  https://forum.minetest.net/viewtopic.php?f=11&t=1882
-* myroofs: sloped roofs in red, green, and dark gray--compare with existing (homedecor?) roofs in ENLIVEN
-  https://github.com/minetest-mods/myroofs
-* baked clay (Ethereal NG integrates with it, mobs redo, and farming redo)
-* Updated pipeworks fork by HybridDog: https://github.com/HybridDog/pipeworks
-
 #### node.js server manager
 * capture log
   * do not store redundant messages such as hunger_ng debug mode (see <https://pastebin.com/dDBg40vf>) or saving playereffects
   * detect restarts (even if no 'separator'--see <https://pastebin.com/Jv3vkhFA>)
-
-##### low-pri
-* (forum replies report lag) weather: https://github.com/Jeija/minetest-mod-weather ( https://forum.minetest.net/viewtopic.php?t=5245 )
-* https://github.com/minetest-mods/BobBlocks (blocks that look like they have single-color LED panel on each side, light poles, and settable damaging traps)
-* drawers: https://github.com/minetest-mods/drawers.git
-* https://github.com/minetest-mods/pontoons (brown blocks with x that can be placed parallel with water's surface by right-clicking water)
-* https://github.com/minetest-mods/trash_can (wood trash can and green dumpster)
-* https://github.com/minetest-mods/breadcrumbs (special sign: right-click sign to see stream of particles to previous sign)
-* https://github.com/minetest-mods/round_trunks
-* https://github.com/minetest-mods/mywoodslopes
-* make fork of trmp_minetest_game that has random wear for tools (see <https://forum.minetest.net/viewtopic.php?p=120285&sid=0ece6da0fc44facebc9d1f044bb033d5#p120285> for setting properties)
-* character_creator: https://forum.minetest.net/viewtopic.php?f=11&t=13138
-* diet, but maybe add hunger monoid when simple carbs are eaten & make hunger monoid cumulatively reduce satiation (instead of using diet):
-  https://github.com/minetest-mods/diet.git
-* make new decor nodes (in order of priority first): corner closed and/or open curtains (for curtains on each window both touching corner) electric range, couch
-* possibly replace Immersive Sounds [ambience]: https://forum.minetest.net/viewtopic.php?t=2807
-  with technic_ambience: http://realbadangel.pl/technic_ambience.zip
-* dungeon_loot (but "loot" mod should already cover that with default settings)
 
 #### Root Script Deprecation Process
 ##### Goals
