@@ -37,7 +37,9 @@ wget -O $zip_name $url/$zip_name || customDie "no $zip_name at $url"
 unzip -u $zip_name || customDie "Can't unzip $zip_name"
 cd "$extracted_name"
 echo "compiling libraries..."
+date
 bash -e mtcompile-libraries.sh build >& libraries.log
+date
 echo "  (see libraries.log in case of any errors)"
 #echo "compiling program..."
 #bash -e mtcompile-program.sh build >& program.log

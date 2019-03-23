@@ -45,6 +45,7 @@ if [ -d minetest ]; then
     fi
 fi
 if [ "@$enable_compile" = "@true" ]; then
+    date
     if [ -f "mtcompile-program.pl" ]; then
         # perl mtcompile-program.pl build >& program.log
         echo "Compiling via perl..."
@@ -54,6 +55,7 @@ if [ "@$enable_compile" = "@true" ]; then
         echo "Compiling via bash..."
         bash -e mtcompile-program.sh build --server $extra_options >& program.log
     fi
+    date
 else
     echo "using existing minetest..."
 fi
