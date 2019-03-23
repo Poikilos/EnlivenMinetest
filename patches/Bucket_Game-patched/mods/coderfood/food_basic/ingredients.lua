@@ -118,9 +118,9 @@ food.module("milk", function()
 	minetest.register_craftitem(":food:milk", {
 		description = S("Milk"),
 		image = "food_milk.png",
-		-- on_use = food.item_eat(3),
-		on_use = minetest.item_eat(2, 'vessels:drinking_glass'),
-		-- groups = { eatable=1, food_milk = 1 },
+		on_use = food.item_eat(2),
+		-- on_use = minetest.item_eat(2, 'vessels:drinking_glass'),
+		groups = { eatable=1, food_milk = 1 },
 		stack_max=10
 	})
 	
