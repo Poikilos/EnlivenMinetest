@@ -11,6 +11,7 @@
 
 ## Primary Features of ENLIVEN subgame
 * birthstones, improved fork: <https://github.com/poikilos/birthstones>
+  (also part of Bucket_Game)
 
 ### Planned Features
 There are several improvements I may implement in new or existing mods. See the [Issues](https://github.com/poikilos/EnlivenMinetest/issues) section of the GitHub project.
