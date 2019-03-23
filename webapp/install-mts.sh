@@ -45,7 +45,7 @@ if [ -d minetest ]; then
     fi
 fi
 if [ "@$enable_compile" = "@true" ]; then
-    date
+    start=`date +%s`
     if [ -f "mtcompile-program.pl" ]; then
         # perl mtcompile-program.pl build >& program.log
         echo "Compiling via perl..."
@@ -55,7 +55,9 @@ if [ "@$enable_compile" = "@true" ]; then
         echo "Compiling via bash..."
         bash -e mtcompile-program.sh build --server $extra_options >& program.log
     fi
-    date
+    end=`date +%s`
+    compile_time=$((end-start))
+    echo "Compiling program finished in $compile_time seconds."
 else
     echo "using existing minetest..."
 fi
