@@ -38,7 +38,7 @@ unzip -u $zip_name || customDie "Can't unzip $zip_name"
 cd "$extracted_name"
 echo "compiling libraries..."
 date
-end=`start +%s`
+start=`date +%s`
 bash -e mtcompile-libraries.sh build >& libraries.log
 end=`date +%s`
 compile_time=$((end-start))
