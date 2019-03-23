@@ -132,3 +132,13 @@ echo "updating '$HOME/minetest/games/ENLIVEN/menu'..."
 rsync -rt "patches/subgame/menu/" "$HOME/minetest/games/ENLIVEN/menu"
 echo "updating '$HOME/minetest/games/ENLIVEN'..."
 rsync -rt "patches/Bucket_Game-patched/" "$HOME/minetest/games/ENLIVEN"
+if [ ! -f "$HOME/minetest/minetest.Bucket_Game-example.conf" ]; then
+    cp -f "$HOME/minetest/minetest.conf" "$HOME/minetest/minetest.Bucket_Game-example.conf"
+fi
+cp -f "patches/subgame/minetest.client-example.conf" "$HOME/minetest/minetest.conf"
+cp -f "patches/subgame/minetest.server-example.conf" "$HOME/minetest/games/ENLIVEN/minetest.conf"
+if [ -f "/home/owner/i_am_dedicated_minetest_server" ]; then
+    echo "server_dedicated = true" >> "$HOME/minetest/games/ENLIVEN/minetest.conf"
+else
+    echo "server_dedicated = false" >> "$HOME/minetest/games/ENLIVEN/minetest.conf"
+fi

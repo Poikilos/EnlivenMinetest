@@ -56,5 +56,7 @@ cd ..
 echo "Check libraries.log for errors, then..."
 echo "- Run the following manually for SERVER only (no graphical client):"
 echo "  bash install-mts.sh"
+echo "- Run the following manually for both minetestserver and minetest:"
+echo "  bash install-mts.sh --client"
 echo
 echo
