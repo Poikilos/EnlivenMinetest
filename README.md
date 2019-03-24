@@ -28,9 +28,13 @@ There are several improvements I may implement in new or existing mods. See the 
 * Any script code related to redis has not been successfully tested.
 * Make sure you convert your world to leveldb and place it in your server's worlds folder $HOME/.minetest/worlds/, as this set of scripts hasn't been tested with any other database nor worlds folder location, and nightly backup scripts cater to leveldb.
 
-## How to use:
 
-### Windows Client:
+## Install
+
+
+## How to use
+
+### Windows Client
 Click "Releases" for the installer, which has the singleplayer and multiplayer client for ENLIVEN.
 * alternate download site is [expertmultimedia.com](http://www.expertmultimedia.com/index.php?htmlref=tutoring.html "Expert Multimedia")
 * you must install to C:\Games\ENLIVEN (or possibly other path without spaces, as long as you don't move the launcher) in order for ENLIVEN to run.
@@ -41,6 +45,30 @@ The ENLIVEN client runs Minetest, which can be used as a client for other Minete
 * is able to run ENLIVEN subgame in singleplayer mode without any changes
 
 ### Server
+
+#### Install on linux server
+* open terminal (root NOT recommended)
+* IF you are a decicated server, first run `touch $HOME/i_am_dedicated_minetest_server` then run:
+```bash
+if [ ! -d webapp ]; then
+    echo "ERROR: this will only work from the extracted or cloned EnlivenMinetest directory"
+    echo "Press Ctrl C, or this terminal will exit..."
+    sleep 1
+    echo "3..."
+    sleep 1
+    echo "2..."
+    sleep 1
+    echo "1..."
+    sleep 1
+    exit 1
+fi
+cd webapp
+bash reset-minetest.sh
+bash install-mts.sh
+# If you want to install the client, you should instead run
+# bash install-mts.sh --client
+# (defaults to client if $HOME/Desktop/org.minetest.minetest.desktop file exists)
+```
 
 ### mtanalyze
 (not maintained, kept for legacy use--if you fix anything, please submit a pull request)
@@ -53,8 +81,8 @@ The ENLIVEN client runs Minetest, which can be used as a client for other Minete
 * If you have a dedicated server, the value server_dedicated = false should be changed to server_dedicated = true in your SERVER's minetest.conf in the ENLIVEN folder that the installer creates.
 
 #### Security and Performance Notes
-* The installer script changes owner and group for ENLIVEN's world.mt and world.mt.1st if present to $USER
-* The included minetest.conf recommended for your clients includes the line enable_local_map_saving = true, which will cache the world locally on their machines. You can feel free to change that according to your preference.
+* The root installer script (deprecated) changes owner and group for ENLIVEN's world.mt and world.mt.1st if present to $USER
+* The included minetest.conf recommended for your clients (patches/subgame/minetest.*client.conf) includes the line enable_local_map_saving = true, which will cache the world locally on their machines. You can feel free to change that according to your preference.
 
 ## Naming conventions:
 * The filenames without extensions
