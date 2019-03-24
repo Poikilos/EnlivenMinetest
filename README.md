@@ -31,6 +31,36 @@ There are several improvements I may implement in new or existing mods. See the 
 
 ## Install
 
+#### Linux
+* Open terminal, then:
+```bash
+if [ ! -d webapp ]; then
+    echo "ERROR: this will only work from the extracted or cloned EnlivenMinetest directory"
+    echo "Press Ctrl C, or this terminal will exit..."
+    sleep 1
+    echo "3..."
+    sleep 1
+    echo "2..."
+    sleep 1
+    echo "1..."
+    sleep 1
+    exit 1
+fi
+cd webapp
+# the next command downloads the latest linux-build-kit, CLEARS the
+# webapp/linux-build-kit/minetest directory, and compiles the libraries.
+# Do not put anything important in that directory--the latter install
+# script installs the game to $HOME/minetest and that is the copy of
+# minetest you should use (such as via the icon).
+bash reset-minetest.sh
+bash install-mts.sh --client
+```
+* Icon will be added as:
+  `$HOME/.local/share/applications/org.minetest.minetest.desktop`
+  (your window manager should automatically detect the change--if not,
+  you may need to restart your window manager. If it still doesn't show,
+  contact the maintainer of your window manager. This works in KDE on
+  Fedora 29. Workaround: copy the icon from there to your desktop.)
 
 ## How to use
 

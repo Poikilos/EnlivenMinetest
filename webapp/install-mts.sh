@@ -129,10 +129,16 @@ else
 fi
 popd
 cd ..
-echo "updating '$HOME/minetest/games/ENLIVEN/menu'..."
-rsync -rt "patches/subgame/menu/" "$HOME/minetest/games/ENLIVEN/menu"
-echo "updating '$HOME/minetest/games/ENLIVEN'..."
-rsync -rt "patches/Bucket_Game-patched/" "$HOME/minetest/games/ENLIVEN"
+src="patches/subgame/menu"
+dst="$HOME/minetest/games/ENLIVEN/menu"
+echo "updating '$dst' from '$src/'..."
+rsync -rt "$src/" "$dst"
+
+src="patches/Bucket_Game-patched"
+dst="$HOME/minetest/games/ENLIVEN"
+echo "updating '$dst' from '$src/'..."
+rsync -rt "$src/" "$dst"
+
 # Bucket_Game doesn't come with a minetest.conf, only minetest.conf.example* files
 # if [ ! -f "$HOME/minetest/minetest.Bucket_Game-example.conf" ]; then
 #     cp -f "$HOME/minetest/minetest.conf" "$HOME/minetest/minetest.Bucket_Game-example.conf"
@@ -142,12 +148,14 @@ client_example_dest="$HOME/minetest/minetest.ENLIVEN.client-example.conf"
 # client conf writing only ever happens once, unless you manually delete $client_example_dest file:
 if [ ! -f "$client_example_dest" ]; then
     if [ -f "$HOME/minetest/minetest.conf" ]; then
+        echo "Backing up minetest.conf..."
         if [ ! -f "$HOME/minetest/minetest.conf.1st" ]; then
             cp -f "$HOME/minetest/minetest.conf" "$HOME/minetest/minetest.conf.1st"
         else
             cp -f "$HOME/minetest/minetest.conf" "$HOME/minetest/minetest.conf.bak"
         fi
     fi
+    echo "Installing minetest.conf and ENLIVEN example conf files..."
     cp -f "patches/subgame/minetest.client-example.conf" "$HOME/minetest/minetest.conf"
     cp -f "patches/subgame/minetest.LAN-client-example.conf" "$HOME/minetest/minetest.ENLIVEN.LAN-client-example.conf"
     cp -f "patches/subgame/minetest.server-example.conf" "$HOME/minetest/minetest.ENLIVEN.server-example.conf"
@@ -159,6 +167,7 @@ if [ -f "$server_minetest_conf_dest" ]; then
     echo "NOTE: $server_minetest_conf_dest will be overwritten (minetest.org releases allow you to put a world.conf file in your world, so that should be customized instead)..."
     echo
 fi
+echo "Writing '$server_minetest_conf_dest'..."
 cp -f "patches/subgame/minetest.server-example.conf" "$server_minetest_conf_dest"
 if [ -f "$HOME/i_am_dedicated_minetest_server" ]; then
     echo "server_dedicated = true" >> "$server_minetest_conf_dest"
