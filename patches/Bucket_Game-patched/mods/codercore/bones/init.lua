@@ -175,7 +175,7 @@ minetest.register_on_dieplayer(function(player)
 	if bones_mode == "keep" or (creative and creative.is_enabled_for
 			and creative.is_enabled_for(player:get_player_name())) then
 		minetest.log("action", player_name .. " dies at " .. pos_string ..
-			". No bones remain")
+			". No bones remain.")
 		if bones_position_message then
 			minetest.chat_send_player(player_name, player_name .. " died at " .. pos_string .. ".")
 		end
@@ -186,7 +186,7 @@ minetest.register_on_dieplayer(function(player)
 	if player_inv:is_empty("main") and
 		player_inv:is_empty("craft") then
 		minetest.log("action", player_name .. " dies at " .. pos_string ..
-			". No bones remain")
+			". No bones remain.")
 		if bones_position_message then
 			minetest.chat_send_player(player_name, player_name .. " died at " .. pos_string .. ".")
 		end
@@ -232,7 +232,7 @@ minetest.register_on_dieplayer(function(player)
 	minetest.set_node(pos, {name = "bones:bones", param2 = param2})
 
 	minetest.log("action", player_name .. " dies at " .. pos_string ..
-		". Bones remain")
+		". Bones remain.")
 	if bones_position_message then
 		minetest.chat_send_player(player_name, player_name .. " died at " .. pos_string ..
 			", and bones remain.")
