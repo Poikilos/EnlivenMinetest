@@ -1,4 +1,5 @@
 #!/bin/bash
+me=`basename "$0"`
 echo
 echo
 echo
@@ -179,11 +180,15 @@ if [ -f "$server_minetest_conf_dest" ]; then
 fi
 echo "Writing '$server_minetest_conf_dest'..."
 cp -f "patches/subgame/minetest.server-example.conf" "$server_minetest_conf_dest"
+echo "" >> "$server_minetest_conf_dest"
+echo "# Added automatically by $me:" >> "$server_minetest_conf_dest"
 if [ -f "$HOME/i_am_dedicated_minetest_server" ]; then
     echo "server_dedicated = true" >> "$server_minetest_conf_dest"
 else
     echo "server_dedicated = false" >> "$server_minetest_conf_dest"
 fi
+echo "" >> "$server_minetest_conf_dest"
+echo "" >> "$server_minetest_conf_dest"
 enable_clear_icon_cache=false
 if [ "@$enable_client" = "@true" ]; then
     dest_icons=$HOME/.local/share/applications

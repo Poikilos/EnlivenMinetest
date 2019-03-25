@@ -36,18 +36,76 @@
 <h2>Mining</h2>
 <h3>Maximum Mining Depths</h3>
 You must go below the maximum to get the material. Many materials also have a deeper level below which they are more common.
-<table class="table">
-    <thead>
-        <tr>
-        <th>Maximum</th>    <th>Common</th> <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-        <td>-256</td>       <td></td>       <td>Lava</td>
-        </tr>
-    </tbody>
+Only a few materials stop occurring at lower depths (see "Minimum" column).
+<%/* comment
+<!--Updated info is at:<a target="_blank" href="https://github.com/minetest-technic/technic/blob/master/manual.md">https://github.com/minetest-technic/technic/blob/master/manual.md</a><br/>-->
+*/%>
+Currently-known mined resource elevations:<br/>
+<style type="text/css">
+#table-6 {
+width: 100%
+border: 1px solid #B0B0B0;
+}
+#table-6 tbody {
+/* Kind of irrelevant unless your .css is alreadt doing something else */
+margin: 0;
+padding: 0;
+border: 0;
+outline: 0;
+font-size: 100%;
+vertical-align: baseline;
+background: transparent;
+}
+#table-6 thead {
+text-align: left;
+}
+#table-6 thead th {
+background: -moz-linear-gradient(top, #F0F0F0 0, #DBDBDB 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #F0F0F0), color-stop(100%, #DBDBDB));
+filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#F0F0F0', endColorstr='#DBDBDB', GradientType=0);
+border: 1px solid #B0B0B0;
+color: #444;
+font-size: 16px;
+font-weight: bold;
+padding: 3px 10px;
+}
+#table-6 td {
+padding: 3px 10px;
+<p>}
+#table-6 tr:nth-child(even) {
+background: #F2F2F2;
+}
+</p></style>
+<table id="table-6">
+  <thead>
+  <th>Resource</th><th>Min</th><th>Max</th><th>Note</th>				<th>Supplied by Mod</th>
+  </thead>
+  <tbody>
+  <tr><td>Coal </td>	<td>&nbsp;</td>			<td>+64</td>	<td>abundant 0 or below</td>			<td>(minetest)</td></tr>
+  <tr><td>Iron</td>		<td>&nbsp;</td>			<td>+2</td>		<td>more abundant as approaches -64</td><td>(minetest)</td></tr>
+  <tr><td>Copper</td>	<td>&nbsp;</td>			<td>-16</td>	<td>abundant -64 or below</td>			<td>(minetest, formerly moreores)</td></tr>
+  <tr><td>Tin</td>		<td>&nbsp;</td>			<td>+8</td>		<td>&nbsp;</td>							<td>moreores</td></tr>
+  <tr><td>Zinc</td>		<td>&nbsp;</td>			<td>+2</td>		<td>&nbsp;</td>							<td>technic</td></tr>
+  <tr><td>Chromium</td>	<td>&nbsp;</td>			<td>-100</td>	<td>&nbsp;</td>							<td>technic</tr>
+  <tr><td>Uranium</td>	<td>-300</td>			<td>-80</td>	<td>&nbsp;</td>							<td>technic</td></tr>
+  <tr><td>Silver</td>	<td>&nbsp;</td>			<td>-2</td>		<td>&nbsp;</td>							<td>moreores</td></tr>
+  <tr><td>Gold</td>		<td>&nbsp;</td>			<td>-64</td>	<td>abundant -256 or below</td>			<td>(minetest, formerly moreores)</td></tr>
+  <tr><td>Mithril</td>	<td>&nbsp;</td>			<td>-512</td>	<td>&nbsp;</td>							<td>moreores</td></tr>
+  <tr><td>Lava</td>		<td>&nbsp;</td>			<td>-256</td>	<td>&nbsp;</td>							<td></td></tr>
+  <tr><td>Mese</td>		<td>&nbsp;</td>			<td>-64</td>	<td>ore abundant -256 or below, blocks -1024 or below but rare</td><td>(minetest)</td></tr>
+  <tr><td>Diamond</td>	<td>&nbsp;</td>			<td>-512</td>	<td>&nbsp;</td>							<td>(minetest, formerly technic)</td></tr>
+  <tr><td>Marble</td>	<td>&nbsp;</td>			<td>-50</td>	<td>&nbsp;</td>							<td>technic</td></tr>
+  <tr><td>Granite</td>	<td>&nbsp;</td>			<td>-150</td>	<td>&nbsp;</td>							<td>technic</td></tr>
+  <tr><td>Mycena Essence,<br/>Glow Mese Crystal</td>	<td>-33,000</td>			<td>-700</td>	<td>&nbsp;</td>							<td>caverealms</td></tr>
+  <tr><td>Dungeon Master's Lair</td>	<td>-5000</td>			<td>-4000</td>	<td>&nbsp;</td>							<td>caverealms</td></tr>
+  <tr><td>Deep Realms</td>	<td></td>			<td>-7000</td>	<td>&nbsp;</td>							<td>caverealms</td></tr>
+  </tbody>
 </table>
+<br/>
+Bring food (and wood to make torches and other tools) to survive deep underground.<br/>
+Set home and go home using the inventory menu. The house button with the <span style="font-weight:bold; color:darkred">red</span>
+arrow sets home. If you die you can always click the house button with the <span style="font-weight:bold; color:darkgreen">green</span> arrow to go back home.<br/>
+You can set additional homes by typing: /sethome, or /sethome2; then return by typing /home, or /home2.
 <h2>Protecting Your Builds and Items</h2>
 <ul>
 <li>Protector blocks protect your area from other players</li>
