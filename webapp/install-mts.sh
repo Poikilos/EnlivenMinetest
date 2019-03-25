@@ -30,9 +30,10 @@ if [ -f "$flag_icon" ]; then
     extra_options="--client"
     enable_client=true
     echo "automatically adding --client to compile since detected"
-    echo "'$flag_icon'--press Ctrl C to cancel..."
+    echo "'$flag_icon'"
+    #echo "--press Ctrl C to cancel..."
+    #sleep 2
     flag_file="minetest/bin/minetest"
-    sleep 2
 fi
 #if [ -f "$flag_file" ]; then
     #rm -f "$flag_file"
