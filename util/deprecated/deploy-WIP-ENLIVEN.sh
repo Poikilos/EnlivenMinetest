@@ -1,4 +1,6 @@
 #!/bin/bash
+echo "functionality of this script is replaced by scripts in /webapp/"
+exit 1
 src=WIP/ENLIVEN
 if [ ! -d "$src" ]; then
     echo "ERROR: missing $src"

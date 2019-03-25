@@ -1,0 +1,134 @@
+Only in Bucket_Game-basis: 00README
+Only in Bucket_Game-patched: LICENSE-Poikilos.md
+Only in Bucket_Game-basis/mods/codercore: 00README
+diff -u -r Bucket_Game-basis/mods/codercore/bones/init.lua Bucket_Game-patched/mods/codercore/bones/init.lua
+--- Bucket_Game-basis/mods/codercore/bones/init.lua	2018-11-18 23:07:10.000000000 -0500
++++ Bucket_Game-patched/mods/codercore/bones/init.lua	2019-03-22 09:44:50.157783253 -0400
+@@ -166,20 +166,33 @@
+ 		bones_mode = "bones"
+ 	end
+ 
++	local bones_position_message = minetest.settings:get_bool("bones_position_message") == true
++	local pos = vector.round(player:getpos())
++	local player_name = player:get_player_name()
++	local pos_string = minetest.pos_to_string(pos)
++
+ 	-- return if keep inventory set or in creative mode
+ 	if bones_mode == "keep" or (creative and creative.is_enabled_for
+ 			and creative.is_enabled_for(player:get_player_name())) then
++		minetest.log("action", player_name .. " dies at " .. pos_string ..
++			". No bones remain")
++		if bones_position_message then
++			minetest.chat_send_player(player_name, player_name .. " died at " .. pos_string .. ".")
++		end
+ 		return
+ 	end
+ 
+ 	local player_inv = player:get_inventory()
+ 	if player_inv:is_empty("main") and
+ 		player_inv:is_empty("craft") then
++		minetest.log("action", player_name .. " dies at " .. pos_string ..
++			". No bones remain")
++		if bones_position_message then
++			minetest.chat_send_player(player_name, player_name .. " died at " .. pos_string .. ".")
++		end
+ 		return
+ 	end
+ 
+-	local pos = vector.round(player:getpos())
+-	local player_name = player:get_player_name()
+ 
+ 	-- check if it's possible to place bones, if not find space near player
+ 	if bones_mode == "bones" and not may_replace(pos, player) then
+@@ -206,12 +219,25 @@
+ 		player_inv:set_list("craft", {})
+ 
+ 		drop(pos, ItemStack("bones:bones"))
++		minetest.log("action", player_name .. " dies at " .. pos_string ..
++			". Inventory dropped")
++		if bones_position_message then
++			minetest.chat_send_player(player_name, player_name .. " died at " .. pos_string ..
++				", and dropped their inventory.")
++		end
+ 		return
+ 	end
+ 
+ 	local param2 = minetest.dir_to_facedir(player:get_look_dir())
+ 	minetest.set_node(pos, {name = "bones:bones", param2 = param2})
+ 
++	minetest.log("action", player_name .. " dies at " .. pos_string ..
++		". Bones remain")
++	if bones_position_message then
++		minetest.chat_send_player(player_name, player_name .. " died at " .. pos_string ..
++			", and bones remain.")
++	end
++
+ 	local meta = minetest.get_meta(pos)
+ 	local inv = meta:get_inventory()
+ 	inv:set_size("main", 8 * 4)
+Only in Bucket_Game-basis/mods/codercore/bones: license.txt
+Only in Bucket_Game-basis/mods/codercore/bones: README.txt
+Only in Bucket_Game-basis/mods/codercore: modpack.txt
+Only in Bucket_Game-basis/mods/codercore: oldcoder.txt
+Only in Bucket_Game-patched/mods/coderfood/food_basic: etc
+diff -u -r Bucket_Game-basis/mods/coderfood/food_basic/ingredients.lua Bucket_Game-patched/mods/coderfood/food_basic/ingredients.lua
+--- Bucket_Game-basis/mods/coderfood/food_basic/ingredients.lua	2019-03-23 14:43:12.000000000 -0400
++++ Bucket_Game-patched/mods/coderfood/food_basic/ingredients.lua	2019-03-23 15:36:07.178972239 -0400
+@@ -118,18 +118,12 @@
+ 	minetest.register_craftitem(":food:milk", {
+ 		description = S("Milk"),
+ 		image = "food_milk.png",
+-		on_use = food.item_eat(1),
++		on_use = food.item_eat(2),
++		-- on_use = minetest.item_eat(2, 'vessels:drinking_glass'),
+ 		groups = { eatable=1, food_milk = 1 },
+ 		stack_max=10
+ 	})
+-	food.craft({
+-		output = "food:milk",
+-		recipe = {
+-			{"default:sand"},
+-			{"bucket:bucket_water"}
+-		},
+-		replacements = {{"bucket:bucket_water", "bucket:bucket_empty"}},
+-	})
++	
+ end, true)
+ 
+ food.module("egg", function()
+diff -u -r Bucket_Game-basis/mods/coderfood/food_basic/README.md Bucket_Game-patched/mods/coderfood/food_basic/README.md
+--- Bucket_Game-basis/mods/coderfood/food_basic/README.md	2019-02-18 03:59:16.000000000 -0500
++++ Bucket_Game-patched/mods/coderfood/food_basic/README.md	2019-03-24 01:17:34.889737209 -0400
+@@ -4,7 +4,11 @@
+ 
+ This will be a high-res (128x128) texture pack for Minetest. Its license is CC0 1.0.
+ 
+-The files in this repo are actually [webtoon](https://github.com/pithydon/webtoon)
++Realistic Milk Bucket:
++Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)
++Attribution: Copyright (C) 2015-2016 ElementW, Poikilos (modified by)
++
++Other files in this repo are actually [webtoon](https://github.com/pithydon/webtoon)
+ CC0 texture pack, which I keep rewriting with the new textures.
+ 
+ The textures are largely my own work, but a lot of them are taken out of other
+Only in Bucket_Game-patched/mods/coderfood/food_basic: textures
+Only in Bucket_Game-patched/mods/codermobs/codermobs: cow.lua
+diff -u -r Bucket_Game-basis/mods/codermobs/codermobs/LICENSE Bucket_Game-patched/mods/codermobs/codermobs/LICENSE
+--- Bucket_Game-basis/mods/codermobs/codermobs/LICENSE	2019-03-16 00:10:02.000000000 -0400
++++ Bucket_Game-patched/mods/codermobs/codermobs/LICENSE	2019-03-24 01:17:08.080563179 -0400
+@@ -30,6 +30,12 @@
+ -----------------------------
+ CC BY-SA 3.0. Attribution: AspireMint.
+ 
++Realistic Milk Bucket
++-----------------------------
++Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)
++Attribution: Copyright (C) 2015-2016 ElementW, Poikilos (modified by)
++
++
+ D00Med code
+ -----------------------------
+ GNU Lesser General Public License 2.1
+Only in Bucket_Game-patched/mods/codermobs/codermobs: textures
+Only in Bucket_Game-basis/mods: LICENSE

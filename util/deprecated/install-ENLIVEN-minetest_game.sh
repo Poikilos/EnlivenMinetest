@@ -881,9 +881,9 @@ if [ -d "$PATCHES_PATH" ]; then
   sudo cp -R $PATCHES_PATH/mods-integration/* "$MT_MYGAME_MODS_PATH/"
   echo
   echo "  [ + ] adding the following multiplayer mods (included):"
-  ls $PATCHES_PATH/mods-multiplayer/
-  ls $PATCHES_PATH/mods-multiplayer/ | grep -v skinsdb >> "$MOD_LIST"
-  sudo cp -R $PATCHES_PATH/mods-multiplayer/* "$MT_MYGAME_MODS_PATH/"
+  ls $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/
+  ls $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/ | grep -v skinsdb >> "$MOD_LIST"
+  sudo cp -R $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/* "$MT_MYGAME_MODS_PATH/"
   echo "  [ / ] patching mobs..."
   echo "adding non-manual patches to subgame (vs minetest_game and downloaded mods):"
   echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
@@ -904,7 +904,7 @@ if [ -d "$SUB_PATH" ]; then
   echo "removing original $SUB_PATH/character_*..."
   rm -Rf $SUB_PATH/character_*  # cannot have quotes if using wildcards
 fi
-sudo cp -f $PATCHES_PATH/mods-multiplayer/$PATCH_SKINS_MOD_NAME/$SUB_NAME/* "$SUB_PATH"
+sudo cp -f $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/$PATCH_SKINS_MOD_NAME/$SUB_NAME/* "$SUB_PATH"
 if [ ! -d "$SUB_PATH" ]; then
   echo "ERROR: failed to install poikilos's skins to $SUB_PATH, so cannot continue." > $err_txt
   cat $err_txt
@@ -926,7 +926,7 @@ if [ -d "$SUB_PATH" ]; then
   echo "removing original $SUB_PATH/character_*..."
   rm -Rf $SUB_PATH/character_*  # cannot have quotes if using wildcards
 fi
-sudo cp -f $PATCHES_PATH/mods-multiplayer/$PATCH_SKINS_MOD_NAME/$SUB_NAME/* "$SUB_PATH"
+sudo cp -f $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/$PATCH_SKINS_MOD_NAME/$SUB_NAME/* "$SUB_PATH"
 if [ ! -d "$SUB_PATH" ]; then
   echo "ERROR: failed to install poikilos's skins to $SUB_PATH, so cannot continue." > $err_txt
   cat $err_txt

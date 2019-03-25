@@ -9,6 +9,12 @@ extracted_name=linux-minetest-kit
 flag_dir="$extracted_name/mtsrc"
 if [ ! -d "$flag_dir" ]; then
     echo "ERROR: missing $flag_dir"
+    echo "- If you do not have a minetest source directory with"
+    echo "  libraries built yet, you must add that such as by running:"
+    echo
+    echo "bash reset-minetest-install-source.sh"
+    echo
+    echo
     exit 1
 fi
 pushd "$extracted_name"
@@ -138,6 +144,9 @@ src="patches/Bucket_Game-patched"
 dst="$HOME/minetest/games/ENLIVEN"
 echo "updating '$dst' from '$src/'..."
 rsync -rt "$src/" "$dst"
+if [ -d "$dst/mods/coderfood/food_basic/etc" ]; then
+  rm -Rf "$dst/mods/coderfood/food_basic/etc"
+fi
 
 # Bucket_Game doesn't come with a minetest.conf, only minetest.conf.example* files
 # if [ ! -f "$HOME/minetest/minetest.Bucket_Game-example.conf" ]; then
