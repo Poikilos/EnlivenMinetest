@@ -1,5 +1,11 @@
 # Changelog
 
+## [git] - 2018-03-27
+### Added
+* overrides for world.conf and world.mt (only if you have the directory
+  ~/.minetest/worlds/CenterOfTheSun)
+* (Getting Started page in web app) areas (self-protection) instructions
+
 ## [git] - 2018-03-25
 **This is the first Changelog entry for the new Bucket_Game-based
 ENLIVEN.**

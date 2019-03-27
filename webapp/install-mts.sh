@@ -173,6 +173,7 @@ if [ ! -f "$client_example_dest" ]; then
     cp -f "patches/subgame/minetest.client-example.conf" "$client_example_dest"
 fi
 server_minetest_conf_dest="$HOME/minetest/games/ENLIVEN/minetest.conf"
+
 if [ -f "$server_minetest_conf_dest" ]; then
     echo
     echo "NOTE: $server_minetest_conf_dest will be overwritten (minetest.org releases allow you to put a world.conf file in your world, so that should be customized instead)..."
@@ -189,6 +190,27 @@ else
 fi
 echo "" >> "$server_minetest_conf_dest"
 echo "" >> "$server_minetest_conf_dest"
+
+
+world_override_src="overrides/worlds/CenterOfTheSun"
+world_override_dst="$HOME/.minetest/worlds/CenterOfTheSun"
+world_conf_src="$world_override_src/world.conf"
+world_conf_dst="$world_override_dst/world.conf"
+world_mt_src="$world_override_src/world.mt"
+world_mt_dst="$world_override_dst/world.mt"
+if [ -d "$world_override_dst" ]; then
+    echo "You have the CenterOfTheSun world. Listing any changes..."
+    if [ -f "$world_conf_src" ]; then
+        if [ -f "$world_conf_dst" ]; then
+            echo " * overwrite world.conf with $world_conf_src"
+        else
+            echo " * add the world.conf from $world_conf_src"
+        fi
+        cp -f "$world_conf_src" "$world_conf_dst"
+    fi
+fi
+
+
 enable_clear_icon_cache=false
 if [ "@$enable_client" = "@true" ]; then
     dest_icons=$HOME/.local/share/applications

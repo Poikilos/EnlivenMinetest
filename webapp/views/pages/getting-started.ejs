@@ -24,19 +24,29 @@
 <ul>
 <li>Super glow glass allows plants to grow without sunlight</li>
 <li>Grass sometimes yields wheat seeds</li>
-<li>Plants in the wild may be vegetables that you can eat or replant to multiply them.</li>
+<li>Plants in the wild may be vegetables that you can eat or replant to
+multiply them.</li>
 </ul>
 <h2>Animal Farming</h2>
 <ul>
-<li>Keep feeding the correct food to an animal to tame it. For currently-known taming info not displayed here, see the enhancement request for this webapp (the request has the taming info shown already) at <a href="https://github.com/poikilos/EnlivenMinetest/issues/88">Taming Guide</a></li>
+<li>Keep feeding the correct food to an animal to tame it. For
+currently-known taming info not displayed here, see the enhancement
+request for this webapp (the request has the taming info shown already)
+at <a href="https://github.com/poikilos/EnlivenMinetest/issues/88">
+Taming Guide</a></li>
 <li>A nametag names a tamed animal.</li>
 <li>A Mob Protection Rune prevents an animal from being killed.</li>
-<li>There is a known issue with animals despawning: see <a href="https://github.com/poikilos/EnlivenMinetest/issues/3">Neutral Mobs Despawn Frequently</a> issue on GitHub.com/EnlivenMinetest to track this issue.</li>
+<li>There is a known issue with animals despawning: see
+<a href="https://github.com/poikilos/EnlivenMinetest/issues/3">Neutral
+Mobs Despawn Frequently</a> issue on GitHub.com/EnlivenMinetest to track
+this issue.</li>
 </ul>
 <h2>Mining</h2>
 <h3>Maximum Mining Depths</h3>
-You must go below the maximum to get the material. Many materials also have a deeper level below which they are more common.
-Only a few materials stop occurring at lower depths (see "Minimum" column).
+You must go below the maximum to get the material. Many materials also
+have a deeper level below which they are more common.
+Only a few materials stop occurring at lower depths (see "Minimum"
+column).
 <%/* comment
 <!--Updated info is at:<a target="_blank" href="https://github.com/minetest-technic/technic/blob/master/manual.md">https://github.com/minetest-technic/technic/blob/master/manual.md</a><br/>-->
 */%>
@@ -47,7 +57,7 @@ width: 100%
 border: 1px solid #B0B0B0;
 }
 #table-6 tbody {
-/* Kind of irrelevant unless your .css is alreadt doing something else */
+/* Kind of irrelevant unless your .css is already doing something else */
 margin: 0;
 padding: 0;
 border: 0;
@@ -102,39 +112,115 @@ background: #F2F2F2;
   </tbody>
 </table>
 <br/>
-Bring food (and wood to make torches and other tools) to survive deep underground.<br/>
-Set home and go home using the inventory menu. The house button with the <span style="font-weight:bold; color:darkred">red</span>
-arrow sets home. If you die you can always click the house button with the <span style="font-weight:bold; color:darkgreen">green</span> arrow to go back home.<br/>
-You can set additional homes by typing: /sethome, or /sethome2; then return by typing /home, or /home2.
+Bring food (and wood to make torches and other tools) to survive deep
+underground.<br/>
+Set home and go home using the inventory menu. The house button with the
+<span style="font-weight:bold; color:darkred">red</span>
+arrow sets home. If you die you can always click the house button with
+the <span style="font-weight:bold; color:darkgreen">green</span> arrow
+to go back home.<br/>
+You can set additional homes by typing: /sethome, or /sethome2; then
+return by typing /home, or /home2.
 <h2>Protecting Your Builds and Items</h2>
+<h3>Area Self-Protection</h3>
 <ul>
-<li>Protector blocks protect your area from other players</li>
+<li>Type /area_pos set (including the slash)</li>
+<li><b>Select the area</b> by clicking the opposite corners you want to
+protect. Remember you're in 3D so you must consider that one should be
+an upper corner and the other should be a lower corner, in addition to
+being opposite from a top view.<br/>
+Alternatively, use /area_pos set1 or /area_pos set2 to set the corners
+separately.
+</li>
+<li>Type /protect AreaName (where AreaName is what you want to name your
+area)</li>
+<li>The default number of areas you can have
+(areas.self_protection_max_areas) is 3, but this may be different in
+each world <i>(See minetest/minetest.conf for single player. For servers,
+see games/game/minetest.conf or worlds/world/world.conf)</i>.</li>
+</ul>
+To remove an area or remove a player from an area:
+<ul>
+    <li>* type /remove_area ID (where ID is the number you see at the
+    bottom left when you are in the area--use the one for the player you
+    want to remove)</li>
+</ul>
+To add additional players to your area:
+<ul>
+<li>Go to your area to see the ID (number) at the bottom left.</li>
+<li>/select_area ID (but put the number instead of ID)<br/>
+Alternatively, select a smaller area within the area (see "Select the
+area" above).</li>
+<li>/add_owner ID playername SubAreaName (but put the number instead of
+ID; the SubAreaName can be the same as AreaName, but if you selected
+a smaller part of your area manually, you may want to use a different
+name to show that it uses different positions for the corners.</li>
+</ul>
+<p>
+Your server's "areas.self_protection_privilege" may differ. For example,
+it is build and you don't have the build privelege, you will getting a
+message saying "required privelege: build." You should consult the
+policies of the server you are on. You may be able to ask a moderator
+with the basic_privs privelege to type "/grant playername build" where
+"playername" is your player name.
+</p>
+<h3>Protection Blocks</h3>
+Protection blocks are an easy way to protect the area around them.
+<ul>
+<li>Protection Blocks protect your area from other players</li>
 <li>You can add other players to your protection block by name.</li>
-<li>Protected chests &amp; doors: Anyone who is on the protection block can use them.</li>
-<li>Locked chests &amp; doors: Only the person who placed them can use them, unless a key is made and given to another player (use skeleton key on a locked target to change the skeleton into a key for the target you're opening).</li>
-<li>Your bones hold your items when you die. After one hour, other players can take the items.</li>
-<li><b>Moderators</b> may not be able to recover your items regarding unprotected areas or items, since proving ownership or where items ended up may be difficult or impossible. Always make sure anything you want to keep is protected.</li>
+<li>Protected chests &amp; doors: Anyone who is on the protection block
+can use them.</li>
+<li>Locked chests &amp; doors: Only the person who placed them can use
+them, unless a key is made and given to another player (use skeleton key
+on a locked target to change the skeleton into a key for the target
+you're opening).</li>
+<li>Your bones hold your items when you die. After one hour, other
+players can take the items.</li>
+<li><b>Moderators</b> may not be able to recover your items regarding
+unprotected areas or items, since proving ownership or where items ended
+up may be difficult or impossible. Always make sure anything you want to
+keep is protected.</li>
 </ul>
 <h2>Issues</h2>
-<b>Only if your server uses ENLIVEN</b>, report issues at <a href="https://github.com/poikilos/EnlivenMinetest/issues">github.com/poikilos/EnlivenMinetest/issues</a> and include a screenshot (F12 saves screenshot to the minetest/bin folder). You can often show what node the item is by pointing at it and turning on the debug screen with F5. Otherwise, report them to a moderator of your server (if you report it to a moderator first, the issue is likely to be resolved faster).
+<b>Only if your server uses ENLIVEN</b>, report issues at
+<a href="https://github.com/poikilos/EnlivenMinetest/issues">
+github.com/poikilos/EnlivenMinetest/issues</a>
+and include a screenshot (F12 saves screenshot to the minetest/bin
+folder). You can often show what node the item is by pointing at it and
+turning on the debug screen with F5. Otherwise, report them to a
+moderator of your server (if you report it to a moderator first, the
+issue is likely to be resolved faster).
 <h2>Minetest Settings</h2>
-All of the settings below can be followed from the Minetest Settings tab (exit to menu if you are in-game, then click Settings).
+All of the settings below can be followed from the Minetest Settings tab
+(exit to menu if you are in-game, then click Settings).
 <h3>Brightness</h3>
-All Settings, Graphics, In-Game, Advanced, "Light Curve Mid Boost = 0.5" (default 0.2).
-(recommended when using Filmic Tone Mapping (In-game, Shaders, Tone
-Mapping, Filmic tone mapping), which makes dark areas almost black in
-caves where there is no moonlight. Caves are dark. Make torches.
-Changing your settings so you can mine in the dark is "cheaty." Doing
-things that are "cheaty" lead to an immature pointless game of getting
-more blocks than anyone else. Make a cool mine with cool torches.
+All Settings, Graphics, In-Game, Advanced, "Light Curve Mid Boost = 0.5"
+(default 0.2): recommended when using Filmic Tone Mapping (In-game,
+Shaders, Tone Mapping, Filmic tone mapping), which makes dark areas
+almost black in caves where there is no moonlight. Caves are dark. Make
+torches. Changing your settings so you can mine in the dark is "cheaty."
+<a name="cheaty"></a>Doing things that are "cheaty" lead to an immature
+pointless game of getting more blocks than anyone else. Make a cool mine
+with cool torches. Make an awesome railway that you and other players
+can ride (remember to protect it--see above).
 
 <h3>Screenshot Location &amp; Format</h3>
-All Settings, Graphics, Menus, then change "Screenshot folder" and "Screenshot format" if desired (recommended: make a Screenshots directory in your computer's Pictures folder and use that, and use jpg format to save space).
+All Settings, Graphics, Menus, then change "Screenshot folder" and
+"Screenshot format" if desired (recommended: make a Screenshots
+directory in your computer's Pictures folder and use that, and use jpg
+format to save space).
         </div>
     </div>
 </div>
 <h3>Feature Requests</h3>
-If you feel like something is lacking such as features found in other games, <b>and your server uses ENLIVEN</b>, consider visiting the <a href="https://github.com/poikilos/EnlivenMinetest/issues/58">Not in Minetest - Feedback Forum</a> issue on the EnlivenMinetest GitHub project. Otherwise, contact a moderator of your server (you can still visit the link to get an idea of what mods are available for Minetest servers).
+If you feel like something is lacking such as features found in other
+games, <b>and your server uses ENLIVEN</b>, consider visiting the
+<a href="https://github.com/poikilos/EnlivenMinetest/issues/58">Not in
+Minetest - Feedback Forum</a> issue on the EnlivenMinetest GitHub
+project. Otherwise, contact a moderator of your server (you can still
+visit the link to get an idea of what mods are available for Minetest
+servers).
 
 </main>
 
