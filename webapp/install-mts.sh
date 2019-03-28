@@ -5,36 +5,37 @@ echo
 echo
 echo "Starting install..."
 date
-echo "Checking if program is compiled..."
-extracted_name=linux-minetest-kit
-flag_dir="$extracted_name/mtsrc"
-if [ ! -d "$flag_dir" ]; then
-    echo "ERROR: missing $flag_dir"
-    echo "- If you do not have a minetest source directory with"
-    echo "  libraries built yet, you must add that such as by running:"
-    echo
-    echo "bash reset-minetest-install-source.sh"
-    echo
-    echo
+customDie() {
+    cat <<END
+
+ERROR:
+$@
+
+
+END
     exit 1
-fi
+}
+extracted_name=linux-minetest-kit
+flag_dir_rel="$extracted_name/mtsrc"
+flag_dir="`pwd`/$flag_dir_rel"
 pushd "$extracted_name"
 enable_client=false
 extra_options=""
 if [ "@$1" = "@--client" ]; then
-    extra_options="--client"
     enable_client=true
 fi
 flag_icon="$HOME/Desktop/org.minetest.minetest.desktop"
 flag_file="minetest/bin/minetestserver"
 if [ -f "$flag_icon" ]; then
-    extra_options="--client"
     enable_client=true
-    echo "automatically adding --client to compile since detected"
-    echo "'$flag_icon'"
-    #echo "--press Ctrl C to cancel..."
-    #sleep 2
+    echo "* automatically adding --client to compile since detected"
+    echo "  '$flag_icon'"
+    # echo "--press Ctrl C to cancel..."
+    # sleep 2
+fi
+if [ "@$enable_client" = "@true" ]; then
     flag_file="minetest/bin/minetest"
+    extra_options="--client"
 fi
 #if [ -f "$flag_file" ]; then
     #rm -f "$flag_file"
@@ -49,57 +50,87 @@ if [ -d minetest ]; then
     if [ "@$enable_client" = "@true" ]; then
         if [ ! -f minetest/bin/minetest ]; then
             enable_compile=true
-            echo "Recompiling since client was not built before..."
+            echo "* enabling compile (since no `pwd`/minetest/bin/minetest but client install is enabled)"
         fi
     fi
+else
+    echo "* enabling compile since missing `pwd`/minetest directory"
 fi
 if [ "@$enable_compile" = "@true" ]; then
+    echo "* checking if the compile library script extracted the program source yet ($flag_dir)..."
+    if [ ! -d "$flag_dir" ]; then
+        cat <<END
+ERROR: missing $flag_dir_rel
+- If you do not have an extracted minetest source directory which
+  is normally extracted by the library build script, you must add
+  that--it can be automatically added by running:
+
+  bash reset-minetest-install-source.sh
+
+
+END
+        exit 1
+    fi
+
     start=`date +%s`
     if [ -f "mtcompile-program.pl" ]; then
         # perl mtcompile-program.pl build >& program.log
-        echo "Compiling via perl..."
+        echo "Compiling via perl (this may take a while--output redirected to `pwd`/program.log)..."
         perl mtcompile-program.pl build --server $extra_options >& program.log
     else
         # NOTE: no pl in $extracted_name, assuming bash:
-        echo "Compiling via bash..."
-        bash -e mtcompile-program.sh build --server $extra_options >& program.log
+        if [ -f mtcompile-program.sh ]; then
+        echo "Compiling via bash (this may take a while--output redirected to `pwd`/program.log)..."
+            bash -e mtcompile-program.sh build --server $extra_options >& program.log
+        else
+            echo
+            echo "ERROR: Install cannot finish since there is no"
+            echo " mtcompile-program.pl nor mtcompile-program.pl"
+            echo " in the extracted $extracted_name directory."
+            echo
+            echo
+        fi
     fi
     end=`date +%s`
     compile_time=$((end-start))
-    echo "Compiling program finished in $compile_time seconds."
+    echo "Compiling the program finished in $compile_time seconds."
 else
-    echo "using existing minetest..."
+    echo "* using existing minetest..."
 fi
 if [ ! -f "$flag_file" ]; then
-    echo "ERROR: Build did not complete--missing '$flag_file'"
-    exit 1
+    customDie "The build did not complete since '$flag_file' is missing."
 fi
 dest_flag_file="$HOME/$flag_file"
 if [ -f "$dest_flag_file" ]; then
     mv -f "$dest_flag_file" "$dest_flag_file.bak"
 fi
 if [ -f "$dest_flag_file" ]; then
-    echo "ERROR: not complete since can't move old '$dest_flag_file'"
-    exit 1
+    customDie "Install is incomplete because it can't move '$dest_flag_file'."
 fi
 if [ ! -d minetest ]; then
-    echo "ERROR: can't install since missing `pwd`/minetest"
-    exit 1
+    customDie "Install is incomplete because `pwd`/minetest is missing."
 fi
-try_dest="/tank/local/owner/minetest"
-if [ -d "$try_dest" ]; then
-    echo "Installing minetest as symlink '$HOME/minetest' pointing to '$try_dest'..."
-    rsync -rt minetest/ $try_dest
+virtual_dest="$HOME/minetest"
+link_target=`readlink $virtual_dest`
+# install_dest="/tank/local/owner/minetest"
+install_dest="$virtual_dest"
+if [ ! -z "$link_target" ]; then
+    install_dest="$link_target"
+    echo "* detected that $virtual_dest is a symlink to $link_target"
+    echo "  (redirecting rsync to prevent symlink to dir conversion: installing to $install_dest"
+    echo "   and recreating symlink '$virtual_dest' pointing to '$install_dest')..."
+    #rsync -rt "minetest/" "$install_dest" || customDie "Cannot rsync files from installer data `pwd`/minetest/ to $install_dest"
     if [ ! -d "$HOME/minetest" ]; then
-        ln -s $try_dest $HOME/minetest
+        echo "* creating link to $install_dest directory as $HOME/minetest..."
+        #ln -s "$install_dest" "$HOME/minetest"
     fi
 else
     echo "Installing minetest to '$HOME'..."
-    rsync -rt minetest/ $HOME/minetest
-    if [ ! -f "$dest_flag_file" ]; then
-        echo "ERROR: not complete--couldn't create '$dest_flag_file'"
-        exit 1
-    fi
+    #rsync -rt minetest/ $install_dest || customDie "Cannot rsync files from installer data `pwd`/minetest/ to $install_dest"
+fi
+if [ ! -f "$dest_flag_file" ]; then
+    echo "ERROR: not complete--couldn't create '$dest_flag_file'"
+    #exit 1
 fi
 
 flag_dir="$HOME/minetest/games/Bucket_Game"
@@ -175,9 +206,13 @@ fi
 server_minetest_conf_dest="$HOME/minetest/games/ENLIVEN/minetest.conf"
 
 if [ -f "$server_minetest_conf_dest" ]; then
-    echo
-    echo "NOTE: $server_minetest_conf_dest will be overwritten (minetest.org releases allow you to put a world.conf file in your world, so that should be customized instead)..."
-    echo
+    cat << END
+NOTE: minetest.org releases allow you to put a world.conf file in your
+  world, so that is the file you should edit manually in your world
+  --this installer overwrites $server_minetest_conf_dest and
+  worlds/CenterOfTheSun settings (the author Poikilos' world).
+
+END
 fi
 echo "Writing '$server_minetest_conf_dest'..."
 cp -f "patches/subgame/minetest.server-example.conf" "$server_minetest_conf_dest"
