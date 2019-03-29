@@ -9,7 +9,7 @@ customDie() {
     cat <<END
 
 ERROR:
-$@
+$1
 
 
 END
@@ -119,24 +119,22 @@ if [ ! -z "$link_target" ]; then
     echo "* detected that $virtual_dest is a symlink to $link_target"
     echo "  (redirecting rsync to prevent symlink to dir conversion: installing to $install_dest"
     echo "   and recreating symlink '$virtual_dest' pointing to '$install_dest')..."
-    #rsync -rt "minetest/" "$install_dest" || customDie "Cannot rsync files from installer data `pwd`/minetest/ to $install_dest"
+    rsync -rt "minetest/" "$install_dest" || customDie "Cannot rsync files from installer data `pwd`/minetest/ to $install_dest"
     if [ ! -d "$HOME/minetest" ]; then
         echo "* creating link to $install_dest directory as $HOME/minetest..."
-        #ln -s "$install_dest" "$HOME/minetest"
+        ln -s "$install_dest" "$HOME/minetest"
     fi
 else
-    echo "Installing minetest to '$HOME'..."
-    #rsync -rt minetest/ $install_dest || customDie "Cannot rsync files from installer data `pwd`/minetest/ to $install_dest"
+    echo "Installing minetest directory to '$HOME'..."
+    rsync -rt minetest/ $install_dest || customDie "Cannot rsync files from installer data `pwd`/minetest/ to $install_dest"
 fi
 if [ ! -f "$dest_flag_file" ]; then
-    echo "ERROR: not complete--couldn't create '$dest_flag_file'"
-    #exit 1
+    customDie "ERROR: not complete--couldn't install binary as '$dest_flag_file'"
 fi
 
 flag_dir="$HOME/minetest/games/Bucket_Game"
 if [ ! -d "$flag_dir" ]; then
-    echo "ERROR: missing $flag_dir"
-    exit 1
+    customDie "ERROR: missing $flag_dir"
 fi
 if [ ! -d "$HOME/minetest/games/ENLIVEN" ]; then
     echo "Copying $flag_dir to $HOME/minetest/games/ENLIVEN..."

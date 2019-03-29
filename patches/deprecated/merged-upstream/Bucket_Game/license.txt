@@ -1,0 +1,3 @@
+see *.diff files for authors of new textures
+Anything else: CC BY-SA 4.0 Poikilos
+Notify  me if any authors are missing.

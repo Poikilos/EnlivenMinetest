@@ -1,9 +1,0 @@
-For license information  related to the  "food" and "food_basic" mods,
-see "food/rwfooddoc/rwfooddoc.txt".
-
-For license information related to these three mods, see the "LICENSE"
-files in the associated directories:
-
-coderfruit
-hudbars
-hbhunger
