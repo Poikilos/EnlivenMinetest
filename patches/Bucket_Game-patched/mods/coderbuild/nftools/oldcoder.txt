@@ -1,0 +1,43 @@
+Name:    nftools
+Source:  Fork of upstream mod - Do not replace
+License: MIT rerelease of modified WTFPL source media and code
+
+----------------------------------------------------------------------
+
+Nftools adds additional minerals and tools to minetest.
+New tools:
+* Battle Axe (low level weapon, does knockback occasionally)
+* Mace (high level weapon)
+* Scythe
+
+The Original version by Sam Hocevar adds the following minerals:
+Amber (block and "chip")
+
+Poikilos' fork is designed to compliment birthstones by making the
+following changes:
+* Changed alexandrite (overlap with birthstones):
+  to bismuth (it already looked somewhat like bismuth)
+* Changed amethyst (modified texture until looked like black opal):
+  to black opal.
+* Changed aquamarine:
+  to turquoise
+* Use standard texture naming conventions
+  (change nftools_*ore.png to nftools_mineral_*.png,
+  nftools:*_ore to nftools:stone_with_*,
+  nftools:amber to nftools:stone_with_amber)
+* The old minerals in the world converted to the one following the comma:
+  `nftools:amethyst, nftools:black_opal`
+  `nftools:alexandrite_ore, nftools:bismuth`
+  `nftools:aquamarine, nftools:turquoise`
+
+Unrelated changes:
+* Battle Axe, Mace, and Scythe textures
+* Tint of amber nodes is now amber (with yellow highlights) instead of
+  yellow. Blending is improved, and texture is 16% transparent.
+* Bismuth texture is more angular to look even more like bismuth
+* Improve ore textures (nftools_mineral_*.png)
+* fixed issue where aquamarine ore drops ore
+* removed all smelting (smelting gemstones? really? not anymore)
+  except Bismuth (formerly nftools:alexandrite)
+* Register each craftitem before referencding it as a drop.
+* Make missing recipe for quartz crystals node (displayable quartz)
