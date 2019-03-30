@@ -262,8 +262,7 @@ minetest.register_node("nftools:sunflower", {
 
 minetest.register_node("nftools:amberblock", {
     description = "Amber Block",
-    drawtype = "glasslike",
-    paramtype = "light",
+    alpha = 170,
     sunlight_propagates = true,
     tiles = {"nftools_amber_block.png"},
     is_ground_content = true,

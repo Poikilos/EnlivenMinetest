@@ -16,8 +16,8 @@
 
 -- ===================================================================
 
-local lcname     = "deer"
-local ucname     = "Deer"
+local lcname     = "elk"
+local ucname     = "Elk"
 local msname     = "codermobs_" .. lcname
 local obj_name   = "codermobs:" .. lcname
 
@@ -91,8 +91,8 @@ mobs_param.core_param = {
     water_damage  =   0          ,
 
     collisionbox  = { -0.70, -1.10, -0.70, 0.70, 0.80, 0.70 } ,
-    mesh          = msname .. "_male.b3d"                     ,
-    textures      = {{ msname .. ".png" }}               ,
+    mesh          = msname .. ".b3d"                     ,
+    textures      = {{ msname .. "_male.png" }}               ,
     visual        = "mesh"                                    ,
 
     sounds        = {
@@ -106,11 +106,11 @@ mobs_param.core_param = {
             chance = 1, min = 1, max = 1             ,
         } ,
         {
-            name   = "animal_materials:deer_horns"   ,
+            name   = "animal_materials:antlers"   ,
             chance = 1, min = 1, max = 1             ,
         } ,
         {
-            name   = "animal_materials:fur_deer"     ,
+            name   = "animal_materials:fur_elk"     ,
             chance = 4, min = 1, max = 1             ,
         } ,
         {
@@ -140,6 +140,10 @@ mobs_param.core_param = {
 -- ===================================================================
 
 codermobs.setup_mob()
+
+-- codermobs:alias_mob("codermobs:deer", "codermobs:elk")
+-- minetest.register_alias("codermobs:deer", "codermobs:elk")
+
 codermobs.log_done()
 
 -- ===================================================================
