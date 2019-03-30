@@ -92,7 +92,10 @@ mobs_param.core_param = {
 
     collisionbox  = { -0.70, -1.10, -0.70, 0.70, 0.80, 0.70 } ,
     mesh          = msname .. ".b3d"                     ,
-    textures      = {{ msname .. "_male.png" }}               ,
+    textures = {
+        { msname .. "_male.png" },
+        { msname .. "_female.png"}
+    },
     visual        = "mesh"                                    ,
 
     sounds        = {
