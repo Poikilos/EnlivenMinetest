@@ -144,9 +144,6 @@ mobs_param.core_param = {
 
 codermobs.setup_mob()
 
--- codermobs:alias_mob("codermobs:deer", "codermobs:elk")
--- minetest.register_alias("codermobs:deer", "codermobs:elk")
-
 codermobs.log_done()
 
 -- ===================================================================

@@ -30,7 +30,11 @@ dofile (mp .. "/cacodemon.lua"    )
 dofile (mp .. "/chicken.lua"      )
 dofile (mp .. "/cow.lua"          )
 dofile (mp .. "/cyberdemon.lua"   )
-dofile (mp .. "/elk.lua"         )
+
+-- dofile (mp .. "/deer.lua"      )
+dofile (mp .. "/elk.lua"          )
+mobs:alias_mob("codermobs:deer", "codermobs:elk")
+
 dofile (mp .. "/dirt_monster.lua" )
 
 dofile (mp .. "/dog.lua"          )
