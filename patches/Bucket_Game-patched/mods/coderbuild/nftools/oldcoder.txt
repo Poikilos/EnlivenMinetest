@@ -1,6 +1,6 @@
 Name:    nftools
 Source:  Fork of upstream mod - Do not replace
-License: MIT rerelease of modified WTFPL source media and code
+License: Open the LICENSE file using your favorite text editor.
 
 ----------------------------------------------------------------------
 
@@ -9,6 +9,7 @@ New tools:
 * Battle Axe (low level weapon, does knockback occasionally)
 * Mace (high level weapon)
 * Scythe
+* "Quartz Crystals" decorative node
 
 The Original version by Sam Hocevar adds the following minerals:
 Amber (block and "chip")
@@ -18,7 +19,7 @@ following changes:
 * Changed alexandrite (overlap with birthstones):
   to bismuth (it already looked somewhat like bismuth)
 * Changed amethyst (modified texture until looked like black opal):
-  to black opal.
+  to black opal
 * Changed aquamarine:
   to turquoise
 * Use standard texture naming conventions
@@ -29,6 +30,7 @@ following changes:
   `nftools:amethyst, nftools:black_opal`
   `nftools:alexandrite_ore, nftools:bismuth`
   `nftools:aquamarine, nftools:turquoise`
+  (using aliases)
 
 Unrelated changes:
 * Battle Axe, Mace, and Scythe textures
@@ -41,3 +43,4 @@ Unrelated changes:
   except Bismuth (formerly nftools:alexandrite)
 * Register each craftitem before referencding it as a drop.
 * Make missing recipe for quartz crystals node (displayable quartz)
+* Removed unused textures
