@@ -1,7 +1,0 @@
-Name:    nftools
-Source:  Fork of upstream mod - Do not replace
-License: WTFPL
-
-----------------------------------------------------------------------
-
-To be documented.
