@@ -1,0 +1,610 @@
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/: LICENSE-Poikilos.md
+diff -r -u /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/coderbuild/nftools/depends.txt /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/depends.txt
+--- /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/coderbuild/nftools/depends.txt	2018-12-16 18:26:08.000000000 -0500
++++ /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/depends.txt	2019-03-30 06:19:16.012557710 -0400
+@@ -1 +1,2 @@
+ default
++quartz?
+diff -r -u /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/coderbuild/nftools/init.lua /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/init.lua
+--- /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/coderbuild/nftools/init.lua	2019-03-30 04:40:17.000000000 -0400
++++ /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/init.lua	2019-03-30 14:42:27.474764586 -0400
+@@ -1,7 +1,7 @@
+ -- ===================================================================
+ -- Light.
+ 
+-minetest.register_node ("nftools:light", {
++minetest.register_node("nftools:light", {
+     drawtype          = "glasslike"              ,
+     tiles             = { "nftools_debug.png" }  ,
+     is_ground_content = true                     ,
+@@ -18,7 +18,7 @@
+ -- ===================================================================
+ -- Mese Pickaxe.
+ 
+-minetest.register_tool ("nftools:pick_mese", {
++minetest.register_tool("nftools:pick_mese", {
+     description = "Mese Pickaxe with light",
+     inventory_image = "nftools_mesepick.png",
+     wield_image = "nftools_mesepick_wield.png",
+@@ -33,7 +33,7 @@
+     },
+ })
+ 
+-minetest.register_craft ({
++minetest.register_craft({
+     output = 'nftools:pick_mese',
+     recipe = {
+         {'default:torch'},
+@@ -44,7 +44,7 @@
+ -- ===================================================================
+ -- Stool.
+ 
+-minetest.register_node ("nftools:stool",{
++minetest.register_node("nftools:stool",{
+     description = "Wooden Stool",
+     tiles = {"nftools_stool.png"},
+     drop = 'nftools:stool',
+@@ -67,7 +67,7 @@
+ -- ===================================================================
+ -- Quartz crystals.
+ 
+-minetest.register_node ("nftools:quartz_crystals", {
++minetest.register_node("nftools:quartz_crystals", {
+     description = "Quartz Crystals",
+     tiles = {"nftools_quartz_crystal.png"},
+     is_ground_content = true,
+@@ -96,149 +96,149 @@
+ -- ===================================================================
+ -- Ore.
+ 
+-minetest.register_ore ({
++minetest.register_ore({
+     ore_type       = "scatter",
+-    ore            = "nftools:alexandrite_ore",
++    ore            = "nftools:stone_with_bismuth",
+     wherein        = "default:stone",
+-    clust_scarcity = 24*24*24,
+-    clust_num_ores = 27,
+-    clust_size     = 6,
+-    y_max          =    -64,
++		clust_scarcity = 24*24*24,
++		clust_num_ores = 4,
++		clust_size     = 3,
++    y_max          = -64,
+     y_min          = -31000,
+     flags          = "absheight",
+ })
+ 
+ -- ===================================================================
+ 
+-minetest.register_ore ({
++minetest.register_ore({
+     ore_type       = "scatter",
+-    ore            = "nftools:amber",
++    ore            = "nftools:stone_with_amber",
+     wherein        = "default:stone",
+-    clust_scarcity = 24*24*24,
+-    clust_num_ores = 27,
+-    clust_size     = 6,
+-    y_max          =    -64,
+-    y_min          = -31000,
++    clust_scarcity = 48*48*48,
++    clust_num_ores = 1,
++    clust_size     = 2,
++    y_max          = -8,
++    y_min          = -64,
+     flags          = "absheight",
+ })
+ 
+ -- ===================================================================
+ 
+-minetest.register_ore ({
++minetest.register_ore({
+     ore_type       = "scatter",
+-    ore            = "nftools:amethyst_ore",
++    ore            = "nftools:stone_with_blackopal",
+     wherein        = "default:stone",
+-    clust_scarcity = 24*24*24,
+-    clust_num_ores = 27,
+-    clust_size     = 6,
+-    y_max          =    -64,
+-    y_min          = -31000,
+-    flags          = "absheight",
++    clust_scarcity = 48*48*48,
++    clust_num_ores = 1,
++    clust_size     = 2,
++    y_max          = -128,
++    y_min          = -256,
+ })
+ 
+ -- ===================================================================
+ 
+-minetest.register_ore ({
++minetest.register_ore({
+     ore_type       = "scatter",
+-    ore            = "nftools:aquamarine_ore",
++    ore            = "nftools:stone_with_turquoise",
+     wherein        = "default:stone",
+-    clust_scarcity = 13*13*13,
+-    clust_num_ores = 5,
++    clust_scarcity = 24*24*24,
++    clust_num_ores = 3,
+     clust_size     = 3,
+-    y_max          =  -5,
+-    y_min          = -40,
++    y_max          = -8,
++    y_min          = -64,
+     flags          = "absheight",
+ })
+ 
+ -- ===================================================================
+--- Alexandrite
++-- Bismuth (formerly Alexandrite)
++
++minetest.register_alias("nftools:alexandrite_ore", "nftools:stone_with_bismuth")
++minetest.register_alias("nftools:alexandrite", "nftools:bismuth")
++
++minetest.register_craftitem("nftools:bismuth", {
++    description = "Bismuth",
++    inventory_image = "nftools_bismuth.png",
++})
+ 
+-minetest.register_node ("nftools:alexandrite_ore", {
+-    description = "Alexandrite Ore",
+-    tiles = {"nftools_alexandriteore.png"},
++minetest.register_node("nftools:stone_with_bismuth", {
++    description = "Raw Bismuth",
++    tiles = {"default_stone.png^nftools_mineral_bismuth.png"},
+     is_ground_content = true,
+     groups = {cracky=1},
+-    drop = "nftools:alexandrite",
++    drop = "nftools:stone_with_bismuth",
+ })
+ 
+-minetest.register_craftitem ("nftools:alexandrite", {
+-    description = "Alexandrite",
+-    inventory_image = "nftools_alexandrite.png",
++
++-- ===================================================================
++-- Smelting (only metals)
++
++minetest.register_craft ({
++    type = "cooking",
++    output = "nftools:bismuth",
++    recipe = "nftools:stone_with_bismuth",
+ })
+ 
+ -- ===================================================================
+ -- Amber
+ 
+-minetest.register_node ("nftools:amber", {
+-    description = "Amber",
+-    tiles = {"nftools_amber.png"},
++minetest.register_alias("nftools:amber", "nftools:stone_with_amber")
++-- (formerly called amber but dropped chip; use conventions instead)
++
++minetest.register_node("nftools:stone_with_amber", {
++    description = "Rough Amber",
++    tiles = {"default_stone.png^nftools_mineral_amber.png"},
+     is_ground_content = true,
+     groups = {cracky=1},
+     drop = "nftools:amber_chip",
+ })
+ 
+-minetest.register_craftitem ("nftools:amber_chip", {
+-    description = "Amber Chip",
++minetest.register_craftitem("nftools:amber_chip", {
++    description = "Amber",
+     inventory_image = "nftools_amberchip.png",
+ })
+ 
+ -- ===================================================================
+--- Aquamarine
++-- Turquoise (formerly Aquamarine)
++
++minetest.register_alias("nftools:aquamarine_ore", "nftools:stone_with_turquoise")
++minetest.register_alias("nftools:aquamarine", "nftools:turquoise")
+ 
+-minetest.register_node ("nftools:aquamarine_ore", {
+-    description = "Aquamarine Ore",
+-    tiles = {"nftools_aquamarineore.png"},
++minetest.register_node("nftools:stone_with_turquoise", {
++    description = "Rough Turquoise",
++    tiles = {"default_stone.png^nftools_mineral_turquoise.png"},
+     is_ground_content = true,
+     groups = {cracky=1},
+-    drop = "nftools:aquamarine_ore",
++    drop = "nftools:turquoise",
+ })
+ 
+-minetest.register_craftitem ("nftools:aquamarine", {
+-    description = "Aquamarine",
+-    inventory_image = "nftools_aquamarine.png",
++minetest.register_craftitem("nftools:turquoise", {
++    description = "Turquoise",
++    inventory_image = "nftools_turquoise.png",
+ })
+ 
+ -- ===================================================================
+--- Smelting
++-- Black Opal (formerly Amethyst)
+ 
+-minetest.register_craft ({
+-    type = "cooking",
+-    output = "nftools:aquamarine",
+-    recipe = "nftools:aquamarine_ore",
+-})
+-
+-minetest.register_craft ({
+-    type = "cooking",
+-    output = "nftools:alexandrite",
+-    recipe = "nftools:alexandrite_ore",
+-})
++minetest.register_alias("nftools:amethyst_ore", "nftools:stone_with_blackopal")
++minetest.register_alias("nftools:amethyst", "nftools:blackopal")
+ 
+-minetest.register_craft ({
+-    type = "cooking",
+-    output = "nftools:amethyst",
+-    recipe = "nftools:amethyst_ore",
++minetest.register_craftitem("nftools:blackopal", {
++    description = "Black Opal",
++    inventory_image = "nftools_blackopal.png",
+ })
+ 
+--- ===================================================================
+--- Amethyst
+-
+-minetest.register_node ("nftools:amethyst_ore", {
+-    description = "Amethyst Ore",
+-    tiles = {"nftools_amethystore.png"},
++minetest.register_node("nftools:stone_with_blackopal", {
++    description = "Rough Black Opal",
++    tiles = {"default_stone.png^nftools_mineral_blackopal.png"},
+     is_ground_content = true,
+     groups = {cracky=1},
+-    drop = "nftools:amethyst",
+-})
+-
+-minetest.register_craftitem ("nftools:amethyst", {
+-    description = "Amethyst",
+-    inventory_image = "nftools_amethyst.png",
++    drop = "nftools:blackopal",
+ })
+ 
+ -- ===================================================================
+ -- Sunflower.
+ 
+-minetest.register_node ("nftools:sunflower", {
++minetest.register_node("nftools:sunflower", {
+     description = "Sunflower",
+     drawtype = "plantlike",
+     visual_scale = 1.5,
+@@ -257,9 +257,60 @@
+ })
+ 
+ -- ===================================================================
++-- Blocks
++
++
++minetest.register_node("nftools:amberblock", {
++    description = "Amber Block",
++    alpha = 170,
++    sunlight_propagates = true,
++    tiles = {"nftools_amber_block.png"},
++    is_ground_content = true,
++    groups = {cracky=1},
++    drop = "nftools:amberblock",
++})
++
++local function registerblockrecipe(name, blockname)
++    minetest.register_craft({
++        output = blockname,
++        recipe = {{name, name, name},
++          {name, name, name},
++          {name, name, name}
++        }
++    })
++    minetest.register_craft({
++        output = name..' 9',
++        recipe = {
++          {blockname},
++        }
++    })
++end
++
++registerblockrecipe('nftools:amber_chip', 'nftools:amberblock')
++
++if minetest.get_modpath("quartz") ~= nil then
++  minetest.register_craft({
++    output = "nftools:quartz_crystals",
++    recipe = {
++      {'', '', ''},
++      {'', 'quartz:quartz_crystal', ''},
++      {'quartz:quartz_crystal', 'nftools:amberblock', 'quartz:quartz_crystal'}
++    }
++  
++  })
++
++  minetest.register_craft({
++    output = "quartz:quartz_crystal"..' 3',
++    recipe = {
++      {"nftools:quartz_crystals"},
++    }
++  })
++end
++
++-- ===================================================================
+ -- Scythe
+ 
+-minetest.register_tool ("nftools:scythe", {
++minetest.register_tool("nftools:scythe", {
+     description = "Scythe",
+     inventory_image = "nftools_tool_scythe.png",
+     tool_capabilities = {
+@@ -272,7 +323,7 @@
+     }
+ })
+ 
+-minetest.register_craft ({
++minetest.register_craft({
+     output = 'nftools:scythe',
+     recipe = {
+         {'default:steel_ingot', 'default:steel_ingot', 'default:steel_ingot'},
+@@ -284,7 +335,7 @@
+ -- ===================================================================
+ -- Mace
+ 
+-minetest.register_tool ("nftools:mace", {
++minetest.register_tool("nftools:mace", {
+     description = "Mace",
+     inventory_image = "nftools_tool_mace.png",
+     tool_capabilities = {
+@@ -297,7 +348,7 @@
+     }
+ })
+ 
+-minetest.register_craft ({
++minetest.register_craft({
+     output = 'nftools:mace',
+     recipe = {
+         {'default:obsidian_shard', 'default:steel_ingot', 'default:obsidian_shard'},
+@@ -309,7 +360,7 @@
+ -- ===================================================================
+ -- Battle-axe
+ 
+-minetest.register_tool ("nftools:battleaxe", {
++minetest.register_tool("nftools:battleaxe", {
+     description = "Battle Axe",
+     inventory_image = "nftools_tool_battleaxe.png",
+     tool_capabilities = {
+@@ -322,7 +373,7 @@
+     }
+ })
+ 
+-minetest.register_craft ({
++minetest.register_craft({
+     output = 'nftools:battleaxe',
+     recipe = {
+         {'default:cobble', 'default:cobble', 'default:cobble'},
+diff -r -u /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/coderbuild/nftools/LICENSE /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/LICENSE
+--- /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/coderbuild/nftools/LICENSE	2013-01-28 08:37:40.000000000 -0500
++++ /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/LICENSE	2019-03-30 19:10:10.932746250 -0400
+@@ -1,13 +1,63 @@
+-            DO WHAT THE F*CK YOU WANT TO PUBLIC LICENSE
+-                    Version 2, December 2004
++# nftools license and author info
+ 
+- Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
+ 
+- Everyone is permitted to copy and distribute verbatim or modified
+- copies of this license document, and changing it is allowed as long
+- as the name is changed.
++## Minerals
++Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>, Poikilos (modified by)
++Creative Commons Zero
++<https://creativecommons.org/share-your-work/public-domain/cc0/>
+ 
+-            DO WHAT THE F*CK YOU WANT TO PUBLIC LICENSE
+-   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
++## Stool
++photo-326311 by Pixabay, made into texture by Poikilos
++Creative Commons Zero
++(replaces old stool texture)
+ 
+-  0. You just DO WHAT THE F*CK YOU WANT TO.
++
++## Weapons
++
++### Mace model & image (only rendered, retouched image is included)
++Creative Commons Attribution 3.0
++You can use this model for any porposes according to the following
++conditions:
++You MUST give attribution/credit to
++antonis <https://www.blendswap.com/blends/view/73677>,
++Poikilos (relit, rendered, & retouched by)
++
++### Axe model & image (only rendered, retouched  image is included)
++Creative Commons Attribution 3.0
++You can use this model for any porposes according to the following
++conditions:
++You MUST give attribution/credit to
++izuzf <https://www.blendswap.com/blends/view/58591>,
++Poikilos (relit, rendered, & retouched by)
++
++### Scythe model & image (only rendered, retouched image is included)
++Creative Commons Attribution 3.0
++You can use this model for any porposes according to the following
++conditions:
++You MUST give attribution/credit to
++GemmaMuhammad <https://www.blendswap.com/blends/view/60556>
++Poikilos (relit, rendered, & retouched by)
++
++
++## Code
++MIT License
++Copyright 2004 Sam Hocevar, 2019 OldCoder, 2019 Poikilos
++
++Permission is hereby granted, free of charge, to any person obtaining a
++copy of this software and associated documentation files (the
++"Software"), to deal in the Software without restriction, including
++without limitation the rights to use, copy, modify, merge, publish,
++distribute, sublicense, and/or sell copies of the Software, and to
++permit persons to whom the Software is furnished to do so, subject to
++the following conditions:
++
++The above copyright notice and this permission notice shall be included
++in all copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
++OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
++MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
++IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
++CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
++TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
++SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+diff -r -u /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/coderbuild/nftools/oldcoder.txt /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/oldcoder.txt
+--- /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/coderbuild/nftools/oldcoder.txt	2019-02-04 17:03:48.000000000 -0500
++++ /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/oldcoder.txt	2019-03-30 19:12:59.922708947 -0400
+@@ -1,7 +1,46 @@
+ Name:    nftools
+ Source:  Fork of upstream mod - Do not replace
+-License: WTFPL
++License: Open the LICENSE file using your favorite text editor.
+ 
+ ----------------------------------------------------------------------
+ 
+-To be documented.
++Nftools adds additional minerals and tools to minetest.
++New tools:
++* Battle Axe (low level weapon, does knockback occasionally)
++* Mace (high level weapon)
++* Scythe
++* "Quartz Crystals" decorative node
++
++The Original version by Sam Hocevar adds the following minerals:
++Amber (block and "chip")
++
++Poikilos' fork is designed to compliment birthstones by making the
++following changes:
++* Changed alexandrite (overlap with birthstones):
++  to bismuth (it already looked somewhat like bismuth)
++* Changed amethyst (modified texture until looked like black opal):
++  to black opal
++* Changed aquamarine:
++  to turquoise
++* Use standard texture naming conventions
++  (change nftools_*ore.png to nftools_mineral_*.png,
++  nftools:*_ore to nftools:stone_with_*,
++  nftools:amber to nftools:stone_with_amber)
++* The old minerals in the world converted to the one following the comma:
++  `nftools:amethyst, nftools:black_opal`
++  `nftools:alexandrite_ore, nftools:bismuth`
++  `nftools:aquamarine, nftools:turquoise`
++  (using aliases)
++
++Unrelated changes:
++* Battle Axe, Mace, and Scythe textures
++* Tint of amber nodes is now amber (with yellow highlights) instead of
++  yellow. Blending is improved, and texture is 16% transparent.
++* Bismuth texture is more angular to look even more like bismuth
++* Improve ore textures (nftools_mineral_*.png)
++* fixed issue where aquamarine ore drops ore
++* removed all smelting (smelting gemstones? really? not anymore)
++  except Bismuth (formerly nftools:alexandrite)
++* Register each craftitem before referencding it as a drop.
++* Make missing recipe for quartz crystals node (displayable quartz)
++* Removed unused textures
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools: src
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/coderbuild/nftools/textures: nftools_alexandriteore.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/coderbuild/nftools/textures: nftools_alexandrite.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/textures: nftools_amber_block.png
+Binary files /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/coderbuild/nftools/textures/nftools_amberchip.png and /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/textures/nftools_amberchip.png differ
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/coderbuild/nftools/textures: nftools_amber.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/coderbuild/nftools/textures: nftools_amethystore.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/coderbuild/nftools/textures: nftools_amethyst.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/coderbuild/nftools/textures: nftools_aquamarineore.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/coderbuild/nftools/textures: nftools_aquamarine.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/textures: nftools_bismuth.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/textures: nftools_blackopal.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/textures: nftools_debug.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/textures: nftools_mesepick.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/textures: nftools_mesepick_wield.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/textures: nftools_mineral_amber.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/textures: nftools_mineral_bismuth.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/textures: nftools_mineral_blackopal.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/textures: nftools_mineral_turquoise.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/textures: nftools_stool.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/textures: nftools_tool_battleaxe.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/textures: nftools_tool_mace.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/textures: nftools_tool_scythe.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/coderbuild/nftools/textures: nftools_turquoise.png
+diff -r -u /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/codermobs/codermobs/animal_materials.lua /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/codermobs/codermobs/animal_materials.lua
+--- /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/codermobs/codermobs/animal_materials.lua	2019-03-30 13:46:31.175551202 -0400
++++ /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/codermobs/codermobs/animal_materials.lua	2019-03-30 14:18:13.693291750 -0400
+@@ -295,6 +295,7 @@
+ 	stack_max=10
+ })
+ 
++
+ minetest.register_craftitem(":animal_materials:coat_cattle", {
+ 	description = S("Cattle coat"),
+ 	image = "animal_materials_cattle_coat.png",
+@@ -305,11 +306,12 @@
+ -- horns
+ --
+ 
+-minetest.register_craftitem(":animal_materials:deer_horns", {
+-	description = S("Deer horns"),
++minetest.register_craftitem(":animal_materials:antlers", {
++	description = S("Antlers"),
+ 	image = "animal_materials_deer_horns.png",
+ 	stack_max=20
+ })
++minetest.register_alias("animal_materials:deer_horns", "animal_materials:antlers")
+ 
+ minetest.register_craftitem(":animal_materials:ivory", {
+ 	description = S("Ivory"),
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/codermobs/codermobs: deer.lua
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/codermobs/codermobs: elk.lua
+diff -r -u /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/codermobs/codermobs/init.lua /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/codermobs/codermobs/init.lua
+--- /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/codermobs/codermobs/init.lua	2019-03-28 06:55:06.000000000 -0400
++++ /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/codermobs/codermobs/init.lua	2019-03-30 15:05:28.409523186 -0400
+@@ -30,7 +30,11 @@
+ dofile (mp .. "/chicken.lua"      )
+ dofile (mp .. "/cow.lua"          )
+ dofile (mp .. "/cyberdemon.lua"   )
+-dofile (mp .. "/deer.lua"         )
++
++-- dofile (mp .. "/deer.lua"      )
++dofile (mp .. "/elk.lua"          )
++mobs:alias_mob("codermobs:deer", "codermobs:elk")
++
+ dofile (mp .. "/dirt_monster.lua" )
+ 
+ dofile (mp .. "/dog.lua"          )
+diff -r -u /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/codermobs/codermobs/LICENSE /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/codermobs/codermobs/LICENSE
+--- /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/codermobs/codermobs/LICENSE	2019-03-28 06:59:48.000000000 -0400
++++ /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/codermobs/codermobs/LICENSE	2019-03-30 13:31:24.119442109 -0400
+@@ -11,7 +11,14 @@
+ 
+ ----------------------------------------------------------------------
+ 
+-Code and media for Sapier's "animal_materials", "deer", and "ostrich":
++Pixel Art Elk texture:
++CC BY SA 3.0 copyright Sapier, Polikilos (skinned by)
++HD (video-based) and Lo-fi (16-color video-based) Elk Textures:
++based on Elk video "Elk.webm.360p.vp9" (CC BY 2.0 Generic)
++Stephen Baker [BLM/Oregon](blm.gov/yg5c).jpg, Poikilos (skinned by)
++
++Other code and media for Sapier's "animal_materials", "elk"
++(formerly "deer"), and "ostrich":
+ See the associated Lua source files.
+ 
+ ----------------------------------------------------------------------
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/codermobs/codermobs: models
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/codermobs/codermobs: src
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/codermobs/codermobs/textures: animal_materials_antlers.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-basis/mods/codermobs/codermobs/textures: animal_materials_deer_horns.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/codermobs/codermobs/textures: codermobs_elk_female.png
+Only in /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/codermobs/codermobs/textures: codermobs_elk_male.png
