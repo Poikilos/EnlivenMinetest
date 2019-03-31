@@ -222,6 +222,85 @@ project. Otherwise, contact a moderator of your server (you can still
 visit the link to get an idea of what mods are available for Minetest
 servers).
 
+<h3>Modding</h3>
+<p>Modding is easy in Minetest, because it is designed to be modded.
+The Minetest client downloads the "game" (collection of mods and
+modpacks) each time you connect to a server, so you don't have to
+install anything yourself. Automatic "game" downloading also means that
+each server can be very different, but load quickly, offering you many
+experiences to try easily.</p>
+<p>Examples are the best way to get started. Since mods are scripted in
+Lua, every mod is open source. Almost every one is released under
+some sort of public license as well, which usually allows you to modify,
+reuse, and redistribute the code (usually under the condition that you
+credit the original author). The license file sometimes has no file
+extension, so you may have to pick a program to open it in Windows.
+You can open it (or any other text file) in Notepad. However, Notepad++
+is recommended since there is more than one undo step. For Lua
+programming, you can install ZeroBrane Studio (which is free) then
+install
+"<a href="https://github.com/poikilos/MinetestIDE">MinetestIDE</a>"
+which patches ZeroBrane Studio to provide code completion
+(a form of autocomplete with API usage tips for coding).
+</p>
+<p>
+API means application programming interface. It is just the set of
+classes and/or functions you use to change the behavior of an existing
+program such as Minetest. Mods that add significant features, such as
+Mobs Redo or codermobs, usually have their own API. You can see all of
+the functions in the api.lua file if the author has followed naming
+conventions and placed public features there. In addition, many mods
+have a api.txt or similarly named files. You can start by opening up
+your minetest directory on your computer (after installing or otherwise
+installing Minetest) and doing a search for api, or just open the
+following files depending on what you want to do:<br/>
+<ul>
+<li>minetest/doc/menu_lua_api.txt</li>
+<li>minetest/doc/fst_api.txt</li>
+<li>minetest/doc/lua_api.txt</li>
+<li>minetest/doc/client_lua_api.txt</li>
+<li>minetest/games/Bucket_Game/mods/codercore/areas/api.md</li>
+<li>minetest/games/Bucket_Game/mods/codercore/craft_guide/api_craft_guide.lua</li>
+<li>minetest/games/Bucket_Game/mods/codermobs/mobs/api_new.txt</li>
+<li>minetest/games/Bucket_Game/mods/codermobs/mobs/api.txt</li>
+<li>minetest/games/Bucket_Game/mods/coderbuild/hopper/api.txt</li>
+<li>minetest/games/Bucket_Game/mods/coderbuild/magmatools/textures/magmatools_tool_magmapick.png</li>
+<li>minetest/games/Bucket_Game/mods/coderbuild/castle/castle_gates/api.txt</li>
+<li>minetest/games/Bucket_Game/mods/coderbuild/ambience/api.txt</li>
+<li>minetest/games/Bucket_Game/mods/coderbuild/bonemeal/api.txt</li>
+<li>minetest/games/Bucket_Game/mods/coderbuild/flowerpot/api.md</li>
+<li>minetest/games/Bucket_Game/mods/coderfood/farming/api.txt</li>
+</ul>
+Remember, you can always look at examples as well. You can find a mod
+that does something similar to what you want, looking at all of the .lua
+files in a mod like that may help.
+</p>
+<h4>Changing Existing Mods</h4>
+<p>A public license allows you to change and rerelease the mod,
+in addition to just being "open source." Many
+mods are on GitHub, GitLab, or notabug.org to allow easy
+forking. Forking is when someone other than the original author
+makes improvements or fixes (often forking implies keeping it separate
+and not having your changes pulled in to the author's version). If the
+changes
+are applicable to everyone, you would usually fork it by clicking "fork"
+which allows you to download your own copy of the mod with "GitHub
+Desktop" for GitHub on Windows or a public licensed program like "Git
+Cola." Then you would make or paste in your changes, go back to the
+program and stage all tracked and untracked changes (not required on
+GitHub Desktop), name the commit, click commit, then click push. Then
+you can go back to the repository online where you got the mod and click
+"pull request" comparing across forks to the "head" from your
+repository, allowing the owner to "accept" the request or comment on
+changes you need to make or regretfully decline. If the owner declines,
+you can always keep your repository and use and distribute your version
+of the mod if the license allows that. In some cases, you can instead
+just make a mod that overrides an existing mod--that would require
+putting the mod in depends.txt, clearing crafting recipes, and other
+similar steps--see <a href="https://github.com/poikilos/homedecor_ua">
+github.com/poikilos/homedecor_ua</a> for an example.
+</p>
+
 </main>
 
 <footer>
