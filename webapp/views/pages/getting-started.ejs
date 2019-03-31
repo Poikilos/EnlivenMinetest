@@ -223,6 +223,11 @@ visit the link to get an idea of what mods are available for Minetest
 servers).
 
 <h3>Modding</h3>
+<p>There are other modding books out there, but they often just rehash
+the documentation of Minetest without explaining much. The Modding
+section of the ENLIVEN Getting Started guide is here to help explain
+some of the assumptions and jargon.
+</p>
 <p>Modding is easy in Minetest, because it is designed to be modded.
 The Minetest client downloads the "game" (collection of mods and
 modpacks) each time you connect to a server, so you don't have to
@@ -236,7 +241,7 @@ games that differ drastically in gameplay can be made if one heavily
 edits or replaces mods that provide core functionality. Must of
 Minetest's core functionality is written in Lua.
 </p>
-<p>Examples are the best way to get started. Since mods are scripted in
+<p>Examples are a good way to get started. Since mods are scripted in
 Lua, every mod is open source. Almost every one is released under
 some sort of public license as well, which usually allows you to modify,
 reuse, and redistribute the code (usually under the condition that you
@@ -365,7 +370,10 @@ a cluster). Generally, the ore is a node (drawn as a block) and the gem
 or metal is a craftitem (drawn as a sprite). You normally should set the
 drop of the ore to a separate craftitem (however, if it is something
 you have to smelt such as a metal, you could drop the ore node, then
-provide a "cooking" crafting recipe to get the metal).
+provide a "cooking" crafting recipe to get the metal).</p>
+<p>the absheight option should only be used for ores that should appear
+in mountains. It forces an ore that occurs in a negative range to also
+appear in the corresponding positive range.</p>
 </main>
 
 <footer>
