@@ -377,7 +377,18 @@ you have to smelt such as a metal, you could drop the ore node, then
 provide a "cooking" crafting recipe to get the metal).</p>
 <p>the absheight option should only be used for ores that should appear
 in mountains. It forces an ore that occurs in a negative range to also
-appear in the corresponding positive range.</p>
+appear in the corresponding positive range. Another confusing parameter
+of the register_ore function is y_min.
+Most programmers are more concerned with y_max, which is how deep a
+player must dig to have a chance of mining the ore.
+y_min is the value below which the
+ore stops. Sometimes people set this to a very low number that normally
+won't be reached, such as -31000. This number may be useful for certain
+cases where an ore shouldn't occur below a certain point, such as amber
+(all nodes generated in this way are called ores in Minetest even if
+they are not technically a metal or mineral ore and even if they
+cannot be smelted nor drop a mineral--they still use the
+minetest.register_ore function).</p>
 </main>
 
 <footer>
