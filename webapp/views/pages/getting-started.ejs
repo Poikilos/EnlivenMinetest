@@ -229,13 +229,20 @@ modpacks) each time you connect to a server, so you don't have to
 install anything yourself. Automatic "game" downloading also means that
 each server can be very different, but load quickly, offering you many
 experiences to try easily.</p>
+<p>Anyone can make a "game" using Minetest by
+writing mods or combining existing mods. Most "games" are based on
+games that are included in the Minetest/games directory--however, some
+games that differ drastically in gameplay can be made if one heavily
+edits or replaces mods that provide core functionality. Must of
+Minetest's core functionality is written in Lua.
+</p>
 <p>Examples are the best way to get started. Since mods are scripted in
 Lua, every mod is open source. Almost every one is released under
 some sort of public license as well, which usually allows you to modify,
 reuse, and redistribute the code (usually under the condition that you
 credit the original author). The license file sometimes has no file
 extension, so you may have to pick a program to open it in Windows.
-You can open it (or any other text file) in Notepad. However, Notepad++
+You can open it (or any other text file) in Notepad. However, Geany
 is recommended since there is more than one undo step. For Lua
 programming, you can install ZeroBrane Studio (which is free) then
 install
@@ -243,6 +250,25 @@ install
 which patches ZeroBrane Studio to provide code completion
 (a form of autocomplete with API usage tips for coding).
 </p>
+<p>Every mod, at minimum, must have a file called init.lua. You
+should also add a description.txt describing it, a README.md or other
+readme file explaining more, and a LICENSE.md or other license file
+MIT License is used for Minetest itself, that is recommended. Some
+people consider using GPL v3 to prevent the program from being used
+on popular mobile devices, since the GPL v3 specifies that a user must
+be able to not only reprogram but also replace the program with their
+recompiled version--this may not be possible if your version shares a
+namespace and key with the application you are changing, and you may not
+have the same connectivity or functionality without using the same key.
+Therefore, components or mods using GPL v3 may prevent their inclusion
+into future version of Minetest "games", as several versions of
+Minetest (often by other names) are on Google Play and the iOS App
+Store.
+You can find the MIT License online and paste it into Notepad or Geany.
+Be sure to fill
+in your name and the year you created the mod. Having a license will
+make sure others feel safe using your mod and redistributing it if
+that's what you want. </p>
 <p>
 API means application programming interface. It is just the set of
 classes and/or functions you use to change the behavior of an existing
@@ -253,7 +279,8 @@ conventions and placed public features there. In addition, many mods
 have a api.txt or similarly named files. You can start by opening up
 your minetest directory on your computer (after installing or otherwise
 installing Minetest) and doing a search for api, or just open the
-following files depending on what you want to do:<br/>
+following files depending on what you want to do:
+</p>
 <ul>
 <li>minetest/doc/menu_lua_api.txt</li>
 <li>minetest/doc/fst_api.txt</li>
@@ -271,6 +298,7 @@ following files depending on what you want to do:<br/>
 <li>minetest/games/Bucket_Game/mods/coderbuild/flowerpot/api.md</li>
 <li>minetest/games/Bucket_Game/mods/coderfood/farming/api.txt</li>
 </ul>
+<p>
 Remember, you can always look at examples as well. You can find a mod
 that does something similar to what you want, looking at all of the .lua
 files in a mod like that may help.
@@ -300,7 +328,44 @@ putting the mod in depends.txt, clearing crafting recipes, and other
 similar steps--see <a href="https://github.com/poikilos/homedecor_ua">
 github.com/poikilos/homedecor_ua</a> for an example.
 </p>
-
+<h4>Craftitems and Nodes</h4>
+A node is drawn as a block, 3d mesh, or other drawtype and
+is placeable. A craftitem can't be placed, so the only way to get rid
+of it is to drop it, and like other things dropped it will become a
+floating sprite waiting to be picked up by clicking. There are also
+other types of entities in Minetest such as mobs and particles.
+All items that aren't nodes are called craftitems even if they aren't
+used in recipes. You can use the name of a node or craftitem when
+defining a crafting recipe. However, you must depend on the mod being
+used to ensure that it is loaded before your mod, if the item comes
+from a different mod. You can depend on another mod by adding its name
+to the depends.txt file in your mod.
+<h4>Mobs</h4>
+Creating passive or hostile Non-Player Characters or Enemy Characters
+requires a mob api such as Simple Mobs, Mobs Redo, or codermobs
+which share anestry in that order. Codermobs is included in Bucket_Game
+and hence new versions of ENLIVEN. Some other mob frameworks include:
+mobf, Jordan4Ibanez' OpenAI, and others.
+<h4>Creating New Ores</h4>
+Creating new ores or other blocks may be confusing after you learn the
+API. If you want about 48 blocks before you find another cluster of
+your ore, then the clust_scarcity should be 48*48*48 since the game is
+3D. The chance of finding a cluster is 1 out of the clust_scarcity
+number. The cluster size (clust_size) only affects the size of the
+"vein" (though technically there are multiple shapes of clusters allowed
+and vein is not recommended since it is hundreds of times slower).
+Minetest uses the generic term cluster to refer to all patterns of ore
+deposits. The number of ores in the cluster is determined by
+clust_num_ores. If your clust_size is 3, then that would be a 3*3*3
+cube (but you just specify 3, not 27 there) and the maximum number of
+ores you could set for clust_num_ores is 27, though that is not
+recommended because then the person would find a 3*3*3 area that is
+completely ore (that would give the person 27 ore each time they found
+a cluster). Generally, the ore is a node (drawn as a block) and the gem
+or metal is a craftitem (drawn as a sprite). You normally should set the
+drop of the ore to a separate craftitem (however, if it is something
+you have to smelt such as a metal, you could drop the ore node, then
+provide a "cooking" crafting recipe to get the metal).
 </main>
 
 <footer>
