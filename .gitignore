@@ -1,5 +1,6 @@
 *.pyc
 *.kate-swp
+*.blend1
 /nohup.out
 /webapp/linux-minetest-kit.zip
 /webapp/linux-minetest-kit
@@ -8,4 +9,3 @@
 /webapp/program.log
 /webapp/WIP
 /webapp/debug.txt
-/patches/Bucket_Game-patched/mods/codermobs/codermobs/src/elk.blend1
