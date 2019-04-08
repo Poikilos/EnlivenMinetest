@@ -165,7 +165,7 @@ else
     # cp -f "$flag_dir/mods/LICENSE" "$HOME/minetest/games/ENLIVEN/mods/LICENSE"
 fi
 popd
-cd ..
+pushd ..
 src="patches/subgame/menu"
 dst="$HOME/minetest/games/ENLIVEN/menu"
 echo "updating '$dst' from '$src/'..."
@@ -293,6 +293,16 @@ if [ "@$enable_client" = "@true" ]; then
         fi
     fi
 fi
+popd
+settings_dump="`pwd`/settings-dump.txt"
+settings_types_list="`pwd`/settingstypes-list.txt"
+echo "Creating $settings_dump..."
+#grep -r `pwd`/linux-minetest-kit/minetest/games/Bucket_Game -e "setting_get" > $settings_dump
+pushd linux-minetest-kit/minetest/games
+grep -r Bucket_Game -e "setting_get" > $settings_dump
+grep -r Bucket_Game -e "minetest.settings:get" >> $settings_dump
+find Bucket_Game -name "settingtypes.txt" > $settings_types_list
+popd
 echo "Done."
 echo
 echo
