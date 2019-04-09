@@ -1,6 +1,25 @@
 #!/bin/bash
 # The git repo ONLY includes the core engine: http://localhost:3000/minetest/minetest.git
 # The build kit should be used, & has "patched Irrlicht, the new LuaJit, built-in LevelDB and Snappy support, Bucket Game, Bucket City, Wonder World, the schems collection, and other pieces"
+
+customDie() {
+    echo
+    echo "ERROR:"
+    echo "$1"
+    echo
+    echo
+}
+
+cd webapp || customDie "You must run this script from the directory containing the webapp directory."
+if [ ! -d linux-minetest-kit ]; then
+    bash reset-minetest-install-source.sh
+fi
+bash install-mts.sh --client --server
+
+
+exit 0
+# IGNORE EVERYTHING BELOW, it forces the git version
+
 msg="Installing minetestserver ONLY (no param specified). If you want to install the client on your server (not normal practice) or are on a computer with a graphical desktop, add client or both param when calling this script."
 warnings=""
 enable_postgres=false
@@ -54,7 +73,7 @@ do
   elif [ "$var" == "--git" ]; then
     touch git_flag
     if [ ! -d minetest ]; then
-      git clone http://localhost:3000/minetest/minetest.git
+      git clone http://git.minetest.org:3000/minetest/minetest.git
     else
       cd minetest
       git pull

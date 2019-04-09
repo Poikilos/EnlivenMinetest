@@ -1010,7 +1010,7 @@ fi
   # NOTE: quotes don't work with wildcard
   #cp -f $PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/textures/* "$MTMOD_DEST_PATH/textures/"
   echo "# not recommended:"
-  echo "# sudo cp -Rf $PATCHES_PATH/mods-stopgap/* $MT_MYGAME_MODS_PATH/"
+  echo "# sudo cp -Rf $PATCHES_PATH/mods-stopgap-minetest_game/* $MT_MYGAME_MODS_PATH/"
   #echo "sudo rm -Rf $MT_MYGAME_MODS_PATH/1.nonworking  # leftovers from deprecated ENLIVEN installer"
 else
   echo "did not find $PATCHES_PATH, so skipped automatic patching which is partially implemented"

@@ -24,6 +24,9 @@ extra_options=""
 if [ "@$1" = "@--client" ]; then
     enable_client=true
 fi
+if [ "@$2" = "@--client" ]; then
+    enable_client=true
+fi
 flag_icon="$HOME/Desktop/org.minetest.minetest.desktop"
 flag_file="minetest/bin/minetestserver"
 if [ -f "$flag_icon" ]; then
@@ -165,6 +168,7 @@ else
     # cp -f "$flag_dir/mods/LICENSE" "$HOME/minetest/games/ENLIVEN/mods/LICENSE"
 fi
 popd
+
 pushd ..
 src="patches/subgame/menu"
 dst="$HOME/minetest/games/ENLIVEN/menu"
@@ -293,6 +297,14 @@ if [ "@$enable_client" = "@true" ]; then
         fi
     fi
 fi
+
+if [ -d $HOME/minetest/games/ENLIVEN/mods/animal_materials ]; then
+    rsync -rt patches/mods-stopgap/animal_materials_legacy $HOME/minetest/games/ENLIVEN/mods/
+fi
+if [ -d $HOME/minetest/games/ENLIVEN/mods/nftools ]; then
+    rsync -rt patches/mods-stopgap/nftools_legacy $HOME/minetest/games/ENLIVEN/mods/
+fi
+
 popd
 settings_dump="`pwd`/settings-dump.txt"
 settings_types_list="`pwd`/settingstypes-list.txt"
