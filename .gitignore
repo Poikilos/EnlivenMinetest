@@ -1,7 +1,7 @@
 *.pyc
 *.kate-swp
 *.blend1
-/nohup.out
+nohup.out
 /webapp/linux-minetest-kit.zip
 /webapp/linux-minetest-kit
 /webapp/linux-minetest-kit-poikilos-patch

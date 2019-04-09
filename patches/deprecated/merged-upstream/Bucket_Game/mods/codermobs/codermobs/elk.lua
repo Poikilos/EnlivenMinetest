@@ -30,7 +30,7 @@ mobs_param = {
     max_light    =   20         ,
     min_height   =    0         ,
     max_height   =  200         ,
-    spawn_chance = 8000         ,
+    spawn_chance = 50000         ,
     spawn_type   = "animal"     ,
 
     spawn_nodes  = {
@@ -43,7 +43,6 @@ mobs_param = {
 
     spawn_by = {
         "default:pine_tree"             ,
-        "flowers:mushroom_brown"        ,
     } ,
 
     add_egg   = true                    ,
