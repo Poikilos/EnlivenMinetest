@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-Authors and licenses of textures (not based on textures from TenPlus1's version):
+Authors and licenses of textures:
 ---------------------------------
 Creative Commons Zero
 https://creativecommons.org/share-your-work/public-domain/cc0/
@@ -38,6 +38,6 @@ lux_pp, Poikilos (texture and 3d version):
   cake_sugar.png
   cake_top.png
   (also files in src directory)
+
 unknown CC0 (multiple users on purepng.com):
   cake_sugar.png
-  (also sugar xcf project in src directory)

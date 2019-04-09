@@ -22,14 +22,44 @@ HD Elk texture and default (16-color realistic) texture:
   (converted to UV-mapped texture by Poikilos)
   Creative Commons Attribution 2.0 Generic
 
-Other code and media for Sapier's "animal_materials", "elk":
+----------------------------------------------------------------------
+
+Ostrich model:
+
+CC-BY-SA 3.0. Attribution: Sapier and Poikilos.
+http://creativecommons.org/licenses/by-sa/3.0/de/legalcode
+
+2019-04-06: Poikilos reexported the model and worked on the textures.
+
+----------------------------------------------------------------------
+
+Other code and media for Sapier's "animal_materials", "elk"
 (formerly "deer"), and "ostrich":
+
 See the associated Lua source files.
 
 ----------------------------------------------------------------------
 
+Code  and  media  for  Sapier's   "animal_materials",  "ostrich",  and
+"sacreeper": See the associated Lua source files.
+
+Additionally, "chicken.lua" uses Sapier's 3D egg.  See that Lua source
+file as well.
+
+----------------------------------------------------------------------
+
+Car model:
+CC-BY-NC-SA 3.0. Attribution: Melkor.
+http://creativecommons.org/licenses/by-nc-sa/3.0/
+
+----------------------------------------------------------------------
+
+mdoege   code and/or media
+-----------------------------
+WTFPL
+
 PilzAdam code and/or media
---------------------------
+-----------------------------
 WTFPL
 
 Bat

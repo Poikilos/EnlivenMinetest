@@ -1,18 +1,13 @@
--- Deer. Descended from Sapier version.
+-- Elk. Descended from Sapier version.
 
 -- ===================================================================
--- Mob Framework Mod by Sapier
+-- License for "elk" media.
 --
--- You may copy, use, modify or do nearly anything except removing this
--- copyright  notice. Of course,  you are NOT allow to pretend you have
--- written it.
--- CC-BY-SA 3.0. Attribution: sapier.
+-- You may  copy,  use,  modify or do nearly anything  but remove this
+-- copyright notice. Of course,  you're not allowed to pretend  you've
+-- created or written the Sapier-specific pieces.
 --
---! @file init.lua
---! @brief deer implementation
---! @copyright Sapier
---! @author Sapier
---! @date 2013-01-27
+-- CC-BY-SA 3.0. Attribution: Sapier and Poikilos.
 
 -- ===================================================================
 
@@ -47,7 +42,7 @@ mobs_param = {
     } ,
 
     spawn_by = {
-        "group:grass"                   ,
+        "default:pine_tree"             ,
         "flowers:mushroom_brown"        ,
     } ,
 
@@ -91,17 +86,18 @@ mobs_param.core_param = {
     water_damage  =   0          ,
 
     collisionbox  = { -0.70, -1.10, -0.70, 0.70, 0.80, 0.70 } ,
-    mesh          = msname .. ".b3d"                     ,
-    textures = {
-        { msname .. "_male.png" },
-        { msname .. "_female.png"}
-    },
+    mesh          = msname .. ".b3d"                          ,
     visual        = "mesh"                                    ,
+
+    textures = {
+        { msname .. "_male_mesh.png"   } ,
+        { msname .. "_female_mesh.png" } ,
+    },
 
     sounds        = {
     },
 
-    follow        = { "default:apple", "farming:potato" } ,
+    follow        = { "default:apple", "farming:potato" }     ,
 
     drops         = {
         {
@@ -109,11 +105,11 @@ mobs_param.core_param = {
             chance = 1, min = 1, max = 1             ,
         } ,
         {
-            name   = "animal_materials:antlers"   ,
+            name   = "animal_materials:antlers"      ,
             chance = 1, min = 1, max = 1             ,
         } ,
         {
-            name   = "animal_materials:fur_elk"     ,
+            name   = "animal_materials:fur_deer"     ,
             chance = 4, min = 1, max = 1             ,
         } ,
         {
@@ -143,7 +139,6 @@ mobs_param.core_param = {
 -- ===================================================================
 
 codermobs.setup_mob()
-
 codermobs.log_done()
 
 -- ===================================================================
