@@ -298,7 +298,7 @@ if [ "@$enable_client" = "@true" ]; then
     fi
 fi
 
-if [ -f $HOME/minetest/games/ENLIVEN/mods/codermobs/animal_materials.lua ]; then
+if [ -f $HOME/minetest/games/ENLIVEN/mods/codermobs/codermobs/animal_materials.lua ]; then
     if [ -d patches/mods-stopgap/animal_materials_legacy ]; then
         echo "* installing animal_materials_legacy (only needed for worlds created with old versions of Bucket_Game)"
         rsync -rt patches/mods-stopgap/animal_materials_legacy $HOME/minetest/games/ENLIVEN/mods/
