@@ -356,6 +356,33 @@ requires a mob api such as Simple Mobs, Mobs Redo, or codermobs
 which share anestry in that order. Codermobs is included in Bucket_Game
 and hence new versions of ENLIVEN. Some other mob frameworks include:
 mobf, Jordan4Ibanez' OpenAI, and others.
+<h5>Codermobs</h5>
+Bucket_Game (the basis for ENLIVEN) has codermobs as the modding
+framework. It is a general purpose API based on Mobs Redo but with
+additional features and fixes. If you want to test your mob or do
+performance testing, you can spawn one or more mobs with one command:
+<pre>
+    "/se" (or "/spawnentity") now supports all of the following modes.
+    This feature will show up in the next snapshot. For now, you can see
+    it working in the online copy of Wonder World.
+
+    /se Ent
+    /se Ent Num
+    /se Ent Pos
+    /se Ent Pos Num
+    /se Ent Num Pos
+
+    For example: /se codermobs:badger 5
+
+    The Num parameter is presently limited to 10. The limit may be increased
+    or decreased at a later date.
+
+    Note: Spaces are permitted, though optional, before or after commas in
+    positions.
+
+        -OldCoder
+</pre>
+
 <h4>Creating New Ores</h4>
 Creating new ores or other blocks may be confusing after you learn the
 API. If you want about 48 blocks before you find another cluster of

@@ -1,5 +1,4 @@
-# nftools license and author info
-
+# "nftools" license information
 
 ## Minerals
 Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>, Poikilos (modified by)
@@ -7,10 +6,9 @@ Creative Commons Zero
 <https://creativecommons.org/share-your-work/public-domain/cc0/>
 
 ## Stool
-photo-326311 by Pixabay, made into texture by Poikilos
+Photo-326311 by Pixabay, made into texture by Poikilos
 Creative Commons Zero
-(replaces old stool texture)
-
+(Replaces old stool texture)
 
 ## Weapons
 
@@ -19,45 +17,47 @@ Creative Commons Attribution 3.0
 You can use this model for any porposes according to the following
 conditions:
 You MUST give attribution/credit to
-antonis <https://www.blendswap.com/blends/view/73677>,
-Poikilos (relit, rendered, & retouched by)
+antonis <https://www.blendswap.com/blends/view/73677>
+Poikilos (relit, rendered and retouched by)
 
 ### Axe model & image (only rendered, retouched  image is included)
 Creative Commons Attribution 3.0
 You can use this model for any porposes according to the following
 conditions:
+
 You MUST give attribution/credit to
 izuzf <https://www.blendswap.com/blends/view/58591>,
-Poikilos (relit, rendered, & retouched by)
+Poikilos (relit, rendered & retouched by)
 
 ### Scythe model & image (only rendered, retouched image is included)
 Creative Commons Attribution 3.0
 You can use this model for any porposes according to the following
 conditions:
+
 You MUST give attribution/credit to
 GemmaMuhammad <https://www.blendswap.com/blends/view/60556>
 Poikilos (relit, rendered, & retouched by)
-
 
 ## Code
 MIT License
 Copyright 2004 Sam Hocevar, 2019 OldCoder, 2019 Poikilos
 
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
+
+Permission is hereby granted,  free of charge, to any person obtaining
+a  copy  of  this  software  and  associated  documentation files (the
+"Software"),  to deal  in the Software without restriction,  including
+without limitation the rights to use,  copy,  modify,  merge, publish,
+distribute,  sublicense,  and/or sell  copies of the Software,  and to
+permit persons to whom the Software is furnished to do so,  subject to
 the following conditions:
 
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
+The  above  copyright  notice  and  this  permission  notice  shall be
+included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+THE  SOFTWARE  IS  PROVIDED  "AS  IS",  WITHOUT  WARRANTY OF ANY KIND,
+EXPRESS  OR  IMPLIED,  INCLUDING  BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+IN  NO  EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM,  DAMAGES OR OTHER LIABILITY,  WHETHER IN AN ACTION OF CONTRACT,
+TORT  OR  OTHERWISE,  ARISING  FROM,  OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
