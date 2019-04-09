@@ -1,0 +1,35 @@
+Name:    xdecor
+Source:  Modified version of upstream mod - Do not replace
+License: See "LICENSE"
+
+----------------------------------------------------------------------
+
+1. This is a modified version of an  upstream mod.  The starting point
+was obtained initially as follows:
+
+      rm -fr xdecor
+      git clone https://github.com/minetest-mods/xdecor.git
+
+----------------------------------------------------------------------
+
+2. Changes include:
+
+2a. Replaced the contents of "depends.txt" with:
+
+bucket
+default
+doors
+fire?
+moreblocks?
+oresplus?
+stairs
+xpanes
+
+2b. Removed screenshot file(s).
+
+2c. Added the files "00README" and "oldcoder.txt" (this file).
+
+----------------------------------------------------------------------
+
+3. This mod shouldn't be replaced with an upstream version unless cha-
+nge (2a) is duplicated in the new copy.
