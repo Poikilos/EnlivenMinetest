@@ -298,11 +298,26 @@ if [ "@$enable_client" = "@true" ]; then
     fi
 fi
 
-if [ -d $HOME/minetest/games/ENLIVEN/mods/animal_materials ]; then
-    rsync -rt patches/mods-stopgap/animal_materials_legacy $HOME/minetest/games/ENLIVEN/mods/
+if [ -f $HOME/minetest/games/ENLIVEN/mods/codermobs/animal_materials.lua ]; then
+    if [ -d patches/mods-stopgap/animal_materials_legacy ]; then
+        echo "* installing animal_materials_legacy (only needed for worlds created with old versions of Bucket_Game)"
+        rsync -rt patches/mods-stopgap/animal_materials_legacy $HOME/minetest/games/ENLIVEN/mods/
+    else
+        echo "* MISSING patches/mods-stopgap/animal_materials"
+    fi
+else
+    echo "* SKIPPING a stopgap mod since no animal_materials"
 fi
-if [ -d $HOME/minetest/games/ENLIVEN/mods/nftools ]; then
-    rsync -rt patches/mods-stopgap/nftools_legacy $HOME/minetest/games/ENLIVEN/mods/
+
+if [ -d "$HOME/minetest/games/ENLIVEN/mods/coderbuild/nftools" ]; then
+    if [ -d patches/mods-stopgap/nftools_legacy ]; then
+        echo "* installing nftools_legacy (only needed for worlds created with old versions of Bucket_Game)"
+        rsync -rt patches/mods-stopgap/nftools_legacy $HOME/minetest/games/ENLIVEN/mods/
+    else
+        echo "* MISSING patches/mods-stopgap/nftools_legacy"
+    fi
+else
+    echo "* SKIPPING a stopgap mod since no nftools"
 fi
 
 popd
