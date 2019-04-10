@@ -1,0 +1,15 @@
+Licenses
+
+
+Everything not mentioned:
+	CC-BY-SA 3.0, Author sapier and Poikilos
+	URL: http://creativecommons.org/licenses/by-sa/3.0/de/legalcode
+
+## 2019-04-06
+### Changes
+(OldCoder)
+* added feather pattern to feather area
+(Poikilos)
+* texture expanded to avoid edge glitter
+* re-exported mesh with github.com/minetest B3D Exporter
+* added eyes
