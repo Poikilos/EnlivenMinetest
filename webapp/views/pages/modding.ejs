@@ -241,18 +241,18 @@ minetest.register_ore function).</p>
 "creatures:chicken" not defined</samp></p>
 <p>If you have the error above, you have removed a mod or customized a
 creature so it has a different name.</p>
-<p>To convert the mob to some other mob, try something like:</p>
-<code>mobs:alias_mob("creatures:chicken", "codermobs:chicken")</code>
-<p>If you have an unknown node (you see blocks in the game that say
+<p>To convert the mob to some other mob, try something like:<br/>
+<code>mobs:alias_mob("creatures:chicken", "codermobs:chicken")</code><br/>
+If you have an unknown node (you see blocks in the game that say
 "unknown node" on them), you may need an additional mod to support
 your world. If you removed a mod on purpose or a node was renamed in a
 later version (see nftools example below), you can use Minetest's
-builtin alias function to make a mod to convert the nodes:
-<code>minetest.register_alias("name", "convert_to")</code>
-Example content for init.lua:
-<code>minetest.register_alias("nftools:aquamarine_ore", "nftools:stone_with_turquoise")</code>
-In that case, your depends.txt must contain one line:
-<code>nftools</code>
+builtin alias function to make a mod to convert the nodes:<br/>
+<code>minetest.register_alias("name", "convert_to")</code><br/>
+Example content for init.lua:<br/>
+<code>minetest.register_alias("nftools:aquamarine_ore", "nftools:stone_with_turquoise")</code><br/>
+In that case, your depends.txt must contain one line:<br/>
+<code>nftools</code><br/>
 </p>
 <p>The alias function may be confusing: You are registering the alias
 parameter 1 for parameter 2, which means that you are defining parameter
