@@ -59,7 +59,11 @@ Minetest's core functionality is written in Lua.
 Lua, every mod is open source. Almost every one is released under
 some sort of public license as well, which usually allows you to modify,
 reuse, and redistribute the code (usually under the condition that you
-credit the original author). The license file sometimes has no file
+credit the original author). <i>Some joke licenses exist but DO NOT
+protect your work in cases where they explicitly allow others to copy
+your work and claim it as their own especially if modified it in any
+way--they would just be doing what you said they could do.</i></p>
+<p>The license file sometimes has no file
 extension, so you may have to pick a program to open it in Windows.
 You can open it (or any other text file) in Notepad. However, Geany
 is recommended since there is more than one undo step. For Lua
@@ -232,6 +236,31 @@ cannot be smelted nor drop a mineral--they still use the
 minetest.register_ore function).</p>
 
 <h2>Appendices</h2>
+<h3>Common Errors</h3>
+<p class="lead"><samp color="darkred">ERROR[Server]: LuaEntity name
+"creatures:chicken" not defined</samp></p>
+<p>If you have the error above, you have removed a mod or customized a
+creature so it has a different name.</p>
+<p>To convert the mob to some other mob, try something like:</p>
+<code>mobs:alias_mob("creatures:chicken", "codermobs:chicken")</code>
+<p>If you have an unknown node (you see blocks in the game that say
+"unknown node" on them), you may need an additional mod to support
+your world. If you removed a mod on purpose or a node was renamed in a
+later version (see nftools example below), you can use Minetest's
+builtin alias function to make a mod to convert the nodes:
+<code>minetest.register_alias("name", "convert_to")</code>
+Example content for init.lua:
+<code>minetest.register_alias("nftools:aquamarine_ore", "nftools:stone_with_turquoise")</code>
+In that case, your depends.txt must contain one line:
+<code>nftools</code>
+</p>
+<p>The alias function may be confusing: You are registering the alias
+parameter 1 for parameter 2, which means that you are defining parameter
+1 as an alias--not a real item--but another name for convert_to. When
+the world is saved, only convert_to will be saved. If you are sure that
+all of the world was loaded that contained the problematic nodes
+(players visited all of those areas) then you can remove your
+transitional mod.</p>
 <h3>Common Items for Moderators to Spawn</h3>
 (list of item names for /giveme itemname)
 <pre>
