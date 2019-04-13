@@ -313,6 +313,17 @@ else
     echo "* SKIPPING a stopgap mod since no animal_materials"
 fi
 
+if [ -f $dest_programs/minetest/games/ENLIVEN/mods/codermobs/codermobs/elk.lua ]; then
+    if [ -d patches/mods-stopgap/elk_legacy ]; then
+        echo "* installing elk_legacy (only needed for worlds created with old versions of Bucket_Game)"
+        rsync -rt patches/mods-stopgap/elk_legacy $dest_programs/minetest/games/ENLIVEN/mods/
+    else
+        echo "* MISSING patches/mods-stopgap/elk_legacy"
+    fi
+else
+    echo "* SKIPPING a stopgap mod since no elk.lua"
+fi
+
 if [ -d "$dest_programs/minetest/games/ENLIVEN/mods/coderbuild/nftools" ]; then
     if [ -d patches/mods-stopgap/nftools_legacy ]; then
         echo "* installing nftools_legacy (only needed for worlds created with old versions of Bucket_Game)"
