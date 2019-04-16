@@ -3,8 +3,15 @@
 me=`basename "$0"`
 
 customDie() {
-    if [ -z "$1" ]; then echo "Unknown error."; fi
+    echo
+    if [ -z "$1" ]; then
+        echo "Unknown error."
+    else
+        echo "ERROR:"
+    fi
     echo "$1"
+    echo
+    echo
     exit 1
 }
 
@@ -46,7 +53,13 @@ what=$1
 file0_path="$project0_path/$what"
 file1_path="$project1_path/$what"
 file2_path="$project2_path/$what"
-
+whatname=`basename $file0_path`
+date_string=$(date +%Y%m%d)
+patchcmd="diff -u $file1_path $file2_path > $patches/$project0-$date_string-$whatname.patch"
+echo
+echo "After editing $file2_path, then create a patch by running:"
+echo "$patchcmd"
+echo
 echo "* getting parent of $file0_path..."
 dir0="$(dirname -- "$(realpath -- "$file0_path")")"
 # can't get realpath when directory doesn't exist yet (we make it):
