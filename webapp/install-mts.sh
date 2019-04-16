@@ -338,12 +338,21 @@ fi
 popd
 settings_dump="`pwd`/settings-dump.txt"
 settings_types_list="`pwd`/settingstypes-list.txt"
-echo "Creating $settings_dump..."
 #grep -r `pwd`/linux-minetest-kit/minetest/games/Bucket_Game -e "setting_get" > $settings_dump
 pushd linux-minetest-kit/minetest/games
-grep -r Bucket_Game -e "setting_get" > $settings_dump
-grep -r Bucket_Game -e "minetest.settings:get" >> $settings_dump
-find Bucket_Game -name "settingtypes.txt" > $settings_types_list
+if [ ! -f "$settings_dump" ]; then
+    echo "Creating $settings_dump..."
+    grep -r Bucket_Game -e "setting_get" > $settings_dump
+    grep -r Bucket_Game -e "minetest.settings:get" >> $settings_dump
+else
+    echo "* $settings_dump was already created"
+fi
+if [ ! -f "$settings_types_list" ]; then
+    echo "Creating $settings_types_list..."
+    find Bucket_Game -name "settingtypes.txt" > $settings_types_list
+else
+    echo "* $settings_types_list was already created"
+fi
 popd
 echo "Done."
 echo
