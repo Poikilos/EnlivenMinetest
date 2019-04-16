@@ -1,0 +1,53 @@
+diff -r -u Bucket_Game-basis/mods/codermobs/codermobs/LICENSE Bucket_Game-patched/mods/codermobs/codermobs/LICENSE
+--- Bucket_Game-basis/mods/codermobs/codermobs/LICENSE	2019-04-16 13:46:28.398846208 -0400
++++ Bucket_Game-patched/mods/codermobs/codermobs/LICENSE	2019-04-16 14:20:32.699460635 -0400
+@@ -100,6 +100,24 @@
+ Other "mobs_mc" Polar Bear media: CC BY-SA 4.0. Attribution: "mobs_mc"
+ team.
+ 
++Improved Spider/Bug Sounds
++--------------------------
++codermobs_damage_giant_exoskeleton, codermobs_death_giant_bug,
++codermobs_use_giant_exoskeleton
++CC BY-SA 4.0. Attribution: Poikilos
++https://creativecommons.org/licenses/by-sa/4.0/
++
++Improved Particles
++------------------
++codermobs_blood, codermobs_damage_stone, codermobs_lott_spider_blood
++CC BY-SA 4.0. Attribution: Poikilos
++https://creativecommons.org/licenses/by-sa/4.0/
++
++codermobs_fireball
++CC-BY-SA 3.0. Attribution: Sapier, OldCoder, Poikilos
++https://creativecommons.org/licenses/by-sa/4.0/
++github.com/AntumMT/mp-animals_modpack/raw/master/animal_dm/License.txt
++
+ ----------------------------------------------------------------------
+ 
+ Krupnov Pavel and TenPlus1 components:
+diff -r -u Bucket_Game-basis/mods/codermobs/codermobs/lott_spider.lua Bucket_Game-patched/mods/codermobs/codermobs/lott_spider.lua
+--- Bucket_Game-basis/mods/codermobs/codermobs/lott_spider.lua	2019-04-16 13:46:28.374846927 -0400
++++ Bucket_Game-patched/mods/codermobs/codermobs/lott_spider.lua	2019-04-16 14:37:35.332705985 -0400
+@@ -113,8 +113,9 @@
+ 
+     sounds = {
+         war_cry = "codermobs_eerie",
+-        death   = "codermobs_howl",
+-        attack  = "codermobs_bellow",
++        damage = "codermobs_damage_giant_exoskeleton",
++        death   = "codermobs_death_giant_bug",
++        attack  = "codermobs_use_giant_exoskeleton",
+     },
+ }
+ 
+Only in Bucket_Game-patched/mods/codermobs/codermobs: sounds
+Only in Bucket_Game-patched/mods/codermobs/codermobs: src
+Binary files Bucket_Game-basis/mods/codermobs/codermobs/textures/codermobs_blood.png and Bucket_Game-patched/mods/codermobs/codermobs/textures/codermobs_blood.png differ
+Only in Bucket_Game-patched/mods/codermobs/codermobs/textures: codermobs_damage_stone.png
+Binary files Bucket_Game-basis/mods/codermobs/codermobs/textures/codermobs_fireball.png and Bucket_Game-patched/mods/codermobs/codermobs/textures/codermobs_fireball.png differ
+Binary files Bucket_Game-basis/mods/codermobs/codermobs/textures/codermobs_lott_spider_blood.png and Bucket_Game-patched/mods/codermobs/codermobs/textures/codermobs_lott_spider_blood.png differ
+Only in Bucket_Game-basis/mods/codermobs/codermobs/textures: codermobs_nssm_blood_blue.png
+Only in Bucket_Game-basis/mods/codermobs/codermobs/textures: codermobs_nssm_blood.png
+Only in Bucket_Game-basis/mods/codermobs/codermobs/textures: codermobs_stone_blood.png
+Only in Bucket_Game-basis/mods/codermobs/codermobs/textures: doom_blood_effect.png
