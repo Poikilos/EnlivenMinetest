@@ -54,7 +54,8 @@ mobs_param.core_param = {
     passive     = true              ,
     fall_damage =  0                ,
     fall_speed  = -8                ,
-    fear_height =  5                ,
+    jump_height =  0                ,
+    fear_height =  1                ,
     hp_max      = 10                ,
     hp_min      =  5                ,
 
@@ -73,8 +74,8 @@ mobs_param.core_param = {
         random = msname ,
     },
 
-    walk_velocity = 1,
-    run_velocity = 3,
+    walk_velocity = 3.2,
+    run_velocity = 6.4,
     runaway = true,
     jump = true,
 
@@ -83,11 +84,14 @@ mobs_param.core_param = {
     },
 
     animation = {
-        speed_normal = 5,
+        speed_normal = 14,
         stand_start = 0,
         stand_end = 69,
         walk_start = 70,
         walk_end = 85,
+        speed_run = 28,
+        run_start = 70,
+        run_end = 85,
     },
 
     follow = { "farming:seed_wheat", "farming:seed_cotton" } ,
