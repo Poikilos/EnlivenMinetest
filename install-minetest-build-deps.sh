@@ -22,19 +22,19 @@ sleep 1
 echo
 this_dnf=""
 if [ -f "`command -v dnf`" ]; then
-  this_dnf = "dnf"
+  this_dnf="dnf"
 else
   if [ -f "`command -v yum`" ]; then
-    this_dnf = "yum"
+    this_dnf="yum"
     echo "WARNING: dnf not found, reverting to yum."
   fi
 fi
 this_apt=""
 if [ -f "`command -v apt`" ]; then
-  this_apt = "apt"
+  this_apt="apt"
 else
   if [ -f "`command -v apt-get`" ]; then
-    this_apt = "apt-get"
+    this_apt="apt-get"
     echo "WARNING: apt not found, reverting to apt-get."
   fi
 fi
