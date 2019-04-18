@@ -1,0 +1,81 @@
+--- Bucket_Game/mods/codermobs/mobs/api.lua	2019-03-30 18:44:42.000000000 -0400
++++ /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/mods/codermobs/mobs/api.lua	2019-04-16 19:17:41.120280000 -0400
+@@ -4,6 +4,7 @@
+ -- Merge in some RJK sections
+ -- detab
+ -- Remove a few superfluous blank lines to improve readability
++-- All despawning code is REMOVED in this fork (by Slopsbucket)
+ 
+ mobs = {}
+ mobs.mod = "redo"
+@@ -2904,39 +2905,39 @@
+     end
+ 
+ 	-- when lifetimer expires remove mob (except npc and tamed)
+-	if self.type ~= "npc"
+-	and not self.tamed
+-	and self.state ~= "attack"
+-	and remove_far ~= true
+-	and self.lifetimer < 20000 then
+-
+-		self.lifetimer = self.lifetimer - dtime
+-
+-		if self.lifetimer <= 0 then
+-
+-			-- only despawn away from player
+-			local objs = minetest.get_objects_inside_radius(pos, 15)
+-
+-			for n = 1, #objs do
+-
+-				if objs[n]:is_player() then
+-
+-					self.lifetimer = 20
+-
+-					return
+-				end
+-			end
+-
++--	if self.type ~= "npc"
++--	and not self.tamed
++--	and self.state ~= "attack"
++--	and remove_far ~= true
++--	and self.lifetimer < 20000 then
++--
++--		self.lifetimer = self.lifetimer - dtime
++--
++--		if self.lifetimer <= 0 then
++--
++--			-- only despawn away from player
++--			local objs = minetest.get_objects_inside_radius(pos, 15)
++--
++--			for n = 1, #objs do
++--
++--				if objs[n]:is_player() then
++--
++--					self.lifetimer = 20
++--
++--					return
++--				end
++--			end
++--
+ --			minetest.log("action",
+ --				S("lifetimer expired, removed @1", self.name))
+-
+-			effect(pos, 15, "tnt_smoke.png", 2, 4, 2, 0)
+-
+-			self.object:remove()
+-
+-			return
+-		end
+-	end
++--
++--			effect(pos, 15, "tnt_smoke.png", 2, 4, 2, 0)
++--
++--			self.object:remove()
++--
++--			return
++--		end
++--	end
+ 
+ -- RJK: Start of simple mob talk code.
+ --
