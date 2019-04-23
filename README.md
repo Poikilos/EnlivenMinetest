@@ -267,3 +267,17 @@ Qt5Widgets.dll
 * Use of input in python, where should never be used except in
   poikilos.py and minetestinfo.py for first-time setup or when
   `interactive_enable` is `True`
+
+### C++ Debugging
+These steps are only needed for debug builds:
+* build minetest with --debug option
+* cd to linux-minetest-kit/minetest/bin directory
+* type:
+  `gdb minetest`
+* After the symbols finish loading, complete the following within gdb:
+  `run`
+  * If the program terminates, gdb will tell you what debug symbol
+    packages are needed for your distro.
+  * When you are done debugging, type:
+    quit
+* Try debugging again after the proper packages are installed.
