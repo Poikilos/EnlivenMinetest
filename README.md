@@ -272,8 +272,9 @@ Qt5Widgets.dll
 These steps are only needed for debug builds:
 * build minetest with --debug option
 * cd to linux-minetest-kit/minetest/bin directory
-* type:
-  `gdb minetest`
+* type (you must put ./ before minetest to ensure that gdb will use your
+  debug build instead of a version your system path):
+  `gdb ./minetest`
 * After the symbols finish loading, complete the following within gdb:
   `run`
   * If the program terminates, gdb will tell you what debug symbol
