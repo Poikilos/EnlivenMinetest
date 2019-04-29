@@ -75,25 +75,43 @@ which patches ZeroBrane Studio to provide code completion
 </p>
 <p>Every mod, at minimum, must have a file called init.lua. You
 should also add a description.txt describing it, a README.md or other
-readme file explaining more, and a LICENSE.md or other license file
-MIT License is used for Minetest itself, that is recommended. Some
-people consider using GPL v3 to prevent the program from being used
-on popular mobile devices, since the GPL v3 specifies that a user must
-be able to not only reprogram but also replace the program with their
-recompiled version--this may not be possible if your version shares a
-namespace and key with the application you are changing, and you may not
-have the same connectivity or functionality without using the same key.
-Therefore, components or mods using GPL v3 may prevent their inclusion
-into future version of Minetest "games", as several versions of
-Minetest (often by other names) are on Google Play and the iOS App
-Store.
+readme file explaining more, and a LICENSE.md or other license file.
+The MIT License is used for Minetest itself, so that is recommended.
+Some people determine that using GPL v3 can prevent the program from
+being used on popular mobile devices, since the GPL v3 specifies that a
+user must be able to not only reprogram but also replace the program
+with their recompiled version--this may not be possible if your version
+shares a namespace and key with the application you are changing, and
+you may not have the same connectivity or functionality without using
+the same key. Therefore, components or mods using GPL v3 may prevent
+their inclusion into future version of Minetest "games", as several
+versions of Minetest (often by other names) are on Google Play and the
+iOS App Store.
 You can find the MIT License online and paste it into Notepad or Geany.
 Be sure to fill
 in your name and the year you created the mod. Having a license will
-make sure others feel safe using your mod and redistributing it if
-that's what you want.</p>
+make sure others know they are legally safe using, changing, and
+redistributing your mod if that's what you tell them in the license.
+Having others change and improve your mod will help you too, because
+all Lua is open source (is distributed in plain text form not compiled
+form normally) and you can normally utilize others' improvements if you
+pick a good license as suggested.
+</p>
+<h2>Debugging Errors</h2>
+<p>If you have an error or Minetest crashes when your mod is enabled,
+try looking at minetest/bin/debug.txt (in $HOME/minetest/bin/debug.txt
+if installed using EnlivenMinetest installer for GNU+Linux systems,
+but usually in C:\games\minetest\bin\debug.txt if using Windows)</p>
+<p>Using the Minetest API and other mods with APIs. Try reading the
+last few lines of the file. Use Geany or ZeroBrane (above)
+instead of Notepad, as Notepad may crash or mangle text when using
+large files. You can also use <a href="https://notepad-plus-plus.org/">
+Notepad++</a>.
+</p>
+<p><i>Delete or rename the debug.txt file by the current date (with
+Minetest closed) every so often so it doesn't get too long.</i></p>
 <p>
-API means application programming interface. It is just the set of
+API stands for application programming interface. It is just the set of
 classes and/or functions you use to change the behavior of an existing
 program such as Minetest. Mods that add significant features, such as
 Mobs Redo or codermobs, usually have their own API. You can see all of
@@ -199,7 +217,84 @@ performance testing, you can spawn one or more mobs with one command:
 
 </pre>
 <p style="text-align:right; width=100%">-OldCoder</p>
-
+<h4>Making Mob Models</h4>
+<h6>How to Use Blender</h6>
+<p>Many Blender tutorials exist on YouTube. However, they usually go
+into painful detail about consfusing options that do not help beginners,
+which are the audience of tutorials in the first place. To offset this
+lack of Blender information, I created a course for when I was teaching
+Blender. These free and public-licensed
+<a href="http://expertmultimedia.com/usingblender/resources/?dir=Blender%202.5-2.7">
+Tutorials are here</a> (that is the Blender 2.5-2.7 directory--for 2.8,
+click "Index" at the top). To install Blender and the B3D exporter for
+Minetest, see "<a href="one-time-setup-3d-modeling">One-time Setup for 3D Modeling</a>" below.</p>
+<h5>Scale</h5>
+<p>10 Blender units is 1 Minetest unit, so if your creature should be
+1.6 meters tall (5 ft 3 in), then the model should be 16 Blender units
+tall.
+<ul>
+<li>The <code>visual_size</code> specifies size for 2D sprites such as wielditem, in
+Minetest units (default 1 x 1 is 1 meter square).</li>
+<li>The <code>visual_size</code> specifies scale for meshes. For
+example: The mummy from tsm_pyramids is about 2 Blender units (also same
+for b3view), the
+<code>visual_size</code> in Lua is 8, result is looks like it is the
+expected 1.6 Minetest units high. 1.6 is the expected result since the 2
+Blender units are divided by 10 resulting in .2--multiplied by
+<code>visual_size</code> 8 results in 1.6 Minetest units.</li>
+</ul>
+</p>
+<h5><a name="one-time-setup-3d-modeling"></a>One-time Setup for 3D Modeling</h5>
+<ol>
+    <li>Install Blender 2.79 from <a href=https://blender.org">
+        blender.org</a> (or 2.8 if you don't need to export b3d).</li>
+    <li>If using Blender 2.79, set it to left click select (like most
+        programs, and Blender 2.8):
+        <ol>
+            <li>Open Blender</li>
+            <li>Click "File," "User Preferences."</li>
+            <li>Click the "Input" tab.</li>
+            <li>Change "Select With" to "Left."</li>
+            <li>Click "Save User Settings," then press x on the "Blender
+            User Preferences" window.</li>
+        </ol>
+    </li>
+    <li>If using Blender 2.79, install the B3D plugin. You can get a
+    version for minetest that does not export the texture path with the
+    model, reducing useless missing texture warnings in the debug log in
+    some versions of minetest (click Save not open, so you can find it
+    in Downloads later):<br/>
+    <a href="https://github.com/minetest/B3DExport/archive/master.zip">
+    Download</a>
+        <ol>
+            <li>Open Blender</li>
+            <li>Click "File," "User Preferences."</li>
+            <li>Click the "Add-ons" tab.</li>
+            <li>Click "Install Add-on from File..."</li>
+            <li>Choose the "B3DExport-master.zip" (or other B3D export
+            plugin if not the one above) that you downloaded.</li>
+            <li>Search for "B3D"</li>
+            <li>If the "Import-Export: B3D (BLITZ3D) Model Exporter" box
+            is not checked, click it and wait for it to become checked
+            (clicking again will just cancel the enable add-on
+            operation).</li>
+            <li>Click "Save User Settings," then press x on the "Blender
+            User Preferences" window.</li>
+        </ol>
+    </li>
+    <li>OPTIONAL: If you need to import x files into Blender, repeat the
+    steps above for github.com/limemidolin/directX_blender (2.79 fork of
+    littleneo's DirectX Exporter):<br/>
+    <a href="https://github.com/limemidolin/directX_blender/archive/master.zip">Download</a></li>
+</ol>
+<h5>Export</h5>
+Minetest modding because 2.8 does not yet have a good b3d exporter, and
+b3d format is the preferred (most efficient) format for animated
+models. If you are creating static (<b>non</b>-animated) models, you can
+use Blender 2.8 then export to any model format supported by Irrlicht
+(Usually 3ds, obj, are good static formats--Irrlicht also supports other
+common formats such as ms3d and md3; uncommon formats; and x for
+animated 3D models but x is not as efficient in size as b3d).</p>
 <h2>Creating New Ores</h2>
 Creating new ores or other blocks may be confusing after you learn the
 API. If you want about 48 blocks before you find another cluster of
