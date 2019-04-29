@@ -1,0 +1,10 @@
+--- ./mtcompile-program.pl	2019-04-13 21:06:34.000000000 -0400
++++ /home/owner/ownCloud/mtcompile-program.pl	2019-04-24 10:11:23.000000000 -0400
+@@ -349,6 +349,7 @@
+         "build"         => \$FlagBuild      ,
+         "client"        => \$FlagClient     ,
+         "gitpull"       => \$FlagGitPull    ,
++        "debug"         => \$FlagDebug      ,
+         "gitreset"      => \$FlagGitReset   ,
+         "help"          => \$FlagHelp       ,
+         "makeprod"      => \$FlagMakeProd   ,
