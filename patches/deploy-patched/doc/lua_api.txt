@@ -8,24 +8,25 @@
 Minetest Lua Modding API Reference
 ==================================
 * More information at <http://www.minetest.org/>
-* WARNING: [The Old (minetest.net Fork)
+* WARNING: [The old (minetest.net Fork)
   Developer Wiki](http://dev.minetest.net/)
-  contains many breaking changes and does not provide migration guides in,
-  most cases, so minetest.org no longer recommends it.
+  contains many breaking changes and, in most cases, does not provide
+  migration guides. So, that wiki is longer recommended.
 
 Introduction
 ------------
-Minetest itself is a game engine. Mods, written in Lua, provide the game
-functionality, so Minetest normally comes with at least one officially-
-supported game (sometimes called a "_game" or "subgame"), which is a
-collection of mods.
+Minetest itself is a game engine. Mods, written in Lua, provide much of
+the game functionality, so Minetest normally comes with at least one
+officially supported game (sometimes called a "_game" or "subgame"),
+structured as a collection of mods.
 
-Each mod is a self-contained collection of scripts, textures and other related
-media. Minetest loads mods at run time and they reside solely on the server
-(single player mode runs a temporary server)
+Each mod is a self-contained collection of scripts, textures and other
+related media. Minetest loads mods at run time and they reside solely
+on the server. Note: In single player mode, Minetest runs a temporary
+local server.
 
 If you see a deficiency in the API, feel free to attempt to add the
-functionality in the engine and API, and to document it here.
+functionality in the engine and API and to document it here.
 
 Programming in Lua
 ------------------
@@ -34,7 +35,7 @@ If you have any difficulty in understanding this, please read
 
 Startup
 -------
-During the server's startup phase it loads enabled mods,
+During the server's startup phase, it loads enabled mods,
 running the `init.lua` scripts in a shared environment.
 The single player or server can disable individual mods from the selected game,
 or explicitly enable mods from the "mods" directory (see
