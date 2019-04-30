@@ -20,6 +20,15 @@ customDie () {
     echo "$1"
     exit 1
 }
+enable_offline=false
+for var in "$@"
+do
+    if [ "@$var" = "@--offline" ]; then
+        enable_offline=true
+    else
+        customDie "Invalid argument: $var"
+    fi
+done
 if [ -d "$extracted_name" ]; then
   if [ "`ls -lR screenshots/*.png | wc -l`" -gt 0 ]; then
     mv screenshots/*.png ~/ || customDie "can't move screenshots from $extracted_name/minetest/bin/*.png"
@@ -33,7 +42,13 @@ if [ -d "$extracted_name" ]; then
   rm -Rf "$extracted_name" || customDie "can't remove $extracted_name"
 fi
 
-wget -O $zip_name $url/$zip_name || customDie "no $zip_name at $url"
+if [ "@$enable_offline" = "@true" ]; then
+    if [ ! -f "$zip_name" ]; then
+        customDie "* Offline install is impossible without '`pwd`/$zip_name'."
+    fi
+else
+    wget -O $zip_name $url/$zip_name || customDie "no $zip_name at $url"
+fi
 unzip -u $zip_name || customDie "Can't unzip $zip_name"
 cd "$extracted_name"
 echo "compiling libraries..."
