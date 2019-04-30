@@ -24,12 +24,23 @@ flag_dir="`pwd`/$flag_dir_rel"
 pushd "$extracted_name"
 enable_client=false
 extra_options=""
-if [ "@$1" = "@--client" ]; then
-    enable_client=true
+for var in "$@"
+do
+    if [ "@$var" = "@--client" ]; then
+        enable_client=true
+    elif [ "@$var" = "@--clean" ]; then
+        enable_clean=true
+    else
+        customDie "Invalid argument: $var"
+    fi
+done
+
+if [ -z "$enable_clean" ]; then
+    enable_clean=true
 fi
-if [ "@$2" = "@--client" ]; then
-    enable_client=true
-fi
+
+echo "enable_clean=\"$enable_clean\"..."
+
 # flag_icon="$HOME/Desktop/org.minetest.minetest.desktop"
 flag_client_dest_file="$dest_programs/minetest/bin/minetest"
 flag_file="minetest/bin/minetestserver"
@@ -121,6 +132,28 @@ virtual_dest="$dest_programs/minetest"
 link_target=`readlink $virtual_dest`
 # install_dest="/tank/local/owner/minetest"
 install_dest="$virtual_dest"
+dest_official_game="$dest_programs/minetest/games/Bucket_Game"
+dest_enliven="$dest_programs/minetest/games/ENLIVEN"
+skins_dst="$dest_enliven/mods/codercore/coderskins/textures"
+skins_bak="$HOME/Backup/ENLIVEN/mods/codercore/coderskins/textures"
+if [ "@$enable_clean" = "@true" ]; then
+    echo "* cleaning destination..."
+    if [ -d "$dest_official_game" ]; then
+        echo "  - erasing '$dest_official_game'..."
+        rm -Rf "$dest_official_game"
+    fi
+    if [ -d "$dest_enliven" ]; then
+        if [ -d "$skins_dst" ]; then
+            echo "  - Backing up '$skins_dst' to '$skins_bak'..."
+            if [ ! -d "$skins_bak" ]; then
+                mkdir -p "$skins_bak" || customDie "* cannot create $skins_bak"
+            fi
+            rsync -rt "$skins_dst/" "$skins_bak"
+        fi
+        echo "  - erasing '$dest_enliven'..."
+        rm -Rf "$dest_enliven"
+    fi
+fi
 if [ ! -z "$link_target" ]; then
     install_dest="$link_target"
     echo "* detected that $virtual_dest is a symlink to $link_target"
@@ -139,7 +172,7 @@ if [ ! -f "$dest_flag_file" ]; then
     customDie "ERROR: not complete--couldn't install binary as '$dest_flag_file'"
 fi
 
-flag_dir="$dest_programs/minetest/games/Bucket_Game"
+flag_dir="$dest_official_game"
 if [ ! -d "$flag_dir" ]; then
     customDie "ERROR: missing $flag_dir"
 fi
@@ -149,27 +182,31 @@ if [ ! -d "$dest_programs/minetest/games/ENLIVEN" ]; then
     echo "name = ENLIVEN" > "$dest_programs/minetest/games/ENLIVEN/game.conf"
 else
     mod_name=coderbuild
-    echo "updating $mod_name..."
-    rsync -rt "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
+    echo "  - updating $mod_name..."
+    rsync -rt --delete "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
     mod_name=codercore
-    echo "updating $mod_name..."
-    rsync -rt "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
+    echo "  - updating $mod_name..."
+    rsync -rt --delete "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
     mod_name=coderedit
-    echo "updating $mod_name..."
-    rsync -rt "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
+    echo "  - updating $mod_name..."
+    rsync -rt --delete "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
     mod_name=coderfood
-    echo "updating $mod_name..."
-    rsync -rt "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
+    echo "  - updating $mod_name..."
+    rsync -rt --delete "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
     mod_name=codermobs
-    echo "updating $mod_name..."
-    rsync -rt "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
+    echo "  - updating $mod_name..."
+    rsync -rt --delete "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
     mod_name=decorpack
-    echo "updating $mod_name..."
-    rsync -rt "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
+    echo "  - updating $mod_name..."
+    rsync -rt --delete "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
     mod_name=mtmachines
-    echo "updating $mod_name..."
-    rsync -rt "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
+    echo "  - updating $mod_name..."
+    rsync -rt --delete "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
     # cp -f "$flag_dir/mods/LICENSE" "$dest_programs/minetest/games/ENLIVEN/mods/LICENSE"
+    if [ -d "$skins_bak" ]; then
+        echo "  - restoring skins from '$skins_bak'..."
+        rsync -rt "$skins_bak/" "$skins_dst"
+    fi
 fi
 popd
 
@@ -235,6 +272,11 @@ echo "" >> "$server_minetest_conf_dest"
 
 world_override_src="overrides/worlds/CenterOfTheSun"
 world_override_dst="$HOME/.minetest/worlds/CenterOfTheSun"
+world_override_dst="$HOME/.minetest/worlds/CenterOfTheSun"
+try_world_override_dst="$HOME/minetest/worlds/CenterOfTheSun"
+if [ -d "$try_world_override_dst" ]; then
+    world_override_dst="$try_world_override_dst"
+fi
 world_conf_src="$world_override_src/world.conf"
 world_conf_dst="$world_override_dst/world.conf"
 world_mt_src="$world_override_src/world.mt"
@@ -243,7 +285,7 @@ if [ -d "$world_override_dst" ]; then
     echo "You have the CenterOfTheSun world. Listing any changes..."
     if [ -f "$world_conf_src" ]; then
         if [ -f "$world_conf_dst" ]; then
-            echo " * overwrite world.conf with $world_conf_src"
+            echo " * overwrite $world_conf_dst with $world_conf_src"
         else
             echo " * add the world.conf from $world_conf_src"
         fi
