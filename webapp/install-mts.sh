@@ -30,6 +30,8 @@ do
         enable_client=true
     elif [ "@$var" = "@--clean" ]; then
         enable_clean=true
+    elif [ "@$var" = "@--noclean" ]; then
+        enable_clean=false
     else
         customDie "Invalid argument: $var"
     fi
@@ -136,6 +138,7 @@ dest_official_game="$dest_programs/minetest/games/Bucket_Game"
 dest_enliven="$dest_programs/minetest/games/ENLIVEN"
 skins_dst="$dest_enliven/mods/codercore/coderskins/textures"
 skins_bak="$HOME/Backup/ENLIVEN/mods/codercore/coderskins/textures"
+official_game_mod_list="coderbuild codercore coderedit coderfood codermobs decorpack mtmachines"
 if [ "@$enable_clean" = "@true" ]; then
     echo "* cleaning destination..."
     if [ -d "$dest_official_game" ]; then
@@ -150,8 +153,11 @@ if [ "@$enable_clean" = "@true" ]; then
             fi
             rsync -rt "$skins_dst/" "$skins_bak"
         fi
-        echo "  - erasing '$dest_enliven'..."
-        rm -Rf "$dest_enliven"
+        for var in $official_game_mod_list
+        do
+            echo "  - erasing '$dest_enliven/$var'..."
+            rm -Rf "$dest_enliven/$var"
+        done
     fi
 fi
 if [ ! -z "$link_target" ]; then
@@ -181,27 +187,12 @@ if [ ! -d "$dest_programs/minetest/games/ENLIVEN" ]; then
     cp -R "$flag_dir" "$dest_programs/minetest/games/ENLIVEN"
     echo "name = ENLIVEN" > "$dest_programs/minetest/games/ENLIVEN/game.conf"
 else
-    mod_name=coderbuild
-    echo "  - updating $mod_name..."
-    rsync -rt --delete "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
-    mod_name=codercore
-    echo "  - updating $mod_name..."
-    rsync -rt --delete "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
-    mod_name=coderedit
-    echo "  - updating $mod_name..."
-    rsync -rt --delete "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
-    mod_name=coderfood
-    echo "  - updating $mod_name..."
-    rsync -rt --delete "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
-    mod_name=codermobs
-    echo "  - updating $mod_name..."
-    rsync -rt --delete "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
-    mod_name=decorpack
-    echo "  - updating $mod_name..."
-    rsync -rt --delete "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
-    mod_name=mtmachines
-    echo "  - updating $mod_name..."
-    rsync -rt --delete "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
+
+    for mod_name in $official_game_mod_list
+    do
+        echo "  - updating $mod_name..."
+        rsync -rt --delete "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
+    done
     # cp -f "$flag_dir/mods/LICENSE" "$dest_programs/minetest/games/ENLIVEN/mods/LICENSE"
     if [ -d "$skins_bak" ]; then
         echo "  - restoring skins from '$skins_bak'..."
