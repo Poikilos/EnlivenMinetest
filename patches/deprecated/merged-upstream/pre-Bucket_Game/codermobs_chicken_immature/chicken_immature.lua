@@ -32,23 +32,23 @@ codermobs.adjust_param()
 
 -- ===================================================================
 
-local msname_img            = msname           .. ".png"
-local msname_cooked_img     = msname_cooked    .. ".png"
-local msname_raw_img        = msname_raw       .. ".png"
+local msname_img            = msname           .. "_mesh.png"
+-- local msname_cooked_img     = msname_cooked    .. ".png"
+-- local msname_raw_img        = msname_raw       .. ".png"
 
-local msname_egg_img        = msname_egg       .. ".png"
-local msname_egg_fried_img  = msname_egg_fried .. ".png"
+-- local msname_egg_img        = msname_egg       .. ".png"
+-- local msname_egg_fried_img  = msname_egg_fried .. ".png"
 
 
-local obj_name_egg          = obj_name         .. "_egg"
-local obj_name_egg_entity   = obj_name_egg     .. "_entity"
-local obj_name_egg_fried    = obj_name_egg     .. "_fried"
+-- local obj_name_egg          = obj_name         .. "_egg"
+-- local obj_name_egg_entity   = obj_name_egg     .. "_entity"
+-- local obj_name_egg_fried    = obj_name_egg     .. "_fried"
 
 -- ===================================================================
 
 mobs_param.core_param = {
     type = mobs_param.spawn_type    ,
-    makes_footstep_sound = true     ,
+    makes_footstep_sound = false    ,
 
     armor       = 200               ,
     passive     = true              ,
@@ -56,40 +56,38 @@ mobs_param.core_param = {
     fall_speed  = -8                ,
     jump_height =  0                ,
     fear_height =  1                ,
-    hp_max      = 10                ,
-    hp_min      =  5                ,
+    hp_max      =  1                ,
+    hp_min      =  1                ,
 
     water_damage = 1,
     lava_damage = 5,
     light_damage = 0,
-
-    collisionbox  = { -0.1, 0, -0.1, 0.1, 0.22, 0.1 }   ,
-    visual_size   = { x=1.0, y=1.0 }                        ,
+    collisionbox  = { -0.21, 0, -0.21, 0.21, 0.42, 0.21 }   ,
+    -- The chick, at size x10, is .53 m tall. Therefore, ratio of
+    -- adult to immature is .63:.53. Maybe change it to two thirds:
+    -- .63:.42 therefore scale by .79 (.42/.53):    
+    visual_size   = { x=7.9, y=7.9 }                        ,
     visual        = "mesh"                                  ,
     mesh          = msname .. ".b3d"                        ,
-    textures      = {{ msname_img }}                        ,
+    textures      = {{ msname_img }}             ,
     child_texture = {{ msname_img }}                        ,
 
     sounds = {
         random = msname ,
     },
 
-    walk_velocity = 3.2,
-    run_velocity = 6.4,
+    walk_velocity = 1.264,
+    run_velocity = 1.264,
     runaway = true,
     jump = true,
 
-    drops = {
-        { name = obj_name_raw, chance = 1, min = 2, max = 2 } ,
-    },
-
     animation = {
-        speed_normal = 14,
+        speed_normal = 5.53,  -- speed_run / 2 = 5.53
         stand_start = 0,
         stand_end = 69,
         walk_start = 70,
         walk_end = 85,
-        speed_run = 28,
+        speed_run = 11.06, -- 14 fps * visual_size = 11.06
         run_start = 70,
         run_end = 85,
     },
