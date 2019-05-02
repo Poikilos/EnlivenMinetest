@@ -1,11 +1,11 @@
 -- ===================================================================
--- License for this mod.
+-- Code and media license.
 --
 -- You may  copy,  use,  modify or do nearly anything  but remove this
 -- copyright notice. Of course,  you're not allowed to pretend  you've
--- created or written the Sapier-specific pieces.
+-- created or written the Sapier or Poikilos pieces.
 --
--- CC-BY-SA 3.0. Attribution: sapier.
+-- CC-BY-SA 3.0. Attribution: Sapier and Poikilos.
 
 -- ===================================================================
 
@@ -306,7 +306,6 @@ minetest.register_craftitem(":animal_materials:antlers", {
     image = "animal_materials_antlers.png",
     stack_max=20
 })
-minetest.register_alias("animal_materials:deer_horns", "animal_materials:antlers")
 
 minetest.register_craftitem(":animal_materials:ivory", {
     description = S("Ivory"),

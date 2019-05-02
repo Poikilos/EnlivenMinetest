@@ -1,15 +1,24 @@
--- Chick. Code descended from "Farlands" chicken.
+-- Baby Chick. Original mob w/media by Poikilos.
 
 -- ===================================================================
+-- Code license. Applies to this module only.
+--
+-- CC-BY-NC-SA 3.0.  (c) 2019 and attribution:  OldCoder  (Robert Kir-
+-- aly).
+
+-- ===================================================================
+-- Media license. Applies to model and associated texture.
 --
 -- You may  copy,  use,  modify or do nearly anything  but remove this
 -- copyright notice. Of course,  you're not allowed to pretend  you've
--- created or written the Sapier pieces.
+-- created or written the Poikilos pieces.
 --
+-- CC-BY-SA 3.0. (c) 2019 and attribution: Poikilos.
+
 -- ===================================================================
 
-local lcname     = "chicken_immature"
-local ucname     = "Chick"
+local lcname     = "baby_chick"
+local ucname     = "Baby Chick"
 local msname     = "codermobs_" .. lcname
 local obj_name   = "codermobs:" .. lcname
 
@@ -22,6 +31,21 @@ mobs_param = {
     aoc          =  2           ,
     obr          =  1           ,
     day_mode     = true         ,
+    aoc          = -1           ,
+
+    obr          =  1           ,
+    day_mode     = true         ,
+    min_light    =  3           ,
+    max_light    = 20           ,
+    min_height   = -31000       ,
+    max_height   =  31000       ,
+    spawn_chance =  60000       ,
+    spawn_type   = "animal"     ,
+
+    spawn_nodes  = {
+        "never:nosuchnode" ,
+    } ,
+
     add_egg   = true                    ,
     egg_image = "wool_brown.png"        ,
 }
@@ -32,81 +56,77 @@ codermobs.adjust_param()
 
 -- ===================================================================
 
-local msname_img            = msname           .. "_mesh.png"
--- local msname_cooked_img     = msname_cooked    .. ".png"
--- local msname_raw_img        = msname_raw       .. ".png"
-
--- local msname_egg_img        = msname_egg       .. ".png"
--- local msname_egg_fried_img  = msname_egg_fried .. ".png"
-
-
--- local obj_name_egg          = obj_name         .. "_egg"
--- local obj_name_egg_entity   = obj_name_egg     .. "_entity"
--- local obj_name_egg_fried    = obj_name_egg     .. "_fried"
-
--- ===================================================================
-
 mobs_param.core_param = {
     type = mobs_param.spawn_type    ,
     makes_footstep_sound = false    ,
 
-    armor       = 200               ,
-    passive     = true              ,
-    fall_damage =  0                ,
-    fall_speed  = -8                ,
-    jump_height =  0                ,
-    fear_height =  1                ,
-    hp_max      =  1                ,
-    hp_min      =  1                ,
+    armor         = 20              ,
+    passive       = true            ,
+    fall_damage   =  0              ,
+    fall_speed    = -8              ,
+    hp_max        = 10              ,
+    hp_min        =  5              ,
+    runaway       = true            ,
+    jump          = false           ,
+    view_range    =  5              ,
 
-    water_damage = 1,
-    lava_damage = 5,
-    light_damage = 0,
-    collisionbox  = { -0.21, 0, -0.21, 0.21, 0.42, 0.21 }   ,
-    -- The chick, at size x10, is .53 m tall. Therefore, ratio of
-    -- adult to immature is .63:.53. Maybe change it to two thirds:
-    -- .63:.42 therefore scale by .79 (.42/.53):    
-    visual_size   = { x=7.9, y=7.9 }                        ,
-    visual        = "mesh"                                  ,
-    mesh          = msname .. ".b3d"                        ,
-    textures      = {{ msname_img }}             ,
-    child_texture = {{ msname_img }}                        ,
+    jump_height   =  0              ,
+    fear_height   =  1              ,
+    stepheight    =  1.2            ,
+    -- at 14 fps, the feet move at .32 meters/sec:
+    walk_velocity =  .32            ,
+    run_velocity  =  .64            ,
+
+    water_damage  = 1               ,
+    floats = 0,
+    runaway = true,
+    lava_damage   = 5               ,
+    light_damage  = 0               ,
+
+    collisionbox  = { -0.3, 0, -0.3, 0.3, 0.8, 0.3 } ,
+    visual_scale  = 1.0                              ,
+    visual        = "mesh"                           ,
+    mesh          = msname .. ".b3d"                 ,
+    textures      = {{ msname .. "_mesh.png" }}      ,
+
+    animation     = {
+        speed_normal = 14 ,
+        stand_start  =  0 ,
+        stand_end    = 69 ,
+        walk_start   = 70 ,
+        walk_end     = 85 ,
+        speed_run    = 28 ,
+        run_start    = 70 ,
+        run_end      = 85 ,
+    },
 
     sounds = {
         random = msname ,
     },
 
-    walk_velocity = 1.264,
-    run_velocity = 1.264,
-    runaway = true,
-    jump = true,
-
-    animation = {
-        speed_normal = 5.53,  -- speed_run / 2 = 5.53
-        stand_start = 0,
-        stand_end = 69,
-        walk_start = 70,
-        walk_end = 85,
-        speed_run = 11.06, -- 14 fps * visual_size = 11.06
-        run_start = 70,
-        run_end = 85,
+    drops = {
     },
 
     follow = { "farming:seed_wheat", "farming:seed_cotton" } ,
-    view_range = 5,
 
     on_rightclick = function (self, clicker)
         mobs:protect (self, clicker)
         mobs:capture_mob (self, clicker, 30, 50, 80, false, nil)
     end,
 
+    do_custom = function (self)
+        if math.random (1, 4000) > 1 then return end
+        local pos = self.object:getpos()
+        self.object:remove()
+        minetest.add_entity (pos, "codermobs:chicken")
+    end ,
 }
 
 -- ===================================================================
 
 codermobs.setup_mob()
 
--- ===================================================================
+mobs:alias_mob ("codermobs:chick" , obj_name)
 
 codermobs.log_done()
 

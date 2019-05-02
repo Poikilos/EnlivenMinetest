@@ -1,11 +1,11 @@
--- Deer. Descended from Sapier version.
+-- Deer. Descended from Sapier Deer/Elk common ancestor.
 
 -- ===================================================================
--- License for "deer" media.
+-- Media license. Applies to model and associated textures.
 --
 -- You may  copy,  use,  modify or do nearly anything  but remove this
 -- copyright notice. Of course,  you're not allowed to pretend  you've
--- created or written the Sapier-specific pieces.
+-- created or written the Sapier or Poikilos pieces.
 --
 -- CC-BY-SA 3.0. Attribution: Sapier and Poikilos.
 
@@ -23,14 +23,14 @@ mobs_param = {
     ucname       = ucname       ,
     obj_name     = obj_name     ,
 
-    aoc          =    2         ,
-    obr          =    1         ,
+    aoc          =     2        ,
+    obr          =     1        ,
     day_mode     = true         ,
-    min_light    =   14         ,
-    max_light    =   20         ,
-    min_height   =    0         ,
-    max_height   =  200         ,
-    spawn_chance = 50000         ,
+    min_light    =    14        ,
+    max_light    =    20        ,
+    min_height   =     0        ,
+    max_height   =   200        ,
+    spawn_chance = 50000        ,
     spawn_type   = "animal"     ,
 
     spawn_nodes  = {
@@ -42,7 +42,7 @@ mobs_param = {
     } ,
 
     spawn_by = {
-        "default:oak_trunk"                   ,
+        "default:oak_trunk"             ,
         "flowers:mushroom_brown"        ,
     } ,
 
@@ -83,21 +83,23 @@ mobs_param.core_param = {
 
     lava_damage   =   5          ,
     light_damage  =   0          ,
-    water_damage  =   0          ,
+    water_damage  =   1          ,
+    floats = 0,
+    runaway = true,
 
     collisionbox  = { -0.70, -1.10, -0.70, 0.70, 0.80, 0.70 } ,
     mesh          = msname .. ".b3d"                          ,
     visual        = "mesh"                                    ,
 
-    textures = {
-        { msname .. "_male_mesh.png"   } ,
+    textures      = {
         { msname .. "_female_mesh.png" } ,
-    },
+        { msname .. "_male_mesh.png"   } ,
+    } ,
 
     sounds        = {
     },
 
-    follow        = { "default:apple", "farming:potato" }     ,
+    follow        = { "default:apple", "farming:potato" } ,
 
     drops         = {
         {
@@ -105,7 +107,7 @@ mobs_param.core_param = {
             chance = 1, min = 1, max = 1             ,
         } ,
         {
-            name   = "animal_materials:antlers"      ,
+            name   = "animal_materials:antlers"   ,
             chance = 1, min = 1, max = 1             ,
         } ,
         {

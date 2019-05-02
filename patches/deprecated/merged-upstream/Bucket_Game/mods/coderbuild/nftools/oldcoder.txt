@@ -36,11 +36,11 @@ Poikilos  has  made  changes  designed to  make  "nftools"  complement
   (change nftools_*ore.png to nftools_mineral_*.png,
   nftools:*_ore to nftools:stone_with_*,
   nftools:amber to nftools:stone_with_amber)
-* The old minerals in the world converted to the one following the comma:
+* The old minerals, converted:
   `nftools:amethyst, nftools:black_opal`
   `nftools:alexandrite_ore, nftools:bismuth`
   `nftools:aquamarine, nftools:turquoise`
-  (using aliases)
+  (for aliases see nftools_legacy in EnlivenMinetest)
 
 Other changes:
 

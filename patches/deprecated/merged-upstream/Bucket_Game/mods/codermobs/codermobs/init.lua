@@ -34,50 +34,55 @@ dofile (mp .. "/cacodemon.lua"    )
 dofile (mp .. "/car.lua"          )
 dofile (mp .. "/chicken.lua"      )
 dofile (mp .. "/cow.lua"          )
-dofile (mp .. "/sacreeper.lua"    )
 dofile (mp .. "/cyberdemon.lua"   )
 
+dofile (mp .. "/deer.lua"         )
 dofile (mp .. "/dirt_monster.lua" )
 dofile (mp .. "/dog.lua"          )
 dofile (mp .. "/elephant.lua"     )
 dofile (mp .. "/elk.lua"          )
-dofile (mp .. "/farhorse.lua"     )
 
+dofile (mp .. "/farhorse.lua"     )
 dofile (mp .. "/flying_pig.lua"   )
 dofile (mp .. "/ghost.lua"        )
 dofile (mp .. "/goat.lua"         )
 dofile (mp .. "/hedgehog.lua"     )
-dofile (mp .. "/jeraf.lua"        )
 
+dofile (mp .. "/jeraf.lua"        )
 dofile (mp .. "/kitten.lua"       )
 dofile (mp .. "/lava_flan.lua"    )
 dofile (mp .. "/lostsoul.lua"     )
 dofile (mp .. "/lott_spider.lua"  )
-dofile (mp .. "/mammoth.lua"      )
 
+dofile (mp .. "/mammoth.lua"      )
 dofile (mp .. "/mdskeleton.lua"   )
 dofile (mp .. "/oerkki.lua"       )
 dofile (mp .. "/ostrich.lua"      )
 dofile (mp .. "/owl.lua"          )
-dofile (mp .. "/panda.lua"        )
 
+dofile (mp .. "/panda.lua"        )
 dofile (mp .. "/penguin.lua"      )
+dofile (mp .. "/plane.lua"        )
 dofile (mp .. "/polar_bear.lua"   )
 dofile (mp .. "/rat.lua"          )
-dofile (mp .. "/rat_better.lua"   )
-dofile (mp .. "/santa.lua"        )
 
+dofile (mp .. "/rat_better.lua"   )
+dofile (mp .. "/sacreeper.lua"    )
+dofile (mp .. "/santa.lua"        )
 dofile (mp .. "/sheep.lua"        )
 dofile (mp .. "/silverfish.lua"   )
+
 dofile (mp .. "/snake_garter.lua" )
 dofile (mp .. "/snake_ice.lua"    )
 dofile (mp .. "/snowman.lua"      )
-
 dofile (mp .. "/tree_monster.lua" )
 dofile (mp .. "/vombie.lua"       )
+
 dofile (mp .. "/warthog.lua"      )
 dofile (mp .. "/wolf.lua"         )
 dofile (mp .. "/zebra.lua"        )
+
+dofile (mp .. "/baby_chick.lua"   )
 
 -- Moon Cow must be defined after regular cow.
 

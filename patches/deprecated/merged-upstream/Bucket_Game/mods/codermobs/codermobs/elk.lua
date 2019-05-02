@@ -1,11 +1,11 @@
--- Elk. Descended from Sapier version.
+-- Elk. Descended from Sapier Deer/Elk common ancestor.
 
 -- ===================================================================
--- License for "elk" media.
+-- Media license. Applies to model and associated textures.
 --
 -- You may  copy,  use,  modify or do nearly anything  but remove this
 -- copyright notice. Of course,  you're not allowed to pretend  you've
--- created or written the Sapier-specific pieces.
+-- created or written the Sapier or Poikilos pieces.
 --
 -- CC-BY-SA 3.0. Attribution: Sapier and Poikilos.
 
@@ -30,7 +30,7 @@ mobs_param = {
     max_light    =   20         ,
     min_height   =    0         ,
     max_height   =  200         ,
-    spawn_chance = 50000         ,
+    spawn_chance = 8000         ,
     spawn_type   = "animal"     ,
 
     spawn_nodes  = {
@@ -43,6 +43,7 @@ mobs_param = {
 
     spawn_by = {
         "default:pine_tree"             ,
+        "flowers:mushroom_brown"        ,
     } ,
 
     add_egg   = true                    ,
@@ -64,6 +65,7 @@ mobs_param.core_param = {
     attack_type   = "dogfight"   ,
     damage        =   2          ,
     fear_height   =   3          ,
+    floats        =   0          ,
     group_attack  = true         ,
     hp_max        =  15          ,
     hp_min        =   5          ,
@@ -75,6 +77,7 @@ mobs_param.core_param = {
     reach         =   2          ,
     rotate        = 270          ,
     run_velocity  =   3          ,
+    runaway       = true         ,
     stepheight    =   0.6        ,
     type          = "animal"     ,
     view_range    =  10          ,
@@ -82,7 +85,7 @@ mobs_param.core_param = {
 
     lava_damage   =   5          ,
     light_damage  =   0          ,
-    water_damage  =   0          ,
+    water_damage  =   1          ,
 
     collisionbox  = { -0.70, -1.10, -0.70, 0.70, 0.80, 0.70 } ,
     mesh          = msname .. ".b3d"                          ,

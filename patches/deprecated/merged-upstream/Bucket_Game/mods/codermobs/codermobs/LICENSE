@@ -3,16 +3,64 @@ es.
 
 ----------------------------------------------------------------------
 
-Original components which not covered under other licenses are licens-
-ed as follows:
+License: CC BY-SA 4.0
+is, or was, described by:
+https://creativecommons.org/licenses/by-sa/4.0/
 
-License: CC BY-SA 4.0  International.  Attribution:  OldCoder  (Robert
-Kiraly).
+License: CC BY-SA 3.0
+is, or was, described by:
+https://creativecommons.org/licenses/by-sa/3.0/
+
+Liense: CC BY-NC-SA 4.0
+is, or was, described by:
+https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+License: CC BY-NC-SA 3.0
+is, or was, described by:
+https://creativecommons.org/licenses/by-nc-sa/3.0/
 
 ----------------------------------------------------------------------
 
+Original components  which are not covered under other  copyrights and
+licenses are copyright and licensed as follows:
 
-Unused Pixel Art (approximately 7 colors) Elk texture:
+(c) 2019 and CC BY-NC-SA 4.0: OldCoder (Robert Kiraly).
+
+----------------------------------------------------------------------
+
+Media for "baby_chick":
+(c) 2019 and CC-BY-NC-SA 3.0: Poikilos.
+
+----------------------------------------------------------------------
+
+Improved Spider/Bug Sounds:
+codermobs_damage_giant_exoskeleton, codermobs_death_giant_bug,
+codermobs_use_giant_exoskeleton   
+(c) 2019 and CC BY-SA 4.0: Poikilos
+
+Improved Particles:
+codermobs_blood, codermobs_damage_stone, codermobs_lott_spider_blood  
+(c) 2019 and CC BY-SA 4.0: Poikilos
+
+codermobs_fireball:
+(c) 2012 to 2019 and CC-BY-SA 3.0: Sapier, Poikilos
+
+----------------------------------------------------------------------
+
+Media for "animal_materials",  "deer", "elk", "ostrich", and "sacreep-
+er":
+
+See  the  5 associated  Lua  source files.  In general,  the media is:
+(c) 2012 to 2019 and  CC-BY-SA 3.0:  Sapier and Poikilos,  except  for
+"sacreeper" for which the media is just Sapier.
+
+The "ostrich" texture is as described above but also attribution: Old-
+Coder.
+
+Code for "animal_materials": Same as media.  The  other 4 mobs  listed
+here use new code.
+
+Unused Pixel Art in src (approximately 7 colors) Elk texture:
   Copyright Sapier and Poikilos
   (converted to UV-mapped texture by Poikilos)
   Creative Commons Attribution Share-Alike 3.0
@@ -22,35 +70,13 @@ HD Elk texture and default (16-color realistic) texture:
   (converted to UV-mapped texture by Poikilos)
   Creative Commons Attribution 2.0 Generic
 
-----------------------------------------------------------------------
-
-Ostrich model:
-
-CC-BY-SA 3.0. Attribution: Sapier and Poikilos.
-http://creativecommons.org/licenses/by-sa/3.0/de/legalcode
-
-2019-04-06: Poikilos reexported the model and worked on the textures.
-
-----------------------------------------------------------------------
-
-Other code and media for Sapier's "animal_materials", "elk"
-(formerly "deer"), and "ostrich":
-
-See the associated Lua source files.
-
-----------------------------------------------------------------------
-
-Code  and  media  for  Sapier's   "animal_materials",  "ostrich",  and
-"sacreeper": See the associated Lua source files.
-
 Additionally, "chicken.lua" uses Sapier's 3D egg.  See that Lua source
 file as well.
 
 ----------------------------------------------------------------------
 
 Car model:
-CC-BY-NC-SA 3.0. Attribution: Melkor.
-http://creativecommons.org/licenses/by-nc-sa/3.0/
+(c) 2015 and CC-BY-NC-SA 3.0: Melkor.
 
 ----------------------------------------------------------------------
 
@@ -70,18 +96,17 @@ Sound file: WTFPL
 
 Birds
 -----------------------------
-CC BY-SA 3.0. Attribution: models by poikilos (based on sapier's anim-
-al_gull.b3d from animals modpack), textures by poikilos.
+(c) 2012-2019  and  CC-BY-SA  3.0:  Sapier,  Poikilos.  Sapier created
+the original models. Poikilos derived new models from them and created
+new textures.
 
 Butterfly
 -----------------------------
-CC BY-SA 3.0. Attribution: AspireMint.
+(c) 2012 to 2019 and CC BY-SA 3.0: AspireMint.
 
 Realistic Milk Bucket
 -----------------------------
-Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)
-Attribution: Copyright (C) 2015-2016 ElementW, Poikilos (modified by)
-
+(c) 2015-2019 and CC BY-SA 3.0: ElementW, Poikilos (modified by).
 
 D00Med code
 -----------------------------
@@ -93,7 +118,8 @@ CC BY-SA 3.0 Unported. Attribution: D00Med.
 
 Mr. Goat
 -----------------------------
-CC BY-SA 3.0. Attribution: Don Batman.
+(c) 2016 to 2019 and CC BY-SA 3.0: Don Batman.  OldCoder worked on the
+eyes.
 
 NSSM components
 -----------------------------
@@ -102,7 +128,7 @@ future, the applicable license will be GPL3.
 
 Sapier components
 -----------------------------
-CC-BY-SA 3.0. Attribution: Sapier.
+(c) 2012-2019 and CC-BY-SA 3.0: Sapier.
 
 "mobs_mc" components
 -----------------------------
@@ -117,9 +143,9 @@ Krupnov Pavel and TenPlus1 components:
 
 The MIT License (MIT)
 
-Copyright (c) 2014 Krupnov Pavel -- bugs, kpgmobs, pmobs
-Copyright (c) 2014 Krupnov Pavel and 2016 TenPlus1 -- mobs_animal
-Copyright (c) 2016 TenPlus1 -- mobs_monster and mobs_npc
+(c) 2014 Krupnov Pavel -- bugs, kpgmobs, pmobs
+(c) 2014 Krupnov Pavel and 2016 TenPlus1 -- mobs_animal
+(c) 2016 TenPlus1 -- mobs_monster and mobs_npc
 
 Permission is hereby granted,  free of charge, to any person obtaining
 a  copy  of  this  software  and  associated  documentation files (the
@@ -144,7 +170,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Blockmen components:
 
-Copyright (c) 2015-2016 BlockMen <blockmen2015@gmail.com>
+(c) 2015-2016 BlockMen <blockmen2015@gmail.com>
 
 This  software  is  provided  'as-is',  without any express or implied
 warranty.  In no event will the authors be held liable for any damages
