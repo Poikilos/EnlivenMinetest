@@ -1,0 +1,1 @@
+Convert glooptest mossy blocks to the equivalent non-mossy blocks.

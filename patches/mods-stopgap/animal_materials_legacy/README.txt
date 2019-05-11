@@ -1,6 +1,6 @@
-Bucket_Game mod: animal_materials_legacy
-=========================
-This mod provides a transition from old versions of animal_materials.
+animal_materials_legacy Minetest mod
+====================================
+See description.txt.
 
 Authors of source code
 ----------------------

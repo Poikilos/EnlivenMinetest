@@ -1,6 +1,6 @@
-Bucket_Game mod: nftools_legacy
-=========================
-This mod provides a transition from old versions of nftools.
+nftools_legacy Minetest mod
+===========================
+See description.txt.
 
 Authors of source code
 ----------------------

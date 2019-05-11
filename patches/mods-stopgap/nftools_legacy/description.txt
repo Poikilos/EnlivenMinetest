@@ -1,0 +1,2 @@
+Convert old nftools nodes (from old versions of Bucket_Game) that
+overlap birthstones to the new nodes in the updated Bucket_Game fork.

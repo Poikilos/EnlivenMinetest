@@ -1,6 +1,6 @@
-Bucket_Game mod: gloopblocks_missing
-====================================
-This mod provides a transition from glooptest.
+Minetest mod: glooptest_missing
+===============================
+See description.txt
 
 Authors of source code
 ----------------------

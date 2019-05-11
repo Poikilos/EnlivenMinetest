@@ -1,0 +1,2 @@
+Convert items spawned by old versions of animal_materials to the new
+codermobs naming.
