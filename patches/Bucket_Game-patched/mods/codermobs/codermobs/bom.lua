@@ -1,12 +1,17 @@
 -- BOM. Descended from Sapier Creeper.
 
 -- ===================================================================
--- Media license. Applies to model and texture.
+-- codermobs_bom_random.ogg:
+--   CC0 by Seidolon and poikilos
+--   (based on fuse)
+-- codermobs_bom_explode.ogg:
+--   CC0 by Deganoth and poikilos
+--   (based on Explosion 1)
 --
+-- Other media (model and textures):
 -- You may  copy,  use,  modify or do nearly anything  but remove this
 -- copyright notice. Of course,  you're not allowed to pretend  you've
 -- created or written the Poikilos and OldCoder pieces.
---
 -- CC-BY-SA 3.0. Attribution: Poikilos and OldCoder.
 
 -- ===================================================================
@@ -77,8 +82,8 @@ mobs_param.core_param = {
     },
 
     sounds = {
-        random  = "codermobs_sacreeper_random"  ,
-        explode = "codermobs_sacreeper_explode" ,
+        random  = "codermobs_bom_random"  ,
+        explode = "codermobs_bom_explode" ,
     } ,
 
     textures = {
