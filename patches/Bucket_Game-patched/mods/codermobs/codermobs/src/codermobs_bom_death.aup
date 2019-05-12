@@ -1,0 +1,33 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="codermobs_bom_death_data" version="1.3.0" audacityversion="2.3.1" sel0="0.0000000000" sel1="0.4345124717" vpos="0" h="0.0000000000" zoom="1189.6340878573" rate="44100.0" snapto="off" selectionformat="hh:mm:ss + milliseconds" frequencyformat="Hz" bandwidthformat="octaves">
+	<tags>
+		<tag name="YEAR" value="2019"/>
+		<tag name="ARTIST" value="poikilos"/>
+	</tags>
+	<wavetrack name="165911__deganoth__explosion-1" channel="2" linked="0" mute="0" solo="0" height="295" minimized="0" isSelected="1" rate="44100" gain="0.630957" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="19162">
+				<waveblock start="0">
+					<simpleblockfile filename="eff1f2e0.au" len="19162" min="-3.162789" max="2.338993" rms="0.45808"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="14">
+				<controlpoint t="0.020174270597" val="0.094076633453"/>
+				<controlpoint t="0.041189135802" val="0.310104548931"/>
+				<controlpoint t="0.081537676997" val="0.449477374554"/>
+				<controlpoint t="0.132813948098" val="0.581881523132"/>
+				<controlpoint t="0.163075353993" val="0.017421603203"/>
+				<controlpoint t="0.193336759889" val="0.024390220642"/>
+				<controlpoint t="0.236207084908" val="0.914634168148"/>
+				<controlpoint t="0.267309085412" val="0.796167254448"/>
+				<controlpoint t="0.297570491308" val="0.073170721531"/>
+				<controlpoint t="0.316063572688" val="0.094076633453"/>
+				<controlpoint t="0.333716059461" val="1.000000000000"/>
+				<controlpoint t="0.333716059461" val="1.207317113876"/>
+				<controlpoint t="0.366499249181" val="1.228222966194"/>
+				<controlpoint t="0.422819087931" val="0.073170721531"/>
+			</envelope>
+		</waveclip>
+	</wavetrack>
+</project>

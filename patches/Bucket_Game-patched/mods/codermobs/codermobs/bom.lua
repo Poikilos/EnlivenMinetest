@@ -82,8 +82,10 @@ mobs_param.core_param = {
     },
 
     sounds = {
-        random  = "codermobs_bom_random"  ,
-        explode = "codermobs_bom_explode" ,
+        random  = "codermobs_bom_random"         ,
+        explode = "codermobs_bom_explode"        ,
+        damage = "codermobs_damage_hollow_metal" ,
+        death   = "codermobs_bom_death"          ,
     } ,
 
     textures = {
