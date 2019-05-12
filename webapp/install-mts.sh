@@ -370,7 +370,7 @@ fi
 
 popd
 settings_dump="`pwd`/settings-dump.txt"
-settings_types_list="`pwd`/settingstypes-list.txt"
+settings_types_list="`pwd`/settingtypes-list.txt"
 #grep -r `pwd`/linux-minetest-kit/minetest/games/Bucket_Game -e "setting_get" > $settings_dump
 pushd linux-minetest-kit/minetest/games
 if [ ! -f "$settings_dump" ]; then
