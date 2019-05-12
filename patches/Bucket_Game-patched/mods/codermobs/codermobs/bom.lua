@@ -12,7 +12,7 @@
 -- You may  copy,  use,  modify or do nearly anything  but remove this
 -- copyright notice. Of course,  you're not allowed to pretend  you've
 -- created or written the Poikilos and OldCoder pieces.
--- CC-BY-SA 3.0. Attribution: Poikilos and OldCoder.
+-- CC-BY-SA 4.0. Attribution: Poikilos and OldCoder.
 
 -- ===================================================================
 
