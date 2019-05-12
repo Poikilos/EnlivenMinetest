@@ -1,12 +1,12 @@
 -- BOM. Descended from Sapier Creeper.
 
 -- ===================================================================
--- codermobs_bom_random.ogg:
---   CC0 by Seidolon and poikilos
---   (based on fuse)
--- codermobs_bom_explode.ogg:
---   CC0 by Deganoth and poikilos
---   (based on Explosion 1)
+-- codermobs_bom_random, codermobs_bom_death
+--   CC0
+--   based on fuse by Seidolon
+-- codermobs_bom_explode, codermobs_damage_hollow_metal
+--   CC0
+--   based on Explosion 1 by Deganoth
 --
 -- Other media (model and textures):
 -- You may  copy,  use,  modify or do nearly anything  but remove this
