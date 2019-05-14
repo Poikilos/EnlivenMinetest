@@ -1,0 +1,31 @@
+diff -u Bucket_Game-basis/mods/coderbuild/lapis/init.lua Bucket_Game-patched/mods/coderbuild/lapis/init.lua
+--- Bucket_Game-basis/mods/coderbuild/lapis/init.lua	2019-05-13 19:50:35.366747663 -0400
++++ Bucket_Game-patched/mods/coderbuild/lapis/init.lua	2019-05-13 21:11:54.644664066 -0400
+@@ -1,6 +1,8 @@
+ screwdriver = screwdriver or {}
+ 
+---dofile(minetest.get_modpath("lapis").."/columns.lua")
++if minetest.setting_getbool("enable_round_lapis_columns") then
++    dofile(minetest.get_modpath("lapis").."/columns.lua")
++end
+ 
+ ----------
+ --Nodes
+@@ -225,14 +227,14 @@
+ 	"Lapis Brick Stair",
+ 	"Lapis Brick Slab",
+ 	default.node_sound_stone_defaults())
+-	
++
+ 	stairs.register_stair_and_slab("lapis_cobble", "lapis:lapis_cobble",
+ 	{cracky = 3},
+ 	{"lapis_cobble.png"},
+ 	"Lapis Cobble Stair",
+ 	"Lapis Cobble Slab",
+ 	default.node_sound_stone_defaults())
+-	
++
+ 	stairs.register_stair_and_slab("lazurite", "lapis:lazurite_block",
+ 	{cracky = 3},
+ 	{"lapis_lazurite_block.png"},
+Only in Bucket_Game-patched/mods/coderbuild/lapis: settingtypes.txt
