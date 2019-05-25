@@ -103,7 +103,14 @@ if [ -f "$file2_path" ]; then
 fi
 echo "* creating $file2_path"
 cp -f "$file0_path" "$file2_path" || customDie "Cannot cp '$file0_path' '$file2_path'"
-
+if [ -f "`command -v geany`" ]; then
+    nohup geany "$file2_path" &
+fi
+if [ -d "$HOME/minetest/games/ENLIVEN" ]; then
+    if [ -f "`command -v meld`" ]; then
+        nohup meld "$file2_path" "$HOME/minetest/games/ENLIVEN/$what" &
+    fi
+fi
 
 eval "arr=($licenses)"
 for license in "${arr[@]}"; do

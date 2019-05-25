@@ -1,0 +1,12 @@
+--- LapisLazuli-init.lua	2019-05-18 17:47:01.306322922 -0400
++++ init.lua	2019-05-18 17:47:36.863117105 -0400
+@@ -1,6 +1,8 @@
+ screwdriver = screwdriver or {}
+ 
+---dofile(minetest.get_modpath("lapis").."/columns.lua")
++if minetest.settings:get_bool("enable_lapis_mod_columns") then
++    dofile(minetest.get_modpath("lapis").."/columns.lua")
++end
+ 
+ ----------
+ --Nodes

@@ -26,11 +26,12 @@ dofile (mp .. "/bee.lua"          )
 dofile (mp .. "/beetle.lua"       )
 
 dofile (mp .. "/bird.lua"         )
+dofile (mp .. "/bom.lua"          )
 dofile (mp .. "/bug.lua"          )
 dofile (mp .. "/bunny.lua"        )
 dofile (mp .. "/butterfly.lua"    )
-dofile (mp .. "/cacodemon.lua"    )
 
+dofile (mp .. "/cacodemon.lua"    )
 dofile (mp .. "/car.lua"          )
 dofile (mp .. "/chicken.lua"      )
 dofile (mp .. "/cow.lua"          )
@@ -48,26 +49,26 @@ dofile (mp .. "/ghost.lua"        )
 dofile (mp .. "/goat.lua"         )
 dofile (mp .. "/hedgehog.lua"     )
 
+dofile (mp .. "/icebom.lua"       )
 dofile (mp .. "/jeraf.lua"        )
 dofile (mp .. "/kitten.lua"       )
 dofile (mp .. "/lava_flan.lua"    )
 dofile (mp .. "/lostsoul.lua"     )
-dofile (mp .. "/lott_spider.lua"  )
 
+dofile (mp .. "/lott_spider.lua"  )
 dofile (mp .. "/mammoth.lua"      )
 dofile (mp .. "/mdskeleton.lua"   )
 dofile (mp .. "/oerkki.lua"       )
 dofile (mp .. "/ostrich.lua"      )
-dofile (mp .. "/owl.lua"          )
 
+dofile (mp .. "/owl.lua"          )
 dofile (mp .. "/panda.lua"        )
 dofile (mp .. "/penguin.lua"      )
 dofile (mp .. "/plane.lua"        )
 dofile (mp .. "/polar_bear.lua"   )
-dofile (mp .. "/rat.lua"          )
 
+dofile (mp .. "/rat.lua"          )
 dofile (mp .. "/rat_better.lua"   )
-dofile (mp .. "/sacreeper.lua"    )
 dofile (mp .. "/santa.lua"        )
 dofile (mp .. "/sheep.lua"        )
 dofile (mp .. "/silverfish.lua"   )
@@ -82,9 +83,10 @@ dofile (mp .. "/warthog.lua"      )
 dofile (mp .. "/wolf.lua"         )
 dofile (mp .. "/zebra.lua"        )
 
-dofile (mp .. "/baby_chick.lua"   )
+-- Baby Chick should be defined after chicken.
+-- Moon Cow   should be defined after regular cow.
 
--- Moon Cow must be defined after regular cow.
+dofile (mp .. "/baby_chick.lua"   )
 
 if enable_moontest then
     dofile (mp .. "/mooncow.lua")

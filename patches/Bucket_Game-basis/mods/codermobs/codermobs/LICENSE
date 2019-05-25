@@ -3,6 +3,10 @@ es.
 
 ----------------------------------------------------------------------
 
+License: CC0 aka CC Public Domain
+is, or was, described by:
+https://creativecommons.org/publicdomain/zero/1.0/
+
 License: CC BY-SA 4.0
 is, or was, described by:
 https://creativecommons.org/licenses/by-sa/4.0/
@@ -11,7 +15,7 @@ License: CC BY-SA 3.0
 is, or was, described by:
 https://creativecommons.org/licenses/by-sa/3.0/
 
-Liense: CC BY-NC-SA 4.0
+License: CC BY-NC-SA 4.0
 is, or was, described by:
 https://creativecommons.org/licenses/by-nc-sa/4.0/
 
@@ -28,18 +32,22 @@ licenses are copyright and licensed as follows:
 
 ----------------------------------------------------------------------
 
-Media for "baby_chick":
-(c) 2019 and CC-BY-NC-SA 3.0: Poikilos.
+Models and mesh textures for "baby_chick", "bom", and "icebom":
+
+(c) 2019 and CC-BY-NC-SA 4.0: Poikilos. OldCoder as well for the "ice-
+bom" mesh texture.
+
+For sound-file information, see the Lua files.
 
 ----------------------------------------------------------------------
 
 Improved Spider/Bug Sounds:
 codermobs_damage_giant_exoskeleton, codermobs_death_giant_bug,
-codermobs_use_giant_exoskeleton   
+codermobs_use_giant_exoskeleton
 (c) 2019 and CC BY-SA 4.0: Poikilos
 
 Improved Particles:
-codermobs_blood, codermobs_damage_stone, codermobs_lott_spider_blood  
+codermobs_blood, codermobs_damage_stone, codermobs_lott_spider_blood
 (c) 2019 and CC BY-SA 4.0: Poikilos
 
 codermobs_fireball:
@@ -47,12 +55,10 @@ codermobs_fireball:
 
 ----------------------------------------------------------------------
 
-Media for "animal_materials",  "deer", "elk", "ostrich", and "sacreep-
-er":
+Media for "animal_materials", "deer", "elk", and "ostrich":
 
 See  the  5 associated  Lua  source files.  In general,  the media is:
-(c) 2012 to 2019 and  CC-BY-SA 3.0:  Sapier and Poikilos,  except  for
-"sacreeper" for which the media is just Sapier.
+(c) 2012 to 2019 and CC-BY-SA 3.0: Sapier and Poikilos.
 
 The "ostrich" texture is as described above but also attribution: Old-
 Coder.
