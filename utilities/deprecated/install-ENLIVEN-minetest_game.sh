@@ -553,8 +553,8 @@ add_git_mod moretrees moretrees https://gitlab.com/VanessaE/moretrees.git
 # in order of dependency (also, clicking armor in unified inventory crashes the game without technic installed since checks radation):
 add_git_mod mesecons mesecons https://github.com/minetest-mods/mesecons
 add_git_mod pipeworks pipeworks https://gitlab.com/VanessaE/pipeworks.git
-#add_git_mod technic technic https://github.com/minetest-mods/technic.git
-add_git_mod technic technic https://github.com/t4im/technic.git
+add_git_mod technic technic https://github.com/minetest-mods/technic.git
+#add_git_mod technic technic https://github.com/t4im/technic.git
 
 add_git_mod technic_armor technic_armor https://github.com/stujones11/technic_armor.git
 # NOTE: load_mod is not a thing for subgames (all mods in subgame are loaded if subgame is loaded)
@@ -658,7 +658,7 @@ add_git_mod ts_furniture ts_furniture https://github.com/minetest-mods/ts_furnit
 #mv minetest-3d_armor_MODPACK/wieldview $MT_MYGAME_MODS_PATH/wieldview
 #mv minetest-3d_armor_MODPACK/3d_armor $MT_MYGAME_MODS_PATH/3d_armor
 #mv minetest-3d_armor_MODPACK/shields $MT_MYGAME_MODS_PATH/shields
-
+add_git_mod basic_materials basic_materials https://gitlab.com/VanessaE/basic_materials.git
 add_git_mod homedecor_modpack homedecor_modpack https://gitlab.com/VanessaE/homedecor_modpack.git
 add_git_mod unifieddyes unifieddyes https://gitlab.com/VanessaE/unifieddyes.git
 #Sokomine's original version has no security ( https://forum.minetest.net/viewtopic.php?id=4877 )
@@ -1079,7 +1079,6 @@ echo "* there is no armor bar at this time since hudbars is not being used (not 
 echo "* You may consider changing $MT_MYGAME_MODS_PATH/technic/technic/config.lua so that flashlight is enabled (however, this will probably cause lag)"
 echo
 echo "If any uncommented commands appear below, consider running them if repairs are needed:"
-echo
 cat $err_txt
 if [ -d "$HOME/.minetest/games/ENLIVEN" ]; then
     if [ "$MT_MYGAME_DIR" != "$HOME/.minetest/games/ENLIVEN" ]; then
@@ -1089,6 +1088,8 @@ fi
 if [ -d "$SYSTEM_MT_GAMES_DIR/$MT_MYGAME_NAME" ]; then
     echo "sudo rm -Rf \"$SYSTEM_MT_GAMES_DIR/$MT_MYGAME_NAME/\"  # deprecated location--see '$MT_MYGAME_DIR' instead."
 fi
+echo
+echo
 echo "You should see $MT_MYGAME_NAME in the list below if the game was configured properly:"
 if [ -f "`command -v minetestserver`" ]; then
     minetestserver --gameid list
