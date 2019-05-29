@@ -47,6 +47,7 @@ if [ ! -f minetestenv.rc ]; then
         cd "$HOME/GitHub/EnlivenMinetest"
     fi
 fi
+EnlivenMinetest_dir="`pwd`"
 if [ ! -f minetestenv.rc ]; then
     # NOTE: customDie is not defined until after this clause.
     echo "ERROR: Nothing done since missing minetestenv.rc (must be in same directory or '$HOME/git/EnlivenMinetest' or '`pwd`')."
@@ -96,7 +97,7 @@ if [ ! -f "`command -v minetestmapper`" ]; then
             fi
         fi
     fi
-    cd ~/Downloads
+    pushd ~/Downloads
     if [ -d minetestmapper ]; then
         rm -Rf minetestmapper
     fi
@@ -110,6 +111,7 @@ if [ ! -f "`command -v minetestmapper`" ]; then
     else
         echo "FAILED to compile minetestmapper--python version will be used"
     fi
+    popd
 fi
 
 if [ -d /tmp/local_mts_user ]; then
@@ -144,21 +146,19 @@ if [ -f "$MT_MYWORLD_DIR/world.mt" ]; then
 fi
 
 
-
-
 #process conf file (account for spaces around equal sign and variable names containing name of other variable name)
 shopt -s extglob
 configfile="$WORLD_MT_PATH" # set the actual path name of your (DOS or Unix) config file
 tr -d '\r' < $configfile > $configfile.unix
 while IFS='= ' read -r lhs rhs
 do
-        if [[ ! $lhs =~ ^\ *# && -n $lhs ]]; then
-                rhs="${rhs%%\#*}"  # Del in line right comments
-                rhs="${rhs%%*( )}" # Del trailing spaces
-                rhs="${rhs%\"*}"   # Del opening string quotes
-                rhs="${rhs#\"*}"   # Del closing string quotes
-                declare world_mt_var_$lhs="$rhs"
-        fi
+    if [[ ! $lhs =~ ^\ *# && -n $lhs ]]; then
+        rhs="${rhs%%\#*}"  # Del in line right comments
+        rhs="${rhs%%*( )}" # Del trailing spaces
+        rhs="${rhs%\"*}"   # Del opening string quotes
+        rhs="${rhs#\"*}"   # Del closing string quotes
+        declare world_mt_var_$lhs="$rhs"
+    fi
 done < $configfile.unix
 
 
@@ -215,12 +215,16 @@ if [ ! -d "$MT_MYGAME_DIR/" ]; then
     customDie "ERROR: failed to create $MT_MYGAME_DIR, so cannot continue."
 fi
 #sudo cp -R $USR_SHARE_MINETEST/games/$mtgame_name/mods/* "$MT_MYGAME_DIR/mods/"
+echo "Copying $MT_MINETEST_GAME_PATH to $MT_MYGAME_DIR"
 if [ -f "`command -v rsync`" ]; then
-    rsync -Rf $MT_MINETEST_GAME_PATH/* "$MT_MYGAME_DIR/"
+    rsync -rt $MT_MINETEST_GAME_PATH/ "$MT_MYGAME_DIR" || echo "rsync -rt $MT_MINETEST_GAME_PATH/ \"$MT_MYGAME_DIR\"  # FAILED" >> "$err_txt"
 else
-    cp -Rf $MT_MINETEST_GAME_PATH/* "$MT_MYGAME_DIR/"
+    cp -Rf $MT_MINETEST_GAME_PATH/* "$MT_MYGAME_DIR/" || echo "cp -Rf $MT_MINETEST_GAME_PATH/* \"$MT_MYGAME_DIR/\"  # FAILED" >> "$err_txt"
 fi
-
+echo "2..."
+sleep 1
+echo "1..."
+sleep 1
 
 #sudo su -
 #WRITEABLE_MINETEST_CONF=$USR_SHARE_MINETEST/games/$MT_MYGAME_NAME/minetest.conf
@@ -858,33 +862,33 @@ if [ -d "$PATCHES_PATH" ]; then
     echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
     cp -f $PATCHES_PATH/subgame/mods/mobs_monster/textures/* "$MT_MYGAME_DIR/mods/mobs_monster/textures/"
 
-echo "  [ / ] patching skins for skinsdb..."
-# REMOVE EXISTING SKINS AND ONLY ADD poikilos skins:
-MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$PATCH_SKINS_MOD_NAME
-SUB_NAME="textures"  # include u_skins since u_skins/u_skins IS THE MOD in the modpack
-SUB_PATH="$MTMOD_DEST_PATH/$SUB_NAME"
-if [ -d "$SUB_PATH" ]; then
-    echo "removing original $SUB_PATH/character_*..."
-    rm -Rf $SUB_PATH/character_*  # cannot have quotes if using wildcards
-fi
-cp -f $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/$PATCH_SKINS_MOD_NAME/$SUB_NAME/* "$SUB_PATH"
-if [ ! -d "$SUB_PATH" ]; then
-    customDie "ERROR: failed to install poikilos's skins to $SUB_PATH, so cannot continue."
-else
-    echo "installed poikilos's skins to $SUB_PATH"
-fi
-SUB_NAME="meta"  # include u_skins since u_skins/u_skins IS THE MOD in the modpack
-SUB_PATH="$MTMOD_DEST_PATH/$SUB_NAME"
-if [ -d "$SUB_PATH" ]; then
-    echo "removing original $SUB_PATH/character_*..."
-    rm -Rf $SUB_PATH/character_*  # cannot have quotes if using wildcards
-fi
-cp -f $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/$PATCH_SKINS_MOD_NAME/$SUB_NAME/* "$SUB_PATH"
-if [ ! -d "$SUB_PATH" ]; then
-    customDie "ERROR: failed to install poikilos's skins to $SUB_PATH, so cannot continue."
-else
-    echo "installed metadata for poikilos's skins to $SUB_PATH"
-fi
+    echo "  [ / ] patching skins for skinsdb..."
+    # REMOVE EXISTING SKINS AND ONLY ADD poikilos skins:
+    MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$PATCH_SKINS_MOD_NAME
+    SUB_NAME="textures"  # include u_skins since u_skins/u_skins IS THE MOD in the modpack
+    SUB_PATH="$MTMOD_DEST_PATH/$SUB_NAME"
+    if [ -d "$SUB_PATH" ]; then
+        echo "removing original $SUB_PATH/character_*..."
+        rm -Rf $SUB_PATH/character_*  # cannot have quotes if using wildcards
+    fi
+    cp -f $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/$PATCH_SKINS_MOD_NAME/$SUB_NAME/* "$SUB_PATH"
+    if [ ! -d "$SUB_PATH" ]; then
+        customDie "ERROR: failed to install poikilos's skins to $SUB_PATH, so cannot continue."
+    else
+        echo "installed poikilos's skins to $SUB_PATH"
+    fi
+    SUB_NAME="meta"  # include u_skins since u_skins/u_skins IS THE MOD in the modpack
+    SUB_PATH="$MTMOD_DEST_PATH/$SUB_NAME"
+    if [ -d "$SUB_PATH" ]; then
+        echo "removing original $SUB_PATH/character_*..."
+        rm -Rf $SUB_PATH/character_*  # cannot have quotes if using wildcards
+    fi
+    cp -f $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/$PATCH_SKINS_MOD_NAME/$SUB_NAME/* "$SUB_PATH"
+    if [ ! -d "$SUB_PATH" ]; then
+        customDie "ERROR: failed to install poikilos's skins to $SUB_PATH, so cannot continue."
+    else
+        echo "installed metadata for poikilos's skins to $SUB_PATH"
+    fi
 
 
 
@@ -956,15 +960,7 @@ fi
     echo "# cp -Rf $PATCHES_PATH/mods-stopgap-minetest_game/* $MT_MYGAME_MODS_PATH/"
     #echo "rm -Rf $MT_MYGAME_MODS_PATH/1.nonworking    # leftovers from deprecated ENLIVEN installer"
 else
-    echo "did not find $PATCHES_PATH, so skipped automatic patching which is partially implemented"
-    echo "continuing anyway unless Ctrl-C is pressed..."
-    echo 1
-    echo "3..."
-    echo 1
-    echo "2..."
-    echo 1
-    echo "1..."
-    echo 1
+    customDie "did not find $PATCHES_PATH"
 fi
 echo
 if [ "$version_0_5_enable" != "true" ]; then
@@ -1086,7 +1082,9 @@ echo "If any uncommented commands appear below, consider running them if repairs
 echo
 cat $err_txt
 if [ -d "$HOME/.minetest/games/ENLIVEN" ]; then
-    echo "rsync -rt --delete \"$MT_MYGAME_DIR/\" \"$HOME/.minetest/games/ENLIVEN\""
+    if [ "$MT_MYGAME_DIR" != "$HOME/.minetest/games/ENLIVEN" ]; then
+        echo "rsync -rt --delete \"$MT_MYGAME_DIR/\" \"$HOME/.minetest/games/ENLIVEN\""
+    fi
 fi
 if [ -d "$SYSTEM_MT_GAMES_DIR/$MT_MYGAME_NAME" ]; then
     echo "sudo rm -Rf \"$SYSTEM_MT_GAMES_DIR/$MT_MYGAME_NAME/\"  # deprecated location--see '$MT_MYGAME_DIR' instead."

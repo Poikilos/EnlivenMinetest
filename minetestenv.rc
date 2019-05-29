@@ -158,6 +158,13 @@ show_changes="true"
 #fi
 
 PATCHES_PATH="$REPO_PATH/patches"
+if [ ! -d "$PATCHES_PATH" ]; then
+    if [ -d "$HOME/git/EnlivenMinetest" ]; then
+        REPO_PATH=$HOME/git/EnlivenMinetest
+        PATCHES_PATH="$REPO_PATH/patches"
+    fi
+fi
+
 echo "PATCHES_PATH: $PATCHES_PATH"
 
 if [ ! -d "$PATCHES_PATH" ]; then
