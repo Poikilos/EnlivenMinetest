@@ -1,59 +1,90 @@
+err_txt=$HOME/err-enliven.txt
+echo "# * minetestenv.rc started `date`" > "$err_txt"
+
+customDie() {
+    echo
+    errorLevel=1
+    if [ -z "$2" ]; then
+        errorLevel=$2
+    fi
+    if [ -z "$1" ]; then
+        echo "Unknown error."
+    else
+        echo "ERROR:"
+        echo "$1" >> "$err_txt"
+    fi
+    echo "$1"
+    echo
+    echo "'$err_txt' may contain more information."
+    echo
+    echo "This session will exit unless you press Ctrl-C to cancel script..."
+    sleep 1
+    echo "4..."
+    sleep 1
+    echo "3..."
+    sleep 1
+    echo "2..."
+    sleep 1
+    echo "1..."
+    sleep 1
+    exit $errorLevel
+}
 
 CONFIG_PATH="$HOME/.config/EnlivenMinetest"
 CACHE_PATH="$HOME/.cache/EnlivenMinetest"
 if [ ! -d "$CONFIG_PATH" ]; then
-  mkdir -p "$CONFIG_PATH"
+    mkdir -p "$CONFIG_PATH"
 fi
 if [ ! -d "$CACHE_PATH" ]; then
-  mkdir -p "$CACHE_PATH"
+    mkdir -p "$CACHE_PATH"
 fi
 
 RELEASES_PATH="$CACHE_PATH/releases"
 if [ -d "$CONFIG_PATH/cache/releases" ]; then
-  # upgrade/remove cache from older versions of this script
-  if [ ! -d "$CACHE_PATH/releases" ]; then
-    mv "$CONFIG_PATH/cache/releases" "$CACHE_PATH/"
-    echo "upgraded cache from older version of this script (moved to $RELEASES_PATH)"
-  else
-    rm -Rf "$CONFIG_PATH/cache/releases"
-    echo "removed redundant cache from older version of this script: $CONFIG_PATH/cache/releases"
-  fi
+    # upgrade/remove cache from older versions of this script
+    if [ ! -d "$CACHE_PATH/releases" ]; then
+        mv "$CONFIG_PATH/cache/releases" "$CACHE_PATH/"
+        echo "upgraded cache from older version of this script (moved to $RELEASES_PATH)"
+    else
+        rm -Rf "$CONFIG_PATH/cache/releases"
+        echo "removed redundant cache from older version of this script: $CONFIG_PATH/cache/releases"
+    fi
 fi
 if [ ! -d "$RELEASES_PATH" ]; then
-  mkdir -p "$RELEASES_PATH"
+    mkdir -p "$RELEASES_PATH"
 fi
 
 GIT_REPOS_PATH="$CACHE_PATH/git"
 if [ -d "$CONFIG_PATH/cache/git" ]; then
-  if [ ! -d "$CACHE_PATH/git" ]; then
-    mv "$CONFIG_PATH/cache/git" "$CACHE_PATH/"
-    echo "upgraded cache from older version of this script (moved to $GIT_REPOS_PATH)"
-  else
-    rm -Rf "$CONFIG_PATH/cache/git"
-    echo "removed redundant cache from older version of this script: $CONFIG_PATH/cache/git"
-  fi
+    if [ ! -d "$CACHE_PATH/git" ]; then
+        mv "$CONFIG_PATH/cache/git" "$CACHE_PATH/"
+        echo "upgraded cache from older version of this script (moved to $GIT_REPOS_PATH)"
+    else
+        rm -Rf "$CONFIG_PATH/cache/git"
+        echo "removed redundant cache from older version of this script: $CONFIG_PATH/cache/git"
+    fi
 fi
 
 if [ ! -d "$GIT_REPOS_PATH" ]; then
-  mkdir -p "$GIT_REPOS_PATH"
+    mkdir -p "$GIT_REPOS_PATH"
 fi
 GIT_BRANCHES_PATH="$CACHE_PATH/git-branches"
 if [ -d "$CONFIG_PATH/cache/git-branches" ]; then
-  # upgrade/remove cache from older versions of this script
-  if [ ! -d "$CACHE_PATH/git-branches" ]; then
-    mv "$CONFIG_PATH/cache/git-branches" "$CACHE_PATH/"
-    echo "upgraded cache from older version of this script (moved to $GIT_BRANCHES_PATH)"
-  else
-    rm -Rf "$CONFIG_PATH/cache/git-branches"
-    echo "removed redundant cache from older version of this script: $CONFIG_PATH/cache/git-branches"
-  fi
+    # upgrade/remove cache from older versions of this script
+    if [ ! -d "$CACHE_PATH/git-branches" ]; then
+        mv "$CONFIG_PATH/cache/git-branches" "$CACHE_PATH/"
+        echo "upgraded cache from older version of this script (moved to $GIT_BRANCHES_PATH)"
+    else
+        rm -Rf "$CONFIG_PATH/cache/git-branches"
+        echo "removed redundant cache from older version of this script: $CONFIG_PATH/cache/git-branches"
+    fi
 fi
 if [ ! -d "$GIT_BRANCHES_PATH" ]; then
-  mkdir -p "$GIT_BRANCHES_PATH"
+    mkdir -p "$GIT_BRANCHES_PATH"
 fi
 
 if [ -d "$CONFIG_PATH/cache" ]; then
-  rmdir "$CONFIG_PATH/cache"
+    rmdir "$CONFIG_PATH/cache"
 fi
 
 MOD_LIST="$CONFIG_PATH/mod_list.txt"
@@ -61,35 +92,35 @@ MOD_LIST="$CONFIG_PATH/mod_list.txt"
 # * Git version uses /home/*/minetest/games and /usr/local/share/minetest/games but the latter is used for minetestserver (minetest-server package)
 # * Arch stable version uses /usr/share/minetest/
 if [ "$1" = "--help" ]; then
-  echo "This script installs ENLIVEN subgame for minetest. It uses individual git repositories, so please only run this once so as not to exceed their bandwidth."
-  echo "Usage:"
-  echo
-  #echo "version_0_5_enable=<value> (where value is true or false): forces 0.5 (if not specified, this script uses 0.5 versions of mods if minetest is at /usr/local/share/minetest)"
-  #echo
-  echo "local_enable=<value> (where value is true or false): forces /usr/local/share/minetest (if not specified, script detects minetest but if exists both in /usr/share/ and /usr/local/share, prefers /usr/local/share/minetest)"
-  echo
-  exit 0
+    echo "This script installs ENLIVEN subgame for minetest. It uses individual git repositories, so please only run this once so as not to exceed their bandwidth."
+    echo "Usage:"
+    echo
+    #echo "version_0_5_enable=<value> (where value is true or false): forces 0.5 (if not specified, this script uses 0.5 versions of mods if minetest is at /usr/local/share/minetest)"
+    #echo
+    echo "local_enable=<value> (where value is true or false): forces /usr/local/share/minetest (if not specified, script detects minetest but if exists both in /usr/share/ and /usr/local/share, prefers /usr/local/share/minetest)"
+    echo
+    exit 0
 fi
 
 #NOTE: version_0_5_enable is now detected further down instead of being specified
 #if [ "$1" = "version_0_5_enable=true" ]; then
-#  version_0_5_enable="true"
+#    version_0_5_enable="true"
 #elif [ "$2" = "version_0_5_enable=true" ]; then
-#  version_0_5_enable="true"
+#    version_0_5_enable="true"
 #elif [ "$1" = "version_0_5_enable=false" ]; then
-#  version_0_5_enable="false"
+#    version_0_5_enable="false"
 #elif [ "$2" = "version_0_5_enable=false" ]; then
-#  version_0_5_enable="false"
+#    version_0_5_enable="false"
 #fi
 
 if [ "$1" = "local_enable=true" ]; then
-  local_enable="true"
+    local_enable="true"
 #elif [ "$2" = "local_enable=true" ]; then
-#  local_enable="true"
+#    local_enable="true"
 elif [ "$1" = "local_enable=false" ]; then
-#  local_enable="false"
+#    local_enable="false"
 #elif [ "$2" = "local_enable=false" ]; then
-  local_enable="false"
+    local_enable="false"
 fi
 #echo "3..."
 #sleep 1
@@ -99,7 +130,6 @@ fi
 #sleep 1
 update_enable="true"
 shell_name="bash"
-err_txt=$HOME/err-enliven.txt
 # doesn't work if equal: [ $0 = *"$shell_name"* ]
 # could be -bash or bash
 #if [ "$0" = "-bash" ]; then
@@ -109,95 +139,76 @@ show_changes="true"
 #if [[ $0 == *"$shell_name"* ]]; then
 #doesn't work on Fedora since shell_name is blank even when in shell and not pasting:
 #if [ "$shell_name" != "" ]; then
-  #REPO_PATH="$HOME/GitHub/EnlivenMinetest"
-  #echo "You must have pasted this into terminal, so assuming REPO_PATH:"
-  #echo "  $REPO_PATH"
+    #REPO_PATH="$HOME/GitHub/EnlivenMinetest"
+    #echo "You must have pasted this into terminal, so assuming REPO_PATH:"
+    #echo "    $REPO_PATH"
 #else
-  SCRIPT=$(readlink -f "$0")
-  if [ "$SCRIPT" = "/bin/bash" ]; then
-    SCRIPT=minetestenv.rc
-    if [ ! -f "$SCRIPT" ]; then
-      echo "ERROR: could not find self (need location of self in order to get SCRIPTPATH and then REPO_PATH in order for patches directory to be found."
-      echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
-      sleep 1
-      echo " 3..."
-      sleep 1
-      echo " 2..."
-      sleep 1
-      echo " 1..."
-      sleep 1
-      exit 1
+    SCRIPT=$(readlink -f "$0")
+    if [ "$SCRIPT" = "/bin/bash" ]; then
+        SCRIPT=minetestenv.rc
+        if [ ! -f "$SCRIPT" ]; then
+            customDie "ERROR: could not find self (need location of self in order to get SCRIPTPATH and then REPO_PATH in order for patches directory to be found."
+        fi
     fi
-  fi
-  # Absolute path this script is in, thus /home/user/bin
-  SCRIPTPATH=$(dirname "$SCRIPT")
-  REPO_PATH="$SCRIPTPATH"
-  #formerly, this script was in a subdir:
-  #REPO_PATH=$(dirname "$SCRIPTPATH")
+    # Absolute path this script is in, thus /home/user/bin
+    SCRIPTPATH=$(dirname "$SCRIPT")
+    REPO_PATH="$SCRIPTPATH"
+    #formerly, this script was in a subdir:
+    #REPO_PATH=$(dirname "$SCRIPTPATH")
 #fi
 
 PATCHES_PATH="$REPO_PATH/patches"
 echo "PATCHES_PATH: $PATCHES_PATH"
-sleep 10
 
 if [ ! -d "$PATCHES_PATH" ]; then
-  # maybe moved somewhere or this code was pasted
-  PATCHES_PATH=$HOME/GitHub/EnlivenMinetest/patches
+    # maybe moved somewhere or this code was pasted
+    PATCHES_PATH=$HOME/GitHub/EnlivenMinetest/patches
 fi
 if [ ! -d "$PATCHES_PATH" ]; then
-  # maybe running from root of repo
-  PATCHES_PATH="patches"
+    # maybe running from root of repo
+    PATCHES_PATH="patches"
 fi
 if [ ! -d "$PATCHES_PATH" ]; then
-  # should work if ran from folder where exists
-  PATCHES_PATH="../patches"
+    # should work if ran from folder where exists
+    PATCHES_PATH="../patches"
 fi
 if [ ! -d "$PATCHES_PATH" ]; then
-  echo
-  echo
-  echo "ERROR: could not find patches such as in $PATCHES_PATH"
-  echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
-  sleep 1
-  echo " 3..."
-  sleep 1
-  echo " 2..."
-  sleep 1
-  echo " 1..."
-  sleep 1
-  exit 1
+    echo
+    echo
+    customDie "ERROR: could not find patches such as in $PATCHES_PATH"
 fi
 # NOTE: minetest mods (other than 0.4.16 client-side mods) are ALWAYS ONLY installed on server, unless you need them for singleplayer
 USR_SHARE_MINETEST=/usr/share/games/minetest
 try_path="/usr/share/minetest"
 if [ -d "$try_path" ]; then
-  # Arch linux
-  USR_SHARE_MINETEST="$try_path"
+    # Arch linux
+    USR_SHARE_MINETEST="$try_path"
 fi
 if [ "$local_enable" != "false" ]; then
-  # IF git version is installed
-  try_path="/usr/local/share/minetest"
-  if [ -d "$try_path" ]; then
-    #if [ -z "$version_0_5_enable" ]; then
-    #  version_0_5_enable="true"
-    #fi
-    USR_SHARE_MINETEST="$try_path"
-  fi
+    # IF git version is installed
+    try_path="/usr/local/share/minetest"
+    if [ -d "$try_path" ]; then
+        #if [ -z "$version_0_5_enable" ]; then
+        #    version_0_5_enable="true"
+        #fi
+        USR_SHARE_MINETEST="$try_path"
+    fi
 fi
 version_0_5_enable="false"
 if [ -d "$USR_SHARE_MINETEST/games/minetest_game/mods/player_api" ]; then
-  version_0_5_enable="true"
+    version_0_5_enable="true"
 fi
 if [ -f "$CONFIG_PATH/local_enable" ]; then
-  local_enable=$(head -n 1 $CONFIG_PATH/local_enable)
+    local_enable=$(head -n 1 $CONFIG_PATH/local_enable)
 fi
 #if [ -f "$CONFIG_PATH/version_0_5_enable" ]; then
-#  version_0_5_enable=$(head -n 1 $CONFIG_PATH/version_0_5_enable)
+#    version_0_5_enable=$(head -n 1 $CONFIG_PATH/version_0_5_enable)
 #fi
 if [ -z "$local_enable" ]; then
-  echo "$local_enable" > "$CONFIG_PATH/local_enable"
+    echo "$local_enable" > "$CONFIG_PATH/local_enable"
 fi
 #if [ -z "$version_0_5_enable" ]; then
-#  echo "$version_0_5_enable" > "$CONFIG_PATH/version_0_5_enable"
+#    echo "$version_0_5_enable" > "$CONFIG_PATH/version_0_5_enable"
 #fi
 
 mtgame_name="minetest_game"
@@ -208,102 +219,91 @@ MT_MINETEST_GAME_PATH=$USR_SHARE_MINETEST/games/$mtgame_name
 #sleep 1
 #echo "1..."
 #sleep 1
-# UNUSED (unknown use): MT_GAMES_DIR=$HOME/.minetest/mods
 # intentionally skip the slash in the following line since $USR_SHARE_MINETEST already starts with one:
-MT_BACKUP_GAMES_DIR=$HOME/Backup$USR_SHARE_MINETEST/games
-MT_GAMES_DIR=$USR_SHARE_MINETEST/games
-MT_MYGAME_BAK=$USR_SHARE_MINETEST/ENLIVEN_BAK
+MT_BACKUP_GAMES_DIR=$HOME/.minetest/games-disabled
+SYSTEM_MT_GAMES_DIR=$USR_SHARE_MINETEST/games
+MT_MYGAMES_DIR=$HOME/.minetest/games
+MT_MYGAME_BAK=$MT_BACKUP_GAMES_DIR/ENLIVEN_BAK
 MT_MYGAME_NAME=ENLIVEN
-#$PREFIX/minetest/games/ENLIVEN:
-MT_MYGAME_DIR="$MT_GAMES_DIR/$MT_MYGAME_NAME"
+MT_MYGAME_DIR="$MT_MYGAMES_DIR/$MT_MYGAME_NAME"
 # formerly MT_MYGAME_MODDIR:
 MT_MYGAME_MODS_PATH="$MT_MYGAME_DIR/mods"
 MT_WORLDS_DIR="$HOME/.minetest/worlds"
 MT_DEFAULT_WORLD_NAME="`ls $MT_WORLDS_DIR | grep -v tar.gz | grep --max-count=1 -v world`"  # aka -m 1 (no '=' sign in that case)
 MT_MYWORLD_NAME="$MT_DEFAULT_WORLD_NAME"
 if [ -z "$MT_DEFAULT_WORLD_NAME" ]; then
-  #if [ -z "`ls $MT_WORLDS_DIR | grep --max-count=1 -v world`" ]; then
-  new_worlds="`ls $MT_WORLDS_DIR | grep --max-count=1 -v '^world$'`"
-  if [ ! -z "$new_worlds" ]; then
-  # anchors (`^` and `$`) ensure only exact match, so name containing world is not counted as a match
-  # see also <https://stackoverflow.com/questions/4709912/how-to-make-grep-only-match-if-the-entire-line-matches>
-    MT_MYWORLD_NAME="$new_worlds"
-  else
-    if [ -d "$MT_WORLDS_DIR/world" ]; then
-      echo "Could not find any new worlds in $MT_WORLDS_DIR so using '$MT_MYWORLD_NAME'"
+    #if [ -z "`ls $MT_WORLDS_DIR | grep --max-count=1 -v world`" ]; then
+    new_worlds="`ls $MT_WORLDS_DIR | grep --max-count=1 -v '^world$'`"
+    if [ ! -z "$new_worlds" ]; then
+    # anchors (`^` and `$`) ensure only exact match, so name containing world is not counted as a match
+    # see also <https://stackoverflow.com/questions/4709912/how-to-make-grep-only-match-if-the-entire-line-matches>
+        MT_MYWORLD_NAME="$new_worlds"
     else
-      echo "Could not find any worlds in $MT_WORLDS_DIR"
+        if [ -d "$MT_WORLDS_DIR/world" ]; then
+            echo "Could not find any new worlds in $MT_WORLDS_DIR so using '$MT_MYWORLD_NAME'"
+        else
+            echo "Could not find any worlds in $MT_WORLDS_DIR"
+        fi
     fi
-  fi
-  #if [ "$0" = "-bash" ]; then
+    #if [ "$0" = "-bash" ]; then
 #'[[' doesn't work in debian:
-  #if [[ $0 == *"$shell_name"* ]]; then
-  #doesn't work on Fedora since shell_name is blank even when in shell and not pasting:
-  #if [ "$shell_name" != "" ]; then
-  #  REPO_PATH="$HOME/GitHub/EnlivenMinetest"
-  #  MT_MYWORLD_NAME="world"
-  #  echo "You must have pasted this into terminal, so assuming MT_MYWORLD_NAME:"
-  #  echo "  $MT_MYWORLD_NAME"
-  #  echo "Press Ctrl C to cancel, otherwise $MT_MYWORLD_NAME will be used..."
-  #  #sleep 1
-  #  #echo " 3..."
-  #  #sleep 1
-  #  #echo " 2..."
-  #  sleep 1
-  #  echo " 1..."
-  #  sleep 1
-  #else
-    read -e -p "Please enter a world (name only--must be in $MT_WORLDS_DIR): " -i "$MT_MYWORLD_NAME" MT_MYWORLD_NAME
-    #$MT_DEFAULT_WORLD_NAME
-    echo using "$MT_MYWORLD_NAME"
-    #echo " 3..."
-    #sleep 1
-    #echo " 2..."
-    sleep 1
-    echo " 1..."
-    sleep 1
-  #fi
+    #if [[ $0 == *"$shell_name"* ]]; then
+    #doesn't work on Fedora since shell_name is blank even when in shell and not pasting:
+    #if [ "$shell_name" != "" ]; then
+    #    REPO_PATH="$HOME/GitHub/EnlivenMinetest"
+    #    MT_MYWORLD_NAME="world"
+    #    echo "You must have pasted this into terminal, so assuming MT_MYWORLD_NAME:"
+    #    echo "    $MT_MYWORLD_NAME"
+    #    echo "Press Ctrl C to cancel, otherwise $MT_MYWORLD_NAME will be used..."
+    #    #sleep 1
+    #    #echo " 3..."
+    #    #sleep 1
+    #    #echo " 2..."
+    #    sleep 1
+    #    echo " 1..."
+    #    sleep 1
+    #else
+        read -e -p "Please enter a world (name only--must be in $MT_WORLDS_DIR): " -i "$MT_MYWORLD_NAME" MT_MYWORLD_NAME
+        #$MT_DEFAULT_WORLD_NAME
+        echo using "$MT_MYWORLD_NAME"
+        #echo " 3..."
+        #sleep 1
+        #echo " 2..."
+        sleep 1
+        echo " 1..."
+        sleep 1
+    #fi
 else
-  #NOTE: $0 doesn't work because gives actual command (such as `./filename.sh`--gives filename only if command was `bash filename.sh`)
-  #'[[' doesn't work in debian:
-  #if [[ $0 == *"$shell_name"* ]]; then
-  #if [ "$shell_name" = "" ]; then echo "running normally (not pasted)"
-  #doesn't work on Fedora since shell_name is blank even when in shell and not pasting:
-  #if [ "$shell_name" != "" ]; then
-  #  REPO_PATH="$HOME/GitHub/EnlivenMinetest"
-  #  MT_MYWORLD_NAME="$MT_DEFAULT_WORLD_NAME"
-  #  echo "You must have pasted this into terminal, so assuming MT_MYWORLD_NAME:"
-  #  echo "  $MT_MYWORLD_NAME"
-  #else
-    ls $MT_WORLDS_DIR
-    read -p "Please enter a world [blank for $MT_DEFAULT_WORLD_NAME]: " MT_MYWORLD_NAME
-    #$MT_DEFAULT_WORLD_NAME
-    if [ -z "$MT_MYWORLD_NAME" ]; then
-      MT_MYWORLD_NAME=$MT_DEFAULT_WORLD_NAME
-    fi
-    echo using "$MT_MYWORLD_NAME"
-    echo " 3..."
-    sleep 1
-    echo " 2..."
-    sleep 1
-    echo " 1..."
-    if [ -z "$MT_MYWORLD_NAME" ]; then
-      MT_MYWORLD_NAME="$MT_DEFAULT_WORLD_NAME"
-    fi
-  #fi
+    #NOTE: $0 doesn't work because gives actual command (such as `./filename.sh`--gives filename only if command was `bash filename.sh`)
+    #'[[' doesn't work in debian:
+    #if [[ $0 == *"$shell_name"* ]]; then
+    #if [ "$shell_name" = "" ]; then echo "running normally (not pasted)"
+    #doesn't work on Fedora since shell_name is blank even when in shell and not pasting:
+    #if [ "$shell_name" != "" ]; then
+    #    REPO_PATH="$HOME/GitHub/EnlivenMinetest"
+    #    MT_MYWORLD_NAME="$MT_DEFAULT_WORLD_NAME"
+    #    echo "You must have pasted this into terminal, so assuming MT_MYWORLD_NAME:"
+    #    echo "    $MT_MYWORLD_NAME"
+    #else
+        ls $MT_WORLDS_DIR
+        read -p "Please enter a world [blank for $MT_DEFAULT_WORLD_NAME]: " MT_MYWORLD_NAME
+        #$MT_DEFAULT_WORLD_NAME
+        if [ -z "$MT_MYWORLD_NAME" ]; then
+            MT_MYWORLD_NAME=$MT_DEFAULT_WORLD_NAME
+        fi
+        echo using "$MT_MYWORLD_NAME"
+        echo " 3..."
+        sleep 1
+        echo " 2..."
+        sleep 1
+        echo " 1..."
+        if [ -z "$MT_MYWORLD_NAME" ]; then
+            MT_MYWORLD_NAME="$MT_DEFAULT_WORLD_NAME"
+        fi
+    #fi
 fi
 if [ ! -d "$MT_WORLDS_DIR/$MT_MYWORLD_NAME" ]; then
-    echo "  ERROR: failed to find world path, so cannot continue." > $err_txt
-    cat $err_txt
-    echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
-    sleep 1
-    echo " 3..."
-    sleep 1
-    echo " 2..."
-    sleep 1
-    echo " 1..."
-    sleep 1
-    exit 1
+        customDie "    ERROR: failed to find world path, so cannot continue."
 fi
 MT_MYWORLD_DIR=$MT_WORLDS_DIR/$MT_MYWORLD_NAME
 echo "Using world at $MT_MYWORLD_DIR"
@@ -311,270 +311,211 @@ WORLD_MT_PATH=$MT_MYWORLD_DIR/world.mt
 # see also https://www.shellscript.sh/functions.html
 
 reinstall_mt_game() {
-  if [ "$MT_MINETEST_GAME_PATH" = "/usr/local/share/minetest/games/minetest_game" ]; then
-    SRC_MT="$HOME/minetest"
-    if [ -d "$HOME/Downloads/minetest/games/minetest_game" ]; then
-      SRC_MT="$HOME/Downloads/minetest"
-    fi
-    if [ -d "$SRC_MT" ]; then
-      SRC_MT_GAME="$SRC_MT/games/minetest_game"
-      cd $SRC_MT_GAME
-      echo "updating $SRC_MT_GAME..."
-      git pull
-      cd
-      sudo rm -Rf "$MT_MINETEST_GAME_PATH"
-      sudo cp -R "$SRC_MT_GAME" "$USR_SHARE_MINETEST/games/"
-      if [ -d "$USR_SHARE_MINETEST/games/minetest_game" ]; then
-        echo "successfully recreated $USR_SHARE_MINETEST/games/minetest_game"
-      else
-        echo "  ERROR: failed to create $USR_SHARE_MINETEST/games/minetest_game, so cannot continue." > $err_txt
-        cat $err_txt
-        echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
-        sleep 1
-        echo " 3..."
-        sleep 1
-        echo " 2..."
-        sleep 1
-        echo " 1..."
-        sleep 1
-        exit 1
-      fi
+    if [ "$MT_MINETEST_GAME_PATH" = "/usr/local/share/minetest/games/minetest_game" ]; then
+        SRC_MT="$HOME/minetest"
+        if [ -d "$HOME/Downloads/minetest/games/minetest_game" ]; then
+            SRC_MT="$HOME/Downloads/minetest"
+        fi
+        if [ -d "$SRC_MT" ]; then
+            SRC_MT_GAME="$SRC_MT/games/minetest_game"
+            cd $SRC_MT_GAME
+            echo "updating $SRC_MT_GAME..."
+            git pull || echo "rm -Rf \"`pwd`\"  # FAILED: cd \"`pwd`\" && git pull" >> "$err_txt"
+            cd
+            sudo rm -Rf "$MT_MINETEST_GAME_PATH"
+            sudo cp -R "$SRC_MT_GAME" "$USR_SHARE_MINETEST/games/"
+            if [ -d "$USR_SHARE_MINETEST/games/minetest_game" ]; then
+                echo "successfully recreated $USR_SHARE_MINETEST/games/minetest_game"
+            else
+                customDie "failed to create $USR_SHARE_MINETEST/games/minetest_game, so cannot continue."
+            fi
+        else
+            echo "ERROR: refusing to reinstall minetest_game since missing sources (not at $HOME/minetest/games/minetest_game nor $HOME/Downloads/minetest/games/minetest_game"
+        fi
     else
-      echo "ERROR: refusing to reinstall minetest_game since missing sources (not at $HOME/minetest/games/minetest_game nor $HOME/Downloads/minetest/games/minetest_game"
+        echo "ERROR: refusing to reinstall minetest_game to packaged dir: $MT_MINETEST_GAME_PATH"
     fi
-  else
-    echo "ERROR: refusing to reinstall minetest_game to packaged dir: $MT_MINETEST_GAME_PATH"
-  fi
 }
 
 add_zip_mod()
 {
-  cd $RELEASES_PATH
-  MTMOD_DEST_NAME=$1
-  MTMOD_GOT_NAME=$2
-  URL=$3
-  MTMOD_SRC_ZIP=$MTMOD_DEST_NAME.zip
-  if [ ! -z "`ls | grep $MTMOD_GOT_NAME`" ]; then  # works with wildcard in variable
-    rm -Rf $MTMOD_GOT_NAME
-  fi
-  if [ -f $MTMOD_SRC_ZIP ]; then
-    rm -f $MTMOD_SRC_ZIP
-  fi
-  wget -O $MTMOD_SRC_ZIP $URL
-  unzip -q "$MTMOD_SRC_ZIP"
-  add_mod_from_here $MTMOD_DEST_NAME $MTMOD_GOT_NAME
+    cd $RELEASES_PATH
+    MTMOD_DEST_NAME=$1
+    MTMOD_GOT_NAME=$2
+    URL=$3
+    MTMOD_SRC_ZIP=$MTMOD_DEST_NAME.zip
+    if [ ! -z "`ls | grep $MTMOD_GOT_NAME`" ]; then    # works with wildcard in variable
+        rm -Rf $MTMOD_GOT_NAME
+    fi
+    if [ -f $MTMOD_SRC_ZIP ]; then
+        rm -f $MTMOD_SRC_ZIP
+    fi
+    wget -O $MTMOD_SRC_ZIP $URL
+    unzip -q "$MTMOD_SRC_ZIP"
+    add_mod_from_here $MTMOD_DEST_NAME $MTMOD_GOT_NAME
 }
 
 add_git_mod()
 {
-  cd $GIT_REPOS_PATH
-  MTMOD_DEST_NAME=$1
-  MTMOD_GOT_NAME=$2
-  URL=$3
-  BRANCH=$4
-  if [ ! -z "$BRANCH" ]; then
-    cd $GIT_BRANCHES_PATH
-    if [ ! -d "$BRANCH" ]; then
-      mkdir "$BRANCH"
-    fi
-    cd "$BRANCH"
-  fi
-  if [ ! -d "$MTMOD_GOT_NAME" ]; then
+    cd $GIT_REPOS_PATH
+    MTMOD_DEST_NAME=$1
+    MTMOD_GOT_NAME=$2
+    URL=$3
+    BRANCH=$4
     if [ ! -z "$BRANCH" ]; then
-      echo "BRANCH: Cloning $BRANCH branch..."
-      echo "git clone -b $BRANCH --single-branch $URL"
-      git clone -b $BRANCH --single-branch $URL
-    else
-      #echo "Cloning main branch since no branch specified: $BRANCH"
-      echo "git clone $URL"
-      git clone $URL
+        cd $GIT_BRANCHES_PATH
+        if [ ! -d "$BRANCH" ]; then
+            mkdir "$BRANCH"
+        fi
+        cd "$BRANCH"
     fi
-  else
-    cd $MTMOD_GOT_NAME
-    git pull
-    cd ..
-  fi
-  add_mod_from_here $MTMOD_DEST_NAME $MTMOD_GOT_NAME
+    if [ ! -d "$MTMOD_GOT_NAME" ]; then
+        if [ ! -z "$BRANCH" ]; then
+            echo "BRANCH: Cloning $BRANCH branch..."
+            this_git_cmd="git clone -b $BRANCH --single-branch $URL"
+            echo "$this_git_cmd"
+            git clone -b $BRANCH --single-branch $URL || echo "#FAILED: cd \"`pwd`\" && $this_git_cmd" >> "$err_txt"
+        else
+            #echo "Cloning main branch since no branch specified: $BRANCH"
+            this_git_cmd="git clone $URL"
+            echo "$this_git_cmd"
+            git clone $URL || echo "#FAILED: cd \"`pwd`\" && $this_git_cmd" >> "$err_txt"
+        fi
+    else
+        cd $MTMOD_GOT_NAME
+        echo "updating mod $MTMOD_GOT_NAME in `pwd`..."
+        git pull || echo "rm -Rf \"`pwd`\"  # FAILED: cd \"`pwd`\" && git pull" >> "$err_txt"
+        cd ..
+    fi
+    add_mod_from_here $MTMOD_DEST_NAME $MTMOD_GOT_NAME
 }
 
 add_mod_from_here()
 {
-  MTMOD_DEST_NAME=$1
-  MTMOD_GOT_NAME=$2
-  if [ ! -f "$MOD_LIST" ]; then touch "$MOD_LIST"; fi
-  echo "$MTMOD_DEST_NAME" >> "$MOD_LIST"
-  MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
-  if [ -z "$MTMOD_DEST_NAME" ]; then
-    echo "ERROR: nothing done since add_mod_from_here FAILED to receive 'MTMOD_DEST_NAME' (1st param)--this session will exit unless you press Ctrl-C to cancel script..."
-    sleep 1
-    echo "4..."
-    sleep 1
-    echo "3..."
-    sleep 1
-    echo "2..."
-    sleep 1
-    echo "1..."
-    sleep 1
-    exit 1
-  fi
-  if [ -z "$MTMOD_GOT_NAME" ]; then
-    echo "ERROR: nothing done since add_mod_from_here FAILED to receive 'MTMOD_GOT_NAME' which is the exact downloaded or unzipped folder name (2nd param)--this session will exit unless you press Ctrl-C to cancel script..."
-    sleep 1
-    echo "4..."
-    sleep 1
-    echo "3..."
-    sleep 1
-    echo "2..."
-    sleep 1
-    echo "1..."
-    sleep 1
-    exit 1
-  fi
+    MTMOD_DEST_NAME=$1
+    MTMOD_GOT_NAME=$2
+    if [ ! -f "$MOD_LIST" ]; then touch "$MOD_LIST"; fi
+    echo "$MTMOD_DEST_NAME" >> "$MOD_LIST"
+    MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+    if [ -z "$MTMOD_DEST_NAME" ]; then
+        customDie "ERROR: nothing done since add_mod_from_here FAILED to receive 'MTMOD_DEST_NAME' (1st param)"
+    fi
+    if [ -z "$MTMOD_GOT_NAME" ]; then
+        customDie "ERROR: nothing done since add_mod_from_here FAILED to receive 'MTMOD_GOT_NAME' which is the exact downloaded or unzipped folder name (2nd param)"
+    fi
 if [ ! -d "$MTMOD_DEST_PATH" ] || [ "$update_enable" = "true" ]; then
-  if [ ! -d "$MTMOD_GOT_NAME" ]; then
-    echo "ERROR: nothing done since add_mod_from_here FAILED to find '$MTMOD_GOT_NAME'--this session will exit unless you press Ctrl-C to cancel script..."
-    sleep 1
-    echo "4..."
-    sleep 1
-    echo "3..."
-    sleep 1
-    echo "2..."
-    sleep 1
-    echo "1..."
-    sleep 1
-    exit 1
-  fi
-  if [ -d "$MTMOD_DEST_PATH" ]; then
-    if [ ! -f "`command -v rsync`" ]; then
-      echo "removing old $MTMOD_DEST_PATH"
-      sudo rm -Rf "$MTMOD_DEST_PATH"
-      if [ -d "$MTMOD_DEST_PATH" ]; then
-        echo "FAILED to remove '$MTMOD_DEST_PATH'--this session will exit unless you press Ctrl-C to cancel script..."
-        sleep 1
-        echo "4..."
-        sleep 1
-        echo "3..."
-        sleep 1
-        echo "2..."
-        sleep 1
-        echo "1..."
-        sleep 1
-        exit 1
-      fi
+    if [ ! -d "$MTMOD_GOT_NAME" ]; then
+        customDie "ERROR: nothing done since add_mod_from_here FAILED to find '$MTMOD_GOT_NAME'"
     fi
-  fi
-  if [ -d "$MTMOD_GOT_NAME" ]; then
-    # outer case is for safety in case variable is blank or something
-    if [ ! -f "`command -v rsync`" ]; then
-      sudo cp -R $MTMOD_GOT_NAME "$MTMOD_DEST_PATH"
-      if [ "$show_changes" != "false" ]; then
-        echo "$MTMOD_DEST_PATH"
-      fi
+    if [ -d "$MTMOD_DEST_PATH" ]; then
+        if [ ! -f "`command -v rsync`" ]; then
+            echo "removing old $MTMOD_DEST_PATH"
+            rm -Rf "$MTMOD_DEST_PATH"
+            if [ -d "$MTMOD_DEST_PATH" ]; then
+                customDie "FAILED to remove '$MTMOD_DEST_PATH'"
+            fi
+        fi
+    fi
+    if [ -d "$MTMOD_GOT_NAME" ]; then
+        # outer case is for safety in case variable is blank or something
+        if [ ! -f "`command -v rsync`" ]; then
+            cp -R $MTMOD_GOT_NAME "$MTMOD_DEST_PATH"
+            if [ "$show_changes" != "false" ]; then
+                echo "$MTMOD_DEST_PATH"
+            fi
+        else
+            if [ ! -d "$MTMOD_DEST_PATH" ]; then
+                mkdir -p "$MTMOD_DEST_PATH"
+            fi
+            if [ "$show_changes" != "false" ]; then
+                #rsync -rtv "$MTMOD_GOT_NAME/" "$MTMOD_DEST_PATH"
+                echo "    * preview of changes (before actual sync):"
+                rsync -zvc "$MTMOD_GOT_NAME/" "$MTMOD_DEST_PATH" --dry-run | grep -v '\.git' | grep -v '\./' | grep -v 'screenshot\.png' | grep -v received | grep -v 'DRY RUN'
+            fi
+            echo "    * synchronizing..."
+            rsync -rt "$MTMOD_GOT_NAME/" "$MTMOD_DEST_PATH"
+        fi
+        if [ -d "$MTMOD_DEST_PATH/.git" ]; then
+            rm -Rf "$MTMOD_DEST_PATH/.git"
+        fi
+        if [ -f "$MTMOD_DEST_PATH/.gitignore" ]; then
+            rm -Rf "$MTMOD_DEST_PATH/.gitignore"
+        fi
+        # remove etc to make users downloading mods faster:
+        if [ -d "$MTMOD_DEST_PATH/etc" ]; then
+            rm -Rf "$MTMOD_DEST_PATH/etc"
+        fi
+        if [ -d "$MTMOD_DEST_PATH/src" ]; then
+            if [ -z "`ls $MTMOD_DEST_PATH/src/*.lua`" ]; then
+                rm -Rf "$MTMOD_DEST_PATH/src"
+            fi
+        fi
+        if [ -f "$MTMOD_DEST_PATH/screenshot.png" ]; then
+            rm -f "$MTMOD_DEST_PATH/screenshot.png"
+        fi
+    fi
+    if [ ! -d "$MTMOD_DEST_PATH" ]; then
+        customDie "    ERROR: failed to get $MTMOD_DEST_PATH, so cannot continue."
     else
-      if [ ! -d "$MTMOD_DEST_PATH" ]; then
-        sudo mkdir -p "$MTMOD_DEST_PATH"
-      fi
-      if [ "$show_changes" != "false" ]; then
-        #sudo rsync -rtv "$MTMOD_GOT_NAME/" "$MTMOD_DEST_PATH"
-        echo "  * preview of changes (before actual sync):"
-        sudo rsync -zvc "$MTMOD_GOT_NAME/" "$MTMOD_DEST_PATH" --dry-run | grep -v '\.git' | grep -v '\./' | grep -v 'screenshot\.png' | grep -v received | grep -v 'DRY RUN'
-      fi
-      echo "  * synchronizing..."
-      sudo rsync -rt "$MTMOD_GOT_NAME/" "$MTMOD_DEST_PATH"
+        echo "    [ + ] added as $MTMOD_DEST_PATH"
     fi
-    if [ -d "$MTMOD_DEST_PATH/.git" ]; then
-      sudo rm -Rf "$MTMOD_DEST_PATH/.git"
-    fi
-    if [ -f "$MTMOD_DEST_PATH/.gitignore" ]; then
-      sudo rm -Rf "$MTMOD_DEST_PATH/.gitignore"
-    fi
-    # remove etc to make users downloading mods faster:
-    if [ -d "$MTMOD_DEST_PATH/etc" ]; then
-      sudo rm -Rf "$MTMOD_DEST_PATH/etc"
-    fi
-    if [ -f "$MTMOD_DEST_PATH/screenshot.png" ]; then
-      sudo rm -f "$MTMOD_DEST_PATH/screenshot.png"
-    fi
-  fi
-  if [ ! -d "$MTMOD_DEST_PATH" ]; then
-    echo "  ERROR: failed to get $MTMOD_DEST_PATH, so cannot continue." > $err_txt
-    cat $err_txt
-    echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
-    sleep 1
-    echo " 3..."
-    sleep 1
-    echo " 2..."
-    sleep 1
-    echo " 1..."
-    sleep 1
-    exit 1
-  else
-    echo "  [ + ] added as $MTMOD_DEST_PATH"
-  fi
-  cd
-  #if [ -d GitHub/EnlivenMinetest ]; then
-  #  cd GitHub/EnlivenMinetest
-  #fi
+    cd
+    #if [ -d GitHub/EnlivenMinetest ]; then
+    #    cd GitHub/EnlivenMinetest
+    #fi
 else
-  echo " [ ~ ] skipped existing $MTMOD_DEST_PATH"
+    echo " [ ~ ] skipped existing $MTMOD_DEST_PATH"
 fi
 }
 
 remove_mod()
 {
-  cd $HOME/Downloads
-  MTMOD_DEST_NAME=$1
-  MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
-  if [ -d "$MTMOD_DEST_PATH" ]; then
-    sudo rm -Rf "$MTMOD_DEST_PATH"
+    cd $HOME/Downloads
+    MTMOD_DEST_NAME=$1
+    MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
     if [ -d "$MTMOD_DEST_PATH" ]; then
-      echo "  ERROR in remove_mod: failed to remove $MTMOD_DEST_PATH, so cannot continue." > $err_txt
-      cat $err_txt
-      echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
-      sleep 1
-      echo " 3..."
-      sleep 1
-      echo " 2..."
-      sleep 1
-      echo " 1..."
-      sleep 1
-      exit 1
+        rm -Rf "$MTMOD_DEST_PATH"
+        if [ -d "$MTMOD_DEST_PATH" ]; then
+            echo "    ERROR in remove_mod: failed to remove $MTMOD_DEST_PATH, so cannot continue." > $err_txt
+            cat $err_txt
+        else
+            echo "    [ - ] removed $MTMOD_DEST_PATH"
+        fi
     else
-      echo "  [ - ] removed $MTMOD_DEST_PATH"
+        echo "    [ - ] already not present: $MTMOD_DEST_PATH"
     fi
-  else
-    echo "  [ - ] already not present: $MTMOD_DEST_PATH"
-  fi
-  cd
-  #if [ -d GitHub/EnlivenMinetest ]; then
-  #  cd GitHub/EnlivenMinetest
-  #fi
+    cd
+    #if [ -d GitHub/EnlivenMinetest ]; then
+    #    cd GitHub/EnlivenMinetest
+    #fi
 }
 #echo "MT_MYGAME_MODS_PATH: $MT_MYGAME_MODS_PATH"
 echo
 echo
 echo "To preconfigure, write true or false to files in $CONFIG_PATH named:"
-echo "  local_enable"
-#echo "  version_0_5_enable"
+echo "    local_enable"
+#echo "    version_0_5_enable"
 echo
 echo "Using following configuration:"
 #if [ -z "$version_0_5_enable" ]; then
-#  echo "  version_0_5_enable: (auto--set this var before pasting region into terminal)"
+#    echo "    version_0_5_enable: (auto--set this var before pasting region into terminal)"
 #else
-echo "  version_0_5_enable: $version_0_5_enable"
+echo "    version_0_5_enable: $version_0_5_enable"
 #fi
 if [ -z "$local_enable" ]; then
-  echo "  local_enable: (auto--set this var before pasting region into terminal)"
+    echo "    local_enable: (auto--set this var before pasting region into terminal)"
 else
-  echo "  local_enable: $local_enable"
+    echo "    local_enable: $local_enable"
 fi
-echo "  USR_SHARE_MINETEST: $USR_SHARE_MINETEST"
-echo "  MT_MYGAME_DIR: $MT_MYGAME_DIR"
-echo "  MT_WORLDS_DIR: $MT_WORLDS_DIR"
-echo "  MT_MYWORLD_NAME: $MT_MYWORLD_NAME"
-echo "  MT_MINETEST_GAME_PATH: $MT_MINETEST_GAME_PATH"
+echo "    USR_SHARE_MINETEST: $USR_SHARE_MINETEST"
+echo "    MT_MYGAMES_DIR: $MT_MYGAMES_DIR"
+echo "    MT_MYGAME_DIR: $MT_MYGAME_DIR"
+echo "    MT_WORLDS_DIR: $MT_WORLDS_DIR"
+echo "    MT_MYWORLD_NAME: $MT_MYWORLD_NAME"
+echo "    MT_MINETEST_GAME_PATH: $MT_MINETEST_GAME_PATH"
 if [ ! -f "`command -v rsync`" ]; then
-  echo
-  echo "The 'rsync' command was not found. Installing rsync will reduce writes to drive if you run install methods (as all use add_mod_from_here) more than once for the same mod."
-  echo
+    echo
+    echo "The 'rsync' command was not found. Installing rsync will reduce writes to drive if you run install methods (as all use add_mod_from_here) more than once for the same mod."
+    echo
 fi
+echo "# * minetestenv.rc finished loading." >> "$err_txt"

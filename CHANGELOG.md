@@ -1,5 +1,22 @@
 # Changelog
 
+## [git] - 2019-05-29
+### Added
+(minetestenv.rc and utilities/deprecated/install-ENLIVEN-minetest_game.sh
+* MT_MYGAMES_DIR (~/.minetest/games)
+
+### Changed
+(minetestenv.rc and utilities/deprecated/install-ENLIVEN-minetest_game.sh
+* install game as non-root always
+  - MT_MYGAME_DIR from `$SYSTEM_MT_GAMES_DIR/$MT_MYGAME_NAME`
+    to `$MT_MYGAMES_DIR/$MT_MYGAME_NAME` (`$MT_MYGAMES_DIR/ENLIVEN`)
+  - renamed MT_GAMES_DIR to SYSTEM_MT_GAMES_DIR
+  - MT_BACKUP_GAMES_DIR from `$HOME/Backup$USR_SHARE_MINETEST/games`
+    to `$HOME/.minetest/games-disabled`
+  - MT_MYGAME_BAK from `$USR_SHARE_MINETEST/ENLIVEN_BAK`
+    to `$MT_BACKUP_GAMES_DIR/ENLIVEN_BAK`
+
+
 ## [git] - 2018-03-27
 ### Added
 * overrides for world.conf and world.mt (only if you have the directory

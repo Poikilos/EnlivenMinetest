@@ -9,23 +9,23 @@
 # Mods were found at https://forum.minetest.net/viewforum.php?f=11
 # (Ubuntu 14.04 Trusty Tahr Server) folders were found using:
 # cd /
-# sudo find -name 'worlds' (worlds folder is in $HOME/.minetest)
-# sudo find -name 'minimal' (stable build [such as 0.4.9 games folder is /usr/share/games/minetest/games, but git version games folder is /usr/local/share/minetest/games)
+# find -name 'worlds' (worlds folder is in $HOME/.minetest)
+# find -name 'minimal' (stable build [such as 0.4.9 games folder is /usr/share/games/minetest/games, but git version games folder is /usr/local/share/minetest/games)
 
 # ISSUES:
 # * ERROR[Main]: Singleplayer mode says following mods could not be found: 3d_armor areas mobs mobs_animal mobs_monster protector technic treasurer unified_inventory xban2
 # * update git discarding local changes:
-#   (see https://stackoverflow.com/questions/4157189/git-pull-while-ignoring-local-changes)
-#   git fetch --all
-#   git reset --hard origin/master
-#   git pull
-#   #"even works when u have committed ur local changes, but still u want to revert" -agsachin
+#     (see https://stackoverflow.com/questions/4157189/git-pull-while-ignoring-local-changes)
+#     git fetch --all
+#     git reset --hard origin/master
+#     git pull
+#     #"even works when u have committed ur local changes, but still u want to revert" -agsachin
 #
-#   #git reset --hard
-#   #git pull
-#   #git clean -xdf
-#   #-f remove untracked files, -d remove untracked directories, -x remove untracked OR ignored
-sudo echo "starting ENLIVEN installer script..."
+#     #git reset --hard
+#     #git pull
+#     #git clean -xdf
+#     #-f remove untracked files, -d remove untracked directories, -x remove untracked OR ignored
+echo "starting ENLIVEN installer script..."
 
 
 
@@ -35,25 +35,39 @@ sudo echo "starting ENLIVEN installer script..."
 
 #region paste this part into terminal to get some great environment variables
 if [ ! -f minetestenv.rc ]; then
-  if [ -f "$HOME/GitHub/EnlivenMinetest" ]; then
-    cd "$HOME/GitHub/EnlivenMinetest"
-  elif [ -f "$HOME/git/EnlivenMinetest" ]; then
-    cd "$HOME/git/EnlivenMinetest"
-  elif [ -f "$HOME/Documents/GitHub/EnlivenMinetest" ]; then
-    cd "$HOME/Documents/GitHub/EnlivenMinetest"
-  fi
+    echo "* No minetestenv.rc, so looking for EnlivenMinetest..."
+    if [ -d "$HOME/git/EnlivenMinetest" ]; then
+        echo "Detected $HOME/git/EnlivenMinetest"
+        cd "$HOME/git/EnlivenMinetest"
+    elif [ -d "$HOME/Documents/GitHub/EnlivenMinetest" ]; then
+        echo "Detected $HOME/Documents/GitHub/EnlivenMinetest"
+        cd "$HOME/Documents/GitHub/EnlivenMinetest"
+    elif [ -d "$HOME/GitHub/EnlivenMinetest" ]; then
+        echo "Detected $HOME/GitHub/EnlivenMinetest"
+        cd "$HOME/GitHub/EnlivenMinetest"
+    fi
 fi
 if [ ! -f minetestenv.rc ]; then
-  echo "ERROR: Nothing done since missing minetestenv.rc (must be in same directory). Press Ctrl-C or allow this session to exit."
-  sleep 5
-  exit 1
+    # NOTE: customDie is not defined until after this clause.
+    echo "ERROR: Nothing done since missing minetestenv.rc (must be in same directory or '$HOME/git/EnlivenMinetest' or '`pwd`')."
+    echo "This session will exit unless you press Ctrl-C to cancel script..."
+    sleep 1
+    echo "4..."
+    sleep 1
+    echo "3..."
+    sleep 1
+    echo "2..."
+    sleep 1
+    echo "1..."
+    sleep 1
+    exit 1
 fi
 source minetestenv.rc
 #endregion paste this part into terminal to get some great environment variables
 
 
 if [ -f "$MOD_LIST" ]; then
-  rm -f "$MOD_LIST"
+    rm -f "$MOD_LIST"
 fi
 ls "$MT_MINETEST_GAME_PATH/mods" > "$MOD_LIST"
 
@@ -66,64 +80,67 @@ ls "$MT_MINETEST_GAME_PATH/mods" > "$MOD_LIST"
 
 
 if [ ! -f "`command -v minetestmapper`" ]; then
-  echo "getting minetestmapper..."
-  if [ -f "`command -v apt`" ]; then
-    sudo apt -y install libgd-dev libsqlite3-dev libleveldb-dev libhiredis-dev libpq-dev
-  else
-    if [ -f "`command -v dnf`" ]; then
-      echo "installing deps for minetestmapper via dnf..."
-      sudo dnf -y install gd-devel sqlite-devel leveldb-devel hiredis-devel postgresql-devel
+    echo "getting minetestmapper..."
+    if [ -f "`command -v apt`" ]; then
+        sudo apt -y install libgd-dev libsqlite3-dev libleveldb-dev libhiredis-dev libpq-dev
     else
-      if [ -f "`command -v pacman`" ]; then
-        echo "installing deps for minetestmapper via pacman..."
-        sudo pacman -Syyu --noconfirm gd sqlite leveldb hiredis postgresql #postgresql-libs
-      else
-        echo "ERROR: packager is unknown--manually get deps (gd-devel sqlite-devel leveldb-devel hiredis-devel postgresql-devel) then run again."
-      fi
+        if [ -f "`command -v dnf`" ]; then
+            echo "installing deps for minetestmapper via dnf..."
+            sudo dnf -y install gd-devel sqlite-devel leveldb-devel hiredis-devel postgresql-devel
+        else
+            if [ -f "`command -v pacman`" ]; then
+                echo "installing deps for minetestmapper via pacman..."
+                sudo pacman -Syyu --noconfirm gd sqlite leveldb hiredis postgresql #postgresql-libs
+            else
+                echo "ERROR: packager is unknown--manually get deps (gd-devel sqlite-devel leveldb-devel hiredis-devel postgresql-devel) then run again."
+            fi
+        fi
     fi
-  fi
-  cd ~/Downloads
-  if [ -d minetestmapper ]; then
-    rm -Rf minetestmapper
-  fi
-  git clone https://github.com/minetest/minetestmapper.git
-  cd minetestmapper
-  cmake . -DENABLE_LEVELDB=1
-  make -j2
-  if [ -f minetestmapper ]; then
-    sudo cp -f minetestmapper /usr/local/bin/
-  else
-    echo "FAILED to compile minetestmapper--python version will be used"
-  fi
+    cd ~/Downloads
+    if [ -d minetestmapper ]; then
+        rm -Rf minetestmapper
+    fi
+    this_git_url="https://github.com/minetest/minetestmapper.git"
+    git clone $this_git_url || echo "#FAILED: cd \"`pwd`\" && git clone $this_git_url" >> "$err_txt"
+    cd minetestmapper
+    cmake . -DENABLE_LEVELDB=1
+    make -j2
+    if [ -f minetestmapper ]; then
+        sudo cp -f minetestmapper /usr/local/bin/
+    else
+        echo "FAILED to compile minetestmapper--python version will be used"
+    fi
 fi
 
 if [ -d /tmp/local_mts_user ]; then
-  # handle paranoia about directory with similar name
-  rm -Rf /tmp/local_mts_user
+    # handle paranoia about directory with similar name
+    rm -Rf /tmp/local_mts_user
 fi
 echo $USER > /tmp/local_mts_user
-# BACKUP world.mt:
+
 # workaround bug in earlier version of installer
-sudo chown `cat /tmp/local_mts_user` "$MT_MYWORLD_DIR/world.mt"
-if [ -f "$MT_MYWORLD_DIR/world.mt.1st" ]; then
-  # workaround bug in earlier version of installer
-  sudo chown `cat /tmp/local_mts_user` "$MT_MYWORLD_DIR/world.mt.1st"
-fi
+#sudo chown `cat /tmp/local_mts_user` "$MT_MYWORLD_DIR/world.mt"
+#if [ -f "$MT_MYWORLD_DIR/world.mt.1st" ]; then
+#    # workaround bug in earlier version of installer
+#    sudo chown `cat /tmp/local_mts_user` "$MT_MYWORLD_DIR/world.mt.1st"
+#fi
+
+# BACKUP world.mt:
 if [ ! -d "$MT_MYGAME_DIR" ]; then
-  sudo mkdir "$MT_MYGAME_DIR"
-  show_changes="false"
-else
-  # workaround bug in earlier version of installer
-  sudo chown -R `cat /tmp/local_mts_user` "$MT_MYGAME_DIR"
+    mkdir "$MT_MYGAME_DIR" || customDie "$USER cannot mkdir '$MT_MYGAME_DIR' (make sure the directory containing it exists)"
+    show_changes="false"
+#else
+#    # workaround bug in earlier version of installer
+#    sudo chown -R `cat /tmp/local_mts_user` "$MT_MYGAME_DIR"
 fi
 if [ -f "$MT_MYWORLD_DIR/world.mt.1st" ]; then
-  echo "Already backed up world.mt to $MT_MYWORLD_DIR/world.mt.1st"
+    echo "Already backed up world.mt to $MT_MYWORLD_DIR/world.mt.1st"
 else
-  cp "$MT_MYWORLD_DIR/world.mt" "$MT_MYWORLD_DIR/world.mt.1st"
-  echo "The original world.mt is now backed up at $MT_MYWORLD_DIR/world.mt.1st"
+    cp "$MT_MYWORLD_DIR/world.mt" "$MT_MYWORLD_DIR/world.mt.1st"
+    echo "The original world.mt is now backed up at $MT_MYWORLD_DIR/world.mt.1st"
 fi
 if [ -f "$MT_MYWORLD_DIR/world.mt" ]; then
-  mv -f "$MT_MYWORLD_DIR/world.mt" "$MT_MYWORLD_DIR/world.mt.bak"
+    mv -f "$MT_MYWORLD_DIR/world.mt" "$MT_MYWORLD_DIR/world.mt.bak"
 fi
 
 
@@ -135,13 +152,13 @@ configfile="$WORLD_MT_PATH" # set the actual path name of your (DOS or Unix) con
 tr -d '\r' < $configfile > $configfile.unix
 while IFS='= ' read -r lhs rhs
 do
-    if [[ ! $lhs =~ ^\ *# && -n $lhs ]]; then
-        rhs="${rhs%%\#*}"    # Del in line right comments
-        rhs="${rhs%%*( )}"   # Del trailing spaces
-        rhs="${rhs%\"*}"     # Del opening string quotes
-        rhs="${rhs#\"*}"     # Del closing string quotes
-        declare world_mt_var_$lhs="$rhs"
-    fi
+        if [[ ! $lhs =~ ^\ *# && -n $lhs ]]; then
+                rhs="${rhs%%\#*}"  # Del in line right comments
+                rhs="${rhs%%*( )}" # Del trailing spaces
+                rhs="${rhs%\"*}"   # Del opening string quotes
+                rhs="${rhs#\"*}"   # Del closing string quotes
+                declare world_mt_var_$lhs="$rhs"
+        fi
 done < $configfile.unix
 
 
@@ -149,16 +166,16 @@ done < $configfile.unix
 
 # REMAKE world.mt
 cd
-if [ -f "$WORLD_MT_PATH" ]; then
-  # workaround bug in earlier version of installer
-  sudo chown `cat /tmp/local_mts_user` "$WORLD_MT_PATH"
-  sudo chgrp `cat /tmp/local_mts_user` "$WORLD_MT_PATH"
-fi
+#if [ -f "$WORLD_MT_PATH" ]; then
+#    # workaround bug in earlier version of installer
+#    sudo chown `cat /tmp/local_mts_user` "$WORLD_MT_PATH"
+#    sudo chgrp `cat /tmp/local_mts_user` "$WORLD_MT_PATH"
+#fi
 echo "gameid = $MT_MYGAME_NAME" > "$WORLD_MT_PATH"
 #if ! grep -q "backend =" "$WORLD_MT_PATH"; then
 if [ -z "$world_mt_var_backend" ]; then
-  echo "has no backend, setting leveldb..."
-  echo "backend = leveldb" >> "$WORLD_MT_PATH"
+    echo "has no backend, setting leveldb..."
+    echo "backend = leveldb" >> "$WORLD_MT_PATH"
 fi
 #if ! grep -q "backend" "$WORLD_MT_PATH"; then
 if [ -z "$world_mt_var_player_backend" ]; then
@@ -168,89 +185,84 @@ fi
 
 #only for BadCommand's teleporter mod https://forum.minetest.net/viewtopic.php?id=2149 (NOT for travelnet) but probably should go in minetest.conf in subgame's directory, not in world.mt
 #if [ -d "$MT_MYGAME_MODS_PATH" ]; then
-#  echo "teleport_perms_to_build = false" >> "$WORLD_MT_PATH"
-#  echo "teleport_perms_to_configure = false" >> "$WORLD_MT_PATH"
-#  echo "teleport_requires_pairing = true" >> "$WORLD_MT_PATH"
-#  echo "teleport_pairing_check_radius = 2" >> "$WORLD_MT_PATH"
-#  echo "teleport_default_coordinates = 0,0,0" >> "$WORLD_MT_PATH"
+#    echo "teleport_perms_to_build = false" >> "$WORLD_MT_PATH"
+#    echo "teleport_perms_to_configure = false" >> "$WORLD_MT_PATH"
+#    echo "teleport_requires_pairing = true" >> "$WORLD_MT_PATH"
+#    echo "teleport_pairing_check_radius = 2" >> "$WORLD_MT_PATH"
+#    echo "teleport_default_coordinates = 0,0,0" >> "$WORLD_MT_PATH"
 #fi
 
 #MT_MYGAME_DIR (a Minetest "game") is the equivalent of a Minecraft modpack, however, in this case it is actually a collection of mods and modpacks, either of which can be in the mods folder
 
 #cd
 if [ ! -d "$HOME/Downloads" ]; then
-  mkdir "$HOME/Downloads"
+    mkdir "$HOME/Downloads"
 fi
 cd "$HOME/Downloads"
 
-if [ -d "$MT_MYGAME_BAK" ];
-then
-  echo "already backed up to $MT_MYGAME_BAK"
+if [ -d "$MT_MYGAME_BAK" ]; then
+    echo "already backed up to $MT_MYGAME_BAK"
 else
-  sudo mv "$MT_MYGAME_DIR" "$MT_MYGAME_BAK"
-  if [ ! -d "$MT_MYGAME_DIR" ]; then
-    sudo mkdir "$MT_MYGAME_DIR"
-  fi
+    mv "$MT_MYGAME_DIR" "$MT_MYGAME_BAK"
+    if [ ! -d "$MT_MYGAME_DIR" ]; then
+        mkdir "$MT_MYGAME_DIR"
+    fi
 fi
 
 #sudo mkdir "$MT_MYGAME_DIR"
 #sudo mkdir "$MT_MYGAME_MODS_PATH"
 if [ ! -d "$MT_MYGAME_DIR/" ]; then
-  echo "ERROR: failed to create $MT_MYGAME_DIR, so cannot continue." > $err_txt
-  cat $err_txt
-  echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
-  sleep 1
-  echo " 3..."
-  sleep 1
-  echo " 2..."
-  sleep 1
-  echo " 1..."
-  sleep 1
-  exit 1
+    customDie "ERROR: failed to create $MT_MYGAME_DIR, so cannot continue."
 fi
 #sudo cp -R $USR_SHARE_MINETEST/games/$mtgame_name/mods/* "$MT_MYGAME_DIR/mods/"
-sudo cp -Rf $MT_MINETEST_GAME_PATH/* "$MT_MYGAME_DIR/"
-
+if [ -f "`command -v rsync`" ]; then
+    rsync -Rf $MT_MINETEST_GAME_PATH/* "$MT_MYGAME_DIR/"
+else
+    cp -Rf $MT_MINETEST_GAME_PATH/* "$MT_MYGAME_DIR/"
+fi
 
 
 #sudo su -
 #WRITEABLE_MINETEST_CONF=$USR_SHARE_MINETEST/games/$MT_MYGAME_NAME/minetest.conf
-WRITEABLE_MINETEST_CONF=$HOME/minetest.conf
+#WRITEABLE_MINETEST_CONF=$HOME/minetest.conf
+MYGAME_MINETEST_CONF=$MT_MYGAME_DIR/minetest.conf
 #rm -f "$HOME/minetest.conf"
-rm -f "$HOME/minetest.conf"
-if [ ! -f "$USR_SHARE_MINETEST/games/$MT_MYGAME_NAME/minetest.conf" ]; then
-  sudo cp "$USR_SHARE_MINETEST/games/$mtgame_name/minetest.conf" "$USR_SHARE_MINETEST/games/$MT_MYGAME_NAME/minetest.conf.1st"
+if [ ! -f "$MT_MYGAME_DIR/minetest.conf.1st" ]; then
+    mv "$MYGAME_MINETEST_CONF" "$MT_MYGAME_DIR/minetest.conf.1st"
+else
+    rm -f "$MYGAME_MINETEST_CONF"
 fi
 if [ -f "$USR_SHARE_MINETEST/games/$mtgame_name/minetest.conf" ]; then
-  cp -f "$USR_SHARE_MINETEST/games/$mtgame_name/minetest.conf" "$WRITEABLE_MINETEST_CONF"
+    cp -f "$USR_SHARE_MINETEST/games/$mtgame_name/minetest.conf" "$MYGAME_MINETEST_CONF"
 else
-  touch "$WRITEABLE_MINETEST_CONF"
+    touch "$MYGAME_MINETEST_CONF"
 fi
+echo "enable_lapis_mod_columns = true" >> "$MYGAME_MINETEST_CONF"
 #4080 since boundaries in chunkymap/singleimage.py (to be compatible with approximate browser max image size) are -4096 to 4096
-echo "map_generation_limit = 4096" >> "$WRITEABLE_MINETEST_CONF"
+echo "map_generation_limit = 4096" >> "$MYGAME_MINETEST_CONF"
 #NOTE: map_generation_limit (aka world boundary, world border, or world limit) must be divisible by 64, so for example, 5000 results in invisible wall at 4928
-echo "protector_radius = 7" >> "$WRITEABLE_MINETEST_CONF"
-echo "protector_flip = true" >> "$WRITEABLE_MINETEST_CONF"
-echo "protector_pvp = true" >> "$WRITEABLE_MINETEST_CONF"
-echo "protector_pvp_spawn = 10" >> "$WRITEABLE_MINETEST_CONF"
-echo "protector_drop = false" >> "$WRITEABLE_MINETEST_CONF"
-echo "protector_hurt = 3" >> "$WRITEABLE_MINETEST_CONF"
-echo "#optional:" >> "$WRITEABLE_MINETEST_CONF"
-echo "map_generation_limit = 5000" >> "$WRITEABLE_MINETEST_CONF"
-echo "#only for worldedge mod:" >> "$WRITEABLE_MINETEST_CONF"
-echo "world_edge = 5000" >> "$WRITEABLE_MINETEST_CONF"
-echo "default_privs = interact,shout,home" >> "$WRITEABLE_MINETEST_CONF"
-echo "max_users = 50" >> "$WRITEABLE_MINETEST_CONF"
-echo "motd = \"Actions and chat messages are logged. Use inventory to see recipes (use web for live map if available).\""  >> "$WRITEABLE_MINETEST_CONF"
-echo "disallow_empty_passwords = true" >> "$WRITEABLE_MINETEST_CONF"
-echo "secure.trusted_mods = advanced_npc" >> "$WRITEABLE_MINETEST_CONF"
-echo "server_dedicated = false" >> "$WRITEABLE_MINETEST_CONF"
-#echo "hudbars_bar_type = statbar_modern" >> "$WRITEABLE_MINETEST_CONF"  #TODO: remove this after fully deprecated
+echo "protector_radius = 7" >> "$MYGAME_MINETEST_CONF"
+echo "protector_flip = true" >> "$MYGAME_MINETEST_CONF"
+echo "protector_pvp = true" >> "$MYGAME_MINETEST_CONF"
+echo "protector_pvp_spawn = 10" >> "$MYGAME_MINETEST_CONF"
+echo "protector_drop = false" >> "$MYGAME_MINETEST_CONF"
+echo "protector_hurt = 3" >> "$MYGAME_MINETEST_CONF"
+echo "#optional:" >> "$MYGAME_MINETEST_CONF"
+echo "map_generation_limit = 5000" >> "$MYGAME_MINETEST_CONF"
+echo "#only for worldedge mod:" >> "$MYGAME_MINETEST_CONF"
+echo "world_edge = 5000" >> "$MYGAME_MINETEST_CONF"
+echo "default_privs = interact,shout,home" >> "$MYGAME_MINETEST_CONF"
+echo "max_users = 50" >> "$MYGAME_MINETEST_CONF"
+echo "motd = \"Actions and chat messages are logged. Use inventory to see recipes (use web for live map if available).\""    >> "$MYGAME_MINETEST_CONF"
+echo "disallow_empty_passwords = true" >> "$MYGAME_MINETEST_CONF"
+echo "secure.trusted_mods = advanced_npc" >> "$MYGAME_MINETEST_CONF"
+echo "server_dedicated = false" >> "$MYGAME_MINETEST_CONF"
+#echo "hudbars_bar_type = statbar_modern" >> "$MYGAME_MINETEST_CONF"  #TODO: remove this after fully deprecated
 
 #region sprint settings only for hbsprint (NOT GunshipPenguin sprint)
-echo "sprint_speed = 2.25" >> "$WRITEABLE_MINETEST_CONF"  # default is 1.3
-echo "sprint_jump = 1.25" >> "$WRITEABLE_MINETEST_CONF"  # default is 1.1
-echo "sprint_stamina_drain = .5" >> "$WRITEABLE_MINETEST_CONF"  # default is 2
+echo "sprint_speed = 2.25" >> "$MYGAME_MINETEST_CONF"  # default is 1.3
+echo "sprint_jump = 1.25" >> "$MYGAME_MINETEST_CONF"  # default is 1.1
+echo "sprint_stamina_drain = .5" >> "$MYGAME_MINETEST_CONF"  # default is 2
 #endregion sprint settings only for hbsprint (NOT GunshipPenguin sprint)
 #TODO: possibly fork and do pull request for configuring GunshipPenguin sprint's hard-coded variables in init.lua:
 #SPRINT_METHOD = 1
@@ -259,47 +271,32 @@ echo "sprint_stamina_drain = .5" >> "$WRITEABLE_MINETEST_CONF"  # default is 2
 #SPRINT_STAMINA = 20
 #SPRINT_TIMEOUT = 0.5 --Only used if SPRINT_METHOD = 0
 
-echo "bones_position_message = true" >> "$WRITEABLE_MINETEST_CONF"  # default is false--this is for client-side chat message (server-side logging always on though)
+echo "bones_position_message = true" >> "$MYGAME_MINETEST_CONF"  # default is false--this is for client-side chat message (server-side logging always on though)
 #no longer needed since these mods check for player_api to determine whether v3 model is used:
 #TODO: below must go in the one in the subgame folder!
 if [ "$version_0_5_enable" = "true" ]; then
-#  echo "player_model_version = default_character_v3" >> "$WRITEABLE_MINETEST_CONF"  # formerly used by playeranim
-   echo "playeranim.model_version = MTG_4_Nov_2017" >> "$WRITEABLE_MINETEST_CONF"  # used by playeranim
-   echo "using version 5 branch of mods..."
+#    echo "player_model_version = default_character_v3" >> "$MYGAME_MINETEST_CONF"  # formerly used by playeranim
+    echo "playeranim.model_version = MTG_4_Nov_2017" >> "$MYGAME_MINETEST_CONF"  # used by playeranim
+    echo "using version 5 branch of mods..."
 else
-#  echo "player_model_version = default_character_v2" >> "$WRITEABLE_MINETEST_CONF"  # formerly used by playeranim
-   echo "playeranim.model_version = MTG_4_Jun_2017" >> "$WRITEABLE_MINETEST_CONF"  # used by playeranim
-   echo "using stable (minetest 0.4) branch of mods..."
-   echo "3..."
-   sleep 1
-   echo "2..."
-   sleep 1
-   echo "1..."
-   sleep 1
+#    echo "player_model_version = default_character_v2" >> "$MYGAME_MINETEST_CONF"  # formerly used by playeranim
+    echo "playeranim.model_version = MTG_4_Jun_2017" >> "$MYGAME_MINETEST_CONF"  # used by playeranim
+    echo "using stable (minetest 0.4) branch of mods..."
+    echo "3..."
+    sleep 1
+    echo "2..."
+    sleep 1
+    echo "1..."
+    sleep 1
 fi
-sudo mv -f $WRITEABLE_MINETEST_CONF "$USR_SHARE_MINETEST/games/$MT_MYGAME_NAME/minetest.conf"
+#sudo mv -f $WRITEABLE_MINETEST_CONF "$USR_SHARE_MINETEST/games/$MT_MYGAME_NAME/minetest.conf"
 
-if [ -f "$MT_MYGAME_DIR/game.conf.1st" ]; then
-  echo "Already backed up $MT_MYGAME_DIR/game.conf to $MT_MYGAME_DIR/game.conf.1st"
+if [ ! -f "$MT_MYGAME_DIR/game.conf.1st" ]; then
+    cp "$MT_MYGAME_DIR/game.conf" "$MT_MYGAME_DIR/game.conf.1st"
 else
-  sudo cp "$MT_MYGAME_DIR/game.conf" "$MT_MYGAME_DIR/game.conf.1st"
+    echo "* Already backed up $MT_MYGAME_DIR/game.conf to $MT_MYGAME_DIR/game.conf.1st"
 fi
-echo "name = $MT_MYGAME_NAME" > "$HOME/game.conf"
-sudo mv -f "$HOME/game.conf" "$MT_MYGAME_DIR/game.conf"
-#su -
-#FAILS: echo "name = $MT_MYGAME_NAME" > "$MT_MYGAME_DIR/game.conf"
-#sudo nano "$MT_MYGAME_DIR/game.conf"
-echo ""
-echo "You should see $MT_MYGAME_NAME in the list below if the game was configured properly:"
-if [ -f "`command -v minetestserver`" ]; then
-  minetestserver --gameid list
-elif [ -f "`command -v minetest`" ]; then
-  minetest --gameid list
-else
-  echo "WARNING: neither minetestserver nor minetest is in the system path"
-fi
-echo ""
-
+echo "name = $MT_MYGAME_NAME" > "$MT_MYGAME_DIR/game.conf"
 
 #region UTILITY MODS
 # https://forum.minetest.net/viewtopic.php?f=11&t=12440&p=310915#p310915
@@ -358,130 +355,112 @@ add_git_mod mobs_sky mobs_sky https://github.com/poikilos/mobs_sky.git
 
 spawners_enable="true"
 if [ "$spawners_enable" = "true" ]; then
-  # forum_url: https://forum.minetest.net/viewtopic.php?f=11&t=13857
-    # description:
-    # * NO LONGER REPLACES pyramids.
-    # * Works with mobs_redo and creatures.
-    # * optionally makes use of fire (in minetest_game; only uses fire:flint_and_steel), mobs, creatures, bones, xpanes (now part of minetest_game)
-    # * only RECIPES require fake_fire and xpanes
-    # * NOW (2017-2018) IS A MODPACK: formerly was a mod named spawners, now is a modpack containing:
-    #   * spawners_env: appears in Dungeons and Temples (the pink stone ones); spawns hostile mobs; has small chance of spawning a spawner
-    #   * spawners_mobs: spawns non-hostile mobs
-    #   * spawners_ores: spawns ores
-    #add_zip_mod spawners minetest_gamers-spawners-* https://bitbucket.org/minetest_gamers/spawners/get/master.zip
-    add_git_mod spawners spawners https://bitbucket.org/minetest_gamers/spawners.git
-    MTMOD_DEST_NAME=spawners/spawners_ores
-    MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
-    if [ -d "$MTMOD_DEST_PATH" ]; then
-      echo "removing $MTMOD_DEST_NAME..."
-      sudo rm -Rf "$MTMOD_DEST_PATH"
-    else
-      echo "ERROR: could not find $MTMOD_DEST_PATH for removal, so cancelling ENLIVEN install"
-      echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
-      sleep 1
-      echo " 3..."
-      sleep 1
-      echo " 2..."
-      sleep 1
-      echo " 1..."
-      sleep 1
-      exit 1
-    fi
-    if [ -d "$MTMOD_DEST_PATH" ]; then
-      echo "ERROR: could not remove $MTMOD_DEST_PATH for removal, so cancelling ENLIVEN install"
-      echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
-      sleep 1
-      echo " 3..."
-      sleep 1
-      echo " 2..."
-      sleep 1
-      echo " 1..."
-      sleep 1
-      exit 1
-    fi
+    # forum_url: https://forum.minetest.net/viewtopic.php?f=11&t=13857
+        # description:
+        # * NO LONGER REPLACES pyramids.
+        # * Works with mobs_redo and creatures.
+        # * optionally makes use of fire (in minetest_game; only uses fire:flint_and_steel), mobs, creatures, bones, xpanes (now part of minetest_game)
+        # * only RECIPES require fake_fire and xpanes
+        # * NOW (2017-2018) IS A MODPACK: formerly was a mod named spawners, now is a modpack containing:
+        #     * spawners_env: appears in Dungeons and Temples (the pink stone ones); spawns hostile mobs; has small chance of spawning a spawner
+        #     * spawners_mobs: spawns non-hostile mobs
+        #     * spawners_ores: spawns ores
+        #add_zip_mod spawners minetest_gamers-spawners-* https://bitbucket.org/minetest_gamers/spawners/get/master.zip
+        add_git_mod spawners spawners https://bitbucket.org/minetest_gamers/spawners.git
+        MTMOD_DEST_NAME=spawners/spawners_ores
+        MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+        if [ -d "$MTMOD_DEST_PATH" ]; then
+            echo "removing $MTMOD_DEST_NAME..."
+            rm -Rf "$MTMOD_DEST_PATH"
+        else
+            customDie "ERROR: could not find $MTMOD_DEST_PATH for removal, so cancelling ENLIVEN install"
+        fi
+        if [ -d "$MTMOD_DEST_PATH" ]; then
+            customDie "ERROR: could not remove $MTMOD_DEST_PATH for removal, so cancelling ENLIVEN install"
+        fi
 
-    #defaults are:
-    #SPAWN_PYRAMIDS = false
-    #SPAWNERS_GENERATE = true
-    #CHESTS_GENERATE = false
-    MTMOD_DEST_NAME=spawners/spawners_env
-    MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
-    cd /tmp
-    echo "SPAWN_PYRAMIDS = true" > settings.txt
-    echo "SPAWNERS_GENERATE = true" >> settings.txt
-    echo "CHESTS_GENERATE = false" >> settings.txt
-    sudo mv settings.txt "$MTMOD_DEST_PATH/"  # formerly $MT_MYGAME_MODS_PATH/spawners/, now is spawners/spawners_env/
-    echo "NOTE: in spawners, only SPAWNERS_GENERATE or CHESTS_GENERATE, not both (chests seem to override) spawn in world for now. See thread for updated info: https://forum.minetest.net/viewtopic.php?f=11&t=13857&start=25"
-    echo "see also poikilos's game-install-enliven-testing-SPAWNERS_BOTH_DEBUG.txt"
+        #defaults are:
+        #SPAWN_PYRAMIDS = false
+        #SPAWNERS_GENERATE = true
+        #CHESTS_GENERATE = false
+        MTMOD_DEST_NAME=spawners/spawners_env
+        MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+        cd /tmp
+        echo "SPAWN_PYRAMIDS = true" > settings.txt
+        echo "SPAWNERS_GENERATE = true" >> settings.txt
+        echo "CHESTS_GENERATE = false" >> settings.txt
+        mv settings.txt "$MTMOD_DEST_PATH/"  # formerly $MT_MYGAME_MODS_PATH/spawners/, now is spawners/spawners_env/
+        echo "NOTE: in spawners, only SPAWNERS_GENERATE or CHESTS_GENERATE, not both (chests seem to override) spawn in world for now. See thread for updated info: https://forum.minetest.net/viewtopic.php?f=11&t=13857&start=25"
+        echo "see also poikilos's game-install-enliven-testing-SPAWNERS_BOTH_DEBUG.txt"
 
-    # dungeon_loot is part of default game, but I haven't created loot tables for this subgame yet, so remove:
-    remove_mod "dungeon_loot"
+        # dungeon_loot is part of default game, but I haven't created loot tables for this subgame yet, so remove:
+        remove_mod "dungeon_loot"
 
-    # NOTE: tsm_chests_dungeon supercedes dungeon_loot, but dungeon_loot :
-    if [ -d "$MT_MYGAME_MODS_PATH/dungeon_loot" ]; then
-      echo "WARNING: tsm_chests_dungeon may not be compatible with dungeon_loot"
-      if [ -d "$MT_MYGAME_MODS_PATH/tsm_chests_dungeon" ]; then
-        echo "so removing tsm_chests_dungeon"
-      else
-        echo "so skipping tsm_chests_dungeon"
-      fi
-      echo "press Ctrl C to cancel installing ENLIVEN"
-      sleep 2
-      echo "4..."
-      sleep 1
-      echo "3..."
-      sleep 1
-      echo "2..."
-      sleep 1
-      echo "1..."
-      sleep 1
-      if [ -d "$MT_MYGAME_MODS_PATH/tsm_chests_dungeon" ]; then
-        remove_mod tsm_chests_dungeon
-      fi
-    else
-      add_git_mod tsm_chests_dungeon minetest_tsm_chests_dungeon http://repo.or.cz/minetest_tsm_chests_dungeon.git
-    fi
-  # NOTE: spawners no longer adds pyramids, so:
-  # add_git_mod tsm_pyramids tsm_pyramids http://repo.or.cz/minetest_pyramids/tsm_pyramids.git
-  # Wuzzy's doesn't account for 5.0.0-dev yet (nodeupdate is now minetest.check_for_falling) so use custom fork:
-  add_git_mod tsm_pyramids tsm_pyramids https://github.com/poikilos/tsm_pyramids.git
-  # NOTE: consider using https://framagit.org/xisd-minetest/tsm_pyramid.git (WARNING: may require CME)
-  # but first see if there are any updates to https://repo.or.cz/minetest_pyramids/tsm_pyramids.git
-  # (WARNING: uses nodeupdate [not minetest.check_for_falling], so only compatible with minetest.org release
-  # see nodes.lua; human readable url: http://repo.or.cz/w/minetest_pyramids/tsm_pyramids.git)
+        # NOTE: tsm_chests_dungeon supercedes dungeon_loot, but dungeon_loot :
+        if [ -d "$MT_MYGAME_MODS_PATH/dungeon_loot" ]; then
+            echo "WARNING: tsm_chests_dungeon may not be compatible with dungeon_loot"
+            if [ -d "$MT_MYGAME_MODS_PATH/tsm_chests_dungeon" ]; then
+                echo "so removing tsm_chests_dungeon"
+            else
+                echo "so skipping tsm_chests_dungeon"
+            fi
+            echo "press Ctrl C to cancel installing ENLIVEN"
+            sleep 2
+            echo "4..."
+            sleep 1
+            echo "3..."
+            sleep 1
+            echo "2..."
+            sleep 1
+            echo "1..."
+            sleep 1
+            if [ -d "$MT_MYGAME_MODS_PATH/tsm_chests_dungeon" ]; then
+                remove_mod tsm_chests_dungeon
+            fi
+        else
+            add_git_mod tsm_chests_dungeon minetest_tsm_chests_dungeon http://repo.or.cz/minetest_tsm_chests_dungeon.git
+        fi
+    # NOTE: spawners no longer adds pyramids, so:
+    # add_git_mod tsm_pyramids tsm_pyramids http://repo.or.cz/minetest_pyramids/tsm_pyramids.git
+    # Wuzzy's doesn't account for 5.0.0-dev yet (nodeupdate is now minetest.check_for_falling) so use custom fork:
+    add_git_mod tsm_pyramids tsm_pyramids https://github.com/poikilos/tsm_pyramids.git
+    # NOTE: consider using https://framagit.org/xisd-minetest/tsm_pyramid.git (WARNING: may require CME)
+    # but first see if there are any updates to https://repo.or.cz/minetest_pyramids/tsm_pyramids.git
+    # (WARNING: uses nodeupdate [not minetest.check_for_falling], so only compatible with minetest.org release
+    # see nodes.lua; human readable url: http://repo.or.cz/w/minetest_pyramids/tsm_pyramids.git)
 
 else
-  remove_mod tsm_chests_dungeon
-  remove_mod spawners
-  # tsm_pyramids: NOTE: results in "tsm_pyramids:mummy" not defined, but xisd fork allows configuring mummy so MAY NEED spawners_mobs:mummy (or original pyramids mod?)
-  add_git_mod tsm_pyramids tsm_pyramids http://repo.or.cz/minetest_pyramids/tsm_pyramids.git
-  add_git_mod loot loot https://github.com/minetest-mods/loot.git
-  # TEST LOOT: use seed "BigIdea" (without mg mod installed) then:
-  # * teleport to dungeon: -332,-1483,272
-  # * for more, turn on noclip&freemove and teleport to -339,-1462,289 and look around
-  # RESULTS: "loot" (with loot_dungeons=true option in world.mt or not set which defaults to true)
-  # seems to provide too much loot--has mese crystals (blocks in one of the chests), loads of iron and many other minerals -- many chests in same dungeon and no enemies
-  # other items: cotton seed, several gold ingot, some diamonds
-  # other items in nearby dungeon: bread, wheat seeds, apples, several gold ingot, some diamonds
-  # * teleport to nearby dungeons:
-  #   * -328,-1468.5,289
-  #   * -355,-1470,312
-  #   * -420,-1493,267
-  #   * -432,-1556,329
-  # * other dungeons:
-  #   * -531,-1402,-143 (several other dungeons are near it)
-  # * caverealm at:
-  #   * -511,-1893,111
-  # * humid desert (small) at:
-  #   * -538,2.5,-82.4
-  # * amazing mountain jungle view from:
-  #   * 2499,6.5,2404
-  # * magma_conduits vs water at:
-  #   * 2686,2.5,-2595
-  # * amazing savannah view at:
-  #   * 2175,3.5,-2714
-  # * tsm_pyramids:
-  #   * 1252,6.5,-847
+    remove_mod tsm_chests_dungeon
+    remove_mod spawners
+    # tsm_pyramids: NOTE: results in "tsm_pyramids:mummy" not defined, but xisd fork allows configuring mummy so MAY NEED spawners_mobs:mummy (or original pyramids mod?)
+    add_git_mod tsm_pyramids tsm_pyramids http://repo.or.cz/minetest_pyramids/tsm_pyramids.git
+    add_git_mod loot loot https://github.com/minetest-mods/loot.git
+    # TEST LOOT: use seed "BigIdea" (without mg mod installed) then:
+    # * teleport to dungeon: -332,-1483,272
+    # * for more, turn on noclip&freemove and teleport to -339,-1462,289 and look around
+    # RESULTS: "loot" (with loot_dungeons=true option in world.mt or not set which defaults to true)
+    # seems to provide too much loot--has mese crystals (blocks in one of the chests), loads of iron and many other minerals -- many chests in same dungeon and no enemies
+    # other items: cotton seed, several gold ingot, some diamonds
+    # other items in nearby dungeon: bread, wheat seeds, apples, several gold ingot, some diamonds
+    # * teleport to nearby dungeons:
+    #     * -328,-1468.5,289
+    #     * -355,-1470,312
+    #     * -420,-1493,267
+    #     * -432,-1556,329
+    # * other dungeons:
+    #     * -531,-1402,-143 (several other dungeons are near it)
+    # * caverealm at:
+    #     * -511,-1893,111
+    # * humid desert (small) at:
+    #     * -538,2.5,-82.4
+    # * amazing mountain jungle view from:
+    #     * 2499,6.5,2404
+    # * magma_conduits vs water at:
+    #     * 2686,2.5,-2595
+    # * amazing savannah view at:
+    #     * 2175,3.5,-2714
+    # * tsm_pyramids:
+    #     * 1252,6.5,-847
 fi
 
 add_git_mod treasurer minetest_treasurer http://repo.or.cz/minetest_treasurer.git
@@ -490,8 +469,8 @@ cd "$HOME/Downloads"
 MTMOD_DEST_NAME=trm_pyramids
 MTMOD_GOT_NAME=trm_pyramids
 MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
-if [ ! -z "`ls | grep $MTMOD_GOT_NAME`" ]; then  # works with wildcard in variable
-  rm -Rf "$MTMOD_GOT_NAME"
+if [ ! -z "`ls | grep $MTMOD_GOT_NAME`" ]; then    # works with wildcard in variable
+    rm -Rf "$MTMOD_GOT_NAME"
 fi
 mkdir "$MTMOD_GOT_NAME"
 cd "$MTMOD_GOT_NAME"
@@ -501,83 +480,75 @@ wget https://github.com/MinetestForFun/server-minetestforfun/raw/master/mods/trm
 wget https://github.com/MinetestForFun/server-minetestforfun/blob/master/LICENSE
 echo "trm_pyramids" >> "$MOD_LIST"
 if [ -d "$MTMOD_DEST_PATH" ]; then
-  sudo rm -Rf "$MTMOD_DEST_PATH"
+    rm -Rf "$MTMOD_DEST_PATH"
 fi
-sudo mkdir "$MTMOD_DEST_PATH"
-sudo mv -f depends.txt "$MTMOD_DEST_PATH/"
-sudo mv -f init.lua "$MTMOD_DEST_PATH/"
-sudo mv -f more_trms.lua "$MTMOD_DEST_PATH/"
-sudo mv -f LICENSE "$MTMOD_DEST_PATH/"
+mkdir "$MTMOD_DEST_PATH"
+mv -f depends.txt "$MTMOD_DEST_PATH/"
+mv -f init.lua "$MTMOD_DEST_PATH/"
+mv -f more_trms.lua "$MTMOD_DEST_PATH/"
+mv -f LICENSE "$MTMOD_DEST_PATH/"
 cd ..
 rmdir "$MTMOD_GOT_NAME"
 if [ ! -z "`ls "$MTMOD_DEST_PATH"`" ]; then
-  echo "  [ + ] added as $MTMOD_DEST_PATH"
+    echo "  [ + ] added as $MTMOD_DEST_PATH"
 else
-  echo "  [ ! ] failed to install files to $MTMOD_DEST_PATH"
-  sleep 4
+    echo "  [ ! ] failed to install files to $MTMOD_DEST_PATH"
+    sleep 4
 fi
 
 add_git_mod moreblocks moreblocks https://github.com/minetest-mods/moreblocks.git
 # plantlife_modpack: includes bushes:* with fruit and fruit recipes
-add_git_mod plantlife_modpack plantlife_modpack https://github.com/minetest-mods/plantlife_modpack.git
+add_git_mod plantlife_modpack plantlife_modpack https://gitlab.com/VanessaE/plantlife_modpack.git
 add_git_mod bushes_soil bushes_soil https://github.com/poikilos/bushes_soil.git
 
 # forum_url="https://forum.minetest.net/viewtopic.php?f=9&t=12368"
 # description="Installing Napiophelios's lapis fork since has blocks, but minetest-mods has a version as well, with dye (not used): https://forum.minetest.net/viewtopic.php?f=9&t=11287"
-MTMOD_DEST_NAME=lapis
-MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
-if [ -f "$MTMOD_DEST_PATH/columns_enabled" ]; then
-  if [ "$update_enable" = "true" ]; then
-    sudo rm -f "$MTMOD_DEST_PATH/columns_enabled"
-    echo "removing flag file $MTMOD_DEST_PATH/columns_enable since updating (preparing for re-patch)"
-    # remove, because the file will no longer be patched if it is redownloaded (so patching must occur again)
-  else
-    echo "found flag file $MTMOD_DEST_PATH/columns_enable (leaving there since not updating, to prevent re-patching)"
-  fi
-fi
+#MTMOD_DEST_NAME=lapis
+#MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+#if [ -f "$MTMOD_DEST_PATH/columns_enabled" ]; then
+#    if [ "$update_enable" = "true" ]; then
+#        rm -f "$MTMOD_DEST_PATH/columns_enabled"
+#        echo "removing flag file $MTMOD_DEST_PATH/columns_enable since updating (preparing for re-patch)"
+#        # remove, because the file will no longer be patched if it is redownloaded (so patching must occur again)
+#    else
+#        echo "found flag file $MTMOD_DEST_PATH/columns_enable (leaving there since not updating, to prevent re-patching)"
+#    fi
+#fi
+#NOTE: upstream has accepted the poikilos configuration pull request. See enable_lapis_mod_columns in minetest.conf instead.
 add_git_mod lapis LapisLazuli https://github.com/Napiophelios/LapisLazuli.git
-echo "patching lapis (Napiophelios's fork) to enable columns..."
-cd $HOME/Downloads
-if [ -f "init.lua" ]; then
-  sudo rm init.lua
-fi
-MTMOD_DEST_NAME=lapis
-MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
-if [ -f "$MTMOD_DEST_PATH/init.lua" ]; then
-  if [ ! -f "$MTMOD_DEST_PATH/columns_enabled" ]; then
-    head -2 "$MTMOD_DEST_PATH/init.lua" > init.lua
-    # cat starting at line after head command above to not skip any
-    # lines, in case later version changes position of lines
-    echo 'dofile(minetest.get_modpath("lapis").."/columns.lua")' >> init.lua
-    tail -n +4 "$MTMOD_DEST_PATH/init.lua" >> init.lua
-    echo "true" > "columns_enabled"
-    sudo mv -f columns_enabled "$MTMOD_DEST_PATH/"
-    sudo mv -f init.lua "$MTMOD_DEST_PATH/"
-    echo "PATCHED $MTMOD_DEST_PATH/init.lua to enable columns"
-  else
-    echo "WARNING: not enabling columns in $MTMOD_DEST_PATH/init.lua since already patched as indicated by the presence of '$MTMOD_DEST_PATH/columns_enabled' flag file."
-  fi
-else
-  echo "FAILED to patch lapis since no $MTMOD_DEST_PATH/init.lua"
-  echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
-  sleep 1
-  echo " 3..."
-  sleep 1
-  echo " 2..."
-  sleep 1
-  echo " 1..."
-  sleep 1
-  exit 1
-fi
+#echo "patching lapis (Napiophelios's fork) to enable columns..."
+#cd $HOME/Downloads
+#if [ -f "init.lua" ]; then
+#    rm init.lua
+#fi
+#MTMOD_DEST_NAME=lapis
+#MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+#if [ -f "$MTMOD_DEST_PATH/init.lua" ]; then
+#    if [ ! -f "$MTMOD_DEST_PATH/columns_enabled" ]; then
+#        head -2 "$MTMOD_DEST_PATH/init.lua" > init.lua
+#        # cat starting at line after head command above to not skip any
+#        # lines, in case later version changes position of lines
+#        echo 'dofile(minetest.get_modpath("lapis").."/columns.lua")' >> init.lua
+#        tail -n +4 "$MTMOD_DEST_PATH/init.lua" >> init.lua
+#        echo "true" > "columns_enabled"
+#        mv -f columns_enabled "$MTMOD_DEST_PATH/"
+#        mv -f init.lua "$MTMOD_DEST_PATH/"
+#        echo "PATCHED $MTMOD_DEST_PATH/init.lua to enable columns"
+#    else
+#        echo "WARNING: not enabling columns in $MTMOD_DEST_PATH/init.lua since already patched as indicated by the presence of '$MTMOD_DEST_PATH/columns_enabled' flag file."
+#    fi
+#else
+#    customDie "FAILED to patch lapis since no $MTMOD_DEST_PATH/init.lua"
+#fi
 
 echo "not installing helicopter--crashes 0.4.14-git, but was updated on 2017-06-08 and was not tested since then"
 # add_git_mod helicopter helicopter https://github.com/SokolovPavel/helicopter.git
-add_git_mod biome_lib biome_lib https://github.com/minetest-mods/biome_lib.git
-add_git_mod moretrees moretrees https://github.com/minetest-mods/moretrees.git
+add_git_mod biome_lib biome_lib https://gitlab.com/VanessaE/biome_lib.git
+add_git_mod moretrees moretrees https://gitlab.com/VanessaE/moretrees.git
 
 # in order of dependency (also, clicking armor in unified inventory crashes the game without technic installed since checks radation):
 add_git_mod mesecons mesecons https://github.com/minetest-mods/mesecons
-add_git_mod pipeworks pipeworks https://github.com/minetest-mods/pipeworks.git
+add_git_mod pipeworks pipeworks https://gitlab.com/VanessaE/pipeworks.git
 #add_git_mod technic technic https://github.com/minetest-mods/technic.git
 add_git_mod technic technic https://github.com/t4im/technic.git
 
@@ -589,26 +560,26 @@ add_git_mod subterrane subterrane https://github.com/minetest-mods/subterrane.gi
 echo "Installing FaceDeer's v7-biome-integrated fork of HeroOfTheWinds' caverealms"
 add_git_mod caverealms minetest-caverealms https://github.com/FaceDeer/minetest-caverealms.git
 #if [ -f "master.zip" ]; then
-  #rm master.zip
+    #rm master.zip
 #fi
 #wget https://github.com/Splizard/minetest-mod-snow/archive/master.zip
 #mv master.zip snow.zip
 #unzip snow.zip
 #mv minetest-mod-snow-master snow
-#sudo mv snow "$MT_MYGAME_MODS_PATH/snow"
+#mv snow "$MT_MYGAME_MODS_PATH/snow"
 # (since snow prevents server 0.4.13 git 2016-02-16 from starting):
-#sudo mv $MT_MYGAME_MODS_PATH/snow $HOME/Downloads/snow
+#mv $MT_MYGAME_MODS_PATH/snow $HOME/Downloads/snow
 
 # formerly https://github.com/Calinou/moreores.git
 add_git_mod moreores moreores https://github.com/minetest-mods/moreores.git
 #the following is NOT needed, since one of the mods above adds the home gui and home permission (but no /home or /sethome command)
 #if [ -f "master.zip" ]; then
-  #rm master.zip
+    #rm master.zip
 #fi
 #wget https://github.com/cornernote/minetest-home_gui/archive/master.zip
 #mv master.zip minetest-home_gui.zip
 #unzip minetest-home_gui.zip
-#sudo mv minetest-home_gui-master/home_gui "$MT_MYGAME_MODS_PATH/home_gui"
+#mv minetest-home_gui-master/home_gui "$MT_MYGAME_MODS_PATH/home_gui"
 #echo "snow:snow 255 255 255" >> $HOME/minetest/util/colors.txt
 #echo "snow:snow_block 255 255 255" >> $HOME/minetest/util/colors.txt
 #echo "snow:ice 144 217 234" >> $HOME/minetest/util/colors.txt
@@ -632,7 +603,7 @@ add_git_mod tsm_railcorridors tsm_railcorridors http://repo.or.cz/RailCorridors/
 #-- carts:rail
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=10172&hilit=boost+cart"
 # birthstones: poikilos fork of a rather non-maintained mod--forum link is at https://forum.minetest.net/viewtopic.php?id=3663 (original mod was at https://github.com/Doc22/birthstones-mod.git)
-add_git_mod birthstones birthstones https://github.com/poikilos/minetest-birthstones.git
+add_git_mod birthstones birthstones https://github.com/poikilos/birthstones.git
 add_git_mod bakedclay bakedclay https://notabug.org/tenplus1/bakedclay.git
 add_git_mod quartz quartz https://github.com/minetest-mods/quartz
 add_git_mod magma_conduits magma_conduits https://github.com/FaceDeer/magma_conduits.git
@@ -671,22 +642,23 @@ add_git_mod ts_furniture ts_furniture https://github.com/minetest-mods/ts_furnit
 #"stable" version is at https://github.com/stujones11/minetest-3d_armor/archive/version-0.4.11.zip
 #add_zip_mod 3d_armor minetest-3d_armor-MT_0.5.0-dev https://github.com/stujones11/minetest-3d_armor/archive/MT_0.5.0-dev.zip
 # git clone -b MT_0.5.0-dev --single-branch https://git@github.com/stujones11/minetest-3d_armor.git
-if [ "$version_0_5_enable" = "true" ]; then
-  echo "  trying to get 3d_armor 0.5.0-dev branch..."
-  add_git_mod 3d_armor minetest-3d_armor https://github.com/stujones11/minetest-3d_armor.git "MT_0.5.0-dev"
-else
-  echo "  trying to get 3d_armor main branch..."
-  add_git_mod 3d_armor minetest-3d_armor https://github.com/stujones11/minetest-3d_armor.git
-fi
+#if [ "$version_0_5_enable" = "true" ]; then
+#    # this branch doesn't exist anymore. See main branch.
+#    echo "  trying to get 3d_armor 0.5.0-dev branch..."
+#    add_git_mod 3d_armor minetest-3d_armor https://github.com/stujones11/minetest-3d_armor.git "MT_0.5.0-dev"
+#else
+    echo "  trying to get 3d_armor main branch..."
+    add_git_mod 3d_armor minetest-3d_armor https://github.com/stujones11/minetest-3d_armor.git
+#fi
 #mv minetest-3d_armor-master minetest-3d_armor_MODPACK
-#sudo mv minetest-3d_armor_MODPACK/wieldview $MT_MYGAME_MODS_PATH/wieldview
-#sudo mv minetest-3d_armor_MODPACK/3d_armor $MT_MYGAME_MODS_PATH/3d_armor
-#sudo mv minetest-3d_armor_MODPACK/shields $MT_MYGAME_MODS_PATH/shields
+#mv minetest-3d_armor_MODPACK/wieldview $MT_MYGAME_MODS_PATH/wieldview
+#mv minetest-3d_armor_MODPACK/3d_armor $MT_MYGAME_MODS_PATH/3d_armor
+#mv minetest-3d_armor_MODPACK/shields $MT_MYGAME_MODS_PATH/shields
 
-add_git_mod homedecor_modpack homedecor_modpack https://github.com/minetest-mods/homedecor_modpack.git
-add_git_mod unifieddyes unifieddyes https://github.com/minetest-mods/unifieddyes.git
+add_git_mod homedecor_modpack homedecor_modpack https://gitlab.com/VanessaE/homedecor_modpack.git
+add_git_mod unifieddyes unifieddyes https://gitlab.com/VanessaE/unifieddyes.git
 #Sokomine's original version has no security ( https://forum.minetest.net/viewtopic.php?id=4877 )
-#  https://github.com/Sokomine/travelnet/archive/master.zip
+#    https://github.com/Sokomine/travelnet/archive/master.zip
 # manually get branch with sound:
 # MERGED: add_git_mod travelnet travelnet https://github.com/poikilos/travelnet restore_sound
 add_git_mod travelnet travelnet https://github.com/Sokomine/travelnet.git
@@ -695,36 +667,26 @@ add_git_mod sling sling https://github.com/minetest-mods/sling.git
 #REPLACES PilzAdam's, modified by kaeza, maintained by VenessaE; FORMERLY in homedecor_modpack
 #forum post: https://forum.minetest.net/viewtopic.php?t=13762
 # kaeza's signs_lib (forked from PilzAdam's and TheXYZ's code) was moved here from: https://github.com/kaeza/minetest-signs_lib-extrafonts/archive/master.zip
-add_git_mod signs_lib signs_lib https://github.com/minetest-mods/signs_lib.git
+add_git_mod signs_lib signs_lib https://gitlab.com/VanessaE/signs_lib.git
 
 farming_redo_enable="false"
 if [ -f "$MT_MYWORLD_DIR/farming_redo_enable" ]; then
-  farming_redo_enable="true"
+    farming_redo_enable="true"
 else
-  echo "$MT_MYWORLD_DIR/farming_redo_enable not found (may contain anything or nothing to enable), so not using farming_redo"
+    echo "$MT_MYWORLD_DIR/farming_redo_enable not found (may contain anything or nothing to enable), so not using farming_redo"
 fi
 if [ "$farming_redo_enable" = "true" ]; then
-  remove_mod crops
-  add_git_mod farming farming https://notabug.org/tenplus1/farming.git
+    remove_mod crops
+    add_git_mod farming farming https://notabug.org/tenplus1/farming.git
 else
-  remove_mod farming
-  sudo cp -R $USR_SHARE_MINETEST/games/$mtgame_name/mods/farming $MT_MYGAME_MODS_PATH/
-  if [ -d "$MT_MYGAME_MODS_PATH/farming" ]; then
-    echo "  [ + ] reinstalled minetest_game farming."
-  else
-    echo "ERROR: failed to install $USR_SHARE_MINETEST/games/$mtgame_name/mods/farming to $MT_MYGAME_MODS_PATH/farming, so cannot continue." > $err_txt
-    cat $err_txt
-    echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
-    sleep 1
-    echo " 3..."
-    sleep 1
-    echo " 2..."
-    sleep 1
-    echo " 1..."
-    sleep 1
-    exit 1
-  fi
-  add_git_mod crops crops https://github.com/minetest-mods/crops
+    remove_mod farming
+    cp -R $USR_SHARE_MINETEST/games/$mtgame_name/mods/farming $MT_MYGAME_MODS_PATH/
+    if [ -d "$MT_MYGAME_MODS_PATH/farming" ]; then
+        echo "  [ + ] reinstalled minetest_game farming."
+    else
+        customDie "ERROR: failed to install $USR_SHARE_MINETEST/games/$mtgame_name/mods/farming to $MT_MYGAME_MODS_PATH/farming, so cannot continue."
+    fi
+    add_git_mod crops crops https://github.com/minetest-mods/crops
 fi
 # forum_url="https://forum.minetest.net/viewtopic.php?f=11&t=10423"
 # Wuzzy's slimenodes mod (only available via /give command).
@@ -819,14 +781,14 @@ add_git_mod ambience ambience https://notabug.org/tenplus1/ambience.git
 # description: ISSUE ON 0.5.0: player halfway into ground--see minetest.conf setting above for fix; Adds animations to the players' head
 add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git
 #if [ "$version_0_5_enable" != "true" ]; then
-  # see https://github.com/minetest-mods/playeranim/issues/14 (fixed)
-  # add_git_mod playeranim playeranim https://github.com/poikilos/playeranim.git
-  #add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git "v5.0"
-  #branch was merged, so checking out branch (above) is no longer needed (just config--see minetest.conf model setting above and
-  #<asdf>).
+    # see https://github.com/minetest-mods/playeranim/issues/14 (fixed)
+    # add_git_mod playeranim playeranim https://github.com/poikilos/playeranim.git
+    #add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git "v5.0"
+    #branch was merged, so checking out branch (above) is no longer needed (just config--see minetest.conf model setting above and
+    #<asdf>).
 #else
-  #must also set player_model_version = default_character_v3 in minetest.conf (see above for when set in subgame folder's minetest.conf)
-#  add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git
+    #must also set player_model_version = default_character_v3 in minetest.conf (see above for when set in subgame folder's minetest.conf)
+#    add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git
 #fi
 #add_git_mod stamina stamina https://github.com/minetest-mods/stamina
 remove_mod stamina
@@ -842,22 +804,23 @@ MATCHING_MODS_BEFORE="`ls $MT_MYGAME_MODS_PATH | grep skin`"
 remove_mod u_skinsdb
 remove_mod u_skins
 PATCH_SKINS_MOD_NAME="skinsdb"  # used further down too!
-if [ "$version_0_5_enable" = "true" ]; then
-  #players are 1 block below ground in skinsdb for Minetest 0.4.* stable...
-  #so get 0.5 branch from fork...
-  add_git_mod $PATCH_SKINS_MOD_NAME skinsdb https://github.com/bell07/skinsdb.git mt_0_5_dev
-else
-  add_git_mod $PATCH_SKINS_MOD_NAME skinsdb https://github.com/minetest-mods/skinsdb.git
-fi
+#if [ "$version_0_5_enable" = "true" ]; then
+#    # There is only one branch now. See master instead.
+#    #players are 1 block below ground in skinsdb for Minetest 0.4.* stable...
+#    #so get 0.5 branch from fork...
+#    add_git_mod $PATCH_SKINS_MOD_NAME skinsdb https://github.com/bell07/skinsdb.git mt_0_5_dev
+#else
+    add_git_mod $PATCH_SKINS_MOD_NAME skinsdb https://github.com/minetest-mods/skinsdb.git
+#fi
 
 if [ ! -z "$MATCHING_MODS_BEFORE" ]; then
-  echo "Removed $MATCHING_MODS_BEFORE then installed $PATCH_SKINS_MOD_NAME (this output is shown on purpose)"
+    echo "Removed $MATCHING_MODS_BEFORE then installed $PATCH_SKINS_MOD_NAME (this output is shown on purpose)"
 fi
 # Update skins database (WARNING: skin numbering affects chosen player skin):
 # (jq is a json processor, required for the updater bash script:)
 # sudo apt -y install jq
 # cd "$MTMOD_DEST_PATH"
-# cd u_skins  #bell07's version is a mod, not a modpack
+# cd u_skins    #bell07's version is a mod, not a modpack
 # cd updater
 # NOTE:
 # Only download entire skins database if you
@@ -875,25 +838,25 @@ echo
 echo
 echo
 if [ -d "$PATCHES_PATH" ]; then
-  echo "  [ + ] adding the following necessary integration mods (included):"
-  ls $PATCHES_PATH/mods-integration/
-  ls $PATCHES_PATH/mods-integration | grep -v debug >> "$MOD_LIST"
-  sudo cp -R $PATCHES_PATH/mods-integration/* "$MT_MYGAME_MODS_PATH/"
-  echo
-  echo "  [ + ] adding the following multiplayer mods (included):"
-  ls $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/
-  ls $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/ | grep -v skinsdb >> "$MOD_LIST"
-  sudo cp -R $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/* "$MT_MYGAME_MODS_PATH/"
-  echo "  [ / ] patching mobs..."
-  echo "adding non-manual patches to subgame (vs minetest_game and downloaded mods):"
-  echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
-  sudo cp -f $PATCHES_PATH/subgame/* "$MT_MYGAME_DIR/"
-  echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
-  sudo cp -f $PATCHES_PATH/subgame/menu/* "$MT_MYGAME_DIR/menu/"
-  echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
-  sudo cp -f $PATCHES_PATH/subgame/mods/mobs/textures/* "$MT_MYGAME_DIR/mods/mobs/textures/"
-  echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
-  sudo cp -f $PATCHES_PATH/subgame/mods/mobs_monster/textures/* "$MT_MYGAME_DIR/mods/mobs_monster/textures/"
+    echo "  [ + ] adding the following necessary integration mods (included):"
+    ls $PATCHES_PATH/mods-integration/
+    ls $PATCHES_PATH/mods-integration | grep -v debug >> "$MOD_LIST"
+    cp -R $PATCHES_PATH/mods-integration/* "$MT_MYGAME_MODS_PATH/"
+    echo
+    echo "  [ + ] adding the following multiplayer mods (included):"
+    ls $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/
+    ls $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/ | grep -v skinsdb >> "$MOD_LIST"
+    cp -R $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/* "$MT_MYGAME_MODS_PATH/"
+    echo "  [ / ] patching mobs..."
+    echo "adding non-manual patches to subgame (vs minetest_game and downloaded mods):"
+    echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
+    cp -f $PATCHES_PATH/subgame/* "$MT_MYGAME_DIR/"
+    echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
+    cp -f $PATCHES_PATH/subgame/menu/* "$MT_MYGAME_DIR/menu/"
+    echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
+    cp -f $PATCHES_PATH/subgame/mods/mobs/textures/* "$MT_MYGAME_DIR/mods/mobs/textures/"
+    echo "patching $MT_MYGAME_DIR (files only, so 'omitting directory' warnings are ok)..."
+    cp -f $PATCHES_PATH/subgame/mods/mobs_monster/textures/* "$MT_MYGAME_DIR/mods/mobs_monster/textures/"
 
 echo "  [ / ] patching skins for skinsdb..."
 # REMOVE EXISTING SKINS AND ONLY ADD poikilos skins:
@@ -901,136 +864,116 @@ MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$PATCH_SKINS_MOD_NAME
 SUB_NAME="textures"  # include u_skins since u_skins/u_skins IS THE MOD in the modpack
 SUB_PATH="$MTMOD_DEST_PATH/$SUB_NAME"
 if [ -d "$SUB_PATH" ]; then
-  echo "removing original $SUB_PATH/character_*..."
-  rm -Rf $SUB_PATH/character_*  # cannot have quotes if using wildcards
+    echo "removing original $SUB_PATH/character_*..."
+    rm -Rf $SUB_PATH/character_*  # cannot have quotes if using wildcards
 fi
-sudo cp -f $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/$PATCH_SKINS_MOD_NAME/$SUB_NAME/* "$SUB_PATH"
+cp -f $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/$PATCH_SKINS_MOD_NAME/$SUB_NAME/* "$SUB_PATH"
 if [ ! -d "$SUB_PATH" ]; then
-  echo "ERROR: failed to install poikilos's skins to $SUB_PATH, so cannot continue." > $err_txt
-  cat $err_txt
-  echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
-  sleep 1
-  echo " 3..."
-  sleep 1
-  echo " 2..."
-  sleep 1
-  echo " 1..."
-  sleep 1
-  exit 1
+    customDie "ERROR: failed to install poikilos's skins to $SUB_PATH, so cannot continue."
 else
-  echo "installed poikilos's skins to $SUB_PATH"
+    echo "installed poikilos's skins to $SUB_PATH"
 fi
 SUB_NAME="meta"  # include u_skins since u_skins/u_skins IS THE MOD in the modpack
 SUB_PATH="$MTMOD_DEST_PATH/$SUB_NAME"
 if [ -d "$SUB_PATH" ]; then
-  echo "removing original $SUB_PATH/character_*..."
-  rm -Rf $SUB_PATH/character_*  # cannot have quotes if using wildcards
+    echo "removing original $SUB_PATH/character_*..."
+    rm -Rf $SUB_PATH/character_*  # cannot have quotes if using wildcards
 fi
-sudo cp -f $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/$PATCH_SKINS_MOD_NAME/$SUB_NAME/* "$SUB_PATH"
+cp -f $PATCHES_PATH/deprecated/mods-multiplayer-minetest_game/$PATCH_SKINS_MOD_NAME/$SUB_NAME/* "$SUB_PATH"
 if [ ! -d "$SUB_PATH" ]; then
-  echo "ERROR: failed to install poikilos's skins to $SUB_PATH, so cannot continue." > $err_txt
-  cat $err_txt
-  echo "  press Ctrl C to cancel ENLIVEN install or this terminal will close..."
-  sleep 1
-  echo " 3..."
-  sleep 1
-  echo " 2..."
-  sleep 1
-  echo " 1..."
-  sleep 1
-  exit 1
+    customDie "ERROR: failed to install poikilos's skins to $SUB_PATH, so cannot continue."
 else
-  echo "installed metadata for poikilos's skins to $SUB_PATH"
+    echo "installed metadata for poikilos's skins to $SUB_PATH"
 fi
 
 
 
-  #echo "mods affected: mobs mobs_monsters $PATCH_SKINS_MOD_NAME"
-  # poikilos bones PR was merged with minetest_game, so below is not needed
-  #PATCHED_FLAG=""
-  #BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/bones/init.lua
-  #MODIFIED_PATH=$PATCHES_PATH/subgame/mods/bones/init.lua
-  #MTMOD_DEST_NAME=bones
-  #MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/bones
-  #TARGET_PATH=$MTMOD_DEST_PATH/init.lua
-  #TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"
-  #if [ -z "$TRY_DIFF" ]; then
-  #  sudo cp -f $MODIFIED_PATH "$MT_MYGAME_DIR/mods/bones/"
-  #  echo "done attempting to patch $MTMOD_DEST_PATH/ with $MODIFIED_PATH"
-  #else
-  #  BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/bones/init-0.5.0-dev.lua
-  #  MODIFIED_PATH=$PATCHES_PATH/subgame/mods/bones/init-0.5.0-dev.lua
-  #  TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"
-  #  if [ -z "$TRY_DIFF" ]; then
-  #    sudo cp -f $MODIFIED_PATH "$MT_MYGAME_DIR/mods/bones/init.lua"
-  #    echo "patched $MT_MYGAME_DIR/mods/bones/init.lua"
-  #  else
-  #    TRY_DONE_DIFF="`diff $MODIFIED_PATH $TARGET_PATH`"
-  #    echo "ALREADY patched $MTMOD_DEST_NAME with $MODIFIED_PATH."
-  #  fi
-  #fi
-  #homedecor: see homedecor_ua (underage) instead ABOVE
-  #BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/homedecor_modpack/homedecor/gastronomy.lua
-  #MODIFIED_PATH=$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/gastronomy.lua
-  #TARGET_PATH=$MT_MYGAME_MODS_PATH/homedecor_modpack/homedecor/gastronomy.lua
-  #MTMOD_DEST_NAME=homedecor_modpack
-  #MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/homedecor_modpack/homedecor
-  #TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"
-  #if [ -z "$TRY_DIFF" ]; then
-  #  sudo cp -f $MODIFIED_PATH "$MTMOD_DEST_PATH/"
-  #  echo "done attempting to patch $MTMOD_DEST_PATH/"
-  #else
-  #  if [ -z `diff $MODIFIED_PATH $TARGET_PATH` ];  then
-  #    echo "ALREADY patched $TARGET_PATH with $MODIFIED_PATH"
-  #  else
-  #    echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version."
-  #    sleep 4
-  #  fi
-  #fi
-  #BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/homedecor_modpack/homedecor/crafts.lua
-  #MODIFIED_PATH=$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/crafts.lua
-  #TARGET_PATH=$MT_MYGAME_MODS_PATH/homedecor_modpack/homedecor/crafts.lua
-  #MTMOD_DEST_NAME=homedecor_modpack
-  #TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"
-  #if [ -z "$TRY_DIFF" ]; then
-  #  sudo cp -f $MODIFIED_PATH "$MTMOD_DEST_PATH/"
-  #  echo "done attempting to patch $MTMOD_DEST_PATH/"
-  #else
-  #  if [ -z `diff $MODIFIED_PATH $TARGET_PATH` ];  then
-  #    echo "ALREADY patched $TARGET_PATH with $MODIFIED_PATH"
-  #  else
-  #    echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version."
-  #    sleep 4
-  #  fi
-  #fi
-  #if [ -d "$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/models" ]; then
-  #  # deprecated, but copy in case gets un-deprecated
-  #  cp -f $PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/models/* "$MTMOD_DEST_PATH/models/"
-  #fi
-  # NOTE: quotes don't work with wildcard
-  #cp -f $PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/textures/* "$MTMOD_DEST_PATH/textures/"
-  echo "# not recommended:"
-  echo "# sudo cp -Rf $PATCHES_PATH/mods-stopgap-minetest_game/* $MT_MYGAME_MODS_PATH/"
-  #echo "sudo rm -Rf $MT_MYGAME_MODS_PATH/1.nonworking  # leftovers from deprecated ENLIVEN installer"
+    #echo "mods affected: mobs mobs_monsters $PATCH_SKINS_MOD_NAME"
+    # poikilos bones PR was merged with minetest_game, so below is not needed
+    #PATCHED_FLAG=""
+    #BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/bones/init.lua
+    #MODIFIED_PATH=$PATCHES_PATH/subgame/mods/bones/init.lua
+    #MTMOD_DEST_NAME=bones
+    #MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/bones
+    #TARGET_PATH=$MTMOD_DEST_PATH/init.lua
+    #TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"
+    #if [ -z "$TRY_DIFF" ]; then
+    #    cp -f $MODIFIED_PATH "$MT_MYGAME_DIR/mods/bones/"
+    #    echo "done attempting to patch $MTMOD_DEST_PATH/ with $MODIFIED_PATH"
+    #else
+    #    BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/bones/init-0.5.0-dev.lua
+    #    MODIFIED_PATH=$PATCHES_PATH/subgame/mods/bones/init-0.5.0-dev.lua
+    #    TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"
+    #    if [ -z "$TRY_DIFF" ]; then
+    #        cp -f $MODIFIED_PATH "$MT_MYGAME_DIR/mods/bones/init.lua"
+    #        echo "patched $MT_MYGAME_DIR/mods/bones/init.lua"
+    #    else
+    #        TRY_DONE_DIFF="`diff $MODIFIED_PATH $TARGET_PATH`"
+    #        echo "ALREADY patched $MTMOD_DEST_NAME with $MODIFIED_PATH."
+    #    fi
+    #fi
+    #homedecor: see homedecor_ua (underage) instead ABOVE
+    #BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/homedecor_modpack/homedecor/gastronomy.lua
+    #MODIFIED_PATH=$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/gastronomy.lua
+    #TARGET_PATH=$MT_MYGAME_MODS_PATH/homedecor_modpack/homedecor/gastronomy.lua
+    #MTMOD_DEST_NAME=homedecor_modpack
+    #MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/homedecor_modpack/homedecor
+    #TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"
+    #if [ -z "$TRY_DIFF" ]; then
+    #    cp -f $MODIFIED_PATH "$MTMOD_DEST_PATH/"
+    #    echo "done attempting to patch $MTMOD_DEST_PATH/"
+    #else
+    #    if [ -z `diff $MODIFIED_PATH $TARGET_PATH` ];    then
+    #        echo "ALREADY patched $TARGET_PATH with $MODIFIED_PATH"
+    #    else
+    #        echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version."
+    #        sleep 4
+    #    fi
+    #fi
+    #BASIS_PATH=$PATCHES_PATH/subgame-basis/mods/homedecor_modpack/homedecor/crafts.lua
+    #MODIFIED_PATH=$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/crafts.lua
+    #TARGET_PATH=$MT_MYGAME_MODS_PATH/homedecor_modpack/homedecor/crafts.lua
+    #MTMOD_DEST_NAME=homedecor_modpack
+    #TRY_DIFF="`diff $BASIS_PATH $TARGET_PATH`"
+    #if [ -z "$TRY_DIFF" ]; then
+    #    cp -f $MODIFIED_PATH "$MTMOD_DEST_PATH/"
+    #    echo "done attempting to patch $MTMOD_DEST_PATH/"
+    #else
+    #    if [ -z `diff $MODIFIED_PATH $TARGET_PATH` ];    then
+    #        echo "ALREADY patched $TARGET_PATH with $MODIFIED_PATH"
+    #    else
+    #        echo "FAILED to patch $MTMOD_DEST_NAME since $TARGET_PATH differs from known version."
+    #        sleep 4
+    #    fi
+    #fi
+    #if [ -d "$PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/models" ]; then
+    #    # deprecated, but copy in case gets un-deprecated
+    #    cp -f $PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/models/* "$MTMOD_DEST_PATH/models/"
+    #fi
+    # NOTE: quotes don't work with wildcard
+    #cp -f $PATCHES_PATH/subgame/mods/homedecor_modpack/homedecor/textures/* "$MTMOD_DEST_PATH/textures/"
+    echo "# not recommended:"
+    echo "# cp -Rf $PATCHES_PATH/mods-stopgap-minetest_game/* $MT_MYGAME_MODS_PATH/"
+    #echo "rm -Rf $MT_MYGAME_MODS_PATH/1.nonworking    # leftovers from deprecated ENLIVEN installer"
 else
-  echo "did not find $PATCHES_PATH, so skipped automatic patching which is partially implemented"
-  echo "continuing anyway unless Ctrl-C is pressed..."
-  echo 1
-  echo "3..."
-  echo 1
-  echo "2..."
-  echo 1
-  echo "1..."
-  echo 1
+    echo "did not find $PATCHES_PATH, so skipped automatic patching which is partially implemented"
+    echo "continuing anyway unless Ctrl-C is pressed..."
+    echo 1
+    echo "3..."
+    echo 1
+    echo "2..."
+    echo 1
+    echo "1..."
+    echo 1
 fi
 echo
 if [ "$version_0_5_enable" != "true" ]; then
-  echo "  [ - ] removing worldedit's worldedit_brush since not compatible with 0.4.* stable (detected)"
-  sudo rm -Rf $MT_MYGAME_MODS_PATH/worldedit/worldedit_brush
+    echo "  [ - ] removing worldedit's worldedit_brush since not compatible with 0.4.* stable (detected)"
+    rm -Rf $MT_MYGAME_MODS_PATH/worldedit/worldedit_brush
 else
-  if [ -d "$MT_MYGAME_MODS_PATH/worldedit/worldedit_brush" ]; then
-    echo "* worldedit_brush (5.0.0-dev+ only, detected) is enabled."
-  fi
+    if [ -d "$MT_MYGAME_MODS_PATH/worldedit/worldedit_brush" ]; then
+        echo "* worldedit_brush (5.0.0-dev+ only, detected) is enabled."
+    fi
 fi
 echo
 echo
@@ -1076,10 +1019,10 @@ echo "#more minetest.conf settings for hbsprint can be found at https://github.c
 echo "#not all settings can be changed in this minetest.conf (see minetest.conf.example in THIS folder)"
 echo "#some settings can only be changed in client's local copy of minetest.conf (see or login scripts in network)"
 if [ "$version_0_5_enable" = "true" ]; then
-  echo "The 0.5 version of mods was installed."
+    echo "The 0.5 version of mods was installed."
 else
-  echo "The non-0.5 version of mods was installed (if you have installed a development version of minetest to /usr/share such as via an AUR package, you must instead run:"
-  echo "./game-install-ENLIVEN version_0_5_enable"
+    echo "The non-0.5 version of mods was installed (if you have installed a development version of minetest to /usr/share such as via an AUR package, you must instead run:"
+    echo "./game-install-ENLIVEN version_0_5_enable"
 fi
 echo "(used $MT_MINETEST_GAME_PATH as base)"
 echo "spawners_enable: $spawners_enable"
@@ -1091,35 +1034,35 @@ echo
 echo
 
 if [ -f "`command -v blender`" ]; then
-  BLENDER_CURRENT_VERSION=`blender --version | cut -d " " -f 2`
-  if [ ! -f "" ]; then
-    cd ~
-    if [ ! -d Downloads ]; then
-      mkdir Downloads
+    BLENDER_CURRENT_VERSION=`blender --version | cut -d " " -f 2`
+    if [ ! -f "" ]; then
+        cd ~
+        if [ ! -d Downloads ]; then
+            mkdir Downloads
+        fi
+        cd Downloads
+        if [ ! -d "B3DExport" ]; then
+            git clone https://github.com/minetest/B3DExport.git
+        else
+            cd "B3DExport"
+            git pull || echo "rm -Rf \"`pwd`\"  # FAILED: cd \"`pwd`\" && git pull" >> "$err_txt"
+            cd ..
+        fi
+        echo "NOTICE: For B3DExport from Blender you must manually install $HOME/Downloads/B3DExport/B3DExport.py using Blender's File Menu, User Preferences, Add-ons, 'Install Add-on from File...', press OK, then check the 'Import-Export B3D' box in the Add-ons list, then Save User Settings"
+        sleep 3
+        cd
     fi
-    cd Downloads
-    if [ ! -d "B3DExport" ]; then
-      git clone https://github.com/minetest/B3DExport.git
-    else
-      cd "B3DExport"
-      git pull
-      cd ..
-    fi
-    echo "NOTICE: For B3DExport from Blender you must manually install $HOME/Downloads/B3DExport/B3DExport.py using Blender's File Menu, User Preferences, Add-ons, 'Install Add-on from File...', press OK, then check the 'Import-Export B3D' box in the Add-ons list, then Save User Settings"
-    sleep 3
-    cd
-  fi
 fi
 echo "Hopefully <https://github.com/minetest-mods/technic/issues/448> is fixed by the time you try this, otherwise you'll have to patch /usr/local/share/minetest/games/ENLIVEN/mods/technic/technic/machines/register/extractor_recipes.lua manually using workaround at <https://github.com/minetest/minetest/issues/6513>."
 echo
 ls $MT_MYGAME_MODS_PATH > "$CONFIG_PATH/actual_mod_list.txt"
 sort "$MOD_LIST" > "$CONFIG_PATH/mod_list_sorted.txt"
 if [ ! -z "`diff "$CONFIG_PATH/mod_list_sorted.txt" "$CONFIG_PATH/actual_mod_list.txt"`" ]; then
-  echo "Any failures to install will be listed below."
-  diff "$CONFIG_PATH/mod_list_sorted.txt" "$CONFIG_PATH/actual_mod_list.txt"
+    echo "Any failures to install will be listed below."
+    diff "$CONFIG_PATH/mod_list_sorted.txt" "$CONFIG_PATH/actual_mod_list.txt"
 fi
 if [ ! -d "$MT_MYGAME_MODS_PATH/dungeon_loot" ]; then
-  echo "No mod loot for dungeon_loot (nor forks of worldgen mods which should use it) are in ENLIVEN, so dungeon_loot from $mtgame_name is removed by this script for now (treasurer and relevant trm_* mods are used instead)."
+    echo "No mod loot for dungeon_loot (nor forks of worldgen mods which should use it) are in ENLIVEN, so dungeon_loot from $mtgame_name is removed by this script for now (treasurer and relevant trm_* mods are used instead)."
 fi
 echo "INSTALLED t4im's technic FOR RECENT PATCH FOR corrected depends.txt..."
 echo "You must manually fix crash in awards unless it has been fixed:"
@@ -1138,4 +1081,23 @@ echo "  awards[\"notify_\" .. tname] = tdef.notify"
 echo
 echo "* there is no armor bar at this time since hudbars is not being used (not used due to issue where overlaps the new 5.0.0-dev hud)"
 echo "* You may consider changing $MT_MYGAME_MODS_PATH/technic/technic/config.lua so that flashlight is enabled (however, this will probably cause lag)"
+echo
+echo "If any uncommented commands appear below, consider running them if repairs are needed:"
+echo
+cat $err_txt
+if [ -d "$HOME/.minetest/games/ENLIVEN" ]; then
+    echo "rsync -rt --delete \"$MT_MYGAME_DIR/\" \"$HOME/.minetest/games/ENLIVEN\""
+fi
+if [ -d "$SYSTEM_MT_GAMES_DIR/$MT_MYGAME_NAME" ]; then
+    echo "sudo rm -Rf \"$SYSTEM_MT_GAMES_DIR/$MT_MYGAME_NAME/\"  # deprecated location--see '$MT_MYGAME_DIR' instead."
+fi
+echo "You should see $MT_MYGAME_NAME in the list below if the game was configured properly:"
+if [ -f "`command -v minetestserver`" ]; then
+    minetestserver --gameid list
+elif [ -f "`command -v minetest`" ]; then
+    minetest --gameid list
+else
+    echo "WARNING: neither minetestserver nor minetest is in the system path"
+fi
+echo
 echo
