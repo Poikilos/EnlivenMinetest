@@ -481,7 +481,7 @@ cd "$MTMOD_GOT_NAME"
 wget https://github.com/MinetestForFun/server-minetestforfun/raw/master/mods/trm_pyramids/depends.txt
 wget https://github.com/MinetestForFun/server-minetestforfun/raw/master/mods/trm_pyramids/init.lua
 wget https://github.com/MinetestForFun/server-minetestforfun/raw/master/mods/trm_pyramids/more_trms.lua
-wget https://github.com/MinetestForFun/server-minetestforfun/blob/master/LICENSE
+wget https://github.com/MinetestForFun/server-minetestforfun/raw/master/LICENSE
 echo "trm_pyramids" >> "$MOD_LIST"
 if [ -d "$MTMOD_DEST_PATH" ]; then
     rm -Rf "$MTMOD_DEST_PATH"
