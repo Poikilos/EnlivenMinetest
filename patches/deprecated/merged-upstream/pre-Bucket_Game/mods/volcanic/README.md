@@ -12,10 +12,10 @@ Using worldedit, make permanent lava flow shapes.
 
 * Code: Open LICENCE file in your favorite text editor
   (code from the Minetest default mod is trivial)
-* Lava Gel Texture
+* Crusted Lava Texture
   CC BY-SA 3.0
   Attribution: Cisoun's texture pack, edited by Poikilos
-* Lava Gel Cool Lava Bucket Texture
+* Crusted Lava Bucket Texture
   based on:
   - CC BY-SA 3.0 Lava from Cisoun's texture pack, edited by Poikilos
   - (c) 2015-2019 and CC BY-SA 3.0: Realistic Bucket by ElementW, modified by Poikilos.
