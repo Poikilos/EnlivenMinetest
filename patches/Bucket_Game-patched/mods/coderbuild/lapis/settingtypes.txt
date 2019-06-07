@@ -1,4 +1,0 @@
-#When true, lapis mod's builtin round column nodes and their crafting
-#recipes are available (castle_masonry comes with its own square
-#columns which are always enabled).
-enable_lapis_mod_columns (Lapis Mod's Round Columns) bool false
