@@ -16,16 +16,37 @@ customDie() {
 }
 branch=
 enable_install=false
-if [ "@$3" == "@--install" ]; then
-    enable_install=true
-    branch="$4"
-elif [ "@$2" == "@--install" ]; then
-    enable_install=true
-    branch="$3"
-elif [ "@$1" == "@--install" ]; then
-    enable_install=true
-    branch="$2"
-else
+enable_meld=false
+next_var=
+enable_bare_param=false
+param1="$1"
+#what=$1
+for var in "$@"
+do
+    if [ "@$next_var" = "@--install" ]; then
+        next_var=
+        branch="$var"
+        enable_install=true
+    elif [ "@$next_var" = "@--meld" ]; then
+        next_var=
+        branch="$var"
+        enable_meld=true
+        #echo "enable_meld:$enable_meld"
+    elif [ "@$var" = "@--install" ]; then
+        next_var="$var"
+    elif [ "@$var" = "@--meld" ]; then
+        next_var="$var"
+        #echo "next_var:$next_var"
+    elif [ "@$var" = "@$param1" ]; then
+        what="$var"
+    else
+        next_var=
+        #branch="$var"
+        enable_bare_param=true
+        echo "selected branch: $var"
+    fi
+done
+if [ "@$enable_bare_param" = "@true" ]; then
     branch="$2"
 fi
 project0=Bucket_Game
@@ -36,7 +57,32 @@ project0_path="$HOME/git/EnlivenMinetest/webapp/linux-minetest-kit/minetest/game
 patches="$HOME/git/1.pull-requests/Bucket_Game-branches"
 project1_path="$patches/$branch/$project1"
 project2_path="$patches/$branch/$project2"
-if [ "@$enable_install" = "@true" ]; then
+if [ "@$enable_meld" = "@true" ]; then
+    echo "meld..."
+    if [ -z "$branch" ]; then
+        customDie "You must specify a branch name after --meld."
+    fi
+    subgame=
+    if [ -d "$patches/$branch/mods" ]; then
+        patch_game_src="$patches/$branch"
+    elif [ -d "$patches/$branch/patched/mods" ]; then
+        patch_game_src="$patches/$branch/patched"
+    else
+        customDie "Cannot detect mods directory in $patches/$branch"
+    fi
+    echo "meld $patch_game_src/ $HOME/minetest/games/ENLIVEN..."
+    if [ -f "`command -v meld`" ]; then
+        if [ -f "`command -v nohup`" ]; then
+            nohup meld "$patch_game_src/" "$HOME/minetest/games/ENLIVEN" &
+        else
+            meld "$patch_game_src/" "$HOME/minetest/games/ENLIVEN" &
+            echo "* install nohup to prevent programs from dumping output to console..."
+        fi
+    fi
+    echo
+    echo
+    exit 0
+elif [ "@$enable_install" = "@true" ]; then
     if [ -z "$branch" ]; then
         customDie "You must specify a branch name after --install."
     fi
@@ -85,10 +131,6 @@ if [ -z "$2" ]; then
     usage
     exit 1
 fi
-
-what=$1
-
-
 
 file0_path="$project0_path/$what"
 file1_path="$project1_path/$what"
