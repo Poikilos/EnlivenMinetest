@@ -19,13 +19,13 @@ enable_install=false
 if [ "@$3" == "@--install" ]; then
     enable_install=true
     branch="$4"
-fi
-if [ "@$2" == "@--install" ]; then
+elif [ "@$2" == "@--install" ]; then
     enable_install=true
     branch="$3"
-fi
-if [ "@$1" == "@--install" ]; then
+elif [ "@$1" == "@--install" ]; then
     enable_install=true
+    branch="$2"
+else
     branch="$2"
 fi
 project0=Bucket_Game
