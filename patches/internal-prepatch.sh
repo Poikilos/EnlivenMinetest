@@ -14,60 +14,24 @@ customDie() {
     echo
     exit 1
 }
-branch=
-enable_install=false
-if [ "@$3" == "@--install" ]; then
-    enable_install=true
-    branch="$4"
-fi
-if [ "@$2" == "@--install" ]; then
-    enable_install=true
-    branch="$3"
-fi
-if [ "@$1" == "@--install" ]; then
-    enable_install=true
-    branch="$2"
-fi
+
 project0=Bucket_Game
-project1=basis
-project2=patched
+project1=Bucket_Game-basis
+project2=Bucket_Game-patched
 project0_path="$HOME/git/EnlivenMinetest/webapp/linux-minetest-kit/minetest/games/$project0"
-#patches="$HOME/git/EnlivenMinetest/patches"
-patches="$HOME/git/1.pull-requests/Bucket_Game-branches"
-project1_path="$patches/$branch/$project1"
-project2_path="$patches/$branch/$project2"
-if [ "@$enable_install" = "@true" ]; then
-    if [ -z "$branch" ]; then
-        customDie "You must specify a branch name after --install."
-    fi
-    echo "* installing $branch branch..."
-    subgame=
-    if [ -d "$patches/$branch/mods" ]; then
-        patch_game_src="$patches/$branch"
-    elif [ -d "$patches/$branch/patched/mods" ]; then
-        patch_game_src="$patches/$branch/patched"
-    else
-        customDie "Cannot detect mods directory in $patches/$branch"
-    fi
-    echo "rsync -rt $patch_game_src/ $HOME/minetest/games/ENLIVEN..."
-    rsync -rt "$patch_game_src/" "$HOME/minetest/games/ENLIVEN"
-    #echo "#patches:$patches"
-    #echo "#branch:$branch"
-    echo "Done."
-    echo
-    echo
-    exit 0
-fi
+patches="$HOME/git/EnlivenMinetest/patches"
+project1_path="$patches/$project1"
+project2_path="$patches/$project2"
 if [ ! -d "$patches" ]; then
     customDie "You are missing $patches so a patch basis and patched target cannot be created there."
 fi
 licenses="license.txt LICENSE LICENSE.txt oldcoder.txt LICENSE.md license.md"
 usage() {
-    echo "$me <file_path> <new-fake-branch-name>"
+    echo "$me <file_path>"
     echo "* will be copied to $project1 and $project2"
     echo
     echo "Example:"
-    echo "$me mods/coderfood/food_basic/init.lua milk-patch"
+    echo "$me mods/coderfood/food_basic/init.lua"
     echo
     echo "* copies the file to $project1 and $project2)"
     echo "* also copies $licenses and same in .. and ../.."
@@ -78,10 +42,6 @@ usage() {
 
 
 if [ -z "$1" ]; then
-    usage
-    exit 1
-fi
-if [ -z "$2" ]; then
     usage
     exit 1
 fi
@@ -143,12 +103,8 @@ if [ -f "$file2_path" ]; then
 fi
 echo "* creating $file2_path"
 cp -f "$file0_path" "$file2_path" || customDie "Cannot cp '$file0_path' '$file2_path'"
-if [ -f "`command -v zbstudio`" ]; then
-    nohup zbstudio "$file2_path" &
-else
-    if [ -f "`command -v geany`" ]; then
-        nohup geany "$file2_path" &
-    fi
+if [ -f "`command -v geany`" ]; then
+    nohup geany "$file2_path" &
 fi
 if [ -d "$HOME/minetest/games/ENLIVEN" ]; then
     if [ -f "`command -v meld`" ]; then
