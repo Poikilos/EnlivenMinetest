@@ -1,4 +1,6 @@
 #!/bin/bash
+echo "use prepatch.sh instead (which now uses and requires branch name)"
+exit 0
 master=~/minetest/games/Bucket_Game
 branches=~/git/1.pull-requests/Bucket_Game-branches
 if [ ! -d "$branches" ]; then
