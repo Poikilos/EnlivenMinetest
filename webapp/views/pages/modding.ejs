@@ -144,6 +144,45 @@ Remember, you can always look at examples as well. You can find a mod
 that does something similar to what you want, looking at all of the .lua
 files in a mod like that may help.
 </p>
+<p>Knowing the Lua language well means you can make more advanced mods.
+Even if you know the API perfectly, you still need to understand both
+programming concepts and the Lua language to do well. If you don't yet
+know any languages, a software development concepts course on YouTube or
+in book or formal education will help you greatly, Lua or not. If you
+already know programming concepts, here are some Lua caveats that can
+help you get started:
+<ul>
+    <li>Everything other than primitive value types are tables. Tables
+    are what all other languages call associative arrays or dictionaries.</li>
+    <li>The concatenation operator (for adding strings together) is <code>..</code></li>
+    <li>You can send self as the first param for function automatically
+    using <code>obj:do_something</code> instead of
+    <code>obj.do_something</code>. This is helpful for functions used as
+    object methods, which make use of the <code>self</code>
+    variable.</li>
+    <li><code>#</code> is the length operator.
+    <code>if #minetest.find_nodes_in_area(pos0, pos1, "group:flora") > 3 then</code>
+    is legitimate code: it will cause the case to happen if the count of
+    flora nodes in the 3D box is greater than 3.</li>
+    <li>Though lua guides will tell you there is no ternary operator,
+    and that is technically true, you can do a ternary operation as
+    follows:
+    <code>local gender = texture_name:find("_female") and "female" or "male"</code>
+    The code sets gender to either "female" or "male".</li>
+    <li>0 is true in lua, but nil is false. This behavior is helpful when checking whether a setting is present:
+    <code>local radius = (tonumber(minetest.setting_get("protector_radius")) or 5)</code>
+    The code allows a zero value.</li>
+    <li>Lua's tostring method does not have an underscore, and is a global function</li>
+    <li>Lua can represent an object as a unique hash using tostring (for
+    an example, see owner of arrow projectile object in mobs redo), but
+    trying to append an object to a string will result in a fatal "not
+    serializeable" error</li>
+</ul>
+Minetest Lua functions unrelated to the engine's functionality:
+<ul>
+    <li><code>dump</code> can convert a table to a string (a list of methods of an object, usually)</li>
+</ul>
+</p>
 <h2>Changing Existing Mods</h2>
 <p>A public license allows you to change and rerelease the mod,
 in addition to just being "open source." Many
