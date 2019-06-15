@@ -63,6 +63,10 @@ if [ "@$enable_meld" = "@true" ]; then
         customDie "You must specify a branch name after --meld."
     fi
     subgame=
+    branch_basis=
+    if [ -d "$patches/$branch/basis/mods" ]; then
+        branch_basis="$patches/$branch/basis"
+    fi
     if [ -d "$patches/$branch/mods" ]; then
         patch_game_src="$patches/$branch"
     elif [ -d "$patches/$branch/patched/mods" ]; then
@@ -79,6 +83,18 @@ if [ "@$enable_meld" = "@true" ]; then
             echo "* install nohup to prevent programs from dumping output to console..."
         fi
     fi
+    if [ ! -z "$branch_basis" ]; then
+        echo "meld $branch_basis $patch_game_src/..."
+        if [ -f "`command -v meld`" ]; then
+            if [ -f "`command -v nohup`" ]; then
+                nohup meld "$branch_basis" "$patch_game_src" &
+            else
+                meld "$patch_game_src/" "$HOME/minetest/games/ENLIVEN" &
+                echo "* install nohup to prevent programs from dumping output to console..."
+            fi
+        fi
+    fi
+
     echo
     echo
     exit 0

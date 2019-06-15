@@ -15,14 +15,36 @@ $1
 END
     exit 1
 }
+
 dest_programs="$HOME"
 #NOTE: $HOME is still used further down, for $HOME/.* and $HOME/i_am_dedicated_minetest_server flag file (which can be empty)
 #TODO: change $HOME/i_am_dedicated_minetest_server to $HOME/.config/EnlivenMinetest/i_am_dedicated_minetest_server or rc file
 extracted_name=linux-minetest-kit
 flag_dir_rel="$extracted_name/mtsrc"
 flag_dir="`pwd`/$flag_dir_rel"
-pushd "$extracted_name"
 enable_client=false
+custom_scripts_dir="$HOME"
+custom_script_name="mts.sh"
+if [ -f "$custom_scripts_dir/mts-CenterOfTheSun.sh" ]; then
+    custom_script_name="mts-CenterOfTheSun.sh"
+fi
+
+scripting_rc_path=~/.config/EnlivenMinetest/scripting.rc
+
+if [ -f ~/.config/EnlivenMinetest/scripting.rc ]; then
+    echo "Running $scripting_rc_path..."
+    source $scripting_rc_path
+    # may contain any variables above, plus:
+    # * enable_run_after_compile: if true, then run the server, such as
+    #   ~/mts-CenterOfTheSun.sh
+else
+    echo "* skipping $scripting_rc_path (not present)"
+    echo "  (can contain settings such as enable_run_after_compile)"
+fi
+
+pushd "$extracted_name"
+
+
 extra_options=""
 for var in "$@"
 do
@@ -387,7 +409,40 @@ else
     echo "* $settings_types_list was already created"
 fi
 popd
-echo "Done."
-echo
-echo
+echo "* finished compiling."
+if [ "@$enable_run_after_compile" = "@true" ]; then
+    echo "Trying to run minetest or other custom post-install script"
+    echo "(enable_run_after_compile is true in '$scripting_rc_path')."
+    if [ -d "$custom_scripts_dir" ]; then
+        pushd "$custom_scripts_dir"
+        if [ -f archive-minetestserver-debug.sh ]; then
+            ./archive-minetestserver-debug.sh
+            echo "NOTE: if you put archive-minetestserver-debug.sh"
+            echo "  in `pwd`, it would run at this point if"
+            echo "  marked executable."
+        fi
+        if [ -f "$custom_script_name" ]; then
+            ./$custom_script_name
+            echo "$custom_script_name finished (exit code $?)"
+        else
+            cat <<END
+ERROR: enable_run_after_compile is true, but
+  '$custom_script_name' is not in
+  '$custom_scripts_dir'.
+  Try setting custom_scripts_dir and custom_script_name in
+  '$scripting_rc_path'
+END
+        fi
+        popd
+    else
+        cat <<END
+ERROR: enable_run_after_compile is true, but
+  '$custom_scripts_dir'
+  does not exist. Try setting custom_scripts_dir in
+  '$scripting_rc_path'.
+END
+    fi
+fi
 
+echo
+echo
