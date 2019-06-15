@@ -1,7 +1,7 @@
 -- ===================================================================
 -- Light.
 
-minetest.register_node("nftools:light", {
+minetest.register_node ("nftools:light", {
     drawtype          = "glasslike"              ,
     tiles             = { "nftools_debug.png" }  ,
     is_ground_content = true                     ,
@@ -18,7 +18,7 @@ minetest.register_node("nftools:light", {
 -- ===================================================================
 -- Mese Pickaxe.
 
-minetest.register_tool("nftools:pick_mese", {
+minetest.register_tool ("nftools:pick_mese", {
     description = "Mese Pickaxe with light",
     inventory_image = "nftools_mesepick.png",
     wield_image = "nftools_mesepick_wield.png",
@@ -33,7 +33,7 @@ minetest.register_tool("nftools:pick_mese", {
     },
 })
 
-minetest.register_craft({
+minetest.register_craft ({
     output = 'nftools:pick_mese',
     recipe = {
         {'default:torch'},
@@ -44,7 +44,7 @@ minetest.register_craft({
 -- ===================================================================
 -- Stool.
 
-minetest.register_node("nftools:stool",{
+minetest.register_node ("nftools:stool",{
     description = "Wooden Stool",
     tiles = {"nftools_stool.png"},
     drop = 'nftools:stool',
@@ -67,7 +67,7 @@ minetest.register_node("nftools:stool",{
 -- ===================================================================
 -- Quartz crystals.
 
-minetest.register_node("nftools:quartz_crystals", {
+minetest.register_node ("nftools:quartz_crystals", {
     description = "Quartz Crystals",
     tiles = {"nftools_quartz_crystal.png"},
     is_ground_content = true,
@@ -80,15 +80,15 @@ minetest.register_node("nftools:quartz_crystals", {
     node_box = {
         type = "fixed",
         fixed = {
-            {-0.437500,-0.500000,-0.437500,0.425000,-0.250000,0.425004}, 
-            {-0.375000,-0.250000,0.187500,-0.250000,0.500000,0.312500}, 
-            {0.062500,-0.250000,-0.187500,0.312500,0.375000,0.125000}, 
-            {-0.312500,-0.500000,-0.250000,-0.125000,0.125000,0.000000}, 
-            {-0.187500,-0.250000,-0.437500,0.125000,0.500000,-0.250000}, 
-            {0.000000,-0.312500,0.187500,0.250000,0.312500,0.375000}, 
-            {-0.125000,-0.187500,-0.250000,0.062500,0.312500,0.000000}, 
-            {0.125000,-0.250000,-0.375000,0.375000,0.375000,-0.187500}, 
-            {-0.250000,-0.250000,0.062500,0.000000,0.125000,0.375000}, 
+            {-0.437500,-0.500000,-0.437500,0.425000,-0.250000,0.425004},
+            {-0.375000,-0.250000,0.187500,-0.250000,0.500000,0.312500},
+            {0.062500,-0.250000,-0.187500,0.312500,0.375000,0.125000},
+            {-0.312500,-0.500000,-0.250000,-0.125000,0.125000,0.000000},
+            {-0.187500,-0.250000,-0.437500,0.125000,0.500000,-0.250000},
+            {0.000000,-0.312500,0.187500,0.250000,0.312500,0.375000},
+            {-0.125000,-0.187500,-0.250000,0.062500,0.312500,0.000000},
+            {0.125000,-0.250000,-0.375000,0.375000,0.375000,-0.187500},
+            {-0.250000,-0.250000,0.062500,0.000000,0.125000,0.375000},
         }
     }
 })
@@ -96,30 +96,30 @@ minetest.register_node("nftools:quartz_crystals", {
 -- ===================================================================
 -- Ore.
 
-minetest.register_ore({
+minetest.register_ore ({
     ore_type       = "scatter",
-    ore            = "nftools:stone_with_bismuth",
-    wherein        = "default:stone",
-		clust_scarcity = 24*24*24,
-		clust_num_ores = 4,
-		clust_size     = 3,
-    y_max          = -64,
-    y_min          = -31000,
-    flags          = "absheight",
+    ore            = "nftools:stone_with_bismuth" ,
+    wherein        = "default:stone" ,
+    clust_scarcity = 24*24*24    ,
+    clust_num_ores =        4    ,
+    clust_size     =        3    ,
+    y_max          =      -64    ,
+    y_min          =   -31000    ,
+    flags          = "absheight" ,
 })
 
 -- ===================================================================
 
-minetest.register_ore({
+minetest.register_ore ({
     ore_type       = "scatter",
     ore            = "nftools:stone_with_amber",
     wherein        = "default:stone",
-    clust_scarcity = 48*48*48,
-    clust_num_ores = 1,
-    clust_size     = 2,
-    y_max          = -8,
-    y_min          = -64,
-    flags          = "absheight",
+    clust_scarcity = 48*48*48    ,
+    clust_num_ores =        1    ,
+    clust_size     =        2    ,
+    y_max          =       -8    ,
+    y_min          =      -64    ,
+    flags          = "absheight" ,
 })
 
 -- ===================================================================
@@ -128,39 +128,38 @@ minetest.register_ore({
     ore_type       = "scatter",
     ore            = "nftools:stone_with_blackopal",
     wherein        = "default:stone",
-    clust_scarcity = 48*48*48,
-    clust_num_ores = 1,
-    clust_size     = 2,
-    y_max          = -128,
-    y_min          = -256,
+    clust_scarcity = 48*48*48 ,
+    clust_num_ores =        1 ,
+    clust_size     =        2 ,
+    y_max          =     -128 ,
+    y_min          =     -256 ,
 })
 
 -- ===================================================================
 
-minetest.register_ore({
+minetest.register_ore ({
     ore_type       = "scatter",
     ore            = "nftools:stone_with_turquoise",
     wherein        = "default:stone",
-    clust_scarcity = 24*24*24,
-    clust_num_ores = 3,
-    clust_size     = 3,
-    y_max          = -8,
-    y_min          = -64,
-    flags          = "absheight",
+    clust_scarcity = 24*24*24    ,
+    clust_num_ores =        3    ,
+    clust_size     =        3    ,
+    y_max          =       -8    ,
+    y_min          =      -64    ,
+    flags          = "absheight" ,
 })
 
 -- ===================================================================
 -- Bismuth (formerly Alexandrite)
 
-minetest.register_alias("nftools:alexandrite_ore", "nftools:stone_with_bismuth")
-minetest.register_alias("nftools:alexandrite", "nftools:bismuth")
-
-minetest.register_craftitem("nftools:bismuth", {
+minetest.register_craftitem ("nftools:bismuth", {
     description = "Bismuth",
     inventory_image = "nftools_bismuth.png",
 })
 
-minetest.register_node("nftools:stone_with_bismuth", {
+minetest.register_alias ("nftools:alexandrite", "nftools:bismuth")
+
+minetest.register_node ("nftools:stone_with_bismuth", {
     description = "Raw Bismuth",
     tiles = {"default_stone.png^nftools_mineral_bismuth.png"},
     is_ground_content = true,
@@ -168,9 +167,10 @@ minetest.register_node("nftools:stone_with_bismuth", {
     drop = "nftools:stone_with_bismuth",
 })
 
+minetest.register_alias ("nftools:alexandrite_ore", "nftools:stone_with_bismuth")
 
 -- ===================================================================
--- Smelting (only metals)
+-- Smelting (only metals).
 
 minetest.register_craft ({
     type = "cooking",
@@ -179,12 +179,9 @@ minetest.register_craft ({
 })
 
 -- ===================================================================
--- Amber
+-- Amber.
 
-minetest.register_alias("nftools:amber", "nftools:stone_with_amber")
--- (formerly called amber but dropped chip; use conventions instead)
-
-minetest.register_node("nftools:stone_with_amber", {
+minetest.register_node ("nftools:stone_with_amber", {
     description = "Rough Amber",
     tiles = {"default_stone.png^nftools_mineral_amber.png"},
     is_ground_content = true,
@@ -192,18 +189,20 @@ minetest.register_node("nftools:stone_with_amber", {
     drop = "nftools:amber_chip",
 })
 
-minetest.register_craftitem("nftools:amber_chip", {
+minetest.register_alias ("nftools:amber",
+                         "nftools:stone_with_amber")
+-- (formerly called amber but dropped chip; use conventions instead)
+
+
+minetest.register_craftitem ("nftools:amber_chip", {
     description = "Amber",
     inventory_image = "nftools_amberchip.png",
 })
 
 -- ===================================================================
--- Turquoise (formerly Aquamarine)
+-- Turquoise (formerly Aquamarine).
 
-minetest.register_alias("nftools:aquamarine_ore", "nftools:stone_with_turquoise")
-minetest.register_alias("nftools:aquamarine", "nftools:turquoise")
-
-minetest.register_node("nftools:stone_with_turquoise", {
+minetest.register_node ("nftools:stone_with_turquoise", {
     description = "Rough Turquoise",
     tiles = {"default_stone.png^nftools_mineral_turquoise.png"},
     is_ground_content = true,
@@ -211,23 +210,26 @@ minetest.register_node("nftools:stone_with_turquoise", {
     drop = "nftools:turquoise",
 })
 
-minetest.register_craftitem("nftools:turquoise", {
+minetest.register_alias ("nftools:aquamarine_ore", "nftools:stone_with_turquoise")
+
+minetest.register_craftitem ("nftools:turquoise", {
     description = "Turquoise",
     inventory_image = "nftools_turquoise.png",
 })
 
+minetest.register_alias ("nftools:aquamarine", "nftools:turquoise")
+
 -- ===================================================================
--- Black Opal (formerly Amethyst)
+-- Black Opal (formerly Amethyst).
 
-minetest.register_alias("nftools:amethyst_ore", "nftools:stone_with_blackopal")
-minetest.register_alias("nftools:amethyst", "nftools:blackopal")
-
-minetest.register_craftitem("nftools:blackopal", {
+minetest.register_craftitem ("nftools:blackopal", {
     description = "Black Opal",
     inventory_image = "nftools_blackopal.png",
 })
 
-minetest.register_node("nftools:stone_with_blackopal", {
+minetest.register_alias ("nftools:amethyst", "nftools:blackopal")
+
+minetest.register_node ("nftools:stone_with_blackopal", {
     description = "Rough Black Opal",
     tiles = {"default_stone.png^nftools_mineral_blackopal.png"},
     is_ground_content = true,
@@ -235,10 +237,12 @@ minetest.register_node("nftools:stone_with_blackopal", {
     drop = "nftools:blackopal",
 })
 
+minetest.register_alias ("nftools:amethyst_ore", "nftools:stone_with_blackopal")
+
 -- ===================================================================
 -- Sunflower.
 
-minetest.register_node("nftools:sunflower", {
+minetest.register_node ("nftools:sunflower", {
     description = "Sunflower",
     drawtype = "plantlike",
     visual_scale = 1.5,
@@ -257,10 +261,9 @@ minetest.register_node("nftools:sunflower", {
 })
 
 -- ===================================================================
--- Blocks
+-- Blocks.
 
-
-minetest.register_node("nftools:amberblock", {
+minetest.register_node ("nftools:amberblock", {
     description = "Amber Block",
     alpha = 170,
     sunlight_propagates = true,
@@ -270,15 +273,16 @@ minetest.register_node("nftools:amberblock", {
     drop = "nftools:amberblock",
 })
 
-local function registerblockrecipe(name, blockname)
-    minetest.register_craft({
+local function registerblockrecipe (name, blockname)
+    minetest.register_craft ({
         output = blockname,
         recipe = {{name, name, name},
           {name, name, name},
           {name, name, name}
         }
     })
-    minetest.register_craft({
+
+    minetest.register_craft ({
         output = name..' 9',
         recipe = {
           {blockname},
@@ -289,18 +293,17 @@ end
 registerblockrecipe('nftools:amber_chip', 'nftools:amberblock')
 
 if minetest.get_modpath("quartz") ~= nil then
-  minetest.register_craft({
+  minetest.register_craft ({
     output = "nftools:quartz_crystals",
     recipe = {
       {'', '', ''},
       {'', 'quartz:quartz_crystal', ''},
       {'quartz:quartz_crystal', 'nftools:amberblock', 'quartz:quartz_crystal'}
     }
-  
   })
 
-  minetest.register_craft({
-    output = "quartz:quartz_crystal"..' 3',
+  minetest.register_craft ({
+    output = "quartz:quartz_crystal" .. ' 3',
     recipe = {
       {"nftools:quartz_crystals"},
     }
@@ -308,9 +311,9 @@ if minetest.get_modpath("quartz") ~= nil then
 end
 
 -- ===================================================================
--- Scythe
+-- Scythe.
 
-minetest.register_tool("nftools:scythe", {
+minetest.register_tool ("nftools:scythe", {
     description = "Scythe",
     inventory_image = "nftools_tool_scythe.png",
     tool_capabilities = {
@@ -323,7 +326,7 @@ minetest.register_tool("nftools:scythe", {
     }
 })
 
-minetest.register_craft({
+minetest.register_craft ({
     output = 'nftools:scythe',
     recipe = {
         {'default:steel_ingot', 'default:steel_ingot', 'default:steel_ingot'},
@@ -333,9 +336,9 @@ minetest.register_craft({
 })
 
 -- ===================================================================
--- Mace
+-- Mace.
 
-minetest.register_tool("nftools:mace", {
+minetest.register_tool ("nftools:mace", {
     description = "Mace",
     inventory_image = "nftools_tool_mace.png",
     tool_capabilities = {
@@ -348,7 +351,7 @@ minetest.register_tool("nftools:mace", {
     }
 })
 
-minetest.register_craft({
+minetest.register_craft ({
     output = 'nftools:mace',
     recipe = {
         {'default:obsidian_shard', 'default:steel_ingot', 'default:obsidian_shard'},
@@ -360,7 +363,7 @@ minetest.register_craft({
 -- ===================================================================
 -- Battle-axe
 
-minetest.register_tool("nftools:battleaxe", {
+minetest.register_tool ("nftools:battleaxe", {
     description = "Battle Axe",
     inventory_image = "nftools_tool_battleaxe.png",
     tool_capabilities = {
@@ -373,7 +376,7 @@ minetest.register_tool("nftools:battleaxe", {
     }
 })
 
-minetest.register_craft({
+minetest.register_craft ({
     output = 'nftools:battleaxe',
     recipe = {
         {'default:cobble', 'default:cobble', 'default:cobble'},
