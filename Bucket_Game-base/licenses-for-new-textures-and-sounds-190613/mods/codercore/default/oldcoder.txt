@@ -1,0 +1,65 @@
+Name:    default
+Source:  Fork of upstream mod - Do not replace
+License: See "LICENSE" and this file (oldcoder.txt)
+
+----------------------------------------------------------------------
+
+This is a Bucket Game  "default" mod  based on  multiple upstream "de-
+fault" mods and original patches.
+
+This mod should not be  upgraded to,  or replaced with,  any mod but a
+Bucket Game "default" mod.
+
+One  important change is that  this mod supports  64x64 skins  but not
+3D Armor.
+
+"New" chests (from the 0.4.17 era) are gone  because they're buggy and
+frustrating to deal with. They're mapped to "classic" chests.
+
+The file "ocutil.lua"  includes some  utility functions written and/or
+added by OldCoder.
+
+----------------------------------------------------------------------
+
+New textures identified by md5sum numbers:
+
+md5sum:   f9ba02526b68cd7be42d0129cfe9418d
+License:  CC BY-SA 3.0: Poikilos
+Name:     default_mese_block.png
+Source:   http://axlemedia.net/poikilos/images/\
+default_mese_block-8D.png
+
+md5sum:   db5e9366cb3d90d4a5538aef92882150
+License:  CC BY-SA 3.0: Paramat and Dr. Frankenstone
+Name:     default_grass_side.png
+source:   Less-Dirt mod
+
+md5sum:   9bd1a007236b3cbb8933253dd6f37fc8
+License:  CC BY-SA 3.0: Paramat and Dr. Frankenstone
+Name:     default_dry_grass_side.png
+Source:   Less-Dirt mod
+
+md5sum:   1bda98db7d77d1d438bc95ede5026501
+License:  CC BY-SA 3.0: Gambit and OldCoder
+Name:     default_snow_side.png
+Source:   OldCoder
+
+Filenames may vary and  links may no longer go to the same versions of
+the files.
+
+----------------------------------------------------------------------
+
+Misc. changes:
+
+* default:ice -- Adjust groups
+* nodes.lua   -- Add Cave Ice
+* mapgen.lua  -- Add "icesheet" biome
+
+* default_grass_side.png     -- Try Less-Dirt version
+* default_dry_grass_side.png -- Try Less-Dirt version
+* default_snow_side.png      -- Adjusted by OldCoder
+
+----------------------------------------------------------------------
+
+License for "lava_crust" textures:
+(c) 2019 and CC-BY-NC-SA 4.0: Poikilos.

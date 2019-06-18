@@ -1,0 +1,204 @@
+All of the files involved are  used and distributed under FOSS licens-
+es.
+
+----------------------------------------------------------------------
+
+License: CC0 aka CC Public Domain
+is, or was, described by:
+https://creativecommons.org/publicdomain/zero/1.0/
+
+License: CC BY-SA 4.0
+is, or was, described by:
+https://creativecommons.org/licenses/by-sa/4.0/
+
+License: CC BY-SA 3.0
+is, or was, described by:
+https://creativecommons.org/licenses/by-sa/3.0/
+
+License: CC BY-NC-SA 4.0
+is, or was, described by:
+https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+License: CC BY-NC-SA 3.0
+is, or was, described by:
+https://creativecommons.org/licenses/by-nc-sa/3.0/
+
+----------------------------------------------------------------------
+
+Original components  which are not covered under other  copyrights and
+licenses are copyright and licensed as follows:
+
+(c) 2019 and CC BY-NC-SA 4.0: OldCoder (Robert Kiraly).
+
+----------------------------------------------------------------------
+
+Models and mesh textures for "baby_chick", "bom", and "icebom":
+
+(c) 2019 and CC-BY-NC-SA 4.0: Poikilos. OldCoder as well for the "ice-
+bom" mesh texture.
+
+For sound-file information, see the Lua files.
+
+----------------------------------------------------------------------
+
+Denny code and media:
+See "denny.lua"
+
+----------------------------------------------------------------------
+
+Improved Spider/Bug Sounds:
+codermobs_damage_giant_exoskeleton, codermobs_death_giant_bug,
+codermobs_use_giant_exoskeleton
+(c) 2019 and CC BY-SA 4.0: Poikilos
+
+Improved Particles:
+codermobs_blood, codermobs_damage_stone, codermobs_lott_spider_blood
+(c) 2019 and CC BY-SA 4.0: Poikilos
+
+codermobs_fireball:
+(c) 2012 to 2019 and CC-BY-SA 3.0: Sapier, Poikilos
+
+----------------------------------------------------------------------
+
+Media for "animal_materials", "deer", "elk", and "ostrich":
+
+See  the  5 associated  Lua  source files.  In general,  the media is:
+(c) 2012 to 2019 and CC-BY-SA 3.0: Sapier and Poikilos.
+
+The "ostrich" texture is as described above but also attribution: Old-
+Coder.
+
+Code for "animal_materials": Same as media.  The  other 4 mobs  listed
+here use new code.
+
+More about the Elk:
+
+Pixel Art Elk texture:
+(c) 2012 to 2019 and CC BY-SA 3.0: Sapier, Polikilos (skinned by)
+
+HD (video-based) and Lo-fi (16-color video-based) Elk Textures:
+based on Elk video "Elk.webm.360p.vp9" (CC BY 2.0 Generic)
+Stephen Baker [BLM/Oregon](blm.gov/yg5c).jpg, Poikilos (skinned by)
+
+Additionally, "chicken.lua" uses Sapier's 3D egg.  See that Lua source
+file as well.
+
+----------------------------------------------------------------------
+
+Car model:
+(c) 2015 and CC-BY-NC-SA 3.0: Melkor.
+
+----------------------------------------------------------------------
+
+mdoege   code and/or media
+-----------------------------
+WTFPL
+
+PilzAdam code and/or media
+-----------------------------
+WTFPL
+
+Bat
+-----------------------------
+Code: GPL
+Model and texture: CC BY-SA 3.0. Attribution: Defense Subgame.
+Sound file: WTFPL
+
+Birds
+-----------------------------
+(c) 2012-2019  and  CC-BY-SA  3.0:  Sapier,  Poikilos.  Sapier created
+the original models. Poikilos derived new models from them and created
+new textures.
+
+Butterfly
+-----------------------------
+(c) 2012 to 2019 and CC BY-SA 3.0: AspireMint.
+
+Realistic Milk Bucket
+-----------------------------
+(c) 2015-2019 and CC BY-SA 3.0: ElementW, Poikilos (modified by).
+
+D00Med code
+-----------------------------
+GNU Lesser General Public License 2.1
+
+D00Med models and/or textures
+-----------------------------
+CC BY-SA 3.0 Unported. Attribution: D00Med.
+
+Mr. Goat
+-----------------------------
+(c) 2016 to 2019 and CC BY-SA 3.0: Don Batman.  OldCoder worked on the
+eyes.
+
+NSSM components
+-----------------------------
+No NSSM are believed  presently to be used.  If  they're  used  in the
+future, the applicable license will be GPL3.
+
+Sapier components
+-----------------------------
+(c) 2012-2019 and CC-BY-SA 3.0: Sapier.
+
+"mobs_mc" components
+-----------------------------
+Code and models: GNU GPL V3
+
+Other "mobs_mc" Polar Bear media: CC BY-SA 4.0. Attribution: "mobs_mc"
+team.
+
+----------------------------------------------------------------------
+
+Krupnov Pavel and TenPlus1 components:
+
+The MIT License (MIT)
+
+(c) 2014 Krupnov Pavel -- bugs, kpgmobs, pmobs
+(c) 2014 Krupnov Pavel and 2016 TenPlus1 -- mobs_animal
+(c) 2016 TenPlus1 -- mobs_monster and mobs_npc
+
+Permission is hereby granted,  free of charge, to any person obtaining
+a  copy  of  this  software  and  associated  documentation files (the
+"Software"),  to deal  in the Software without restriction,  including
+without limitation the rights to use,  copy,  modify,  merge, publish,
+distribute,  sublicense,  and/or sell  copies of the Software,  and to
+permit persons to whom the Software is furnished to do so,  subject to
+the following conditions:
+
+The  above  copyright  notice  and  this  permission  notice  shall be
+included in all copies or substantial portions of the Software.
+
+THE  SOFTWARE  IS  PROVIDED  "AS  IS",  WITHOUT  WARRANTY OF ANY KIND,
+EXPRESS  OR  IMPLIED,  INCLUDING  BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN  NO  EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM,  DAMAGES OR OTHER LIABILITY,  WHETHER IN AN ACTION OF CONTRACT,
+TORT  OR  OTHERWISE,  ARISING  FROM,  OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+----------------------------------------------------------------------
+
+Blockmen components:
+
+(c) 2015-2016 BlockMen <blockmen2015@gmail.com>
+
+This  software  is  provided  'as-is',  without any express or implied
+warranty.  In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission  is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1.  The origin  of  this software must not be misrepresented; you must
+not claim  that  you  wrote  the  original  software.  If you use this
+software in a product,  an acknowledgment in the product documentation
+is required.
+
+2.  Altered source versions  must be plainly marked as such,  and must
+not be misrepresented as being the original software.
+
+3.  This notice  may  not  be  removed  or  altered  from  any  source
+distribution.
+
+(end of document)

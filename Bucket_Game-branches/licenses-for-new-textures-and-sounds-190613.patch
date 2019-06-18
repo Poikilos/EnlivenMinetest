@@ -1,0 +1,27 @@
+diff -u -r /home/owner/git/EnlivenMinetest/Bucket_Game-base/licenses-for-new-textures-and-sounds-190613/mods/codercore/default/LICENSE /home/owner/git/EnlivenMinetest/Bucket_Game-branches/licenses-for-new-textures-and-sounds-190613/mods/codercore/default/LICENSE
+--- /home/owner/git/EnlivenMinetest/Bucket_Game-base/licenses-for-new-textures-and-sounds-190613/mods/codercore/default/LICENSE	2019-06-18 16:32:09.468955771 -0400
++++ /home/owner/git/EnlivenMinetest/Bucket_Game-branches/licenses-for-new-textures-and-sounds-190613/mods/codercore/default/LICENSE	2019-06-18 16:36:07.897459554 -0400
+@@ -39,6 +39,9 @@
+ Things not listed here or elsewhere:
+ Copyright (C) 2010-2012 celeron55, Perttu Ahola <celeron55@gmail.com>
+ 
++Poikilos, cmusounddesign, Tomlija (CC BY 3.0):
++  player_falling_damage
++
+ Cisoun's WTFPL texture pack:
+   default_jungletree.png
+   default_lava.png
+diff -u -r /home/owner/git/EnlivenMinetest/Bucket_Game-base/licenses-for-new-textures-and-sounds-190613/mods/codercore/default/oldcoder.txt /home/owner/git/EnlivenMinetest/Bucket_Game-branches/licenses-for-new-textures-and-sounds-190613/mods/codercore/default/oldcoder.txt
+--- /home/owner/git/EnlivenMinetest/Bucket_Game-base/licenses-for-new-textures-and-sounds-190613/mods/codercore/default/oldcoder.txt	2019-06-18 16:32:09.471955702 -0400
++++ /home/owner/git/EnlivenMinetest/Bucket_Game-branches/licenses-for-new-textures-and-sounds-190613/mods/codercore/default/oldcoder.txt	2019-06-18 16:37:15.492899894 -0400
+@@ -59,6 +59,10 @@
+ * default_dry_grass_side.png -- Try Less-Dirt version
+ * default_snow_side.png      -- Adjusted by OldCoder
+ 
++* player_falling_damage: redone based on default_break_glass .1 & .2.
++  - changes by Poikilos: change timing to blend both sounds, overall
++    tonal range, temporal tonal range.
++
+ ----------------------------------------------------------------------
+ 
+ License for "lava_crust" textures:
