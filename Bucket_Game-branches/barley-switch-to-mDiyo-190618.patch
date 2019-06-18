@@ -1,0 +1,12 @@
+--- /home/owner/git/EnlivenMinetest/Bucket_Game-base/barley-mDiyo-190618/mods/coderfood/farming/license.txt	2019-06-18 18:07:05.276885588 -0400
++++ /home/owner/git/EnlivenMinetest/Bucket_Game-branches/barley-mDiyo-190618/mods/coderfood/farming/license.txt	2019-06-18 18:10:41.439290947 -0400
+@@ -23,6 +23,9 @@
+ 
+ License of media (textures):
+ ----------------------------
++Created by mDiyo (Natura) (License: CC BY-SA 3.0):
++  farming_barley.png
++
+ Created by PilzAdam (License: WTFPL):
+   farming_bread.png
+   farming_soil.png
