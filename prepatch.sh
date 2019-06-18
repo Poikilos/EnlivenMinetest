@@ -50,41 +50,42 @@ if [ "@$enable_bare_param" = "@true" ]; then
     branch="$2"
 fi
 project0=Bucket_Game
-project1=basis
-project2=patched
+project1=Bucket_Game-base
+project2=Bucket_Game-branches
 project0_path="$HOME/git/EnlivenMinetest/webapp/linux-minetest-kit/minetest/games/$project0"
 #patches="$HOME/git/EnlivenMinetest/patches"
-patches="$HOME/git/1.pull-requests/Bucket_Game-branches"
-project1_path="$patches/$branch/$project1"
-project2_path="$patches/$branch/$project2"
+#patches="$HOME/git/1.pull-requests/Bucket_Game-branches"
+repo="$HOME/git/EnlivenMinetest"
+patches="$HOME/git/EnlivenMinetest"
+project1_path="$repo/$project1/$branch"
+project2_path="$repo/$project2/$branch"
 if [ "@$enable_meld" = "@true" ]; then
     echo "meld..."
     if [ -z "$branch" ]; then
         customDie "You must specify a branch name after --meld."
     fi
     subgame=
-    branch_basis=
-    if [ -d "$patches/$branch/basis/mods" ]; then
-        branch_basis="$patches/$branch/basis"
+    patch_game_src=
+    if [ -d "$project1_path/mods" ]; then
+        branch_basis="$project1_path"
     fi
-    if [ -d "$patches/$branch/mods" ]; then
-        patch_game_src="$patches/$branch"
-    elif [ -d "$patches/$branch/patched/mods" ]; then
-        patch_game_src="$patches/$branch/patched"
+    if [ -d "$project2_path/mods" ]; then
+        patch_game_src="$project2_path"
     else
-        customDie "Cannot detect mods directory in $patches/$branch"
+        customDie "Cannot detect mods directory in $project2_path/mods"
     fi
-    echo "meld $patch_game_src/ $HOME/minetest/games/ENLIVEN..."
-    if [ -f "`command -v meld`" ]; then
-        if [ -f "`command -v nohup`" ]; then
-            nohup meld "$patch_game_src/" "$HOME/minetest/games/ENLIVEN" &
-        else
-            meld "$patch_game_src/" "$HOME/minetest/games/ENLIVEN" &
-            echo "* install nohup to prevent programs from dumping output to console..."
-        fi
-    fi
+    #below (commented part) should only happen if $project2_path already has been edited (diverged from $project1_path)
+    #echo "meld $patch_game_src/ $HOME/minetest/games/ENLIVEN..."
+    #if [ -f "`command -v meld`" ]; then
+        #if [ -f "`command -v nohup`" ]; then
+            #nohup meld "$patch_game_src/" "$HOME/minetest/games/ENLIVEN" &
+        #else
+            #meld "$patch_game_src/" "$HOME/minetest/games/ENLIVEN" &
+            #echo "* install nohup to prevent programs from dumping output to console..."
+        #fi
+    #fi
     if [ ! -z "$branch_basis" ]; then
-        echo "meld $branch_basis $patch_game_src/..."
+        echo "meld '$branch_basis' '$patch_game_src'..."
         if [ -f "`command -v meld`" ]; then
             if [ -f "`command -v nohup`" ]; then
                 nohup meld "$branch_basis" "$patch_game_src" &
@@ -92,9 +93,22 @@ if [ "@$enable_meld" = "@true" ]; then
                 meld "$patch_game_src/" "$HOME/minetest/games/ENLIVEN" &
                 echo "* install nohup to prevent programs from dumping output to console..."
             fi
+        else
+            customDie "You do not have meld installed."
+        fi
+    else
+        echo "meld '$HOME/minetest/games/ENLIVEN' '$patch_game_src'..."
+        if [ -f "`command -v meld`" ]; then
+            if [ -f "`command -v nohup`" ]; then
+                nohup meld "$HOME/minetest/games/ENLIVEN" "$patch_game_src" &
+            else
+                meld "$$HOME/minetest/games/ENLIVEN" "$patch_game_src" &
+                echo "* install nohup to prevent programs from dumping output to console..."
+            fi
+        else
+            customDie "You do not have meld installed."
         fi
     fi
-
     echo
     echo
     exit 0
@@ -104,17 +118,17 @@ elif [ "@$enable_install" = "@true" ]; then
     fi
     echo "* installing $branch branch..."
     subgame=
-    if [ -d "$patches/$branch/mods" ]; then
-        patch_game_src="$patches/$branch"
-    elif [ -d "$patches/$branch/patched/mods" ]; then
-        patch_game_src="$patches/$branch/patched"
+    if [ -d "$project2_path/mods" ]; then
+        patch_game_src="$project2_path"
+    elif [ -d "$project2_path/patched/mods" ]; then
+        patch_game_src="$project2_path/patched"
     else
-        customDie "Cannot detect mods directory in $patches/$branch"
+        customDie "Cannot detect mods directory in $project2_path/mods"
     fi
     echo "rsync -rt $patch_game_src/ $HOME/minetest/games/ENLIVEN..."
     rsync -rt "$patch_game_src/" "$HOME/minetest/games/ENLIVEN"
-    #echo "#patches:$patches"
-    #echo "#branch:$branch"
+    # echo "#patches:$patches"
+    # echo "#branch:$branch"
     echo "Done."
     echo
     echo
