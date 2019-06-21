@@ -1,6 +1,58 @@
-diff -r -u /home/owner/Downloads/git/mat9117/travelnet/elevator.lua /home/owner/git/travelnet/elevator.lua
---- /home/owner/Downloads/git/mat9117/travelnet/elevator.lua	2019-06-21 03:00:07.676171998 -0400
-+++ /home/owner/git/travelnet/elevator.lua	2019-06-21 03:02:07.108674782 -0400
+diff -r -u travelnet/config.lua /home/owner/git/travelnet/config.lua
+--- travelnet/config.lua	2019-06-21 08:40:37.406186997 -0400
++++ /home/owner/git/travelnet/config.lua	2019-06-21 07:12:16.474634770 -0400
+@@ -1,22 +1,26 @@
+ 
+-travelnet.MAX_STATIONS_PER_NETWORK = 24;
++-- maximum travelnet stations per network
++travelnet.MAX_STATIONS_PER_NETWORK = tonumber(minetest.settings:get("travelnet.MAX_STATIONS_PER_NETWORK")) or 24;
+ 
+ -- set this to true if you want a simulated beam effect
+-travelnet.travelnet_effect_enabled = false;
++travelnet.enable_travelnet_effect = minetest.settings:get_bool("travelnet.enable_travelnet_effect") or false;
++
+ -- set this to true if you want a sound to be played when the travelnet is used
+-travelnet.travelnet_sound_enabled  = false;
++travelnet.enable_travelnet_sound  = minetest.settings:get_bool("travelnet.enable_travelnet_sound") or true;
+ 
+ -- if you set this to false, travelnets cannot be created
+ -- (this may be useful if you want nothing but the elevators on your server)
+-travelnet.travelnet_enabled        = true;
+--- if you set travelnet.elevator_enabled to false, you will not be able to
++travelnet.enable_travelnet        = minetest.settings:get_bool("travelnet.enable_travelnet") or true;
++
++-- if you set travelnet.enable_elevator to false, you will not be able to
+ -- craft, place or use elevators
+-travelnet.elevator_enabled         = true;
++travelnet.enable_elevator         = minetest.settings:get_bool("travelnet.enable_elevator") or true;
++
+ -- if you set this to false, doors will be disabled
+-travelnet.doors_enabled            = true;
++travelnet.enable_doors            = minetest.settings:get_bool("travelnet.enable_doors") or true;
+ 
+ -- starts an abm which re-adds travelnet stations to networks in case the savefile got lost
+-travelnet.abm_enabled              = false;
++travelnet.enable_abm              = minetest.settings:get_bool("travelnet.enable_abm") or false;
+ 
+ -- change these if you want other receipes for travelnet or elevator
+ travelnet.travelnet_recipe = {
+@@ -90,7 +94,7 @@
+ -- if you want to allow *everybody* to attach stations to all nets, let the
+ -- function always return true;
+ -- if the function returns false, players with the travelnet_attach priv
+--- can still add stations to that network 
++-- can still add stations to that network
+ 
+ travelnet.allow_attach = function( player_name, owner_name, network_name )
+    return false;
+@@ -120,4 +124,3 @@
+    return true;
+ end
+ 
+-travelnet.travelnet_sound_enabled = true
+diff -r -u travelnet/elevator.lua /home/owner/git/travelnet/elevator.lua
+--- travelnet/elevator.lua	2019-06-21 08:40:37.406186997 -0400
++++ /home/owner/git/travelnet/elevator.lua	2019-06-21 08:04:04.738329200 -0400
 @@ -20,8 +20,8 @@
  	if( travelnet.targets[ owner_name ][ network_name ]
  	  -- does the network have any members at all?
@@ -53,66 +105,144 @@ diff -r -u /home/owner/Downloads/git/mat9117/travelnet/elevator.lua /home/owner/
            return;
         end
         return minetest.item_place(itemstack, placer, pointed_thing);
-Only in /home/owner/Downloads/git/mat9117/travelnet: etc
-diff -r -u /home/owner/Downloads/git/mat9117/travelnet/.git/config /home/owner/git/travelnet/.git/config
---- /home/owner/Downloads/git/mat9117/travelnet/.git/config	2019-06-21 03:00:07.669505191 -0400
-+++ /home/owner/git/travelnet/.git/config	2019-06-21 03:02:07.105341379 -0400
-@@ -4,7 +4,7 @@
+Only in travelnet: etc
+Only in /home/owner/git/travelnet/.git: COMMIT_EDITMSG
+diff -r -u travelnet/.git/config /home/owner/git/travelnet/.git/config
+--- travelnet/.git/config	2019-06-21 08:40:37.399520197 -0400
++++ /home/owner/git/travelnet/.git/config	2019-06-21 08:04:58.639452355 -0400
+@@ -4,8 +4,17 @@
  	bare = false
  	logallrefupdates = true
  [remote "origin"]
--	url = https://github.com/mat9117/travelnet.git
+-	url = https://github.com/Sokomine/travelnet.git
 +	url = https://github.com/poikilos/travelnet.git
  	fetch = +refs/heads/*:refs/remotes/origin/*
  [branch "master"]
  	remote = origin
-Binary files /home/owner/Downloads/git/mat9117/travelnet/.git/index and /home/owner/git/travelnet/.git/index differ
-diff -r -u /home/owner/Downloads/git/mat9117/travelnet/.git/logs/HEAD /home/owner/git/travelnet/.git/logs/HEAD
---- /home/owner/Downloads/git/mat9117/travelnet/.git/logs/HEAD	2019-06-21 03:00:07.669505191 -0400
-+++ /home/owner/git/travelnet/.git/logs/HEAD	2019-06-21 03:02:07.102007976 -0400
+ 	merge = refs/heads/master
++[branch "use-mt4-playermodel-origin"]
++	remote = origin
++	merge = refs/heads/use-mt4-playermodel-origin
++[branch "english-corrections-vs-9795b8d"]
++	remote = origin
++	merge = refs/heads/english-corrections-vs-9795b8d
++[branch "texture-improvements"]
++	remote = origin
++	merge = refs/heads/texture-improvements
+Only in /home/owner/git/travelnet/.git: FETCH_HEAD
+Only in /home/owner/git/travelnet/.git: GIT_COLA_MSG
+Binary files travelnet/.git/index and /home/owner/git/travelnet/.git/index differ
+diff -r -u travelnet/.git/logs/HEAD /home/owner/git/travelnet/.git/logs/HEAD
+--- travelnet/.git/logs/HEAD	2019-06-21 08:40:37.399520197 -0400
++++ /home/owner/git/travelnet/.git/logs/HEAD	2019-06-21 08:36:05.044072793 -0400
+@@ -1 +1,17 @@
+-0000000000000000000000000000000000000000 9f2bbc617ec5b9569eccad3f49d701a9bd204456 poikilos <7557867+poikilos@users.noreply.github.com> 1561120837 -0400	clone: from https://github.com/Sokomine/travelnet.git
++0000000000000000000000000000000000000000 9795b8d9b012403af757289ac34f2d9393cdc6e7 poikilos <7557867+poikilos@users.noreply.github.com> 1561115536 -0400	clone: from https://github.com/poikilos/travelnet.git
++9795b8d9b012403af757289ac34f2d9393cdc6e7 9795b8d9b012403af757289ac34f2d9393cdc6e7 poikilos <7557867+poikilos@users.noreply.github.com> 1561115544 -0400	checkout: moving from master to use-mt4-playermodel-origin
++9795b8d9b012403af757289ac34f2d9393cdc6e7 313a425aa8c6962be3aa080a63751341636a2a7f poikilos <7557867+poikilos@users.noreply.github.com> 1561115828 -0400	commit: Use MT 4 player model y offset--works in 5 too
++313a425aa8c6962be3aa080a63751341636a2a7f 9795b8d9b012403af757289ac34f2d9393cdc6e7 poikilos <7557867+poikilos@users.noreply.github.com> 1561117319 -0400	checkout: moving from use-mt4-playermodel-origin to english-corrections-vs-9795b8d
++9795b8d9b012403af757289ac34f2d9393cdc6e7 85fcf6e0045f4d73ba97d2ef3ca4b6ecef443b2e poikilos <7557867+poikilos@users.noreply.github.com> 1561118216 -0400	commit: Correct English spelling and grammar.
++85fcf6e0045f4d73ba97d2ef3ca4b6ecef443b2e 9795b8d9b012403af757289ac34f2d9393cdc6e7 poikilos <7557867+poikilos@users.noreply.github.com> 1561118636 -0400	checkout: moving from english-corrections-vs-9795b8d to master
++9795b8d9b012403af757289ac34f2d9393cdc6e7 ac7d10e76fe09a26c4da68105ac09c3034d318ad poikilos <7557867+poikilos@users.noreply.github.com> 1561118644 -0400	pull: Fast-forward
++ac7d10e76fe09a26c4da68105ac09c3034d318ad ac7d10e76fe09a26c4da68105ac09c3034d318ad poikilos <7557867+poikilos@users.noreply.github.com> 1561118698 -0400	checkout: moving from master to texture-improvements
++ac7d10e76fe09a26c4da68105ac09c3034d318ad 5ce38fc4844df047ad27c6f6db5ee3a14672f643 poikilos <7557867+poikilos@users.noreply.github.com> 1561119975 -0400	commit: improve textures and mv etc src
++5ce38fc4844df047ad27c6f6db5ee3a14672f643 ac7d10e76fe09a26c4da68105ac09c3034d318ad poikilos <7557867+poikilos@users.noreply.github.com> 1561120118 -0400	checkout: moving from texture-improvements to master
++ac7d10e76fe09a26c4da68105ac09c3034d318ad 38af7ed9c5c2ca32ee54b84cf9a8d69805688dec poikilos <7557867+poikilos@users.noreply.github.com> 1561120123 -0400	pull: Fast-forward
++38af7ed9c5c2ca32ee54b84cf9a8d69805688dec 5ce38fc4844df047ad27c6f6db5ee3a14672f643 poikilos <7557867+poikilos@users.noreply.github.com> 1561120369 -0400	checkout: moving from master to texture-improvements
++5ce38fc4844df047ad27c6f6db5ee3a14672f643 38af7ed9c5c2ca32ee54b84cf9a8d69805688dec poikilos <7557867+poikilos@users.noreply.github.com> 1561120378 -0400	checkout: moving from texture-improvements to master
++38af7ed9c5c2ca32ee54b84cf9a8d69805688dec 5ce38fc4844df047ad27c6f6db5ee3a14672f643 poikilos <7557867+poikilos@users.noreply.github.com> 1561120391 -0400	checkout: moving from master to texture-improvements
++5ce38fc4844df047ad27c6f6db5ee3a14672f643 9c20e76c26856520d4acdc29b7c11b488ccbb93b poikilos <7557867+poikilos@users.noreply.github.com> 1561120423 -0400	commit: add missing author info for improved textures
++9c20e76c26856520d4acdc29b7c11b488ccbb93b 38af7ed9c5c2ca32ee54b84cf9a8d69805688dec poikilos <7557867+poikilos@users.noreply.github.com> 1561120560 -0400	checkout: moving from texture-improvements to master
++38af7ed9c5c2ca32ee54b84cf9a8d69805688dec 542fbf1e1f6de988257372f76d03195a7f381474 poikilos <7557867+poikilos@users.noreply.github.com> 1561120565 -0400	pull: Fast-forward
+Only in /home/owner/git/travelnet/.git/logs/refs/heads: english-corrections-vs-9795b8d
+diff -r -u travelnet/.git/logs/refs/heads/master /home/owner/git/travelnet/.git/logs/refs/heads/master
+--- travelnet/.git/logs/refs/heads/master	2019-06-21 08:40:37.399520197 -0400
++++ /home/owner/git/travelnet/.git/logs/refs/heads/master	2019-06-21 08:36:05.044072793 -0400
+@@ -1 +1,4 @@
+-0000000000000000000000000000000000000000 9f2bbc617ec5b9569eccad3f49d701a9bd204456 poikilos <7557867+poikilos@users.noreply.github.com> 1561120837 -0400	clone: from https://github.com/Sokomine/travelnet.git
++0000000000000000000000000000000000000000 9795b8d9b012403af757289ac34f2d9393cdc6e7 poikilos <7557867+poikilos@users.noreply.github.com> 1561115536 -0400	clone: from https://github.com/poikilos/travelnet.git
++9795b8d9b012403af757289ac34f2d9393cdc6e7 ac7d10e76fe09a26c4da68105ac09c3034d318ad poikilos <7557867+poikilos@users.noreply.github.com> 1561118644 -0400	pull: Fast-forward
++ac7d10e76fe09a26c4da68105ac09c3034d318ad 38af7ed9c5c2ca32ee54b84cf9a8d69805688dec poikilos <7557867+poikilos@users.noreply.github.com> 1561120123 -0400	pull: Fast-forward
++38af7ed9c5c2ca32ee54b84cf9a8d69805688dec 542fbf1e1f6de988257372f76d03195a7f381474 poikilos <7557867+poikilos@users.noreply.github.com> 1561120565 -0400	pull: Fast-forward
+Only in /home/owner/git/travelnet/.git/logs/refs/heads: texture-improvements
+Only in /home/owner/git/travelnet/.git/logs/refs/heads: use-mt4-playermodel-origin
+Only in /home/owner/git/travelnet/.git/logs/refs/remotes/origin: english-corrections-vs-9795b8d
+diff -r -u travelnet/.git/logs/refs/remotes/origin/HEAD /home/owner/git/travelnet/.git/logs/refs/remotes/origin/HEAD
+--- travelnet/.git/logs/refs/remotes/origin/HEAD	2019-06-21 08:40:37.399520197 -0400
++++ /home/owner/git/travelnet/.git/logs/refs/remotes/origin/HEAD	2019-06-21 07:12:16.467968119 -0400
 @@ -1 +1 @@
--0000000000000000000000000000000000000000 4fb4aefbf9d66149d48066e1e577e7b6187f1628 poikilos <7557867+poikilos@users.noreply.github.com> 1561100407 -0400	clone: from https://github.com/mat9117/travelnet.git
-+0000000000000000000000000000000000000000 75d6d0de9a4b8846ef2d879285dfed92c0099d79 poikilos <7557867+poikilos@users.noreply.github.com> 1561100527 -0400	clone: from https://github.com/poikilos/travelnet.git
-diff -r -u /home/owner/Downloads/git/mat9117/travelnet/.git/logs/refs/heads/master /home/owner/git/travelnet/.git/logs/refs/heads/master
---- /home/owner/Downloads/git/mat9117/travelnet/.git/logs/refs/heads/master	2019-06-21 03:00:07.669505191 -0400
-+++ /home/owner/git/travelnet/.git/logs/refs/heads/master	2019-06-21 03:02:07.102007976 -0400
-@@ -1 +1 @@
--0000000000000000000000000000000000000000 4fb4aefbf9d66149d48066e1e577e7b6187f1628 poikilos <7557867+poikilos@users.noreply.github.com> 1561100407 -0400	clone: from https://github.com/mat9117/travelnet.git
-+0000000000000000000000000000000000000000 75d6d0de9a4b8846ef2d879285dfed92c0099d79 poikilos <7557867+poikilos@users.noreply.github.com> 1561100527 -0400	clone: from https://github.com/poikilos/travelnet.git
-diff -r -u /home/owner/Downloads/git/mat9117/travelnet/.git/logs/refs/remotes/origin/HEAD /home/owner/git/travelnet/.git/logs/refs/remotes/origin/HEAD
---- /home/owner/Downloads/git/mat9117/travelnet/.git/logs/refs/remotes/origin/HEAD	2019-06-21 03:00:07.669505191 -0400
-+++ /home/owner/git/travelnet/.git/logs/refs/remotes/origin/HEAD	2019-06-21 03:02:07.102007976 -0400
-@@ -1 +1 @@
--0000000000000000000000000000000000000000 4fb4aefbf9d66149d48066e1e577e7b6187f1628 poikilos <7557867+poikilos@users.noreply.github.com> 1561100407 -0400	clone: from https://github.com/mat9117/travelnet.git
-+0000000000000000000000000000000000000000 75d6d0de9a4b8846ef2d879285dfed92c0099d79 poikilos <7557867+poikilos@users.noreply.github.com> 1561100527 -0400	clone: from https://github.com/poikilos/travelnet.git
-Only in /home/owner/Downloads/git/mat9117/travelnet/.git/objects/pack: pack-0873693b88aa869d5dc1918f1f951f77a2119ba8.idx
-Only in /home/owner/Downloads/git/mat9117/travelnet/.git/objects/pack: pack-0873693b88aa869d5dc1918f1f951f77a2119ba8.pack
-Only in /home/owner/git/travelnet/.git/objects/pack: pack-e64bc1272cd11eb20cf1f824479fc3a6b4877364.idx
-Only in /home/owner/git/travelnet/.git/objects/pack: pack-e64bc1272cd11eb20cf1f824479fc3a6b4877364.pack
-diff -r -u /home/owner/Downloads/git/mat9117/travelnet/.git/packed-refs /home/owner/git/travelnet/.git/packed-refs
---- /home/owner/Downloads/git/mat9117/travelnet/.git/packed-refs	2019-06-21 03:00:07.669505191 -0400
-+++ /home/owner/git/travelnet/.git/packed-refs	2019-06-21 03:02:07.102007976 -0400
-@@ -1,4 +1,4 @@
+-0000000000000000000000000000000000000000 9f2bbc617ec5b9569eccad3f49d701a9bd204456 poikilos <7557867+poikilos@users.noreply.github.com> 1561120837 -0400	clone: from https://github.com/Sokomine/travelnet.git
++0000000000000000000000000000000000000000 9795b8d9b012403af757289ac34f2d9393cdc6e7 poikilos <7557867+poikilos@users.noreply.github.com> 1561115536 -0400	clone: from https://github.com/poikilos/travelnet.git
+Only in /home/owner/git/travelnet/.git/logs/refs/remotes/origin: master
+Only in /home/owner/git/travelnet/.git/logs/refs/remotes/origin: texture-improvements
+Only in /home/owner/git/travelnet/.git/logs/refs/remotes/origin: use-mt4-playermodel-origin
+Only in /home/owner/git/travelnet/.git/objects: 08
+Only in /home/owner/git/travelnet/.git/objects: 09
+Only in /home/owner/git/travelnet/.git/objects: 17
+Only in /home/owner/git/travelnet/.git/objects: 2a
+Only in /home/owner/git/travelnet/.git/objects: 31
+Only in /home/owner/git/travelnet/.git/objects: 38
+Only in /home/owner/git/travelnet/.git/objects: 3e
+Only in /home/owner/git/travelnet/.git/objects: 41
+Only in /home/owner/git/travelnet/.git/objects: 52
+Only in /home/owner/git/travelnet/.git/objects: 54
+Only in /home/owner/git/travelnet/.git/objects: 5c
+Only in /home/owner/git/travelnet/.git/objects: 5f
+Only in /home/owner/git/travelnet/.git/objects: 75
+Only in /home/owner/git/travelnet/.git/objects: 77
+Only in /home/owner/git/travelnet/.git/objects: 85
+Only in /home/owner/git/travelnet/.git/objects: 91
+Only in /home/owner/git/travelnet/.git/objects: 97
+Only in /home/owner/git/travelnet/.git/objects: 9a
+Only in /home/owner/git/travelnet/.git/objects: 9b
+Only in /home/owner/git/travelnet/.git/objects: 9c
+Only in /home/owner/git/travelnet/.git/objects: 9d
+Only in /home/owner/git/travelnet/.git/objects: a9
+Only in /home/owner/git/travelnet/.git/objects: aa
+Only in /home/owner/git/travelnet/.git/objects: ac
+Only in /home/owner/git/travelnet/.git/objects: b5
+Only in /home/owner/git/travelnet/.git/objects: c4
+Only in /home/owner/git/travelnet/.git/objects: ce
+Only in /home/owner/git/travelnet/.git/objects: f9
+Only in travelnet/.git/objects/pack: pack-87f23a5f28fe44900f8493f0852f43f2302bbb57.idx
+Only in travelnet/.git/objects/pack: pack-87f23a5f28fe44900f8493f0852f43f2302bbb57.pack
+Only in /home/owner/git/travelnet/.git/objects/pack: pack-b2d3ee0ec36e71d0adf2c940853e3b117b4dee71.idx
+Only in /home/owner/git/travelnet/.git/objects/pack: pack-b2d3ee0ec36e71d0adf2c940853e3b117b4dee71.pack
+Only in /home/owner/git/travelnet/.git: ORIG_HEAD
+diff -r -u travelnet/.git/packed-refs /home/owner/git/travelnet/.git/packed-refs
+--- travelnet/.git/packed-refs	2019-06-21 08:40:37.399520197 -0400
++++ /home/owner/git/travelnet/.git/packed-refs	2019-06-21 07:12:16.464634793 -0400
+@@ -1,4 +1,7 @@
  # pack-refs with: peeled fully-peeled sorted 
--4fb4aefbf9d66149d48066e1e577e7b6187f1628 refs/remotes/origin/master
-+75d6d0de9a4b8846ef2d879285dfed92c0099d79 refs/remotes/origin/master
+-9f2bbc617ec5b9569eccad3f49d701a9bd204456 refs/remotes/origin/master
++906d0bf836dafe5400ced7d1a6716b84b422a479 refs/remotes/origin/english-corrections
++9795b8d9b012403af757289ac34f2d9393cdc6e7 refs/remotes/origin/master
++aae31665f3158dce5188e4ebcba8f37e2be2758e refs/remotes/origin/use-minetest-conf
++9795b8d9b012403af757289ac34f2d9393cdc6e7 refs/remotes/origin/use-mt4-playermodel-origin
  4331483c72e3ce567f7a076ed9da3cb830f2dbfe refs/tags/2.3
  cc1e2eade3e43449e8df56128cf42c1dec19fdcb refs/tags/2.3.1
-diff -r -u /home/owner/Downloads/git/mat9117/travelnet/.git/refs/heads/master /home/owner/git/travelnet/.git/refs/heads/master
---- /home/owner/Downloads/git/mat9117/travelnet/.git/refs/heads/master	2019-06-21 03:00:07.669505191 -0400
-+++ /home/owner/git/travelnet/.git/refs/heads/master	2019-06-21 03:02:07.102007976 -0400
+Only in /home/owner/git/travelnet/.git/refs/heads: english-corrections-vs-9795b8d
+diff -r -u travelnet/.git/refs/heads/master /home/owner/git/travelnet/.git/refs/heads/master
+--- travelnet/.git/refs/heads/master	2019-06-21 08:40:37.399520197 -0400
++++ /home/owner/git/travelnet/.git/refs/heads/master	2019-06-21 08:36:05.044072793 -0400
 @@ -1 +1 @@
--4fb4aefbf9d66149d48066e1e577e7b6187f1628
-+75d6d0de9a4b8846ef2d879285dfed92c0099d79
-diff -r -u /home/owner/Downloads/git/mat9117/travelnet/init.lua /home/owner/git/travelnet/init.lua
---- /home/owner/Downloads/git/mat9117/travelnet/init.lua	2019-06-21 03:00:07.676171998 -0400
-+++ /home/owner/git/travelnet/init.lua	2019-06-21 03:02:07.112008186 -0400
+-9f2bbc617ec5b9569eccad3f49d701a9bd204456
++542fbf1e1f6de988257372f76d03195a7f381474
+Only in /home/owner/git/travelnet/.git/refs/heads: texture-improvements
+Only in /home/owner/git/travelnet/.git/refs/heads: use-mt4-playermodel-origin
+Only in /home/owner/git/travelnet/.git/refs/remotes/origin: english-corrections-vs-9795b8d
+Only in /home/owner/git/travelnet/.git/refs/remotes/origin: master
+Only in /home/owner/git/travelnet/.git/refs/remotes/origin: texture-improvements
+Only in /home/owner/git/travelnet/.git/refs/remotes/origin: use-mt4-playermodel-origin
+diff -r -u travelnet/init.lua /home/owner/git/travelnet/init.lua
+--- travelnet/init.lua	2019-06-21 08:40:37.406186997 -0400
++++ /home/owner/git/travelnet/init.lua	2019-06-21 08:04:04.741662602 -0400
 @@ -64,7 +64,7 @@
            - removed nodes that are not intended for manual use from creative inventory
            - improved naming of station levels for the elevator
   21.06.13 - elevator stations are sorted by height instead of date of creation as is the case with travelnet boxes
 -          - elevator stations are named automaticly
-+          - elevator stations are named Choose a destination
++          - elevator stations are named automatically
   20.06.13 - doors can be opened and closed from inside the travelnet box/elevator
            - the elevator can only move vertically; the network name is defined by its x and z coordinate
   13.06.13 - bugfix
@@ -121,7 +251,7 @@ diff -r -u /home/owner/Downloads/git/mat9117/travelnet/init.lua /home/owner/git/
   20.03.13 - added inventory image provided by VanessaE
            - fixed bug that made it impossible to remove stations from the net
 -          - if the station a player beamed to no longer exists, the station will be removed automaticly
-+          - if the station a player beamed to no longer exists, the station will be removed Choose a destination
++          - if the station a player beamed to no longer exists, the station will be removed automatically
            - with the travelnet_attach priv, you can now attach your box to the nets of other players
            - in newer versions of Minetest, the players yaw is set so that he/she looks out of the receiving box
            - target list is now centered if there are less than 9 targets
@@ -231,36 +361,57 @@ diff -r -u /home/owner/Downloads/git/mat9117/travelnet/init.lua /home/owner/git/
        return;
     end
  
-@@ -840,10 +840,17 @@
+@@ -825,14 +825,14 @@
+ 
+ 
+ 
+-   if( travelnet.travelnet_sound_enabled ) then
++   if( travelnet.enable_travelnet_sound ) then
+       if ( this_node.name == 'travelnet:elevator' ) then
+          minetest.sound_play("travelnet_bell", {pos = pos, gain = 0.75, max_hear_distance = 10,});
+       else
+          minetest.sound_play("travelnet_travel", {pos = pos, gain = 0.75, max_hear_distance = 10,});
+       end
+    end
+-   if( travelnet.travelnet_effect_enabled ) then
++   if( travelnet.enable_travelnet_effect ) then
+       minetest.add_entity( {x=pos.x,y=pos.y+0.5,z=pos.z}, "travelnet:effect"); -- it self-destructs after 20 turns
+    end
+ 
+@@ -840,10 +840,12 @@
     travelnet.open_close_door( pos, player, 1 );
  
     -- transport the player to the target location
--   local target_pos = travelnet.targets[ owner_name ][ station_network ][ fields.target ].pos;
-+   local player_model_offset_y = -.5;  -- 0 for MT 5?
-+   local player_model_vec = vector.new(0, player_model_offset_y, 0);
-+   local original_target_pos = travelnet.targets[ owner_name ][ station_network ][ fields.target ].pos;
-+   -- local target_pos = travelnet.targets[ owner_name ][ station_network ][ fields.target ].pos;
-+   -- local target_pos = {x = original_target_pos.x, y = original_target_pos.y+player_model_offset_y, z = original_target_pos.z};  -- ERROR: expected y got nil (not sure why)
-+   local target_pos = vector.add(travelnet.targets[ owner_name ][ station_network ][ fields.target ].pos, player_model_vec);
-    player:move_to( target_pos, false);
-+   local source_pos = vector.add(pos, player_model_vec);
-+   -- local source_pos = {x = pos.x, y = pos.y+player_model_offset_y, z = pos.z};
++   local player_model_bottom = tonumber(minetest.settings:get("player_model_bottom")) or -.5;  -- may be 0.0 for some versions of MT 5 player model
++   local player_model_vec = vector.new(0, player_model_bottom, 0);
+    local target_pos = travelnet.targets[ owner_name ][ station_network ][ fields.target ].pos;
+-   player:move_to( target_pos, false);
++   player:move_to( vector.add(target_pos, player_model_vec), false);
  
 -   if( travelnet.travelnet_effect_enabled ) then 
-+   if( travelnet.travelnet_effect_enabled ) then
++   if( travelnet.enable_travelnet_effect ) then
        minetest.add_entity( {x=target_pos.x,y=target_pos.y+0.5,z=target_pos.z}, "travelnet:effect"); -- it self-destructs after 20 turns
     end
  
-@@ -859,7 +866,7 @@
+@@ -859,7 +861,7 @@
  
        travelnet.remove_box( target_pos, nil, oldmetadata, player );
        -- send the player back as there's no receiving travelnet
 -      player:move_to( pos, false );
-+      player:move_to( source_pos, false );
++      player:move_to( vector.add(pos, player_model_vec), false );
  
     else
        travelnet.rotate_player( target_pos, player, 0 )
-@@ -912,7 +919,7 @@
+@@ -877,7 +879,7 @@
+    end
+ 
+    -- play sound at the target position as well
+-   if( travelnet.travelnet_sound_enabled ) then
++   if( travelnet.enable_travelnet_sound ) then
+       if ( node2.name == 'travelnet:elevator' ) then
+          minetest.sound_play("travelnet_bell", {pos = target_pos, gain = 0.75, max_hear_distance = 10,});
+       else
+@@ -912,7 +914,7 @@
  
     if( not( oldmetadata ) or oldmetadata=="nil" or not(oldmetadata.fields)) then
        minetest.chat_send_player( digger:get_player_name(), S("Error")..": "..
@@ -269,7 +420,7 @@ diff -r -u /home/owner/Downloads/git/mat9117/travelnet/init.lua /home/owner/git/
        return;
     end
  
-@@ -928,7 +935,7 @@
+@@ -928,7 +930,7 @@
       or not( travelnet.targets[ owner_name ][ station_network ] )) then
  
        minetest.chat_send_player( digger:get_player_name(), S("Error")..": "..
@@ -278,7 +429,7 @@ diff -r -u /home/owner/Downloads/git/mat9117/travelnet/init.lua /home/owner/git/
        return;
     end
  
-@@ -979,7 +986,7 @@
+@@ -979,7 +981,7 @@
     end
  
     if( not( meta ) or not( owner) or owner=='') then
@@ -287,18 +438,41 @@ diff -r -u /home/owner/Downloads/git/mat9117/travelnet/init.lua /home/owner/git/
        return false;
  
     elseif( owner ~= name ) then
-@@ -1033,7 +1040,7 @@
-    dofile(travelnet.path.."/elevator.lua");  -- allows up/down transfers only
- end
- if( travelnet.doors_enabled ) then
--   dofile(travelnet.path.."/doors.lua");     -- doors that open and close automaticly when the travelnet or elevator is used
-+   dofile(travelnet.path.."/doors.lua");     -- doors that open and close Choose a destination when the travelnet or elevator is used
+@@ -993,7 +995,7 @@
+ 
+ 
+ 
+-if( travelnet.travelnet_effect_enabled ) then
++if( travelnet.enable_travelnet_effect ) then
+   minetest.register_entity( 'travelnet:effect', {
+ 
+     hp_max = 1,
+@@ -1026,17 +1028,17 @@
  end
  
- if( travelnet.abm_enabled ) then
-diff -r -u /home/owner/Downloads/git/mat9117/travelnet/locale/template.pot /home/owner/git/travelnet/locale/template.pot
---- /home/owner/Downloads/git/mat9117/travelnet/locale/template.pot	2019-06-21 03:00:07.679505401 -0400
-+++ /home/owner/git/travelnet/locale/template.pot	2019-06-21 03:02:07.112008186 -0400
+ 
+-if( travelnet.travelnet_enabled ) then
++if( travelnet.enable_travelnet ) then
+    dofile(travelnet.path.."/travelnet.lua"); -- the travelnet node definition
+ end
+-if( travelnet.elevator_enabled ) then
++if( travelnet.enable_elevator ) then
+    dofile(travelnet.path.."/elevator.lua");  -- allows up/down transfers only
+ end
+-if( travelnet.doors_enabled ) then
+-   dofile(travelnet.path.."/doors.lua");     -- doors that open and close automaticly when the travelnet or elevator is used
++if( travelnet.enable_doors ) then
++   dofile(travelnet.path.."/doors.lua");     -- doors that open and close automatically when the travelnet or elevator is used
+ end
+ 
+-if( travelnet.abm_enabled ) then
++if( travelnet.enable_abm ) then
+    dofile(travelnet.path.."/restore_network_via_abm.lua"); -- restore travelnet data when players pass by broken networks
+ end
+ 
+diff -r -u travelnet/locale/template.pot /home/owner/git/travelnet/locale/template.pot
+--- travelnet/locale/template.pot	2019-06-21 08:40:37.406186997 -0400
++++ /home/owner/git/travelnet/locale/template.pot	2019-06-21 08:04:04.741662602 -0400
 @@ -34,8 +34,8 @@
  
  #: elevator.lua
@@ -439,9 +613,9 @@ diff -r -u /home/owner/Downloads/git/mat9117/travelnet/locale/template.pot /home
  msgstr ""
  
  #: init.lua
-diff -r -u /home/owner/Downloads/git/mat9117/travelnet/README.md /home/owner/git/travelnet/README.md
---- /home/owner/Downloads/git/mat9117/travelnet/README.md	2019-06-21 03:00:07.676171998 -0400
-+++ /home/owner/git/travelnet/README.md	2019-06-21 03:02:07.108674782 -0400
+diff -r -u travelnet/README.md /home/owner/git/travelnet/README.md
+--- travelnet/README.md	2019-06-21 08:40:37.406186997 -0400
++++ /home/owner/git/travelnet/README.md	2019-06-21 08:36:05.044072793 -0400
 @@ -1,6 +1,6 @@
  # TravelNet
  
@@ -457,14 +631,15 @@ diff -r -u /home/owner/Downloads/git/mat9117/travelnet/README.md /home/owner/git
 -The models and textures as found in the textures/ and models/ folders where created by VanessaE
 +The models and textures as found in the textures/ and models/ folders where created by VanessaE, modified by Poikilos,
  and are provided under the CC0 license.
+Only in /home/owner/git/travelnet: settingtypes.txt
 Only in /home/owner/git/travelnet: src
-Binary files /home/owner/Downloads/git/mat9117/travelnet/textures/travelnet_inv.png and /home/owner/git/travelnet/textures/travelnet_inv.png differ
-Binary files /home/owner/Downloads/git/mat9117/travelnet/textures/travelnet_travelnet_back.png and /home/owner/git/travelnet/textures/travelnet_travelnet_back.png differ
-Binary files /home/owner/Downloads/git/mat9117/travelnet/textures/travelnet_travelnet_front.png and /home/owner/git/travelnet/textures/travelnet_travelnet_front.png differ
-Binary files /home/owner/Downloads/git/mat9117/travelnet/textures/travelnet_travelnet_side.png and /home/owner/git/travelnet/textures/travelnet_travelnet_side.png differ
-diff -r -u /home/owner/Downloads/git/mat9117/travelnet/travelnet.lua /home/owner/git/travelnet/travelnet.lua
---- /home/owner/Downloads/git/mat9117/travelnet/travelnet.lua	2019-06-21 03:00:07.682838804 -0400
-+++ /home/owner/git/travelnet/travelnet.lua	2019-06-21 03:02:07.122008396 -0400
+Binary files travelnet/textures/travelnet_inv.png and /home/owner/git/travelnet/textures/travelnet_inv.png differ
+Binary files travelnet/textures/travelnet_travelnet_back.png and /home/owner/git/travelnet/textures/travelnet_travelnet_back.png differ
+Binary files travelnet/textures/travelnet_travelnet_front.png and /home/owner/git/travelnet/textures/travelnet_travelnet_front.png differ
+Binary files travelnet/textures/travelnet_travelnet_side.png and /home/owner/git/travelnet/textures/travelnet_travelnet_side.png differ
+diff -r -u travelnet/travelnet.lua /home/owner/git/travelnet/travelnet.lua
+--- travelnet/travelnet.lua	2019-06-21 08:40:37.409520396 -0400
++++ /home/owner/git/travelnet/travelnet.lua	2019-06-21 08:04:04.741662602 -0400
 @@ -25,13 +25,13 @@
  		fixed = {
  
