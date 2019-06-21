@@ -222,7 +222,7 @@ minetest.register_craftitem("bucket:empty", {
 
 bucket.register_liquid (
     "default:water_source" ,
-    nil                    ,
+    "default:water_flowing" ,
     "bucket:water"         ,
     "bucket_water.png"     ,
     "Water Bucket"         ,

@@ -1,5 +1,5 @@
 --- /home/owner/git/EnlivenMinetest/Bucket_Game-base/classic-fluid-function-190621-vs-190620/mods/codercore/bucket/init.lua	2019-06-21 14:31:03.666215087 -0400
-+++ /home/owner/git/EnlivenMinetest/Bucket_Game-branches/classic-fluid-function-190621-vs-190620/mods/codercore/bucket/init.lua	2019-06-21 14:59:21.994168336 -0400
++++ /home/owner/git/EnlivenMinetest/Bucket_Game-branches/classic-fluid-function-190621-vs-190620/mods/codercore/bucket/init.lua	2019-06-21 15:15:48.118447894 -0400
 @@ -75,14 +75,18 @@
  --
  -- This function can be called from any mod that depends on bucket.
@@ -25,7 +25,7 @@
  
  bucket.register_liquid (
      "default:water_source" ,
-+    nil                    ,
++    "default:water_flowing" ,
      "bucket:water"         ,
      "bucket_water.png"     ,
      "Water Bucket"         ,
