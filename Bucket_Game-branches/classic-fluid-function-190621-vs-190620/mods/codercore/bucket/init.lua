@@ -294,7 +294,7 @@ bucket.register_liquid (
 
 bucket.register_liquid(
     "default:river_water_source" ,
-    nil                          ,
+    "default:river_water_flowing",
     "bucket:river_water"         ,
     "bucket_river_water.png"     ,
     "River Water Bucket"         ,
