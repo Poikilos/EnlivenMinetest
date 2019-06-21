@@ -1,0 +1,119 @@
+--- /home/owner/git/EnlivenMinetest/Bucket_Game-base/classic-fluid-function-190621-vs-190620/mods/codercore/bucket/init.lua	2019-06-21 14:31:03.666215087 -0400
++++ /home/owner/git/EnlivenMinetest/Bucket_Game-branches/classic-fluid-function-190621-vs-190620/mods/codercore/bucket/init.lua	2019-06-21 14:59:21.994168336 -0400
+@@ -75,14 +75,18 @@
+ --
+ -- This function can be called from any mod that depends on bucket.
+ 
+-function bucket.register_liquid (source,
+-    itemname, inventory_image, name, groups, force_renew)
++function bucket.register_liquid(source, flowing, itemname, inventory_image, name,
++        groups, force_renew)
+ 
+     bucket.liquids [source] = {
+         source      = source      ,
+         itemname    = itemname    ,
+         force_renew = force_renew ,
+     }
++    if flowing then
++        bucket.liquids [source] ["flowing"] = flowing
++        bucket.liquids [flowing] = bucket.liquids[source]
++    end
+ 
+     if itemname ~= nil then
+         minetest.register_craftitem(itemname, {
+@@ -218,6 +222,7 @@
+ 
+ bucket.register_liquid (
+     "default:water_source" ,
++    nil                    ,
+     "bucket:water"         ,
+     "bucket_water.png"     ,
+     "Water Bucket"         ,
+@@ -227,6 +232,7 @@
+ if bucket_gels_water then
+ bucket.register_liquid (
+     "default:water_gel"    ,
++    nil                    ,
+     "bucket:water"         ,
+     "bucket_water.png"     ,
+     "Water Gel Bucket"     ,
+@@ -238,6 +244,7 @@
+ 
+ bucket.register_liquid (
+     "default:water_gel"       ,
++    nil                       ,
+     "bucket:water_gel"        ,
+     "bucket_water.png"        ,
+     "Water Gel Bucket"        ,
+@@ -246,6 +253,7 @@
+ 
+ bucket.register_liquid (
+     "default:water_gel_slope" ,
++    nil                       ,
+     "bucket:water_gel_slope"  ,
+     "bucket_water.png"        ,
+     "Water Gel Slope Bucket"  ,
+@@ -256,6 +264,7 @@
+ 
+ bucket.register_liquid (
+     "default:lava_source"  ,
++    nil                    ,
+     "bucket:lava"          ,
+     "bucket_lava.png"      ,
+     "Lava Bucket"
+@@ -264,6 +273,7 @@
+ if bucket_gels_lava then
+ bucket.register_liquid (
+     "default:lava_gel"     ,
++    nil                    ,
+     "bucket:lava"          ,
+     "bucket_lava.png"      ,
+     "Lava Gel Bucket"
+@@ -274,6 +284,7 @@
+ 
+ bucket.register_liquid (
+     "default:lava_crust_source" ,
++    nil                         ,
+     "bucket:lava_crust"         ,
+     "bucket_lava_crust.png"     ,
+     "Lava Crust Bucket"
+@@ -283,6 +294,7 @@
+ 
+ bucket.register_liquid(
+     "default:river_water_source" ,
++    nil                          ,
+     "bucket:river_water"         ,
+     "bucket_river_water.png"     ,
+     "River Water Bucket"         ,
+@@ -309,6 +321,7 @@
+ 
+     bucket.register_liquid (
+         dename .. "_source"           ,
++        nil                           ,
+         bcname                        ,
+         img                           ,
+         ucname .. " Bucket"           ,
+@@ -318,6 +331,7 @@
+     if bucket_gels_water then
+         bucket.register_liquid (
+             dename .. "_gel"          ,
++            nil                       ,
+             bcname                    ,
+             img                       ,
+             ucname .. " Gel Bucket"   ,
+@@ -327,6 +341,7 @@
+ 
+     bucket.register_liquid (
+         dename .. "_gel"              ,
++        nil                           ,
+         bcname .. "_gel"              ,
+         img                           ,
+         ucname .. " Gel Bucket"       ,
+@@ -335,6 +350,7 @@
+ 
+     bucket.register_liquid (
+         dename .. "_gel_slope"        ,
++        nil                           ,
+         bcname .. "_gel_slope"        ,
+         img                           ,
+         ucname .. " Gel Slope Bucket" ,

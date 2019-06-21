@@ -1,0 +1,28 @@
+Name:     bucket
+Source:   Fork of upstream mod - Do not replace
+License:  See "LICENSE"
+
+----------------------------------------------------------------------
+
+1. This is a  fork of an  upstream mod, "bucket" from "minetest_game".
+The point of divergence isn't recorded.
+
+This mod should not be synced with upstream, except in small respects,
+or things will break.
+
+----------------------------------------------------------------------
+
+2. Changes include:
+
+2a. Detabbed and/or adjusted white space.
+
+2b. Changes related to new nodes:
+
+      default:lava_gel
+      default:water_gel
+      default:lava_crust_source
+
+2c. Simplify  some data structures and  make them  module-internal for
+now as opposed to global.
+
+2d. Added the files "00README" and "oldcoder.txt" (this file).
