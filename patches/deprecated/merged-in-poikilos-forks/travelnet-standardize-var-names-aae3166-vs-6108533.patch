@@ -1,0 +1,143 @@
+diff --git a/config.lua b/config.lua
+index 040dbe9..8df6227 100644
+--- a/config.lua
++++ b/config.lua
+@@ -3,24 +3,24 @@
+ travelnet.MAX_STATIONS_PER_NETWORK = tonumber(minetest.settings:get("travelnet.MAX_STATIONS_PER_NETWORK")) or 24;
+ 
+ -- set this to true if you want a simulated beam effect
+-travelnet.travelnet_effect_enabled = minetest.settings:get_bool("travelnet.travelnet_effect_enabled") or false;
++travelnet.enable_travelnet_effect = minetest.settings:get_bool("travelnet.enable_travelnet_effect") or false;
+ 
+ -- set this to true if you want a sound to be played when the travelnet is used
+-travelnet.travelnet_sound_enabled  = minetest.settings:get_bool("travelnet.travelnet_sound_enabled") or true;
++travelnet.enable_travelnet_sound  = minetest.settings:get_bool("travelnet.enable_travelnet_sound") or true;
+ 
+ -- if you set this to false, travelnets cannot be created
+ -- (this may be useful if you want nothing but the elevators on your server)
+-travelnet.travelnet_enabled        = minetest.settings:get_bool("travelnet.travelnet_enabled") or true;
++travelnet.enable_travelnet        = minetest.settings:get_bool("travelnet.enable_travelnet") or true;
+ 
+--- if you set travelnet.elevator_enabled to false, you will not be able to
++-- if you set travelnet.enable_elevator to false, you will not be able to
+ -- craft, place or use elevators
+-travelnet.elevator_enabled         = minetest.settings:get_bool("travelnet.elevator_enabled") or true;
++travelnet.enable_elevator         = minetest.settings:get_bool("travelnet.enable_elevator") or true;
+ 
+ -- if you set this to false, doors will be disabled
+-travelnet.doors_enabled            = minetest.settings:get_bool("travelnet.doors_enabled") or true;
++travelnet.enable_doors            = minetest.settings:get_bool("travelnet.enable_doors") or true;
+ 
+ -- starts an abm which re-adds travelnet stations to networks in case the savefile got lost
+-travelnet.abm_enabled              = minetest.settings:get_bool("travelnet.abm_enabled") or false;
++travelnet.enable_abm              = minetest.settings:get_bool("travelnet.enable_abm") or false;
+ 
+ -- change these if you want other receipes for travelnet or elevator
+ travelnet.travelnet_recipe = {
+@@ -94,7 +94,7 @@ end
+ -- if you want to allow *everybody* to attach stations to all nets, let the
+ -- function always return true;
+ -- if the function returns false, players with the travelnet_attach priv
+--- can still add stations to that network 
++-- can still add stations to that network
+ 
+ travelnet.allow_attach = function( player_name, owner_name, network_name )
+    return false;
+diff --git a/init.lua b/init.lua
+index edc083e..46279bd 100644
+--- a/init.lua
++++ b/init.lua
+@@ -123,7 +123,7 @@ end
+ 
+ 
+ travelnet.restore_data = function()
+-   
++
+    local file = io.open( travelnet.mod_data_path, "r" );
+    if( not file ) then
+       print(S("[Mod travelnet] Error: Savefile '%s' not found.")
+@@ -825,14 +825,14 @@ travelnet.on_receive_fields = function(pos, formname, fields, player)
+ 
+ 
+ 
+-   if( travelnet.travelnet_sound_enabled ) then
++   if( travelnet.enable_travelnet_sound ) then
+       if ( this_node.name == 'travelnet:elevator' ) then
+          minetest.sound_play("travelnet_bell", {pos = pos, gain = 0.75, max_hear_distance = 10,});
+       else
+          minetest.sound_play("travelnet_travel", {pos = pos, gain = 0.75, max_hear_distance = 10,});
+       end
+    end
+-   if( travelnet.travelnet_effect_enabled ) then
++   if( travelnet.enable_travelnet_effect ) then
+       minetest.add_entity( {x=pos.x,y=pos.y+0.5,z=pos.z}, "travelnet:effect"); -- it self-destructs after 20 turns
+    end
+ 
+@@ -843,7 +843,7 @@ travelnet.on_receive_fields = function(pos, formname, fields, player)
+    local target_pos = travelnet.targets[ owner_name ][ station_network ][ fields.target ].pos;
+    player:move_to( target_pos, false);
+ 
+-   if( travelnet.travelnet_effect_enabled ) then 
++   if( travelnet.enable_travelnet_effect ) then
+       minetest.add_entity( {x=target_pos.x,y=target_pos.y+0.5,z=target_pos.z}, "travelnet:effect"); -- it self-destructs after 20 turns
+    end
+ 
+@@ -877,7 +877,7 @@ travelnet.rotate_player = function( target_pos, player, tries )
+    end
+ 
+    -- play sound at the target position as well
+-   if( travelnet.travelnet_sound_enabled ) then
++   if( travelnet.enable_travelnet_sound ) then
+       if ( node2.name == 'travelnet:elevator' ) then
+          minetest.sound_play("travelnet_bell", {pos = target_pos, gain = 0.75, max_hear_distance = 10,});
+       else
+@@ -993,7 +993,7 @@ end
+ 
+ 
+ 
+-if( travelnet.travelnet_effect_enabled ) then
++if( travelnet.enable_travelnet_effect ) then
+   minetest.register_entity( 'travelnet:effect', {
+ 
+     hp_max = 1,
+@@ -1026,17 +1026,17 @@ if( travelnet.travelnet_effect_enabled ) then
+ end
+ 
+ 
+-if( travelnet.travelnet_enabled ) then
++if( travelnet.enable_travelnet ) then
+    dofile(travelnet.path.."/travelnet.lua"); -- the travelnet node definition
+ end
+-if( travelnet.elevator_enabled ) then
++if( travelnet.enable_elevator ) then
+    dofile(travelnet.path.."/elevator.lua");  -- allows up/down transfers only
+ end
+-if( travelnet.doors_enabled ) then
++if( travelnet.enable_doors ) then
+    dofile(travelnet.path.."/doors.lua");     -- doors that open and close automaticly when the travelnet or elevator is used
+ end
+ 
+-if( travelnet.abm_enabled ) then
++if( travelnet.enable_abm ) then
+    dofile(travelnet.path.."/restore_network_via_abm.lua"); -- restore travelnet data when players pass by broken networks
+ end
+ 
+diff --git a/settingtypes.txt b/settingtypes.txt
+index 575390c..b6e4146 100644
+--- a/settingtypes.txt
++++ b/settingtypes.txt
+@@ -1,7 +1,7 @@
+-travelnet.MAX_STATIONS_PER_NETWORK (Maximum travelnet stations per network) float 24
+-travelnet.travelnet_effect_enabled (Travelnet visual beam effect) bool false
+-travelnet.travelnet_sound_enabled (Travelnet sound effect) bool true
+-travelnet.travelnet_enabled (Allow travelnets) bool true
+-travelnet.elevator_enabled (Allow travelnet elevators) bool true
+-travelnet.doors_enabled (Travelnet elevator doors) bool true
+-travelnet.abm_enabled (Reconnect travelnets automatically via ABM) bool false
++travelnet.MAX_STATIONS_PER_NETWORK (Maximum travelnet stations per network) int 24
++travelnet.enable_travelnet_effect (Travelnet visual beam effect) bool false
++travelnet.enable_travelnet_sound (Travelnet sound effect) bool true
++travelnet.enable_travelnet (Allow travelnets) bool true
++travelnet.enable_elevator (Allow travelnet elevators) bool true
++travelnet.enable_doors (Travelnet elevator doors) bool true
++travelnet.enable_abm (Reconnect travelnets automatically via ABM) bool false
