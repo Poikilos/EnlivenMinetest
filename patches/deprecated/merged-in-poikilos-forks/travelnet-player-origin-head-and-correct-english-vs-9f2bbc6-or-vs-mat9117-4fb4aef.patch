@@ -1,0 +1,502 @@
+diff -r -u /home/owner/Downloads/git/mat9117/travelnet/elevator.lua /home/owner/git/travelnet/elevator.lua
+--- /home/owner/Downloads/git/mat9117/travelnet/elevator.lua	2019-06-21 03:00:07.676171998 -0400
++++ /home/owner/git/travelnet/elevator.lua	2019-06-21 03:02:07.108674782 -0400
+@@ -20,8 +20,8 @@
+ 	if( travelnet.targets[ owner_name ][ network_name ]
+ 	  -- does the network have any members at all?
+ 	  and next( travelnet.targets[ owner_name ][ network_name ], nil )) then
+-		minetest.chat_send_player( owner_name, S("This elevator will automaticly connect to the "..
+-			"other elevators you have placed at diffrent heights. Just enter a station name "..
++		minetest.chat_send_player( owner_name, S("This elevator will automatically connect to the "..
++			"other elevators you have placed at different heights. Just enter a station name "..
+ 			"and click on \"store\" to set it up. Or just punch it to set the height as station "..
+ 			"name."));
+ 		return;
+@@ -106,11 +106,11 @@
+ 		fixed = {
+ 
+ 			{ 0.48, -0.5,-0.5,  0.5,  0.5, 0.5},
+-			{-0.5 , -0.5, 0.48, 0.48, 0.5, 0.5}, 
++			{-0.5 , -0.5, 0.48, 0.48, 0.5, 0.5},
+ 			{-0.5,  -0.5,-0.5 ,-0.48, 0.5, 0.5},
+ 
+ 			--groundplate to stand on
+-			{ -0.5,-0.5,-0.5,0.5,-0.48, 0.5}, 
++			{ -0.5,-0.5,-0.5,0.5,-0.48, 0.5},
+ 		},
+ 	},
+ 
+@@ -128,7 +128,7 @@
+         meta:set_string("station_network","");
+         meta:set_string("owner",          placer:get_player_name() );
+         -- request initial data
+-        meta:set_string("formspec", 
++        meta:set_string("formspec",
+                             "size[12,10]"..
+                             "field[0.3,5.6;6,0.7;station_name;"..S("Name of this station:")..";]"..
+ --                            "field[0.3,6.6;6,0.7;station_network;Assign to Network:;]"..
+@@ -140,7 +140,7 @@
+        minetest.add_node(p, {name="travelnet:elevator_top", paramtype2="facedir", param2=p2})
+        travelnet.show_nearest_elevator( pos, placer:get_player_name(), p2 );
+     end,
+-    
++
+     on_receive_fields = travelnet.on_receive_fields,
+     on_punch          = function(pos, node, puncher)
+                              travelnet.update_formspec(pos, puncher:get_player_name())
+@@ -164,7 +164,7 @@
+        local node = minetest.get_node({x=pos.x, y=pos.y+1, z=pos.z});
+        -- leftover elevator_top nodes can be removed by placing a new elevator underneath
+        if( node ~= nil and node.name ~= "air" and node.name ~= 'travelnet:elevator_top') then
+-          minetest.chat_send_player( placer:get_player_name(), S('Not enough vertical space to place the travelnet box!'))
++          minetest.chat_send_player( placer:get_player_name(), S('There is not enough vertical space to place the travelnet box!'))
+           return;
+        end
+        return minetest.item_place(itemstack, placer, pointed_thing);
+Only in /home/owner/Downloads/git/mat9117/travelnet: etc
+diff -r -u /home/owner/Downloads/git/mat9117/travelnet/.git/config /home/owner/git/travelnet/.git/config
+--- /home/owner/Downloads/git/mat9117/travelnet/.git/config	2019-06-21 03:00:07.669505191 -0400
++++ /home/owner/git/travelnet/.git/config	2019-06-21 03:02:07.105341379 -0400
+@@ -4,7 +4,7 @@
+ 	bare = false
+ 	logallrefupdates = true
+ [remote "origin"]
+-	url = https://github.com/mat9117/travelnet.git
++	url = https://github.com/poikilos/travelnet.git
+ 	fetch = +refs/heads/*:refs/remotes/origin/*
+ [branch "master"]
+ 	remote = origin
+Binary files /home/owner/Downloads/git/mat9117/travelnet/.git/index and /home/owner/git/travelnet/.git/index differ
+diff -r -u /home/owner/Downloads/git/mat9117/travelnet/.git/logs/HEAD /home/owner/git/travelnet/.git/logs/HEAD
+--- /home/owner/Downloads/git/mat9117/travelnet/.git/logs/HEAD	2019-06-21 03:00:07.669505191 -0400
++++ /home/owner/git/travelnet/.git/logs/HEAD	2019-06-21 03:02:07.102007976 -0400
+@@ -1 +1 @@
+-0000000000000000000000000000000000000000 4fb4aefbf9d66149d48066e1e577e7b6187f1628 poikilos <7557867+poikilos@users.noreply.github.com> 1561100407 -0400	clone: from https://github.com/mat9117/travelnet.git
++0000000000000000000000000000000000000000 75d6d0de9a4b8846ef2d879285dfed92c0099d79 poikilos <7557867+poikilos@users.noreply.github.com> 1561100527 -0400	clone: from https://github.com/poikilos/travelnet.git
+diff -r -u /home/owner/Downloads/git/mat9117/travelnet/.git/logs/refs/heads/master /home/owner/git/travelnet/.git/logs/refs/heads/master
+--- /home/owner/Downloads/git/mat9117/travelnet/.git/logs/refs/heads/master	2019-06-21 03:00:07.669505191 -0400
++++ /home/owner/git/travelnet/.git/logs/refs/heads/master	2019-06-21 03:02:07.102007976 -0400
+@@ -1 +1 @@
+-0000000000000000000000000000000000000000 4fb4aefbf9d66149d48066e1e577e7b6187f1628 poikilos <7557867+poikilos@users.noreply.github.com> 1561100407 -0400	clone: from https://github.com/mat9117/travelnet.git
++0000000000000000000000000000000000000000 75d6d0de9a4b8846ef2d879285dfed92c0099d79 poikilos <7557867+poikilos@users.noreply.github.com> 1561100527 -0400	clone: from https://github.com/poikilos/travelnet.git
+diff -r -u /home/owner/Downloads/git/mat9117/travelnet/.git/logs/refs/remotes/origin/HEAD /home/owner/git/travelnet/.git/logs/refs/remotes/origin/HEAD
+--- /home/owner/Downloads/git/mat9117/travelnet/.git/logs/refs/remotes/origin/HEAD	2019-06-21 03:00:07.669505191 -0400
++++ /home/owner/git/travelnet/.git/logs/refs/remotes/origin/HEAD	2019-06-21 03:02:07.102007976 -0400
+@@ -1 +1 @@
+-0000000000000000000000000000000000000000 4fb4aefbf9d66149d48066e1e577e7b6187f1628 poikilos <7557867+poikilos@users.noreply.github.com> 1561100407 -0400	clone: from https://github.com/mat9117/travelnet.git
++0000000000000000000000000000000000000000 75d6d0de9a4b8846ef2d879285dfed92c0099d79 poikilos <7557867+poikilos@users.noreply.github.com> 1561100527 -0400	clone: from https://github.com/poikilos/travelnet.git
+Only in /home/owner/Downloads/git/mat9117/travelnet/.git/objects/pack: pack-0873693b88aa869d5dc1918f1f951f77a2119ba8.idx
+Only in /home/owner/Downloads/git/mat9117/travelnet/.git/objects/pack: pack-0873693b88aa869d5dc1918f1f951f77a2119ba8.pack
+Only in /home/owner/git/travelnet/.git/objects/pack: pack-e64bc1272cd11eb20cf1f824479fc3a6b4877364.idx
+Only in /home/owner/git/travelnet/.git/objects/pack: pack-e64bc1272cd11eb20cf1f824479fc3a6b4877364.pack
+diff -r -u /home/owner/Downloads/git/mat9117/travelnet/.git/packed-refs /home/owner/git/travelnet/.git/packed-refs
+--- /home/owner/Downloads/git/mat9117/travelnet/.git/packed-refs	2019-06-21 03:00:07.669505191 -0400
++++ /home/owner/git/travelnet/.git/packed-refs	2019-06-21 03:02:07.102007976 -0400
+@@ -1,4 +1,4 @@
+ # pack-refs with: peeled fully-peeled sorted 
+-4fb4aefbf9d66149d48066e1e577e7b6187f1628 refs/remotes/origin/master
++75d6d0de9a4b8846ef2d879285dfed92c0099d79 refs/remotes/origin/master
+ 4331483c72e3ce567f7a076ed9da3cb830f2dbfe refs/tags/2.3
+ cc1e2eade3e43449e8df56128cf42c1dec19fdcb refs/tags/2.3.1
+diff -r -u /home/owner/Downloads/git/mat9117/travelnet/.git/refs/heads/master /home/owner/git/travelnet/.git/refs/heads/master
+--- /home/owner/Downloads/git/mat9117/travelnet/.git/refs/heads/master	2019-06-21 03:00:07.669505191 -0400
++++ /home/owner/git/travelnet/.git/refs/heads/master	2019-06-21 03:02:07.102007976 -0400
+@@ -1 +1 @@
+-4fb4aefbf9d66149d48066e1e577e7b6187f1628
++75d6d0de9a4b8846ef2d879285dfed92c0099d79
+diff -r -u /home/owner/Downloads/git/mat9117/travelnet/init.lua /home/owner/git/travelnet/init.lua
+--- /home/owner/Downloads/git/mat9117/travelnet/init.lua	2019-06-21 03:00:07.676171998 -0400
++++ /home/owner/git/travelnet/init.lua	2019-06-21 03:02:07.112008186 -0400
+@@ -64,7 +64,7 @@
+           - removed nodes that are not intended for manual use from creative inventory
+           - improved naming of station levels for the elevator
+  21.06.13 - elevator stations are sorted by height instead of date of creation as is the case with travelnet boxes
+-          - elevator stations are named automaticly
++          - elevator stations are named Choose a destination
+  20.06.13 - doors can be opened and closed from inside the travelnet box/elevator
+           - the elevator can only move vertically; the network name is defined by its x and z coordinate
+  13.06.13 - bugfix
+@@ -78,7 +78,7 @@
+           - beam effect is disabled by default
+  20.03.13 - added inventory image provided by VanessaE
+           - fixed bug that made it impossible to remove stations from the net
+-          - if the station a player beamed to no longer exists, the station will be removed automaticly
++          - if the station a player beamed to no longer exists, the station will be removed Choose a destination
+           - with the travelnet_attach priv, you can now attach your box to the nets of other players
+           - in newer versions of Minetest, the players yaw is set so that he/she looks out of the receiving box
+           - target list is now centered if there are less than 9 targets
+@@ -100,8 +100,8 @@
+ travelnet.S = S
+ 
+ 
+-minetest.register_privilege("travelnet_attach", { description = S("allows to attach travelnet boxes to travelnets of other players"), give_to_singleplayer = false});
+-minetest.register_privilege("travelnet_remove", { description = S("allows to dig travelnet boxes which belog to nets of other players"), give_to_singleplayer = false});
++minetest.register_privilege("travelnet_attach", { description = S("allows attaching travelnet boxes to travelnets of other players"), give_to_singleplayer = false});
++minetest.register_privilege("travelnet_remove", { description = S("allows breaking travelnet boxes which belong to networks of other players"), give_to_singleplayer = false});
+ 
+ -- read the configuration
+ dofile(travelnet.path.."/config.lua"); -- the normal, default travelnet
+@@ -123,10 +123,10 @@
+ 
+ 
+ travelnet.restore_data = function()
+-   
++
+    local file = io.open( travelnet.mod_data_path, "r" );
+    if( not file ) then
+-      print(S("[Mod travelnet] Error: Savefile '%s' not found.")
++      print(S("[Mod travelnet] Error: Savefile '%s' was not found.")
+          :format(travelnet.mod_data_path));
+       return;
+    end
+@@ -244,7 +244,7 @@
+ 		"button_exit[8.0,0.0;2.2,0.7;station_dig;"..S("Remove station").."]"..
+ 		"field[0.3,1.2;9,0.9;station_name;"..S("Name of this station")..":;"..
+ 			minetest.formspec_escape(station_name or "").."]"..
+-		"label[0.3,1.5;"..S("How do you call this place here? Example: \"my first house\", \"mine\", \"shop\"...").."]"..
++		"label[0.3,1.5;"..S("Name of this location (Example: \"my first house\", \"mine\", \"shop\"):").."]"..
+ 
+ 		"field[0.3,2.8;9,0.9;station_network;"..S("Assign to Network:")..";"..
+ 			minetest.formspec_escape(station_network or "").."]"..
+@@ -292,7 +292,7 @@
+ 
+ 
+       travelnet.reset_formspec( meta );
+-      travelnet.show_message( pos, puncher_name, "Error", S("Update failed! Resetting this box on the travelnet."));
++      travelnet.show_message( pos, puncher_name, "Error", S("Update failed! Resetting...."));
+       return;
+    end
+ 
+@@ -490,7 +490,7 @@
+    meta:set_string( "infotext", S("Station '%s'"):format(tostring( station_name )).." "..
+ 				S("on travelnet '%s'"):format(tostring( station_network )).." "..
+                                 S("(owned by %s)"):format(tostring( owner_name )).." "..
+-				S("ready for usage. Right-click to travel, punch to update."));
++				S("is ready. Right-click to travel, punch to update."));
+ 
+    -- show the player the updated formspec
+    travelnet.show_current_formspec( pos, meta, puncher_name );
+@@ -521,7 +521,7 @@
+ 
+    if( network_name == "" or not( network_name )) then
+       travelnet.show_message( pos, player_name, S("Error"),
+-	S("Please provide the name of the network this station ought to be connected to."));
++	S("Please provide a new or existing network to which this station should connect."));
+       return;
+    end
+ 
+@@ -534,15 +534,15 @@
+    elseif( not( minetest.check_player_privs(player_name, {interact=true}))) then
+ 
+       travelnet.show_message( pos, player_name, S("Error"),
+-	S("There is no player with interact privilege named '%s'. Aborting."):format(tostring( player_name )));
++	S("Access has been denied. There is no player with interact privilege named '%s'."):format(tostring( player_name )));
+       return;
+ 
+    elseif( not( minetest.check_player_privs(player_name, {travelnet_attach=true}))
+        and not( travelnet.allow_attach( player_name, owner_name, network_name ))) then
+ 
+       travelnet.show_message( pos, player_name, S("Error"),
+-	S("You do not have the travelnet_attach priv which is required to attach your box to "..
+-	"the network of someone else. Aborting."));
++	S("Access has been denied. You do not have the travelnet_attach priv which is required to attach your box to "..
++	"the network of someone else."));
+       return;
+    end
+ 
+@@ -562,7 +562,7 @@
+ 
+       if( k == station_name ) then
+          travelnet.show_message( pos, player_name, S("Error"),
+-	    S("A station named '%s' already exists on this network. Please choose a diffrent name!"):format(station_name));
++	    S("A station named '%s' already exists on this network. Please choose a different name!"):format(station_name));
+          return;
+       end
+ 
+@@ -574,7 +574,7 @@
+       travelnet.show_message( pos, player_name, S("Error"),
+ 	S("Network '%s',"):format(network_name).." "..
+ 	S("already contains the maximum number (=%s) of allowed stations per network. "..
+-	"Please choose a diffrent/new network name."):format(travelnet.MAX_STATIONS_PER_NETWORK));
++	"Please choose a different/new network name."):format(travelnet.MAX_STATIONS_PER_NETWORK));
+       return;
+    end
+ 
+@@ -752,7 +752,7 @@
+    end
+ 
+    if( not( fields.target )) then
+-      minetest.chat_send_player(name, S("Please click on the target you want to travel to."));
++      minetest.chat_send_player(name, S("Choose a destination."));
+       return;
+    end
+ 
+@@ -840,10 +840,17 @@
+    travelnet.open_close_door( pos, player, 1 );
+ 
+    -- transport the player to the target location
+-   local target_pos = travelnet.targets[ owner_name ][ station_network ][ fields.target ].pos;
++   local player_model_offset_y = -.5;  -- 0 for MT 5?
++   local player_model_vec = vector.new(0, player_model_offset_y, 0);
++   local original_target_pos = travelnet.targets[ owner_name ][ station_network ][ fields.target ].pos;
++   -- local target_pos = travelnet.targets[ owner_name ][ station_network ][ fields.target ].pos;
++   -- local target_pos = {x = original_target_pos.x, y = original_target_pos.y+player_model_offset_y, z = original_target_pos.z};  -- ERROR: expected y got nil (not sure why)
++   local target_pos = vector.add(travelnet.targets[ owner_name ][ station_network ][ fields.target ].pos, player_model_vec);
+    player:move_to( target_pos, false);
++   local source_pos = vector.add(pos, player_model_vec);
++   -- local source_pos = {x = pos.x, y = pos.y+player_model_offset_y, z = pos.z};
+ 
+-   if( travelnet.travelnet_effect_enabled ) then 
++   if( travelnet.travelnet_effect_enabled ) then
+       minetest.add_entity( {x=target_pos.x,y=target_pos.y+0.5,z=target_pos.z}, "travelnet:effect"); -- it self-destructs after 20 turns
+    end
+ 
+@@ -859,7 +866,7 @@
+ 
+       travelnet.remove_box( target_pos, nil, oldmetadata, player );
+       -- send the player back as there's no receiving travelnet
+-      player:move_to( pos, false );
++      player:move_to( source_pos, false );
+ 
+    else
+       travelnet.rotate_player( target_pos, player, 0 )
+@@ -912,7 +919,7 @@
+ 
+    if( not( oldmetadata ) or oldmetadata=="nil" or not(oldmetadata.fields)) then
+       minetest.chat_send_player( digger:get_player_name(), S("Error")..": "..
+-		S("Could not find information about the station that is to be removed."));
++		S("Travelnet could not find information about the station that is to be removed."));
+       return;
+    end
+ 
+@@ -928,7 +935,7 @@
+      or not( travelnet.targets[ owner_name ][ station_network ] )) then
+ 
+       minetest.chat_send_player( digger:get_player_name(), S("Error")..": "..
+-		S("Could not find the station that is to be removed."));
++		S("Travelnet could not find the station that is to be removed."));
+       return;
+    end
+ 
+@@ -979,7 +986,7 @@
+    end
+ 
+    if( not( meta ) or not( owner) or owner=='') then
+-      minetest.chat_send_player(name, S("This %s has not been configured yet. Please set it up first to claim it. Afterwards you can remove it because you are then the owner."):format(description));
++      minetest.chat_send_player(name, S("This %s has not been configured yet. Please set it up first to claim it. You can only remove stations you own."):format(description));
+       return false;
+ 
+    elseif( owner ~= name ) then
+@@ -1033,7 +1040,7 @@
+    dofile(travelnet.path.."/elevator.lua");  -- allows up/down transfers only
+ end
+ if( travelnet.doors_enabled ) then
+-   dofile(travelnet.path.."/doors.lua");     -- doors that open and close automaticly when the travelnet or elevator is used
++   dofile(travelnet.path.."/doors.lua");     -- doors that open and close Choose a destination when the travelnet or elevator is used
+ end
+ 
+ if( travelnet.abm_enabled ) then
+diff -r -u /home/owner/Downloads/git/mat9117/travelnet/locale/template.pot /home/owner/git/travelnet/locale/template.pot
+--- /home/owner/Downloads/git/mat9117/travelnet/locale/template.pot	2019-06-21 03:00:07.679505401 -0400
++++ /home/owner/git/travelnet/locale/template.pot	2019-06-21 03:02:07.112008186 -0400
+@@ -34,8 +34,8 @@
+ 
+ #: elevator.lua
+ msgid ""
+-"This elevator will automaticly connect to the other elevators you have "
+-"placed at diffrent heights. Just enter a station name and click on \"store\" "
++"This elevator will automatically connect to the other elevators you have "
++"placed at different heights. Just enter a station name and click on \"store\" "
+ "to set it up. Or just punch it to set the height as station name."
+ msgstr ""
+ 
+@@ -96,15 +96,15 @@
+ msgstr ""
+ 
+ #: elevator.lua travelnet.lua
+-msgid "Not enough vertical space to place the travelnet box!"
++msgid "There is not enough vertical space to place the travelnet box!"
+ msgstr ""
+ 
+ #: init.lua
+-msgid "allows to attach travelnet boxes to travelnets of other players"
++msgid "allows attaching travelnet boxes to travelnets of other players"
+ msgstr ""
+ 
+ #: init.lua
+-msgid "allows to dig travelnet boxes which belog to nets of other players"
++msgid "allows breaking travelnet boxes which belong to networks of other players"
+ msgstr ""
+ 
+ #: init.lua
+@@ -114,7 +114,7 @@
+ 
+ #: init.lua
+ #, lua-format
+-msgid "[Mod travelnet] Error: Savefile '%s' not found."
++msgid "[Mod travelnet] Error: Savefile '%s' was not found."
+ msgstr ""
+ 
+ #: init.lua
+@@ -139,8 +139,8 @@
+ 
+ #: init.lua
+ msgid ""
+-"How do you call this place here? Example: \"my first house\", \"mine\", "
+-"\"shop\"..."
++"Name of this location (Example: \"my first house\", \"mine\", "
++"\"shop\"):"
+ msgstr ""
+ 
+ #: init.lua
+@@ -169,7 +169,7 @@
+ msgstr ""
+ 
+ #: init.lua
+-msgid "Update failed! Resetting this box on the travelnet."
++msgid "Update failed! Resetting...."
+ msgstr ""
+ 
+ #: init.lua
+@@ -237,7 +237,7 @@
+ msgstr ""
+ 
+ #: init.lua
+-msgid "ready for usage. Right-click to travel, punch to update."
++msgid "is ready. Right-click to travel, punch to update."
+ msgstr ""
+ 
+ #: init.lua
+@@ -255,25 +255,25 @@
+ 
+ #: init.lua
+ msgid ""
+-"Please provide the name of the network this station ought to be connected to."
++"Please provide a new or existing network to which this station should connect."
+ msgstr ""
+ 
+ #: init.lua
+ #, lua-format
+-msgid "There is no player with interact privilege named '%s'. Aborting."
++msgid "Access has been denied. There is no player with interact privilege named '%s'."
+ msgstr ""
+ 
+ #: init.lua
+ msgid ""
+-"You do not have the travelnet_attach priv which is required to attach your "
+-"box to the network of someone else. Aborting."
++"Access has been denied. You do not have the travelnet_attach priv which is required to attach your "
++"box to the network of someone else."
+ msgstr ""
+ 
+ #: init.lua
+ #, lua-format
+ msgid ""
+ "A station named '%s' already exists on this network. Please choose a "
+-"diffrent name!"
++"different name!"
+ msgstr ""
+ 
+ #: init.lua
+@@ -285,7 +285,7 @@
+ #, lua-format
+ msgid ""
+ "already contains the maximum number (=%s) of allowed stations per network. "
+-"Please choose a diffrent/new network name."
++"Please choose a different/new network name."
+ msgstr ""
+ 
+ #: init.lua
+@@ -311,7 +311,7 @@
+ msgstr ""
+ 
+ #: init.lua
+-msgid "Please click on the target you want to travel to."
++msgid "Choose a destination."
+ msgstr ""
+ 
+ #: init.lua
+@@ -332,11 +332,11 @@
+ msgstr ""
+ 
+ #: init.lua
+-msgid "Could not find information about the station that is to be removed."
++msgid "Travelnet could not find information about the station that is to be removed."
+ msgstr ""
+ 
+ #: init.lua
+-msgid "Could not find the station that is to be removed."
++msgid "Travelnet could not find the station that is to be removed."
+ msgstr ""
+ 
+ #: init.lua
+@@ -348,7 +348,7 @@
+ #, lua-format
+ msgid ""
+ "This %s has not been configured yet. Please set it up first to claim it. "
+-"Afterwards you can remove it because you are then the owner."
++"You can only remove stations you own."
+ msgstr ""
+ 
+ #: init.lua
+diff -r -u /home/owner/Downloads/git/mat9117/travelnet/README.md /home/owner/git/travelnet/README.md
+--- /home/owner/Downloads/git/mat9117/travelnet/README.md	2019-06-21 03:00:07.676171998 -0400
++++ /home/owner/git/travelnet/README.md	2019-06-21 03:02:07.108674782 -0400
+@@ -1,6 +1,6 @@
+ # TravelNet
+ 
+-How this works: 
++How this works:
+ 
+ - craft it by filling the right and left row with glass; place in the middle row (from top to bottom): steel, mese, steel
+ - place the travelnet box somewhere
+@@ -16,5 +16,5 @@
+ The mod was written by me, Sokomine, and includes small contributions from other contributors.
+ License: GPLv3 (see file LICENSE)
+ 
+-The models and textures as found in the textures/ and models/ folders where created by VanessaE
++The models and textures as found in the textures/ and models/ folders where created by VanessaE, modified by Poikilos,
+ and are provided under the CC0 license.
+Only in /home/owner/git/travelnet: src
+Binary files /home/owner/Downloads/git/mat9117/travelnet/textures/travelnet_inv.png and /home/owner/git/travelnet/textures/travelnet_inv.png differ
+Binary files /home/owner/Downloads/git/mat9117/travelnet/textures/travelnet_travelnet_back.png and /home/owner/git/travelnet/textures/travelnet_travelnet_back.png differ
+Binary files /home/owner/Downloads/git/mat9117/travelnet/textures/travelnet_travelnet_front.png and /home/owner/git/travelnet/textures/travelnet_travelnet_front.png differ
+Binary files /home/owner/Downloads/git/mat9117/travelnet/textures/travelnet_travelnet_side.png and /home/owner/git/travelnet/textures/travelnet_travelnet_side.png differ
+diff -r -u /home/owner/Downloads/git/mat9117/travelnet/travelnet.lua /home/owner/git/travelnet/travelnet.lua
+--- /home/owner/Downloads/git/mat9117/travelnet/travelnet.lua	2019-06-21 03:00:07.682838804 -0400
++++ /home/owner/git/travelnet/travelnet.lua	2019-06-21 03:02:07.122008396 -0400
+@@ -25,13 +25,13 @@
+ 		fixed = {
+ 
+ 			{ 0.45, -0.5,-0.5,  0.5,  1.45, 0.5},
+-			{-0.5 , -0.5, 0.45, 0.45, 1.45, 0.5}, 
++			{-0.5 , -0.5, 0.45, 0.45, 1.45, 0.5},
+ 			{-0.5,  -0.5,-0.5 ,-0.45, 1.45, 0.5},
+ 
+ 			--groundplate to stand on
+-			{ -0.5,-0.5,-0.5,0.5,-0.45, 0.5}, 
++			{ -0.5,-0.5,-0.5,0.5,-0.45, 0.5},
+ 			--roof
+-			{ -0.5, 1.45,-0.5,0.5, 1.5, 0.5}, 
++			{ -0.5, 1.45,-0.5,0.5, 1.5, 0.5},
+ 
+ 			-- control panel
+ 			--                { -0.2, 0.6,  0.3, 0.2, 1.1,  0.5},
+@@ -52,7 +52,7 @@
+ 	travelnet.reset_formspec( meta );
+         meta:set_string("owner",          placer:get_player_name() );
+     end,
+-    
++
+     on_receive_fields = travelnet.on_receive_fields,
+     on_punch          = function(pos, node, puncher)
+                              travelnet.update_formspec(pos, puncher:get_player_name(), nil)
+@@ -78,7 +78,7 @@
+              minetest.get_node({x=pos.x, y=pos.y+1, z=pos.z}).name]
+        if not def or not def.buildable_to then
+ 
+-          minetest.chat_send_player( placer:get_player_name(), S('Not enough vertical space to place the travelnet box!'))
++          minetest.chat_send_player( placer:get_player_name(), S('There is not enough vertical space to place the travelnet box!'))
+           return;
+        end
+        return minetest.item_place(itemstack, placer, pointed_thing);
