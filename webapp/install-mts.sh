@@ -15,7 +15,7 @@ $1
 END
     exit 1
 }
-
+enable_server=true
 dest_programs="$HOME"
 #NOTE: $HOME is still used further down, for $HOME/.* and $HOME/i_am_dedicated_minetest_server flag file (which can be empty)
 #TODO: change $HOME/i_am_dedicated_minetest_server to $HOME/.config/EnlivenMinetest/i_am_dedicated_minetest_server or rc file
@@ -95,9 +95,11 @@ if [ -d minetest ]; then
             echo "* enabling compile (since no `pwd`/minetest/bin/minetest but client install is enabled)"
         fi
     fi
-    if [ ! -f minetest/bin/minetestserver ]; then
-        enable_compile=true
-        echo "* enabling compile (since no `pwd`/minetest/bin/minetestserver)"
+    if [ "@$enable_server" = "@true" ]; then
+        if [ ! -f minetest/bin/minetestserver ]; then
+            enable_compile=true
+            echo "* enabling compile (since no `pwd`/minetest/bin/minetestserver)"
+        fi
     fi
 else
     echo "* enabling compile since missing `pwd`/minetest directory"
