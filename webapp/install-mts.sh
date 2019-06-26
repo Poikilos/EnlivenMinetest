@@ -95,6 +95,10 @@ if [ -d minetest ]; then
             echo "* enabling compile (since no `pwd`/minetest/bin/minetest but client install is enabled)"
         fi
     fi
+    if [ ! -f minetest/bin/minetestserver ]; then
+        enable_compile=true
+        echo "* enabling compile (since no `pwd`/minetest/bin/minetestserver)"
+    fi
 else
     echo "* enabling compile since missing `pwd`/minetest directory"
 fi
