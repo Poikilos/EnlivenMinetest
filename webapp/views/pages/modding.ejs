@@ -160,16 +160,17 @@ help you get started:
     <code>obj.do_something</code>. This is helpful for functions used as
     object methods, which make use of the <code>self</code>
     variable.</li>
+    <li>Arrays start at 1 (unless you forcefully set a 0 or negative index). You must start the array at one for array functions to work. Prefilled arrays start at 1, and use curly braces: <code>things = {"something", "something else"}</code>.</li>
     <li><code>#</code> is the length operator.
     <code>if #minetest.find_nodes_in_area(pos0, pos1, "group:flora") > 3 then</code>
     is legitimate code: it will cause the case to happen if the count of
     flora nodes in the 3D box is greater than 3.</li>
-    <li>Though lua guides will tell you there is no ternary operator,
+    <li>Though Lua guides will tell you there is no ternary operator,
     and that is technically true, you can do a ternary operation as
     follows:
     <code>local gender = texture_name:find("_female") and "female" or "male"</code>
     The code sets gender to either "female" or "male".</li>
-    <li>0 is true in lua, but nil is false. This behavior is helpful when checking whether a setting is present:
+    <li>0 is true in Lua, but nil is false. This behavior is helpful when checking whether a setting is present:
     <code>local radius = (tonumber(minetest.setting_get("protector_radius")) or 5)</code>
     The code allows a zero value.</li>
     <li>Lua's tostring method does not have an underscore, and is a global function</li>
@@ -177,6 +178,8 @@ help you get started:
     an example, see owner of arrow projectile object in mobs redo), but
     trying to append an object to a string will result in a fatal "not
     serializeable" error</li>
+    <li>For-loops use a "do" keyword: <code>for i=-5, 5 do</code></li>
+    <li>Clauses (such as if, else and for) end with <code>end</code></li>
 </ul>
 Minetest Lua functions unrelated to the engine's functionality:
 <ul>
