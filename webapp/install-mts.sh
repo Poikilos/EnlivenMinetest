@@ -43,6 +43,7 @@ else
 fi
 
 pushd "$extracted_name"
+extracted_dir="`pwd`"
 
 
 extra_options=""
@@ -416,6 +417,10 @@ else
 fi
 popd
 echo "* finished compiling."
+if [ -f "$extracted_dir/release.txt" ]; then
+    echo "  - version:"
+    cat "$extracted_dir/release.txt"
+fi
 if [ "@$enable_run_after_compile" = "@true" ]; then
     echo "Trying to run minetest or other custom post-install script"
     echo "(enable_run_after_compile is true in '$scripting_rc_path')."
