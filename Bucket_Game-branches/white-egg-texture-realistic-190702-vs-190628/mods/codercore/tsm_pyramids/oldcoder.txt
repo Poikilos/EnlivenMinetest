@@ -1,0 +1,27 @@
+Name:    tsm_pyramids
+Source:  Fork of existing mod - Do not use original
+License: See "README.txt"
+
+----------------------------------------------------------------------
+
+1. This version runs if and only if either of the following  conf-file
+settings is used:
+
+      enable_tsm_pyramids = true
+      enable_wonder       = true
+
+----------------------------------------------------------------------
+
+2. Partial list of changes:
+
+2a. Applied the following patch file, which is included with this file
+(oldcoder.txt):
+
+      bucket-tsm_pyramids.patch
+
+2b. Renamed "init.lua" to "baseinit.lua".  Added a new "init.lua" file
+that  conditionally loads "baseinit.lua".
+
+2c. Added the files "00README" and "oldcoder.txt" (this file).
+
+2d. Replaced egg texture with a new Poikilos version.

@@ -1,0 +1,79 @@
+diff -r -u Bucket_Game-base/white-egg-texture-realistic-190702-vs-190628/mods/codercore/codersea/LICENSE Bucket_Game-branches/white-egg-texture-realistic-190702-vs-190628/mods/codercore/codersea/LICENSE
+--- Bucket_Game-base/white-egg-texture-realistic-190702-vs-190628/mods/codercore/codersea/LICENSE	2019-07-02 10:29:22.068425566 -0400
++++ Bucket_Game-branches/white-egg-texture-realistic-190702-vs-190628/mods/codercore/codersea/LICENSE	2019-07-02 11:56:17.555500858 -0400
+@@ -13,6 +13,12 @@
+ 
+ ----------------------------------------------------------------------
+ 
++mobs_chicken_egg and mobs_chicken_egg_overlay:
++MIT License
++(c) 2016-2019 TenPlus1 and Poikilos
++
++----------------------------------------------------------------------
++
+ Sushi texture:
+ 
+ Creative Commons Attribution Share-Alike 4.0
+Binary files Bucket_Game-base/white-egg-texture-realistic-190702-vs-190628/mods/codercore/codersea/textures/mobs_chicken_egg_overlay.png and Bucket_Game-branches/white-egg-texture-realistic-190702-vs-190628/mods/codercore/codersea/textures/mobs_chicken_egg_overlay.png differ
+Binary files Bucket_Game-base/white-egg-texture-realistic-190702-vs-190628/mods/codercore/codersea/textures/mobs_chicken_egg.png and Bucket_Game-branches/white-egg-texture-realistic-190702-vs-190628/mods/codercore/codersea/textures/mobs_chicken_egg.png differ
+diff -r -u Bucket_Game-base/white-egg-texture-realistic-190702-vs-190628/mods/codercore/tsm_pyramids/oldcoder.txt Bucket_Game-branches/white-egg-texture-realistic-190702-vs-190628/mods/codercore/tsm_pyramids/oldcoder.txt
+--- Bucket_Game-base/white-egg-texture-realistic-190702-vs-190628/mods/codercore/tsm_pyramids/oldcoder.txt	2019-07-02 10:32:04.377685424 -0400
++++ Bucket_Game-branches/white-egg-texture-realistic-190702-vs-190628/mods/codercore/tsm_pyramids/oldcoder.txt	2019-07-02 11:46:23.344304309 -0400
+@@ -23,3 +23,5 @@
+ that  conditionally loads "baseinit.lua".
+ 
+ 2c. Added the files "00README" and "oldcoder.txt" (this file).
++
++2d. Replaced egg texture with a new Poikilos version.
+diff -r -u Bucket_Game-base/white-egg-texture-realistic-190702-vs-190628/mods/codercore/tsm_pyramids/README.txt Bucket_Game-branches/white-egg-texture-realistic-190702-vs-190628/mods/codercore/tsm_pyramids/README.txt
+--- Bucket_Game-base/white-egg-texture-realistic-190702-vs-190628/mods/codercore/tsm_pyramids/README.txt	2015-02-07 09:12:28.000000000 -0500
++++ Bucket_Game-branches/white-egg-texture-realistic-190702-vs-190628/mods/codercore/tsm_pyramids/README.txt	2019-07-02 11:34:11.913283780 -0400
+@@ -17,6 +17,7 @@
+ -tsm_pyramids_eye.png by bas080, CC-BY-SA 3.0
+ -tsm_pyramids_men.png by bas080, CC-BY-SA 3.0
+ -tsm_pyramids_sun.png by bas080, CC-BY-SA 3.0
++-tsm_pyramids_mummy_egg.png by Poikilos, CC-BY-SA 4.0
+ 
+ all other: BlockMen, WTFPL
+ 
+Binary files Bucket_Game-base/white-egg-texture-realistic-190702-vs-190628/mods/codercore/tsm_pyramids/textures/tsm_pyramids_mummy_egg.png and Bucket_Game-branches/white-egg-texture-realistic-190702-vs-190628/mods/codercore/tsm_pyramids/textures/tsm_pyramids_mummy_egg.png differ
+diff -r -u Bucket_Game-base/white-egg-texture-realistic-190702-vs-190628/mods/codermobs/codermobs/LICENSE Bucket_Game-branches/white-egg-texture-realistic-190702-vs-190628/mods/codermobs/codermobs/LICENSE
+--- Bucket_Game-base/white-egg-texture-realistic-190702-vs-190628/mods/codermobs/codermobs/LICENSE	2019-07-02 09:19:21.253547685 -0400
++++ Bucket_Game-branches/white-egg-texture-realistic-190702-vs-190628/mods/codermobs/codermobs/LICENSE	2019-07-02 11:47:09.351236303 -0400
+@@ -85,6 +85,12 @@
+ 
+ ----------------------------------------------------------------------
+ 
++Egg texture:
++MIT License
++(c) 2016-2019 TenPlus1 and Poikilos
++
++----------------------------------------------------------------------
++
+ Car model:
+ (c) 2015 and CC-BY-NC-SA 3.0: Melkor.
+ 
+Binary files Bucket_Game-base/white-egg-texture-realistic-190702-vs-190628/mods/codermobs/codermobs/textures/codermobs_chicken_egg.png and Bucket_Game-branches/white-egg-texture-realistic-190702-vs-190628/mods/codermobs/codermobs/textures/codermobs_chicken_egg.png differ
+diff -r -u Bucket_Game-base/white-egg-texture-realistic-190702-vs-190628/mods/codermobs/mobs/license.txt Bucket_Game-branches/white-egg-texture-realistic-190702-vs-190628/mods/codermobs/mobs/license.txt
+--- Bucket_Game-base/white-egg-texture-realistic-190702-vs-190628/mods/codermobs/mobs/license.txt	2019-07-02 09:16:56.283951703 -0400
++++ Bucket_Game-branches/white-egg-texture-realistic-190702-vs-190628/mods/codermobs/mobs/license.txt	2019-07-02 12:04:11.640484137 -0400
+@@ -18,6 +18,16 @@
+ 
+ ----------------------------------------------------------------------
+ 
++Additional changes:
++
++      mobs_chicken_egg.png
++      mobs_chicken_egg_overlay.png
++
++(c) 2016-2019 and MIT License: TenPlus1, Poikilos.
++
++----------------------------------------------------------------------
++
++
+ The MIT License (MIT)
+ 
+ Copyright (c) 2016 TenPlus1
+Only in Bucket_Game-branches/white-egg-texture-realistic-190702-vs-190628/mods/codermobs/mobs: src
+Binary files Bucket_Game-base/white-egg-texture-realistic-190702-vs-190628/mods/codermobs/mobs/textures/mobs_chicken_egg_overlay.png and Bucket_Game-branches/white-egg-texture-realistic-190702-vs-190628/mods/codermobs/mobs/textures/mobs_chicken_egg_overlay.png differ
+Binary files Bucket_Game-base/white-egg-texture-realistic-190702-vs-190628/mods/codermobs/mobs/textures/mobs_chicken_egg.png and Bucket_Game-branches/white-egg-texture-realistic-190702-vs-190628/mods/codermobs/mobs/textures/mobs_chicken_egg.png differ

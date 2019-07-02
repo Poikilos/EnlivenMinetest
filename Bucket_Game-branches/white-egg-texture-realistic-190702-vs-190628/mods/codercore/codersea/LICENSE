@@ -1,0 +1,109 @@
+License information
+----------------------------------------------------------------------
+
+"codersea" is distributed under the following licenses.  Note: Not all
+of the elements listed here are used in this fork.
+
+----------------------------------------------------------------------
+
+License for  original elements  not covered in  the rest of this docu-
+ment:
+Creative Commons CC BY-NC 4.0 with rights assigned to "OldCoder" (Rob-
+ert Kiraly).
+
+----------------------------------------------------------------------
+
+mobs_chicken_egg and mobs_chicken_egg_overlay:
+MIT License
+(c) 2016-2019 TenPlus1 and Poikilos
+
+----------------------------------------------------------------------
+
+Sushi texture:
+
+Creative Commons Attribution Share-Alike 4.0
+https://creativecommons.org/licenses/by-sa/4.0/
+by Poikilos
+
+----------------------------------------------------------------------
+
+Code remaining from the original "sea" mod:
+
+Copyright (C) 2011-2017 celeron55, Perttu Ahola <celeron55@gmail.com>
+
+GNU  Lesser  General  Public License as published by the Free Software
+Foundation; either version 2.1 of the License, or (at your option) any
+later version.
+
+Mito551's  sounds,  dirt,  sand, gravel, sand, stone,  and leaves:  CC
+BY-SA.
+
+Dirt,  tree,  and  chests  textures  from Cisoun's WTFPL texture pack:
+WTFPL.
+
+RealBadAngel's animated water textures: WTFPL.
+
+Cobble and wood textures from G4JC's Almost MC Texture Pack: CC-BY-SA.
+
+VanessaE's  sand,  desert_sand,  sandstonebrick  and  torch  textures:
+WTFPL.
+
+----------------------------------------------------------------------
+
+Mobs Redo API and/or "ethereal" image filenames:
+
+The MIT License (MIT) Copyright (c) 2016 TenPlus1
+
+Permission is hereby granted,  free of charge, to any person obtaining
+a  copy  of  this  software  and  associated  documentation files (the
+"Software"),  to deal  in the Software without restriction,  including
+without limitation the rights to use,  copy,  modify,  merge, publish,
+distribute,  sublicense,  and/or sell  copies of the Software,  and to
+permit persons to whom the Software is furnished to do so,  subject to
+the following conditions:
+
+The  above  copyright  notice  and  this  permission  notice  shall be
+included in all copies or substantial portions of the Software.
+
+THE  SOFTWARE  IS  PROVIDED  "AS  IS",  WITHOUT  WARRANTY OF ANY KIND,
+EXPRESS  OR  IMPLIED,  INCLUDING  BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN  NO  EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM,  DAMAGES OR OTHER LIABILITY,  WHETHER IN AN ACTION OF CONTRACT,
+TORT  OR  OTHERWISE,  ARISING  FROM,  OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+----------------------------------------------------------------------
+
+mobs_fish media
+===============
+
+Model/Textures: CC-BY-SA 3.0
+Author: Sapier
+URL: http://creativecommons.org/licenses/by-sa/3.0/de/legalcode
+
+mobs_jellyfish media
+====================
+
+Model/Textures: WTFPL
+Author: blert2112
+
+mobs_sharks media
+=================
+
+Model/Textures: CC-BY-SA 3.0
+http://creativecommons.org/licenses/by-sa/3.0/de/legalcode
+Author: Sapier
+texture modification by: blert2112
+
+mobs_turtles media
+==================
+Model/textures: unknown
+Author: AspireMint
+
+----------------------------------------------------------------------
+
+nssm
+====
+License for the code: LGPL
+License for all the models, textures and sound: CC BY-SA 4.0

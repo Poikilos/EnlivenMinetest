@@ -1,0 +1,5 @@
+Name:    codersea
+Source:  Largely original mod (do not replace)
+License: See "LICENSE"
+
+For documentation, see the files "codersea.md" and "LICENSE".
