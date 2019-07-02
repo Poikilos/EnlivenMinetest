@@ -418,8 +418,8 @@ fi
 popd
 echo "* finished compiling."
 if [ -f "$extracted_dir/release.txt" ]; then
-    echo "  - version:"
-    cat "$extracted_dir/release.txt"
+    versionLine=`cat $extracted_dir/release.txt`
+    echo "  - version: $versionLine"
 fi
 if [ "@$enable_run_after_compile" = "@true" ]; then
     echo "Trying to run minetest or other custom post-install script"
