@@ -1,0 +1,53 @@
+diff -r -u Bucket_Game-base/orange-texture-realistic-190702-vs-190628/mods/coderfood/farming/license.txt Bucket_Game-branches/orange-texture-realistic-190702-vs-190628/mods/coderfood/farming/license.txt
+--- Bucket_Game-base/orange-texture-realistic-190702-vs-190628/mods/coderfood/farming/license.txt	2019-07-02 08:55:50.050780682 -0400
++++ Bucket_Game-branches/orange-texture-realistic-190702-vs-190628/mods/coderfood/farming/license.txt	2019-07-02 12:35:31.500622882 -0400
+@@ -28,6 +28,9 @@
+ Added to replace a texture that TenPlus1 was using before without pro-
+ per attribution.
+ 
++Created by NyankoSensei, VanessaE, Poikilos (CC0 formerly WTFPL):
++  farming_orange.png
++
+ Created by PilzAdam (License: WTFPL):
+   farming_bread.png
+   farming_soil.png
+Binary files Bucket_Game-base/orange-texture-realistic-190702-vs-190628/mods/coderfood/farming/textures/farming_orange.png and Bucket_Game-branches/orange-texture-realistic-190702-vs-190628/mods/coderfood/farming/textures/farming_orange.png differ
+diff -r -u Bucket_Game-base/orange-texture-realistic-190702-vs-190628/mods/coderfood/food_basic/oldcoder.txt Bucket_Game-branches/orange-texture-realistic-190702-vs-190628/mods/coderfood/food_basic/oldcoder.txt
+--- Bucket_Game-base/orange-texture-realistic-190702-vs-190628/mods/coderfood/food_basic/oldcoder.txt	2019-07-02 09:01:32.282714929 -0400
++++ Bucket_Game-branches/orange-texture-realistic-190702-vs-190628/mods/coderfood/food_basic/oldcoder.txt	2019-07-02 12:36:32.332202023 -0400
+@@ -1,5 +1,5 @@
+ To be documented.
+ 
+-Added/replaced 3 textures with changes by Poikilos.
++Added/replaced 4 textures with changes by Poikilos.
+ 
+ Now depends on "codermobs?".
+diff -r -u Bucket_Game-base/orange-texture-realistic-190702-vs-190628/mods/coderfood/food_basic/README.md Bucket_Game-branches/orange-texture-realistic-190702-vs-190628/mods/coderfood/food_basic/README.md
+--- Bucket_Game-base/orange-texture-realistic-190702-vs-190628/mods/coderfood/food_basic/README.md	2019-02-18 03:59:16.000000000 -0500
++++ Bucket_Game-branches/orange-texture-realistic-190702-vs-190628/mods/coderfood/food_basic/README.md	2019-07-02 12:33:48.623025807 -0400
+@@ -4,17 +4,19 @@
+ 
+ This will be a high-res (128x128) texture pack for Minetest. Its license is CC0 1.0.
+ 
+-The files in this repo are actually [webtoon](https://github.com/pithydon/webtoon)
++The files in this repo started as [webtoon](https://github.com/pithydon/webtoon)
+ CC0 texture pack, which I keep rewriting with the new textures.
+ 
+-The textures are largely my own work, but a lot of them are taken out of other
++The new textures are largely my own work, but a lot of them are taken out of other
+ CC0 works.
+ 
+-I won't be commiting extremely often in order to not bloat the repo with binary file
++I won't be committing extremely often in order to not bloat the repo with binary file
+ changes.
+ 
+-Most notable texture sources (feel free to send me more sources or your own contributions):
+-
++## Most notable texture sources
++(feel free to send me more sources or your own contributions)
++- food_orange.png
++  CC0 2014-2019 NyankoSensei & VanessaE (farming_plus PR), Poikilos
+ - https://www.blendswap.com/blends/view/74021
+ - https://opengameart.org/content/glitch-sprite-assets-huge-collection
+ - https://opengameart.org/content/glitch-alpine-landscape-svg
+Binary files Bucket_Game-base/orange-texture-realistic-190702-vs-190628/mods/coderfood/food_basic/textures/food_orange.png and Bucket_Game-branches/orange-texture-realistic-190702-vs-190628/mods/coderfood/food_basic/textures/food_orange.png differ
