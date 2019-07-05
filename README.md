@@ -23,6 +23,7 @@
 ## Primary Features of ENLIVEN subgame
 * birthstones, improved fork: <https://github.com/poikilos/birthstones>
   (also part of Bucket_Game)
+* See also overrides/worlds/CenterOfTheSun/world.conf
 
 ### Planned Features
 There are several improvements I may implement in new or existing mods.
@@ -34,6 +35,9 @@ section of the GitHub project.
   they are in Bucket_Game!)
 * Issues not yet added to the GitHub project's Issues are at
   [Minetest Kanboard](https://poikilos.dyndns.org/kanboard/?controller=BoardViewController&action=readonly&token=f214530d2f1294d90279631ce66b2e8b8569c6f15faf3773086476158bc8)
+* Disable potentially (stuff in Bucket_Game not matching theme):
+  - codermobs gems (see codermobs_gem_*.png such as
+    codermobs_gem_fire.png)
 
 #### node.js server manager
 * capture log
