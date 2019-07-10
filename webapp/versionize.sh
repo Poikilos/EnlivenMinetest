@@ -1,5 +1,6 @@
 #!/usr/bin/bash
-
+echo
+echo "Collecting version..."
 if [ -z "$original_src_path" ]; then
     original_src_path="$1"
 fi
@@ -46,17 +47,18 @@ if [ -d versionize ]; then
 fi
 mkdir versionize || customDie "cannot create /tmp/versionize"
 cd /tmp/versionize || customDie "cannot cd /tmp/versionize"
-src_archive=
 if [ -f "$original_src_path" ]; then
-    echo "* detected full path..."
+    echo "* detected archive file full path..."
     try_path="$original_src_path"
-    src_archive="$original_src_path"
 elif [ -d "$original_src_path" ]; then
-    echo "* detected full path..."
+    echo "* detected directory full path..."
     try_path="$original_src_path"
 fi
 
+src_archive=
 if [ -f "$try_path" ]; then
+    src_archive="$try_path"
+    echo "* set src_archive to '$try_path'"
     unzip "$try_path"
     src_name="`ls`"
     if [ ! -d "$src_name" ]; then
@@ -93,10 +95,11 @@ dest_path="$versions_path/linux-minetest-kit-$version"
 echo "dest_path=$dest_path"
 
 if [ ! -z "$src_archive" ]; then
+    echo "* Collecting src_archive '$src_archive'"
     # The effectiveness of any bash extension extraction is debatable--
     # see
     # <https://stackoverflow.com/questions/965053/extract-filename-and-extension-in-bash>
-    filename=$(basename -- "$fullfile")
+    filename=$(basename -- "$src_archive")
     extension="${filename##*.}"
     filename="${filename%.*}"
     dst_archive="$versions_path/$filename-$version.$extension"
@@ -112,6 +115,8 @@ if [ ! -z "$src_archive" ]; then
         echo
         echo
     fi
+else
+    echo "* There is no src_archive to collect."
 fi
 if [ -d "$dest_path" ]; then
     echo
@@ -123,6 +128,6 @@ if [ -d "$dest_path" ]; then
 fi
 mv "$src_path" "$dest_path" || customDie "Failed to move to 'dest_path'"
 echo
-echo "Done."
+echo "Done $0."
 echo
 echo
