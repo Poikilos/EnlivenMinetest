@@ -1,5 +1,6 @@
 # EnlivenMinetest
 (see also webapp/README.md)
+by [Poikilos](https://github.com/poikilos)
 
 1. ENLIVEN is a subgame for minetest with the goals of providing
    immersion and lessons for humanity.
