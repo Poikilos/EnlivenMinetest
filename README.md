@@ -287,6 +287,3 @@ These steps are only needed for debug builds:
   * When you are done debugging, type:
     quit
 * Try debugging again after the proper packages are installed.
-
-
-<a rel="me" href="https://mastodon.oldcoder.org/@poikilos">Mastodon</a>
