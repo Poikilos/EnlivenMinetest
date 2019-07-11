@@ -34,11 +34,15 @@ section of the GitHub project.
   the old ENLIVEN that will probably be added to the new ENLIVEN which
   is based on Bucket_Game (many of the mods are already present because
   they are in Bucket_Game!)
-* Issues not yet added to the GitHub project's Issues are at
-  [Minetest Kanboard](https://poikilos.dyndns.org/kanboard/?controller=BoardViewController&action=readonly&token=f214530d2f1294d90279631ce66b2e8b8569c6f15faf3773086476158bc8)
-* Disable potentially (stuff in Bucket_Game not matching theme):
-  - codermobs gems (see codermobs_gem_*.png such as
-    codermobs_gem_fire.png)
+* Issues not yet added to the GitHub project's Issues are at [Minetest
+  Kanboard](https://poikilos.dyndns.org/kanboard/?controller=BoardViewController&action=readonly&token=f214530d2f1294d90279631ce66b2e8b8569c6f15faf3773086476158bc8)
+
+#### Planned Removals
+Disable or remove these Bucket_Game mods/features potentially (not matching theme):
+- codermobs gems (see codermobs_gem_*.png such as
+  codermobs_gem_fire.png)
+- lmb_blocks
+- mychisel
 
 #### node.js server manager
 * capture log
@@ -46,6 +50,7 @@ section of the GitHub project.
     <https://pastebin.com/dDBg40vf>) or saving playereffects
   * detect restarts (even if no 'separator'--see
     <https://pastebin.com/Jv3vkhFA>)
+
 
 ## DISCLAIMERS
 * Please read the Sources and License section of this document. You must
