@@ -1,0 +1,4 @@
+Improved Spider/Bug Sounds:
+codermobs_damage_giant_exoskeleton, codermobs_death_giant_bug,
+codermobs_use_giant_exoskeleton
+(c) 2019 and CC BY-SA 4.0: Poikilos

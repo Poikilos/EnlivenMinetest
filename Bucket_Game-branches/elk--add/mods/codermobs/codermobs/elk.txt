@@ -1,0 +1,9 @@
+Unused Pixel Art in src (approximately 7 colors) Elk texture:
+  Copyright Sapier and Poikilos
+  (converted to UV-mapped texture by Poikilos)
+  Creative Commons Attribution Share-Alike 3.0
+
+HD Elk texture and default (16-color realistic) texture:
+  Copyright Stephen Baker (BLM/Oregon) and Poikilos
+  (converted to UV-mapped texture by Poikilos)
+  Creative Commons Attribution 2.0 Generic

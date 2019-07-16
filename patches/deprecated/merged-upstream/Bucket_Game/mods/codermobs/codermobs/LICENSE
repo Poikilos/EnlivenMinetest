@@ -28,25 +28,6 @@ licenses are copyright and licensed as follows:
 
 ----------------------------------------------------------------------
 
-Media for "baby_chick":
-(c) 2019 and CC-BY-NC-SA 3.0: Poikilos.
-
-----------------------------------------------------------------------
-
-Improved Spider/Bug Sounds:
-codermobs_damage_giant_exoskeleton, codermobs_death_giant_bug,
-codermobs_use_giant_exoskeleton   
-(c) 2019 and CC BY-SA 4.0: Poikilos
-
-Improved Particles:
-codermobs_blood, codermobs_damage_stone, codermobs_lott_spider_blood  
-(c) 2019 and CC BY-SA 4.0: Poikilos
-
-codermobs_fireball:
-(c) 2012 to 2019 and CC-BY-SA 3.0: Sapier, Poikilos
-
-----------------------------------------------------------------------
-
 Media for "animal_materials",  "deer", "elk", "ostrich", and "sacreep-
 er":
 
@@ -59,16 +40,6 @@ Coder.
 
 Code for "animal_materials": Same as media.  The  other 4 mobs  listed
 here use new code.
-
-Unused Pixel Art in src (approximately 7 colors) Elk texture:
-  Copyright Sapier and Poikilos
-  (converted to UV-mapped texture by Poikilos)
-  Creative Commons Attribution Share-Alike 3.0
-
-HD Elk texture and default (16-color realistic) texture:
-  Copyright Stephen Baker (BLM/Oregon) and Poikilos
-  (converted to UV-mapped texture by Poikilos)
-  Creative Commons Attribution 2.0 Generic
 
 Additionally, "chicken.lua" uses Sapier's 3D egg.  See that Lua source
 file as well.
@@ -103,10 +74,6 @@ new textures.
 Butterfly
 -----------------------------
 (c) 2012 to 2019 and CC BY-SA 3.0: AspireMint.
-
-Realistic Milk Bucket
------------------------------
-(c) 2015-2019 and CC BY-SA 3.0: ElementW, Poikilos (modified by).
 
 D00Med code
 -----------------------------

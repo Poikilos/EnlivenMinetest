@@ -1,0 +1,7 @@
+Media for "animal_materials",  "deer", "elk", and "ostrich":
+
+See  the  5 associated  Lua  source files.  In general,  the media is:
+(c) 2012 to 2019 and  CC-BY-SA 3.0:  Sapier and Poikilos
+
+The "ostrich" texture is as described above but also attribution: Old-
+Coder.
