@@ -301,6 +301,8 @@ world_conf_src="$world_override_src/world.conf"
 world_conf_dst="$world_override_dst/world.conf"
 world_mt_src="$world_override_src/world.mt"
 world_mt_dst="$world_override_dst/world.mt"
+override_more="overrides/CenterOfTheSun/games/ENLIVEN"
+minetest_conf_more="$override_more/minetest.conf"
 if [ -d "$world_override_dst" ]; then
     echo "You have the CenterOfTheSun world. Listing any changes..."
     if [ -f "$world_conf_src" ]; then
@@ -310,6 +312,9 @@ if [ -d "$world_override_dst" ]; then
             echo " * add the world.conf from $world_conf_src"
         fi
         cp -f "$world_conf_src" "$world_conf_dst"
+    fi
+    if [ -f "$minetest_conf_more" ]; then
+        cat "$minetest_conf_more" >> "$server_minetest_conf_dest"
     fi
 fi
 
