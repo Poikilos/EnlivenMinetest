@@ -50,5 +50,39 @@ else
     sleep 1
   fi
 fi
-screen -S MinetestServer $mts --gameid ENLIVEN --worldname $MT_MYWORLD_NAME
+
+# screen -S MinetestServer $mts --gameid Bucket_Game --worldname $MT_MYWORLD_NAME
+# screen -S MinetestServer $mts --gameid ENLIVEN --worldname $MT_MYWORLD_NAME
+# minetestserver options:
+# --worldname <world must be in normal worlds directory>
+# --world <any world directory can be specified>
+# --config <any minetest.conf>
+# cmd="$mts --gameid ENLIVEN --world /home/owner/.minetest/worlds/$MT_MYWORLD_NAME --config /home/owner/minetest/games/ENLIVEN/minetest.conf"
+cmd="$mts --gameid ENLIVEN --world /home/owner/.minetest/worlds/$MT_MYWORLD_NAME"
+enable_screen=true
+if [ -z "$screen_cmd" ]; then
+    if [ -f "`command -v screen`" ]; then
+        screen_cmd="screen"
+    else
+        enable_screen=false
+    fi
+fi
+
+if [ "@$1" = "@--noscreen" ]; then
+    enable_screen=false
+fi
+if [ "@$enable_screen" = "@true" ]; then
+    if [ "@$screen_cmd" = "@screen" ]; then
+        screen -S MinetestServer $cmd
+    else
+        echo "Syntax for $screen_cmd is not implemented, so falling back to:"
+        echo "    $screen_cmd $cmd"
+        $screen_cmd $cmd
+    fi
+    echo "$screen_cmd finished running $cmd"
+else
+    echo "Running minetestserver without screen command..."
+    $cmd
+    echo "$cmd  # finished."
+fi
 
