@@ -1,4 +1,5 @@
 print("How to use: paste into a Blender Text Editor panel, select object, Run Script")
+
 y_up = True
 enable_minetest = True
 
@@ -13,6 +14,34 @@ try:
 except:
     # < 2.8
     ob1 = bpy.context.scene.objects.active
+
+
+class MessageBox(bpy.types.Operator):
+    bl_idname = "message.messagebox"
+    bl_label = ""
+    message = bpy.props.StringProperty(
+        name = "message",
+        description = "message",
+        default = ''
+    )
+
+    def execute(self, context):
+        self.report({'INFO'}, self.message)
+        print(self.message)
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self, width = 400)
+
+    def draw(self, context):
+        self.layout.label(self.message)
+        self.layout.label("")
+        #col = self.layout.column(align = True)
+        #col.prop(context.scene, "my_string_prop")
+
+
+bpy.utils.register_class(MessageBox)
+
 #print(str(thisO))
 #extents1 = ob1.dimensions.copy()
 #if (extents1.x == 0.0) and (extents1.y == 0.0) and (extents1.z == 0.0) and (ob1.scale.x > 0.0):
@@ -98,6 +127,8 @@ if enable_minetest:
     zMin /= 10.0
     zMax /= 10.0
 
+msg = 'Size is not available. Make sure you have a mesh object selected.'
+
 if xMin is not None:
     if y_up:
         tmp = yMin
@@ -106,6 +137,9 @@ if xMin is not None:
         tmp = yMax
         yMax = zMax
         zMax = tmp
-    print(
-        "    collisionbox = {{{:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}}}".format(xMin, yMin, zMin, xMax, yMax, zMax)
-    )
+    msg = "    collisionbox = {{{:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}}}".format(xMin, yMin, zMin, xMax, yMax, zMax)
+    # print(msg)
+
+bpy.ops.message.messagebox('INVOKE_DEFAULT', message = msg)
+
+bpy.utils.unregister_class(MessageBox)
