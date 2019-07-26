@@ -69,6 +69,8 @@ sudo $this_apt -y install \
     libxml-parser-perl    \
     xserver-xorg-dev
 
+#libcurl4-openssl-dev: for announce to work
+
 
   if [ "$enable_redis" = "true" ]; then
     sudo $this_apt -y install libhiredis-dev
