@@ -51,6 +51,7 @@ else
 fi
 unzip -u $zip_name || customDie "Can't unzip $zip_name"
 cd "$extracted_name"
+cat "$extracted_name/release.txt"
 echo "compiling libraries..."
 date
 start=`date +%s`

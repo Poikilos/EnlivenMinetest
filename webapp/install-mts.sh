@@ -244,53 +244,60 @@ if [ -d "$dst/mods/coderfood/food_basic/etc" ]; then
   rm -Rf "$dst/mods/coderfood/food_basic/etc"
 fi
 
+minetest_conf_dest="$dest_programs/minetest/minetest.conf"
+game_minetest_conf_dest="$dest_programs/minetest/games/ENLIVEN/minetest.conf"
+
 # Bucket_Game doesn't come with a minetest.conf, only minetest.conf.example* files
 # if [ ! -f "$dest_programs/minetest/minetest.Bucket_Game-example.conf" ]; then
-#     cp -f "$dest_programs/minetest/minetest.conf" "$dest_programs/minetest/minetest.Bucket_Game-example.conf"
+#     cp -f "$$minetest_conf_dest" "$dest_programs/minetest/minetest.Bucket_Game-example.conf"
 # fi
 
 client_example_dest="$dest_programs/minetest/minetest.ENLIVEN.client-example.conf"
-# client conf writing only ever happens once, unless you manually delete $client_example_dest file:
-if [ ! -f "$client_example_dest" ]; then
-    if [ -f "$dest_programs/minetest/minetest.conf" ]; then
-        echo "Backing up minetest.conf..."
-        if [ ! -f "$dest_programs/minetest/minetest.conf.1st" ]; then
-            cp -f "$dest_programs/minetest/minetest.conf" "$dest_programs/minetest/minetest.conf.1st"
-        else
-            cp -f "$dest_programs/minetest/minetest.conf" "$dest_programs/minetest/minetest.conf.bak"
-        fi
-    fi
-    echo "Installing minetest.conf and ENLIVEN example conf files..."
-    cp -f "patches/subgame/minetest.client-example.conf" "$dest_programs/minetest/minetest.conf"
-    cp -f "patches/subgame/minetest.LAN-client-example.conf" "$dest_programs/minetest/minetest.ENLIVEN.LAN-client-example.conf"
-    cp -f "patches/subgame/minetest.server-example.conf" "$dest_programs/minetest/minetest.ENLIVEN.server-example.conf"
-    cp -f "patches/subgame/minetest.client-example.conf" "$client_example_dest"
-fi
-server_minetest_conf_dest="$dest_programs/minetest/games/ENLIVEN/minetest.conf"
 
-if [ -f "$server_minetest_conf_dest" ]; then
+echo "Installing minetest.ENLIVEN.*-example.conf files..."
+cp -f "patches/subgame/minetest.LAN-client-example.conf" "$dest_programs/minetest/minetest.ENLIVEN.LAN-client-example.conf" || customDie "Cannot copy minetest.ENLIVEN.LAN-client-example.conf"
+cp -f "patches/subgame/minetest.server-example.conf"     "$dest_programs/minetest/minetest.ENLIVEN.server-example.conf" || customDie "Cannot copy minetest.ENLIVEN.server-example.conf"
+cp -f "patches/subgame/minetest.client-example.conf"     "$dest_programs/minetest/minetest.ENLIVEN.client-example.conf" || customDie "Cannot copy minetest.ENLIVEN.client-example.conf"
+
+echo "Writing '$game_minetest_conf_dest'..."
+cp -f "patches/subgame/minetest.conf" "$game_minetest_conf_dest"
+
+# client conf writing only ever happens once, unless you manually delete $minetest_conf_dest:
+if [ ! -f "$minetest_conf_dest" ]; then
+    # if [ -f "$minetest_conf_dest" ]; then
+        # echo "Backing up minetest.conf..."
+        # if [ ! -f "$minetest_conf_dest.1st" ]; then
+            # cp -f "$minetest_conf_dest" "$minetest_conf_dest.1st"
+        # else
+            # cp -f "$minetest_conf_dest" "$minetest_conf_dest.bak"
+        # fi
+    # fi
+    echo "Writing minetest.conf (client region)..."
+    cp -f "patches/subgame/minetest.client-example.conf" "$minetest_conf_dest"  || customDie "Cannot copy minetest.client-example.conf to $minetest_conf_dest"
+    echo "Appending example settings (server region) to '$minetest_conf_dest'..."
+    cat "patches/subgame/minetest.server-example.conf" >> "$minetest_conf_dest" || customDie "Cannot append minetest.server-example.conf"
+else
+    echo "$minetest_conf_dest exists (remove it if you want the installer to write an example version)"
+fi
+
+
+if [ -f "$minetest_conf_dest" ]; then
     cat << END
 NOTE: minetest.org releases allow you to put a world.conf file in your
   world, so that is the file you should edit manually in your world
-  --this installer overwrites $server_minetest_conf_dest and
+  --this installer overwrites $minetest_conf_dest and
   worlds/CenterOfTheSun settings (the author Poikilos' world).
+  Continue to place server settings such as announce in
+  $minetest_conf_dest.
+  Leave $game_minetest_conf_dest intact, as it defines the game.
+  If you have suggestions for changes or configurability, please use the
+  issue tracker at <https://github.com/poikilos/EnlivenMinetest>.
 
 END
 fi
-echo "Writing '$server_minetest_conf_dest'..."
-cp -f "patches/subgame/minetest.server-example.conf" "$server_minetest_conf_dest"
-echo "" >> "$server_minetest_conf_dest"
-echo "# Added automatically by $me:" >> "$server_minetest_conf_dest"
-if [ -f "$HOME/i_am_dedicated_minetest_server" ]; then
-    echo "server_dedicated = true" >> "$server_minetest_conf_dest"
-else
-    echo "server_dedicated = false" >> "$server_minetest_conf_dest"
-fi
-echo "" >> "$server_minetest_conf_dest"
-echo "" >> "$server_minetest_conf_dest"
 
 
-world_override_src="overrides/worlds/CenterOfTheSun"
+world_override_src="overrides/CenterOfTheSun/minetest/worlds/CenterOfTheSun"
 world_override_dst="$HOME/.minetest/worlds/CenterOfTheSun"
 world_override_dst="$HOME/.minetest/worlds/CenterOfTheSun"
 try_world_override_dst="$HOME/minetest/worlds/CenterOfTheSun"
@@ -302,7 +309,8 @@ world_conf_dst="$world_override_dst/world.conf"
 world_mt_src="$world_override_src/world.mt"
 world_mt_dst="$world_override_dst/world.mt"
 override_more="overrides/CenterOfTheSun/games/ENLIVEN"
-minetest_conf_more="$override_more/minetest.conf"
+appends="overrides/CenterOfTheSun/append"
+minetest_conf_append="$appends/minetest.conf"
 if [ -d "$world_override_dst" ]; then
     echo "You have the CenterOfTheSun world. Listing any changes..."
     if [ -f "$world_conf_src" ]; then
@@ -313,8 +321,8 @@ if [ -d "$world_override_dst" ]; then
         fi
         cp -f "$world_conf_src" "$world_conf_dst"
     fi
-    if [ -f "$minetest_conf_more" ]; then
-        cat "$minetest_conf_more" >> "$server_minetest_conf_dest"
+    if [ -f "$minetest_conf_append" ]; then
+        cat "$minetest_conf_append" >> "$minetest_conf_dest"
     fi
 fi
 
