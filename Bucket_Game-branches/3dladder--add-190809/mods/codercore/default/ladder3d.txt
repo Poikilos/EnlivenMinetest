@@ -1,6 +1,8 @@
 3D Ladder Model
 by Andrey2470T and Poikilos
-(submitted to minetest_game, so author's intent is MIT License)
+(submitted to minetest_game, so author's intent is MIT License,
+via temporary links, posted at
+https://github.com/minetest/minetest_game/issues/2423)
 (uses textures from minetest_game:
 Gambit (CC BY-SA 3.0): default_ladder_steel.png
 celeron55, Perttu Ahola <celeron55@gmail.com>, modified by Poikilos (CC BY-SA 3.0): default_ladder_wood.png)

@@ -1,0 +1,240 @@
+--- /home/owner/Downloads/git/minetest/minetest_game/mods/default/nodes.lua	2019-08-09 21:01:18.889965673 -0400
++++ /home/owner/git/EnlivenMinetest/Bucket_Game-branches/3dladder--add-190809/mods/codercore/default/nodes.lua	2019-08-09 20:47:08.726218000 -0400
+@@ -52,8 +52,6 @@
+ default:dirt_with_snow
+ default:dirt_with_rainforest_litter
+ default:dirt_with_coniferous_litter
+-default:dry_dirt
+-default:dry_dirt_with_dry_grass
+ 
+ default:permafrost
+ default:permafrost_with_stones
+@@ -245,7 +243,7 @@
+ 	description = "Stone",
+ 	tiles = {"default_stone.png"},
+ 	groups = {cracky = 3, stone = 1},
+-	drop = "default:cobble",
++	drop = 'default:cobble',
+ 	legacy_mineral = true,
+ 	sounds = default.node_sound_stone_defaults(),
+ })
+@@ -289,7 +287,7 @@
+ 	description = "Desert Stone",
+ 	tiles = {"default_desert_stone.png"},
+ 	groups = {cracky = 3, stone = 1},
+-	drop = "default:desert_cobble",
++	drop = 'default:desert_cobble',
+ 	legacy_mineral = true,
+ 	sounds = default.node_sound_stone_defaults(),
+ })
+@@ -437,7 +435,7 @@
+ 		{name = "default_dirt.png^default_grass_side.png",
+ 			tileable_vertical = false}},
+ 	groups = {crumbly = 3, soil = 1, spreading_dirt_type = 1},
+-	drop = "default:dirt",
++	drop = 'default:dirt',
+ 	sounds = default.node_sound_dirt_defaults({
+ 		footstep = {name = "default_grass_footstep", gain = 0.25},
+ 	}),
+@@ -449,7 +447,7 @@
+ 		{name = "default_dirt.png^default_grass_side.png",
+ 			tileable_vertical = false}},
+ 	groups = {crumbly = 3, soil = 1, not_in_creative_inventory = 1},
+-	drop = "default:dirt",
++	drop = 'default:dirt',
+ 	sounds = default.node_sound_dirt_defaults({
+ 		footstep = {name = "default_grass_footstep", gain = 0.25},
+ 	}),
+@@ -461,8 +459,8 @@
+ 		"default_dirt.png",
+ 		{name = "default_dirt.png^default_dry_grass_side.png",
+ 			tileable_vertical = false}},
+-	groups = {crumbly = 3, soil = 1},
+-	drop = "default:dirt",
++	groups = {crumbly = 3, soil = 1, spreading_dirt_type = 1},
++	drop = 'default:dirt',
+ 	sounds = default.node_sound_dirt_defaults({
+ 		footstep = {name = "default_grass_footstep", gain = 0.4},
+ 	}),
+@@ -474,7 +472,7 @@
+ 		{name = "default_dirt.png^default_snow_side.png",
+ 			tileable_vertical = false}},
+ 	groups = {crumbly = 3, soil = 1, spreading_dirt_type = 1, snowy = 1},
+-	drop = "default:dirt",
++	drop = 'default:dirt',
+ 	sounds = default.node_sound_dirt_defaults({
+ 		footstep = {name = "default_snow_footstep", gain = 0.2},
+ 	}),
+@@ -510,25 +508,6 @@
+ 	}),
+ })
+ 
+-minetest.register_node("default:dry_dirt", {
+-	description = "Dry Dirt",
+-	tiles = {"default_dry_dirt.png"},
+-	groups = {crumbly = 3, soil = 1},
+-	sounds = default.node_sound_dirt_defaults(),
+-})
+-
+-minetest.register_node("default:dry_dirt_with_dry_grass", {
+-	description = "Dry Dirt with Dry Grass",
+-	tiles = {"default_dry_grass.png", "default_dry_dirt.png",
+-		{name = "default_dry_dirt.png^default_dry_grass_side.png",
+-			tileable_vertical = false}},
+-	groups = {crumbly = 3, soil = 1},
+-	drop = "default:dry_dirt",
+-	sounds = default.node_sound_dirt_defaults({
+-		footstep = {name = "default_grass_footstep", gain = 0.4},
+-	}),
+-})
+-
+ minetest.register_node("default:permafrost", {
+ 	description = "Permafrost",
+ 	tiles = {"default_permafrost.png"},
+@@ -586,8 +565,8 @@
+ 	drop = {
+ 		max_items = 1,
+ 		items = {
+-			{items = {"default:flint"}, rarity = 16},
+-			{items = {"default:gravel"}}
++			{items = {'default:flint'}, rarity = 16},
++			{items = {'default:gravel'}}
+ 		}
+ 	}
+ })
+@@ -596,7 +575,7 @@
+ 	description = "Clay",
+ 	tiles = {"default_clay.png"},
+ 	groups = {crumbly = 3},
+-	drop = "default:clay_lump 4",
++	drop = 'default:clay_lump 4',
+ 	sounds = default.node_sound_dirt_defaults(),
+ })
+ 
+@@ -743,13 +722,13 @@
+ 		items = {
+ 			{
+ 				-- player will get sapling with 1/20 chance
+-				items = {"default:sapling"},
++				items = {'default:sapling'},
+ 				rarity = 20,
+ 			},
+ 			{
+ 				-- player will get leaves only if he get no saplings,
+ 				-- this is because max_items is 1
+-				items = {"default:leaves"},
++				items = {'default:leaves'},
+ 			}
+ 		}
+ 	},
+@@ -845,8 +824,8 @@
+ 	drop = {
+ 		max_items = 1,
+ 		items = {
+-			{items = {"default:junglesapling"}, rarity = 20},
+-			{items = {"default:jungleleaves"}}
++			{items = {'default:junglesapling'}, rarity = 20},
++			{items = {'default:jungleleaves'}}
+ 		}
+ 	},
+ 	sounds = default.node_sound_leaves_defaults(),
+@@ -1170,7 +1149,7 @@
+ 	description = "Coal Ore",
+ 	tiles = {"default_stone.png^default_mineral_coal.png"},
+ 	groups = {cracky = 3},
+-	drop = "default:coal_lump",
++	drop = 'default:coal_lump',
+ 	sounds = default.node_sound_stone_defaults(),
+ })
+ 
+@@ -1187,7 +1166,7 @@
+ 	description = "Iron Ore",
+ 	tiles = {"default_stone.png^default_mineral_iron.png"},
+ 	groups = {cracky = 2},
+-	drop = "default:iron_lump",
++	drop = 'default:iron_lump',
+ 	sounds = default.node_sound_stone_defaults(),
+ })
+ 
+@@ -1204,7 +1183,7 @@
+ 	description = "Copper Ore",
+ 	tiles = {"default_stone.png^default_mineral_copper.png"},
+ 	groups = {cracky = 2},
+-	drop = "default:copper_lump",
++	drop = 'default:copper_lump',
+ 	sounds = default.node_sound_stone_defaults(),
+ })
+ 
+@@ -2618,6 +2597,63 @@
+ 
+ minetest.register_node("default:ladder_wood", {
+ 	description = "Wooden Ladder",
++	mesh = "default_ladder.b3d",
++	tiles = {"default_ladder_wood.png"},
++	paramtype = "light",
++	paramtype2 = "facedir",
++	sunlight_propagates=true,
++	walkable=true,
++	climbable=true,
++	is_ground_content=false,
++	groups = {choppy=1.5, oddly_breakable_by_hand=2.5, flammable=2},
++	drawtype="mesh",
++	collision_box = {
++		type="fixed",
++		fixed = {
++                         {-0.47, -0.5, 0.335, 0.47, 0.5, 0.5}
++                        }
++	},
++	selection_box = {
++		type="fixed",
++		fixed = {
++			{-0.47, -0.5, 0.335, 0.47, 0.5, 0.5}
++		}
++	},
++	legacy_wallmounted = true,
++	sounds = default.node_sound_wood_defaults()
++})
++
++minetest.register_node("default:ladder_steel", {
++	description = "Steel Ladder",
++	mesh = "default_ladder.b3d",
++	tiles = {"default_ladder_steel.png"},
++	paramtype = "light",
++	paramtype2 = "facedir",
++	sunlight_propagates=true,
++	walkable=true,
++	climbable=true,
++	is_ground_content=false,
++	groups = {choppy=1.5, oddly_breakable_by_hand=2.5, flammable=2},
++	drawtype="mesh",
++	collision_box = {
++		type="fixed",
++		fixed = {
++			{-0.47, -0.5, 0.335, 0.47, 0.5, 0.5}
++		}
++	},
++	selection_box = {
++		type="fixed",
++		fixed = {
++			{-0.47, -0.5, 0.335, 0.47, 0.5, 0.5}
++		}
++	},
++	legacy_wallmounted = true,
++	sounds = default.node_sound_metal_defaults()
++})
++
++
++--[[minetest.register_node("default:ladder_wood", {
++	description = "Wooden Ladder",
+ 	drawtype = "signlike",
+ 	tiles = {"default_ladder_wood.png"},
+ 	inventory_image = "default_ladder_wood.png",
+@@ -2659,7 +2695,7 @@
+ 	},
+ 	groups = {cracky = 2},
+ 	sounds = default.node_sound_metal_defaults(),
+-})
++})]]
+ 
+ default.register_fence("default:fence_wood", {
+ 	description = "Apple Wood Fence",
