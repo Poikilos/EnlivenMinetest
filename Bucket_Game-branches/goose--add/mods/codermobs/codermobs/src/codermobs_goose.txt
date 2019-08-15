@@ -1,0 +1,32 @@
+
+Goose
+Model & Texture based on "Flying Duck"
+CC BY-SA 4.0
+(c) 2016-2019 NPX team, Poikilos
+
+## Changes by Poikilos
+* added knees
+* made neck straight as is normal for birds in flight
+* removed wierd "arms" connecting wings to body (3 bones is the correct amount for a bird wing)
+* retextured, improved UV map
+* fixed up wing proportions (thanks for goose photo earlier, Slopsbucket)
+* changed old texture slightly to make it into a gosling. Texture transparency reduces wingspan. I baked it onto a new texture to translate it to the new UV map like the adult.
+* altered size to match real life (size*10 for minetest units)
+* bird legs fold the other way guys...
+* [ ] animate
+* [ ] eventually add more goose types (textures)
+
+## Developer Nodes
+### Deprecated
+animation = {
+    speed_normal = 25,
+    speed_run = 25,
+    stand_start = 0,
+    stand_end = 80,
+    walk_start = 160,
+    walk_end = 200,
+    run_start = 160,
+    run_end = 220,
+    punch_start = 110,
+    punch_end = 140,
+}
