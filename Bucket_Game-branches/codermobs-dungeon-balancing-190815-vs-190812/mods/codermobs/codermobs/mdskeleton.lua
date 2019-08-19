@@ -46,35 +46,35 @@ codermobs.adjust_param()
 
 mobs_param.core_param = {
     type = mobs_param.spawn_type    ,
-    makes_footstep_sound = true     ,
-
-    armor          = 100            ,
+    passive        = false          ,
     attack_animals = true           ,
     attack_type    = "dogfight"     ,
     damage         =   2            ,
-    floats         =   0            ,
-    hp_max         =  33            ,
-    hp_min         =   7            ,
-    stepheight     = 1.2            ,
-    jump_height    =   0            ,
-    jump           = false          ,
-    passive        = false          ,
-    reach          =   2            ,
-    run_velocity   =   3            ,
     view_range     =  15            ,
-    walk_velocity  =   1            ,
+    reach          =   2            ,
 
+    hp_min         =   7            ,
+    hp_max         =  33            ,
+    armor          = 100            ,
     fall_damage    =   0            ,
     lava_damage    =   0            ,
     light_damage   =   2            ,
     water_damage   =   0            ,
+    drops          = {
+        { name="default:apple", chance=2, min=1, max=3 } ,
+    } ,
 
     collisionbox   = { -0.40, -0.01, -0.40, 0.40, 1.80, 0.40 } ,
+    visual         = "mesh"                                    ,
     drawtype       = "front"                                   ,
     mesh           = msname .. ".x"                            ,
     textures       = { msname .. "_mesh.png" }                 ,
-    visual         = "mesh"                                    ,
-
+    stepheight     = 1.2            ,
+    jump_height    =   0            ,
+    jump           = false          ,
+    floats         =   0            ,
+    walk_velocity  =   1            ,
+    run_velocity   =   3            ,
     animation      = {
         stand_start  =   0 ,
         stand_end    =  23 ,
@@ -92,15 +92,12 @@ mobs_param.core_param = {
         speed_run    =  60 ,
     } ,
 
-    drops          = {
-        { name="default:apple", chance=2, min=1, max=3 } ,
-    } ,
-
     sounds         = {
         death  = msname .. "_death"  ,
         hurt   = msname .. "_hurt"   ,
         random = msname .. "_random" ,
     } ,
+    makes_footstep_sound = true     ,
 }
 
 -- ===================================================================

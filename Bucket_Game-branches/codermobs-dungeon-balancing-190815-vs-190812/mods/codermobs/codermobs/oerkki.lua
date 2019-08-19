@@ -43,52 +43,49 @@ codermobs.adjust_param()
 
 mobs_param.core_param = {
     type = mobs_param.spawn_type ,
-
-    armor          = 100         ,
+    passive        = false       ,
+    runaway        = true        ,
+    attack_animals = true        ,
     attack_type    = "dogfight"  ,
     damage         =   4         ,
-    attack_animals = true           ,
-    fear_height    =   4         ,
-    hp_max         =  34         ,
-    hp_min         =   8         ,
-    stepheight     = 1.2         ,
-    jump_height    =   0         ,
-    jump           = false       ,
-    passive        = false       ,
-    pathfinding    = true        ,
-    reach          =   2         ,
-    run_velocity   =   3         ,
     view_range     =  10         ,
-    walk_velocity  =   1         ,
-    floats         =   0         ,
-    runaway        = true        ,
-
-    lava_damage    =   4         ,
-    light_damage   =   1         ,
-    water_damage   =   2         ,
-
+    reach          =   2         ,
     -- This mob eats torches
     replace_offset =  -1                    ,
     replace_rate   =   5                    ,
     replace_what   = { "default:torch" }    ,
     replace_with   = "air"                  ,
 
-    makes_footstep_sound = false ,
-
+    hp_min         =   8         ,
+    hp_max         =  34         ,
+    armor          = 100         ,
+    lava_damage    =   4         ,
+    light_damage   =   1         ,
+    water_damage   =   2         ,
+    immune_to = {
+        { "default:sword_wood" ,   0 } , -- No damage
+        { "default:gold_lump"  , -10 } , -- Heals by 10 points
+    },
     drops = {
         { name = "default:obsidian" ,
           chance = 3, min = 1, max = 2 } ,
     },
 
-    immune_to = {
-        { "default:sword_wood" ,   0 } , -- No damage
-        { "default:gold_lump"  , -10 } , -- Heals by 10 points
+    collisionbox = { -0.4, -1, -0.4, 0.4, 0.9, 0.4 }    ,
+    visual       = "mesh"                               ,
+    mesh         = "codermobs_oerkki.b3d"               ,
+    textures = {
+        { "codermobs_oerkki1.png" } ,
+        { "codermobs_oerkki2.png" } ,
     },
-
-    sounds = {
-        random = "codermobs_oerkki" ,
-    },
-
+    pathfinding    = true        ,
+    stepheight     = 1.2         ,
+    fear_height    =   4         ,
+    jump_height    =   0         ,
+    jump           = false       ,
+    floats         =   0         ,
+    walk_velocity  =   1         ,
+    run_velocity   =   3         ,
     animation = {
         stand_start  =  0 ,
         stand_end    = 23 ,
@@ -102,14 +99,10 @@ mobs_param.core_param = {
         speed_run    = 15 ,
     },
 
-    textures = {
-        { "codermobs_oerkki1.png" } ,
-        { "codermobs_oerkki2.png" } ,
+    sounds = {
+        random = "codermobs_oerkki" ,
     },
-
-    collisionbox = { -0.4, -1, -0.4, 0.4, 0.9, 0.4 }    ,
-    mesh         = "codermobs_oerkki.b3d"               ,
-    visual       = "mesh"                               ,
+    makes_footstep_sound = false ,
 }
 
 -- ===================================================================
