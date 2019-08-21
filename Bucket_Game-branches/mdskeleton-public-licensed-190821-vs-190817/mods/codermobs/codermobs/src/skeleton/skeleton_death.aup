@@ -1,0 +1,49 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="skeleton_death_data" version="1.3.0" audacityversion="2.3.2" sel0="0.0000000000" sel1="0.0000000000" vpos="0" h="0.0000000000" zoom="172.2656250000" rate="44100.0" snapto="off" selectionformat="hh:mm:ss + milliseconds" frequencyformat="Hz" bandwidthformat="octaves">
+	<tags>
+		<tag name="YEAR" value="2019"/>
+		<tag name="ARTIST" value="poikilos"/>
+		<tag name="COMMENTS" value="CC BY-SA 4.0"/>
+	</tags>
+	<wavetrack name="bones1 pencils bathroom Audio recording 2019-08-16 12-55-43" channel="0" linked="1" mute="0" solo="0" height="150" minimized="0" isSelected="1" rate="44100" gain="0.501187" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="44800">
+				<waveblock start="0">
+					<simpleblockfile filename="eff1f589.au" len="44800" min="-0.162407" max="0.166947" rms="0.018423"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="bones1 pencils bathroom Audio recording 2019-08-16 12-55-43" channel="1" linked="0" mute="0" solo="0" height="150" minimized="0" isSelected="1" rate="44100" gain="0.501187" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="44800">
+				<waveblock start="0">
+					<simpleblockfile filename="eff1fbc4.au" len="44800" min="-0.189546" max="0.180102" rms="0.020638"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="bones1 pencils bathroom Audio recording 2019-08-16 12-55-43" channel="0" linked="1" mute="0" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="1.0" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="44800">
+				<waveblock start="0">
+					<simpleblockfile filename="eff1fce9.au" len="44800" min="-0.12807" max="0.168764" rms="0.020955"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="bones1 pencils bathroom Audio recording 2019-08-16 12-55-43" channel="1" linked="0" mute="0" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="1.0" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="44800">
+				<waveblock start="0">
+					<simpleblockfile filename="eff1f596.au" len="44800" min="-0.12807" max="0.168764" rms="0.020955"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+</project>

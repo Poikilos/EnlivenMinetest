@@ -66,7 +66,8 @@ mobs_param.core_param = {
 
     collisionbox   = { -0.40, -0.01, -0.40, 0.40, 1.80, 0.40 } ,
     visual         = "mesh"                                    ,
-    drawtype       = "front"                                   ,
+    -- drawtype       = "front"                                   ,
+    backface_culling = false,
     mesh           = msname .. ".x"                            ,
     textures       = { msname .. "_mesh.png" }                 ,
     stepheight     = 1.2            ,
@@ -96,6 +97,9 @@ mobs_param.core_param = {
         death  = msname .. "_death"  ,
         hurt   = msname .. "_hurt"   ,
         random = msname .. "_random" ,
+        war_cry = msname .. "_war_cry",
+        attack = msname .. "_attack",
+        jump = msname .. "_jump",
     } ,
     makes_footstep_sound = true     ,
 }

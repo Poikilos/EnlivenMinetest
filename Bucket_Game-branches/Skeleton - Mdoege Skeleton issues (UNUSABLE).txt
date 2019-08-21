@@ -1,0 +1,27 @@
+## Texture is "familiar"
+- If you change it to half res, it is nearly exactly the same as
+  the Minecraft skeleton's texture. There was no attempt to hide the
+  pixel-perfect similarity in the outline, eyes, or mouth. A row of
+  light pixels changes the shape of the nose, and the resolutions is
+  doubled and noise is added. The outline of the major features and
+  the alpha outline match the actual Minecraft texture almost exactly,
+  as if the Minecraft one was scaled to 2x with nearest neighbor scaling
+  and as a basis. See:
+  - <https://www.curseforge.com/minecraft/mc-mods/good-skeletons-dont-strafe>
+
+## Sounds are "familiar"
+- "death" may be original, but sounds awefully similar to other sounds
+  at higher speeds with equalization, such as hurt1 from Minecraft.
+- "random" is "say1" (exactly) from Minecraft.
+- "hurt" sounds like a processed version of "hurt1" from Minecraft.
+
+### Sources not Cited by Mdoege
+- [Minecraft - Skeleton sounds](https://www.youtube.com/watch?v=PQVIToqJpJ4)
+- MSP 1.14.zip: A complete collection of sounds from Minecraft 1.14, in
+  the original folder structure, is from
+  <https://www.mediafire.com/file/2x1d234nxmdl746/MSP_1.14.zip/file>
+  via <https://www.mineimatorforums.com/index.php?/topic/46037-minecraft-sound-pack-%E2%80%94-114/>
+  (extracted by [Voxy](https://www.mineimatorforums.com/index.php?/profile/20285-voxy/)
+  and uploaded May 4, 2019).
+  They are structured such as to be used easily with Mine-imator.
+
