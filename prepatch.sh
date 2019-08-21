@@ -1,5 +1,4 @@
 #!/bin/bash
-# such as meld /home/owner/minetest/games/ENLIVEN/ /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/
 me=`basename "$0"`
 
 customDie() {
@@ -139,6 +138,10 @@ if [ ! -d "$patches" ]; then
 fi
 licenses="license.txt LICENSE LICENSE.txt oldcoder.txt LICENSE.md license.md"
 usage() {
+    echo
+    echo
+    echo "Usage:"
+    echo
     echo "$me <file_path> <new-fake-branch-name>"
     echo "* will be copied to $project1 and $project2"
     echo

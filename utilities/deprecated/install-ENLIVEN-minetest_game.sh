@@ -97,7 +97,8 @@ if [ ! -f "`command -v minetestmapper`" ]; then
             fi
         fi
     fi
-    pushd ~/Downloads
+    prevPath="`pwd`"
+    cd ~/Downloads
     if [ -d minetestmapper ]; then
         rm -Rf minetestmapper
     fi
@@ -111,7 +112,7 @@ if [ ! -f "`command -v minetestmapper`" ]; then
     else
         echo "FAILED to compile minetestmapper--python version will be used"
     fi
-    popd
+    cd "$prevPath"
 fi
 
 if [ -d /tmp/local_mts_user ]; then
@@ -126,6 +127,11 @@ echo $USER > /tmp/local_mts_user
 #    # workaround bug in earlier version of installer
 #    sudo chown `cat /tmp/local_mts_user` "$MT_MYWORLD_DIR/world.mt.1st"
 #fi
+
+if [ -z "$MT_MYGAME_DIR" ]; then
+    echo "You must have minetestenv.rc to provide MT_MYGAME_DIR and other variables."
+    exit 1
+fi
 
 # BACKUP world.mt:
 if [ ! -d "$MT_MYGAME_DIR" ]; then
@@ -558,6 +564,10 @@ add_git_mod technic technic https://github.com/minetest-mods/technic.git
 
 add_git_mod technic_armor technic_armor https://github.com/stujones11/technic_armor.git
 # NOTE: load_mod is not a thing for subgames (all mods in subgame are loaded if subgame is loaded)
+
+# subterrane now requires mapgen_helper:
+add_git_mod mapgen_helper mapgen_helper https://github.com/minetest-mods/mapgen_helper.git
+
 #add_git_mod caverealms minetest-caverealms https://github.com/HeroOfTheWinds/minetest-caverealms
 # FaceDeer's caverealms REQUIRES subterrane:
 add_git_mod subterrane subterrane https://github.com/minetest-mods/subterrane.git
@@ -1098,5 +1108,9 @@ elif [ -f "`command -v minetest`" ]; then
 else
     echo "WARNING: neither minetestserver nor minetest is in the system path"
 fi
+
+# if [ ! -z "`cat "$err_txt"`" ]; then
+cat "$err_txt"
+# fi
 echo
 echo
