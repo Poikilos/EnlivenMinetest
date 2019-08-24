@@ -1,0 +1,225 @@
+diff -ru /home/owner/git/EnlivenMinetest/Bucket_Game-base/codermobs-dungeon-balancing/mods/codermobs/codermobs/mdskeleton.lua /home/owner/git/EnlivenMinetest/Bucket_Game-branches/codermobs-dungeon-balancing-190815-vs-190812/mods/codermobs/codermobs/mdskeleton.lua
+--- /home/owner/git/EnlivenMinetest/Bucket_Game-base/codermobs-dungeon-balancing/mods/codermobs/codermobs/mdskeleton.lua	2019-08-15 15:27:00.692217112 -0400
++++ /home/owner/git/EnlivenMinetest/Bucket_Game-branches/codermobs-dungeon-balancing-190815-vs-190812/mods/codermobs/codermobs/mdskeleton.lua	2019-08-21 16:48:42.064846678 -0400
+@@ -20,15 +20,17 @@
+     aoc          =     1        ,
+     day_mode     = false        ,
+     min_light    =     0        ,
+-    max_light    =     7        ,
++    max_light    =     3        ,
+     min_height   = -1000        ,
+     max_height   =   500        ,
+-    spawn_chance =  20000        ,
++    spawn_chance =    36        ,
+     spawn_type   = "monster"    ,
+ 
+     spawn_nodes  = {
+-        "default:dirt"             ,
+-        "default:dirt_with_grass"  ,
++        "default:cobble"           ,
++        "default:mossycobble"      ,
++        "default:desert_stone"     ,
++        "default:sandstonebrick"   ,
+         "ethereal:gray_dirt"       ,
+     } ,
+ 
+@@ -44,35 +46,36 @@
+ 
+ mobs_param.core_param = {
+     type = mobs_param.spawn_type    ,
+-    makes_footstep_sound = true     ,
+-
+-    armor          = 100            ,
++    passive        = false          ,
+     attack_animals = true           ,
+     attack_type    = "dogfight"     ,
+     damage         =   2            ,
+-    floats         =   0            ,
+-    hp_max         =  33            ,
+-    hp_min         =   7            ,
+-    stepheight     = 1.2            ,
+-    jump_height    =   0            ,
+-    jump           = false          ,
+-    passive        = false          ,
+-    reach          =   2            ,
+-    run_velocity   =   3            ,
+     view_range     =  15            ,
+-    walk_velocity  =   1            ,
++    reach          =   2            ,
+ 
++    hp_min         =   7            ,
++    hp_max         =  33            ,
++    armor          = 100            ,
+     fall_damage    =   0            ,
+     lava_damage    =   0            ,
+     light_damage   =   2            ,
+     water_damage   =   0            ,
++    drops          = {
++        { name="default:apple", chance=2, min=1, max=3 } ,
++    } ,
+ 
+     collisionbox   = { -0.40, -0.01, -0.40, 0.40, 1.80, 0.40 } ,
+-    drawtype       = "front"                                   ,
++    visual         = "mesh"                                    ,
++    -- drawtype       = "front"                                   ,
++    backface_culling = false,
+     mesh           = msname .. ".x"                            ,
+     textures       = { msname .. "_mesh.png" }                 ,
+-    visual         = "mesh"                                    ,
+-
++    stepheight     = 1.2            ,
++    jump_height    =   0            ,
++    jump           = false          ,
++    floats         =   0            ,
++    walk_velocity  =   1            ,
++    run_velocity   =   3            ,
+     animation      = {
+         stand_start  =   0 ,
+         stand_end    =  23 ,
+@@ -90,15 +93,15 @@
+         speed_run    =  60 ,
+     } ,
+ 
+-    drops          = {
+-        { name="default:apple", chance=2, min=1, max=3 } ,
+-    } ,
+-
+     sounds         = {
+         death  = msname .. "_death"  ,
+         hurt   = msname .. "_hurt"   ,
+         random = msname .. "_random" ,
++        war_cry = msname .. "_war_cry",
++        attack = msname .. "_attack",
++        jump = msname .. "_jump",
+     } ,
++    makes_footstep_sound = true     ,
+ }
+ 
+ -- ===================================================================
+diff -ru /home/owner/git/EnlivenMinetest/Bucket_Game-base/codermobs-dungeon-balancing/mods/codermobs/codermobs/oerkki.lua /home/owner/git/EnlivenMinetest/Bucket_Game-branches/codermobs-dungeon-balancing-190815-vs-190812/mods/codermobs/codermobs/oerkki.lua
+--- /home/owner/git/EnlivenMinetest/Bucket_Game-base/codermobs-dungeon-balancing/mods/codermobs/codermobs/oerkki.lua	2019-08-15 15:58:29.858007876 -0400
++++ /home/owner/git/EnlivenMinetest/Bucket_Game-branches/codermobs-dungeon-balancing-190815-vs-190812/mods/codermobs/codermobs/oerkki.lua	2019-08-19 15:06:08.271182926 -0400
+@@ -15,16 +15,20 @@
+     obj_name     = obj_name     ,
+ 
+     aoc          =      1       ,
+-    day_mode     = true         ,
++    day_mode     =  false       ,
+     min_light    =      0       ,
+     max_light    =      7       ,
+     min_height   = -31000       ,
+-    max_height   =    -10       ,
+-    spawn_chance =  25000       ,
++    max_height   =    -51       ,
++    spawn_chance =    288       ,
+     spawn_type   = "monster"    ,
+ 
+     spawn_nodes  = {
+-        "default:stone"                 ,
++        -- "default:stone"         ,
++        "default:cobble"        ,
++        "default:desert_stone"  ,
++        "default:mossycobble"   ,
++        "default:sandstonebrick",
+     } ,
+ 
+     add_egg   = true                    ,
+@@ -39,52 +43,49 @@
+ 
+ mobs_param.core_param = {
+     type = mobs_param.spawn_type ,
+-
+-    armor          = 100         ,
++    passive        = false       ,
++    runaway        = true        ,
++    attack_animals = true        ,
+     attack_type    = "dogfight"  ,
+     damage         =   4         ,
+-    attack_animals = true           ,
+-    fear_height    =   4         ,
+-    hp_max         =  34         ,
+-    hp_min         =   8         ,
+-    stepheight     = 1.2         ,
+-    jump_height    =   0         ,
+-    jump           = false       ,
+-    passive        = false       ,
+-    pathfinding    = true        ,
+-    reach          =   2         ,
+-    run_velocity   =   3         ,
+     view_range     =  10         ,
+-    walk_velocity  =   1         ,
+-    floats         =   0         ,
+-    runaway        = true        ,
+-
+-    lava_damage    =   4         ,
+-    light_damage   =   1         ,
+-    water_damage   =   2         ,
+-
++    reach          =   2         ,
+     -- This mob eats torches
+     replace_offset =  -1                    ,
+     replace_rate   =   5                    ,
+     replace_what   = { "default:torch" }    ,
+     replace_with   = "air"                  ,
+ 
+-    makes_footstep_sound = false ,
+-
+-    drops = {
+-        { name = "default:obsidian" ,
+-          chance = 3, min = 1, max = 2 } ,
+-    },
+-
++    hp_min         =   8         ,
++    hp_max         =  34         ,
++    armor          = 100         ,
++    lava_damage    =   4         ,
++    light_damage   =   1         ,
++    water_damage   =   2         ,
+     immune_to = {
+         { "default:sword_wood" ,   0 } , -- No damage
+         { "default:gold_lump"  , -10 } , -- Heals by 10 points
+     },
+-
+-    sounds = {
+-        random = "codermobs_oerkki" ,
++    drops = {
++        { name = "default:obsidian" ,
++          chance = 3, min = 1, max = 2 } ,
+     },
+ 
++    collisionbox = { -0.4, -1, -0.4, 0.4, 0.9, 0.4 }    ,
++    visual       = "mesh"                               ,
++    mesh         = "codermobs_oerkki.b3d"               ,
++    textures = {
++        { "codermobs_oerkki1.png" } ,
++        { "codermobs_oerkki2.png" } ,
++    },
++    pathfinding    = true        ,
++    stepheight     = 1.2         ,
++    fear_height    =   4         ,
++    jump_height    =   0         ,
++    jump           = false       ,
++    floats         =   0         ,
++    walk_velocity  =   1         ,
++    run_velocity   =   3         ,
+     animation = {
+         stand_start  =  0 ,
+         stand_end    = 23 ,
+@@ -98,14 +99,10 @@
+         speed_run    = 15 ,
+     },
+ 
+-    textures = {
+-        { "codermobs_oerkki1.png" } ,
+-        { "codermobs_oerkki2.png" } ,
++    sounds = {
++        random = "codermobs_oerkki" ,
+     },
+-
+-    collisionbox = { -0.4, -1, -0.4, 0.4, 0.9, 0.4 }    ,
+-    mesh         = "codermobs_oerkki.b3d"               ,
+-    visual       = "mesh"                               ,
++    makes_footstep_sound = false ,
+ }
+ 
+ -- ===================================================================
