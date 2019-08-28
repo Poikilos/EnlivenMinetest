@@ -1,0 +1,2 @@
+codermobs_skeleton model & texture
+(c) 2019 Poikilos CC BY-SA 4.0
