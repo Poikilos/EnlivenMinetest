@@ -1,0 +1,20 @@
+Name:     stairs
+Source:   Modified upstream mod (do not replace)
+License:  See "license.txt"
+
+----------------------------------------------------------------------
+
+1. This is a copy of the standard MT "stairs" mod from circa mid-2016.
+It should not, ever, be  synced with upstream or placing and/or screw-
+driver may not work correctly.
+
+As a related note,  the following upstream commit in  "minetest_game",
+which applies to "stairs", is bad and shouldn't be used:
+
+e6d0d775e3533b7b91b292e13c800b9737e057fd
+
+----------------------------------------------------------------------
+
+2. Changes include:
+
+2a. Added the files "00README" and "oldcoder.txt" (this file).

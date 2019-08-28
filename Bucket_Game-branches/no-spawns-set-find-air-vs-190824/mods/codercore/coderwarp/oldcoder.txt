@@ -1,0 +1,19 @@
+Name:    coderwarp
+Source:  New mod incorporating old code
+License: WTFPL
+
+----------------------------------------------------------------------
+
+This mod will need changes to the world ".conf" file and to "init.lua"
+for each world.
+
+By default,  dynamic spawn management is used.  To use a single  fixed
+spawnpoint,  add  two settings  of the  following  form  to the  world
+".conf" file:
+
+      disable_multispawn = true
+      static_spawn_point = 10, 10, 5
+
+The  dynamic spawn management code is  similar to  code by Pitriss and
+Octactian but  is believed to have evolved independently and to be un-
+der the WTFPL.
