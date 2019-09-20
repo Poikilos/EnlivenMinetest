@@ -1,4 +1,21 @@
 # Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a
+Changelog](https://keepachangelog.com/en/1.0.0/).
+
+
+## [git] - 2019-09-20
+### Added
+- generate_Empty_at_each_vertex.py
+
+### Changed
+- rename generate_collision_box_lua.py to generate_lua_collisionbox.py
+- generate_lua_collisionbox.py uses the world transform of the
+  object instead of object location, so it accounts for rotation and
+  scale now.
+- store Blender-specific py files in utilities/blender
+
 
 ## [git] - 2019-05-29
 ### Added
@@ -22,6 +39,7 @@
 * overrides for world.conf and world.mt (only if you have the directory
   ~/.minetest/worlds/CenterOfTheSun)
 * (Getting Started page in web app) areas (self-protection) instructions
+
 
 ## [git] - 2018-03-25
 **This is the first Changelog entry for the new Bucket_Game-based
