@@ -56,8 +56,9 @@ else:
     # See https://blender.stackexchange.com/questions/6139/how-to-iterate-through-all-vertices-of-an-object-that-contains-multiple-meshes
     mesh = ob1.data
     # print("mesh:" + str(mesh))
-    # print("hasattr(mesh, 'vertices'):" + str(hasattr(mesh, 'vertices')))]
-    xMin = None
+    # print("hasattr(mesh, 'vertices'):" + str(hasattr(mesh,
+                                                     # 'vertices')))
+    xMin = None  # Define so None check is possible later.
     if (mesh is not None) and (not hasattr(mesh, 'vertices')):
         print("--can't calculate collisionbox for skeleton")
     elif mesh is not None:

@@ -29,7 +29,7 @@ class MessageBox(bpy.types.Operator):
 
     def execute(self, context):
         self.report({'INFO'}, self.message)
-        print(self.message)
+        # print(self.message)
         return {'FINISHED'}
 
     def invoke(self, context, event):
@@ -69,14 +69,14 @@ else:
     #     yMax -= yMin
     #     yMin = 0.0
 
-    print("    collisionbox = {{{:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f},"
-          " {:.2f}}}".format(xMin, yMin, zMin, xMax, yMax, zMax))
+    # print("    collisionbox = {{{:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f},"
+          # " {:.2f}}}".format(xMin, yMin, zMin, xMax, yMax, zMax))
 
     # See https://blender.stackexchange.com/questions/6139/how-to-iterate-through-all-vertices-of-an-object-that-contains-multiple-meshes
     # print("mesh:" + str(mesh))
     # print("hasattr(mesh, 'vertices'):"
           # + str(hasattr(mesh, 'vertices')))]
-    xMin = None
+    xMin = None  # Define so None check is possible later.
     if mesh is not None:
         xMin = None
         yMin = None
@@ -113,31 +113,32 @@ else:
         # Use ob1.matrix_world (above) instead of incrementing
         # ob1.location.x, y, and z
 
-        newNamePrefix = "Empty.EDGE." + ob1.name
-        i = 0
-        wm = ob1.matrix_world
-        for vert in mesh.vertices:
-            newName = newNamePrefix + "." + str(i)
-            try:
-                loc = mat @ vert.co  # NOT transitive
-            except TypeError:
-                loc = mat * vert.co  # Blender <2.8
-            isFar = False
-            if loc.x == xMax or loc.y == yMax or loc.z == zMax:
-                isFar = True
-            elif loc.x == xMin or loc.y == yMin or loc.z == zMin:
-                isFar = True
-            if isFar:
-                pass
-                # result = bpy.ops.object.add(type='EMPTY', radius=.25,
-                                            # location=loc);
-                # NOTE: result is merely {'FINISHED'}
-                # print("{:.2f}, {:.2f}, {:.2f}".format(loc.x, loc.y,
-                                                      # loc.z))
+        # newNamePrefix = "Empty.EDGE." + ob1.name
+        # i = 0
+        # wm = ob1.matrix_world
+        # for vert in mesh.vertices:
+            # newName = newNamePrefix + "." + str(i)
+            # # This matrix multiplication is NOT transitive.
+            # try:
+                # loc = wm @ vert.co
+            # except TypeError:
+                # loc = wm * vert.co  # Blender <2.8
+            # isFar = False
+            # if loc.x == xMax or loc.y == yMax or loc.z == zMax:
+                # isFar = True
+            # elif loc.x == xMin or loc.y == yMin or loc.z == zMin:
+                # isFar = True
+            # if isFar:
+                # pass
+                # # result = bpy.ops.object.add(type='EMPTY', radius=.25,
+                                            # # location=loc);
+                # # NOTE: result is merely {'FINISHED'}
+                # # print("{:.2f}, {:.2f}, {:.2f}".format(loc.x, loc.y,
+                                                      # # loc.z))
 
-                bpy.ops.object.add_named(name=newName, type='EMPTY',
-                                         radius=.25, location=loc)
-            i += 1
+                # bpy.ops.object.add_named(name=newName, type='EMPTY',
+                                         # radius=.25, location=loc)
+            # i += 1
     else:
         extents1 = ob1.scale.copy()
         # Object is an empty, so scale up for Minetest
@@ -175,7 +176,10 @@ else:
         msg = ("    collisionbox = {{{:.2f}, {:.2f}, {:.2f}, {:.2f},"
                " {:.2f}, {:.2f}}}".format(xMin, yMin, zMin, xMax, yMax,
                                           zMax))
-        msg += msgSuffix
+        if len(msgSuffix) > 0:
+            msgSuffix = "  -- " + msgSuffix
+        bpy.context.window_manager.clipboard = msg + msgSuffix
+        msg += " --copied to clipboard"
         # if enable_minetest:
             # msg += "  -- *10"
     print(msg)
