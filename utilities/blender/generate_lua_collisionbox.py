@@ -1,5 +1,26 @@
-print("How to use: paste into a Blender Text Editor panel, select"
-      " object, Run Script")
+#!/usr/bin/env python
+
+# collisionbox Lua generator
+# 1. Select a mob mesh or an Empty
+# 2. Press the "Run Script" button below
+# - The script copies the collisionbox the the clipboard.
+# - An 'Empty' with the object's name will appear,
+#   which visually represents the collisionbox
+#   (which MUST be symmetrical on horizontal axes and
+#   centered at 0,0,0 for Minetest, since
+#   collision boxes to not turn).
+# 3. To adjust, scale the Empty.collisionbox.* object
+#    in Blender then repeat steps 1-2. To keep the Empty
+#    symmetrical for Minetest, scale ONLY with one
+#    of the following hotkey sequences (with
+#    the mouse pointer in the 3D View):
+#    - 's'
+#    - 's', 'z'
+#    - 's', "shift z"
+
+print("How to use: Paste this script into a Blender"
+      " Text Editor panel, select an object,"
+      " press the 'Run Script' button")
 
 y_up = True
 enable_minetest = True
