@@ -1,185 +1,3 @@
-#!/bin/bash
-
-#two-line version:
-# if [! -f CMakeLists.txt ]; then git clone https://github.com/MultiCraft/MultiCraft.git && cd MultiCraft || exit 1; fi
-# cmake . -DOpenGL_GL_PREFERENCE=GLVND && make
-
-me="$0"
-RAN_FROM="`pwd`"
-customDie() {
-    echo
-    echo
-    echo "$me ERROR:"
-    echo $1
-    echo
-    exit 1
-}
-usage() {
-    cat <<END
-
-
-
-    **************** $0 ****************
-
-    Options:
-    --what    (must be followed by a space)
-              Specify building a directory other than
-              $BUILD_WHAT_DEFAULT.
-
-    1.) Build:
-      $0
-    2.)
-      $0 --install
-
-    If you want to install an existing binary version,
-    Run this script from a directory that contains a
-    $BUILD_WHAT_DEFAULT directory (If you want to use this location,
-    '$srcRepo' would have to exist, otherwise specify an existing
-    directory in $RAN_FROM
-    after the "--what" option).
-
-
-END
-}
-
-usageDie() {
-    usage
-    customDie $1
-}
-
-dieIfOnline() {
-    echo
-    echo
-    if [ "@$OFFLINE" = "@false" ]; then
-        echo "$me ERROR:"
-        echo $1
-        echo
-        exit 1
-    else
-        echo "$me WARNING:"
-        echo $1
-        echo
-    fi
-}
-
-if [ -z "$PREFIX" ]; then
-    PREFIX=~/.local
-fi
-
-OFFLINE=false
-INSTALL=false
-UNINSTALL=false
-CLEAN=false
-GET_WHAT=false
-USE_WHAT=false
-for var in "$@"
-do
-    if [ "@$var" = "@--offline" ]; then
-        OFFLINE=true
-    elif [ "@$var" = "@--uninstall" ]; then
-        UNINSTALL=true
-    elif [ "@$var" = "@--install" ]; then
-        INSTALL=true
-    elif [ "@$var" = "@--clean" ]; then
-        CLEAN=true
-    elif [ "@$var" = "@--what" ]; then
-        GET_WHAT=true
-    elif [ "@$GET_WHAT" = "@true" ]; then
-        if [ -d "$var" ]; then
-            BUILD_WHAT="$var"
-            USE_WHAT=true
-        else
-            customDie "'$var' is not a directory."
-        fi
-    else
-        customDie "$var is not a valid option."
-    fi
-done
-
-if [ "@$USE_WHAT" = "@true" ]; then
-    OFFLINE=true
-fi
-
-BUILD_WHAT_DEFAULT=MultiCraft
-
-# This is NOT a mistake (MultiCraft is the git username)...
-GIT_REPOS_DIR="$HOME/Downloads/git/MultiCraft"
-# ...so srcRepo should be MultiCraft/MultiCraft in this case
-# (unless user ran script from a directory containing their own
-# MultiCraft directory).
-
-if [ -z "$BUILD_WHAT" ]; then
-    BUILD_WHAT="$BUILD_WHAT_DEFAULT"
-fi
-srcRepo="`pwd`/$BUILD_WHAT"
-if [ ! -d "$srcRepo" ]; then
-    srcRepo="$GIT_REPOS_DIR/$BUILD_WHAT"
-    if [ ! -d "$GIT_REPOS_DIR" ]; then
-        mkdir -p "$GIT_REPOS_DIR" || customDie echo "mkdir -p '$GIT_REPOS_DIR' FAILED."
-    fi
-fi
-echo "* Using $srcRepo..."
-if [ ! -d /tmp/MultiCraft ]; then
-    mkdir /tmp/MultiCraft || customDie echo "mkdir -p '/tmp/MultiCraft' FAILED."
-fi
-artifactsPath=/tmp/MultiCraft/src.txt
-cat > $artifactsPath <<END
-.git
-.clang-format
-.gitattributes
-.gitignore
-.gitmodules
-.mailmap
-.travis.yml
-CMakeLists.txt
-build
-cmake
-src
-CMakeFiles
-CPackConfig.cmake
-CPackSourceConfig.cmake
-CMakeDoxyfile.in
-CMakeDoxygenDefaults.cmake
-CMakeCache.txt
-Makefile
-cmake_install.cmake
-END
-
-
-
-
-
-srcBin=$srcRepo/bin
-srcExe=$srcBin/MultiCraft
-iconCaption=MultiCraft
-dstShortcuts=$PREFIX/share/applications
-dstShortcut=$dstShortcuts/MultiCraft.desktop
-#dstPrograms="$HOME"
-#DESTINATION="$dstPrograms/MultiCraft"
-DESTINATION="$HOME/MultiCraft"
-dstIcon=minetest
-#tryIcon="$HOME/minetest/misc/minetest-xorg-icon-128.png"
-tryIcon="$DESTINATION/misc/MultiCraft-xorg-icon-128.png"
-dstBin=$DESTINATION/bin
-dstExe=$dstBin/MultiCraft
-
-if [ "@$CLEAN" = "@true" ]; then
-    echo "ERROR: --clean is not implemented. See"
-    echo "EnlivenMinetest/utilities/MultiCraft/manifests/cmake+make+bin.txt"
-    echo "to clean manually."
-    exit 1
-fi
-
-if [ "@$UNINSTALL" = "@true" ]; then
-    echo
-    prevDir="`pwd`"
-    echo "Uninstalling $DESTINATION..."
-    cd "$DESTINATION" || customDie echo "cd $DESTINATION FAILED."
-    if [ ! -d /tmp/MultiCraft ]; then
-        mkdir /tmp/MultiCraft || customDie echo "mkdir -p '/tmp/MultiCraft' FAILED."
-    fi
-    manifestPath=/tmp/MultiCraft/manifest.txt
-cat > $manifestPath <<END
 games/default/files/bluestone/mesecons_pistons/textures/mesecons_piston_pusher_front_sticky.png
 games/default/files/bluestone/mesecons_pistons/textures/mesecons_piston_pusher_front.png
 games/default/files/bluestone/mesecons_noteblock/sounds/mesecons_noteblock_litecrash.ogg
@@ -222,6 +40,7 @@ games/default/files/farming/farming_addons/textures/farming_addons_cocoa_side_1.
 games/default/files/bluestone/mesecons_walllever/textures/jeija_wall_lever_back.png
 games/default/files/bluestone/mesecons_noteblock/sounds/mesecons_noteblock_kick.ogg
 games/default/files/bluestone/bluestone_torch/textures/bluestone_torch_animated.png
+games/default/.git/objects/pack/pack-7696377696672fc494af32f918c3196bfbb24314.pack
 games/default/files/farming/farming_addons/textures/farming_addons_pumpkin_top.png
 games/default/files/farming/farming_addons/textures/farming_addons_potato_seed.png
 games/default/files/farming/farming_addons/textures/farming_addons_cocoa_top_3.png
@@ -230,6 +49,11 @@ games/default/files/farming/farming_addons/textures/farming_addons_cocoa_top_1.p
 games/default/files/farming/farming_addons/textures/farming_addons_carrot_seed.png
 games/default/files/bluestone/mesecons_walllever/textures/jeija_wall_lever_top.png
 games/default/files/bluestone/mesecons_pistons/textures/mesecons_piston_bottom.png
+build/iOS/MultiCraft/MultiCraft/Assets.xcassets/AppIcon.appiconset/AppIcon-180.png
+build/iOS/MultiCraft/MultiCraft/Assets.xcassets/AppIcon.appiconset/AppIcon-167.png
+build/iOS/MultiCraft/MultiCraft/Assets.xcassets/AppIcon.appiconset/AppIcon-152.png
+build/iOS/MultiCraft/MultiCraft/Assets.xcassets/AppIcon.appiconset/AppIcon-120.png
+games/default/.git/objects/pack/pack-7696377696672fc494af32f918c3196bfbb24314.idx
 games/default/files/farming/farming_addons/textures/farming_addons_melon_seed.png
 games/default/files/farming/farming_addons/textures/farming_addons_corn_baked.png
 games/default/files/farming/farming_addons/textures/farming_addons_cocoa_bean.png
@@ -242,6 +66,7 @@ games/default/files/bluestone/mesecons_noteblock/sounds/mesecons_noteblock_d2.og
 games/default/files/bluestone/mesecons_noteblock/sounds/mesecons_noteblock_c2.ogg
 games/default/files/bluestone/mesecons_noteblock/sounds/mesecons_noteblock_b2.ogg
 games/default/files/bluestone/mesecons_noteblock/sounds/mesecons_noteblock_a2.ogg
+build/iOS/MultiCraft/MultiCraft/Assets.xcassets/AppIcon.appiconset/AppIcon-76.png
 games/default/files/farming/farming_addons/textures/farming_addons_pumpkin_8.png
 games/default/files/farming/farming_addons/textures/farming_addons_pumpkin_7.png
 games/default/files/farming/farming_addons/textures/farming_addons_pumpkin_6.png
@@ -264,6 +89,7 @@ games/default/files/bluestone/mesecons_noteblock/sounds/mesecons_noteblock_c.ogg
 games/default/files/bluestone/mesecons_noteblock/sounds/mesecons_noteblock_b.ogg
 games/default/files/bluestone/mesecons_noteblock/sounds/mesecons_noteblock_a.ogg
 games/default/files/bluestone/mesecons_delayer/textures/mesecons_delayer_off.png
+build/iOS/MultiCraft/MultiCraft/Assets.xcassets/AppIcon.appiconset/Contents.json
 games/default/files/farming/farming_addons/textures/farming_addons_potato_4.png
 games/default/files/farming/farming_addons/textures/farming_addons_potato_3.png
 games/default/files/farming/farming_addons/textures/farming_addons_potato_2.png
@@ -275,6 +101,7 @@ games/default/files/farming/farming_addons/textures/farming_addons_carrot_2.png
 games/default/files/farming/farming_addons/textures/farming_addons_carrot_1.png
 games/default/files/bluestone/mesecons_pistons/textures/mesecons_piston_top.png
 games/default/files/bluestone/mesecons_delayer/textures/mesecons_delayer_on.png
+build/iOS/MultiCraft/MultiCraft/Assets.xcassets/AppIcon.appiconset/AppStore.jpg
 games/default/files/farming/farming_addons/textures/farming_addons_melon_8.png
 games/default/files/farming/farming_addons/textures/farming_addons_melon_7.png
 games/default/files/farming/farming_addons/textures/farming_addons_melon_6.png
@@ -303,6 +130,8 @@ games/default/files/default/textures/default_river_water_source_animated.png
 games/default/files/default/schematics/emergent_jungle_tree_from_sapling.mts
 games/default/files/bluestone/mesecons_button/sounds/mesecons_button_pop.ogg
 games/default/files/bluestone/bluestone_lamp/textures/bluestone_lamp_off.png
+build/android/app/src/main/java/com/multicraft/game/InputDialogActivity.java
+build/android/app/src/main/java/com/multicraft/game/CheckConnectionTask.java
 games/default/files/farming/farming_addons/textures/farming_addons_corn.png
 games/default/files/farming/farming_addons/textures/farming_addons_bowl.png
 games/default/files/bluestone/mesecons_wires/textures/mesecons_wire_off.png
@@ -312,12 +141,18 @@ games/default/files/default/sounds/default_dig_oddly_breakable_by_hand.ogg
 games/default/files/bluestone/mesecons_wires/textures/mesecons_wire_on.png
 games/default/files/bluestone/mesecons_walllever/sounds/mesecons_lever.ogg
 games/default/files/bluestone/bluestone_torch/textures/bluestone_torch.png
+build/android/app/src/main/java/com/multicraft/game/PreferencesHelper.java
+build/android/app/src/main/java/com/multicraft/game/AlertDialogHelper.java
 games/default/files/3d_armor/textures/3d_armor_inv_chestplate_leather.png
 games/default/files/3d_armor/textures/3d_armor_inv_chestplate_diamond.png
+build/android/app/src/main/java/com/multicraft/game/CallBackListener.java
 games/default/files/mobs/mobs_monster/textures/mobs_spider_small_egg.png
 games/default/files/farming/farming/textures/farming_tool_diamondhoe.png
 games/default/files/bluestone/mesecons_wires/textures/bluestone_dust.png
 games/default/files/bluestone/mesecons_pistons/sounds/piston_retract.ogg
+build/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png
+build/android/app/src/main/java/com/multicraft/game/WVersionManager.java
+build/android/app/src/main/java/com/multicraft/game/DialogsCallback.java
 games/default/files/mobs/mobs_animal/textures/mobs_sheep_dark_green.png
 games/default/files/default/textures/default_water_flowing_animated.png
 games/default/files/default/schematics/snowy_pine_tree_from_sapling.mts
@@ -327,6 +162,7 @@ games/default/files/3d_armor/textures/3d_armor_inv_leggings_leather.png
 games/default/files/3d_armor/textures/3d_armor_inv_leggings_diamond.png
 games/default/files/3d_armor/textures/3d_armor_inv_chestplate_steel.png
 games/default/files/3d_armor/textures/3d_armor_inv_chestplate_chain.png
+build/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png
 games/default/files/workbench/textures/formspec_workbench_creating.png
 games/default/files/workbench/textures/formspec_workbench_crafting.png
 games/default/files/mobs/mobs_redo/textures/mobs_chicken_egg_fried.png
@@ -338,6 +174,8 @@ games/default/files/farming/farming/textures/farming_tool_steelhoe.png
 games/default/files/default/textures/default_water_source_animated.png
 games/default/files/default/textures/default_lava_flowing_animated.png
 games/default/files/3d_armor/textures/3d_armor_inv_chestplate_gold.png
+build/android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png
+build/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
 games/default/files/mobs/mobs_monster/textures/mobs_spider_orange.png
 games/default/files/mobs/mobs_animal/textures/mobs_kitten_striped.png
 games/default/files/farming/farming/textures/farming_tool_woodhoe.png
@@ -351,6 +189,12 @@ games/default/files/3d_armor/textures/3d_armor_inv_helmet_leather.png
 games/default/files/3d_armor/textures/3d_armor_inv_helmet_diamond.png
 games/default/files/3d_armor/textures/3d_armor_chestplate_leather.png
 games/default/files/3d_armor/textures/3d_armor_chestplate_diamond.png
+build/android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png
+build/android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png
+build/android/app/src/main/java/com/multicraft/game/UnzipService.java
+build/android/app/src/main/java/com/multicraft/game/MainActivity.java
+build/android/app/src/main/java/com/multicraft/game/GameActivity.java
+.git/objects/pack/pack-43f61a045779d8d789d3eb2522e530c4f73deba5.pack
 games/default/files/mobs/mobs_npc/textures/mobs_npc_woman_shirt3.png
 games/default/files/mobs/mobs_npc/textures/mobs_npc_woman_shirt2.png
 games/default/files/mobs/mobs_npc/textures/mobs_npc_woman_shirt1.png
@@ -371,6 +215,8 @@ games/default/files/default/textures/default_quartz_block_bottom.png
 games/default/files/3d_armor/textures/3d_armor_inv_leggings_gold.png
 games/default/files/3d_armor/textures/3d_armor_inv_boots_leather.png
 games/default/files/3d_armor/textures/3d_armor_inv_boots_diamond.png
+build/android/app/src/main/java/com/multicraft/game/CopyZipTask.java
+.git/objects/pack/pack-43f61a045779d8d789d3eb2522e530c4f73deba5.idx
 games/default/files/workbench/textures/formspec_workbench_anvil.png
 games/default/files/player/pep/textures/pep_speedreset_particle.png
 games/default/files/player/pep/textures/pep_speedminus_particle.png
@@ -402,6 +248,8 @@ games/default/files/3d_armor/textures/3d_armor_inv_helmet_steel.png
 games/default/files/3d_armor/textures/3d_armor_inv_helmet_chain.png
 games/default/files/3d_armor/textures/3d_armor_chestplate_steel.png
 games/default/files/3d_armor/textures/3d_armor_chestplate_chain.png
+build/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
+build/android/app/src/main/java/com/multicraft/game/DeleteTask.java
 games/default/files/player/pep/textures/pep_speedplus_particle.png
 games/default/files/player/pep/textures/pep_manaregen_particle.png
 games/default/files/player/pep/textures/pep_jumpreset_particle.png
@@ -436,6 +284,10 @@ games/default/files/3d_armor/textures/3d_armor_inv_helmet_gold.png
 games/default/files/3d_armor/textures/3d_armor_inv_boots_steel.png
 games/default/files/3d_armor/textures/3d_armor_inv_boots_chain.png
 games/default/files/3d_armor/textures/3d_armor_chestplate_gold.png
+build/iOS/MultiCraft/MultiCraft/Base.lproj/LaunchScreen.storyboard
+build/iOS/MultiCraft/MultiCraft/Assets.xcassets/AppIcon.appiconset
+build/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png
+build/android/app/src/main/res/drawable/ic_launcher_background.xml
 games/default/files/player/pep/textures/pep_jumpplus_particle.png
 games/default/files/mobs/mobs_redo/textures/mobs_rotten_flesh.png
 games/default/files/mobs/mobs_redo/textures/mobs_cheese_wield.png
@@ -476,6 +328,7 @@ games/default/files/3d_armor/textures/3d_armor_leggings_chain.png
 games/default/files/3d_armor/textures/3d_armor_inv_boots_gold.png
 games/default/files/3d_armor/textures/3d_armor_helmet_leather.png
 games/default/files/3d_armor/textures/3d_armor_helmet_diamond.png
+build/android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png
 games/default/files/workbench/textures/workbench_button_back.png
 games/default/files/mobs/mobs_redo/textures/mobs_rabbit_hide.png
 games/default/files/mobs/mobs_redo/textures/mobs_pork_cooked.png
@@ -523,6 +376,10 @@ games/default/files/carts/textures/carts_rail_t_junction_brk.png
 games/default/files/3d_armor/textures/3d_armor_leggings_gold.png
 games/default/files/3d_armor/textures/3d_armor_boots_leather.png
 games/default/files/3d_armor/textures/3d_armor_boots_diamond.png
+build/android/app/src/main/res/values/ic_launcher_background.xml
+build/android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
+build/android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png
+build/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
 games/default/files/wallet/textures/cobblestonemossy_wallet.png
 games/default/files/player/pep/textures/pep_regen2_particle.png
 games/default/files/player/pep/textures/pep_breath_particle.png
@@ -561,6 +418,9 @@ games/default/files/carts/textures/carts_rail_t_junction_cp.png
 games/default/files/carts/textures/carts_rail_curved_dtc_on.png
 games/default/files/3d_armor/textures/3d_armor_helmet_steel.png
 games/default/files/3d_armor/textures/3d_armor_helmet_chain.png
+build/android/deprecated/patches/irrlicht-native_activity.patch
+build/android/app/src/main/res/drawable/custom_progress_bar.xml
+build/android/app/src/main/java/com/multicraft/game/RateMe.java
 games/default/files/player/pep/textures/pep_regen_particle.png
 games/default/files/player/pep/textures/pep_grav0_particle.png
 games/default/files/mobs/mobs_redo/textures/mobs_protector.png
@@ -626,6 +486,7 @@ games/default/files/bluestone/mesecons_pressureplates/init.lua
 games/default/files/3d_armor/textures/3d_armor_helmet_gold.png
 games/default/files/3d_armor/textures/3d_armor_boots_steel.png
 games/default/files/3d_armor/textures/3d_armor_boots_chain.png
+build/android/app/src/main/res/xml/network_security_config.xml
 games/default/files/vessels/textures/vessels_glass_bottle.png
 games/default/files/player/pep/textures/pep_mole_particle.png
 games/default/files/mobs/mobs_redo/textures/mobs_pork_raw.png
@@ -661,6 +522,8 @@ games/default/files/bluestone/mesecons_solarpanel/depends.txt
 games/default/files/3d_armor/textures/3d_armor_statbar_fg.png
 games/default/files/3d_armor/textures/3d_armor_statbar_bg.png
 games/default/files/3d_armor/textures/3d_armor_boots_gold.png
+build/android/deprecated/patches/irrlicht-roundingerror.patch
+build/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
 games/default/files/mobs/mobs_redo/textures/mobs_nametag.png
 games/default/files/mobs/mobs_redo/textures/mobs_leather.png
 games/default/files/mobs/mobs_monster/sounds/mobs_spider.ogg
@@ -702,6 +565,9 @@ games/default/files/carts/textures/carts_rail_curved_brk.png
 games/default/files/bluestone/mesecons_walllever/depends.txt
 games/default/files/bluestone/mesecons_noteblock/depends.txt
 games/default/files/bluestone/mesecons_materials/depends.txt
+build/iOS/MultiCraft/MultiCraft/ru.lproj/Localizable.strings
+build/android/app/src/main/res/mipmap-xxxhdpi/background.png
+build/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
 games/default/files/workbench/textures/workbench_hammer.png
 games/default/files/vessels/textures/vessels_shelf_slot.png
 games/default/files/mobs/mobs_redo/textures/mobs_shears.png
@@ -749,6 +615,9 @@ games/default/files/default/sounds/default_place_node.1.ogg
 games/default/files/carts/textures/carts_rail_curved_ss.png
 games/default/files/carts/textures/carts_rail_curved_cp.png
 games/default/files/bonusbox/textures/chest_open_bottom.png
+build/android/deprecated/patches/irrlicht-back_button.patch
+build/android/app/src/main/res/mipmap-xxhdpi/background.png
+build/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
 games/default/files/workbench/textures/workbench_sides.png
 games/default/files/workbench/textures/workbench_front.png
 games/default/files/workbench/textures/workbench_anvil.png
@@ -798,6 +667,9 @@ games/default/files/bluestone/mesecons_solarpanel/textures
 games/default/files/bluestone/mesecons_solarpanel/init.lua
 games/default/files/bluestone/mesecons_pistons/depends.txt
 games/default/files/bluestone/mesecons_delayer/depends.txt
+build/iOS/MultiCraft/MultiCraft/Base.lproj/Main.storyboard
+build/android/deprecated/patches/irrlicht-touchcount.patch
+build/android/app/src/main/res/mipmap-xhdpi/background.png
 games/default/files/sethome/textures/creative_home_go.png
 games/default/files/player/pep/textures/pep_speedplus.png
 games/default/files/player/pep/textures/pep_manaregen.png
@@ -836,6 +708,7 @@ games/default/files/bluestone/mesecons_materials/textures
 games/default/files/bluestone/mesecons_materials/init.lua
 games/default/files/bluestone/mesecons_button/depends.txt
 games/default/files/bluestone/bluestone_torch/depends.txt
+build/iOS/MultiCraft/MultiCraft.xcodeproj/project.pbxproj
 games/default/files/workbench/textures/workbench_top.png
 games/default/files/workbench/textures/workbench_saw.png
 games/default/files/workbench/models/workbench_slope.obj
@@ -864,6 +737,7 @@ games/default/files/bluestone/mesecons_wires/depends.txt
 games/default/files/bluestone/mesecons_alias/depends.txt
 games/default/files/bluestone/bluestone_torch/README.txt
 games/default/files/bluestone/bluestone_lamp/depends.txt
+build/android/app/src/main/res/mipmap-xxxhdpi/update.png
 games/default/files/mobs/mobs_animal/models/mobs_wolf.x
 games/default/files/flowers/textures/flowers_orchid.png
 games/default/files/flowers/textures/flowers_allium.png
@@ -884,6 +758,9 @@ games/default/files/bluestone/mesecons_noteblock/sounds
 games/default/files/bluestone/mesecons_mvps/depends.txt
 games/default/files/bluestone/mesecons_delayer/textures
 games/default/files/bluestone/mesecons_delayer/init.lua
+build/android/deprecated/patches/libiconv_android.patch
+build/android/app/src/main/res/mipmap-xxhdpi/update.png
+build/android/app/src/main/res/layout/activity_main.xml
 games/default/files/vessels/textures/vessels_shelf.png
 games/default/files/player/pep/textures/pep_regen2.png
 games/default/files/player/pep/textures/pep_breath.png
@@ -918,6 +795,11 @@ games/default/files/bluestone/mesecons_button/init.lua
 games/default/files/bluestone/mesecons/actionqueue.lua
 games/default/files/bluestone/bluestone_torch/textures
 games/default/files/bluestone/bluestone_torch/init.lua
+build/android/gradle/wrapper/gradle-wrapper.properties
+build/android/app/src/main/res/xml/my_backup_rules.xml
+build/android/app/src/main/res/mipmap-xxxhdpi/logo.png
+build/android/app/src/main/res/mipmap-xhdpi/update.png
+build/android/app/src/main/res/layout/input_dialog.xml
 games/default/files/player/pep/textures/pep_regen.png
 games/default/files/player/pep/textures/pep_grav0.png
 games/default/files/mobs/mobs_npc/locale/template.txt
@@ -953,6 +835,12 @@ games/default/files/bluestone/mesecons_pistons/sounds
 games/default/files/bluestone/mesecons_alias/init.lua
 games/default/files/bluestone/bluestone_lamp/textures
 games/default/files/bluestone/bluestone_lamp/init.lua
+build/iOS/MultiCraft/MultiCraft/SDVersion/SDVersion.h
+build/iOS/MultiCraft/MultiCraft/SDVersion/LICENSE.txt
+build/android/app/src/main/res/mipmap-xxhdpi/logo.png
+build/android/app/src/main/res/mipmap/ic_launcher.png
+build/android/app/src/main/res/layout/rate_dialog.xml
+build/android/app/src/main/res/layout/gdpr_dialog.xml
 games/default/files/player/pep/textures/pep_mole.png
 games/default/files/flowers/schematics/waterlily.mts
 games/default/files/flowerpot/textures/flowerpot.png
@@ -973,6 +861,10 @@ games/default/files/bonusbox/textures/chest_back.png
 games/default/files/bluestone/mesecons_mvps/init.lua
 games/default/files/bluestone/mesecons_button/sounds
 client/shaders/selection_shader/opengl_fragment.glsl
+build/android/app/src/main/res/values-v21/styles.xml
+build/android/app/src/main/res/values-ru/strings.xml
+build/android/app/src/main/res/mipmap-xhdpi/logo.png
+build/android/app/src/main/res/mipmap/background.png
 games/default/files/player_api/models/character.png
 games/default/files/player_api/models/character.b3d
 games/default/files/farming/farming_addons/textures
@@ -992,6 +884,9 @@ games/default/files/bonusbox/textures/chest_top.png
 games/default/files/bluestone/mesecons/settings.lua
 games/default/files/bluestone/mesecons/services.lua
 games/default/files/bluestone/mesecons/internal.lua
+build/android/app/src/main/java/com/multicraft/game
+games/default/.git/hooks/prepare-commit-msg.sample
+games/default/.git/hooks/fsmonitor-watchman.sample
 games/default/files/player/playereffects/README.md
 games/default/files/mobs/mobs_redo/locale/template
 games/default/files/mobs/mobs_monster/skeleton.lua
@@ -1015,6 +910,9 @@ games/default/files/default/textures/heart_bg.png
 games/default/files/default/models/torch_wall.obj
 games/default/files/bluestone/mesecons_solarpanel
 games/default/files/bluestone/mesecons/legacy.lua
+build/android/native/src/main/AndroidManifest.xml
+build/android/app/src/main/res/values/strings.xml
+games/default/.git/logs/refs/remotes/origin/HEAD
 games/default/files/mobs/mobs_redo/locale/ru.txt
 games/default/files/mobs/mobs_monster/zombie.lua
 games/default/files/mobs/mobs_monster/spider.lua
@@ -1031,6 +929,9 @@ client/shaders/wielded_shader/opengl_vertex.glsl
 client/shaders/nodes_shader/opengl_fragment.glsl
 client/shaders/minimap_shader/opengl_vertex.glsl
 client/shaders/default_shader/opengl_vertex.glsl
+build/android/app/src/main/res/values/styles.xml
+build/android/app/src/main/res/mipmap/update.png
+build/android/app/src/main/res/mipmap-anydpi-v26
 games/default/files/mobs/mobs_npc/locale/ru.txt
 games/default/files/mobs/mobs_npc/locale/ms.txt
 games/default/files/mobs/mobs_npc/locale/de.txt
@@ -1053,6 +954,10 @@ games/default/files/bluestone/mesecons/init.lua
 doc/Font Licenses/DroidSansFallback-LICENSE.txt
 doc/Font Licenses/1001fonts-retron2000-eula.txt
 builtin/mainmenu/generate_from_settingtypes.lua
+build/iOS/MultiCraft/MultiCraft/Assets.xcassets
+build/android/gradle/wrapper/gradle-wrapper.jar
+games/default/.git/hooks/pre-applypatch.sample
+games/default/.git/hooks/applypatch-msg.sample
 games/default/files/player_api/models/hand.b3d
 games/default/files/mobs/mobs_redo/license.txt
 games/default/files/mobs/mobs_redo/depends.txt
@@ -1072,6 +977,10 @@ games/default/files/bluestone/mesecons_pistons
 games/default/files/bluestone/mesecons_delayer
 games/default/files/beds/textures/beds_bed.png
 client/shaders/nodes_shader/opengl_vertex.glsl
+build/android/app/src/main/res/mipmap/logo.png
+build/android/app/src/main/res/drawable/bg.xml
+build/android/app/src/main/java/com/multicraft
+build/android/app/src/main/AndroidManifest.xml
 games/default/files/mobs/mobs_redo/README.txt
 games/default/files/mobs/mobs_redo/crafts.lua
 games/default/files/mobs/mobs_npc/depends.txt
@@ -1086,6 +995,7 @@ games/default/files/dye/textures/dye_blue.png
 games/default/files/boats/models/boats_boat.x
 games/default/files/bluestone/mesecons_button
 games/default/files/bluestone/bluestone_torch
+build/android/app/src/main/res/mipmap-xxxhdpi
 games/default/files/mobs/mobs_npc/trader.lua
 games/default/files/mobs/mobs_npc/README.txt
 games/default/files/mobs/mobs_monster/sounds
@@ -1102,6 +1012,11 @@ games/default/files/bluestone/mesecons_wires
 games/default/files/bluestone/mesecons_alias
 games/default/files/bluestone/bluestone_lamp
 games/default/files/beds/models/beds_bed.obj
+build/android/app/src/main/res/mipmap-xxhdpi
+games/default/.git/refs/remotes/origin/HEAD
+games/default/.git/logs/refs/remotes/origin
+games/default/.git/hooks/pre-receive.sample
+games/default/.git/hooks/post-update.sample
 games/default/files/mobs/mobs_redo/textures
 games/default/files/mobs/mobs_redo/mod.conf
 games/default/files/mobs/mobs_redo/init.lua
@@ -1113,6 +1028,11 @@ games/default/files/dungeon_loot/mapgen.lua
 games/default/files/doors/models/door_b.obj
 games/default/files/doors/models/door_a.obj
 games/default/files/bluestone/mesecons_mvps
+build/android/app/src/main/res/mipmap-xhdpi
+src/unittest/test_map_settings_manager.cpp
+games/default/.git/hooks/pre-rebase.sample
+games/default/.git/hooks/pre-commit.sample
+games/default/.git/hooks/commit-msg.sample
 games/default/files/player/pep/depends.txt
 games/default/files/player_api/license.txt
 games/default/files/mobs/mobs_redo/api.lua
@@ -1126,7 +1046,13 @@ games/default/files/craftguide/license.txt
 games/default/files/compatibility/textures
 games/default/files/compatibility/init.lua
 builtin/mainmenu/dlg_settings_advanced.lua
+build/iOS/MultiCraft/MultiCraft/Info.plist
+build/iOS/MultiCraft/MultiCraft/Base.lproj
+build/iOS/MultiCraft/MultiCraft/Ads/ads.mm
+build/android/app/src/main/res/mipmap-mdpi
+build/android/app/src/main/res/mipmap-hdpi
 textures/base/local_creative_checkbox.png
+games/default/.git/logs/refs/heads/master
 games/default/files/workbench/depends.txt
 games/default/files/wieldview/depends.txt
 games/default/files/sethome/locale/ru.txt
@@ -1146,8 +1072,13 @@ games/default/files/carts/cart_entity.lua
 games/default/files/bluestone/modpack.txt
 games/default/files/bluestone/LICENSE.txt
 games/default/files/bluestone/COPYING.txt
+build/iOS/MultiCraft/MultiCraft.xcodeproj
+build/iOS/MultiCraft/MultiCraft/SDVersion
+build/iOS/MultiCraft/MultiCraft/ioswrap.m
+build/iOS/MultiCraft/MultiCraft/ioswrap.h
+build/android/app/src/main/res/values-v21
 textures/base/minimap_overlay_square.png
-locale/sr_Cyrl/LC_MESSAGES/MultiCraft.mo
+games/default/.git/hooks/pre-push.sample
 games/default/files/workbench/README.txt
 games/default/files/wieldview/README.txt
 games/default/files/player/playereffects
@@ -1161,6 +1092,10 @@ games/default/files/bucket/locale/ru.txt
 games/default/files/bonemeal/license.txt
 games/default/files/3d_armor/LICENSE.txt
 games/default/files/3d_armor/depends.txt
+build/WindowsApp/toolchain_mingw64.cmake
+build/iOS/MultiCraft/MultiCraft/ru.lproj
+build/android/deprecated/jni/Irrlicht.mk
+build/android/app/src/main/res/values-ru
 textures/base/server_flags_favorite.png
 textures/base/server_flags_creative.png
 textures/base/minimap_overlay_round.png
@@ -1188,9 +1123,14 @@ games/default/files/bonusbox/README.txt
 games/default/files/bonemeal/README.txt
 games/default/files/bluestone/README.md
 builtin/mainmenu/dlg_rename_modpack.lua
+build/android/native/jni/Application.mk
+build/android/app/src/main/res/drawable
 util/travis/clang-format-whitelist.txt
 textures/base/progress_bar_overlay.png
-locale/pt_BR/LC_MESSAGES/MultiCraft.mo
+src/unittest/test_voxelmanipulator.cpp
+src/script/lua_api/l_itemstackmeta.cpp
+games/default/.git/refs/remotes/origin
+games/default/.git/hooks/update.sample
 games/default/files/xpanes/license.txt
 games/default/files/workbench/textures
 games/default/files/workbench/init.lua
@@ -1217,9 +1157,11 @@ games/default/files/bluestone/mesecons
 games/default/files/beds/locale/ru.txt
 games/default/files/beds/functions.lua
 games/default/files/3d_armor/armor.lua
+build/WindowsApp/toolchain_mingw.cmake
 textures/base/server_flags_damage.png
 textures/base/minimap_mask_square.png
 textures/base/gui_hotbar_selected.png
+src/unittest/test_voxelalgorithms.cpp
 games/default/files/xpanes/README.txt
 games/default/files/walls/license.txt
 games/default/files/walls/depends.txt
@@ -1253,10 +1195,19 @@ builtin/mainmenu/tab_texturepacks.lua
 builtin/mainmenu/dlg_delete_world.lua
 builtin/mainmenu/dlg_create_world.lua
 builtin/mainmenu/dlg_config_world.lua
+build/android/app/src/main/res/values
+build/android/app/src/main/res/mipmap
+build/android/app/src/main/res/layout
 util/travis/toolchain_mingw.cmake.in
 textures/base/minimap_mask_round.png
+src/script/lua_api/l_localplayer.cpp
+src/script/lua_api/l_itemstackmeta.h
+src/irrlicht_changes/static_text.cpp
 misc/com.MultiCraft.game.appdata.xml
-locale/jbo/LC_MESSAGES/MultiCraft.mo
+.git/hooks/prepare-commit-msg.sample
+.git/hooks/fsmonitor-watchman.sample
+games/default/.git/refs/heads/master
+games/default/.git/logs/refs/remotes
 games/default/files/workbench/models
 games/default/files/walls/README.txt
 games/default/files/vessels/textures
@@ -1281,33 +1232,12 @@ games/default/files/beds/license.txt
 games/default/files/beds/depends.txt
 games/default/files/3d_armor/api.lua
 builtin/profiler/instrumentation.lua
+build/android/deprecated/jni/Deps.mk
 textures/base/object_marker_red.png
-locale/uk/LC_MESSAGES/MultiCraft.mo
-locale/tr/LC_MESSAGES/MultiCraft.mo
-locale/sw/LC_MESSAGES/MultiCraft.mo
-locale/sv/LC_MESSAGES/MultiCraft.mo
-locale/sl/LC_MESSAGES/MultiCraft.mo
-locale/ru/LC_MESSAGES/MultiCraft.mo
-locale/ro/LC_MESSAGES/MultiCraft.mo
-locale/pt/LC_MESSAGES/MultiCraft.mo
-locale/pl/LC_MESSAGES/MultiCraft.mo
-locale/nl/LC_MESSAGES/MultiCraft.mo
-locale/nb/LC_MESSAGES/MultiCraft.mo
-locale/ms/LC_MESSAGES/MultiCraft.mo
-locale/lt/LC_MESSAGES/MultiCraft.mo
-locale/ja/LC_MESSAGES/MultiCraft.mo
-locale/it/LC_MESSAGES/MultiCraft.mo
-locale/id/LC_MESSAGES/MultiCraft.mo
-locale/hu/LC_MESSAGES/MultiCraft.mo
-locale/fr/LC_MESSAGES/MultiCraft.mo
-locale/et/LC_MESSAGES/MultiCraft.mo
-locale/es/LC_MESSAGES/MultiCraft.mo
-locale/eo/LC_MESSAGES/MultiCraft.mo
-locale/dv/LC_MESSAGES/MultiCraft.mo
-locale/de/LC_MESSAGES/MultiCraft.mo
-locale/da/LC_MESSAGES/MultiCraft.mo
-locale/cs/LC_MESSAGES/MultiCraft.mo
-locale/ca/LC_MESSAGES/MultiCraft.mo
+src/unittest/test_serialization.cpp
+src/network/serverpackethandler.cpp
+src/network/clientpackethandler.cpp
+src/irrlicht_changes/CMakeLists.txt
 games/default/files/xpanes/init.lua
 games/default/files/wallet/textures
 games/default/files/wallet/init.lua
@@ -1321,11 +1251,26 @@ games/default/files/bucket/textures
 games/default/files/bucket/init.lua
 games/default/files/beds/spawns.lua
 games/default/files/beds/README.txt
+cmake/Modules/GenerateVersion.cmake
 builtin/mainmenu/dlg_delete_mod.lua
 builtin/game/detached_inventory.lua
+build/iOS/MultiCraft/MultiCraft/Ads
+build/android/native/jni/Android.mk
+build/android/app/src/main/java/com
 textures/base/server_flags_pvp.png
 textures/base/gui_hotbar_small.png
 textures/base/down_three_press.png
+src/unittest/test_noderesolver.cpp
+src/script/lua_api/l_particles.cpp
+src/script/lua_api/l_nodetimer.cpp
+src/script/lua_api/l_localplayer.h
+src/script/lua_api/l_inventory.cpp
+src/script/lua_api/l_areastore.cpp
+src/script/cpp_api/s_inventory.cpp
+src/irrlicht_changes/static_text.h
+src/client/joystick_controller.cpp
+.git/logs/refs/remotes/origin/HEAD
+games/default/.git/logs/refs/heads
 games/default/files/walls/init.lua
 games/default/files/sfinv/init.lua
 games/default/files/sethome/locale
@@ -1342,9 +1287,25 @@ games/default/files/carts/textures
 games/default/files/carts/init.lua
 games/default/files/boats/textures
 games/default/files/boats/init.lua
+cmake/Modules/FindGettextLib.cmake
+build/android/app/src/main/res/xml
 textures/base/server_flags_mt.png
 textures/base/server_flags_mc.png
 textures/base/progress_bar_bg.png
+src/unittest/test_compression.cpp
+src/settings_translation_file.cpp
+src/script/scripting_mainmenu.cpp
+src/script/lua_api/l_settings.cpp
+src/script/lua_api/l_rollback.cpp
+src/script/lua_api/l_nodemeta.cpp
+src/script/lua_api/l_metadata.cpp
+src/script/lua_api/l_mainmenu.cpp
+src/script/lua_api/CMakeLists.txt
+src/script/cpp_api/s_security.cpp
+src/script/cpp_api/s_nodemeta.cpp
+src/script/cpp_api/s_mainmenu.cpp
+src/script/cpp_api/CMakeLists.txt
+src/script/common/c_converter.cpp
 misc/MultiCraft-xorg-icon-128.png
 games/default/files/sfinv/api.lua
 games/default/files/mobs/mobs_npc
@@ -1354,7 +1315,10 @@ games/default/files/compatibility
 games/default/files/bucket/locale
 games/default/files/beds/textures
 games/default/files/beds/init.lua
+cmake/Modules/FindOpenGLES2.cmake
 builtin/mainmenu/tab_settings.lua
+build/android/native/build.gradle
+build/android/deprecated/Makefile
 worlds/World 5 Flat/map_meta.txt
 util/generate-texture-normals.sh
 textures/base/up_three_press.png
@@ -1362,7 +1326,21 @@ textures/base/unknown_object.png
 textures/base/down_two_press.png
 textures/base/down_three_btn.png
 textures/base/down_one_press.png
+src/unittest/test_connection.cpp
+src/script/lua_api/l_storage.cpp
+src/script/lua_api/l_particles.h
+src/script/lua_api/l_nodetimer.h
+src/script/lua_api/l_minimap.cpp
+src/script/lua_api/l_inventory.h
+src/script/lua_api/l_areastore.h
+src/script/cpp_api/s_inventory.h
+src/script/common/CMakeLists.txt
+src/script/common/c_internal.cpp
+src/irrlichttypes_extrabloated.h
+src/client/joystick_controller.h
 misc/com.MultiCraft.game.desktop
+.git/hooks/pre-applypatch.sample
+.git/hooks/applypatch-msg.sample
 games/default/files/pie/init.lua
 games/default/files/dye/textures
 games/default/files/dye/init.lua
@@ -1373,7 +1351,10 @@ games/default/files/carts/sounds
 games/default/files/carts/models
 games/default/files/boats/models
 games/default/files/beds/api.lua
+cmake/Modules/FindNcursesw.cmake
+cmake/Modules/FindIrrlicht.cmake
 builtin/mainmenu/tab_credits.lua
+build/android/deprecated/patches
 textures/base/server_ping_4.png
 textures/base/server_ping_3.png
 textures/base/server_ping_2.png
@@ -1382,15 +1363,55 @@ textures/base/rangeview_btn.png
 textures/base/player_marker.png
 textures/base/no_screenshot.png
 textures/base/inventory_btn.png
+src/unittest/test_utilities.cpp
+src/unittest/test_threading.cpp
+src/unittest/test_schematic.cpp
+src/unittest/test_inventory.cpp
+src/unittest/test_collision.cpp
+src/unittest/test_areastore.cpp
+src/threading/mutex_auto_lock.h
+src/script/scripting_server.cpp
+src/script/scripting_mainmenu.h
+src/script/scripting_client.cpp
+src/script/lua_api/l_vmanip.cpp
+src/script/lua_api/l_settings.h
+src/script/lua_api/l_server.cpp
+src/script/lua_api/l_rollback.h
+src/script/lua_api/l_object.cpp
+src/script/lua_api/l_nodemeta.h
+src/script/lua_api/l_metadata.h
+src/script/lua_api/l_mapgen.cpp
+src/script/lua_api/l_mainmenu.h
+src/script/lua_api/l_internal.h
+src/script/lua_api/l_client.cpp
+src/script/lua_api/l_camera.cpp
+src/script/cpp_api/s_server.cpp
+src/script/cpp_api/s_security.h
+src/script/cpp_api/s_player.cpp
+src/script/cpp_api/s_nodemeta.h
+src/script/cpp_api/s_mainmenu.h
+src/script/cpp_api/s_internal.h
+src/script/cpp_api/s_entity.cpp
+src/script/cpp_api/s_client.cpp
+src/script/common/c_converter.h
+src/script/common/c_content.cpp
+games/default/.git/refs/remotes
+games/default/.git/objects/pack
+games/default/.git/objects/info
+games/default/.git/info/exclude
 games/default/files/fire/sounds
 games/default/files/beds/models
 games/default/files/beds/locale
+cmake/Modules/FindSQLite3.cmake
 client/shaders/selection_shader
 builtin/mainmenu/tab_server.lua
 builtin/mainmenu/tab_online.lua
 builtin/common/misc_helpers.lua
 builtin/common/chatcommands.lua
 builtin/client/chatcommands.lua
+build/iOS/MultiCraft/MultiCraft
+build/android/gradle.properties
+build/android/app/src/main/java
 textures/base/up_two_press.png
 textures/base/up_three_btn.png
 textures/base/up_one_press.png
@@ -1398,6 +1419,19 @@ textures/base/unknown_node.png
 textures/base/unknown_item.png
 textures/base/down_two_btn.png
 textures/base/down_one_btn.png
+src/unittest/test_settings.cpp
+src/unittest/test_profiler.cpp
+src/unittest/test_filepath.cpp
+src/script/lua_api/l_storage.h
+src/script/lua_api/l_sound.cpp
+src/script/lua_api/l_noise.cpp
+src/script/lua_api/l_minimap.h
+src/script/lua_api/l_craft.cpp
+src/script/cpp_api/s_async.cpp
+src/script/common/c_internal.h
+src/cguittfont/xCGUITTFont.cpp
+games/default/.git/packed-refs
+games/default/.git/description
 games/default/files/player/pep
 games/default/files/player_api
 games/default/files/itemframes
@@ -1415,12 +1449,57 @@ fonts/mono_dejavu_sans_140.png
 fonts/mono_dejavu_sans_120.png
 fonts/mono_dejavu_sans_110.png
 fonts/mono_dejavu_sans_100.png
+cmake/Modules/FindVorbis.cmake
+cmake/Modules/FindLuaJIT.cmake
 builtin/mainmenu/tab_local.lua
 builtin/common/async_event.lua
+build/WindowsApp/buildwin64.sh
+build/WindowsApp/buildwin32.sh
+build/android/app/src/main/res
+build/android/app/build.gradle
 util/travis/before_install.sh
 textures/base/right_press.png
 textures/base/minimap_btn.png
+src/unittest/test_nodedef.cpp
+src/unittest/test_mapnode.cpp
+src/unittest/test_keycode.cpp
+src/terminal_chat_console.cpp
+src/script/scripting_server.h
+src/script/scripting_client.h
+src/script/lua_api/l_vmanip.h
+src/script/lua_api/l_util.cpp
+src/script/lua_api/l_server.h
+src/script/lua_api/l_object.h
+src/script/lua_api/l_mapgen.h
+src/script/lua_api/l_item.cpp
+src/script/lua_api/l_http.cpp
+src/script/lua_api/l_client.h
+src/script/lua_api/l_camera.h
+src/script/lua_api/l_base.cpp
+src/script/cpp_api/s_server.h
+src/script/cpp_api/s_player.h
+src/script/cpp_api/s_node.cpp
+src/script/cpp_api/s_item.cpp
+src/script/cpp_api/s_entity.h
+src/script/cpp_api/s_client.h
+src/script/cpp_api/s_base.cpp
+src/script/common/c_types.cpp
+src/script/common/c_content.h
+src/network/serveropcodes.cpp
+src/network/networkprotocol.h
+src/network/networkpacket.cpp
+src/network/clientopcodes.cpp
+src/mesh_generator_thread.cpp
+src/cmake_config_githash.h.in
+src/client/clientlauncher.cpp
+src/cguittfont/CMakeLists.txt
+src/cguittfont/CGUITTFont.cpp
+.git/refs/remotes/origin/HEAD
+.git/logs/refs/remotes/origin
+.git/hooks/pre-receive.sample
+.git/hooks/post-update.sample
 games/default/multicraft.conf
+games/default/.git/refs/heads
 games/default/files/workbench
 games/default/files/wieldview
 games/default/files/furniture
@@ -1454,12 +1533,35 @@ builtin/game/static_spawn.lua
 builtin/game/forceloading.lua
 builtin/game/chatcommands.lua
 builtin/common/filterlist.lua
+build/android/settings.gradle
+build/android/native/src/main
 worlds/World 5 Flat/world.mt
 textures/base/up_two_btn.png
 textures/base/up_one_btn.png
 textures/base/left_press.png
 textures/base/gui_hotbar.png
 textures/base/escape_btn.png
+src/util/enriched_string.cpp
+src/util/directiontables.cpp
+src/unittest/test_socket.cpp
+src/unittest/test_random.cpp
+src/unittest/test_player.cpp
+src/unittest/test_objdef.cpp
+src/threading/CMakeLists.txt
+src/script/lua_api/l_sound.h
+src/script/lua_api/l_noise.h
+src/script/lua_api/l_env.cpp
+src/script/lua_api/l_craft.h
+src/script/cpp_api/s_env.cpp
+src/script/cpp_api/s_async.h
+src/map_settings_manager.cpp
+src/cguittfont/xCGUITTFont.h
+.git/hooks/pre-rebase.sample
+.git/hooks/pre-commit.sample
+.git/hooks/commit-msg.sample
+games/default/.git/refs/tags
+games/default/.git/logs/refs
+games/default/.git/logs/HEAD
 games/default/files/creative
 games/default/files/bonusbox
 games/default/files/bonemeal
@@ -1468,10 +1570,16 @@ fonts/mono_dejavu_sans_9.xml
 fonts/mono_dejavu_sans_8.xml
 fonts/mono_dejavu_sans_6.xml
 fonts/mono_dejavu_sans_4.xml
+cmake/Modules/FindJson.cmake
+cmake/Modules/FindCURL.cmake
+client/serverlist/.gitignore
 builtin/utf8lib/utf8data.lua
 builtin/mainmenu/gamemgr.lua
 builtin/game/item_entity.lua
 builtin/common/serialize.lua
+build/WindowsApp/package.bat
+build/android/gradle/wrapper
+build/android/deprecated/jni
 util/wireshark/minetest.lua
 textures/base/sunrisebg.png
 textures/base/right_btn.png
@@ -1479,8 +1587,34 @@ textures/base/empty_btn.png
 textures/base/bg_online.png
 textures/base/bg_dialog.png
 textures/base/bg_common.png
+src/unittest/test_noise.cpp
+src/unittest/CMakeLists.txt
+src/threading/semaphore.cpp
+src/terminal_chat_console.h
+src/script/lua_api/l_util.h
+src/script/lua_api/l_item.h
+src/script/lua_api/l_http.h
+src/script/lua_api/l_base.h
+src/script/cpp_api/s_node.h
+src/script/cpp_api/s_item.h
+src/script/cpp_api/s_base.h
+src/script/common/c_types.h
+src/quicktune_shortcutter.h
+src/network/serveropcodes.h
+src/network/networkpacket.h
+src/network/clientopcodes.h
+src/mesh_generator_thread.h
+src/irrlichttypes_bloated.h
+src/face_position_cache.cpp
+src/database-postgresql.cpp
+src/client/inputhandler.cpp
+src/client/clientlauncher.h
+src/cguittfont/irrUString.h
+src/cguittfont/CGUITTFont.h
 misc/MultiCraft.appdata.xml
 lib/intl/MessageCatalog.hpp
+.git/logs/refs/heads/master
+games/default/.git/branches
 games/default/files/vessels
 games/default/files/sethome
 games/default/files/locales
@@ -1488,6 +1622,8 @@ games/default/files/flowers
 games/default/files/farming
 games/default/files/default
 fonts/DroidSansFallback.ttf
+cmake/Modules/FindLua.cmake
+cmake/Modules/FindGMP.cmake
 client/shaders/nodes_shader
 clientmods/preview/init.lua
 builtin/mainmenu/modmgr.lua
@@ -1495,14 +1631,29 @@ builtin/mainmenu/common.lua
 builtin/intllib/gettext.lua
 builtin/game/privileges.lua
 builtin/client/register.lua
+build/WindowsApp/README.txt
+build/iOS/deps/libvorbis.sh
+build/iOS/deps/libraries.sh
 textures/base/left_btn.png
 textures/base/jump_btn.png
 textures/base/drop_btn.png
 textures/base/down_btn.png
 textures/base/chat_btn.png
 textures/base/bg_local.png
+src/util/enriched_string.h
+src/util/directiontables.h
+src/util/cpp11_container.h
+src/script/lua_api/l_env.h
+src/script/cpp_api/s_env.h
+src/rollback_interface.cpp
+src/network/connection.cpp
+src/network/CMakeLists.txt
+src/map_settings_manager.h
 misc/minetest.exe.manifest
-locale/sr_Cyrl/LC_MESSAGES
+lib/lua/src/CMakeLists.txt
+lib/jsoncpp/CMakeLists.txt
+.git/hooks/pre-push.sample
+games/default/.git/objects
 games/default/files/xpanes
 games/default/files/wallet
 games/default/files/sponge
@@ -1512,9 +1663,28 @@ builtin/mainmenu/store.lua
 builtin/intllib/LICENSE.md
 builtin/game/voxelarea.lua
 builtin/game/constants.lua
+build/iOS/deps/irrlicht.sh
+build/iOS/deps/freetype.sh
+build/android/build.gradle
+build/android/app/src/main
 textures/base/refresh.png
+src/util/pointedthing.cpp
+src/threading/semaphore.h
+src/serverenvironment.cpp
+src/script/CMakeLists.txt
+src/object_properties.cpp
+src/mapgen_singlenode.cpp
+src/itemstackmetadata.cpp
+src/guiPasswordChange.cpp
+src/guiFileSelectMenu.cpp
+src/face_position_cache.h
+src/database-postgresql.h
+src/client/inputhandler.h
+src/clientenvironment.cpp
+src/client/CMakeLists.txt
 misc/MultiCraft-icon.icns
 lib/jsoncpp/json/UPDATING
+games/default/.git/config
 games/default/files/walls
 games/default/files/sfinv
 games/default/files/doors
@@ -1527,12 +1697,29 @@ builtin/game/statbars.lua
 builtin/game/register.lua
 builtin/common/vector.lua
 builtin/common/strict.lua
+build/WindowsApp/build.sh
+build/iOS/deps/libcurl.sh
+build/iOS/deps/leveldb.sh
+build/android/gradlew.bat
 util/test_multiplayer.sh
 textures/base/search.png
 textures/base/ignore.png
+src/threading/thread.cpp
+src/rollback_interface.h
+src/network/connection.h
+src/inventorymanager.cpp
+src/guiscalingfilter.cpp
+src/guiKeyChangeMenu.cpp
+src/database-sqlite3.cpp
+src/database-leveldb.cpp
+src/content_nodemeta.cpp
+src/content_mapblock.cpp
+src/clientsimpleobject.h
 po/sr_Cyrl/MultiCraft.po
-locale/pt_BR/LC_MESSAGES
-lib/jsoncpp/libjsoncpp.a
+.git/refs/remotes/origin
+.git/hooks/update.sample
+games/default/.git/index
+games/default/.git/hooks
 games/default/files/mobs
 games/default/files/fire
 games/default/files/beds
@@ -1542,17 +1729,44 @@ builtin/intllib/init.lua
 builtin/game/falling.lua
 builtin/fstk/tabview.lua
 builtin/common/after.lua
+build/iOS/deps/luajit.sh
+build/iOS/deps/libogg.sh
+build/android/native/src
+build/android/native/jni
+build/android/deprecated
 worlds/World 4/world.mt
 worlds/World 3/world.mt
 worlds/World 2/world.mt
 worlds/World 1/world.mt
 textures/base/trash.png
 textures/base/blank.png
+src/voxelalgorithms.cpp
+src/util/pointedthing.h
+src/util/CMakeLists.txt
+src/util/basic_macros.h
+src/threading/mutex.cpp
+src/threading/event.cpp
+src/serverenvironment.h
+src/porting_android.cpp
+src/object_properties.h
+src/mapgen_singlenode.h
+src/itemstackmetadata.h
+src/guiVolumeChange.cpp
+src/guiPasswordChange.h
+src/guiFormSpecMenu.cpp
+src/guiFileSelectMenu.h
+src/defaultsettings.cpp
+src/content_mapnode.cpp
+src/clientenvironment.h
 multicraft.conf.example
 misc/MultiCraft.desktop
 lib/jsoncpp/json/json.h
 lib/jsoncpp/jsoncpp.cpp
 games/default/README.md
+games/default/.git/refs
+games/default/.git/logs
+games/default/.git/info
+games/default/.git/HEAD
 games/default/game.conf
 games/default/files/pie
 games/default/files/dye
@@ -1560,60 +1774,161 @@ builtin/intllib/lib.lua
 builtin/game/hunger.lua
 builtin/fstk/dialog.lua
 builtin/client/init.lua
+build/android/README.md
 util/sectors2sqlite.py
 util/minetestmapper.py
 textures/base/halo.png
+src/util/timetaker.cpp
+src/util/serialize.cpp
+src/util/md32_common.h
+src/util/areastore.cpp
+src/touchscreengui.cpp
+src/threading/thread.h
+src/threading/atomic.h
+src/mapgen_valleys.cpp
+src/mapgen_fractal.cpp
+src/inventorymanager.h
+src/intlGUIEditBox.cpp
+src/guiscalingfilter.h
+src/guiKeyChangeMenu.h
+src/guiChatConsole.cpp
+src/database-sqlite3.h
+src/database-redis.cpp
+src/database-leveldb.h
+src/database-files.cpp
+src/database-dummy.cpp
+src/content_nodemeta.h
+src/content_mapblock.h
 po/zh_TW/MultiCraft.po
 po/zh_CN/MultiCraft.po
 po/pt_BR/MultiCraft.po
-locale/jbo/LC_MESSAGES
+lib/lua/src/lopcodes.h
+lib/lua/src/lopcodes.c
+lib/lua/src/lmathlib.c
+lib/lua/src/lbaselib.c
+lib/lua/CMakeLists.txt
+lib/gmp/CMakeLists.txt
+.git/refs/heads/master
+.git/logs/refs/remotes
 doc/MultiCraftServer.6
 builtin/async/init.lua
+build/android/Start.sh
 util/travis/script.sh
 util/travis/common.sh
-locale/uk/LC_MESSAGES
-locale/tr/LC_MESSAGES
-locale/sw/LC_MESSAGES
-locale/sv/LC_MESSAGES
-locale/sl/LC_MESSAGES
-locale/ru/LC_MESSAGES
-locale/ro/LC_MESSAGES
-locale/pt/LC_MESSAGES
-locale/pl/LC_MESSAGES
-locale/nl/LC_MESSAGES
-locale/nb/LC_MESSAGES
-locale/ms/LC_MESSAGES
-locale/lt/LC_MESSAGES
-locale/ja/LC_MESSAGES
-locale/it/LC_MESSAGES
-locale/id/LC_MESSAGES
-locale/hu/LC_MESSAGES
-locale/fr/LC_MESSAGES
-locale/et/LC_MESSAGES
-locale/es/LC_MESSAGES
-locale/eo/LC_MESSAGES
-locale/dv/LC_MESSAGES
-locale/de/LC_MESSAGES
-locale/da/LC_MESSAGES
-locale/cs/LC_MESSAGES
-locale/ca/LC_MESSAGES
+src/voxelalgorithms.h
+src/unittest/test.cpp
+src/tileanimation.cpp
+src/threading/mutex.h
+src/threading/event.h
+src/serialization.cpp
+src/porting_android.h
+src/nameidmapping.cpp
+src/mg_decoration.cpp
+src/mapblock_mesh.cpp
+src/mainmenumanager.h
+src/guiVolumeChange.h
+src/guiFormSpecMenu.h
+src/genericobject.cpp
+src/defaultsettings.h
+src/content_mapnode.h
+src/cmake_config.h.in
+lib/lua/src/lundump.h
+lib/lua/src/lundump.c
+lib/lua/src/luaconf.h
+lib/lua/src/ltablib.c
+lib/lua/src/lstrlib.c
+lib/lua/src/lstring.h
+lib/lua/src/lstring.c
+lib/lua/src/lparser.h
+lib/lua/src/lparser.c
+lib/lua/src/lobject.h
+lib/lua/src/lobject.c
+lib/lua/src/loadlib.c
+lib/lua/src/llimits.h
+lib/lua/src/lauxlib.h
+lib/lua/src/lauxlib.c
 doc/texture_packs.txt
 doc/client_lua_api.md
 builtin/game/misc.lua
 builtin/game/item.lua
 builtin/game/init.lua
 builtin/game/auth.lua
+build/iOS/deps/sdk.sh
+build/android/gradlew
+build/android/app/src
 util/bump_version.sh
 textures/base/bg.png
+src/util/timetaker.h
+src/util/serialize.h
+src/util/numeric.cpp
+src/util/container.h
+src/util/areastore.h
+src/touchscreengui.h
+src/staticobject.cpp
+src/sound_openal.cpp
+src/serverobject.cpp
+src/remoteplayer.cpp
+src/nodemetadata.cpp
+src/mg_schematic.cpp
+src/mapgen_valleys.h
+src/mapgen_fractal.h
+src/irrlicht_changes
+src/intlGUIEditBox.h
+src/imagefilters.cpp
+src/guiChatConsole.h
+src/database-redis.h
+src/database-files.h
+src/database-dummy.h
+src/convert_json.cpp
+src/clientobject.cpp
+src/chat_interface.h
 po/jbo/MultiCraft.po
+lib/lua/src/lualib.h
+lib/lua/src/ltable.h
+lib/lua/src/ltable.c
+lib/lua/src/lstate.h
+lib/lua/src/lstate.c
+lib/lua/src/loslib.c
+lib/lua/src/liolib.c
+lib/lua/src/ldebug.h
+lib/lua/src/ldebug.c
+lib/lua/src/ldblib.c
 lib/intl/libintl.cpp
+.git/logs/refs/heads
 fonts/Retron2000.ttf
 doc/world_format.txt
 doc/Other License.md
 doc/menu_lua_api.txt
 builtin/game/hud.lua
+build/iOS/MultiCraft
+build/iOS/appicon.sh
+build/android/native
+build/android/gradle
 worlds/World 5 Flat
 util/travis/lint.sh
+src/util/string.cpp
+src/util/base64.cpp
+src/unittest/test.h
+src/tileanimation.h
+src/serialization.h
+src/porting_ios.cpp
+src/nameidmapping.h
+src/modifiedstate.h
+src/mg_decoration.h
+src/mapgen_flat.cpp
+src/mapblock_mesh.h
+src/localplayer.cpp
+src/irrlichttypes.h
+src/genericobject.h
+src/event_manager.h
+src/environment.cpp
+src/daynightratio.h
+src/content_sao.cpp
+src/content_cao.cpp
+src/content_abm.cpp
+src/client/tile.cpp
+src/clientmedia.cpp
+src/clientiface.cpp
 po/uk/MultiCraft.po
 po/tr/MultiCraft.po
 po/sw/MultiCraft.po
@@ -1648,30 +1963,180 @@ misc/winresource.rc
 misc/MultiCraft.svg
 misc/MultiCraft.ico
 misc/debpkg-control
+lib/lua/src/print.c
+lib/lua/src/linit.c
+lib/lua/src/lfunc.h
+lib/lua/src/lfunc.c
+lib/lua/src/ldump.c
+lib/lua/src/lcode.h
+lib/lua/src/lcode.c
 games/default/files
 doc/CONTRIBUTING.md
 builtin/fstk/ui.lua
+build/iOS/assets.sh
+src/util/pointer.h
+src/util/numeric.h
+src/staticobject.h
+src/sound_openal.h
+src/serverobject.h
+src/serverlist.cpp
+src/script/lua_api
+src/script/cpp_api
+src/remoteplayer.h
+src/reflowscan.cpp
+src/pathfinder.cpp
+src/nodemetadata.h
+src/mg_schematic.h
+src/mapgen_v7p.cpp
+src/imagefilters.h
+src/fontengine.cpp
+src/dungeongen.cpp
+src/convert_json.h
+src/CMakeLists.txt
+src/clientobject.h
+src/activeobject.h
+lib/lua/src/lzio.h
+lib/lua/src/lzio.c
+lib/lua/src/luac.c
+lib/lua/src/lmem.h
+lib/lua/src/lmem.c
+lib/lua/src/llex.h
+lib/lua/src/llex.c
+lib/lua/src/lapi.h
+lib/lua/src/lapi.c
 lib/intl/libintl.h
 lib/gmp/mini-gmp.h
 lib/gmp/mini-gmp.c
+games/default/.git
 clientmods/preview
+build/iOS/Start.sh
+src/wieldmesh.cpp
+src/util/thread.h
+src/util/string.h
+src/util/strfnd.h
+src/util/sha256.c
+src/util/sha1.cpp
+src/util/base64.h
+src/util/auth.cpp
+src/script/common
+src/quicktune.cpp
+src/porting_ios.h
+src/particles.cpp
+src/nodetimer.cpp
+src/mapsector.cpp
+src/mapgen_v7.cpp
+src/mapgen_v6.cpp
+src/mapgen_v5.cpp
+src/mapgen_flat.h
+src/localplayer.h
+src/inventory.cpp
+src/httpfetch.cpp
+src/guiMainMenu.h
+src/guiEngine.cpp
+src/filecache.cpp
+src/environment.h
+src/drawscene.cpp
+src/content_sao.h
+src/content_cao.h
+src/content_abm.h
+src/collision.cpp
+src/cloudparams.h
+src/client/tile.h
+src/clientmedia.h
+src/clientmap.cpp
+src/client/keys.h
+src/clientiface.h
 po/MultiCraft.pot
+lib/lua/src/lvm.h
+lib/lua/src/lvm.c
+lib/lua/src/lua.h
+lib/lua/src/lua.c
+lib/lua/src/ltm.h
+lib/lua/src/ltm.c
+lib/lua/src/lgc.h
+lib/lua/src/lgc.c
+lib/lua/src/ldo.h
+lib/lua/src/ldo.c
 lib/lua/COPYRIGHT
 lib/intl/Util.hpp
+.git/refs/remotes
+.git/objects/pack
+.git/objects/info
+.git/info/exclude
 games/default/doc
 doc/main_page.dox
 doc/Font Licenses
 client/serverlist
+build/iOS/Podfile
+build/android/app
 util/updatepo.sh
+src/util/srp.cpp
+src/util/cpp11.h
+src/settings.cpp
+src/serverlist.h
+src/rollback.cpp
+src/reflowscan.h
+src/profiler.cpp
+src/pathfinder.h
+src/mg_biome.cpp
+src/metadata.cpp
+src/mapgen_v7p.h
+src/mapblock.cpp
+src/irr_aabb3d.h
+src/guiTable.cpp
+src/gameparams.h
+src/fontengine.h
+src/exceptions.h
+src/dungeongen.h
+src/database.cpp
+src/craftdef.cpp
 lib/jsoncpp/json
+.git/packed-refs
+.git/description
 doc/protocol.txt
 doc/MultiCraft.6
 builtin/profiler
 builtin/mainmenu
 builtin/init.lua
+build/WindowsApp
 util/colors.txt
+src/wieldmesh.h
+src/version.cpp
+src/util/sha2.h
+src/util/sha1.h
+src/util/auth.h
+src/treegen.cpp
+src/subgame.cpp
+src/raycast.cpp
+src/quicktune.h
+src/porting.cpp
+src/particles.h
+src/nodetimer.h
+src/nodedef.cpp
+src/modalMenu.h
+src/minimap.cpp
+src/mapsector.h
+src/mapnode.cpp
+src/mapgen_v7.h
+src/mapgen_v6.h
+src/mapgen_v5.h
+src/keycode.cpp
+src/itemgroup.h
+src/itemdef.cpp
+src/inventory.h
+src/httpfetch.h
+src/guiEngine.h
+src/gettext.cpp
+src/filesys.cpp
+src/filecache.h
+src/drawscene.h
+src/constants.h
+src/collision.h
+src/clientmap.h
+src/cavegen.cpp
 misc/Info.plist
 lib/intl/README
+.git/refs/heads
 doc/lua_api.txt
 doc/LGPL-3.0.md
 doc/fst_api.txt
@@ -1683,62 +2148,145 @@ worlds/World 3
 worlds/World 2
 worlds/World 1
 util/wireshark
-locale/sr_Cyrl
+src/util/srp.h
+src/util/hex.h
+src/socket.cpp
+src/shader.cpp
+src/settings.h
+src/server.cpp
+src/rollback.h
+src/profiler.h
+src/player.cpp
+src/objdef.cpp
+src/mg_ore.cpp
+src/mg_biome.h
+src/metadata.h
+src/mapgen.cpp
+src/mapblock.h
+src/guiTable.h
+src/emerge.cpp
+src/database.h
+src/craftdef.h
+src/clouds.cpp
+src/client.cpp
+src/cguittfont
+src/camera.cpp
+.git/refs/tags
+.git/logs/refs
+.git/logs/HEAD
+.gitattributes
+CMakeLists.txt
 client/shaders
 builtin/common
 builtin/client
-bin/MultiCraft
+build/iOS/deps
 textures/base
+src/voxel.cpp
+src/version.h
+src/treegen.h
+src/threads.h
+src/threading
+src/subgame.h
+src/sound.cpp
+src/raycast.h
+src/porting.h
+src/noise.cpp
+src/nodedef.h
+src/minimap.h
+src/mapnode.h
+src/light.cpp
+src/keycode.h
+src/itemdef.h
+src/irr_v3d.h
+src/irr_v2d.h
+src/gettime.h
+src/gettext.h
+src/gamedef.h
+src/filesys.h
+src/debug.cpp
+src/cavegen.h
+.git/branches
 games/default
 doc/Readme.md
+cmake/Modules
+.clang-format
 builtin/async
-locale/pt_BR
-doc/Doxyfile
+build/android
+src/unittest
+src/tool.cpp
+src/socket.h
+src/shader.h
+src/server.h
+src/player.h
+src/objdef.h
+src/mods.cpp
+src/mg_ore.h
+src/mesh.cpp
+src/mapgen.h
+src/main.cpp
+src/game.cpp
+src/emerge.h
+src/config.h
+src/clouds.h
+src/client.h
+src/chat.cpp
+src/camera.h
+.git/objects
 builtin/game
 builtin/fstk
 util/travis
+.travis.yml
+src/voxel.h
+src/sound.h
+src/sky.cpp
+src/noise.h
+src/network
+src/map.cpp
+src/log.cpp
+src/light.h
+src/hud.cpp
+src/event.h
+src/debug.h
+src/ban.cpp
+lib/lua/src
 lib/jsoncpp
+.gitmodules
+.git/config
+src/tool.h
+src/script
+src/mods.h
+src/mesh.h
+src/game.h
+src/client
+src/chat.h
 po/sr_Cyrl
-locale/jbo
+.git/index
+.gitignore
+.git/hooks
 clientmods
+src/sky.h
+src/map.h
+src/log.h
+src/hud.h
+src/ban.h
 README.md
-locale/uk
-locale/tr
-locale/sw
-locale/sv
-locale/sl
-locale/ru
-locale/ro
-locale/pt
-locale/pl
-locale/nl
-locale/nb
-locale/ms
-locale/lt
-locale/ja
-locale/it
-locale/id
-locale/hu
-locale/fr
-locale/et
-locale/es
-locale/eo
-locale/dv
-locale/de
-locale/da
-locale/cs
-locale/ca
+.git/refs
+.git/logs
+.git/info
+.git/HEAD
+build/iOS
 textures
+src/util
 po/zh_TW
 po/zh_CN
 po/pt_BR
+.mailmap
 lib/intl
 lib/lua
 lib/gmp
 builtin
 worlds
 po/jbo
-locale
 client
 po/uk
 po/tr
@@ -1772,185 +2320,12 @@ po/ca
 po/be
 games
 fonts
+cmake
+build
 util
 misc
+.git
+src
 lib
 doc
-bin
 po
-END
-    if [ -z "$DESTINATION" ]; then
-        customDie "DESTINATION is blank."
-    fi
-    while read p; do
-        if [ -f "$DESTINATION/$p" ]; then
-            # echo "rm '$p'"
-            rm "$DESTINATION/$p"
-        fi
-    done <$manifestPath
-    while read p; do
-        if [ -d "$DESTINATION/$p" ]; then
-            rmdir --ignore-fail-on-non-empty "$DESTINATION/$p"
-        fi
-    done <$manifestPath
-    rm $manifestPath
-    rmdir --ignore-fail-on-non-empty /tmp/MultiCraft
-    rmdir --ignore-fail-on-non-empty "$DESTINATION"
-    echo "$0 --uninstall is complete."
-    exit 0
-fi
-
-if [ "@$INSTALL" = "@true" ]; then
-    echo "* installing from '$srcRepo' to '$DESTINATION'..."
-    if [ ! -f "`command -v rsync`" ]; then
-        customDie "You must first install rsync to use the install option."
-    fi
-    if [ ! -d "$DESTINATION" ]; then
-        mkdir -p "$DESTINATION" || customDie "mkdir -p '$DESTINATION' FAILED."
-    fi
-    if [ -f "$DESTINATION/multicraft.conf" ]; then
-        echo "  - The existing multicraft.conf will not be overwritten."
-        rsync -rt --info=progress2 --exclude-from "$artifactsPath" --exclude 'multicraft.conf' "$srcRepo/" "$DESTINATION" || customDie "rsync failed."
-    else
-        rsync -rt --info=progress2 --exclude-from "$artifactsPath" "$srcRepo/" "$DESTINATION" || customDie "rsync failed."
-    fi
-    rm $artifactsPath
-    rmdir --ignore-fail-on-non-empty /tmp/MultiCraft
-
-    if [ -f "$tryIcon" ]; then
-        dstIcon="$tryIcon"
-    else
-        echo "WARNING: rsync did not provide '$tryIcon'."
-        echo "  The shortcut will try to use the system's $dstIcon icon."
-    fi
-
-    if [ ! -f "$dstExe" ]; then
-        customDie "Install did not result in '$dstExe'."
-    fi
-    if [ ! -d "$dstShortcuts" ]; then
-        mkdir -p "$dstShortcuts" || customDie echo "mkdir -p '$dstShortcuts' FAILED."
-    fi
-cat > $dstShortcut <<END
-[Desktop Entry]
-Name=$iconCaption
-GenericName[en_US]=$iconCaption
-GenericName=$iconCaption
-Icon=$dstIcon
-Path=$dstBin
-Exec=$dstExe
-Categories=Game;Simulation;
-Comment[en_US]=Multiplayer infinite-world block sandbox
-Comment=Multiplayer infinite-world block sandbox
-Comment[de]=Mehrspieler-Sandkastenspiel mit unendlichen Blockwelten
-Comment[es]=Juego sandbox multijugador con mundos infinitos
-Comment[fr]=Jeu multijoueurs de type bac \xc3\xa0 sable avec des mondes infinis
-Comment[ja]=\xe3\x83\x9e\xe3\x83\xab\xe3\x83\x81\xe3\x83\x97\xe3\x83\xac\xe3\x82\xa4\xe3\x81\xab\xe5\xaf\xbe\xe5\xbf\x9c\xe3\x81\x97\xe3\x81\x9f\xe3\x80\x81\xe7\x84\xa1\xe9\x99\x90\xe3\x81\xae\xe4\xb8\x96\xe7\x95\x8c\xe3\x81\xae\xe3\x83\x96\xe3\x83\xad\xe3\x83\x83\xe3\x82\xaf\xe5\x9e\x8b\xe3\x82\xb5\xe3\x83\xb3\xe3\x83\x89\xe3\x83\x9c\xe3\x83\x83\xe3\x82\xaf\xe3\x82\xb9\xe3\x82\xb2\xe3\x83\xbc\xe3\x83\xa0\xe3\x81\xa7\xe3\x81\x99
-Comment[ru]=\xd0\x98\xd0\xb3\xd1\x80\xd0\xb0-\xd0\xbf\xd0\xb5\xd1\x81\xd0\xbe\xd1\x87\xd0\xbd\xd0\xb8\xd1\x86\xd0\xb0 \xd1\x81 \xd0\xb1\xd0\xb5\xd0\xb7\xd0\xb3\xd1\x80\xd0\xb0\xd0\xbd\xd0\xb8\xd1\x87\xd0\xbd\xd1\x8b\xd0\xbc \xd0\xbc\xd0\xb8\xd1\x80\xd0\xbe\xd0\xbc, \xd1\x81\xd0\xbe\xd1\x81\xd1\x82\xd0\xbe\xd1\x8f\xd1\x89\xd0\xb8\xd0\xbc \xd0\xb8\xd0\xb7 \xd0\xb1\xd0\xbb\xd0\xbe\xd0\xba\xd0\xbe\xd0\xb2
-Comment[tr]=Tek-\xc3\x87ok oyuncuyla k\xc3\xbcplerden sonsuz d\xc3\xbcnyalar in\xc5\x9fa et
-Keywords=sandbox;world;mining;crafting;blocks;nodes;multiplayer;roleplaying;
-MimeType=
-StartupNotify=false
-Terminal=false
-TerminalOptions=
-Type=Application
-X-DBUS-ServiceName=
-X-DBUS-StartupType=
-X-KDE-SubstituteUID=false
-X-KDE-Username=
-END
-if [ $? -eq 0 ]; then
-    echo "* Created $dstShortcut."
-else
-    customDie "Creating $dstShortcut FAILED."
-fi
-    echo
-    echo
-    echo "Installation is complete."
-    echo "Find $iconCaption in your application menu."
-    echo
-    echo "Uninstall:"
-    echo "$0 --uninstall"
-    echo
-    echo "Uninstall manually (game and data):"
-    echo "#This will delete all data such as worlds and screenshots!"
-    echo "rm -rf '$DESTINATION'"
-    echo "rm '$dstShortcut'"
-    echo
-    echo
-    echo "$0 is complete."
-    exit 0
-fi
-
-if [ ! -d "$srcRepo" ]; then
-    cd "$GIT_REPOS_DIR" || customDie "cd '$GIT_REPOS_DIR' FAILED"
-fi
-goodFlagFile=MultiCraft/CMakeLists.txt
-if [ -f "`command -v git`" ]; then
-    echo "In `pwd`..."
-    if [ ! -d "$BUILD_WHAT" ]; then
-        if [ "@$OFFLINE" = "@false" ]; then
-            git clone https://github.com/MultiCraft/MultiCraft.git || customDie "Cannot clone MultiCraft from `pwd`"
-        fi
-        cd "$BUILD_WHAT" || customDie "Cannot cd '$BUILD_WHAT' from `pwd`"
-    else
-        cd "$BUILD_WHAT" || customDie "Cannot cd '$BUILD_WHAT' from `pwd`"
-        if [ "@$OFFLINE" = "@false" ]; then
-            git pull || dieIfOnline "WARNING: Cannot pull '$BUILD_WHAT' from `pwd`"
-        fi
-    fi
-else
-    if [ ! -f "$goodFlagFile" ]; then
-        customDie "You are missing git, and offline install is not possible without in current directory (`pwd`)"
-    else
-        cd "$BUILD_WHAT" || usageDie "Cannot cd '$BUILD_WHAT' from `pwd`"
-    fi
-fi
-cd games || usageDie "cd games FAILED in `pwd`"
-rmdir --ignore-fail-on-non-empty default
-if [ ! -d "default" ]; then
-    if [ "@$OFFLINE" = "@false" ]; then
-        git clone https://github.com/MultiCraft/MultiCraft_game default || customDie "git clone https://github.com/MultiCraft/MultiCraft_game FAILED"
-    else
-        echo
-        echo
-        echo
-        echo "ERROR: default is not in `pwd`--worlds cannot load without a game."
-        echo
-        echo
-        sleep 2
-    fi
-else
-    if [ "@$OFFLINE" = "@false" ]; then
-        cd default || customDie "cd default FAILED in `pwd`"
-        git pull || customDie "git pull FAILED in `pwd`"
-        cd .. || customDie "cd .. FAILED in `pwd`"
-    fi
-fi
-cd .. || usageDie "cd .. FAILED in `pwd`"
-srcPath=.
-flag1="-DOpenGL_GL_PREFERENCE=GLVND"
-echo
-echo "Running cmake srcPath..."
-# NOTE: you can make a Code::Blocks project by adding the cmake option: -G"CodeBlocks - Unix Makefiles"
-# usually: cmake . -DOpenGL_GL_PREFERENCE=GLVND -DRUN_IN_PLACE=1 -DENABLE_GETTEXT=1 -DENABLE_FREETYPE=1 -DENABLE_LEVELDB=1
-cmake $srcPath $flag1 -G"CodeBlocks - Unix Makefiles" -DRUN_IN_PLACE=1 -DENABLE_GETTEXT=1 -DENABLE_FREETYPE=1 -DENABLE_LEVELDB=1 || usageDie "cmake failed in `pwd`. See any messages above for more information. Run ./install-minetest-build-deps.sh if you did not."
-echo
-echo "Running make..."
-make -j$(nproc) || customDie "make failed. See any messages above for more information. Run ./install-minetest-build-deps.sh if you did not."
-if [ -f "`pwd`/bin/MultiCraft" ]; then
-    echo "`pwd`/bin/MultiCraft"
-else
-    echo "`pwd`"
-fi
-#if [ -d "$GIT_REPOS_DIR/MultiCraft-poikilos" ]; then
-#    rsync -rt --info=progress2 --exclude 'multicraft.conf' "$srcRepo/" "$GIT_REPOS_DIR/MultiCraft-poikilos"
-#fi
-echo "$0 is complete."
-echo "To Install:"
-if [ "@$BUILD_WHAT" = "@$BUILD_WHAT_DEFAULT" ]; then
-    echo "  $0 --install"
-else
-    echo "  $0 --what '$BUILD_WHAT' --install"
-fi
-echo
-echo

@@ -24,7 +24,7 @@ fi
 # BROKEN: screen -t MinetestServer minetestserver --gameid ENLIVEN --worldname FCAGameAWorld
 # NOTE: if only title is set, screen -x must be used to resume, so use -S <name> to resume with -r <name>
 # screen -S MinetestServer minetestserver --gameid ENLIVEN --worldname FCAGameAWorld
-# screen -S MinetestServer /home/owner/minetest/bin/minetestserver --gameid ENLIVEN --worldname FCAGameAWorld
+# screen -S MinetestServer $HOME/minetest/bin/minetestserver --gameid ENLIVEN --worldname FCAGameAWorld
 MT_MYWORLD_NAME="FCAWorldB"
 MT_MYWORLD_DIR="$HOME/.minetest/worlds/$MT_MYWORLD_NAME"
 WORLD_MT_PATH="$MT_MYWORLD_DIR/world.mt"
@@ -57,8 +57,8 @@ fi
 # --worldname <world must be in normal worlds directory>
 # --world <any world directory can be specified>
 # --config <any minetest.conf>
-# cmd="$mts --gameid ENLIVEN --world /home/owner/.minetest/worlds/$MT_MYWORLD_NAME --config /home/owner/minetest/games/ENLIVEN/minetest.conf"
-cmd="$mts --gameid ENLIVEN --world /home/owner/.minetest/worlds/$MT_MYWORLD_NAME"
+# cmd="$mts --gameid ENLIVEN --world $HOME/.minetest/worlds/$MT_MYWORLD_NAME --config $HOME/minetest/games/ENLIVEN/minetest.conf"
+cmd="$mts --gameid ENLIVEN --world $HOME/.minetest/worlds/$MT_MYWORLD_NAME"
 enable_screen=true
 if [ -z "$screen_cmd" ]; then
     if [ -f "`command -v screen`" ]; then

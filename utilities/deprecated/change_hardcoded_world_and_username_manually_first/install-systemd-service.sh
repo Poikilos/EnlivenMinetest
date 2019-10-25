@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #This is a systemd startup unit, and will only work if your system is running systemd
 #(see https://wiki.ubuntu.com/SystemdForUpstartUsers or https://www.freedesktop.org/software/systemd/man/systemd.service.html
@@ -12,9 +12,9 @@
 # * should use machinectl shell instead of su or sudo as of 2016 updates to systemd
 # * Restart=on-abort and RestartSec=3 settings could be used (but probably shouldn't, so minetest crash can be noticed [and debugged more easily by viewing tail of debug log])
 # * Maybe for ExecStart, instead use:
-#   su owner "screen -S MinetestServer /home/owner/minetest/bin/minetestserver --gameid ENLIVEN --worldname FCAGameAWorld"
+#   su owner "screen -S MinetestServer $HOME/minetest/bin/minetestserver --gameid ENLIVEN --worldname FCAGameAWorld"
 #   OR
-#   sudo -u owner screen -S MinetestServer /home/owner/minetest/bin/minetestserver --gameid ENLIVEN --worldname FCAGameAWorld
+#   sudo -u owner screen -S MinetestServer $HOME/minetest/bin/minetestserver --gameid ENLIVEN --worldname FCAGameAWorld
 #   instead of User=owner
 
 #Update the unit:
@@ -23,7 +23,7 @@ if [ -f mts-ENLIVEN.service ]; then
 #clear old downloaded copy if exists in userspace
 rm mts-ENLIVEN.service
 fi
-wget https://github.com/poikilos/EnlivenMinetest/raw/master/etc/change_hardcoded_world_and_username_manually_first/mts-ENLIVEN.service
+wget https://github.com/poikilos/EnlivenMinetest/raw/master/utilities/deprecated/change_hardcoded_world_and_username_manually_first/mts-ENLIVEN.service
 echo "This will only work if you are using systemd."
 sudo mv -f mts-ENLIVEN.service /etc/systemd/system/
 #sudo chmod +x /etc/systemd/system/mts-ENLIVEN.service
