@@ -52,31 +52,45 @@ archive_debug() {
 }
 
 count=0
+last_not_found=
 if [ "$MT_DATA" = "$HOME" ]; then
-    if [ -f "$MT_DATA/debug.txt" ]; then
+    TRY_FILE="$HOME/debug.txt"
+    if [ -f "$TRY_FILE" ]; then
         let count++
-        archive_debug "$MT_DATA/debug.txt"
+        archive_debug "$TRY_FILE"
+    else
+        last_not_found="$TRY_FILE"
     fi
 else
-    if [ -f "$HOME/debug.txt" ]; then
+    TRY_FILE="$HOME/debug.txt"
+    if [ -f "$TRY_FILE" ]; then
         let count++
-        archive_debug "$HOME/debug.txt"
+        archive_debug "$TRY_FILE"
+    else
+        last_not_found="$TRY_FILE"
     fi
 fi
 
-if [ -f "$HOME/minetest/debug.txt" ]; then
+TRY_FILE="$HOME/minetest/debug.txt"
+if [ -f "$TRY_FILE" ]; then
     let count++
-    archive_debug "$HOME/minetest/debug.txt"
+    archive_debug "$TRY_FILE"
+else
+    last_not_found="$TRY_FILE"
 fi
 
-if [ -f "$HOME/minetest/bin/debug.txt" ]; then
+TRY_FILE="$HOME/minetest/bin/debug.txt"
+if [ -f "$TRY_FILE" ]; then
     let count++
-    archive_debug "$HOME/minetest/bin/debug.txt"
+    archive_debug "$TRY_FILE"
+else
+    last_not_found="$TRY_FILE"
 fi
 
 if [ "$count" -lt "1" ]; then
     echo
-    echo "- There is not a minetest log in a known location yet."
+    echo "- There is not yet a minetest log in a known location such as"
+    echo "  '$last_not_found'."
     echo "  Maybe it was already archived."
     echo
     echo
