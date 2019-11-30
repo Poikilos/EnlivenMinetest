@@ -1,6 +1,11 @@
 #!/bin/bash
 me=`basename "$0"`
 
+# Create a "fake branch" (base and patch, only containing files
+# selected, and automatically-gathered readme files if named as
+# expected)
+# --install    Install the specified patch.
+
 customDie() {
     echo
     if [ -z "$1" ]; then

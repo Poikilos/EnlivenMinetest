@@ -268,6 +268,80 @@ Qt5Widgets.dll
 
 ## Developer Notes
 
+### Not tried yet
+- [ ] icomoon.io: (generates a font using symbols you choose) has
+  symbols for websites and applications (more consistent and bold than
+  many in the noun project).
+- [ ] LineAwesome: outline version of FontAwesome's symbols
+- [ ] ForkAwesome: infinitely scalable vector graphics; 744 icons
+- [ ] github.com/RyanZim/EJS-Lint: add it to a quality script
+- [ ] How to save form data to MongoDB with Node.js [UPDATED]
+  <https://youtube.com/watch?v=rOfT83_eKWk>
+- [ ] getbootstrap.com/docs/4.3/components/badge/
+- [ ] Review octacian's [Per-player
+  Gamemodes](https://github.com/octacian/gamemode) and see if still
+  relevant.
+- [ ] Link to database(s) directly:
+  <https://itnext.io/express-knex-objection-painless-api-with-db-74512c484f0c>
+  - handles PostgreSQL/MySQL/SQLite/others
+- [ ] Fix attribution for Fireball:
+  Copyright (c) 2010-2011 Perttu Ahola <celeron55@gmail.com>
+  (CC BY-SA 3.0) according to
+  https://github.com/minetest/minetest/blob/stable-0.3/README.txt
+  - Found
+    [here](https://github.com/minetest/minetest/blob/stable-0.3/data/fireball.png)
+    thanks to [PilzAdam](https://github.com/PilzAdam/mobs/issues/11)
+- [ ] [MERN stack A to Z: Part 1](https://blog.logrocket.com/mern-stack-a-to-z-part-1/)
+- [ ] Strapi: open-source headless Node.js CMS
+- [ ] augmented-ui: "Futuristic, cyberpunk-inspired UI shaping for any
+  element; Add the "augmented-ui" attribute to equip the augs"
+- [ ] optimize or improve decoblocks
+  - Is it the same as the one from decoblocks game? See:
+    <https://minetest.org/forum/viewtopic.php?f=15&t=6420&sid=21c1c7e61a1b4e61661ceaae3b41519a>
+- [ ] recommend fork of misfit model 3d to modders, if it works
+  - <https://github.com/zturtleman/mm3d/issues?q=is%3Aopen+is%3Aissue>
+  - Blender 2.8 replaces 2.79 on Fedora 30 now, so export plugins for
+    Blender to b3d do not work yet
+    - [ ] See if Joric's is easier to port or already ported.
+- [ ] Unblock launcher automatically during install
+  - <https://stackoverflow.com/questions/6374673/unblock-file-from-within-net-4-c-sharp>
+- [ ] make new non-magical items based on traxie21 potions if that is
+  a good start.
+- [ ] Review the state of
+  [More-creeps-and-weirdoes-blender-models](https://github.com/poikilos/More-creeps-and-weirdoes-blender-models)
+  and see if any more work is necessary
+- [ ] Work on X import plugin. See
+  Blender API [Best
+  Practice](https://docs.blender.org/api/current/info_best_practice.html)
+- [ ] Read <https://oldcoder.org/general/artwork/watercodia.html>
+- [ ] Review armor settings and ensure they don't interfere with
+  [Kinetic Combat](https://wiki.minetest.org/main/ideas/kinetic_combat.html) plans.
+  - <https://github.com/stujones11/minetest-3d_armor/blob/master/settingtypes.txt>
+  - [[Modpack] 3D Armor [0.4.8] [minetest-3d_armor]](https://forum.minetest.org/viewtopic.php?t=4654)
+- [ ] Review MineClone2's ["Missing features in
+  Minetest..."](https://repo.or.cz/MineClone/MineClone2.git/blob_plain/HEAD:/MISSING_ENGINE_FEATURES.md)
+  - See which were implemented in MineClone2 and how.
+- [ ] Review user-submitted mob textures at [Post your - Textures for
+  Mobs](https://forum.minetest.org/viewtopic.php?f=4&t=10623) and use
+  any that are better.
+- [ ] Review textures packs and consider using one instead of default,
+  or including one or more, or adding interface to add more
+  automatically.
+  - [PixelPerfection - By XSSheep](https://forum.minetest.org/viewtopic.php?t=14289)
+  - [[16x] PixelBOX Reloaded](https://forum.minetest.org/viewtopic.php?t=14132)
+  - Only on .net site: [[16x] VILJA PIX 2.0 (modified by Jozet)](https://forum.minetest.net/viewtopic.php?t=19881)
+  - [mini8x](https://forum.minetest.org/viewtopic.php?t=14633)
+  - Only on .net site: [[16px] Isabella II - Minetest Community Edition](https://forum.minetest.net/viewtopic.php?t=21523)
+- [ ] Review free part of LinkedIn "The Composite Pattern" course:
+  <https://www.linkedin.com/learning/node-js-design-patterns/the-composite-pattern>
+- [ ] Try Jordach's [[Game] Big Freaking Dig
+  [0.5]](https://forum.minetest.org/viewtopic.php?f=15&t=9036) on Final
+  Minetest.
+- [ ] (only on .net site) Review issues regarding
+  [damage_per_second](https://forum.minetest.net/viewtopic.php?f=6&t=18369)
+- [ ] Review notes from "Node.js Design Patterns" course:
+  ~/ownCloud/Student/LinkedIn/Node.js-DesignPatterns/notes.md
+
 ### minetest.org build speeds
 * Intel i7-4770K
   * libraries ~3m
