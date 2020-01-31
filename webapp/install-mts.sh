@@ -220,6 +220,11 @@ if [ -d "$dest_enliven_mods" ]; then
     pushd "$dest_enliven_mods" || customDie "'pushd \"$dest_enliven_mods\"' failed."
     install_git_mod_here https://github.com/BenjieFiftysix/sponge.git sponge
     install_git_mod_here https://github.com/poikilos/metatools.git metatools
+    install_git_mod_here https://github.com/MinetestForFun/fishing.git fishing
+    install_git_mod_here https://github.com/minetest-mods/throwing.git throwing
+    install_git_mod_here https://github.com/minetest-mods/ccompass.git ccompass
+    install_git_mod_here https://github.com/minetest-mods/throwing_arrows.git throwing_arrows
+
     popd || customDie "'popd' failed."
 else
     enliven_warning="$enliven_warning* WARNING: Installing ENLIVEN mods was skipped since '$dest_enliven_mods' does not exist."
