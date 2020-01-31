@@ -15,6 +15,25 @@ $1
 END
     exit 1
 }
+
+install_git_mod_here(){
+    git_url="$1"
+    mod_name="$2"
+    if [ -z "$git_url" ]; then
+        customDie "install_git_mod_here requires a URL."
+    fi
+    if [ -z "$mod_name" ]; then
+        customDie "install_git_mod_here requires a mod name as the second parameter."
+    fi
+    if [ ! -d "$mod_name" ]; then
+        git clone "$git_url" "$mod_name"
+    else
+        cd "$mod_name" || customDie "(install_git_mod_here) 'cd \"$mod_name\"' failed in '`pwd`'"
+        echo "* updating '`pwd`' from git..."
+        git pull || echo "WARNING: (install_git_mod_here) 'git pull' failed in '`pwd`'"
+        cd .. || customDie "(install_git_mod_here) 'cd ..' failed in '`pwd`'"
+    fi
+}
 enable_server=true
 dest_programs="$HOME"
 #NOTE: $HOME is still used further down, for $HOME/.* and $HOME/i_am_dedicated_minetest_server flag file (which can be empty)
@@ -168,6 +187,7 @@ dest_enliven="$dest_programs/minetest/games/ENLIVEN"
 skins_dst="$dest_enliven/mods/codercore/coderskins/textures"
 skins_bak="$HOME/Backup/ENLIVEN/mods/codercore/coderskins/textures"
 official_game_mod_list="coderbuild codercore coderedit coderfood codermobs decorpack mtmachines"
+dest_enliven_mods="$dest_enliven/mods"
 if [ "@$enable_clean" = "@true" ]; then
     echo "* cleaning destination..."
     if [ -d "$dest_official_game" ]; then
@@ -184,10 +204,25 @@ if [ "@$enable_clean" = "@true" ]; then
         fi
         for var in $official_game_mod_list
         do
-            echo "  - erasing '$dest_enliven/$var'..."
-            rm -Rf "$dest_enliven/$var"
+            if [ -d "$dest_enliven_mods/$var" ]; then
+                echo "  - erasing '$dest_enliven_mods/$var'..."
+                rm -Rf "$dest_enliven_mods/$var" || customDie "rm -Rf \"$dest_enliven_mods/$var\" failed"
+                # See rsync further down for installation of each of these
+            else
+                echo "  - already clean: no '$dest_enliven_mods/$var'..."
+            fi
         done
     fi
+fi
+
+enliven_warning=""
+if [ -d "$dest_enliven_mods" ]; then
+    pushd "$dest_enliven_mods" || customDie "'pushd \"$dest_enliven_mods\"' failed."
+    install_git_mod_here https://github.com/BenjieFiftysix/sponge.git sponge
+    install_git_mod_here https://github.com/poikilos/metatools.git metatools
+    popd || customDie "'popd' failed."
+else
+    enliven_warning="$enliven_warning* WARNING: Installing ENLIVEN mods was skipped since '$dest_enliven_mods' does not exist."
 fi
 if [ ! -z "$link_target" ]; then
     install_dest="$link_target"
@@ -201,7 +236,7 @@ if [ ! -z "$link_target" ]; then
     fi
 else
     echo "Installing minetest directory to '$dest_programs'..."
-    rsync -rt minetest/ $install_dest || customDie "Cannot rsync files from installer data `pwd`/minetest/ to $install_dest"
+    rsync -rt --info=progress2 minetest/ $install_dest || customDie "Cannot rsync files from installer data `pwd`/minetest/ to $install_dest"
 fi
 if [ ! -f "$dest_flag_file" ]; then
     customDie "ERROR: not complete--couldn't install binary as '$dest_flag_file'"
@@ -219,7 +254,7 @@ else
 
     for mod_name in $official_game_mod_list
     do
-        echo "  - updating $mod_name..."
+        echo "  - updating $mod_name from '$flag_dir/mods/$mod_name' to '$dest_programs/minetest/games/ENLIVEN/mods'..."
         rsync -rt --delete "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
     done
     # cp -f "$flag_dir/mods/LICENSE" "$dest_programs/minetest/games/ENLIVEN/mods/LICENSE"
@@ -467,6 +502,6 @@ ERROR: enable_run_after_compile is true, but
 END
     fi
 fi
-
+echo "$enliven_warning"
 echo
 echo
