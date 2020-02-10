@@ -15,6 +15,27 @@ $1
 END
     exit 1
 }
+customWarn() {
+    cat <<END
+
+WARNING:
+$1
+
+
+END
+    echo -en "\a" > /dev/tty0  # beep (You must specify a tty path if not in console mode)
+    echo "Press Ctrl+C to cancel..."
+    sleep 1
+    echo -en "\a" > /dev/tty0
+    echo "3..."
+    sleep 1
+    echo -en "\a" > /dev/tty0
+    echo "2..."
+    sleep 1
+    echo -en "\a" > /dev/tty0
+    echo "1..."
+    sleep 1
+}
 
 install_git_mod_here(){
     git_url="$1"
@@ -162,6 +183,7 @@ END
     end=`date +%s`
     compile_time=$((end-start))
     echo "Compiling the program finished in $compile_time seconds."
+    cp release.txt minetest/ | customWarn "Cannot copy `pwd`/release.txt to `pwd`/minetest/"
 else
     echo "* using existing minetest..."
 fi
@@ -453,7 +475,7 @@ fi
 popd
 settings_dump="`pwd`/settings-dump.txt"
 settings_types_list="`pwd`/settingtypes-list.txt"
-#grep -r `pwd`/linux-minetest-kit/minetest/games/Bucket_Game -e "setting_get" > $settings_dump
+# grep -r `pwd`/linux-minetest-kit/minetest/games/Bucket_Game -e "setting_get" > $settings_dump
 pushd linux-minetest-kit/minetest/games
 if [ ! -f "$settings_dump" ]; then
     echo "Creating $settings_dump..."

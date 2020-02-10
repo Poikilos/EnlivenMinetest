@@ -14,12 +14,58 @@ in_use_name=minetest
 #  killall $in_use_name
 #fi
 url=https://downloads.minetest.org
+release_txt_url=http://downloads.minetest.org/release.txt
+customWarn() {
+    cat <<END
+
+WARNING:
+$1
+
+
+END
+    echo -en "\a" > /dev/tty0  # beep (You must specify a tty path if not in console mode)
+    echo "Press Ctrl+C to cancel..."
+    sleep 1
+    echo -en "\a" > /dev/tty0
+    echo "3..."
+    sleep 1
+    echo -en "\a" > /dev/tty0
+    echo "2..."
+    sleep 1
+    echo -en "\a" > /dev/tty0
+    echo "1..."
+    sleep 1
+}
 
 customDie () {
     echo "ERROR: Cannot continue since"
     echo "$1"
     exit 1
 }
+available_release_line=`curl http://downloads.minetest.org/release.txt | head -n 1`
+# echo "Release data: $available_release_line"  # "Release *" where * is YYMMDD
+# See <https://unix.stackexchange.com/questions/174037/extracting-the-second-word-from-a-string-variable>
+available_version=$(echo $available_release_line | awk '{print $2}')
+# OR: available_version="${available_release_line##* }"  # get second word
+if [ ${#available_version} -ne 6 ]; then
+    customDie "The available version is not recognized: $available_version"
+fi
+installed_release_line=`head -n 1 ~/minetest/release.txt`
+installed_version=$(echo $installed_release_line | awk '{print $2}')
+compiled_release_line=`head -n 1 ~/minetest/release.txt`
+compiled_version=$(echo $compiled_release_line | awk '{print $2}')
+echo "installed_version: $installed_version"
+echo "compiled_version: $compiled_version"
+echo "available_version: $available_version"
+if [ "@$installed_version" = "@$available_version" ]; then
+    echo "You already have the latest version installed."
+    exit 1
+fi
+if [ "@$compiled_version" -ne "@$installed_version" ]; then
+    echo "ERROR: You have not yet installed version $compiled_version which you already compiled (you have installed $installed_version)."
+    echo "You should run ./install-mts.sh instead (with --client option if you want more than minetestserver)"
+    exit 2
+fi
 enable_offline=false
 for var in "$@"
 do

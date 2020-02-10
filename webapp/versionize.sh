@@ -16,6 +16,27 @@ if [ -z "$original_src_path" ]; then
     echo "You must specify a zip file path OR directory path."
     exit 1
 fi
+customWarn() {
+    cat <<END
+
+WARNING:
+$1
+
+
+END
+    echo -en "\a" > /dev/tty0  # beep (You must specify a tty path if not in console mode)
+    echo "Press Ctrl+C to cancel..."
+    sleep 1
+    echo -en "\a" > /dev/tty0
+    echo "3..."
+    sleep 1
+    echo -en "\a" > /dev/tty0
+    echo "2..."
+    sleep 1
+    echo -en "\a" > /dev/tty0
+    echo "1..."
+    sleep 1
+}
 customDie() {
     echo
     echo "ERROR:"
@@ -75,17 +96,24 @@ elif [ -d "$try_path" ]; then
 else
     customDie "$try_path is not a file or directory."
 fi
-if [ ! -f "$src_path/release.txt" ]; then
-    echo
-    echo
-    echo "* '$src_path' remains$destroy_msg."
-    customDie "Missing $src_path/release.txt"
+release_txt_path="$src_path/minetest/release.txt"
+if [ ! -f "$release_txt_path" ]; then
+    try_release_txt_path="$src_path/release.txt"
+    if [ ! -f "$try_release_txt_path" ]; then
+        echo
+        echo
+        echo "* '$src_path' remains$destroy_msg."
+        customDie "Missing $release_txt_path (or $src_path/release.txt)"
+    else
+        echo "Missing $release_txt_path (usually copied from $try_release_txt_path by EnlivenMinetest compille script(s)); reverting to $try_release_txt_path"
+        release_txt_path="$try_release_txt_path"
+    fi
 fi
-release_line="`head -n 1 $src_path/release.txt`"
+release_line="`head -n 1 $release_txt_path`"
 version="${release_line##* }"  # get second word
 version_len=${#version}
 if [ "$version_len" -ne "6" ]; then
-    customDie "Unexpected version scheme (not 6 characters): '$version'"
+    customDie "Unexpected version scheme (not 6 characters): '$version' near '$release_line' in file $release_txt_path"
 fi
 echo "src_name=$src_name"
 echo "src_path=$src_path"
@@ -103,6 +131,9 @@ if [ ! -z "$src_archive" ]; then
     extension="${filename##*.}"
     filename="${filename%.*}"
     dst_archive="$versions_path/$filename-$version.$extension"
+    if [ -f "$dst_archive" ]; then
+        customWarn "This will overwrite '$dst_archive' with '$src_archive'."
+    fi
     if [ -f "$src_archive" ]; then
         mv "$src_archive" "$dst_archive" || customDie "Cannot mv '$src_archive' '$dst_archive'"
         echo "* moved archive to '$dst_archive'"
