@@ -1,27 +1,31 @@
 #!/usr/bin/env python
+"""
+collisionbox Lua generator
+1. Select a mob mesh or an Empty
+2. Press the "Run Script" button below
+   - The script copies the collisionbox the the clipboard.
+   - An 'Empty' with the object's name will appear,
+     which visually represents the collisionbox
+     (which MUST be symmetrical on horizontal axes and
+     centered at 0,0,0 for Minetest, since
+     collision boxes to not turn).
+3. To adjust, scale the Empty.collisionbox.* object
+   in Blender then repeat steps 1-2. To keep the Empty
+   symmetrical for Minetest, scale ONLY with one
+   of the following hotkey sequences (with
+   the mouse pointer in the 3D View):
+   - 's'
+   - 's', 'z'
+   - 's', "shift z"
 
-# collisionbox Lua generator
-# 1. Select a mob mesh or an Empty
-# 2. Press the "Run Script" button below
-# - The script copies the collisionbox the the clipboard.
-# - An 'Empty' with the object's name will appear,
-#   which visually represents the collisionbox
-#   (which MUST be symmetrical on horizontal axes and
-#   centered at 0,0,0 for Minetest, since
-#   collision boxes to not turn).
-# 3. To adjust, scale the Empty.collisionbox.* object
-#    in Blender then repeat steps 1-2. To keep the Empty
-#    symmetrical for Minetest, scale ONLY with one
-#    of the following hotkey sequences (with
-#    the mouse pointer in the 3D View):
-#    - 's'
-#    - 's', 'z'
-#    - 's', "shift z"
+How to use: Paste this script into a Blender"
+Text Editor panel, select an object,"
+press the 'Run Script' button")
+"""
+print("""
 
-print("How to use: Paste this script into a Blender"
-      " Text Editor panel, select an object,"
-      " press the 'Run Script' button")
-
+STARTING generate_lua_collisionbox...
+""")
 y_up = True
 enable_minetest = True
 enable_lowest_h = False
@@ -36,19 +40,18 @@ v = 2  # vertical axis index
 #if y_up:
 #    hs = (0, 2)
 #    v = 1
-
-import bpy
+try:
+    import bpy
+except ImportError:
+    print(__doc__)
+    exit(1)
 # from mathutils import Matrix
 from mathutils import Vector
 # from mathutils import Euler
 
 def calculate_one():
     ob1 = None
-    try:
-        ob1 = obj.select_get()
-    except:
-        # < 2.8
-        ob1 = bpy.context.scene.objects.active
+    ob1 = bpy.context.active_object  # works with 2.7 or 2.8
     calculate_collisionbox(ob1)
 
 
@@ -71,11 +74,10 @@ class MessageBox(bpy.types.Operator):
                                                           width=400)
 
     def draw(self, context):
-        self.layout.label(self.message)
-        self.layout.label("")
+        self.layout.label(text=self.message)
+        self.layout.label(text="")
         # col = self.layout.column(align = True)
         # col.prop(context.scene, "my_string_prop")
-
 
 bpy.utils.register_class(MessageBox)
 
@@ -84,14 +86,17 @@ msgSuffix = ""
 def calculate_collisionbox(ob1):
     global msgSuffix
     mesh = None
+    if ob1 is None:
+        if len(bpy.context.selected_objects) > 0:
+            ob1 = bpy.context.selected_objects[0]
     if ob1 is not None:
         mesh = ob1.data
-
     if ob1 is None:
         msg = "Nothing is selected."
         bpy.ops.message.messagebox('INVOKE_DEFAULT', message = msg)
     elif (mesh is not None) and (not hasattr(mesh, 'vertices')):
-        msg = "Collision box for armatures cannot be calculated."
+        msg = ("A collision box cannot be calculated for a non-mesh"
+               " object.")
         bpy.ops.message.messagebox('INVOKE_DEFAULT', message = msg)
     else:
         # extents1 = ob1.dimensions.copy()
@@ -159,10 +164,17 @@ def calculate_collisionbox(ob1):
                 # i += 1
         else:
             extents1 = ob1.scale.copy()
+            print(dir(ob1))
             # Object is an empty, so scale up for Minetest
-            extents1.x = extents1.x * (ob1.empty_draw_size * 2.0)
-            extents1.y = extents1.y * (ob1.empty_draw_size * 2.0)
-            extents1.z = extents1.z * (ob1.empty_draw_size * 2.0)
+            try:
+                extents1.x = extents1.x * (ob1.empty_display_size * 2.0)
+                extents1.y = extents1.y * (ob1.empty_display_size * 2.0)
+                extents1.z = extents1.z * (ob1.empty_display_size * 2.0)
+            except AttributeError:
+                # Blender 2.7
+                extents1.x = extents1.x * (ob1.empty_draw_size * 2.0)
+                extents1.y = extents1.y * (ob1.empty_draw_size * 2.0)
+                extents1.z = extents1.z * (ob1.empty_draw_size * 2.0)
             mins[0] = obj1Loc.x - extents1.x / 2.0
             maxes[0] = obj1Loc.x + extents1.x / 2.0
             mins[1] = obj1Loc.y - extents1.y / 2.0
@@ -208,11 +220,23 @@ def calculate_collisionbox(ob1):
         loc = (centers[0], centers[1], centers[2])
         bpy.ops.object.add(type='EMPTY', radius=.5, location=loc)
         collisionboxName = "Empty.collisionbox." + ob1.name
-        newEmpty = bpy.context.scene.objects.active
+        newEmpty = bpy.context.object  # works with 2.7 or 2.8
+        # newEmpty = bpy.context.selected_objects[0]
+        try:
+            pass
+            # bpy.context.scene.collection.objects.link(newEmpty)
+        except AttributeError:
+            # Blender 2.7
+            pass
         newEmpty.name = collisionboxName
         newEmpty.location = (centers[0], centers[1], centers[2])
-        newEmpty.empty_draw_type = 'CUBE'
-        # newEmpty.empty_draw_size = (sizes[0], sizes[1], sizes[2])
+        try:
+            newEmpty.empty_display_type = 'CUBE'
+            # newEmpty.empty_display_size = (sizes[0], sizes[1], sizes[2])
+        except AttributeError:
+            # Blender 2.7:
+            newEmpty.empty_draw_type = 'CUBE'
+            # newEmpty.empty_draw_size = (sizes[0], sizes[1], sizes[2])
         # newEmpty.dimensions = (sizes[0], sizes[1], sizes[2])
         # newEmpty.scale = (sizes[0]/2.0, sizes[1]/2.0, sizes[2]/2.0)
         newEmpty.scale = (sizes[0], sizes[1], sizes[2])
