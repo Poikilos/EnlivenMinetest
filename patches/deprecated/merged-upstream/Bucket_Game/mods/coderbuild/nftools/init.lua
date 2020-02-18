@@ -12,7 +12,7 @@ minetest.register_node ("nftools:light", {
         cracky = 3, oddly_breakable_by_hand=2,
     } ,
 
-    sounds = default.node_sound_stone_defaults() ,
+    sounds = default.sound_stone() ,
 })
 
 -- ===================================================================
@@ -49,7 +49,7 @@ minetest.register_node ("nftools:stool",{
     tiles = {"nftools_stool.png"},
     drop = 'nftools:stool',
     groups = {choppy=2,oddly_breakable_by_hand=2,flammable=3,wood=1},
-    sounds = default.node_sound_wood_defaults(),
+    sounds = default.sound_wood(),
     drawtype="nodebox",
     paramtype = "light",
     node_box = {
@@ -72,7 +72,7 @@ minetest.register_node ("nftools:quartz_crystals", {
     tiles = {"nftools_quartz_crystal.png"},
     is_ground_content = true,
     groups = {cracky=1,level=2},
-    sounds = default.node_sound_stone_defaults(),
+    sounds = default.sound_stone(),
     drawtype="nodebox",
     paramtype = "light",
     paramtype2="facedir",
@@ -135,6 +135,9 @@ minetest.register_ore({
     y_min          =     -256 ,
 })
 
+minetest.register_alias ("nftools:amethyst_ore",
+                         "nftools:stone_with_blackopal")
+
 -- ===================================================================
 
 minetest.register_ore ({
@@ -157,8 +160,6 @@ minetest.register_craftitem ("nftools:bismuth", {
     inventory_image = "nftools_bismuth.png",
 })
 
-minetest.register_alias ("nftools:alexandrite", "nftools:bismuth")
-
 minetest.register_node ("nftools:stone_with_bismuth", {
     description = "Raw Bismuth",
     tiles = {"default_stone.png^nftools_mineral_bismuth.png"},
@@ -166,8 +167,6 @@ minetest.register_node ("nftools:stone_with_bismuth", {
     groups = {cracky=1},
     drop = "nftools:stone_with_bismuth",
 })
-
-minetest.register_alias ("nftools:alexandrite_ore", "nftools:stone_with_bismuth")
 
 -- ===================================================================
 -- Smelting (only metals).
@@ -191,8 +190,6 @@ minetest.register_node ("nftools:stone_with_amber", {
 
 minetest.register_alias ("nftools:amber",
                          "nftools:stone_with_amber")
--- (formerly called amber but dropped chip; use conventions instead)
-
 
 minetest.register_craftitem ("nftools:amber_chip", {
     description = "Amber",
@@ -210,14 +207,10 @@ minetest.register_node ("nftools:stone_with_turquoise", {
     drop = "nftools:turquoise",
 })
 
-minetest.register_alias ("nftools:aquamarine_ore", "nftools:stone_with_turquoise")
-
 minetest.register_craftitem ("nftools:turquoise", {
     description = "Turquoise",
     inventory_image = "nftools_turquoise.png",
 })
-
-minetest.register_alias ("nftools:aquamarine", "nftools:turquoise")
 
 -- ===================================================================
 -- Black Opal (formerly Amethyst).
@@ -227,8 +220,6 @@ minetest.register_craftitem ("nftools:blackopal", {
     inventory_image = "nftools_blackopal.png",
 })
 
-minetest.register_alias ("nftools:amethyst", "nftools:blackopal")
-
 minetest.register_node ("nftools:stone_with_blackopal", {
     description = "Rough Black Opal",
     tiles = {"default_stone.png^nftools_mineral_blackopal.png"},
@@ -236,8 +227,6 @@ minetest.register_node ("nftools:stone_with_blackopal", {
     groups = {cracky=1},
     drop = "nftools:blackopal",
 })
-
-minetest.register_alias ("nftools:amethyst_ore", "nftools:stone_with_blackopal")
 
 -- ===================================================================
 -- Sunflower.

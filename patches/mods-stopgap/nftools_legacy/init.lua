@@ -12,5 +12,6 @@ minetest.register_alias("nftools:amber", "nftools:stone_with_amber")
 minetest.register_alias("nftools:aquamarine_ore", "nftools:stone_with_turquoise")
 minetest.register_alias("nftools:aquamarine", "nftools:turquoise")
 
-minetest.register_alias("nftools:amethyst_ore", "nftools:stone_with_blackopal")
+
+-- minetest.register_alias("nftools:amethyst_ore", "nftools:stone_with_blackopal")  -- merged with Bucket_Game
 minetest.register_alias("nftools:amethyst", "nftools:blackopal")
