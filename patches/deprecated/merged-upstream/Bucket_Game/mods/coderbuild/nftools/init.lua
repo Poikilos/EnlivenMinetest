@@ -305,6 +305,7 @@ end
 minetest.register_tool ("nftools:scythe", {
     description = "Scythe",
     inventory_image = "nftools_tool_scythe.png",
+    wield_scale = {x = 2, y = 2, z = .25},
     tool_capabilities = {
         full_punch_interval = 0.8,
         max_drop_level=1,
@@ -330,6 +331,7 @@ minetest.register_craft ({
 minetest.register_tool ("nftools:mace", {
     description = "Mace",
     inventory_image = "nftools_tool_mace.png",
+    wield_scale = {x = 2, y = 2, z = .75},
     tool_capabilities = {
         full_punch_interval = 1.5,
         max_drop_level=1,
@@ -355,6 +357,7 @@ minetest.register_craft ({
 minetest.register_tool ("nftools:battleaxe", {
     description = "Battle Axe",
     inventory_image = "nftools_tool_battleaxe.png",
+    wield_scale = {x = 2, y = 2, z = .25},
     tool_capabilities = {
         full_punch_interval = 0.8,
         max_drop_level=1,
