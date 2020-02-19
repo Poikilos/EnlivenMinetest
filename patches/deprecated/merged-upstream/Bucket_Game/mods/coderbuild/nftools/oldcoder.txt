@@ -36,11 +36,16 @@ Poikilos  has  made  changes  designed to  make  "nftools"  complement
   (change nftools_*ore.png to nftools_mineral_*.png,
   nftools:*_ore to nftools:stone_with_*,
   nftools:amber to nftools:stone_with_amber)
-* The old minerals, converted:
-  `nftools:amethyst, nftools:black_opal`
-  `nftools:alexandrite_ore, nftools:bismuth`
-  `nftools:aquamarine, nftools:turquoise`
-  (for aliases see nftools_legacy in EnlivenMinetest)
+* The old minerals, converted
+  (* = requires EnlivenMinetest/patches/mods-stopgap/nftools_legacy now):
+  - * `minetest.register_alias("nftools:alexandrite_ore", "nftools:stone_with_bismuth")`
+  - * `minetest.register_alias("nftools:alexandrite", "nftools:bismuth")`
+  - `minetest.register_alias("nftools:amber", "nftools:stone_with_amber")  -- merged with Bucket_Game`
+    (formerly called amber but dropped chip; use conventions instead)
+  - * `minetest.register_alias("nftools:aquamarine_ore", "nftools:stone_with_turquoise")`
+  - * `minetest.register_alias("nftools:aquamarine", "nftools:turquoise")`
+  - `minetest.register_alias("nftools:amethyst_ore", "nftools:stone_with_blackopal")  -- merged with Bucket_Game`
+  - * `minetest.register_alias("nftools:amethyst", "nftools:blackopal")`
 
 Other changes:
 
