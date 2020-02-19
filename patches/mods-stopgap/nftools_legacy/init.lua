@@ -6,7 +6,7 @@
 minetest.register_alias("nftools:alexandrite_ore", "nftools:stone_with_bismuth")
 minetest.register_alias("nftools:alexandrite", "nftools:bismuth")
 
-minetest.register_alias("nftools:amber", "nftools:stone_with_amber")
+-- minetest.register_alias("nftools:amber", "nftools:stone_with_amber")  -- merged with Bucket_Game
 -- (formerly called amber but dropped chip; use conventions instead)
 
 minetest.register_alias("nftools:aquamarine_ore", "nftools:stone_with_turquoise")
