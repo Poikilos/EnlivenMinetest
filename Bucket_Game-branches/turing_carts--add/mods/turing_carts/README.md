@@ -1,7 +1,6 @@
 # Turing Carts
 by Poikilos (based on carts by PilzAdam, SmallJoker, stujones11)
 
-
 ## Features
 * 3D Rails and New Cart
 * Separate textures to reveal parts of mesh for different cart types
@@ -42,6 +41,13 @@ by Poikilos (based on carts by PilzAdam, SmallJoker, stujones11)
 
 
 ## Developer Notes
+### Related Projects
+- [Locomotion-Pack](https://github.com/jordan4ibanez/Locomotion-Pack)
+  - based on boost_cart
+  - redone card based on github.com/stujones11/railcart
+- [open_minecart](https://github.com/jordan4ibanez/open_minecart)
+  - [ ] Look at the code, then add notes here.
+
 ### Possible Alternate Names
 - dywat_rails: Don't You Want These Rails?
 
@@ -54,6 +60,5 @@ by Poikilos (based on carts by PilzAdam, SmallJoker, stujones11)
   PR#6825](https://github.com/minetest/minetest/pull/6825) (smooth
   turning) into account.
 
-
-## References
+### References
 * Ridable miniature railway. Retrieved Jun 12, 2019 from Wikipedia website <https://en.wikipedia.org/wiki/Ridable_miniature_railway>
