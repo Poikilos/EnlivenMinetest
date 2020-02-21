@@ -70,13 +70,17 @@ for i in range(1, len(sys.argv)):
     arg = sys.argv[i]
     if arg.startswith("#"):
         arg = arg[1:]
-    try:
-        match_number = int(arg)
-    except ValueError:
-        if (cmd is None) and (cmds.get(arg) is not None):
-            cmd = arg
-        else:
-            match_all_labels.append(arg)
+    if (cmd is None) and (arg in cmds.keys()):
+        cmd = arg
+        print("* mode set to {}".format(cmd))
+    else:
+        try:
+            match_number = int(arg)
+        except ValueError:
+            if (cmd is None) and (cmds.get(arg) is not None):
+                cmd = arg
+            else:
+                match_all_labels.append(arg)
 if cmd is None:
     if len(match_all_labels) > 1:
         cmd = "list"
@@ -143,6 +147,10 @@ for issue in d:
         if this_issue_match_count == len(match_all_labels):
             match_count += 1
             print("#{} {}".format(issue["number"], issue["title"]))
+    elif match_number is None:
+        # Show all since no criteria is set.
+        match_count += 1
+        print("#{} {}".format(issue["number"], issue["title"]))
     if match_number is not None:
         # INFO: match_number & issue["number"] are ints
         if match_number == issue["number"]:
@@ -201,10 +209,13 @@ if cmd == "labels":
     print("The repo has {} label(s).".format(len(labels)))
 elif cmd == "list":
     print()
-    print("{} issue(s) matched {}".format(
-        match_count,
-        " + ".join("'{}'".format(s) for s in match_all_labels)
-    ))
+    if len(match_all_labels) > 0:
+        print("{} issue(s) matched {}".format(
+            match_count,
+            " + ".join("'{}'".format(s) for s in match_all_labels)
+        ))
+    else:
+        print("{} issue(s) are showing.".format(match_count))
     if match_count > 0:
         print()
         print()
