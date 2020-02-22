@@ -24,7 +24,7 @@ except ImportError:
 
 
 repo_url = "https://api.github.com/repos/poikilos/EnlivenMinetest"
-url = repo_url + "/issues"
+issues_url = repo_url + "/issues"
 labels_url = repo_url + "/labels"
 cmd = None
 # me = sys.argv[0]
@@ -44,12 +44,18 @@ cmds = {
                  " issues)."),
         "examples": [" labels"]
     },
+    "page": {
+        "help": ("GitHub only lists 30 issues at a time. Type page"
+                 " followed by a number to see additional pages."),
+        "examples": [" page 2"]
+    },
     "<#>": {
         "help": "Specify an issue number to see details.",
         "examples": [" 1"]
     }
 }
 match_all_labels = []
+page = None
 def usage():
     print("")
     print("Commands:")
@@ -65,17 +71,24 @@ def usage():
                 print(" "*(left_w+len(spacer)+2) + "./" + me + s)
         print("")
         print("")
+
 match_number = None
 for i in range(1, len(sys.argv)):
     arg = sys.argv[i]
     if arg.startswith("#"):
         arg = arg[1:]
     if (cmd is None) and (arg in cmds.keys()):
-        cmd = arg
-        print("* mode set to {}".format(cmd))
+        if arg == "page":
+            cmd = "list"
+        else:
+            cmd = arg
     else:
         try:
-            match_number = int(arg)
+            i = int(arg)
+            if cmd == "list":
+                page = i
+            else:
+                match_number = i
         except ValueError:
             if (cmd is None) and (cmds.get(arg) is not None):
                 cmd = arg
@@ -108,7 +121,10 @@ elif cmd not in valid_cmds:
     exit(0)
 print("")
 # print("Loading...")
-response = request.urlopen(url)
+query_s = issues_url
+if page is not None:
+    query_s = issues_url + "?page=" + str(page)
+response = request.urlopen(query_s)
 d_s = response.read()
 d = json.loads(d_s)
 label_ids = []
@@ -147,7 +163,7 @@ for issue in d:
         if this_issue_match_count == len(match_all_labels):
             match_count += 1
             print("#{} {}".format(issue["number"], issue["title"]))
-    elif match_number is None:
+    elif (match_number is None) and (cmd == "list"):
         # Show all since no criteria is set.
         match_count += 1
         print("#{} {}".format(issue["number"], issue["title"]))
@@ -203,6 +219,8 @@ if matching_issue is not None:
 
 
 if cmd == "labels":
+    # print("Labels:")
+    # print("")
     for label_s in labels:
         print(label_s)
     print("")
@@ -215,7 +233,19 @@ elif cmd == "list":
             " + ".join("'{}'".format(s) for s in match_all_labels)
         ))
     else:
-        print("{} issue(s) are showing.".format(match_count))
+        if page is not None:
+            print("{} issue(s) are showing for page"
+                  " {}.".format(match_count, page))
+        else:
+            print("{} issue(s) are showing.".format(match_count))
+        if match_count >= 30:
+            print("That is the maximum number per page. Type")
+            if page is not None:
+                print("    ./" + me + " page " + str(page+1))
+                print("to see additional pages.")
+            else:
+                print("    ./" + me + " page")
+                print("followed by a number to see additional pages.")
     if match_count > 0:
         print()
         print()
