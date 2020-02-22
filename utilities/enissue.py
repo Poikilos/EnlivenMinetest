@@ -22,6 +22,12 @@ except ImportError:
     from urllib import quote
     from urllib import unquote
 
+def decode_safe(b):
+    try:
+        s = b.decode()
+    except UnicodeDecodeError:
+        s = b.decode('utf-8')
+    return s
 
 repo_url = "https://api.github.com/repos/poikilos/EnlivenMinetest"
 issues_url = repo_url + "/issues"
@@ -128,13 +134,14 @@ elif cmd not in valid_cmds:
     print()
     print()
     exit(0)
+
 print("")
 # print("Loading...")
 query_s = issues_url
 if page is not None:
     query_s = issues_url + "?page=" + str(page)
 response = request.urlopen(query_s)
-d_s = response.read()
+d_s = decode_safe(response.read())
 d = json.loads(d_s)
 label_ids = []
 labels = []
@@ -189,7 +196,7 @@ if matching_issue is not None:
     print("")
     this_issue_json_url = matching_issue["url"]
     response = request.urlopen(this_issue_json_url)
-    issue_data_s = response.read()
+    issue_data_s = decode_safe(response.read())
     issue_data = json.loads(issue_data_s)
     markdown = issue_data["body"]
     markdown = markdown.replace("\\r\\n", "\n").replace("\\t", "\t")
@@ -211,7 +218,7 @@ if matching_issue is not None:
         print("({}) comment(s):".format(issue_data["comments"]))
         this_cmts_json_url = issue_data["comments_url"]
         response = request.urlopen(this_cmts_json_url)
-        cmts_data_s = response.read()
+        cmts_data_s = decode_safe(response.read())
         cmts_data = json.loads(cmts_data_s)
         left_margin = "    "
         c_prop_fmt = (left_margin + "{: <" + str(left_w) + "}" + spacer
