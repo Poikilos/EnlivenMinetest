@@ -55,7 +55,7 @@ cmds = {
     }
 }
 match_all_labels = []
-page = None
+
 def usage():
     print("")
     print("Commands:")
@@ -72,12 +72,17 @@ def usage():
         print("")
         print("")
 
+page = None
+prev_arg = None
 match_number = None
 for i in range(1, len(sys.argv)):
     arg = sys.argv[i]
     if arg.startswith("#"):
         arg = arg[1:]
     if (cmd is None) and (arg in cmds.keys()):
+        # don't set the command to list unless the enclosing case is
+        # true. If a label was specified, paging is handled in the
+        # other case.
         if arg == "page":
             cmd = "list"
         else:
@@ -85,7 +90,7 @@ for i in range(1, len(sys.argv)):
     else:
         try:
             i = int(arg)
-            if cmd == "list":
+            if prev_arg == "page":
                 page = i
             else:
                 match_number = i
@@ -93,7 +98,11 @@ for i in range(1, len(sys.argv)):
             if (cmd is None) and (cmds.get(arg) is not None):
                 cmd = arg
             else:
-                match_all_labels.append(arg)
+                if arg != "page":
+                    print("* adding criteria: {}".format(arg))
+                    cmd = "list"
+                    match_all_labels.append(arg)
+    prev_arg = arg
 if cmd is None:
     if len(match_all_labels) > 1:
         cmd = "list"
@@ -136,6 +145,7 @@ for s in match_all_labels:
     match_all_labels_lower.append(s.lower())
 
 match_count = 0
+total_count = len(d)
 matching_issue = None
 for issue in d:
     this_issue_labels_lower = []
@@ -171,6 +181,7 @@ for issue in d:
         # INFO: match_number & issue["number"] are ints
         if match_number == issue["number"]:
             matching_issue = issue
+
 if matching_issue is not None:
     print("")
     print("#{} {}".format(issue["number"], issue["title"]))
@@ -232,6 +243,16 @@ elif cmd == "list":
             match_count,
             " + ".join("'{}'".format(s) for s in match_all_labels)
         ))
+        if total_count >= 30:
+            print("{} searched, which is the maximum number"
+                  " per page.".format(total_count))
+            next_page = 2
+            if page is not None:
+                next_page = page + 1
+            print("    ./" + me + " " + " ".join(match_all_labels)
+                  + " page " + str(next_page))
+            print("to see additional pages.")
+
     else:
         if page is not None:
             print("{} issue(s) are showing for page"
@@ -240,12 +261,11 @@ elif cmd == "list":
             print("{} issue(s) are showing.".format(match_count))
         if match_count >= 30:
             print("That is the maximum number per page. Type")
+            next_page = 2
             if page is not None:
-                print("    ./" + me + " page " + str(page+1))
-                print("to see additional pages.")
-            else:
-                print("    ./" + me + " page")
-                print("followed by a number to see additional pages.")
+                next_page = page + 1
+            print("    ./" + me + " page " + str(next_page))
+            print("to see additional pages.")
     if match_count > 0:
         print()
         print()
