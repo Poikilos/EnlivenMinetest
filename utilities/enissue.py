@@ -148,11 +148,13 @@ api_repo_url_fmt = "https://api.github.com/repos/{}/{}"
 repo_url = api_repo_url_fmt.format(remote_user, repo_name)
 issues_url = repo_url + "/issues"
 labels_url = repo_url + "/labels"
-
+page_size = 30  # The GitHub API only lists 30 issues per page.
+p = "@ "
 def get_issues():
     query_s = issues_url
     c_issues_name_fmt = "issues_page={}{}.json"
     this_page = 1
+
     query_part = ""
     # TODO: IF longer API query is implemented, put something in
     #   query_part like "&label=Bucket_Game"
@@ -168,28 +170,36 @@ def get_issues():
         c_issues_mtime = os.path.getmtime(c_issues_path)
         filetime = datetime.fromtimestamp(c_issues_mtime)
         if filetime > cache_delta:
-            print("Loading cache: \"{}\"".format(c_issues_path))
-            # print("Cache time limit: {}".format(max_cache_delta)
-            print("Cache expires: {}".format(filetime
+            print(p+"Loading cache: \"{}\"".format(c_issues_path))
+            # print(p+"Cache time limit: {}".format(max_cache_delta)
+            print(p+"Cache expires: {}".format(filetime
                                              + max_cache_delta))
             with open(c_issues_path) as json_file:
                 results = json.load(json_file)
-            print("The cache has {} issue(s).".format(len(results)))
+            # print(p+"The cache file has"
+            #       " {} issue(s).".format(len(results)))
+            max_issue = None
+            for issue in results:
+                issue_n = issue.get("number")
+                if issue_n is not None:
+                    if (max_issue is None) or (issue_n > max_issue):
+                        max_issue = issue_n
+            print(p+"The highest cached issue# is {}.".format(max_issue))
             return results
         else:
-            print("Cache time limit: {}".format(max_cache_delta))
-            print("The cache has expired: \"{}\"".format(c_issues_path))
+            print(p+"Cache time limit: {}".format(max_cache_delta))
+            print(p+"The cache has expired: \"{}\"".format(c_issues_path))
     else:
-        print("There is no cache for \"{}\"".format(c_issues_path))
+        print(p+"There is no cache for \"{}\"".format(c_issues_path))
 
     if page is not None:
         query_s = issues_url + "?page=" + str(page)
     try:
         response = request.urlopen(query_s)
     except urllib.error.HTTPError as e:
-        print("You may be able to view the issues on GitHub")
-        print("at the 'html_url', and a login may be required.")
-        print("The URL \"{}\" is not accessible, so you may have"
+        print(p+"You may be able to view the issues on GitHub")
+        print(p+"at the 'html_url', and a login may be required.")
+        print(p+"The URL \"{}\" is not accessible, so you may have"
               " exceeded the rate limit and be blocked"
               " temporarily:".format(query_s))
         print(str(e))
@@ -197,12 +207,14 @@ def get_issues():
     response_s = decode_safe(response.read())
     if not os.path.isdir(c_repo_path):
         os.makedirs(c_repo_path)
-    print("Saving issues cache: {}".format(c_issues_path))
+    print(p+"Saving issues cache: {}".format(c_issues_path))
     with open(c_issues_path, "w") as outs:
         outs.write(response_s)
     results = json.loads(response_s)
     return results
 
+# TODO: get labels another way, and make this conditional:
+# if cmd == "list":
 issues = get_issues()
 if issues is None:
     exit(0)
@@ -211,7 +223,8 @@ labels = []
 
 match_all_labels_lower = []
 for s in match_all_labels:
-    # print("appending {} to match_all_labels_lower.".format(s.lower()))
+    # print(p+"appending"
+    #       " {} to match_all_labels_lower.".format(s.lower()))
     match_all_labels_lower.append(s.lower())
 
 match_count = 0
@@ -220,6 +233,8 @@ matching_issue = None
 
 matching_issue_labels = None
 
+# TODO: get labels another way, and make this conditional:
+# if cmd == "list":
 for issue in issues:
     this_issue_labels_lower = []
     for label in issue["labels"]:
@@ -255,7 +270,7 @@ for issue in issues:
         if match_number == issue["number"]:
             matching_issue = issue
             matching_issue_labels = this_issue_labels_lower
-issue = None
+issue = None  # prevent value from leaking
 
 
 def show_issue(issue):
@@ -270,13 +285,13 @@ def show_issue(issue):
         issue_data_bytes = response.read()
     except urllib.error.HTTPError as e:
         print(str(e))
-        print("The URL \"{}\" is not accessible, so you may have"
+        print(p+"The URL \"{}\" is not accessible, so you may have"
               " exceeded the rate limit and be blocked"
               " temporarily:".format(this_issue_json_url))
         html_url = issue.get("html_url")
-        print("You may be able to view the issue on GitHub")
-        print("at the 'html_url', and a login may be required:")
-        print("html_url: {}".format(html_url))
+        print(p+"You may be able to view the issue on GitHub")
+        print(p+"at the 'html_url', and a login may be required:")
+        print(p+"html_url: {}".format(html_url))
         return False
     issue_data_s = decode_safe(issue_data_bytes)
     issue_data = json.loads(issue_data_s)
@@ -345,6 +360,16 @@ if cmd == "labels":
         print(label_s)
     print("")
     print("The repo has {} label(s).".format(len(labels)))
+    print("")
+    if total_count >= page_size:
+        print("The maximum issue count per page was reached.")
+        next_page = 2
+        if page is not None:
+            next_page = page + 1
+        print("    ./" + me + " labels page " + str(next_page))
+        print("to see labels on additional pages.")
+
+
 elif cmd == "list":
     print()
     if len(match_all_labels) > 0:
@@ -352,7 +377,7 @@ elif cmd == "list":
             match_count,
             " + ".join("'{}'".format(s) for s in match_all_labels)
         ))
-        if total_count >= 30:
+        if total_count >= page_size:
             print("{} searched, which is the maximum number"
                   " per page.".format(total_count))
             next_page = 2
@@ -368,7 +393,7 @@ elif cmd == "list":
                   " {}.".format(match_count, page))
         else:
             print("{} issue(s) are showing.".format(match_count))
-        if match_count >= 30:
+        if total_count >= page_size:
             print("That is the maximum number per page. Type")
             next_page = 2
             if page is not None:
