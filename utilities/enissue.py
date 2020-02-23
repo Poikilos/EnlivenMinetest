@@ -154,6 +154,9 @@ for s in match_all_labels:
 match_count = 0
 total_count = len(d)
 matching_issue = None
+
+matching_issue_labels = None
+
 for issue in d:
     this_issue_labels_lower = []
     for label in issue["labels"]:
@@ -188,6 +191,7 @@ for issue in d:
         # INFO: match_number & issue["number"] are ints
         if match_number == issue["number"]:
             matching_issue = issue
+            matching_issue_labels = this_issue_labels_lower
 
 if matching_issue is not None:
     print("")
@@ -208,10 +212,25 @@ if matching_issue is not None:
     print(line_fmt.format("state:",  issue_data["state"]))
     assignees = issue_data["assignees"]
     if len(assignees) > 1:
-        print(line_fmt.format("assignees:",  " ".join(assignees)))
-    else:
-        print(line_fmt.format("assignee:",  issue_data["assignee"]))
+        assignee_names = [a["login"] for a in assignees]
+        print(line_fmt.format("assignees:",  " ".join(assignee_names)))
+    elif issue_data.get("assignee") is not None:
+        assignee_name = issue_data["assignee"]["login"]
+        print(line_fmt.format("assignee:", assignee_name))
+    labels_s = "None"
+    if len(matching_issue_labels) > 0:
+        neat_labels = []
+        for label_s in matching_issue_labels:
+            if " " in label_s:
+                neat_labels.append('"' + label_s + '"')
+            else:
+                neat_labels.append(label_s)
+        labels_s = ", ".join(neat_labels)
+    print(line_fmt.format("labels:", labels_s))
+    print("")
+    print('"""')
     print(markdown)
+    print('"""')
     if issue_data["comments"] > 0:
         print("")
         print("")
@@ -229,7 +248,9 @@ if matching_issue is not None:
             print(c_prop_fmt.format("from:", cmt["user"]["login"]))
             print(c_prop_fmt.format("updated_at:", cmt["updated_at"]))
             print("")
+            print(left_margin + '"""')
             print(left_margin + cmt["body"])
+            print(left_margin + '"""')
             print("")
 
     print("")
