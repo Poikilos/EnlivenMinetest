@@ -3,6 +3,7 @@ from __future__ import print_function
 import sys
 import json
 import os
+from datetime import datetime, timedelta
 
 try:
     import urllib.request
@@ -22,6 +23,8 @@ except ImportError:
     from urllib import quote
     from urllib import unquote
 
+import urllib
+
 def decode_safe(b):
     try:
         s = b.decode()
@@ -29,9 +32,6 @@ def decode_safe(b):
         s = b.decode('utf-8')
     return s
 
-repo_url = "https://api.github.com/repos/poikilos/EnlivenMinetest"
-issues_url = repo_url + "/issues"
-labels_url = repo_url + "/labels"
 cmd = None
 # me = sys.argv[0]
 me = os.path.basename(__file__)
@@ -137,12 +137,75 @@ elif cmd not in valid_cmds:
 
 print("")
 # print("Loading...")
-query_s = issues_url
-if page is not None:
-    query_s = issues_url + "?page=" + str(page)
-response = request.urlopen(query_s)
-d_s = decode_safe(response.read())
-d = json.loads(d_s)
+
+
+caches_path = "/tmp/enissue"
+remote_user = "poikilos"
+repo_name = "EnlivenMinetest"
+c_remote_user_path = os.path.join(caches_path, remote_user)
+c_repo_path = os.path.join(c_remote_user_path, repo_name)
+api_repo_url_fmt = "https://api.github.com/repos/{}/{}"
+repo_url = api_repo_url_fmt.format(remote_user, repo_name)
+issues_url = repo_url + "/issues"
+labels_url = repo_url + "/labels"
+
+def get_issues():
+    query_s = issues_url
+    c_issues_name_fmt = "issues_page={}{}.json"
+    this_page = 1
+    query_part = ""
+    # TODO: IF longer API query is implemented, put something in
+    #   query_part like "&label=Bucket_Game"
+    if page is not None:
+        this_page = page
+    c_issues_name = c_issues_name_fmt.format(this_page, query_part)
+    c_issues_path = os.path.join(c_repo_path, c_issues_name)
+    if os.path.isfile(c_issues_path):
+        # See <https://stackoverflow.com/questions/7430928/
+        # comparing-dates-to-check-for-old-files>
+        max_cache_delta = timedelta(hours=12)
+        cache_delta = datetime.now() - max_cache_delta
+        c_issues_mtime = os.path.getmtime(c_issues_path)
+        filetime = datetime.fromtimestamp(c_issues_mtime)
+        if filetime > cache_delta:
+            print("Loading cache: \"{}\"".format(c_issues_path))
+            # print("Cache time limit: {}".format(max_cache_delta)
+            print("Cache expires: {}".format(filetime
+                                             + max_cache_delta))
+            with open(c_issues_path) as json_file:
+                results = json.load(json_file)
+            print("The cache has {} issue(s).".format(len(results)))
+            return results
+        else:
+            print("Cache time limit: {}".format(max_cache_delta))
+            print("The cache has expired: \"{}\"".format(c_issues_path))
+    else:
+        print("There is no cache for \"{}\"".format(c_issues_path))
+
+    if page is not None:
+        query_s = issues_url + "?page=" + str(page)
+    try:
+        response = request.urlopen(query_s)
+    except urllib.error.HTTPError as e:
+        print("You may be able to view the issues on GitHub")
+        print("at the 'html_url', and a login may be required.")
+        print("The URL \"{}\" is not accessible, so you may have"
+              " exceeded the rate limit and be blocked"
+              " temporarily:".format(query_s))
+        print(str(e))
+        return None
+    response_s = decode_safe(response.read())
+    if not os.path.isdir(c_repo_path):
+        os.makedirs(c_repo_path)
+    print("Saving issues cache: {}".format(c_issues_path))
+    with open(c_issues_path, "w") as outs:
+        outs.write(response_s)
+    results = json.loads(response_s)
+    return results
+
+issues = get_issues()
+if issues is None:
+    exit(0)
 label_ids = []
 labels = []
 
@@ -152,12 +215,12 @@ for s in match_all_labels:
     match_all_labels_lower.append(s.lower())
 
 match_count = 0
-total_count = len(d)
+total_count = len(issues)
 matching_issue = None
 
 matching_issue_labels = None
 
-for issue in d:
+for issue in issues:
     this_issue_labels_lower = []
     for label in issue["labels"]:
         label_ids.append(label["id"])
@@ -192,22 +255,37 @@ for issue in d:
         if match_number == issue["number"]:
             matching_issue = issue
             matching_issue_labels = this_issue_labels_lower
+issue = None
 
-if matching_issue is not None:
+
+def show_issue(issue):
     print("")
     print("#{} {}".format(issue["number"], issue["title"]))
-    # print(matching_issue["html_url"])
+    # print(issue["html_url"])
     print("")
-    this_issue_json_url = matching_issue["url"]
-    response = request.urlopen(this_issue_json_url)
-    issue_data_s = decode_safe(response.read())
+    this_issue_json_url = issue["url"]
+    issue_data_bytes = None
+    try:
+        response = request.urlopen(this_issue_json_url)
+        issue_data_bytes = response.read()
+    except urllib.error.HTTPError as e:
+        print(str(e))
+        print("The URL \"{}\" is not accessible, so you may have"
+              " exceeded the rate limit and be blocked"
+              " temporarily:".format(this_issue_json_url))
+        html_url = issue.get("html_url")
+        print("You may be able to view the issue on GitHub")
+        print("at the 'html_url', and a login may be required:")
+        print("html_url: {}".format(html_url))
+        return False
+    issue_data_s = decode_safe(issue_data_bytes)
     issue_data = json.loads(issue_data_s)
     markdown = issue_data["body"]
     markdown = markdown.replace("\\r\\n", "\n").replace("\\t", "\t")
     left_w = 10
     spacer = " "
     line_fmt = "{: <" + str(left_w) + "}" + spacer + "{}"
-    print(line_fmt.format("html_url:",  matching_issue["html_url"]))
+    print(line_fmt.format("html_url:",  issue["html_url"]))
     print(line_fmt.format("by:",  issue_data["user"]["login"]))
     print(line_fmt.format("state:",  issue_data["state"]))
     assignees = issue_data.get("assignees")
@@ -255,7 +333,10 @@ if matching_issue is not None:
 
     print("")
     print("")
+    return True
 
+if matching_issue is not None:
+    show_issue(matching_issue)
 
 if cmd == "labels":
     # print("Labels:")
