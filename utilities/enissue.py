@@ -210,8 +210,8 @@ if matching_issue is not None:
     print(line_fmt.format("html_url:",  matching_issue["html_url"]))
     print(line_fmt.format("by:",  issue_data["user"]["login"]))
     print(line_fmt.format("state:",  issue_data["state"]))
-    assignees = issue_data["assignees"]
-    if len(assignees) > 1:
+    assignees = issue_data.get("assignees")
+    if (assignees is not None) and len(assignees) > 1:
         assignee_names = [a["login"] for a in assignees]
         print(line_fmt.format("assignees:",  " ".join(assignee_names)))
     elif issue_data.get("assignee") is not None:
