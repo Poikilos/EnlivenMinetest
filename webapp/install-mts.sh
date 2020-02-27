@@ -183,7 +183,7 @@ END
     end=`date +%s`
     compile_time=$((end-start))
     echo "Compiling the program finished in $compile_time seconds."
-    cp release.txt minetest/ | customWarn "Cannot copy `pwd`/release.txt to `pwd`/minetest/"
+    cp release.txt minetest/ || customWarn "Cannot copy `pwd`/release.txt to `pwd`/minetest/"
 else
     echo "* using existing minetest..."
 fi
