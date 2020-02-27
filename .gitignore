@@ -11,3 +11,4 @@ nohup.out
 /webapp/debug.txt
 /webapp/settings-dump.txt
 /webapp/settingtypes-list.txt
+err.txt

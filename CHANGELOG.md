@@ -5,6 +5,29 @@ The format is based on [Keep a
 Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
+## [git] - 2020-02-27
+### Added
+- new super for map generators
+
+### Fixed
+- Changed uses of `os.rename` to `shutil.move` (prevents invalid cross-
+  filesystem link errors).
+  - Remove unnecessary and bare exception handler in
+    correct_genresults_paths.
+- fix missing "self" param for isMinWBRenderCount,
+  isMinNWBRenderCount
+- fix missing "self." when using isCDeployed,
+  self.is_worldborder_chunk
+
+### Removed
+- (generators.py) verify_correct_map code (was commented already)
+
+### Changed
+- Use PEP8 for map generators.
+  - Rename variables in map generators (and add succinct temp vars).
+- (map generators) Move common code to `prepare_env`.
+
+
 ## [git] - 2019-09-20
 ### Added
 - generate_Empty_at_each_vertex.py
