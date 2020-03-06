@@ -226,6 +226,14 @@ and authorship where specified below and in subfolders.
 Source code is available at
 [https://github.com/poikilos/EnlivenMinetest](https://github.com/poikilos/EnlivenMinetest).
 
+### Additional Media
+
+#### subgame icon
+- by erlehmann and Poikilos
+- Attribution-ShareAlike 3.0 Unported
+  ([CC BY-SA 3.0](http://creativecommons.org/licenses/by-sa/3.0/))
+- based on the Minetest icon by erlehmann
+
 ### Minetest
 Minetest is included with releases--for Minetest license, please read
 README.txt in Minetest's doc folder which is provided in releases.
