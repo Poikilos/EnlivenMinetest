@@ -2,12 +2,14 @@
 import os
 import platform
 
+
 def doDie(msg, error_code=1):
     print()
     print(msg)
     print()
     print()
     exit(error_code)
+
 
 rem_cmd = "#"
 rm_cmd = "rm "
@@ -71,7 +73,7 @@ for path in sorted_list:
         try:
             os.remove(path)
             file_count += 1
-        except:
+        except PermissionError:
             not_removed_files.append(path)
     elif os.path.isdir(path):
         if path[0:1] == ".":
@@ -81,7 +83,7 @@ for path in sorted_list:
         try:
             os.rmdir(path)
             dir_count += 1
-        except:
+        except PermissionError:
             not_removed_dirs.append(path)
     else:
         does_not_exist.append(path)
@@ -100,15 +102,16 @@ if (len(not_removed_files) + len(not_removed_dirs)) > 0:
     for path in not_removed_files:
         if path[0:1] == ".":
             if show_dot_warning:
-                print(rem_cmd + "Paths starting with '.' are not yet implemented."
+                print(rem_cmd + "Paths starting with '.' are not yet"
+                      " implemented.")
                 show_dot_warning = False
         print(rm_cmd + "\"" + path + "\"")
     for path in not_removed_dirs:
         print(rmdir_cmd + "\"" + path + "\"")
     print(rem_cmd + "Deleting items above FAILED:")
     print("  " + rem_cmd + "- files: " + str(not_removed_file_count))
-    print("  " + rem_cmd + "- directories: " + str(not_removed_dir_count))
+    print("  " + rem_cmd + "- directories: "
+          + str(not_removed_dir_count))
 
-
-print()
-print()
+print("")
+print("")

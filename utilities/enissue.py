@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 try:
     import urllib.request
     request = urllib.request
-except:
+except ImportError:
     # python2
     python_mr = 2
     import urllib2 as urllib
@@ -25,12 +25,14 @@ except ImportError:
 
 import urllib
 
+
 def decode_safe(b):
     try:
         s = b.decode()
     except UnicodeDecodeError:
         s = b.decode('utf-8')
     return s
+
 
 cmd = None
 # me = sys.argv[0]
@@ -62,6 +64,7 @@ cmds = {
 }
 match_all_labels = []
 
+
 def usage():
     print("")
     print("Commands:")
@@ -77,6 +80,7 @@ def usage():
                 print(" "*(left_w+len(spacer)+2) + "./" + me + s)
         print("")
         print("")
+
 
 page = None
 prev_arg = None
@@ -105,7 +109,7 @@ for i in range(1, len(sys.argv)):
                 cmd = arg
             else:
                 if arg != "page":
-                    print("* adding criteria: {}".format(arg))
+                    # print("* adding criteria: {}".format(arg))
                     cmd = "list"
                     match_all_labels.append(arg)
     prev_arg = arg
@@ -150,6 +154,8 @@ issues_url = repo_url + "/issues"
 labels_url = repo_url + "/labels"
 page_size = 30  # The GitHub API only lists 30 issues per page.
 p = "@ "
+
+
 def get_issues():
     query_s = issues_url
     c_issues_name_fmt = "issues_page={}{}.json"
@@ -173,7 +179,7 @@ def get_issues():
             print(p+"Loading cache: \"{}\"".format(c_issues_path))
             # print(p+"Cache time limit: {}".format(max_cache_delta)
             print(p+"Cache expires: {}".format(filetime
-                                             + max_cache_delta))
+                                               + max_cache_delta))
             with open(c_issues_path) as json_file:
                 results = json.load(json_file)
             # print(p+"The cache file has"
@@ -213,6 +219,7 @@ def get_issues():
     results = json.loads(response_s)
     return results
 
+
 # TODO: get labels another way, and make this conditional:
 # if cmd == "list":
 issues = get_issues()
@@ -247,7 +254,7 @@ for issue in issues:
             if label_s not in labels:
                 labels.append(label_s)
         else:
-            raise ValueError("The url '{}' does not start with"
+            raise ValueError(p+"ERROR: The url '{}' does not start with"
                              " '{}'".format(label["url"], labels_url))
     if len(match_all_labels) > 0:
         this_issue_match_count = 0
@@ -255,7 +262,7 @@ for issue in issues:
             if try_label in this_issue_labels_lower:
                 this_issue_match_count += 1
             # else:
-            #     print("#{} is not a match ({} is not in"
+            #     print(p+"{} is not a match ({} is not in"
             #           " {})".format(issue["number"], try_label,
             #                         this_issue_labels_lower))
         if this_issue_match_count == len(match_all_labels):
@@ -350,6 +357,7 @@ def show_issue(issue):
     print("")
     return True
 
+
 if matching_issue is not None:
     show_issue(matching_issue)
 
@@ -407,4 +415,3 @@ elif cmd == "list":
         print("    ./" + me)
         print("followed by a number.")
 print("")
-

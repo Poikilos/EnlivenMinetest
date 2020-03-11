@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 
+
 def usage():
     print("")
     print(sys.argv[0] + " <file1> <file2>")
@@ -8,6 +9,7 @@ def usage():
     print("- Show QUOTED strings in file2 that aren't in file1.")
     print("")
     print("")
+
 
 argCount = len(sys.argv) - 1
 
@@ -17,7 +19,6 @@ if argCount < 2:
 
 oldPath = sys.argv[1]
 newPath = sys.argv[2]
-
 
 
 def getStrings(path, delimiter='"', unique=True):
@@ -43,6 +44,7 @@ def getStrings(path, delimiter='"', unique=True):
                         got += line[i]
                     i += 1
     return ret
+
 
 olds = getStrings(oldPath)
 news = getStrings(newPath)

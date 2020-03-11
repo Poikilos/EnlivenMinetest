@@ -1,10 +1,12 @@
 # Channel Tools
 
+The remove halo feature is now at:
 https://github.com/poikilos/channel_tools.git
 
 ## [git] - 2020-02-19
 ### Removed
-- This may have worked after additoinal fixes.
+- This may have worked after additional fixes. I thought this was the
+  fault but it apparently was not.
   - https://www.youtube.com/watch?v=YHXX3KuB23Q (outdated)
   - https://jacksonbates.wordpress.com/2015/09/14/python-fu-6-accepting-user-input/
 ```python
@@ -26,7 +28,8 @@ register(
 )
 ```
 
-- This may be deprecated, even though it matches the docs.
+- This kind of register call may be deprecated, even though it matches
+  the docs.
   - https://www.gimp.org/docs/python/index.html
 ```python
 register(

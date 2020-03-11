@@ -22,6 +22,9 @@ How to use: Paste this script into a Blender"
 Text Editor panel, select an object,"
 press the 'Run Script' button")
 """
+# from mathutils import Matrix
+from mathutils import Vector
+# from mathutils import Euler
 print("""
 
 STARTING generate_lua_collisionbox...
@@ -37,17 +40,15 @@ if enable_minetest:
 hs = (0, 1)  # horizontal axis indices
 v = 2  # vertical axis index
 # Do NOT swap until end.
-#if y_up:
-#    hs = (0, 2)
-#    v = 1
+# if y_up:
+#     hs = (0, 2)
+#     v = 1
 try:
     import bpy
 except ImportError:
     print(__doc__)
     exit(1)
-# from mathutils import Matrix
-from mathutils import Vector
-# from mathutils import Euler
+
 
 def calculate_one():
     ob1 = None
@@ -59,9 +60,9 @@ class MessageBox(bpy.types.Operator):
     bl_idname = "message.messagebox"
     bl_label = ""
     message = bpy.props.StringProperty(
-        name = "message",
-        description = "message",
-        default = ''
+        name="message",
+        description="message",
+        default=''
     )
 
     def execute(self, context):
@@ -79,9 +80,11 @@ class MessageBox(bpy.types.Operator):
         # col = self.layout.column(align = True)
         # col.prop(context.scene, "my_string_prop")
 
+
 bpy.utils.register_class(MessageBox)
 
 msgSuffix = ""
+
 
 def calculate_collisionbox(ob1):
     global msgSuffix
@@ -93,25 +96,28 @@ def calculate_collisionbox(ob1):
         mesh = ob1.data
     if ob1 is None:
         msg = "Nothing is selected."
-        bpy.ops.message.messagebox('INVOKE_DEFAULT', message = msg)
+        bpy.ops.message.messagebox('INVOKE_DEFAULT', message=msg)
     elif (mesh is not None) and (not hasattr(mesh, 'vertices')):
         msg = ("A collision box cannot be calculated for a non-mesh"
                " object.")
-        bpy.ops.message.messagebox('INVOKE_DEFAULT', message = msg)
+        bpy.ops.message.messagebox('INVOKE_DEFAULT', message=msg)
     else:
         # extents1 = ob1.dimensions.copy()
         obj1Loc = ob1.location
 
-        # See https://blender.stackexchange.com/questions/8459/get-blender-x-y-z-and-bounding-box-with-script
-        # bbox_corners = [ob1.matrix_world * Vector(corner) for corner in ob1.bound_box]
+        # See <https://blender.stackexchange.com/questions/8459/get-
+        #   blender-x-y-z-and-bounding-box-with-script>
+        # bbox_corners = [(ob1.matrix_world
+        #                 * Vector(corner)) for corner in ob1.bound_box]
 
-
-        # See https://blender.stackexchange.com/questions/6139/how-to-iterate-through-all-vertices-of-an-object-that-contains-multiple-meshes
+        # See <https://blender.stackexchange.com/questions/6139/
+        #   how-to-iterate-through-all-vertices-of-an-object-that-
+        #   contains-multiple-meshes>
         # print("mesh:" + str(mesh))
         # print("hasattr(mesh, 'vertices'):"
-              # + str(hasattr(mesh, 'vertices')))]
-        mins = [None, None, None]  # minimums; in outer scope for checks.
-        maxes = [None, None, None]  # minimums; in outer scope for checks.
+        #       + str(hasattr(mesh, 'vertices')))]
+        mins = [None, None, None]  # minimums; in outer scope for check
+        maxes = [None, None, None]  # minimums; in outer scope for check
         if mesh is not None:
             wm = ob1.matrix_world
             for vert in mesh.vertices:
@@ -129,9 +135,10 @@ def calculate_collisionbox(ob1):
                         maxes[i] = coords[i]
             # print(str(extents1))
             # print("--by vertices (raw):")
-            # print("    collisionbox = {{{:.2f}, {:.2f}, {:.2f}, {:.2f},"
-                  # " {:.2f}, {:.2f}}}".format(mins[0], mins[2], mins[1],
-                                             # maxes[0], maxes[2], maxes[1]))
+            # print("    collisionbox = {{{:.2f}, {:.2f}, {:.2f},"
+            #       " {:.2f}, {:.2f}, {:.2f}}}".format(mins[0], mins[2],
+            #                                  mins[1], maxes[0],
+            #                                  maxes[2], maxes[1]))
 
             # Use ob1.matrix_world (above) instead of incrementing
             # ob1.location.x, y, and z
@@ -140,28 +147,30 @@ def calculate_collisionbox(ob1):
             # i = 0
             # wm = ob1.matrix_world
             # for vert in mesh.vertices:
-                # newName = newNamePrefix + "." + str(i)
-                # # This matrix multiplication is NOT transitive.
-                # try:
-                    # loc = wm @ vert.co
-                # except TypeError:
-                    # loc = wm * vert.co  # Blender <2.8
-                # isFar = False
-                # if loc.x == maxes[0] or loc.y == maxes[1] or loc.z == maxes[2]:
-                    # isFar = True
-                # elif loc.x == mins[0] or loc.y == mins[1] or loc.z == mins[2]:
-                    # isFar = True
-                # if isFar:
-                    # pass
-                    # # result = bpy.ops.object.add(type='EMPTY', radius=.25,
-                                                # # location=loc)
-                    # # NOTE: result is merely {'FINISHED'}
-                    # # print("{:.2f}, {:.2f}, {:.2f}".format(loc.x, loc.y,
-                                                          # # loc.z))
+            #     newName = newNamePrefix + "." + str(i)
+            #     # This matrix multiplication is NOT transitive.
+            #     try:
+            #         loc = wm @ vert.co
+            #     except TypeError:
+            #         loc = wm * vert.co  # Blender <2.8
+            #     isFar = False
+            #     if (loc.x == maxes[0] or loc.y == maxes[1] or
+            #             loc.z == maxes[2]):
+            #         isFar = True
+            #     elif (loc.x == mins[0] or loc.y == mins[1] or
+            #             loc.z == mins[2]):
+            #         isFar = True
+            #     if isFar:
+            #         pass
+            #         # result = bpy.ops.object.add(type='EMPTY', radius=.25,
+            #                                     # location=loc)
+            #         # NOTE: result is merely {'FINISHED'}
+            #         # print("{:.2f}, {:.2f}, {:.2f}".format(loc.x, loc.y,
+            #                                               # loc.z))
 
-                    # bpy.ops.object.add_named(name=newName, type='EMPTY',
-                                             # radius=.25, location=loc)
-                # i += 1
+            #         bpy.ops.object.add_named(name=newName, type='EMPTY',
+            #                                  radius=.25, location=loc)
+            #     i += 1
         else:
             extents1 = ob1.scale.copy()
             print(dir(ob1))
@@ -189,8 +198,10 @@ def calculate_collisionbox(ob1):
         #     maxes[1] -= mins[1]
         #     mins[1] = 0.0
 
-        # print("    collisionbox = {{{:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f},"
-              # " {:.2f}}}".format(mins[0], mins[1], mins[2], maxes[0], maxes[1], maxes[2]))
+        # print("    collisionbox = {{{:.2f}, {:.2f}, {:.2f}, {:.2f},"
+        #       " {:.2f}, {:.2f}}}".format(mins[0], mins[1], mins[2],
+        #                                  maxes[0], maxes[1],
+        #                                  maxes[2]))
         sizes = [None, None, None]
         centers = [None, None, None]
         for i in range(3):
@@ -266,12 +277,12 @@ def calculate_collisionbox(ob1):
             bpy.context.window_manager.clipboard = msg + msgSuffix
             msg += " --copied to clipboard"
             # if enable_minetest:
-                # msg += "  -- *10"
+            #     msg += "  -- *10"
         print(msg)
 
         bpy.ops.message.messagebox('INVOKE_DEFAULT', message=msg)
 
+
 # Unregistering before user clicks the MessageBox will crash Blender!
 # bpy.utils.unregister_class(MessageBox)
-
 calculate_one()

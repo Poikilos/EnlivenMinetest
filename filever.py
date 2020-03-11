@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-#by Jamie at http://stackoverflow.com/questions/580924/python-windows-file-version-attribute
+# by Jamie at <http://stackoverflow.com/questions/580924/python-windows-
+#   file-version-attribute>
 try:
     from win32api import GetFileVersionInfo, LOWORD, HIWORD
-except:
+except ImportError:
     print("you need to install win32api such as with the command:")
     print("sudo python2 -m pip install --upgrade pip")
     print("sudo python -m pip install pypiwin32")
@@ -10,14 +11,17 @@ except:
 
     from win32api import GetFileVersionInfo, LOWORD, HIWORD
 
-def get_version_number (filename):
+
+def get_version_number(filename):
     try:
-        info = GetFileVersionInfo (filename, "\\")
+        info = GetFileVersionInfo(filename, "\\")
         ms = info['FileVersionMS']
         ls = info['FileVersionLS']
-        return HIWORD (ms), LOWORD (ms), HIWORD (ls), LOWORD (ls)
-    except:
-        return 0,0,0,0
+        return HIWORD(ms), LOWORD(ms), HIWORD(ls), LOWORD(ls)
+    except IndexError:
+        # FIXME: test this and find out what exception can occur.
+        return 0, 0, 0, 0
+
 
 if __name__ == '__main__':
     import os
@@ -25,9 +29,9 @@ if __name__ == '__main__':
         filename = os.environ["COMSPEC"]
         this_delimiter = "."
         print(str(filename) + " version:")
-        print(".".join ([str (i) for i in get_version_number (filename)]))
+        print(".".join([str(i) for i in get_version_number(filename)]))
     print("Running filever directly doesn't do much.\n\n#Usage:\n" +
-        "import filever\n" +
-        "parts = filever.get_version_number(filename)\n" +
-        "major,minor,subminor,revision = parts\n" +
-        "print(\".\".join([str (i) for i in parts]))\n\n")
+          "import filever\n" +
+          "parts = filever.get_version_number(filename)\n" +
+          "major,minor,subminor,revision = parts\n" +
+          "print(\".\".join([str (i) for i in parts]))\n\n")

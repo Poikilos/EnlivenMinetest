@@ -6,7 +6,7 @@ import sys
 mtdeltas_csv = "mtoldtonew.csv"
 if not os.path.isfile(mtdeltas_csv):
     print("ERROR: missing " + mtdeltas_csv)
-    #exit(1)
+    # exit(1)
 
 files = []
 
@@ -32,24 +32,30 @@ Examples:
 '''
 usageStr += "edit '%s' as needed (old name in column 1, new name in 2)"
 
+
 def usage():
     print(usageStr)
 
+
 mtdeltas = {}
+
 
 def stripQuotes(s, quotechar='"'):
     if (len(s) >= 2) and (s[0] == quotechar) and (s[-1] == quotechar):
         s = s[1:-1]
     return s
 
+
 def quoted(str1, quotechar='"'):
     return(quotechar + str1 + quotechar)
+
 
 def replaceQuoted(str1, deltas, quotechar='"'):
     ret = str1
     for k, v in deltas.items():
         ret = ret.replace(quoted(k, quotechar), quoted(v, quotechar))
     return ret
+
 
 with open(mtdeltas_csv) as csvfile:
     ins = csv.reader(csvfile, delimiter=',', quotechar='"')
@@ -69,6 +75,7 @@ with open(mtdeltas_csv) as csvfile:
                 print("Skipped empty destination for '" + oldStr
                       + " on line " + str(lineI) + " in " + csvfile)
 
+
 def oldToNew(path, quotechar='"'):
     newName = path.replace("old", "new")
     if newName == path:
@@ -83,6 +90,7 @@ def oldToNew(path, quotechar='"'):
                 if oldLine:
                     outs.write(replaceQuoted(oldLine, mtdeltas) + "\n")
     print("* wrote '%s'" % newName)
+
 
 if __name__ == "__main__":
     for i in range(1, len(sys.argv)):
