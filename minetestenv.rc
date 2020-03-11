@@ -95,22 +95,22 @@ if [ "$1" = "--help" ]; then
     echo "This script installs ENLIVEN subgame for minetest. It uses individual git repositories, so please only run this once so as not to exceed their bandwidth."
     echo "Usage:"
     echo
-    #echo "version_0_5_enable=<value> (where value is true or false): forces 0.5 (if not specified, this script uses 0.5 versions of mods if minetest is at /usr/local/share/minetest)"
+    #echo "enable_version_0_5=<value> (where value is true or false): forces 0.5 (if not specified, this script uses 0.5 versions of mods if minetest is at /usr/local/share/minetest)"
     #echo
     echo "local_enable=<value> (where value is true or false): forces /usr/local/share/minetest (if not specified, script detects minetest but if exists both in /usr/share/ and /usr/local/share, prefers /usr/local/share/minetest)"
     echo
     exit 0
 fi
 
-#NOTE: version_0_5_enable is now detected further down instead of being specified
-#if [ "$1" = "version_0_5_enable=true" ]; then
-#    version_0_5_enable="true"
-#elif [ "$2" = "version_0_5_enable=true" ]; then
-#    version_0_5_enable="true"
-#elif [ "$1" = "version_0_5_enable=false" ]; then
-#    version_0_5_enable="false"
-#elif [ "$2" = "version_0_5_enable=false" ]; then
-#    version_0_5_enable="false"
+#NOTE: enable_version_0_5 is now detected further down instead of being specified
+#if [ "$1" = "enable_version_0_5=true" ]; then
+#    enable_version_0_5="true"
+#elif [ "$2" = "enable_version_0_5=true" ]; then
+#    enable_version_0_5="true"
+#elif [ "$1" = "enable_version_0_5=false" ]; then
+#    enable_version_0_5="false"
+#elif [ "$2" = "enable_version_0_5=false" ]; then
+#    enable_version_0_5="false"
 #fi
 
 if [ "$1" = "local_enable=true" ]; then
@@ -195,27 +195,27 @@ if [ "$local_enable" != "false" ]; then
     # IF git version is installed
     try_path="/usr/local/share/minetest"
     if [ -d "$try_path" ]; then
-        #if [ -z "$version_0_5_enable" ]; then
-        #    version_0_5_enable="true"
+        #if [ -z "$enable_version_0_5" ]; then
+        #    enable_version_0_5="true"
         #fi
         USR_SHARE_MINETEST="$try_path"
     fi
 fi
-version_0_5_enable="false"
+enable_version_0_5="false"
 if [ -d "$USR_SHARE_MINETEST/games/minetest_game/mods/player_api" ]; then
-    version_0_5_enable="true"
+    enable_version_0_5="true"
 fi
 if [ -f "$CONFIG_PATH/local_enable" ]; then
     local_enable=$(head -n 1 $CONFIG_PATH/local_enable)
 fi
-#if [ -f "$CONFIG_PATH/version_0_5_enable" ]; then
-#    version_0_5_enable=$(head -n 1 $CONFIG_PATH/version_0_5_enable)
+#if [ -f "$CONFIG_PATH/enable_version_0_5" ]; then
+#    enable_version_0_5=$(head -n 1 $CONFIG_PATH/enable_version_0_5)
 #fi
 if [ -z "$local_enable" ]; then
     echo "$local_enable" > "$CONFIG_PATH/local_enable"
 fi
-#if [ -z "$version_0_5_enable" ]; then
-#    echo "$version_0_5_enable" > "$CONFIG_PATH/version_0_5_enable"
+#if [ -z "$enable_version_0_5" ]; then
+#    echo "$enable_version_0_5" > "$CONFIG_PATH/enable_version_0_5"
 #fi
 
 mtgame_name="minetest_game"
@@ -236,6 +236,7 @@ MT_MYGAME_DIR="$MT_MYGAMES_DIR/$MT_MYGAME_NAME"
 # formerly MT_MYGAME_MODDIR:
 MT_MYGAME_MODS_PATH="$MT_MYGAME_DIR/mods"
 MT_WORLDS_DIR="$HOME/.minetest/worlds"
+echo "Worlds in '$MT_WORLDS_DIR':"
 MT_DEFAULT_WORLD_NAME="`ls $MT_WORLDS_DIR | grep -v tar.gz | grep --max-count=1 -v world`"  # aka -m 1 (no '=' sign in that case)
 MT_MYWORLD_NAME="$MT_DEFAULT_WORLD_NAME"
 if [ -z "$MT_DEFAULT_WORLD_NAME" ]; then
@@ -501,13 +502,13 @@ echo
 echo
 echo "To preconfigure, write true or false to files in $CONFIG_PATH named:"
 echo "    local_enable"
-#echo "    version_0_5_enable"
+#echo "    enable_version_0_5"
 echo
 echo "Using following configuration:"
-#if [ -z "$version_0_5_enable" ]; then
-#    echo "    version_0_5_enable: (auto--set this var before pasting region into terminal)"
+#if [ -z "$enable_version_0_5" ]; then
+#    echo "    enable_version_0_5: (auto--set this var before pasting region into terminal)"
 #else
-echo "    version_0_5_enable: $version_0_5_enable"
+echo "    enable_version_0_5: $enable_version_0_5"
 #fi
 if [ -z "$local_enable" ]; then
     echo "    local_enable: (auto--set this var before pasting region into terminal)"

@@ -5,6 +5,19 @@ The format is based on [Keep a
 Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
+## [git] - 2020-03-11
+### Changed
+- Generate readme-ENLIVEN.md `game-release.rc` when building ENLIVEN-mtg
+  instead of emitting instructions to standard output and creating flag
+  files.
+  - `game-release.rc` stores information the script needs to read upon
+    later runs (The file is now used instead of flag files).
+  - `readme-ENLIVEN.md` stores information for the user or developer.
+- Rename variables in `minetestenv.rc`.
+
+### Fixed
+- Use the new awards URL.
+
 ## [git] - 2020-02-27
 ### Added
 - new super for map generators

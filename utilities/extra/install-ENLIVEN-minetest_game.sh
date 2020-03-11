@@ -133,14 +133,22 @@ if [ -z "$MT_MYGAME_DIR" ]; then
     exit 1
 fi
 
+BUILD_DATE=`date '+%Y-%m-%d'`
+
 # BACKUP world.mt:
 if [ ! -d "$MT_MYGAME_DIR" ]; then
     mkdir "$MT_MYGAME_DIR" || customDie "$USER cannot mkdir '$MT_MYGAME_DIR' (make sure the directory containing it exists)"
     show_changes="false"
-#else
-#    # workaround bug in earlier version of installer
-#    sudo chown -R `cat /tmp/local_mts_user` "$MT_MYGAME_DIR"
+# else
+#     # workaround bug in earlier version of installer
+#     sudo chown -R `cat /tmp/local_mts_user` "$MT_MYGAME_DIR"
 fi
+release_rc="$MT_MYGAME_DIR/game-release.rc"
+if [ -f "$release_rc" ]; then
+    source "$release_rc"
+fi
+# WAIT to echo build date until end, to ensure annotated correctly
+echo "# build_started=`date`" > "$release_rc"
 if [ -f "$MT_MYWORLD_DIR/world.mt.1st" ]; then
     echo "Already backed up world.mt to $MT_MYWORLD_DIR/world.mt.1st"
 else
@@ -284,7 +292,8 @@ echo "sprint_stamina_drain = .5" >> "$MYGAME_MINETEST_CONF"  # default is 2
 echo "bones_position_message = true" >> "$MYGAME_MINETEST_CONF"  # default is false--this is for client-side chat message (server-side logging always on though)
 #no longer needed since these mods check for player_api to determine whether v3 model is used:
 #TODO: below must go in the one in the subgame folder!
-if [ "$version_0_5_enable" = "true" ]; then
+echo "enable_version_0_5=\"$enable_version_0_5\"" >> "$release_rc"
+if [ "$enable_version_0_5" = "true" ]; then
 #    echo "player_model_version = default_character_v3" >> "$MYGAME_MINETEST_CONF"  # formerly used by playeranim
     echo "playeranim.model_version = MTG_4_Nov_2017" >> "$MYGAME_MINETEST_CONF"  # used by playeranim
     echo "using version 5 branch of mods..."
@@ -363,8 +372,9 @@ add_git_mod mob_horse mob_horse https://notabug.org/tenplus1/mob_horse.git
 # add_git_mod mobs_sky mobs_sky https://github.com/blert2112/mobs_sky.git
 add_git_mod mobs_sky mobs_sky https://github.com/poikilos/mobs_sky.git
 
-spawners_enable="true"
-if [ "$spawners_enable" = "true" ]; then
+enable_spawners="true"
+echo "enable_spawners=\"$enable_spawners\"" >> "$release_rc"
+if [ "$enable_spawners" = "true" ]; then
     # forum_url: https://forum.minetest.net/viewtopic.php?f=11&t=13857
         # description:
         # * NO LONGER REPLACES pyramids.
@@ -438,7 +448,6 @@ if [ "$spawners_enable" = "true" ]; then
     # but first see if there are any updates to https://repo.or.cz/minetest_pyramids/tsm_pyramids.git
     # (WARNING: uses nodeupdate [not minetest.check_for_falling], so only compatible with minetest.org release
     # see nodes.lua; human readable url: http://repo.or.cz/w/minetest_pyramids/tsm_pyramids.git)
-
 else
     remove_mod tsm_chests_dungeon
     remove_mod spawners
@@ -656,7 +665,7 @@ add_git_mod ts_furniture ts_furniture https://github.com/minetest-mods/ts_furnit
 #"stable" version is at https://github.com/stujones11/minetest-3d_armor/archive/version-0.4.11.zip
 #add_zip_mod 3d_armor minetest-3d_armor-MT_0.5.0-dev https://github.com/stujones11/minetest-3d_armor/archive/MT_0.5.0-dev.zip
 # git clone -b MT_0.5.0-dev --single-branch https://git@github.com/stujones11/minetest-3d_armor.git
-#if [ "$version_0_5_enable" = "true" ]; then
+#if [ "$enable_version_0_5" = "true" ]; then
 #    # this branch doesn't exist anymore. See main branch.
 #    echo "  trying to get 3d_armor 0.5.0-dev branch..."
 #    add_git_mod 3d_armor minetest-3d_armor https://github.com/stujones11/minetest-3d_armor.git "MT_0.5.0-dev"
@@ -684,6 +693,7 @@ add_git_mod sling sling https://github.com/minetest-mods/sling.git
 add_git_mod signs_lib signs_lib https://gitlab.com/VanessaE/signs_lib.git
 
 farming_redo_enable="false"
+echo "farming_redo_enable=\"$farming_redo_enable\"" >> "$release_rc"
 if [ -f "$MT_MYWORLD_DIR/farming_redo_enable" ]; then
     farming_redo_enable="true"
 else
@@ -722,8 +732,9 @@ add_git_mod digilines digilines https://github.com/minetest-mods/digilines.git
 add_git_mod trmp_minetest_game trmp_minetest_game https://github.com/poikilos/trmp_minetest_game.git
 
 #forum_url = "http://minetest.org/forum/viewtopic.php?f=11&t=4870&sid=3ccbe3a667c6201075fc475ef7dc7cea"
-#see also minetest-mods version:
-add_git_mod awards awards https://github.com/minetest-mods/awards.git
+# minetest-mods version MOVED to https://gitlab.com/rubenwardy/awards.git:
+# add_git_mod awards awards https://github.com/minetest-mods/awards.git
+add_git_mod awards awards https://gitlab.com/rubenwardy/awards.git
 # xisd is GONE from GitHub:
 # add_git_mod awards_board awards_board https://github.com/xisd/awards_board.git
 # poikilos/awards_board is DELETED from GitLab (due to exposed e-mail address
@@ -794,7 +805,7 @@ add_git_mod ambience ambience https://notabug.org/tenplus1/ambience.git
 # forum_url: https://forum.minetest.net/viewtopic.php?t=12189
 # description: ISSUE ON 0.5.0: player halfway into ground--see minetest.conf setting above for fix; Adds animations to the players' head
 add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git
-#if [ "$version_0_5_enable" != "true" ]; then
+#if [ "$enable_version_0_5" != "true" ]; then
     # see https://github.com/minetest-mods/playeranim/issues/14 (fixed)
     # add_git_mod playeranim playeranim https://github.com/poikilos/playeranim.git
     #add_git_mod playeranim playeranim https://github.com/minetest-mods/playeranim.git "v5.0"
@@ -818,7 +829,7 @@ MATCHING_MODS_BEFORE="`ls $MT_MYGAME_MODS_PATH | grep skin`"
 remove_mod u_skinsdb
 remove_mod u_skins
 PATCH_SKINS_MOD_NAME="skinsdb"  # used further down too!
-#if [ "$version_0_5_enable" = "true" ]; then
+#if [ "$enable_version_0_5" = "true" ]; then
 #    # There is only one branch now. See master instead.
 #    #players are 1 block below ground in skinsdb for Minetest 0.4.* stable...
 #    #so get 0.5 branch from fork...
@@ -973,7 +984,7 @@ else
     customDie "did not find $PATCHES_PATH"
 fi
 echo
-if [ "$version_0_5_enable" != "true" ]; then
+if [ "$enable_version_0_5" != "true" ]; then
     echo "  [ - ] removing worldedit's worldedit_brush since not compatible with 0.4.* stable (detected)"
     rm -Rf $MT_MYGAME_MODS_PATH/worldedit/worldedit_brush
 else
@@ -984,12 +995,58 @@ fi
 echo
 echo
 echo
-echo "#### $WORLD_MT_PATH: ####"
-cat "$WORLD_MT_PATH"
-echo "### end $WORLD_MT_PATH ##"
-echo ""
-echo ""
-echo ""
+cat > "$MT_MYGAME_DIR/readme-ENLIVEN.md" <<END
+# ENLIVEN
+ENLIVEN is a game for Minetest by Poikilos.
+This is mostly a collection of mods and small patches. The source code
+is available at the various repos of the included mods, and in the
+patches which the install script (which is more of a build script--see
+"Linux" section) reads.
+
+
+## Version
+- Open game-release.rc in your favorite text editor.
+
+
+## License
+
+### Mods from minetest_game:
+- See LICENSE.txt (except mods overwritten--for example farming has been
+  replaced by farming redo--see licenses in subfolders for mods with
+  licenses that differ).
+
+### Other mods
+See licenses in subdirectories. For a complete list of repository links,
+see
+<https://github.com/poikilos/EnlivenMinetest/blob/master/utilities/extra/install-ENLIVEN-minetest_game.sh>
+
+
+## Install
+### Windows
+Click "Download ENLIVEN" at
+<https://expertmultimedia.com/index.php?action=show&htmlref=tutoring.html#normal>
+for an older version.
+
+### Linux
+
+#### MT6
+The new version is based on Final Minetest, but not much is done
+yet. Fortunately, since it is based on Bucket_Game, it has most of the
+mods from the deprecated version (found in the Windows installer
+or by running the `install-ENLIVEN-minetest_game.sh` script).
+
+#### MT5
+- A nearly complete but unmaintained version is installed by running the
+  following:
+
+```bash
+git clone https://github.com/poikilos/EnlivenMinetest.git
+cd EnlivenMinetest
+./utilities/extra/install-ENLIVEN-minetest_game.sh
+```
+END
+echo "WORLD_MT_PATH=$WORLD_MT_PATH"
+
 ##echo "Remember, if you are using Better HUD + Hunger, add the values for the new meat to hunger.lua"
 ##echo "--see <https://forum.minetest.net/viewtopic.php?f=11&t=9917&hilit=mobs>"
 #echo "NOTE: hud_hunger/hunger/food.lua now comes with values for food from mobs."
@@ -1024,14 +1081,15 @@ echo ""
 echo "#more minetest.conf settings for hbsprint can be found at https://github.com/minetest-mods/hbsprint/blob/master/settingtypes.txt"
 echo "#not all settings can be changed in this minetest.conf (see minetest.conf.example in THIS folder)"
 echo "#some settings can only be changed in client's local copy of minetest.conf (see or login scripts in network)"
-if [ "$version_0_5_enable" = "true" ]; then
+if [ "$enable_version_0_5" = "true" ]; then
     echo "The 0.5 version of mods was installed."
 else
     echo "The non-0.5 version of mods was installed (if you have installed a development version of minetest to /usr/share such as via an AUR package, you must instead run:"
-    echo "./game-install-ENLIVEN version_0_5_enable"
+    echo "# (In the EnlivenMinetest directory)"
+    echo "./utilities/extra/install-ENLIVEN-minetest_game.sh enable_version_0_5"
 fi
 echo "(used $MT_MINETEST_GAME_PATH as base)"
-echo "spawners_enable: $spawners_enable"
+echo "enable_spawners: $enable_spawners"
 echo
 echo "As for world.mt, the following WORLD_MT_PATH was used: $WORLD_MT_PATH"
 echo "  content:"
@@ -1072,7 +1130,8 @@ if [ ! -d "$MT_MYGAME_MODS_PATH/dungeon_loot" ]; then
 fi
 echo "INSTALLED t4im's technic FOR RECENT PATCH FOR corrected depends.txt..."
 echo "You must manually fix crash in awards unless it has been fixed:"
-echo "see also <https://github.com/rubenwardy/awards/issues/59>"
+echo "formerly at <https://github.com/rubenwardy/awards/issues/59>"
+echo "moved to https://gitlab.com/rubenwardy/awards"
 echo "in $MT_MYGAME_MODS_PATH/awards/src/api_triggers.lua"
 echo "change:"
 echo "assert(player and player.is_player and player:is_player() and key)"
@@ -1109,8 +1168,15 @@ else
     echo "WARNING: neither minetestserver nor minetest is in the system path"
 fi
 
-# if [ ! -z "`cat "$err_txt"`" ]; then
-cat "$err_txt"
-# fi
+if [ ! -s "$err_txt" ]; then
+    # -s: exists and is not blank
+    echo "There are errors in the error log:"
+    cat "$err_txt"
+else
+    echo "$err_txt does not contain any errors."
+fi
+echo "BUILD_DATE=$BUILD_DATE" >> "$release_rc"
+echo
+echo "See also \"$release_rc\""
 echo
 echo
