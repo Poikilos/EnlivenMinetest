@@ -1,0 +1,63 @@
+Unified Foods Licenses
+----------------------------------------------------------------------
+
+1. OldCoder  Unified Foods  includes a  food registration system and a
+hunger system.
+
+----------------------------------------------------------------------
+
+2. The food registration system is original code.  The license for the
+code in question is:
+
+(c) 2015-2020 and CC BY-NC-SA 4.0 International: OldCoder (Robert Kir-
+aly)
+
+----------------------------------------------------------------------
+
+3. The hunger system is descended from a MT mod named "hbhunger".  The
+license for "hbhunger" code is LGPL v2.1.  The license for  "hbhunger"
+textures is MIT.
+
+One "hbhunger" sound file is used:
+
+better_hunger_eat_generic.ogg
+
+The license for that file is CC BY 3.0 with attribution to:
+
+https://freesound.org/people/xtrgamr/sounds/253619/
+
+----------------------------------------------------------------------
+
+4. The licenses for other files are as follows:
+
+* ufoods_*.png: WTFPL except for "ufoods_glass_*".
+
+* ufoods_glass_*.png:  These textures are presently based on a version
+of "mobs_glass_milk.png" that is licensed as follows:
+
+The MIT License (MIT)
+Copyright (c) 2014 Krupnov Pavel and 2016 TenPlus1
+
+* farming_*.png: See "farming" mod license file.
+
+* mobs_*.png: See "mobs" mod license file.
+
+* mtfoods_*.png:
+
+License: (c) 2014-2020 and CC BY-NC-SA 4.0 International:  Philip Rob-
+inson.
+
+* misc_baked_potato.png: WTFPL.
+
+* coderfruit_*.png:
+
+License: (c) 2019 and CC BY-NC-SA 4.0 International:  OldCoder (Robert
+Kiraly).
+
+* moono_*.png:
+License: (c) 2015-2020 and CC BY-SA 4.0 International: Moono.
+
+* dessert_*.png and food_*.png:
+License: (c) 2013-2010 and CC-BY-SA 3.0 Rubenwardy.
+
+(end of document)
