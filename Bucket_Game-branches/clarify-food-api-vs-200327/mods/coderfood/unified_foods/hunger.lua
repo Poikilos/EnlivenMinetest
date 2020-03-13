@@ -1,5 +1,6 @@
 local modname = minetest.get_current_modname()
 local modpath = minetest.get_modpath (modname)
+-- NOTE: 30 indicates 10 more beyond the visible bar is allowed.
 
 local enable_wonder = minetest.setting_getbool ("enable_wonder")
 unified_hunger = {}
@@ -49,14 +50,37 @@ local function custom_hud(player)
     hb.init_hudbar(player, "satiation", unified_hunger.get_hunger(player))
 end
 
+local function pull_hunger(player)
+    local inv = player:get_inventory()
+    if not inv then return nil end
+    local hgp = inv:get_stack("hunger", 1):get_count()
+    if hgp == 0 then
+        hgp = 21
+        inv:set_stack("hunger", 1, ItemStack({name = ":", count = hgp}))
+    else
+        hgp = hgp
+    end
+    unified_hunger.hunger[name] = hgp - 1
+    return true
+end
+
+local function push_hunger(player)
+    local inv = player:get_inventory()
+    local name = player:get_player_name()
+    local value = unified_hunger.hunger[name]
+    if not inv or not value then  return nil  end
+    inv:set_stack("hunger", 1, ItemStack({name = ":", count = value + 1}))
+    return true
+end
+
 -- Keep these for backwards compatibility
 
 function unified_hunger.save_hunger(player)
-    unified_hunger.set_hunger(player)
+    push_hunger(player)
 end
 
 function unified_hunger.load_hunger(player)
-    unified_hunger.get_hunger(player)
+    pull_hunger(player)
 end
 
 -- Poison player
@@ -213,45 +237,35 @@ local function update_hud(player)
 end
 
 unified_hunger.get_hunger = function(player)
-    local inv = player:get_inventory()
-    if not inv then return nil end
-    local hgp = inv:get_stack("hunger", 1):get_count()
-    if hgp == 0 then
-        hgp = 21
-        inv:set_stack("hunger", 1, ItemStack({name = ":", count = hgp}))
-    else
-        hgp = hgp
-    end
-    return hgp - 1
+    pull_hunger(player)
+    return unified_hunger.hunger[name]
 end
 
-unified_hunger.set_hunger = function(player)
-    local inv = player:get_inventory()
+unified_hunger.set_hunger = function(player, value)
     local name = player:get_player_name()
-    local value = unified_hunger.hunger[name]
-    if not inv  or not value then return nil end
     if value > 30 then value = 30 end
     if value < 0 then value = 0 end
-    inv:set_stack("hunger", 1, ItemStack({name = ":", count = value + 1}))
-    return true
+    unified_hunger.hunger[name] = value
+    return push_hunger(player)
 end
+
+
 
 minetest.register_on_joinplayer(function(player)
     local name = player:get_player_name()
     local inv = player:get_inventory()
     inv:set_size("hunger", 1)
-    unified_hunger.hunger[name] = unified_hunger.get_hunger(player)
+    pull_hunger(player)  -- Load hunger[name] (and ensure non-nil).
     unified_hunger.hunger_out[name] = unified_hunger.hunger[name]
     unified_hunger.exhaustion[name] = 0
     custom_hud(player)
-    unified_hunger.set_hunger(player)
+    push_hunger(player)  -- Save the now non-nil value.
 end)
 
 minetest.register_on_respawnplayer(function(player)
     -- reset hunger (and save)
     local name = player:get_player_name()
-    unified_hunger.hunger[name] = 20
-    unified_hunger.set_hunger(player)
+    unified_hunger.set_hunger(player, 20)
     unified_hunger.exhaustion[name] = 0
 end)
 
