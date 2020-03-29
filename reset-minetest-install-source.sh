@@ -4,8 +4,16 @@ echo
 echo
 echo "Starting cleanup and library rebuild..."
 date
+MY_NAME="reset-minetest-install-source.sh"
+config_path=$HOME/.config/EnlivenMinetest
+
 zip_name=linux-minetest-kit.zip
 extracted_name=linux-minetest-kit
+config_path=~/.config/EnlivenMinetest
+if [ ! -d "$config_path" ]; then
+    mkdir -p "$config_path"
+fi
+
 in_use_name=minetest
 #not reliable with bash -e (if not running, check throws error):
 #running=`ps ax | grep -v grep | grep $in_use_name | wc -l`
@@ -61,7 +69,7 @@ if [ "@$installed_version" = "@$available_version" ]; then
     echo "You already have the latest version installed."
     exit 1
 fi
-if [ "@$compiled_version" -ne "@$installed_version" ]; then
+if [ "@$compiled_version" != "@$installed_version" ]; then
     echo "ERROR: You have not yet installed version $compiled_version which you already compiled (you have installed $installed_version)."
     echo "You should run ./install-mts.sh instead (with --client option if you want more than minetestserver)"
     exit 2
@@ -75,6 +83,7 @@ do
         customDie "Invalid argument: $var"
     fi
 done
+cd "$config_path" || customDie "[$MY_NAME] cd \"$config_path\" failed."
 if [ -d "$extracted_name" ]; then
   if [ "`ls -lR screenshots/*.png | wc -l`" -gt 0 ]; then
     mv screenshots/*.png ~/ || customDie "can't move screenshots from $extracted_name/minetest/bin/*.png"
@@ -116,7 +125,7 @@ echo
 echo
 cd ..
 echo "Check libraries.log for errors, then..."
-echo "- Run the following manually for SERVER only (no graphical client):"
+echo "- Run the following manually for SERVER only (no graphical client unless an old copy of ~/minetest/bin/minetest is detected):"
 echo "  bash install-mts.sh"
 echo "- Run the following manually for both minetestserver and minetest:"
 echo "  bash install-mts.sh --client"

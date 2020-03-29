@@ -7,6 +7,14 @@ Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [git] - 2020-03-11
 ### Changed
+- Use $HOME/.config/EnlivenMinetest to store downloads.
+
+### Fixed
+- Use instead of `-ne` for comparing strings.
+
+
+## [git] - 2020-03-11
+### Changed
 - Generate readme-ENLIVEN.md `game-release.rc` when building ENLIVEN-mtg
   instead of emitting instructions to standard output and creating flag
   files.

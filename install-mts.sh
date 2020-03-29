@@ -4,6 +4,9 @@ echo
 echo
 echo
 echo "Starting install..."
+MY_NAME="install-mts.sh"
+config_path="$HOME/.config/EnlivenMinetest"
+
 date
 customDie() {
     cat <<END
@@ -59,9 +62,11 @@ enable_server=true
 dest_programs="$HOME"
 #NOTE: $HOME is still used further down, for $HOME/.* and $HOME/i_am_dedicated_minetest_server flag file (which can be empty)
 #TODO: change $HOME/i_am_dedicated_minetest_server to $HOME/.config/EnlivenMinetest/i_am_dedicated_minetest_server or rc file
-extracted_name=linux-minetest-kit
+extracted_name="linux-minetest-kit"
+extracted_path="$config_path/$extracted_name"
+cd "$config_path" || customDie "[$MY_NAME] cd \"$config_path\" failed."
 flag_dir_rel="$extracted_name/mtsrc"
-flag_dir="`pwd`/$flag_dir_rel"
+flag_dir="$extracted_path/mtsrc"
 enable_client=false
 custom_scripts_dir="$HOME"
 custom_script_name="mts.sh"
@@ -82,9 +87,7 @@ else
     echo "  (can contain settings such as enable_run_after_compile)"
 fi
 
-pushd "$extracted_name"
-extracted_dir="`pwd`"
-
+pushd "$extracted_path" || customDie "pushd \"$extracted_path\" failed in \"`pwd`\""
 
 extra_options=""
 for var in "$@"
@@ -183,12 +186,12 @@ END
     end=`date +%s`
     compile_time=$((end-start))
     echo "Compiling the program finished in $compile_time seconds."
-    cp release.txt minetest/ || customWarn "Cannot copy `pwd`/release.txt to `pwd`/minetest/"
+    cp $extracted_path/release.txt $extracted_path/minetest/ || customWarn "Cannot copy $extracted_path/release.txt to $extracted_path/minetest/"
 else
     echo "* using existing minetest..."
 fi
 if [ ! -f "$flag_file" ]; then
-    customDie "The build did not complete since '$flag_file' is missing."
+    customDie "The build did not complete since '$flag_file' is missing. Maybe you didn't compile the libraries. Running reset-minetest-install-source.sh should do that automatically, but you can also do: cd $extracted_path && ./mtcompile-libraries.sh build"
 fi
 dest_flag_file="$dest_programs/$flag_file"
 if [ -f "$dest_flag_file" ]; then
@@ -292,7 +295,15 @@ else
 fi
 popd
 
-pushd ..
+# pushd ..  # go from EnlivenMinetest/webapp to EnlivenMinetest
+PATCHES_DIR="patches"
+if [ -z "$REPO_PATH" ]; then
+    REPO_PATH="$HOME/git/EnlivenMinetest"
+fi
+PATCHES_PATH="$REPO_PATH/patches"
+if [ -d "$PATCHES_PATH" ]; then
+    pushd "$REPO_PATH"
+
 src="patches/subgame/menu"
 dst="$dest_programs/minetest/games/ENLIVEN/menu"
 echo "updating '$dst' from '$src/'..."
@@ -473,6 +484,15 @@ else
 fi
 
 popd
+else
+    cat <<END
+$PATCHES_PATH is missing. To fix this, set the REPO_PATH environment variable like:
+
+    REPO_PATH=$HOME/git/EnlivenMinetest $MY_NAME
+    # (where $HOME/git/EnlivenMinetest is the actual repo path).
+END
+fi
+
 settings_dump="`pwd`/settings-dump.txt"
 settings_types_list="`pwd`/settingtypes-list.txt"
 # grep -r `pwd`/linux-minetest-kit/minetest/games/Bucket_Game -e "setting_get" > $settings_dump
@@ -492,8 +512,8 @@ else
 fi
 popd
 echo "* finished compiling."
-if [ -f "$extracted_dir/release.txt" ]; then
-    versionLine=`cat $extracted_dir/release.txt`
+if [ -f "$extracted_path/release.txt" ]; then
+    versionLine=`cat $extracted_path/release.txt | grep Release`
     echo "  - version: $versionLine"
 fi
 if [ "@$enable_run_after_compile" = "@true" ]; then
