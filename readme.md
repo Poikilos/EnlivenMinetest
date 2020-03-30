@@ -15,11 +15,13 @@ by [Poikilos](https://github.com/poikilos)
    using other subgames, which client will download from servers as
    usual.
 
+
 ## Primary Features of EnlivenMinetest Project
 * Server installer for ENLIVEN on linux server (Ubuntu so far)
 * Client installer for single-player ENLIVEN, including on Windows
 * automatically install Minetest client with a usable minetest.conf (for
   improved graphics)
+
 
 ## Primary Features of ENLIVEN subgame
 * birthstones, improved fork: <https://github.com/poikilos/birthstones>
@@ -94,6 +96,55 @@ bash install-mts.sh --client
   you may need to restart your window manager. If it still doesn't show,
   contact the maintainer of your window manager. This works in KDE on
   Fedora 29. Workaround: copy the icon from there to your desktop.)
+
+
+## Linux Server Install or Upgrade
+```
+cd ~/git/EnlivenMinetest
+./reset-minetest-install-source.sh && ./versionize && ./install-mts.sh
+# You can leave out `&& ./versionize` if you don't want to keep old
+# copies.
+```
+
+### Using install-mts.sh
+You must first run reset-minetest-install-source.sh to compile the
+libraries automatically, or otherwise have run the compile libraries
+script in `~/.config/EnlivenMinetest/linux-minetest-kit`, or at least
+have already compiled Minetest there. If the minetest or
+minetestserver binary (or just minetestserver if client is not enabled)
+is not present there (in
+`~/.config/EnlivenMinetest/linux-minetest-kit/minetest/bin/`), the
+script will try to compile the program before installing or stop if it
+cannot.
+
+#### Arguments
+- `--clean` is the recommended option, and is the default. It
+  erases Bucket_Game and causes ENLIVEN to be remade using Bucket_Game.
+  - It backs up skins, but that is not necessary anymore since
+    coderskins uses world storage (follow this issue at
+    <https://github.com/poikilos/EnlivenMinetest/issues/382>).
+- `--client` installs the client too. Since "install-mts.sh" stands for
+  "Install minetestserver," the `--client` option is off by default
+  (See the "Configuration Files" section for how to change the default).
+
+#### Configuration Files
+You can place zero or more of the following variables in
+$HOME/.config/EnlivenMinetest/scripting.rc:
+```
+CUSTOM_SCRIPTS_PATH
+MT_POST_INSTALL_SCRIPT_2  # relative to CUSTOM_SCRIPTS_PATH
+REPO_PATH  # Set this if your copy of the repo is not ~/git/EnlivenMinetest
+ENABLE_CLIENT  # =true if you want install-mts.sh to install the client.
+```
+- If ~/minetest/bin/minetest is present, that has the same effect as
+  `ENABLE_CLIENT=true`.
+
+You can place a script called mts.sh in your home (or
+CUSTOM_SCRIPTS_PATH) directory to run it after install (you can put
+archive-minetestserver-debug.sh there too to run first). A suggested use
+is to put a line in mts.sh that starts the server, so that the server
+starts after the installation or upgrade is complete.
+
 
 ## How to use
 

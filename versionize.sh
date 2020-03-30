@@ -2,8 +2,8 @@
 echo
 echo "Collecting version..."
 MY_NAME="versionize.sh"
-config_path=$HOME/.config/EnlivenMinetest
-cd "$config_path" || customDie "[$MY_NAME] cd \"$config_path\" failed."
+EM_CONFIG_PATH=$HOME/.config/EnlivenMinetest
+cd "$EM_CONFIG_PATH" || customDie "[$MY_NAME] cd \"$EM_CONFIG_PATH\" failed."
 if [ -z "$original_src_path" ]; then
     original_src_path="$1"
 fi
@@ -51,13 +51,13 @@ customDie() {
 destroy_msg=""
 # src_path: extracted name (always linux-mintetest-kit unless source is
 #   archive, in which case src_path is detected)
-src_path="$config_path/linux-minetest-kit"
-versions_path="$config_path/minetest-versions"
+src_path="$EM_CONFIG_PATH/linux-minetest-kit"
+versions_path="$EM_CONFIG_PATH/minetest-versions"
 if [ ! -d "$versions_path" ]; then
     mkdir -p "$versions_path" || customDie "mkdir $versions_path FAILED"
 fi
 src_name=""
-try_path="$config_path/$original_src_path"
+try_path="$EM_CONFIG_PATH/$original_src_path"
 if [ -f "$original_src_path" ]; then
     echo "* detected file param..."
 elif [ -d "$original_src_path" ]; then

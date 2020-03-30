@@ -5,13 +5,14 @@ echo
 echo "Starting cleanup and library rebuild..."
 date
 MY_NAME="reset-minetest-install-source.sh"
-config_path=$HOME/.config/EnlivenMinetest
+EM_CONFIG_PATH=$HOME/.config/EnlivenMinetest
 
 zip_name=linux-minetest-kit.zip
 extracted_name=linux-minetest-kit
-config_path=~/.config/EnlivenMinetest
-if [ ! -d "$config_path" ]; then
-    mkdir -p "$config_path"
+EM_CONFIG_PATH=~/.config/EnlivenMinetest
+extracted_path="$EM_CONFIG_PATH/$extracted_name"
+if [ ! -d "$EM_CONFIG_PATH" ]; then
+    mkdir -p "$EM_CONFIG_PATH"
 fi
 
 in_use_name=minetest
@@ -83,10 +84,16 @@ do
         customDie "Invalid argument: $var"
     fi
 done
-cd "$config_path" || customDie "[$MY_NAME] cd \"$config_path\" failed."
-if [ -d "$extracted_name" ]; then
-  if [ "`ls -lR screenshots/*.png | wc -l`" -gt 0 ]; then
-    mv screenshots/*.png ~/ || customDie "can't move screenshots from $extracted_name/minetest/bin/*.png"
+cd "$EM_CONFIG_PATH" || customDie "[$MY_NAME] cd \"$EM_CONFIG_PATH\" failed."
+if [ -d "$extracted_path" ]; then
+
+  # NOTE: ls -lR $extracted_path/screenshots/
+  screenshot_count=0
+  if [ -d $extracted_path/screenshots/ ]; then
+    screenshot_count="`ls $extracted_path/screenshots/ | wc -l`"
+  fi
+  if [ $screenshot_count -gt 0 ]; then
+    mv $extracted_path/screenshots/*.png ~/ || customDie "can't move screenshots from $extracted_name/minetest/bin/*.png"
     rmdir --ignore-fail-on-non-empty screenshots
   fi
   if [ "`ls -lR $extracted_name/minetest/bin/*.png | wc -l`" -gt 0 ]; then

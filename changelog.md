@@ -5,7 +5,20 @@ The format is based on [Keep a
 Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
-## [git] - 2020-03-11
+## [git] - 2020-03-29
+### Added
+- Add "Linux Server Install or Upgrade" section to
+  [readme.md](readme.md).
+
+### Fixed
+- Fix counting of screenshots (`*` doesn't work in quotes)
+
+### Changed
+- Do not depend on pwd.
+- Use more variables from scripting.rc if they are present.
+
+
+## [git] - 2020-03-29
 ### Changed
 - Use $HOME/.config/EnlivenMinetest to store downloads.
 

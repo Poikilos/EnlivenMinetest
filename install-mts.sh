@@ -5,7 +5,7 @@ echo
 echo
 echo "Starting install..."
 MY_NAME="install-mts.sh"
-config_path="$HOME/.config/EnlivenMinetest"
+EM_CONFIG_PATH="$HOME/.config/EnlivenMinetest"
 
 date
 customDie() {
@@ -63,28 +63,48 @@ dest_programs="$HOME"
 #NOTE: $HOME is still used further down, for $HOME/.* and $HOME/i_am_dedicated_minetest_server flag file (which can be empty)
 #TODO: change $HOME/i_am_dedicated_minetest_server to $HOME/.config/EnlivenMinetest/i_am_dedicated_minetest_server or rc file
 extracted_name="linux-minetest-kit"
-extracted_path="$config_path/$extracted_name"
-cd "$config_path" || customDie "[$MY_NAME] cd \"$config_path\" failed."
+extracted_path="$EM_CONFIG_PATH/$extracted_name"
+cd "$EM_CONFIG_PATH" || customDie "[$MY_NAME] cd \"$EM_CONFIG_PATH\" failed."
 flag_dir_rel="$extracted_name/mtsrc"
 flag_dir="$extracted_path/mtsrc"
-enable_client=false
-custom_scripts_dir="$HOME"
-custom_script_name="mts.sh"
-if [ -f "$custom_scripts_dir/mts-CenterOfTheSun.sh" ]; then
-    custom_script_name="mts-CenterOfTheSun.sh"
+if [ -z "$CUSTOM_SCRIPTS_PATH" ]; then
+    CUSTOM_SCRIPTS_PATH="$HOME"
+fi
+MT_POST_INSTALL_SCRIPT_1=archive-minetestserver-debug.sh
+scripting_rc_path=~/.config/EnlivenMinetest/scripting.rc
+if [ -z "$MT_POST_INSTALL_SCRIPT_2" ]; then
+    MT_POST_INSTALL_SCRIPT_2="mts.sh"
+    if [ -f "$CUSTOM_SCRIPTS_PATH/mts-CenterOfTheSun.sh" ]; then
+        MT_POST_INSTALL_SCRIPT_2="mts-CenterOfTheSun.sh"
+    else
+        if [ ! -f $CUSTOM_SCRIPTS_PATH/$MT_POST_INSTALL_SCRIPT_2 ]; then
+            cat <<END
+* If $MT_POST_INSTALL_SCRIPT_2 were in $CUSTOM_SCRIPTS_PATH, then it
+  will run after compiling is finished. You can also set
+  MT_POST_INSTALL_SCRIPT_2 to determine what filename to run, and set
+  CUSTOM_SCRIPTS_PATH to determine where it (and
+  $MT_POST_INSTALL_SCRIPT_1 which runs first if present there) is
+  located. You can set the variables in
+  $scripting_rc_path or the environment.
+END
+        fi
+    fi
+fi
+if [ -z "$ENABLE_CLIENT" ]; then
+    ENABLE_CLIENT=false
 fi
 
-scripting_rc_path=~/.config/EnlivenMinetest/scripting.rc
 
-if [ -f ~/.config/EnlivenMinetest/scripting.rc ]; then
-    echo "Running $scripting_rc_path..."
+
+if [ -f "$EM_CONFIG_PATH/scripting.rc" ]; then
+    echo "Using $scripting_rc_path..."
     source $scripting_rc_path
     # may contain any variables above, plus:
     # * enable_run_after_compile: if true, then run the server, such as
     #   ~/mts-CenterOfTheSun.sh
 else
     echo "* skipping $scripting_rc_path (not present)"
-    echo "  (can contain settings such as enable_run_after_compile)"
+    echo "  (can contain settings such as enable_run_after_compile=true)"
 fi
 
 pushd "$extracted_path" || customDie "pushd \"$extracted_path\" failed in \"`pwd`\""
@@ -93,7 +113,7 @@ extra_options=""
 for var in "$@"
 do
     if [ "@$var" = "@--client" ]; then
-        enable_client=true
+        ENABLE_CLIENT=true
     elif [ "@$var" = "@--clean" ]; then
         enable_clean=true
     elif [ "@$var" = "@--noclean" ]; then
@@ -110,17 +130,19 @@ fi
 echo "enable_clean=\"$enable_clean\"..."
 
 # flag_icon="$HOME/Desktop/org.minetest.minetest.desktop"
+good_mts="$extracted_path/minetest/bin/minetestserver"
+good_mt="$extracted_path/minetest/bin/minetest"
 flag_client_dest_file="$dest_programs/minetest/bin/minetest"
-flag_file="minetest/bin/minetestserver"
+flag_file="$good_mts"
 if [ -f "$flag_client_dest_file" ]; then
-    enable_client=true
+    ENABLE_CLIENT=true
     echo "* automatically adding --client to compile since detected"
     echo "  '$flag_client_dest_file'"
     # echo "--press Ctrl C to cancel..."
     # sleep 2
 fi
-if [ "@$enable_client" = "@true" ]; then
-    flag_file="minetest/bin/minetest"
+if [ "@$ENABLE_CLIENT" = "@true" ]; then
+    flag_file="$good_mt"
     extra_options="--client"
 fi
 #if [ -f "$flag_file" ]; then
@@ -131,31 +153,30 @@ fi
     #exit 1
 #fi
 enable_compile=true
-flag_mts="$extracted_path/minetest/bin/minetestserver"
-flag_mt="$extracted_path/minetest/bin/minetest"
+
 has_any_binary=false
-if [ -f "$flag_mts" ]; then
+if [ -f "$good_mts" ]; then
     has_any_binary=true
 fi
-if [ -f "$flag_mt" ]; then
+if [ -f "$good_mt" ]; then
     has_any_binary=true
 fi
 if [ "@$has_any_binary" == "@true" ]; then
     enable_compile=false
-    if [ "@$enable_client" = "@true" ]; then
-        if [ ! -f minetest/bin/minetest ]; then
+    if [ "@$ENABLE_CLIENT" = "@true" ]; then
+        if [ ! -f "$good_mt" ]; then
             enable_compile=true
             echo "* enabling compile (since no `pwd`/minetest/bin/minetest but client install is enabled)"
         fi
     fi
     if [ "@$enable_server" = "@true" ]; then
-        if [ ! -f minetest/bin/minetestserver ]; then
+        if [ ! -f "$good_mts" ]; then
             enable_compile=true
             echo "* enabling compile (since no `pwd`/minetest/bin/minetestserver)"
         fi
     fi
 else
-    echo "* enabling compile since neither \"$flag_mts\" nor \"$flag_mt\" are present."
+    echo "* enabling compile since neither \"$good_mts\" nor \"$good_mt\" are present."
 fi
 if [ "@$enable_compile" = "@true" ]; then
     echo "* checking if the compile library script extracted the program source yet ($flag_dir)..."
@@ -174,6 +195,7 @@ END
     fi
 
     start=`date +%s`
+    cd "$extracted_path" || customDie "cd \"$extracted_path\" failed."
     if [ -f "mtcompile-program.pl" ]; then
         # perl mtcompile-program.pl build >& program.log
         echo "Compiling via perl (this may take a while--output redirected to `pwd`/program.log)..."
@@ -197,7 +219,7 @@ END
     echo "Compiling the program finished in $compile_time seconds."
     cp $extracted_path/release.txt $extracted_path/minetest/ || customWarn "Cannot copy $extracted_path/release.txt to $extracted_path/minetest/"
 else
-    echo "* using existing minetest..."
+    echo "* using existing $extracted_path/minetest..."
 fi
 if [ ! -f "$flag_file" ]; then
     customDie "The build did not complete since '$flag_file' is missing. Maybe you didn't compile the libraries. Running reset-minetest-install-source.sh should do that automatically, but you can also do: cd $extracted_path && ./mtcompile-libraries.sh build"
@@ -209,8 +231,8 @@ fi
 if [ -f "$dest_flag_file" ]; then
     customDie "Install is incomplete because it can't move '$dest_flag_file'."
 fi
-if [ ! -d minetest ]; then
-    customDie "Install is incomplete because `pwd`/minetest is missing."
+if [ ! -d "$extracted_path/minetest" ]; then
+    customDie "Install is incomplete because \"$extracted_path/minetest\" is missing."
 fi
 virtual_dest="$dest_programs/minetest"
 link_target=`readlink $virtual_dest`
@@ -268,14 +290,14 @@ if [ ! -z "$link_target" ]; then
     echo "* detected that $virtual_dest is a symlink to $link_target"
     echo "  (redirecting rsync to prevent symlink to dir conversion: installing to $install_dest"
     echo "   and recreating symlink '$virtual_dest' pointing to '$install_dest')..."
-    rsync -rt "minetest/" "$install_dest" || customDie "Cannot rsync files from installer data `pwd`/minetest/ to $install_dest"
+    rsync -rt "$extracted_path/minetest/" "$install_dest" || customDie "Cannot rsync files from installer data $extracted_path/minetest/ to $install_dest"
     if [ ! -d "$dest_programs/minetest" ]; then
         echo "* creating link to $install_dest directory as $dest_programs/minetest..."
         ln -s "$install_dest" "$dest_programs/minetest"
     fi
 else
-    echo "Installing minetest directory to '$dest_programs'..."
-    rsync -rt --info=progress2 minetest/ $install_dest || customDie "Cannot rsync files from installer data `pwd`/minetest/ to $install_dest"
+    echo "Installing \"$extracted_path/minetest\" directory to \"$dest_programs\"..."
+    rsync -rt --info=progress2 $extracted_path/minetest/ $install_dest || customDie "Cannot rsync files from installer data $extracted_path/minetest/ to $install_dest"
 fi
 if [ ! -f "$dest_flag_file" ]; then
     customDie "ERROR: not complete--couldn't install binary as '$dest_flag_file'"
@@ -305,20 +327,20 @@ fi
 popd
 
 # pushd ..  # go from EnlivenMinetest/webapp to EnlivenMinetest
-PATCHES_DIR="patches"
+# PATCHES_DIR_NAME="patches"
 if [ -z "$REPO_PATH" ]; then
     REPO_PATH="$HOME/git/EnlivenMinetest"
 fi
 PATCHES_PATH="$REPO_PATH/patches"
 if [ -d "$PATCHES_PATH" ]; then
-    pushd "$REPO_PATH"
+    # pushd "$REPO_PATH"
 
-src="patches/subgame/menu"
+src="$PATCHES_PATH/subgame/menu"
 dst="$dest_programs/minetest/games/ENLIVEN/menu"
 echo "updating '$dst' from '$src/'..."
 rsync -rt "$src/" "$dst"
 
-src="patches/Bucket_Game-patched"
+src="$PATCHES_PATH/Bucket_Game-patched"
 dst="$dest_programs/minetest/games/ENLIVEN"
 echo "updating '$dst' from '$src/'..."
 rsync -rt "$src/" "$dst"
@@ -337,12 +359,12 @@ game_minetest_conf_dest="$dest_programs/minetest/games/ENLIVEN/minetest.conf"
 client_example_dest="$dest_programs/minetest/minetest.ENLIVEN.client-example.conf"
 
 echo "Installing minetest.ENLIVEN.*-example.conf files..."
-cp -f "patches/subgame/minetest.LAN-client-example.conf" "$dest_programs/minetest/minetest.ENLIVEN.LAN-client-example.conf" || customDie "Cannot copy minetest.ENLIVEN.LAN-client-example.conf"
-cp -f "patches/subgame/minetest.server-example.conf"     "$dest_programs/minetest/minetest.ENLIVEN.server-example.conf" || customDie "Cannot copy minetest.ENLIVEN.server-example.conf"
-cp -f "patches/subgame/minetest.client-example.conf"     "$dest_programs/minetest/minetest.ENLIVEN.client-example.conf" || customDie "Cannot copy minetest.ENLIVEN.client-example.conf"
+cp -f "$PATCHES_PATH/subgame/minetest.LAN-client-example.conf" "$dest_programs/minetest/minetest.ENLIVEN.LAN-client-example.conf" || customDie "Cannot copy minetest.ENLIVEN.LAN-client-example.conf"
+cp -f "$PATCHES_PATH/subgame/minetest.server-example.conf"     "$dest_programs/minetest/minetest.ENLIVEN.server-example.conf" || customDie "Cannot copy minetest.ENLIVEN.server-example.conf"
+cp -f "$PATCHES_PATH/subgame/minetest.client-example.conf"     "$dest_programs/minetest/minetest.ENLIVEN.client-example.conf" || customDie "Cannot copy minetest.ENLIVEN.client-example.conf"
 
 echo "Writing '$game_minetest_conf_dest'..."
-cp -f "patches/subgame/minetest.conf" "$game_minetest_conf_dest"
+cp -f "$PATCHES_PATH/subgame/minetest.conf" "$game_minetest_conf_dest"
 
 # client conf writing only ever happens once, unless you manually delete $minetest_conf_dest:
 if [ ! -f "$minetest_conf_dest" ]; then
@@ -355,9 +377,9 @@ if [ ! -f "$minetest_conf_dest" ]; then
         # fi
     # fi
     echo "Writing minetest.conf (client region)..."
-    cp -f "patches/subgame/minetest.client-example.conf" "$minetest_conf_dest"  || customDie "Cannot copy minetest.client-example.conf to $minetest_conf_dest"
+    cp -f "$PATCHES_PATH/subgame/minetest.client-example.conf" "$minetest_conf_dest"  || customDie "Cannot copy minetest.client-example.conf to $minetest_conf_dest"
     echo "Appending example settings (server region) to '$minetest_conf_dest'..."
-    cat "patches/subgame/minetest.server-example.conf" >> "$minetest_conf_dest" || customDie "Cannot append minetest.server-example.conf"
+    cat "$PATCHES_PATH/subgame/minetest.server-example.conf" >> "$minetest_conf_dest" || customDie "Cannot append minetest.server-example.conf"
 else
     echo "$minetest_conf_dest exists (remove it if you want the installer to write an example version)"
 fi
@@ -410,7 +432,7 @@ fi
 
 
 enable_clear_icon_cache=false
-if [ "@$enable_client" = "@true" ]; then
+if [ "@$ENABLE_CLIENT" = "@true" ]; then
     dest_icons=$HOME/.local/share/applications
     dest_icon=$dest_icons/org.minetest.minetest.desktop
     # if [ -f "$dest_icon" ]; then
@@ -421,7 +443,7 @@ if [ "@$enable_client" = "@true" ]; then
         # enable_clear_icon_cache=true
     # fi
     echo "Writing icon '$dest_icon'..."
-    cat "patches/deploy-patched/misc/org.minetest.minetest.desktop" | grep -v Icon | grep -v Path | grep -v Exec > "$dest_icon"
+    cat "$PATCHES_PATH/deploy-patched/misc/org.minetest.minetest.desktop" | grep -v Icon | grep -v Path | grep -v Exec > "$dest_icon"
     # Icon must be an absolute path (other variables use $HOME in
     # desktop file above), so exclude it above and rewrite it below:
     echo "Icon=$dest_programs/minetest/misc/minetest-xorg-icon-128.png" >> "$dest_icon"
@@ -460,45 +482,45 @@ if [ "@$enable_client" = "@true" ]; then
 fi
 
 if [ -f $dest_programs/minetest/games/ENLIVEN/mods/codermobs/codermobs/animal_materials.lua ]; then
-    if [ -d patches/mods-stopgap/animal_materials_legacy ]; then
+    if [ -d $PATCHES_PATH/mods-stopgap/animal_materials_legacy ]; then
         echo "* installing animal_materials_legacy (only needed for worlds created with old versions of Bucket_Game)"
-        rsync -rt patches/mods-stopgap/animal_materials_legacy $dest_programs/minetest/games/ENLIVEN/mods/
+        rsync -rt $PATCHES_PATH/mods-stopgap/animal_materials_legacy $dest_programs/minetest/games/ENLIVEN/mods/
     else
-        echo "* MISSING patches/mods-stopgap/animal_materials"
+        echo "* MISSING $PATCHES_PATH/mods-stopgap/animal_materials"
     fi
 else
     echo "* SKIPPING a stopgap mod since no animal_materials"
 fi
 
 if [ -f $dest_programs/minetest/games/ENLIVEN/mods/codermobs/codermobs/elk.lua ]; then
-    if [ -d patches/mods-stopgap/elk_legacy ]; then
+    if [ -d $PATCHES_PATH/mods-stopgap/elk_legacy ]; then
         echo "* installing elk_legacy (only needed for worlds created with old versions of Bucket_Game)"
-        rsync -rt patches/mods-stopgap/elk_legacy $dest_programs/minetest/games/ENLIVEN/mods/
+        rsync -rt $PATCHES_PATH/mods-stopgap/elk_legacy $dest_programs/minetest/games/ENLIVEN/mods/
     else
-        echo "* MISSING patches/mods-stopgap/elk_legacy"
+        echo "* MISSING $PATCHES_PATH/mods-stopgap/elk_legacy"
     fi
 else
     echo "* SKIPPING a stopgap mod since no elk.lua"
 fi
 
 if [ -d "$dest_programs/minetest/games/ENLIVEN/mods/coderbuild/nftools" ]; then
-    if [ -d patches/mods-stopgap/nftools_legacy ]; then
+    if [ -d $PATCHES_PATH/mods-stopgap/nftools_legacy ]; then
         echo "* installing nftools_legacy (only needed for worlds created with old versions of Bucket_Game)"
-        rsync -rt patches/mods-stopgap/nftools_legacy $dest_programs/minetest/games/ENLIVEN/mods/
+        rsync -rt $PATCHES_PATH/mods-stopgap/nftools_legacy $dest_programs/minetest/games/ENLIVEN/mods/
     else
-        echo "* MISSING patches/mods-stopgap/nftools_legacy"
+        echo "* MISSING $PATCHES_PATH/mods-stopgap/nftools_legacy"
     fi
 else
     echo "* SKIPPING a stopgap mod since no nftools"
 fi
 
-popd
+# popd
 else
     cat <<END
-$PATCHES_PATH is missing. To fix this, set the REPO_PATH environment variable like:
+$PATCHES_PATH is missing. To fix this, set:
 
-    REPO_PATH=$HOME/git/EnlivenMinetest $MY_NAME
-    # (where $HOME/git/EnlivenMinetest is the actual repo path).
+    REPO_PATH=$HOME/git/EnlivenMinetest
+    # in \"$scripting_rc_path\" or the environment.
 END
 fi
 
@@ -528,23 +550,23 @@ fi
 if [ "@$enable_run_after_compile" = "@true" ]; then
     echo "Trying to run minetest or other custom post-install script"
     echo "(enable_run_after_compile is true in '$scripting_rc_path')."
-    if [ -d "$custom_scripts_dir" ]; then
-        pushd "$custom_scripts_dir"
-        if [ -f archive-minetestserver-debug.sh ]; then
-            ./archive-minetestserver-debug.sh
-            echo "NOTE: if you put archive-minetestserver-debug.sh"
+    if [ -d "$CUSTOM_SCRIPTS_PATH" ]; then
+        cd "$CUSTOM_SCRIPTS_PATH" || customDie "cd $CUSTOM_SCRIPTS_PATH failed."
+        if [ -f "$MT_POST_INSTALL_SCRIPT_1" ]; then
+            ./$MT_POST_INSTALL_SCRIPT_1
+            echo "NOTE: if you put $MT_POST_INSTALL_SCRIPT_1"
             echo "  in `pwd`, it would run at this point if"
             echo "  marked executable."
         fi
-        if [ -f "$custom_script_name" ]; then
-            ./$custom_script_name
-            echo "$custom_script_name finished (exit code $?)"
+        if [ -f "$MT_POST_INSTALL_SCRIPT_2" ]; then
+            ./$MT_POST_INSTALL_SCRIPT_2
+            echo "$MT_POST_INSTALL_SCRIPT_2 finished (exit code $?)"
         else
             cat <<END
 ERROR: enable_run_after_compile is true, but
-  '$custom_script_name' is not in
-  '$custom_scripts_dir'.
-  Try setting custom_scripts_dir and custom_script_name in
+  '$MT_POST_INSTALL_SCRIPT_2' is not in
+  '$CUSTOM_SCRIPTS_PATH'.
+  Try setting CUSTOM_SCRIPTS_PATH and MT_POST_INSTALL_SCRIPT_2 in
   '$scripting_rc_path'
 END
         fi
@@ -552,8 +574,8 @@ END
     else
         cat <<END
 ERROR: enable_run_after_compile is true, but
-  '$custom_scripts_dir'
-  does not exist. Try setting custom_scripts_dir in
+  '$CUSTOM_SCRIPTS_PATH'
+  does not exist. Try setting CUSTOM_SCRIPTS_PATH in
   '$scripting_rc_path'.
 END
     fi
