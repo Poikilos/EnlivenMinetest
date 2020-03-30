@@ -131,7 +131,16 @@ fi
     #exit 1
 #fi
 enable_compile=true
-if [ -d minetest ]; then
+flag_mts="$extracted_path/minetest/bin/minetestserver"
+flag_mt="$extracted_path/minetest/bin/minetest"
+has_any_binary=false
+if [ -f "$flag_mts" ]; then
+    has_any_binary=true
+fi
+if [ -f "$flag_mt" ]; then
+    has_any_binary=true
+fi
+if [ "@$has_any_binary" == "@true" ]; then
     enable_compile=false
     if [ "@$enable_client" = "@true" ]; then
         if [ ! -f minetest/bin/minetest ]; then
@@ -146,7 +155,7 @@ if [ -d minetest ]; then
         fi
     fi
 else
-    echo "* enabling compile since missing `pwd`/minetest directory"
+    echo "* enabling compile since neither \"$flag_mts\" nor \"$flag_mt\" are present."
 fi
 if [ "@$enable_compile" = "@true" ]; then
     echo "* checking if the compile library script extracted the program source yet ($flag_dir)..."
