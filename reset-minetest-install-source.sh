@@ -87,16 +87,17 @@ done
 cd "$EM_CONFIG_PATH" || customDie "[$MY_NAME] cd \"$EM_CONFIG_PATH\" failed."
 if [ -d "$extracted_path" ]; then
 
-  # NOTE: ls -lR $extracted_path/screenshots/
+  # NOTE: ls -lR provides a count, so it is not suitable unless output
+  # is parsed. `| wc -l` is easier (word count).
   screenshot_count=0
   if [ -d $extracted_path/screenshots/ ]; then
-    screenshot_count="`ls $extracted_path/screenshots/ | wc -l`"
+    screenshot_count=`ls $extracted_path/screenshots/*.png | wc -l`
   fi
   if [ $screenshot_count -gt 0 ]; then
     mv $extracted_path/screenshots/*.png ~/ || customDie "can't move screenshots from $extracted_name/minetest/bin/*.png"
-    rmdir --ignore-fail-on-non-empty screenshots
+    rmdir --ignore-fail-on-non-empty "$extracted_path/screenshots"
   fi
-  if [ "`ls -lR $extracted_name/minetest/bin/*.png | wc -l`" -gt 0 ]; then
+  if [ `ls $extracted_name/minetest/bin/*.png | wc -l` -gt 0 ]; then
     # if [ ! -d screenshots ]; then mkdir screenshots; fi
     # NOTE: system-wide install of minetest puts screenshots in ~/ (cwd)
     mv $extracted_name/minetest/bin/*.png ~/ || customDie "can't move screenshots from $extracted_name/minetest/bin/*.png"
