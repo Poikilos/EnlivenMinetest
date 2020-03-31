@@ -66,7 +66,7 @@ extracted_name="linux-minetest-kit"
 extracted_path="$EM_CONFIG_PATH/$extracted_name"
 cd "$EM_CONFIG_PATH" || customDie "[$MY_NAME] cd \"$EM_CONFIG_PATH\" failed."
 flag_dir_rel="$extracted_name/mtsrc"
-flag_dir="$extracted_path/mtsrc"
+code_flag_dir_path="$extracted_path/mtsrc"
 if [ -z "$CUSTOM_SCRIPTS_PATH" ]; then
     CUSTOM_SCRIPTS_PATH="$HOME"
 fi
@@ -130,57 +130,60 @@ fi
 echo "enable_clean=\"$enable_clean\"..."
 
 # flag_icon="$HOME/Desktop/org.minetest.minetest.desktop"
-good_mts="$extracted_path/minetest/bin/minetestserver"
-good_mt="$extracted_path/minetest/bin/minetest"
-flag_client_dest_file="$dest_programs/minetest/bin/minetest"
-flag_file="$good_mts"
-if [ -f "$flag_client_dest_file" ]; then
+good_src_mts="$extracted_path/minetest/bin/minetestserver"
+good_src_mt="$extracted_path/minetest/bin/minetest"
+this_src_flag_path="$good_src_mts"
+good_dst_mts="$dest_programs/minetest/bin/minetestserver"
+good_dst_mt="$dest_programs/minetest/bin/minetest"
+this_dst_flag_path="$good_dst_mts"
+if [ -f "$good_dst_mt" ]; then
     ENABLE_CLIENT=true
     echo "* automatically adding --client to compile since detected"
-    echo "  '$flag_client_dest_file'"
+    echo "  '$good_dst_mt'"
     # echo "--press Ctrl C to cancel..."
     # sleep 2
 fi
 if [ "@$ENABLE_CLIENT" = "@true" ]; then
-    flag_file="$good_mt"
+    this_src_flag_path="$good_src_mt"
+    this_dst_flag_path="$good_dst_mt"
     extra_options="--client"
 fi
-#if [ -f "$flag_file" ]; then
-    #rm -f "$flag_file"
+#if [ -f "$this_src_flag_path" ]; then
+    #rm -f "$this_src_flag_path"
 #fi
-#if [ -f "$flag_file" ]; then
-    #echo "ERROR: Nothing done since can't remove old '$flag_file'"
+#if [ -f "$this_src_flag_path" ]; then
+    #echo "ERROR: Nothing done since can't remove old '$this_src_flag_path'"
     #exit 1
 #fi
 enable_compile=true
 
 has_any_binary=false
-if [ -f "$good_mts" ]; then
+if [ -f "$good_src_mts" ]; then
     has_any_binary=true
 fi
-if [ -f "$good_mt" ]; then
+if [ -f "$good_src_mt" ]; then
     has_any_binary=true
 fi
 if [ "@$has_any_binary" == "@true" ]; then
     enable_compile=false
     if [ "@$ENABLE_CLIENT" = "@true" ]; then
-        if [ ! -f "$good_mt" ]; then
+        if [ ! -f "$good_src_mt" ]; then
             enable_compile=true
             echo "* enabling compile (since no `pwd`/minetest/bin/minetest but client install is enabled)"
         fi
     fi
     if [ "@$enable_server" = "@true" ]; then
-        if [ ! -f "$good_mts" ]; then
+        if [ ! -f "$good_src_mts" ]; then
             enable_compile=true
             echo "* enabling compile (since no `pwd`/minetest/bin/minetestserver)"
         fi
     fi
 else
-    echo "* enabling compile since neither \"$good_mts\" nor \"$good_mt\" are present."
+    echo "* enabling compile since neither \"$good_src_mts\" nor \"$good_src_mt\" are present."
 fi
 if [ "@$enable_compile" = "@true" ]; then
-    echo "* checking if the compile library script extracted the program source yet ($flag_dir)..."
-    if [ ! -d "$flag_dir" ]; then
+    echo "* checking if the compile library script extracted the program source yet ($code_flag_dir_path)..."
+    if [ ! -d "$code_flag_dir_path" ]; then
         cat <<END
 ERROR: missing $flag_dir_rel
 - If you do not have an extracted minetest source directory which
@@ -221,15 +224,14 @@ END
 else
     echo "* using existing $extracted_path/minetest..."
 fi
-if [ ! -f "$flag_file" ]; then
-    customDie "The build did not complete since '$flag_file' is missing. Maybe you didn't compile the libraries. Running reset-minetest-install-source.sh should do that automatically, but you can also do: cd $extracted_path && ./mtcompile-libraries.sh build"
+if [ ! -f "$this_src_flag_path" ]; then
+    customDie "The build did not complete since '$this_src_flag_path' is missing. Maybe you didn't compile the libraries. Running reset-minetest-install-source.sh should do that automatically, but you can also do: cd $extracted_path && ./mtcompile-libraries.sh build"
 fi
-dest_flag_file="$dest_programs/$flag_file"
-if [ -f "$dest_flag_file" ]; then
-    mv -f "$dest_flag_file" "$dest_flag_file.bak"
+if [ -f "$this_dst_flag_path" ]; then
+    mv -f "$this_dst_flag_path" "$this_dst_flag_path.bak"
 fi
-if [ -f "$dest_flag_file" ]; then
-    customDie "Install is incomplete because it can't move '$dest_flag_file'."
+if [ -f "$this_dst_flag_path" ]; then
+    customDie "Install is incomplete because it can't move '$this_dst_flag_path'."
 fi
 if [ ! -d "$extracted_path/minetest" ]; then
     customDie "Install is incomplete because \"$extracted_path/minetest\" is missing."
@@ -299,26 +301,26 @@ else
     echo "Installing \"$extracted_path/minetest\" directory to \"$dest_programs\"..."
     rsync -rt --info=progress2 $extracted_path/minetest/ $install_dest || customDie "Cannot rsync files from installer data $extracted_path/minetest/ to $install_dest"
 fi
-if [ ! -f "$dest_flag_file" ]; then
-    customDie "ERROR: not complete--couldn't install binary as '$dest_flag_file'"
+if [ ! -f "$this_dst_flag_path" ]; then
+    customDie "ERROR: not complete--couldn't install binary as '$this_dst_flag_path'"
 fi
 
-flag_dir="$dest_official_game"
-if [ ! -d "$flag_dir" ]; then
-    customDie "ERROR: missing $flag_dir"
+dst_game_flag_dir_path="$dest_official_game"
+if [ ! -d "$dst_game_flag_dir_path" ]; then
+    customDie "ERROR: missing $dst_game_flag_dir_path"
 fi
 if [ ! -d "$dest_programs/minetest/games/ENLIVEN" ]; then
-    echo "Copying $flag_dir to $dest_programs/minetest/games/ENLIVEN..."
-    cp -R "$flag_dir" "$dest_programs/minetest/games/ENLIVEN"
+    echo "Copying $dst_game_flag_dir_path to $dest_programs/minetest/games/ENLIVEN..."
+    cp -R "$dst_game_flag_dir_path" "$dest_programs/minetest/games/ENLIVEN"
     echo "name = ENLIVEN" > "$dest_programs/minetest/games/ENLIVEN/game.conf"
 else
 
     for mod_name in $official_game_mod_list
     do
-        echo "  - updating $mod_name from '$flag_dir/mods/$mod_name' to '$dest_programs/minetest/games/ENLIVEN/mods'..."
-        rsync -rt --delete "$flag_dir/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
+        echo "  - updating $mod_name from '$dst_game_flag_dir_path/mods/$mod_name' to '$dest_programs/minetest/games/ENLIVEN/mods'..."
+        rsync -rt --delete "$dst_game_flag_dir_path/mods/$mod_name" "$dest_programs/minetest/games/ENLIVEN/mods"
     done
-    # cp -f "$flag_dir/mods/LICENSE" "$dest_programs/minetest/games/ENLIVEN/mods/LICENSE"
+    # cp -f "$dst_game_flag_dir_path/mods/LICENSE" "$dest_programs/minetest/games/ENLIVEN/mods/LICENSE"
     if [ -d "$skins_bak" ]; then
         echo "  - restoring skins from '$skins_bak'..."
         rsync -rt "$skins_bak/" "$skins_dst"
