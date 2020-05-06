@@ -1,4 +1,5 @@
 #!/bin/bash
+clear
 me=`basename "$0"`
 echo
 echo
@@ -127,6 +128,15 @@ install_shortcut(){
     fi
 }
 # ^ same as install-minetest-linux64.sh
+get_os_release(){
+    if [ -f "/etc/os-release" ]; then
+        #if [ -z "$NAME" ]; then
+        source /etc/os-release
+        echo
+        echo "Your operating system is $NAME $VERSION"
+        #fi
+    fi
+}
 install_my_shortcut(){
     #requires SHORTCUT_PATH to already be set to a valid Minetest ".desktop" file.
     EXEC_PATH="$INSTALL_PATH/bin/minetest"
@@ -142,6 +152,7 @@ install_my_shortcut(){
         echo "* WARNING: The Minetest icon is not present: \"$MT_ICON\""
     fi
     install_shortcut "$SHORTCUT_PATH" "org.minetest.minetest.desktop" "$EXEC_PATH" "$WORKING_DIR_PATH" "$MT_ICON" "Final Minetest"
+    get_os_release
 }
 
 DL_NAME=minetest-linux64.zip
@@ -237,6 +248,7 @@ if [ "@$old_version" = "@$version" ]; then
     #if [ ! -f "$SHORTCUT_PATH" ]; then
     install_my_shortcut
     #fi
+    #get_os_release
     customExit "Version $version is already installed at $INSTALL_PATH. There is nothing to do."
 fi
 
@@ -329,3 +341,4 @@ else
     customExit "Extracting \"$DL_PATH\" did not result in $EXTRACTED_PATH."
 fi
 echo "Installing Final Minetest $version to $INSTALL_PATH is complete."
+echo
