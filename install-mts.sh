@@ -6,9 +6,13 @@ echo
 echo "Starting install..."
 MY_NAME="install-mts.sh"
 EM_CONFIG_PATH="$HOME/.config/EnlivenMinetest"
-
 date
-customDie() {
+
+customExit() {
+    errorCode=1
+    if [ ! -z "$2" ]; then
+        errorCode="$2"
+    fi
     cat <<END
 
 ERROR:
@@ -16,8 +20,11 @@ $1
 
 
 END
-    exit 1
+    exit $errorCode
 }
+
+
+
 customWarn() {
     cat <<END
 
@@ -40,22 +47,91 @@ END
     sleep 1
 }
 
+
+install_shortcut(){
+    enable_clear_icon_cache=false
+
+    _SRC_SHORTCUT_PATH=$1
+    _DST_SHORTCUT_NAME=$2
+    # _CAPTION is optional (original "Name" is kept if not specified)
+    _EXEC=$3
+    _WORKING_DIR=$4
+    _ICON=$5
+    _CAPTION=$6
+    dest_icons=$HOME/.local/share/applications
+    dest_icon=$dest_icons/$_DST_SHORTCUT_NAME
+    if [ ! -d "$dest_icons" ]; then
+        mdkir -p "$dest_icons" || customExit "mkdir -p \"$dest_icons\" failed."
+    fi
+    # if [ -f "$dest_icon" ]; then
+        # comment since never fixes broken icon anyway
+        # TODO: fixed bad cache even if icon was rewritten properly after written improperly
+        # * not tried yet:
+        #   * rm $HOME/.kde/share/config/kdeglobals
+        # enable_clear_icon_cache=true
+    # fi
+    echo "Writing icon '$dest_icon'..."
+    if [ ! -z "$_ICON" ]; then
+        cat "$_SRC_SHORTCUT_PATH" | grep -v Icon | grep -v Path | grep -v Exec > "$dest_icon"
+    else
+        cat "$_SRC_SHORTCUT_PATH" | grep -v Path | grep -v Exec > "$dest_icon"
+    fi
+    # Icon must be an absolute path (other variables use $HOME in
+    # desktop file above), so exclude it above and rewrite it below:
+    echo "Path=$dest_programs/minetest/bin" >> "$dest_icon"
+    if [ ! -z "$_ICON" ]; then
+        echo "Icon=$_ICON" >> "$dest_icon"
+    fi
+    echo "Exec=$_EXEC" >> "$dest_icon"
+    if [ "@$enable_clear_icon_cache" = "@true" ]; then
+        if [ -f "`command -v gnome-shell`" ]; then
+            echo "Refreshing Gnome icons..."
+            gnome-shell --replace & disown
+            sleep 10
+        fi
+        if [ -f "$HOME/.cache/icon-cache.kcache" ]; then
+            echo "clearing $HOME/.cache/icon-cache.kcache..."
+            rm $HOME/.cache/icon-cache.kcache
+        fi
+        if [ -f "`command -v kquitapp5`" ]; then
+            echo "Refreshing KDE icons..."
+            if [ "`command -v kstart5`" ]; then
+                kquitapp5 plasmashell && kstart5 plasmashell
+            else
+                kquitapp5 plasmashell && kstart plasmashell
+            fi
+            sleep 15
+        fi
+        if [ -f "`command -v xfce4-panel`" ]; then
+            echo "Refreshing Xfce icons..."
+            xfce4-panel -r && xfwm4 --replace
+            sleep 5
+        fi
+        if [ -f "`command -v lxpanelctl`" ]; then
+            echo "Refreshing LXDE icons..."
+            lxpanelctl restart && openbox --restart
+            sleep 5
+        fi
+    fi
+}
+# ^ same as install-minetest-linux64.sh
+
 install_git_mod_here(){
     git_url="$1"
     mod_name="$2"
     if [ -z "$git_url" ]; then
-        customDie "install_git_mod_here requires a URL."
+        customExit "install_git_mod_here requires a URL."
     fi
     if [ -z "$mod_name" ]; then
-        customDie "install_git_mod_here requires a mod name as the second parameter."
+        customExit "install_git_mod_here requires a mod name as the second parameter."
     fi
     if [ ! -d "$mod_name" ]; then
         git clone "$git_url" "$mod_name"
     else
-        cd "$mod_name" || customDie "(install_git_mod_here) 'cd \"$mod_name\"' failed in '`pwd`'"
+        cd "$mod_name" || customExit "(install_git_mod_here) 'cd \"$mod_name\"' failed in '`pwd`'"
         echo "* updating '`pwd`' from git..."
         git pull || echo "WARNING: (install_git_mod_here) 'git pull' failed in '`pwd`'"
-        cd .. || customDie "(install_git_mod_here) 'cd ..' failed in '`pwd`'"
+        cd .. || customExit "(install_git_mod_here) 'cd ..' failed in '`pwd`'"
     fi
 }
 enable_server=true
@@ -64,7 +140,7 @@ dest_programs="$HOME"
 #TODO: change $HOME/i_am_dedicated_minetest_server to $HOME/.config/EnlivenMinetest/i_am_dedicated_minetest_server or rc file
 extracted_name="linux-minetest-kit"
 extracted_path="$EM_CONFIG_PATH/$extracted_name"
-cd "$EM_CONFIG_PATH" || customDie "[$MY_NAME] cd \"$EM_CONFIG_PATH\" failed."
+cd "$EM_CONFIG_PATH" || customExit "[$MY_NAME] cd \"$EM_CONFIG_PATH\" failed."
 flag_dir_rel="$extracted_name/mtsrc"
 code_flag_dir_path="$extracted_path/mtsrc"
 if [ -z "$CUSTOM_SCRIPTS_PATH" ]; then
@@ -107,7 +183,7 @@ else
     echo "  (can contain settings such as enable_run_after_compile=true)"
 fi
 
-pushd "$extracted_path" || customDie "pushd \"$extracted_path\" failed in \"`pwd`\""
+pushd "$extracted_path" || customExit "pushd \"$extracted_path\" failed in \"`pwd`\""
 
 extra_options=""
 for var in "$@"
@@ -119,7 +195,7 @@ do
     elif [ "@$var" = "@--noclean" ]; then
         enable_clean=false
     else
-        customDie "Invalid argument: $var"
+        customExit "Invalid argument: $var"
     fi
 done
 
@@ -198,7 +274,7 @@ END
     fi
 
     start=`date +%s`
-    cd "$extracted_path" || customDie "cd \"$extracted_path\" failed."
+    cd "$extracted_path" || customExit "cd \"$extracted_path\" failed."
     if [ -f "mtcompile-program.pl" ]; then
         # perl mtcompile-program.pl build >& program.log
         echo "Compiling via perl (this may take a while--output redirected to `pwd`/program.log)..."
@@ -225,16 +301,16 @@ else
     echo "* using existing $extracted_path/minetest..."
 fi
 if [ ! -f "$this_src_flag_path" ]; then
-    customDie "The build did not complete since '$this_src_flag_path' is missing. Maybe you didn't compile the libraries. Running reset-minetest-install-source.sh should do that automatically, but you can also do: cd $extracted_path && ./mtcompile-libraries.sh build"
+    customExit "The build did not complete since '$this_src_flag_path' is missing. Maybe you didn't compile the libraries. Running reset-minetest-install-source.sh should do that automatically, but you can also do: cd $extracted_path && ./mtcompile-libraries.sh build"
 fi
 if [ -f "$this_dst_flag_path" ]; then
     mv -f "$this_dst_flag_path" "$this_dst_flag_path.bak"
 fi
 if [ -f "$this_dst_flag_path" ]; then
-    customDie "Install is incomplete because it can't move '$this_dst_flag_path'."
+    customExit "Install is incomplete because it can't move '$this_dst_flag_path'."
 fi
 if [ ! -d "$extracted_path/minetest" ]; then
-    customDie "Install is incomplete because \"$extracted_path/minetest\" is missing."
+    customExit "Install is incomplete because \"$extracted_path/minetest\" is missing."
 fi
 virtual_dest="$dest_programs/minetest"
 link_target=`readlink $virtual_dest`
@@ -256,7 +332,7 @@ if [ "@$enable_clean" = "@true" ]; then
         if [ -d "$skins_dst" ]; then
             echo "  - Backing up '$skins_dst' to '$skins_bak'..."
             if [ ! -d "$skins_bak" ]; then
-                mkdir -p "$skins_bak" || customDie "* cannot create $skins_bak"
+                mkdir -p "$skins_bak" || customExit "* cannot create $skins_bak"
             fi
             rsync -rt "$skins_dst/" "$skins_bak"
         fi
@@ -264,7 +340,7 @@ if [ "@$enable_clean" = "@true" ]; then
         do
             if [ -d "$dest_enliven_mods/$var" ]; then
                 echo "  - erasing '$dest_enliven_mods/$var'..."
-                rm -Rf "$dest_enliven_mods/$var" || customDie "rm -Rf \"$dest_enliven_mods/$var\" failed"
+                rm -Rf "$dest_enliven_mods/$var" || customExit "rm -Rf \"$dest_enliven_mods/$var\" failed"
                 # See rsync further down for installation of each of these
             else
                 echo "  - already clean: no '$dest_enliven_mods/$var'..."
@@ -275,7 +351,7 @@ fi
 
 enliven_warning=""
 if [ -d "$dest_enliven_mods" ]; then
-    pushd "$dest_enliven_mods" || customDie "'pushd \"$dest_enliven_mods\"' failed."
+    pushd "$dest_enliven_mods" || customExit "'pushd \"$dest_enliven_mods\"' failed."
     install_git_mod_here https://github.com/BenjieFiftysix/sponge.git sponge
     install_git_mod_here https://github.com/poikilos/metatools.git metatools
     install_git_mod_here https://github.com/MinetestForFun/fishing.git fishing
@@ -283,7 +359,7 @@ if [ -d "$dest_enliven_mods" ]; then
     install_git_mod_here https://github.com/minetest-mods/ccompass.git ccompass
     install_git_mod_here https://github.com/minetest-mods/throwing_arrows.git throwing_arrows
 
-    popd || customDie "'popd' failed."
+    popd || customExit "'popd' failed."
 else
     enliven_warning="$enliven_warning* WARNING: Installing ENLIVEN mods was skipped since '$dest_enliven_mods' does not exist."
 fi
@@ -292,22 +368,22 @@ if [ ! -z "$link_target" ]; then
     echo "* detected that $virtual_dest is a symlink to $link_target"
     echo "  (redirecting rsync to prevent symlink to dir conversion: installing to $install_dest"
     echo "   and recreating symlink '$virtual_dest' pointing to '$install_dest')..."
-    rsync -rt "$extracted_path/minetest/" "$install_dest" || customDie "Cannot rsync files from installer data $extracted_path/minetest/ to $install_dest"
+    rsync -rt "$extracted_path/minetest/" "$install_dest" || customExit "Cannot rsync files from installer data $extracted_path/minetest/ to $install_dest"
     if [ ! -d "$dest_programs/minetest" ]; then
         echo "* creating link to $install_dest directory as $dest_programs/minetest..."
         ln -s "$install_dest" "$dest_programs/minetest"
     fi
 else
     echo "Installing \"$extracted_path/minetest\" directory to \"$dest_programs\"..."
-    rsync -rt --info=progress2 $extracted_path/minetest/ $install_dest || customDie "Cannot rsync files from installer data $extracted_path/minetest/ to $install_dest"
+    rsync -rt --info=progress2 $extracted_path/minetest/ $install_dest || customExit "Cannot rsync files from installer data $extracted_path/minetest/ to $install_dest"
 fi
 if [ ! -f "$this_dst_flag_path" ]; then
-    customDie "ERROR: not complete--couldn't install binary as '$this_dst_flag_path'"
+    customExit "ERROR: not complete--couldn't install binary as '$this_dst_flag_path'"
 fi
 
 dst_game_flag_dir_path="$dest_official_game"
 if [ ! -d "$dst_game_flag_dir_path" ]; then
-    customDie "ERROR: missing $dst_game_flag_dir_path"
+    customExit "ERROR: missing $dst_game_flag_dir_path"
 fi
 if [ ! -d "$dest_programs/minetest/games/ENLIVEN" ]; then
     echo "Copying $dst_game_flag_dir_path to $dest_programs/minetest/games/ENLIVEN..."
@@ -361,9 +437,9 @@ game_minetest_conf_dest="$dest_programs/minetest/games/ENLIVEN/minetest.conf"
 client_example_dest="$dest_programs/minetest/minetest.ENLIVEN.client-example.conf"
 
 echo "Installing minetest.ENLIVEN.*-example.conf files..."
-cp -f "$PATCHES_PATH/subgame/minetest.LAN-client-example.conf" "$dest_programs/minetest/minetest.ENLIVEN.LAN-client-example.conf" || customDie "Cannot copy minetest.ENLIVEN.LAN-client-example.conf"
-cp -f "$PATCHES_PATH/subgame/minetest.server-example.conf"     "$dest_programs/minetest/minetest.ENLIVEN.server-example.conf" || customDie "Cannot copy minetest.ENLIVEN.server-example.conf"
-cp -f "$PATCHES_PATH/subgame/minetest.client-example.conf"     "$dest_programs/minetest/minetest.ENLIVEN.client-example.conf" || customDie "Cannot copy minetest.ENLIVEN.client-example.conf"
+cp -f "$PATCHES_PATH/subgame/minetest.LAN-client-example.conf" "$dest_programs/minetest/minetest.ENLIVEN.LAN-client-example.conf" || customExit "Cannot copy minetest.ENLIVEN.LAN-client-example.conf"
+cp -f "$PATCHES_PATH/subgame/minetest.server-example.conf"     "$dest_programs/minetest/minetest.ENLIVEN.server-example.conf" || customExit "Cannot copy minetest.ENLIVEN.server-example.conf"
+cp -f "$PATCHES_PATH/subgame/minetest.client-example.conf"     "$dest_programs/minetest/minetest.ENLIVEN.client-example.conf" || customExit "Cannot copy minetest.ENLIVEN.client-example.conf"
 
 echo "Writing '$game_minetest_conf_dest'..."
 cp -f "$PATCHES_PATH/subgame/minetest.conf" "$game_minetest_conf_dest"
@@ -379,9 +455,9 @@ if [ ! -f "$minetest_conf_dest" ]; then
         # fi
     # fi
     echo "Writing minetest.conf (client region)..."
-    cp -f "$PATCHES_PATH/subgame/minetest.client-example.conf" "$minetest_conf_dest"  || customDie "Cannot copy minetest.client-example.conf to $minetest_conf_dest"
+    cp -f "$PATCHES_PATH/subgame/minetest.client-example.conf" "$minetest_conf_dest"  || customExit "Cannot copy minetest.client-example.conf to $minetest_conf_dest"
     echo "Appending example settings (server region) to '$minetest_conf_dest'..."
-    cat "$PATCHES_PATH/subgame/minetest.server-example.conf" >> "$minetest_conf_dest" || customDie "Cannot append minetest.server-example.conf"
+    cat "$PATCHES_PATH/subgame/minetest.server-example.conf" >> "$minetest_conf_dest" || customExit "Cannot append minetest.server-example.conf"
 else
     echo "$minetest_conf_dest exists (remove it if you want the installer to write an example version)"
 fi
@@ -433,54 +509,15 @@ if [ -d "$world_override_dst" ]; then
 fi
 
 
-enable_clear_icon_cache=false
+
+
 if [ "@$ENABLE_CLIENT" = "@true" ]; then
-    dest_icons=$HOME/.local/share/applications
-    dest_icon=$dest_icons/org.minetest.minetest.desktop
-    # if [ -f "$dest_icon" ]; then
-        # comment since never fixes broken icon anyway
-        # TODO: fixed bad cache even if icon was rewritten properly after written improperly
-        # * not tried yet:
-        #   * rm $HOME/.kde/share/config/kdeglobals
-        # enable_clear_icon_cache=true
-    # fi
-    echo "Writing icon '$dest_icon'..."
-    cat "$PATCHES_PATH/deploy-patched/misc/org.minetest.minetest.desktop" | grep -v Icon | grep -v Path | grep -v Exec > "$dest_icon"
-    # Icon must be an absolute path (other variables use $HOME in
-    # desktop file above), so exclude it above and rewrite it below:
-    echo "Icon=$dest_programs/minetest/misc/minetest-xorg-icon-128.png" >> "$dest_icon"
-    echo "Path=$dest_programs/minetest/bin" >> "$dest_icon"
-    echo "Exec=$dest_programs/minetest/bin/minetest" >> "$dest_icon"
-    if [ "@$enable_clear_icon_cache" = "@true" ]; then
-        if [ -f "`command -v gnome-shell`" ]; then
-            echo "Refreshing Gnome icons..."
-            gnome-shell --replace & disown
-            sleep 10
-        fi
-        if [ -f "$HOME/.cache/icon-cache.kcache" ]; then
-            echo "clearing $HOME/.cache/icon-cache.kcache..."
-            rm $HOME/.cache/icon-cache.kcache
-        fi
-        if [ -f "`command -v kquitapp5`" ]; then
-            echo "Refreshing KDE icons..."
-            if [ "`command -v kstart5`" ]; then
-                kquitapp5 plasmashell && kstart5 plasmashell
-            else
-                kquitapp5 plasmashell && kstart plasmashell
-            fi
-            sleep 15
-        fi
-        if [ -f "`command -v xfce4-panel`" ]; then
-            echo "Refreshing Xfce icons..."
-            xfce4-panel -r && xfwm4 --replace
-            sleep 5
-        fi
-        if [ -f "`command -v lxpanelctl`" ]; then
-            echo "Refreshing LXDE icons..."
-            lxpanelctl restart && openbox --restart
-            sleep 5
-        fi
-    fi
+    #params: _SRC_SHORTCUT_PATH, _DST_SHORTCUT_NAME, _EXEC, _WORKING_DIR, _ICON, _CAPTION:
+    SHORTCUT_PATH="$PATCHES_PATH/deploy-patched/misc/org.minetest.minetest.desktop"
+    EXEC_PATH="$dest_programs/minetest/bin/minetest"
+    WORKING_DIR_PATH="$dest_programs/minetest/bin"
+    MT_ICON="$dest_programs/minetest/misc/minetest-xorg-icon-128.png"
+    install_shortcut "$SHORTCUT_PATH" "org.minetest.minetest.desktop" "$EXEC_PATH" "$WORKING_DIR_PATH" "$MT_ICON" "Final Minetest"
 fi
 
 if [ -f $dest_programs/minetest/games/ENLIVEN/mods/codermobs/codermobs/animal_materials.lua ]; then
@@ -553,7 +590,7 @@ if [ "@$enable_run_after_compile" = "@true" ]; then
     echo "Trying to run minetest or other custom post-install script"
     echo "(enable_run_after_compile is true in '$scripting_rc_path')."
     if [ -d "$CUSTOM_SCRIPTS_PATH" ]; then
-        cd "$CUSTOM_SCRIPTS_PATH" || customDie "cd $CUSTOM_SCRIPTS_PATH failed."
+        cd "$CUSTOM_SCRIPTS_PATH" || customExit "cd $CUSTOM_SCRIPTS_PATH failed."
         if [ -f "$MT_POST_INSTALL_SCRIPT_1" ]; then
             ./$MT_POST_INSTALL_SCRIPT_1
             echo "NOTE: if you put $MT_POST_INSTALL_SCRIPT_1"
