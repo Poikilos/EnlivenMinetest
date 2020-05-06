@@ -188,6 +188,7 @@ fi
 for var in "$@"
 do
     if [ "@$var" = "@--update" ]; then
+        # This doesn't do much yet.
         ENABLE_DL=true
     fi
 done
