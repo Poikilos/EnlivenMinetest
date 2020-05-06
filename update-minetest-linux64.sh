@@ -249,7 +249,11 @@ if [ "@$old_version" = "@$version" ]; then
     install_my_shortcut
     #fi
     #get_os_release
-    customExit "Version $version is already installed at $INSTALL_PATH. There is nothing to do."
+    echo
+    echo
+    echo "Version $version is already installed at $INSTALL_PATH. There is nothing to do."
+    echo
+    exit 0
 fi
 
 if [ "@$ENABLE_DL" = "@true" ]; then
