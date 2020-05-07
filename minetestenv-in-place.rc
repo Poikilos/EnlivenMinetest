@@ -1,0 +1,368 @@
+#!/bin/bash
+EM_CONFIG_PATH="$HOME/.config/EnlivenMinetest"
+
+customExit() {
+    errorCode=1
+    if [ ! -z "$2" ]; then
+        errorCode="$2"
+    fi
+    cat <<END
+
+ERROR:
+$1
+
+
+END
+    sleep 10
+    exit $errorCode
+}
+
+customWarn() {
+    cat <<END
+
+WARNING:
+$1
+
+
+END
+    echo -en "\a" > /dev/tty0  # beep (You must specify a tty path if not in console mode)
+    echo "Press Ctrl+C to cancel..."
+    sleep 1
+    echo -en "\a" > /dev/tty0
+    echo "3..."
+    sleep 1
+    echo -en "\a" > /dev/tty0
+    echo "2..."
+    sleep 1
+    echo -en "\a" > /dev/tty0
+    echo "1..."
+    sleep 1
+}
+
+install_shortcut(){
+    enable_clear_icon_cache=false
+
+    _SRC_SHORTCUT_PATH=$1
+    if [ ! -f "$_SRC_SHORTCUT_PATH" ]; then
+        customExit "The shortcut \"$_SRC_SHORTCUT_PATH\" is missing."
+    fi
+    _DST_SHORTCUT_NAME=$2
+    # _CAPTION is optional (original "Name" is kept if not specified)
+    _EXEC=$3
+    _WORKING_DIR=$4
+    _ICON=$5
+    _CAPTION=$6
+    dest_icons=$HOME/.local/share/applications
+    dest_icon=$dest_icons/$_DST_SHORTCUT_NAME
+    if [ ! -d "$dest_icons" ]; then
+        mdkir -p "$dest_icons" || customExit "mkdir -p \"$dest_icons\" failed."
+    fi
+    # if [ -f "$dest_icon" ]; then
+        # comment since never fixes broken icon anyway
+        # TODO: fixed bad cache even if icon was rewritten properly after written improperly
+        # * not tried yet:
+        #   * rm $HOME/.kde/share/config/kdeglobals
+        # enable_clear_icon_cache=true
+    # fi
+    echo "* writing icon '$dest_icon'..."
+    if [ ! -z "$_ICON" ]; then
+        if [ ! -z "$_CAPTION" ]; then
+            cat "$_SRC_SHORTCUT_PATH" | grep -v "^Icon=" | grep -v "^Path=" | grep -v "^Exec=" | grep -v "^Name=" > "$dest_icon"
+        else
+            cat "$_SRC_SHORTCUT_PATH" | grep -v "^Icon=" | grep -v "^Path=" | grep -v "^Exec=" > "$dest_icon"
+        fi
+    else
+        if [ ! -z "$_CAPTION" ]; then
+            cat "$_SRC_SHORTCUT_PATH" | grep -v "^Path=" | grep -v "^Exec=" | grep -v "^Name=" > "$dest_icon"
+        else
+            cat "$_SRC_SHORTCUT_PATH" | grep -v "^Path=" | grep -v "^Exec=" > "$dest_icon"
+        fi
+    fi
+    # Icon must be an absolute path (other variables use $HOME in
+    # desktop file above), so exclude it above and rewrite it below:
+    echo "Path=$dest_programs/minetest/bin" >> "$dest_icon"
+    if [ ! -z "$_CAPTION" ]; then
+        echo "Name=$_CAPTION" >> "$dest_icon"
+    fi
+    if [ ! -z "$_ICON" ]; then
+        echo "Icon=$_ICON" >> "$dest_icon"
+    fi
+    echo "Exec=$_EXEC" >> "$dest_icon"
+    if [ -d "$HOME/Desktop" ]; then
+        cp -f "$dest_icon" "$HOME/Desktop/$_DST_SHORTCUT_NAME"
+    fi
+    if [ "@$enable_clear_icon_cache" = "@true" ]; then
+        if [ -f "`command -v gnome-shell`" ]; then
+            echo "Refreshing Gnome icons..."
+            gnome-shell --replace & disown
+            sleep 10
+        fi
+        if [ -f "$HOME/.cache/icon-cache.kcache" ]; then
+            echo "clearing $HOME/.cache/icon-cache.kcache..."
+            rm $HOME/.cache/icon-cache.kcache
+        fi
+        if [ -f "`command -v kquitapp5`" ]; then
+            echo "Refreshing KDE icons..."
+            if [ "`command -v kstart5`" ]; then
+                kquitapp5 plasmashell && kstart5 plasmashell
+            else
+                kquitapp5 plasmashell && kstart plasmashell
+            fi
+            sleep 15
+        fi
+        if [ -f "`command -v xfce4-panel`" ]; then
+            echo "Refreshing Xfce icons..."
+            xfce4-panel -r && xfwm4 --replace
+            sleep 5
+        fi
+        if [ -f "`command -v lxpanelctl`" ]; then
+            echo "Refreshing LXDE icons..."
+            lxpanelctl restart && openbox --restart
+            sleep 5
+        fi
+    fi
+}
+
+install_mt_in_place_shortcut(){
+    # You must either set SHORTCUT_PATH or the first parameter to a
+    # valid Minetest ".desktop" file.
+    # You must either set INSTALL_PATH or the second parameter to a
+    # valid installed minetest directory (containing bin).
+    if [ ! -f "$SHORTCUT_PATH" ]; then
+        if [ ! -z "$1" ]; then
+            SHORTCUT_PATH="$1"
+        fi
+    fi
+    if [ ! -d "$INSTALL_PATH" ]; then
+        if [ ! -z "$2" ]; then
+            INSTALL_PATH="$2"
+        fi
+    fi
+    if [ ! -f "$SHORTCUT_PATH" ]; then
+        echo "* WARNING: The SHORTCUT_PATH $SHORTCUT_PATH does not exist."
+    elif [ ! -d "$INSTALL_PATH" ]; then
+        echo "* ERROR: The INSTALL_PATH $INSTALL_PATH does not exist."
+    else
+        EXEC_PATH="$INSTALL_PATH/bin/minetest"
+        if [ ! -f "$EXEC_PATH" ]; then
+            echo "* WARNING: The Minetest executable is not present: \"$EXEC_PATH\""
+        fi
+        WORKING_DIR_PATH="$INSTALL_PATH/bin"
+        if [ ! -d "$WORKING_DIR_PATH" ]; then
+            echo "* WARNING: The Minetest working directory is not present: \"$WORKING_DIR_PATH\""
+        fi
+        MT_ICON="$INSTALL_PATH/misc/minetest-xorg-icon-128.png"
+        if [ ! -f "$MT_ICON" ]; then
+            echo "* WARNING: The Minetest icon is not present: \"$MT_ICON\""
+        fi
+        install_shortcut "$SHORTCUT_PATH" "org.minetest.minetest.desktop" "$EXEC_PATH" "$WORKING_DIR_PATH" "$MT_ICON" "Final Minetest"
+    fi
+    show_os_release
+}
+
+upgradeAndMerge(){
+    # You must set the following variables or sequential parameters:
+    # 1. UPGRADE_TYPE: a minetest subdirectory such as "worlds"
+    # 2. INSTALL_PATH: a valid installed copy of minetest
+    # 3. OLD_VERSION_PATH: a valid old installed copy of minetest
+    # 4. (optional) "inplace" to copy instead of move and to only affect
+    #    OLD_VERSION_PATH such as for:
+    #    upgradeAndMerge "mods" "$INSTALL_PATH/games/Bucket_Game" "$INSTALL_PATH/games/ENLIVEN" "inplace"
+    if [ ! -z "$1" ]; then
+        # worlds, games, or something else
+        UPGRADE_TYPE="$1"
+    fi
+    if [ ! -z "$2" ]; then
+        # ~/minetest or
+        INSTALL_PATH="$2"
+    fi
+    if [ ! -z "$3" ]; then
+        OLD_VERSION_PATH="$3"
+    fi
+    UPGRADE_MODE="move"
+    if [ ! -z "$4" ]; then
+        UPGRADE_MODE="$4"
+    fi
+    if [ ! -d "$INSTALL_PATH/$UPGRADE_TYPE" ]; then
+        customExit "* WARNING: The $UPGRADE_TYPE upgrade will be skipped since the UPGRADE_TYPE directory \"$UPGRADE_TYPE\" is not present in the INSTALL_PATH \"$INSTALL_PATH\"."
+    else
+        echo "* upgrading $UPGRADE_TYPE"
+        for SUB_PATH in `find $INSTALL_PATH/$UPGRADE_TYPE -maxdepth 1`
+        do
+            SUB_NAME="`basename $SUB_PATH`"
+            if [ "$SUB_PATH" = "$INSTALL_PATH/$UPGRADE_TYPE" ]; then
+                echo "  * examining $SUB_PATH..."
+            elif [ -d "$SUB_PATH" ]; then
+                echo "  * upgrading $SUB_NAME..."
+                if [ -d "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" ]; then
+                    # Remove the old version (the one to upgrade and
+                    # keep if $UPGRADE_MODE is not move, otherwise the
+                    # one to upgrade and later move to INSTALL_PATH!)
+                    rm -Rf "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "* rm -Rf \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" failed."
+                    if [ "@$UPGRADE_MODE" = "@move" ]; then
+                        mv "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "mv \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\""
+                    else
+                        cp -R "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "cp -R \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\""
+                    fi
+                fi
+            else
+                echo "  * upgrading $SUB_NAME..."
+                if [ "@$UPGRADE_MODE" = "@move" ]; then
+                    mv -f "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "mv \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\""
+                else
+                    cp -f "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "cp \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\""
+                fi
+            fi
+        done
+        if [ "@$UPGRADE_MODE" = "@move" ]; then
+            rmdir "$INSTALL_PATH/$UPGRADE_TYPE" || customExit "rmdir \"$INSTALL_PATH/$UPGRADE_TYPE\" failed."
+            mv "$OLD_VERSION_PATH/$UPGRADE_TYPE" "$INSTALL_PATH/" || customExit "mv \"$OLD_VERSION_PATH/$UPGRADE_TYPE\" \"$INSTALL_PATH/\""
+            echo "  * $OLD_VERSION_PATH/$UPGRADE_TYPE is now upgraded and moved to \"$INSTALL_PATH/$UPGRADE_TYPE\"."
+        else
+            echo "  * $OLD_VERSION_PATH is now upgraded in place (\"$INSTALL_PATH/$UPGRADE_TYPE\" was left untouched as expected)."
+        fi
+    fi
+}
+
+copyIfExists(){
+    if [ -f "$1" ]; then
+        cp "$1" "$2"
+    fi
+}
+
+moveIfExists(){
+    if [ -f "$1" ]; then
+        mv "$1" "$2"
+    fi
+}
+
+moveIfExistsOrDeleteIfOnDest(){
+    if [ -f "$1" ]; then
+        if [ -f "$2" ]; then
+            rm "$1"
+        else
+            mv "$1" "$2"
+        fi
+    fi
+}
+
+deleteIfExists(){
+    if [ ! -z "$1" ]; then
+        if [ -d "$1" ]; then
+            rm -Rf $1
+        elif [ -f "$1" ]; then
+            rm $1
+        fi
+    else
+        echo "* ERROR: No param was specified for deleteDirIfExists"
+    fi
+}
+
+installOrUpgradeMinetest(){
+    # You must set the following variables or sequential parameters:
+    # 1. NEW_VERSION_PATH
+    # 2. INSTALL_PATH
+    # 3. VERSIONED_MT_PATH (a path that does not yet exist but will
+    #    store the old version temporarily until user data is moved
+    #    to the new version and other data is deleted)
+    if [ ! -z "$1" ]; then
+        NEW_VERSION_PATH="$1"
+    fi
+    if [ ! -z "$2" ]; then
+        INSTALL_PATH="$2"
+    fi
+    if [ ! -z "$3" ]; then
+        VERSIONED_MT_PATH="$3"
+    fi
+    if [ -d "$NEW_VERSION_PATH" ]; then
+        # cd "$HOME" || customExit "cd \"$HOME\" failed."
+        if [ -d "$INSTALL_PATH" ]; then
+            if [ -z "$VERSIONED_MT_PATH" ]; then
+                customExit "You must specify the VERSIONED_MT_PATH (such as \"$HOME/minetest.bak\" or another unused directory) to retain and merge the old version's user data since the old version exists."
+            fi
+
+            if [ -d "$VERSIONED_MT_PATH" ]; then
+                customExit "You already have an old copy of \"$VERSIONED_MT_PATH\". You must rename it or backup your world and other data then remove it before proceeding."
+            fi
+            if [ ! -f "`command -v basename`" ]; then
+                customExit "Install cannot continue because the basename command is not present."
+            fi
+            if [ ! -f "`command -v find`" ]; then
+                customExit "Install cannot continue because the find command is not present."
+            fi
+            mv "$INSTALL_PATH" "$VERSIONED_MT_PATH"
+            mv "$NEW_VERSION_PATH" "$INSTALL_PATH"
+
+            moveIfExists "$VERSIONED_MT_PATH/client/serverlist/favoriteservers.txt" "$NEW_VERSION_PATH/client/serverlist/favoriteservers.txt"
+            if [ -d "$VERSIONED_MT_PATH/client/serverlist" ]; then
+                rmdir --ignore-fail-on-non-empty "$VERSIONED_MT_PATH/client/serverlist"
+            fi
+            upgradeAndMerge "client" "$INSTALL_PATH" "$VERSIONED_MT_PATH"
+            upgradeAndMerge "clientmods" "$INSTALL_PATH" "$VERSIONED_MT_PATH"
+            upgradeAndMerge "games" "$INSTALL_PATH" "$VERSIONED_MT_PATH"
+            upgradeAndMerge "worlds" "$INSTALL_PATH" "$VERSIONED_MT_PATH"
+            upgradeAndMerge "mods" "$INSTALL_PATH" "$VERSIONED_MT_PATH"
+            upgradeAndMerge "textures" "$INSTALL_PATH" "$VERSIONED_MT_PATH"
+            upgradeAndMerge "media" "$INSTALL_PATH/cache" "$VERSIONED_MT_PATH/cache"
+            deleteIfExists "$VERSIONED_MT_PATH/media"
+            deleteIfExists "$VERSIONED_MT_PATH/minetest.conf.example"
+            deleteIfExists "$VERSIONED_MT_PATH/minetest.conf.example.extra"
+            deleteIfExists "$VERSIONED_MT_PATH/bin/minetest"
+            deleteIfExists "$VERSIONED_MT_PATH/bin/minetestserver"
+            deleteIfExists "$VERSIONED_MT_PATH/bin/minetest.bin"
+            deleteIfExists "$VERSIONED_MT_PATH/bin/minetestserver.bin"
+            rmdir --ignore-fail-on-non-empty "$VERSIONED_MT_PATH/bin"
+            # upgradeAndMerge "util" "$INSTALL_PATH" "$VERSIONED_MT_PATH"
+            # ^ texture packs
+            upgradeAndMerge "clientmods" "$INSTALL_PATH" "$VERSIONED_MT_PATH"
+            moveIfExistsOrDeleteIfOnDest "$VERSIONED_MT_PATH/minetest.ENLIVEN.client-example.conf" "$INSTALL_PATH/minetest.ENLIVEN.client-example.conf"
+            moveIfExistsOrDeleteIfOnDest "$VERSIONED_MT_PATH/minetest.ENLIVEN.LAN-client-example.conf" "$INSTALL_PATH/minetest.ENLIVEN.LAN-client-example.conf"
+            moveIfExistsOrDeleteIfOnDest "$VERSIONED_MT_PATH/minetest.ENLIVEN.server-example.conf" "$INSTALL_PATH/minetest.ENLIVEN.server-example.conf"
+            moveIfExists "$VERSIONED_MT_PATH/minetest.conf" "$INSTALL_PATH/minetest.conf"
+            moveIfExists "$VERSIONED_MT_PATH/arrowkeys.txt" "$INSTALL_PATH/arrowkeys.txt"
+            moveIfExists "$VERSIONED_MT_PATH/.saved_passwords" "$INSTALL_PATH/.saved_passwords"
+            if [ -d "$INSTALL_PATH/games/ENLIVEN" ]; then
+                if [ -d "$INSTALL_PATH/games/Bucket_Game" ]; then
+                    echo "* upgrading $INSTALL_PATH/games/ENLIVEN components using $INSTALL_PATH/games/Bucket_Game..."
+                    upgradeAndMerge "mods" "$INSTALL_PATH/games/Bucket_Game" "$INSTALL_PATH/games/ENLIVEN" "inplace"
+                else
+                    echo "* WARNING: Upgrading ENLIVEN is not possible since $INSTALL_PATH/games/Bucket_Game is not present."
+                fi
+            fi
+            OLD_BIN_PATH="$VERSIONED_MT_PATH/bin"
+            NEW_BIN_PATH="$NEW_VERSION_PATH/bin"
+            # See <https://unix.stackexchange.com/questions/87456/shell-script-to-check-for-the-presence-of-one-or-more-files-with-a-specific-exte>
+            if ls ${OLD_BIN_PATH}/*.png &>/dev/null
+            then
+                mv ${OLD_BIN_PATH}/*.png ${NEW_BIN_PATH}/
+            fi
+            if ls ${OLD_BIN_PATH}/*.jpg &>/dev/null
+            then
+                mv ${OLD_BIN_PATH}/*.jpg ${NEW_BIN_PATH}/
+            fi
+            deleteIfExists "$VERSIONED_MT_PATH/builtin"
+            deleteIfExists "$VERSIONED_MT_PATH/doc"
+            deleteIfExists "$VERSIONED_MT_PATH/fonts"
+            deleteIfExists "$VERSIONED_MT_PATH/locale"
+            deleteIfExists "$VERSIONED_MT_PATH/misc"
+            deleteIfExists "$VERSIONED_MT_PATH/po"
+            deleteIfExists "$VERSIONED_MT_PATH/sounds"
+            deleteIfExists "$VERSIONED_MT_PATH/util"
+        else
+            mv "$NEW_VERSION_PATH" "$INSTALL_PATH"
+        fi
+        # curl https://downloads.minetest.org/release.txt -o "$INSTALL_PATH/release.txt"
+    else
+        customExit "There is no minetest directory $NEW_VERSION_PATH."
+    fi
+}
+
+show_os_release(){
+    if [ -f "/etc/os-release" ]; then
+        #if [ -z "$NAME" ]; then
+        source /etc/os-release
+        echo
+        echo "Your operating system is $NAME $VERSION"
+        #fi
+    fi
+}
