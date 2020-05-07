@@ -175,6 +175,9 @@ if [ -z "$MY_TMP" ]; then
 fi
 mkdir -p "$MY_TMP"
 EXTRACTED_PATH="$MY_TMP/$EXTRACTED_NAME"
+if [ -d "$EXTRACTED_PATH" ]; then
+    rm -Rf "$EXTRACTED_PATH" || customExit "Deleting the old $EXTRACTED_PATH failed."
+fi
 
 exitAndDeleteDownload(){
     if [ -f "$DL_PATH" ]; then
