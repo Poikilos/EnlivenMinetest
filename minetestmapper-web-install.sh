@@ -1,6 +1,6 @@
 #!/bin/bash
 
-customDie() {
+customExit() {
     echo
     echo
     echo "ERROR:"
@@ -24,19 +24,19 @@ mkdir -p $REPOS_PATH
 REPO_PATH="$REPOS_PATH/$_REPO_NAME"
 
 if [ ! -d "$REPOS_PATH" ]; then
-    mkdir -p "$REPOS_PATH" || customDie "mkdir -p \"$REPOS_PATH\" failed."
+    mkdir -p "$REPOS_PATH" || customExit "mkdir -p \"$REPOS_PATH\" failed."
 fi
 
-cd "$REPOS_PATH" || customDie "cd \"$REPOS_PATH\" failed."
+cd "$REPOS_PATH" || customExit "cd \"$REPOS_PATH\" failed."
 if [ -d "$REPO_PATH" ]; then
-    cd "$REPO_PATH" || customDie "cd \"$REPO_PATH\" failed."
-    git pull || customDie "git pull failed in `pwd`."
+    cd "$REPO_PATH" || customExit "cd \"$REPO_PATH\" failed."
+    git pull || customExit "git pull failed in `pwd`."
 else
-    git clone "$_REPO_URL" "$REPO_PATH" || customDie "git clone \"$_REPO_URL\" \"$REPO_PATH\" failed."
+    git clone "$_REPO_URL" "$REPO_PATH" || customExit "git clone \"$_REPO_URL\" \"$REPO_PATH\" failed."
 fi
 echo "* compiling in `pwd`..."
-cmake . -DENABLE_LEVELDB=1 -DENABLE_POSTGRES=1 -DENABLE_REDIS=1 || customDie "cmake . failed in `pwd`."
-make -j$(nproc) || customDie "make failed in `pwd`."
+cmake . -DENABLE_LEVELDB=1 -DENABLE_POSTGRES=1 -DENABLE_REDIS=1 || customExit "cmake . failed in `pwd`."
+make -j$(nproc) || customExit "make failed in `pwd`."
 _EXE_PATH="`pwd`/$_EXE_NAME"
 if [ -f "$_EXE_PATH" ]; then
     echo "* finished compiling \"$_EXE_PATH\""
@@ -48,7 +48,7 @@ if [ -f "$_EXE_PATH" ]; then
     if [ -f "$EXE_DEST_PATH" ]; then
         echo "* installed \"$EXE_DEST_PATH\""
     else
-        customDie "* installing \"$EXE_DEST_PATH\" failed."
+        customExit "* installing \"$EXE_DEST_PATH\" failed."
     fi
 else
     echo "* finished compiling in `pwd` (but $_EXE_PATH was not detected)"

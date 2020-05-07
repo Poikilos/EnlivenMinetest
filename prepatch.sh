@@ -6,7 +6,7 @@ me=`basename "$0"`
 # expected)
 # --install    Install the specified patch.
 
-customDie() {
+customExit() {
     echo
     if [ -z "$1" ]; then
         echo "Unknown error."
@@ -66,7 +66,7 @@ project2_path="$repo/$project2/$branch"
 if [ "@$enable_meld" = "@true" ]; then
     echo "meld..."
     if [ -z "$branch" ]; then
-        customDie "You must specify a branch name after --meld."
+        customExit "You must specify a branch name after --meld."
     fi
     subgame=
     patch_game_src=
@@ -76,7 +76,7 @@ if [ "@$enable_meld" = "@true" ]; then
     if [ -d "$project2_path/mods" ]; then
         patch_game_src="$project2_path"
     else
-        customDie "Cannot detect mods directory in $project2_path/mods"
+        customExit "Cannot detect mods directory in $project2_path/mods"
     fi
     #below (commented part) should only happen if $project2_path already has been edited (diverged from $project1_path)
     #echo "meld $patch_game_src/ $HOME/minetest/games/ENLIVEN..."
@@ -98,7 +98,7 @@ if [ "@$enable_meld" = "@true" ]; then
                 echo "* install nohup to prevent programs from dumping output to console..."
             fi
         else
-            customDie "You do not have meld installed."
+            customExit "You do not have meld installed."
         fi
     else
         echo "meld '$HOME/minetest/games/ENLIVEN' '$patch_game_src'..."
@@ -110,7 +110,7 @@ if [ "@$enable_meld" = "@true" ]; then
                 echo "* install nohup to prevent programs from dumping output to console..."
             fi
         else
-            customDie "You do not have meld installed."
+            customExit "You do not have meld installed."
         fi
     fi
     echo
@@ -118,7 +118,7 @@ if [ "@$enable_meld" = "@true" ]; then
     exit 0
 elif [ "@$enable_install" = "@true" ]; then
     if [ -z "$branch" ]; then
-        customDie "You must specify a branch name after --install."
+        customExit "You must specify a branch name after --install."
     fi
     echo "* installing $branch branch..."
     subgame=
@@ -127,7 +127,7 @@ elif [ "@$enable_install" = "@true" ]; then
     elif [ -d "$project2_path/patched/mods" ]; then
         patch_game_src="$project2_path/patched"
     else
-        customDie "Cannot detect mods directory in $project2_path/mods"
+        customExit "Cannot detect mods directory in $project2_path/mods"
     fi
     echo "rsync -rt $patch_game_src/ $HOME/minetest/games/ENLIVEN..."
     rsync -rt "$patch_game_src/" "$HOME/minetest/games/ENLIVEN"
@@ -139,7 +139,7 @@ elif [ "@$enable_install" = "@true" ]; then
     exit 0
 fi
 if [ ! -d "$patches" ]; then
-    customDie "You are missing $patches so a patch basis and patched target cannot be created there."
+    customExit "You are missing $patches so a patch basis and patched target cannot be created there."
 fi
 licenses="license.txt LICENSE LICENSE.txt oldcoder.txt LICENSE.md license.md"
 usage() {
@@ -199,30 +199,30 @@ dir2_pp="$(dirname -- "$dir2_p")"
 #echo "* checking $dir2_pp..."
 
 if [ ! -d "$project0_path" ]; then
-    customDie "ERROR: You must have '$project0' installed as '$project0_path'"
+    customExit "ERROR: You must have '$project0' installed as '$project0_path'"
 fi
 
 if [ ! -f "$file0_path" ]; then
-    customDie "ERROR: Missing '$file0_path')"
+    customExit "ERROR: Missing '$file0_path')"
 fi
 
 if [ ! -d "$dir1" ]; then
-    mkdir -p "$dir1" || customDie "Cannot mkdir $dir1"
+    mkdir -p "$dir1" || customExit "Cannot mkdir $dir1"
 fi
 
 if [ ! -d "$dir2" ]; then
-    mkdir -p "$dir2" || customDie "Cannot mkdir $dir2"
+    mkdir -p "$dir2" || customExit "Cannot mkdir $dir2"
 fi
 
 # if file1 exists, overwriting is ok--update basis so diff will make patch correctly
 echo "* updating $file1_path"
-cp -f "$file0_path" "$file1_path" || customDie "Cannot cp '$file0_path' '$file1_path'"
+cp -f "$file0_path" "$file1_path" || customExit "Cannot cp '$file0_path' '$file1_path'"
 
 if [ -f "$file2_path" ]; then
-    customDie "Nothing done since '$file2_path' already exists."
+    customExit "Nothing done since '$file2_path' already exists."
 fi
 echo "* creating $file2_path"
-cp -f "$file0_path" "$file2_path" || customDie "Cannot cp '$file0_path' '$file2_path'"
+cp -f "$file0_path" "$file2_path" || customExit "Cannot cp '$file0_path' '$file2_path'"
 if [ -f "`command -v zbstudio`" ]; then
     nohup zbstudio "$file2_path" &
 else
@@ -243,10 +243,10 @@ for license in "${arr[@]}"; do
     lic2="$dir2/$license"
     if [ -f "$lic0" ]; then
         echo "* updating LICENSE '$lic1'..."
-        cp -f "$lic0" "$lic1" || customDie "Cannot cp -f '$lic0' '$lic1'"
+        cp -f "$lic0" "$lic1" || customExit "Cannot cp -f '$lic0' '$lic1'"
         if [ ! -f "$lic2" ]; then
             echo "  - also for $project2..."
-            cp --no-clobber "$lic0" "$lic2" || customDie "Cannot cp -f '$lic0' '$lic2'"
+            cp --no-clobber "$lic0" "$lic2" || customExit "Cannot cp -f '$lic0' '$lic2'"
         fi
     fi
     lic0="$dir0_p/$license"
@@ -254,10 +254,10 @@ for license in "${arr[@]}"; do
     lic2="$dir2_p/$license"
     if [ -f "$lic0" ]; then
         echo "* updating LICENSE '$lic1'..."
-        cp -f "$lic0" "$lic1" || customDie "Cannot cp -f '$lic0' '$lic1'"
+        cp -f "$lic0" "$lic1" || customExit "Cannot cp -f '$lic0' '$lic1'"
         if [ ! -f "$lic2" ]; then
             echo "  - also for $project2..."
-            cp --no-clobber "$lic0" "$lic2" || customDie "Cannot cp -f '$lic0' '$lic2'"
+            cp --no-clobber "$lic0" "$lic2" || customExit "Cannot cp -f '$lic0' '$lic2'"
         fi
     fi
     lic0="$dir0_pp/$license"
@@ -265,10 +265,10 @@ for license in "${arr[@]}"; do
     lic2="$dir2_pp/$license"
     if [ -f "$lic0" ]; then
         echo "* updating '$lic1'..."
-        cp -f "$lic0" "$lic1" || customDie "Cannot cp -f '$lic0' '$lic1'"
+        cp -f "$lic0" "$lic1" || customExit "Cannot cp -f '$lic0' '$lic1'"
         if [ ! -f "$lic2" ]; then
             echo "  - also for $project2..."
-            cp --no-clobber "$lic0" "$lic2" || customDie "Cannot cp -f '$lic0' '$lic2'"
+            cp --no-clobber "$lic0" "$lic2" || customExit "Cannot cp -f '$lic0' '$lic2'"
         fi
     fi
 done

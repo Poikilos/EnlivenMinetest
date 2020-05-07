@@ -2,7 +2,7 @@
 # such as meld /home/owner/minetest/games/ENLIVEN/ /home/owner/git/EnlivenMinetest/patches/Bucket_Game-patched/
 me=`basename "$0"`
 
-customDie() {
+customExit() {
     echo
     if [ -z "$1" ]; then
         echo "Unknown error."
@@ -23,7 +23,7 @@ patches="$HOME/git/EnlivenMinetest/patches"
 project1_path="$patches/$project1"
 project2_path="$patches/$project2"
 if [ ! -d "$patches" ]; then
-    customDie "You are missing $patches so a patch basis and patched target cannot be created there."
+    customExit "You are missing $patches so a patch basis and patched target cannot be created there."
 fi
 licenses="license.txt LICENSE LICENSE.txt oldcoder.txt LICENSE.md license.md"
 usage() {
@@ -79,30 +79,30 @@ dir2_pp="$(dirname -- "$dir2_p")"
 #echo "* checking $dir2_pp..."
 
 if [ ! -d "$project0_path" ]; then
-    customDie "ERROR: You must have '$project0' installed as '$project0_path'"
+    customExit "ERROR: You must have '$project0' installed as '$project0_path'"
 fi
 
 if [ ! -f "$file0_path" ]; then
-    customDie "ERROR: Missing '$file0_path')"
+    customExit "ERROR: Missing '$file0_path')"
 fi
 
 if [ ! -d "$dir1" ]; then
-    mkdir -p "$dir1" || customDie "Cannot mkdir $dir1"
+    mkdir -p "$dir1" || customExit "Cannot mkdir $dir1"
 fi
 
 if [ ! -d "$dir2" ]; then
-    mkdir -p "$dir2" || customDie "Cannot mkdir $dir2"
+    mkdir -p "$dir2" || customExit "Cannot mkdir $dir2"
 fi
 
 # if file1 exists, overwriting is ok--update basis so diff will make patch correctly
 echo "* updating $file1_path"
-cp -f "$file0_path" "$file1_path" || customDie "Cannot cp '$file0_path' '$file1_path'"
+cp -f "$file0_path" "$file1_path" || customExit "Cannot cp '$file0_path' '$file1_path'"
 
 if [ -f "$file2_path" ]; then
-    customDie "Nothing done since '$file2_path' already exists."
+    customExit "Nothing done since '$file2_path' already exists."
 fi
 echo "* creating $file2_path"
-cp -f "$file0_path" "$file2_path" || customDie "Cannot cp '$file0_path' '$file2_path'"
+cp -f "$file0_path" "$file2_path" || customExit "Cannot cp '$file0_path' '$file2_path'"
 if [ -f "`command -v geany`" ]; then
     nohup geany "$file2_path" &
 fi
@@ -119,10 +119,10 @@ for license in "${arr[@]}"; do
     lic2="$dir2/$license"
     if [ -f "$lic0" ]; then
         echo "* updating LICENSE '$lic1'..."
-        cp -f "$lic0" "$lic1" || customDie "Cannot cp -f '$lic0' '$lic1'"
+        cp -f "$lic0" "$lic1" || customExit "Cannot cp -f '$lic0' '$lic1'"
         if [ ! -f "$lic2" ]; then
             echo "  - also for $project2..."
-            cp --no-clobber "$lic0" "$lic2" || customDie "Cannot cp -f '$lic0' '$lic2'"
+            cp --no-clobber "$lic0" "$lic2" || customExit "Cannot cp -f '$lic0' '$lic2'"
         fi
     fi
     lic0="$dir0_p/$license"
@@ -130,10 +130,10 @@ for license in "${arr[@]}"; do
     lic2="$dir2_p/$license"
     if [ -f "$lic0" ]; then
         echo "* updating LICENSE '$lic1'..."
-        cp -f "$lic0" "$lic1" || customDie "Cannot cp -f '$lic0' '$lic1'"
+        cp -f "$lic0" "$lic1" || customExit "Cannot cp -f '$lic0' '$lic1'"
         if [ ! -f "$lic2" ]; then
             echo "  - also for $project2..."
-            cp --no-clobber "$lic0" "$lic2" || customDie "Cannot cp -f '$lic0' '$lic2'"
+            cp --no-clobber "$lic0" "$lic2" || customExit "Cannot cp -f '$lic0' '$lic2'"
         fi
     fi
     lic0="$dir0_pp/$license"
@@ -141,10 +141,10 @@ for license in "${arr[@]}"; do
     lic2="$dir2_pp/$license"
     if [ -f "$lic0" ]; then
         echo "* updating '$lic1'..."
-        cp -f "$lic0" "$lic1" || customDie "Cannot cp -f '$lic0' '$lic1'"
+        cp -f "$lic0" "$lic1" || customExit "Cannot cp -f '$lic0' '$lic1'"
         if [ ! -f "$lic2" ]; then
             echo "  - also for $project2..."
-            cp --no-clobber "$lic0" "$lic2" || customDie "Cannot cp -f '$lic0' '$lic2'"
+            cp --no-clobber "$lic0" "$lic2" || customExit "Cannot cp -f '$lic0' '$lic2'"
         fi
     fi
 done

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-customDie() {
+customExit() {
     echo
     echo
     echo "ERROR:"
@@ -27,12 +27,12 @@ elif [ -f "`command -v yum`" ]; then
     INSTALL_CMD="yum -y install"
     PACKAGE_TYPE="rpm"
 else
-    customDie "Your package system is not implemented in this script."
+    customExit "Your package system is not implemented in this script."
 fi
 if [ "@$PACKAGE_TYPE" = "@deb" ]; then
     sudo $INSTALL_CMD libgd-dev libsqlite3-dev libleveldb-dev libhiredis-dev libpq-dev
 elif [ "@$PACKAGE_TYPE" = "@rpm" ]; then
     sudo $INSTALL_CMD gd-devel sqlite-devel leveldb-devel hiredis-devel libpq-devel
 else
-    customDie "The package names for your OS are unknown."
+    customExit "The package names for your OS are unknown."
 fi

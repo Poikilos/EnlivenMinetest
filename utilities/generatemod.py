@@ -7,7 +7,7 @@ myPath = os.path.realpath(__file__)
 myDir = os.path.dirname(myPath)
 
 
-def customDie(msg, code=1):
+def customExit(msg, code=1):
     print("")
     print("ERROR:")
     print(msg)
@@ -67,7 +67,7 @@ for i in range(1, len(sys.argv)):
     else:
         if (len(sys.argv[i]) >= 2) and (sys.argv[i][:2] == "--"):
             usage()
-            customDie("Invalid option: " + sys.argv[i])
+            customExit("Invalid option: " + sys.argv[i])
         options.append(sys.argv[i])
 if (len(options) != 1) and (len(options) != 3):
     usage()
@@ -90,7 +90,7 @@ if (len(options) == 3):
         toMod = toName[:delimI]
         if toMod.find(":") > -1:
             usage()
-            customDie("Your modname contains too many colons.")
+            customExit("Your modname contains too many colons.")
             exit(1)
     else:
         toMod = "default"

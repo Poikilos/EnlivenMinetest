@@ -4,11 +4,11 @@ exit 0
 master=~/minetest/games/Bucket_Game
 branches=~/git/1.pull-requests/Bucket_Game-branches
 if [ ! -d "$branches" ]; then
-    mkdir -p "$branches" || customDie "Failed to mkdir -p '$branches'"
+    mkdir -p "$branches" || customExit "Failed to mkdir -p '$branches'"
     echo "Created '$branches'"
 fi
 
-customDie() {
+customExit() {
     errcode=1
     echo
     echo "ERROR:"
@@ -53,13 +53,13 @@ do
         if [ "@$next" = "@branch" ]; then
             # NOT -p on purpose--guarantee normal name (and no spaces)
             branch="$var"
-            mkdir "$branches/$branch" || customDie "The new branch name must be valid directory name--can't create '$branches/$var'"
+            mkdir "$branches/$branch" || customExit "The new branch name must be valid directory name--can't create '$branches/$var'"
         else
             tryPath="$master/$var"
             if [ -f "$tryPath" ]; then
                 partial=$var
             else
-                customDie "File does not exist: '$tryPath'"
+                customExit "File does not exist: '$tryPath'"
             fi
         fi
         next=
@@ -68,12 +68,12 @@ done
 
 if [ -z "$branch" ]; then
     usage
-    customDie "You must specify a branch name"
+    customExit "You must specify a branch name"
 fi
 
 if [ -z "$partial" ]; then
     usage
-    customDie "You must specify a file to fork"
+    customExit "You must specify a file to fork"
 fi
 
 masterFile="$master/$partial"

@@ -25,8 +25,6 @@ countDown(){
 
 echo "This will DELETE ~/minetest/games/minimal and remake it!"
 countDown
-#> You'll need minimum git 1.9 for this to work. Tested it myself only with 2.2.0 and 2.2.2.
-#-<https://stackoverflow.com/questions/600079/how-do-i-clone-a-subdirectory-only-of-a-git-repository/52269934#52269934>
 REPO_URL=https://github.com/minetest/minetest
 # REPO_URL=http://git.minetest.org:3000/minetest/minetest.git
 DEST_REPO=~/Downloads/git/minetest_minimal
@@ -40,6 +38,9 @@ if [ -e $DEST_GAMES/minimal ]; then
 fi
 
 if [ ! -d "$DEST_REPO" ]; then
+    # "You'll need minimum git 1.9 for this to work. Tested it myself
+    # only with 2.2.0 and 2.2.2."
+    # -<https://stackoverflow.com/questions/600079/how-do-i-clone-a-subdirectory-only-of-a-git-repository/52269934#52269934>
     mkdir -p ~/Downloads/git \
         && git init "$DEST_REPO" \
         && cd "$DEST_REPO" \

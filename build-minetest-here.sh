@@ -1,5 +1,5 @@
 #!/bin/bash
-customDie(){
+customExit(){
     echo "$1"
     exit 1
 }
@@ -8,14 +8,14 @@ if [ ! -d $mybuild ]; then
     # mkdir $mybuild
     echo
 fi
-# cd $mybuild || customDie "$0: cd build failed in '`pwd`'."
+# cd $mybuild || customExit "$0: cd build failed in '`pwd`'."
 if [ -f bin/minetest ]; then
-    make clean || customDie "$0: make clean failed in '`pwd`'."
+    make clean || customExit "$0: make clean failed in '`pwd`'."
 fi
 if [ -z "$RUN_IN_PLACE" ]; then
     RUN_IN_PLACE=0
 fi
-cmake . -DENABLE_GETTEXT=1 -DENABLE_FREETYPE=1 -DENABLE_LEVELDB=1 -DENABLE_REDIS=1 -DRUN_IN_PLACE=$RUN_IN_PLACE && make -j$(grep -c processor /proc/cpuinfo)  || customDie "$0: Build failed in '`pwd`'."
+cmake . -DENABLE_GETTEXT=1 -DENABLE_FREETYPE=1 -DENABLE_LEVELDB=1 -DENABLE_REDIS=1 -DRUN_IN_PLACE=$RUN_IN_PLACE && make -j$(grep -c processor /proc/cpuinfo)  || customExit "$0: Build failed in '`pwd`'."
 echo
 if [ "@$RUN_IN_PLACE" = "@1" ]; then
     echo "WARNING: do not do make install with -DRUN_IN_PLACE=$RUN_IN_PLACE!"

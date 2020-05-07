@@ -1,7 +1,7 @@
 #!/bin/sh
 extracted_path=$HOME/Downloads/minetest
 mnf_name=install_manifest.txt
-customDie() {
+customExit() {
     echo
     echo "ERROR:"
     echo "$1"
@@ -10,14 +10,14 @@ customDie() {
     exit 1
 }
 if [ ! -f "$extracted_path/$mnf_name" ]; then
-    customDie "$extracted_path/$mnf_name is missing, so $0 cannot continue."
+    customExit "$extracted_path/$mnf_name is missing, so $0 cannot continue."
 fi
 
 if [ ! -f "`command -v xargs`" ]; then
-    customDie "This script cannot work without xargs. Try uninstall.py."
+    customExit "This script cannot work without xargs. Try uninstall.py."
 fi
 
-cd $extracted_path || customDie "* cannot cd $extracted_path."
+cd $extracted_path || customExit "* cannot cd $extracted_path."
 echo "- about to run 'sudo xargs rm < $mnf_name'..."
 xargs rm < $mnf_name
 echo "- about to run 'sudo xargs rmdir --ignore-fail-on-non-empty < $mnf_name'..."

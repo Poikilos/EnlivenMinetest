@@ -6,7 +6,7 @@
 
 me="$0"
 RAN_FROM="`pwd`"
-customDie() {
+customExit() {
     echo
     echo
     echo "$me ERROR:"
@@ -44,7 +44,7 @@ END
 
 usageDie() {
     usage
-    customDie $1
+    customExit $1
 }
 
 dieIfOnline() {
@@ -89,10 +89,10 @@ do
             BUILD_WHAT="$var"
             USE_WHAT=true
         else
-            customDie "'$var' is not a directory."
+            customExit "'$var' is not a directory."
         fi
     else
-        customDie "$var is not a valid option."
+        customExit "$var is not a valid option."
     fi
 done
 
@@ -115,12 +115,12 @@ srcRepo="`pwd`/$BUILD_WHAT"
 if [ ! -d "$srcRepo" ]; then
     srcRepo="$GIT_REPOS_DIR/$BUILD_WHAT"
     if [ ! -d "$GIT_REPOS_DIR" ]; then
-        mkdir -p "$GIT_REPOS_DIR" || customDie echo "mkdir -p '$GIT_REPOS_DIR' FAILED."
+        mkdir -p "$GIT_REPOS_DIR" || customExit echo "mkdir -p '$GIT_REPOS_DIR' FAILED."
     fi
 fi
 echo "* Using $srcRepo..."
 if [ ! -d /tmp/MultiCraft ]; then
-    mkdir /tmp/MultiCraft || customDie echo "mkdir -p '/tmp/MultiCraft' FAILED."
+    mkdir /tmp/MultiCraft || customExit echo "mkdir -p '/tmp/MultiCraft' FAILED."
 fi
 artifactsPath=/tmp/MultiCraft/src.txt
 cat > $artifactsPath <<END
@@ -174,9 +174,9 @@ if [ "@$UNINSTALL" = "@true" ]; then
     echo
     prevDir="`pwd`"
     echo "Uninstalling $DESTINATION..."
-    cd "$DESTINATION" || customDie echo "cd $DESTINATION FAILED."
+    cd "$DESTINATION" || customExit echo "cd $DESTINATION FAILED."
     if [ ! -d /tmp/MultiCraft ]; then
-        mkdir /tmp/MultiCraft || customDie echo "mkdir -p '/tmp/MultiCraft' FAILED."
+        mkdir /tmp/MultiCraft || customExit echo "mkdir -p '/tmp/MultiCraft' FAILED."
     fi
     manifestPath=/tmp/MultiCraft/manifest.txt
 cat > $manifestPath <<END
@@ -1780,7 +1780,7 @@ bin
 po
 END
     if [ -z "$DESTINATION" ]; then
-        customDie "DESTINATION is blank."
+        customExit "DESTINATION is blank."
     fi
     while read p; do
         if [ -f "$DESTINATION/$p" ]; then
@@ -1803,16 +1803,16 @@ fi
 if [ "@$INSTALL" = "@true" ]; then
     echo "* installing from '$srcRepo' to '$DESTINATION'..."
     if [ ! -f "`command -v rsync`" ]; then
-        customDie "You must first install rsync to use the install option."
+        customExit "You must first install rsync to use the install option."
     fi
     if [ ! -d "$DESTINATION" ]; then
-        mkdir -p "$DESTINATION" || customDie "mkdir -p '$DESTINATION' FAILED."
+        mkdir -p "$DESTINATION" || customExit "mkdir -p '$DESTINATION' FAILED."
     fi
     if [ -f "$DESTINATION/multicraft.conf" ]; then
         echo "  - The existing multicraft.conf will not be overwritten."
-        rsync -rt --info=progress2 --exclude-from "$artifactsPath" --exclude 'multicraft.conf' "$srcRepo/" "$DESTINATION" || customDie "rsync failed."
+        rsync -rt --info=progress2 --exclude-from "$artifactsPath" --exclude 'multicraft.conf' "$srcRepo/" "$DESTINATION" || customExit "rsync failed."
     else
-        rsync -rt --info=progress2 --exclude-from "$artifactsPath" "$srcRepo/" "$DESTINATION" || customDie "rsync failed."
+        rsync -rt --info=progress2 --exclude-from "$artifactsPath" "$srcRepo/" "$DESTINATION" || customExit "rsync failed."
     fi
     rm $artifactsPath
     rmdir --ignore-fail-on-non-empty /tmp/MultiCraft
@@ -1825,10 +1825,10 @@ if [ "@$INSTALL" = "@true" ]; then
     fi
 
     if [ ! -f "$dstExe" ]; then
-        customDie "Install did not result in '$dstExe'."
+        customExit "Install did not result in '$dstExe'."
     fi
     if [ ! -d "$dstShortcuts" ]; then
-        mkdir -p "$dstShortcuts" || customDie echo "mkdir -p '$dstShortcuts' FAILED."
+        mkdir -p "$dstShortcuts" || customExit echo "mkdir -p '$dstShortcuts' FAILED."
     fi
 cat > $dstShortcut <<END
 [Desktop Entry]
@@ -1861,7 +1861,7 @@ END
 if [ $? -eq 0 ]; then
     echo "* Created $dstShortcut."
 else
-    customDie "Creating $dstShortcut FAILED."
+    customExit "Creating $dstShortcut FAILED."
 fi
     echo
     echo
@@ -1882,25 +1882,25 @@ fi
 fi
 
 if [ ! -d "$srcRepo" ]; then
-    cd "$GIT_REPOS_DIR" || customDie "cd '$GIT_REPOS_DIR' FAILED"
+    cd "$GIT_REPOS_DIR" || customExit "cd '$GIT_REPOS_DIR' FAILED"
 fi
 goodFlagFile=MultiCraft/CMakeLists.txt
 if [ -f "`command -v git`" ]; then
     echo "In `pwd`..."
     if [ ! -d "$BUILD_WHAT" ]; then
         if [ "@$OFFLINE" = "@false" ]; then
-            git clone https://github.com/MultiCraft/MultiCraft.git || customDie "Cannot clone MultiCraft from `pwd`"
+            git clone https://github.com/MultiCraft/MultiCraft.git || customExit "Cannot clone MultiCraft from `pwd`"
         fi
-        cd "$BUILD_WHAT" || customDie "Cannot cd '$BUILD_WHAT' from `pwd`"
+        cd "$BUILD_WHAT" || customExit "Cannot cd '$BUILD_WHAT' from `pwd`"
     else
-        cd "$BUILD_WHAT" || customDie "Cannot cd '$BUILD_WHAT' from `pwd`"
+        cd "$BUILD_WHAT" || customExit "Cannot cd '$BUILD_WHAT' from `pwd`"
         if [ "@$OFFLINE" = "@false" ]; then
             git pull || dieIfOnline "WARNING: Cannot pull '$BUILD_WHAT' from `pwd`"
         fi
     fi
 else
     if [ ! -f "$goodFlagFile" ]; then
-        customDie "You are missing git, and offline install is not possible without in current directory (`pwd`)"
+        customExit "You are missing git, and offline install is not possible without in current directory (`pwd`)"
     else
         cd "$BUILD_WHAT" || usageDie "Cannot cd '$BUILD_WHAT' from `pwd`"
     fi
@@ -1909,7 +1909,7 @@ cd games || usageDie "cd games FAILED in `pwd`"
 rmdir --ignore-fail-on-non-empty default
 if [ ! -d "default" ]; then
     if [ "@$OFFLINE" = "@false" ]; then
-        git clone https://github.com/MultiCraft/MultiCraft_game default || customDie "git clone https://github.com/MultiCraft/MultiCraft_game FAILED"
+        git clone https://github.com/MultiCraft/MultiCraft_game default || customExit "git clone https://github.com/MultiCraft/MultiCraft_game FAILED"
     else
         echo
         echo
@@ -1921,9 +1921,9 @@ if [ ! -d "default" ]; then
     fi
 else
     if [ "@$OFFLINE" = "@false" ]; then
-        cd default || customDie "cd default FAILED in `pwd`"
-        git pull || customDie "git pull FAILED in `pwd`"
-        cd .. || customDie "cd .. FAILED in `pwd`"
+        cd default || customExit "cd default FAILED in `pwd`"
+        git pull || customExit "git pull FAILED in `pwd`"
+        cd .. || customExit "cd .. FAILED in `pwd`"
     fi
 fi
 cd .. || usageDie "cd .. FAILED in `pwd`"
@@ -1936,7 +1936,7 @@ echo "Running cmake srcPath..."
 cmake $srcPath $flag1 -G"CodeBlocks - Unix Makefiles" -DRUN_IN_PLACE=1 -DENABLE_GETTEXT=1 -DENABLE_FREETYPE=1 -DENABLE_LEVELDB=1 || usageDie "cmake failed in `pwd`. See any messages above for more information. Run ./install-minetest-build-deps.sh if you did not."
 echo
 echo "Running make..."
-make -j$(nproc) || customDie "make failed. See any messages above for more information. Run ./install-minetest-build-deps.sh if you did not."
+make -j$(nproc) || customExit "make failed. See any messages above for more information. Run ./install-minetest-build-deps.sh if you did not."
 if [ -f "`pwd`/bin/MultiCraft" ]; then
     echo "`pwd`/bin/MultiCraft"
 else

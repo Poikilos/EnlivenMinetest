@@ -2,7 +2,7 @@
 # The git repo ONLY includes the core engine: http://localhost:3000/minetest/minetest.git
 # The build kit should be used, & has "patched Irrlicht, the new LuaJit, built-in LevelDB and Snappy support, Bucket Game, Bucket City, Wonder World, the schems collection, and other pieces"
 
-customDie() {
+customExit() {
     echo
     echo "ERROR:"
     echo "$1"
@@ -10,7 +10,7 @@ customDie() {
     echo
 }
 
-cd webapp || customDie "You must run this script from the directory containing the webapp directory."
+cd webapp || customExit "You must run this script from the directory containing the webapp directory."
 if [ ! -d linux-minetest-kit ]; then
     bash reset-minetest-install-source.sh
 fi

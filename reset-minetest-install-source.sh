@@ -46,7 +46,7 @@ END
     sleep 1
 }
 
-customDie () {
+customExit () {
     echo "ERROR: Cannot continue since"
     echo "$1"
     exit 1
@@ -57,7 +57,7 @@ available_release_line=`curl http://downloads.minetest.org/release.txt | head -n
 available_version=$(echo $available_release_line | awk '{print $2}')
 # OR: available_version="${available_release_line##* }"  # get second word
 if [ ${#available_version} -ne 6 ]; then
-    customDie "The available version is not recognized: $available_version"
+    customExit "The available version is not recognized: $available_version"
 fi
 installed_release_line=`head -n 1 ~/minetest/release.txt`
 installed_version=$(echo $installed_release_line | awk '{print $2}')
@@ -81,10 +81,10 @@ do
     if [ "@$var" = "@--offline" ]; then
         enable_offline=true
     else
-        customDie "Invalid argument: $var"
+        customExit "Invalid argument: $var"
     fi
 done
-cd "$EM_CONFIG_PATH" || customDie "[$MY_NAME] cd \"$EM_CONFIG_PATH\" failed."
+cd "$EM_CONFIG_PATH" || customExit "[$MY_NAME] cd \"$EM_CONFIG_PATH\" failed."
 if [ -d "$extracted_path" ]; then
     # NOTE: ls -lR provides a count, so it is not suitable unless output
     # is parsed. `| wc -l` is easier (word count).
@@ -93,26 +93,26 @@ if [ -d "$extracted_path" ]; then
         screenshot_count=`ls $extracted_path/screenshots/*.png | wc -l`
     fi
     if [ $screenshot_count -gt 0 ]; then
-        mv $extracted_path/screenshots/*.png ~/ || customDie "can't move screenshots from $extracted_path/screenshots/*.png"
+        mv $extracted_path/screenshots/*.png ~/ || customExit "can't move screenshots from $extracted_path/screenshots/*.png"
         rmdir --ignore-fail-on-non-empty "$extracted_path/screenshots"
     fi
     if [ `ls $extracted_path/minetest/bin/*.png | wc -l` -gt 0 ]; then
         # if [ ! -d screenshots ]; then mkdir screenshots; fi
         # NOTE: system-wide install of minetest puts screenshots in ~/ (cwd)
-        mv $extracted_path/minetest/bin/*.png ~/ || customDie "can't move screenshots from $extracted_path/minetest/bin/*.png"
+        mv $extracted_path/minetest/bin/*.png ~/ || customExit "can't move screenshots from $extracted_path/minetest/bin/*.png"
     fi
-    rm -Rf "$extracted_path" || customDie "can't remove $extracted_name"
+    rm -Rf "$extracted_path" || customExit "can't remove $extracted_name"
 fi
 
 if [ "@$enable_offline" = "@true" ]; then
     if [ ! -f "$zip_name" ]; then
-        customDie "* Offline install is impossible without '`pwd`/$zip_name'."
+        customExit "* Offline install is impossible without '`pwd`/$zip_name'."
     fi
 else
-    wget -O "$EM_CONFIG_PATH/$zip_name" $url/$zip_name || customDie "no $zip_name at $url"
+    wget -O "$EM_CONFIG_PATH/$zip_name" $url/$zip_name || customExit "no $zip_name at $url"
 fi
-unzip -u $zip_name || customDie "Can't unzip $zip_name"
-cd "$extracted_name" || customDie "Unzipping \"$zip_name\" in \"`pwd`\" did not result in a readable directory named \"$extracted_name\" there."
+unzip -u $zip_name || customExit "Can't unzip $zip_name"
+cd "$extracted_name" || customExit "Unzipping \"$zip_name\" in \"`pwd`\" did not result in a readable directory named \"$extracted_name\" there."
 cat "$extracted_path/release.txt"
 echo "compiling libraries..."
 date
