@@ -1119,11 +1119,11 @@ if [ -f "`command -v blender`" ]; then
 fi
 echo "Hopefully <https://github.com/minetest-mods/technic/issues/448> is fixed by the time you try this, otherwise you'll have to patch /usr/local/share/minetest/games/ENLIVEN/mods/technic/technic/machines/register/extractor_recipes.lua manually using workaround at <https://github.com/minetest/minetest/issues/6513>."
 echo
-ls $MT_MYGAME_MODS_PATH > "$CONFIG_PATH/actual_mod_list.txt"
-sort "$MOD_LIST" > "$CONFIG_PATH/mod_list_sorted.txt"
-if [ ! -z "`diff "$CONFIG_PATH/mod_list_sorted.txt" "$CONFIG_PATH/actual_mod_list.txt"`" ]; then
+ls $MT_MYGAME_MODS_PATH > "$EM_CONFIG_PATH/actual_mod_list.txt"
+sort "$MOD_LIST" > "$EM_CONFIG_PATH/mod_list_sorted.txt"
+if [ ! -z "`diff "$EM_CONFIG_PATH/mod_list_sorted.txt" "$EM_CONFIG_PATH/actual_mod_list.txt"`" ]; then
     echo "Any failures to install will be listed below."
-    diff "$CONFIG_PATH/mod_list_sorted.txt" "$CONFIG_PATH/actual_mod_list.txt"
+    diff "$EM_CONFIG_PATH/mod_list_sorted.txt" "$EM_CONFIG_PATH/actual_mod_list.txt"
 fi
 if [ ! -d "$MT_MYGAME_MODS_PATH/dungeon_loot" ]; then
     echo "No mod loot for dungeon_loot (nor forks of worldgen mods which should use it) are in ENLIVEN, so dungeon_loot from $mtgame_name is removed by this script for now (treasurer and relevant trm_* mods are used instead)."

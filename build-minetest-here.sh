@@ -3,11 +3,11 @@ customExit(){
     echo "$1"
     exit 1
 }
-mybuild="minetest-built"
-if [ ! -d $mybuild ]; then
+#mybuild="minetest-built"
+#if [ ! -d $mybuild ]; then
     # mkdir $mybuild
-    echo
-fi
+    # echo
+#fi
 # cd $mybuild || customExit "$0: cd build failed in '`pwd`'."
 if [ -f bin/minetest ]; then
     make clean || customExit "$0: make clean failed in '`pwd`'."
