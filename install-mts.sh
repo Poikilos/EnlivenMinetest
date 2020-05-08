@@ -33,8 +33,8 @@ else
         # This is necessary on cygwin for some reason.
         curl $MT_BASH_RC_URL > "$MT_BASH_RC_PATH"
     fi
-    if [ $? -ne 0 ]; then
-    #if [ ! -f "$MT_BASH_RC_PATH" ]; then
+    #if [ $? -ne 0 ]; then
+    if [ ! -f "$MT_BASH_RC_PATH" ]; then
         # This is necessary on cygwin for some reason.
         wget -O "$MT_BASH_RC_PATH" $MT_BASH_RC_URL
     fi
