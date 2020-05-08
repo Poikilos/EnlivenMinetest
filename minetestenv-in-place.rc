@@ -1,6 +1,45 @@
 #!/bin/bash
 EM_CONFIG_PATH="$HOME/.config/EnlivenMinetest"
+EM_CACHE_PATH="$HOME/.cache/EnlivenMinetest"
+MT_ENV_RUP_NAME="minetestenv-in-place.rc"
+if [ -z "$EM_TMP" ]; then
+    EM_TMP=/tmp/EnlivenMinetest
+fi
+#QUIET=true
+scripting_rc_path=~/.config/EnlivenMinetest/scripting.rc
+if [ -f "$EM_CONFIG_PATH/scripting.rc" ]; then
+    echo "* [$MT_ENV_RUP_NAME] using $scripting_rc_path..."
+    source $scripting_rc_path
+    # may contain any variables above, plus:
+    # * enable_run_after_compile: if true, then run the server, such as
+    #   ~/mts-CenterOfTheSun.sh
+else
+    echo "* \"$scripting_rc_path\" is not present and has been skipped."
+    echo "  The file can contain settings such as:"
+    echo "    enable_run_after_compile=true"
+    echo "    REPO_PATH=$HOME/Downloads/git/EnlivenMinetest"
+fi
 
+if [ -z "$REPO_PATH" ]; then
+    TRY_REPO_PATH="$HOME/git/EnlivenMinetest"
+    #if [ -d "$TRY_REPO_PATH" ]; then
+    REPO_PATH="$TRY_REPO_PATH"
+    #fi
+    TRY_REPO_PATH="$HOME/Downloads/git/EnlivenMinetest"
+    if [ -d "$TRY_REPO_PATH" ]; then
+        REPO_PATH="$TRY_REPO_PATH"
+    fi
+    TRY_REPO_PATH="`pwd`"
+    if [ -f "$TRY_REPO_PATH/$MT_ENV_RUP_NAME" ]; then
+        REPO_PATH="$TRY_REPO_PATH"
+    fi
+    if [ -d "$REPO_PATH" ]; then
+        echo "* [minetestenv-in-place.rc] using REPO_PATH \"$REPO_PATH\""
+    fi
+fi
+#if [ ! -d "$REPO_PATH" ]; then
+    # "[$MT_ENV_RUP_NAME] WARNING: REPO_PATH \"$REPO_PATH\" does not exist, so certain features will not be available."
+#fi
 customExit() {
     errorCode=1
     if [ ! -z "$2" ]; then
@@ -26,15 +65,15 @@ $1
 
 END
     echo -en "\a" > /dev/tty0  # beep (You must specify a tty path if not in console mode)
-    echo "Press Ctrl+C to cancel..."
+    #echo "Press Ctrl+C to cancel..."
     sleep 1
-    echo -en "\a" > /dev/tty0
+    #echo -en "\a" > /dev/tty0
     echo "3..."
     sleep 1
-    echo -en "\a" > /dev/tty0
+    #echo -en "\a" > /dev/tty0
     echo "2..."
     sleep 1
-    echo -en "\a" > /dev/tty0
+    #echo -en "\a" > /dev/tty0
     echo "1..."
     sleep 1
 }
@@ -80,7 +119,7 @@ install_shortcut(){
     fi
     # Icon must be an absolute path (other variables use $HOME in
     # desktop file above), so exclude it above and rewrite it below:
-    echo "Path=$dest_programs/minetest/bin" >> "$dest_icon"
+    echo "Path=$_WORKING_DIR" >> "$dest_icon"
     if [ ! -z "$_CAPTION" ]; then
         echo "Name=$_CAPTION" >> "$dest_icon"
     fi
@@ -128,16 +167,16 @@ install_mt_in_place_shortcut(){
     # valid Minetest ".desktop" file.
     # You must either set INSTALL_PATH or the second parameter to a
     # valid installed minetest directory (containing bin).
-    if [ ! -f "$SHORTCUT_PATH" ]; then
+    #if [ ! -f "$SHORTCUT_PATH" ]; then
         if [ ! -z "$1" ]; then
             SHORTCUT_PATH="$1"
         fi
-    fi
-    if [ ! -d "$INSTALL_PATH" ]; then
+    #fi
+    #if [ ! -d "$INSTALL_PATH" ]; then
         if [ ! -z "$2" ]; then
             INSTALL_PATH="$2"
         fi
-    fi
+    #fi
     if [ ! -f "$SHORTCUT_PATH" ]; then
         echo "* WARNING: The SHORTCUT_PATH $SHORTCUT_PATH does not exist."
     elif [ ! -d "$INSTALL_PATH" ]; then
@@ -165,16 +204,17 @@ upgradeAndMerge(){
     # 1. UPGRADE_TYPE: a minetest subdirectory such as "worlds"
     # 2. INSTALL_PATH: a valid installed copy of minetest
     # 3. OLD_VERSION_PATH: a valid old installed copy of minetest
-    # 4. (optional) "inplace" to copy instead of move and to only affect
-    #    OLD_VERSION_PATH such as for:
+    # 4. (optional) "inplace" to copy instead of "move" and to only
+    #    affect OLD_VERSION_PATH such as for:
     #    upgradeAndMerge "mods" "$INSTALL_PATH/games/Bucket_Game" "$INSTALL_PATH/games/ENLIVEN" "inplace"
     if [ ! -z "$1" ]; then
         # worlds, games, or something else
         UPGRADE_TYPE="$1"
     fi
+    upgrades_base_path="$INSTALL_PATH"
     if [ ! -z "$2" ]; then
         # ~/minetest or
-        INSTALL_PATH="$2"
+        upgrades_base_path="$2"
     fi
     if [ ! -z "$3" ]; then
         OLD_VERSION_PATH="$3"
@@ -183,43 +223,65 @@ upgradeAndMerge(){
     if [ ! -z "$4" ]; then
         UPGRADE_MODE="$4"
     fi
-    if [ ! -d "$INSTALL_PATH/$UPGRADE_TYPE" ]; then
-        customExit "* WARNING: The $UPGRADE_TYPE upgrade will be skipped since the UPGRADE_TYPE directory \"$UPGRADE_TYPE\" is not present in the INSTALL_PATH \"$INSTALL_PATH\"."
+    if [ ! -d "$upgrades_base_path/$UPGRADE_TYPE" ]; then
+        customExit "* WARNING: The $UPGRADE_TYPE upgrade will be skipped since the UPGRADE_TYPE directory \"$UPGRADE_TYPE\" is not present in the upgrades_base_path \"$upgrades_base_path\"."
     else
-        echo "* upgrading $UPGRADE_TYPE"
-        for SUB_PATH in `find $INSTALL_PATH/$UPGRADE_TYPE -maxdepth 1`
+        #echo "* upgrading $UPGRADE_TYPE"
+        for SUB_PATH in `find $upgrades_base_path/$UPGRADE_TYPE -maxdepth 1`
         do
             SUB_NAME="`basename $SUB_PATH`"
-            if [ "$SUB_PATH" = "$INSTALL_PATH/$UPGRADE_TYPE" ]; then
-                echo "  * examining $SUB_PATH..."
+            if [ "$SUB_PATH" = "$upgrades_base_path/$UPGRADE_TYPE" ]; then
+                echo "  * upgrading $SUB_PATH..."
             elif [ -d "$SUB_PATH" ]; then
-                echo "  * upgrading $SUB_NAME..."
+                if [ "@$QUIET" != "@true" ]; then
+                    echo "    * upgrading $SUB_NAME..."
+                fi
                 if [ -d "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" ]; then
                     # Remove the old version (the one to upgrade and
                     # keep if $UPGRADE_MODE is not move, otherwise the
-                    # one to upgrade and later move to INSTALL_PATH!)
+                    # one to upgrade and later move to upgrades_base_path!)
                     rm -Rf "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "* rm -Rf \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" failed."
                     if [ "@$UPGRADE_MODE" = "@move" ]; then
-                        mv "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "mv \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\""
+                        #if [ "@$QUIET" != "@true" ]; then
+                        #    echo "    - moving $SUB_PATH..."
+                        #fi
+                        mv "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "mv \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" failed for the SUB_PATH directory on the destination"
                     else
-                        cp -R "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "cp -R \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\""
+                        cp -R "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "cp -R \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" failed for the SUB_PATH directory on the destination"
+                    fi
+                else
+                    if [ "@$UPGRADE_MODE" = "@move" ]; then
+                        #echo "    - moving $SUB_PATH..."
+                        if [ ! -d "$OLD_VERSION_PATH/$UPGRADE_TYPE" ]; then
+                            mkdir -p "$OLD_VERSION_PATH/$UPGRADE_TYPE"
+                        fi
+                        mv "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "mv \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" for the SUB_PATH directory that is not on the destination."
+                        # ^ so that rmdir doesn't fail below.
                     fi
                 fi
             else
-                echo "  * upgrading $SUB_NAME..."
+                if [ "@$QUIET" != "@true" ]; then
+                    echo "    * upgrading $SUB_NAME..."
+                fi
                 if [ "@$UPGRADE_MODE" = "@move" ]; then
-                    mv -f "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "mv \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\""
+                    #if [ "@$QUIET" != "@true" ]; then
+                    #    echo "    - moving $SUB_PATH..."
+                    #fi
+                    if [ ! -d "$OLD_VERSION_PATH/$UPGRADE_TYPE" ]; then
+                        mkdir -p "$OLD_VERSION_PATH/$UPGRADE_TYPE" || customExit "mkdir -p \"$OLD_VERSION_PATH/$UPGRADE_TYPE\" failed for the SUB_PATH file on the destination."
+                    fi
+                    mv -f "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "mv \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" failed for the SUB_PATH file on the destination"
                 else
-                    cp -f "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "cp \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\""
+                    cp -f "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "cp \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" failed for the SUB_PATH file on the destination"
                 fi
             fi
         done
         if [ "@$UPGRADE_MODE" = "@move" ]; then
-            rmdir "$INSTALL_PATH/$UPGRADE_TYPE" || customExit "rmdir \"$INSTALL_PATH/$UPGRADE_TYPE\" failed."
-            mv "$OLD_VERSION_PATH/$UPGRADE_TYPE" "$INSTALL_PATH/" || customExit "mv \"$OLD_VERSION_PATH/$UPGRADE_TYPE\" \"$INSTALL_PATH/\""
-            echo "  * $OLD_VERSION_PATH/$UPGRADE_TYPE is now upgraded and moved to \"$INSTALL_PATH/$UPGRADE_TYPE\"."
-        else
-            echo "  * $OLD_VERSION_PATH is now upgraded in place (\"$INSTALL_PATH/$UPGRADE_TYPE\" was left untouched as expected)."
+            rmdir "$upgrades_base_path/$UPGRADE_TYPE" || customExit "rmdir \"$upgrades_base_path/$UPGRADE_TYPE\" failed while upgrading \"$OLD_VERSION_PATH\"."
+            mv "$OLD_VERSION_PATH/$UPGRADE_TYPE" "$upgrades_base_path/" || customExit "mv \"$OLD_VERSION_PATH/$UPGRADE_TYPE\" \"$upgrades_base_path/\""
+            # echo "  * $OLD_VERSION_PATH/$UPGRADE_TYPE is now upgraded and moved to \"$upgrades_base_path/$UPGRADE_TYPE\"."
+        #else
+            #echo "  * $OLD_VERSION_PATH has been upgraded in place (\"$upgrades_base_path/$UPGRADE_TYPE\" remains untouched)."
         fi
     fi
 }
@@ -262,9 +324,12 @@ installOrUpgradeMinetest(){
     # You must set the following variables or sequential parameters:
     # 1. NEW_VERSION_PATH
     # 2. INSTALL_PATH
-    # 3. VERSIONED_MT_PATH (a path that does not yet exist but will
-    #    store the old version temporarily until user data is moved
-    #    to the new version and other data is deleted)
+    # 3. (optional) VERSIONED_MT_PATH (a path that does not yet exist
+    #    but will store the old version temporarily until user data is
+    #    moved to the new version and other data is deleted).
+    #    If not set, it will become $INSTALL_PATH.$new_release_version
+    #    ($new_release_version must be present, and is set above by
+    #    this rc file).
     if [ ! -z "$1" ]; then
         NEW_VERSION_PATH="$1"
     fi
@@ -273,10 +338,54 @@ installOrUpgradeMinetest(){
     fi
     if [ ! -z "$3" ]; then
         VERSIONED_MT_PATH="$3"
+    else
+        if [ -z "$old_release_version" ]; then
+            customExit "old_release_version was not detected. This should never happen (it should at least be 1st or bak or something)."
+        fi
+        if [ -z "$INSTALL_PATH" ]; then
+            customExit "INSTALL_PATH was not detected. This should never happen."
+        fi
+        VERSIONED_MT_PATH="$INSTALL_PATH.$old_release_version"
+        echo "  * [installOrUpgradeMinetest] using $VERSIONED_MT_PATH for remnants"
     fi
+    install_dest="$INSTALL_PATH"
+    # ^ make a separate variable since it will change if a symlink
+    if [ -z "$this_dst_flag_path" ]; then
+        this_dst_flag_path="$INSTALL_PATH/bin/minetest"
+    fi
+
+    #rsync -rt --info=progress2 "$EXTRACTED_SRC_PATH/minetest/" "$install_dest" || customExit "Cannot rsync files from installer data $EXTRACTED_SRC_PATH/minetest/ to $install_dest"
+    if [ -z "$new_release_version" ]; then
+        customExit "You must call detect_mt_version_at such as 'detect_mt_version_at \"$NEW_VERSION_PATH\"' before running installOrUpgradeMinetest."
+    fi
+    #echo "Checking $new_release_version..."
+    if [ "@$new_release_version" = "@new" ]; then
+        customWarn "The new version wasn't detected properly (using \"new\")"
+    else
+        echo "  - installing or upgrading using version $new_release_version..."
+    fi
+
     if [ -d "$NEW_VERSION_PATH" ]; then
-        # cd "$HOME" || customExit "cd \"$HOME\" failed."
-        if [ -d "$INSTALL_PATH" ]; then
+        virtual_dest="$install_dest"
+        link_target=`readlink $virtual_dest`
+        # install_dest="/tank/local/owner/minetest"
+        #install_dest="$virtual_dest"
+        ENABLE_RELINK=false
+        if [ ! -z "$link_target" ]; then
+            ENABLE_RELINK=true
+            if [ ! -d "$link_target" ]; then
+                customExit "The link \"$virtual_dest\" points to a directory that does not exist: \"$link_target\""
+            fi
+            install_dest="$link_target"
+            echo "* detected that $virtual_dest is a symlink to $link_target"
+            echo "  (redirecting rsync to prevent symlink to dir conversion: installing to $install_dest"
+            echo "   and recreating symlink '$virtual_dest' pointing to '$install_dest')..."
+        else
+            echo "Installing \"$EXTRACTED_SRC_PATH/minetest\" directory as \"$install_dest\"..."
+        fi
+
+
+        if [ -d "$install_dest" ]; then
             if [ -z "$VERSIONED_MT_PATH" ]; then
                 customExit "You must specify the VERSIONED_MT_PATH (such as \"$HOME/minetest.bak\" or another unused directory) to retain and merge the old version's user data since the old version exists."
             fi
@@ -290,70 +399,118 @@ installOrUpgradeMinetest(){
             if [ ! -f "`command -v find`" ]; then
                 customExit "Install cannot continue because the find command is not present."
             fi
-            mv "$INSTALL_PATH" "$VERSIONED_MT_PATH"
-            mv "$NEW_VERSION_PATH" "$INSTALL_PATH"
+            mv "$install_dest" "$VERSIONED_MT_PATH"
+            mv "$NEW_VERSION_PATH" "$install_dest"
 
-            moveIfExists "$VERSIONED_MT_PATH/client/serverlist/favoriteservers.txt" "$NEW_VERSION_PATH/client/serverlist/favoriteservers.txt"
+            #moveIfExists "$VERSIONED_MT_PATH/client/serverlist/favoriteservers.txt" "$install_dest/client/serverlist/favoriteservers.txt"
+            moveIfExists "$VERSIONED_MT_PATH/client/serverlist/favoriteservers.txt" "$install_dest/client/serverlist/favoriteservers.txt"
             if [ -d "$VERSIONED_MT_PATH/client/serverlist" ]; then
                 rmdir --ignore-fail-on-non-empty "$VERSIONED_MT_PATH/client/serverlist"
             fi
-            upgradeAndMerge "client" "$INSTALL_PATH" "$VERSIONED_MT_PATH"
-            upgradeAndMerge "clientmods" "$INSTALL_PATH" "$VERSIONED_MT_PATH"
-            upgradeAndMerge "games" "$INSTALL_PATH" "$VERSIONED_MT_PATH"
-            upgradeAndMerge "worlds" "$INSTALL_PATH" "$VERSIONED_MT_PATH"
-            upgradeAndMerge "mods" "$INSTALL_PATH" "$VERSIONED_MT_PATH"
-            upgradeAndMerge "textures" "$INSTALL_PATH" "$VERSIONED_MT_PATH"
-            upgradeAndMerge "media" "$INSTALL_PATH/cache" "$VERSIONED_MT_PATH/cache"
+            upgradeAndMerge "client" "$install_dest" "$VERSIONED_MT_PATH"
+            upgradeAndMerge "clientmods" "$install_dest" "$VERSIONED_MT_PATH"
+            upgradeAndMerge "games" "$install_dest" "$VERSIONED_MT_PATH"
+            upgradeAndMerge "worlds" "$install_dest" "$VERSIONED_MT_PATH"
+            upgradeAndMerge "mods" "$install_dest" "$VERSIONED_MT_PATH"
+            PREV_QUIET="$QUIET"
+            QUIET=true
+            upgradeAndMerge "textures" "$install_dest" "$VERSIONED_MT_PATH"
+            upgradeAndMerge "media" "$install_dest/cache" "$VERSIONED_MT_PATH/cache"
             deleteIfExists "$VERSIONED_MT_PATH/media"
+            QUIET="$PREV_QUIET"
             deleteIfExists "$VERSIONED_MT_PATH/minetest.conf.example"
             deleteIfExists "$VERSIONED_MT_PATH/minetest.conf.example.extra"
             deleteIfExists "$VERSIONED_MT_PATH/bin/minetest"
             deleteIfExists "$VERSIONED_MT_PATH/bin/minetestserver"
+            deleteIfExists "$VERSIONED_MT_PATH/bin/minetest.bak"
             deleteIfExists "$VERSIONED_MT_PATH/bin/minetest.bin"
+            deleteIfExists "$VERSIONED_MT_PATH/bin/minetestserver.bak"
             deleteIfExists "$VERSIONED_MT_PATH/bin/minetestserver.bin"
+            deleteIfExists "$VERSIONED_MT_PATH/bin/debug.txt"
             rmdir --ignore-fail-on-non-empty "$VERSIONED_MT_PATH/bin"
-            # upgradeAndMerge "util" "$INSTALL_PATH" "$VERSIONED_MT_PATH"
+            # upgradeAndMerge "util" "$install_dest" "$VERSIONED_MT_PATH"
             # ^ texture packs
-            upgradeAndMerge "clientmods" "$INSTALL_PATH" "$VERSIONED_MT_PATH"
-            moveIfExistsOrDeleteIfOnDest "$VERSIONED_MT_PATH/minetest.ENLIVEN.client-example.conf" "$INSTALL_PATH/minetest.ENLIVEN.client-example.conf"
-            moveIfExistsOrDeleteIfOnDest "$VERSIONED_MT_PATH/minetest.ENLIVEN.LAN-client-example.conf" "$INSTALL_PATH/minetest.ENLIVEN.LAN-client-example.conf"
-            moveIfExistsOrDeleteIfOnDest "$VERSIONED_MT_PATH/minetest.ENLIVEN.server-example.conf" "$INSTALL_PATH/minetest.ENLIVEN.server-example.conf"
-            moveIfExists "$VERSIONED_MT_PATH/minetest.conf" "$INSTALL_PATH/minetest.conf"
-            moveIfExists "$VERSIONED_MT_PATH/arrowkeys.txt" "$INSTALL_PATH/arrowkeys.txt"
-            moveIfExists "$VERSIONED_MT_PATH/.saved_passwords" "$INSTALL_PATH/.saved_passwords"
-            if [ -d "$INSTALL_PATH/games/ENLIVEN" ]; then
-                if [ -d "$INSTALL_PATH/games/Bucket_Game" ]; then
-                    echo "* upgrading $INSTALL_PATH/games/ENLIVEN components using $INSTALL_PATH/games/Bucket_Game..."
-                    upgradeAndMerge "mods" "$INSTALL_PATH/games/Bucket_Game" "$INSTALL_PATH/games/ENLIVEN" "inplace"
-                else
-                    echo "* WARNING: Upgrading ENLIVEN is not possible since $INSTALL_PATH/games/Bucket_Game is not present."
-                fi
-            fi
+            upgradeAndMerge "clientmods" "$install_dest" "$VERSIONED_MT_PATH"
+            moveIfExistsOrDeleteIfOnDest "$VERSIONED_MT_PATH/minetest.ENLIVEN.client-example.conf" "$install_dest/minetest.ENLIVEN.client-example.conf"
+            moveIfExistsOrDeleteIfOnDest "$VERSIONED_MT_PATH/minetest.ENLIVEN.LAN-client-example.conf" "$install_dest/minetest.ENLIVEN.LAN-client-example.conf"
+            moveIfExistsOrDeleteIfOnDest "$VERSIONED_MT_PATH/minetest.ENLIVEN.server-example.conf" "$install_dest/minetest.ENLIVEN.server-example.conf"
+            moveIfExists "$VERSIONED_MT_PATH/minetest.conf" "$install_dest/minetest.conf"
+            moveIfExists "$VERSIONED_MT_PATH/arrowkeys.txt" "$install_dest/arrowkeys.txt"
+            moveIfExists "$VERSIONED_MT_PATH/.saved_passwords" "$install_dest/.saved_passwords"
             OLD_BIN_PATH="$VERSIONED_MT_PATH/bin"
-            NEW_BIN_PATH="$NEW_VERSION_PATH/bin"
+            NEW_BIN_PATH="$install_dest/bin"
             # See <https://unix.stackexchange.com/questions/87456/shell-script-to-check-for-the-presence-of-one-or-more-files-with-a-specific-exte>
             if ls ${OLD_BIN_PATH}/*.png &>/dev/null
             then
+                echo "  * moving png screenshots..."
                 mv ${OLD_BIN_PATH}/*.png ${NEW_BIN_PATH}/
+            else
+                echo "  * You have no png files in ${OLD_BIN_PATH}."
             fi
             if ls ${OLD_BIN_PATH}/*.jpg &>/dev/null
             then
+                echo "  * moving jpg screenshots..."
                 mv ${OLD_BIN_PATH}/*.jpg ${NEW_BIN_PATH}/
+            else
+                echo "  * You have no jpg files in ${OLD_BIN_PATH}."
             fi
             deleteIfExists "$VERSIONED_MT_PATH/builtin"
+            rmdir --ignore-fail-on-non-empty "$VERSIONED_MT_PATH/cache"
             deleteIfExists "$VERSIONED_MT_PATH/doc"
             deleteIfExists "$VERSIONED_MT_PATH/fonts"
             deleteIfExists "$VERSIONED_MT_PATH/locale"
             deleteIfExists "$VERSIONED_MT_PATH/misc"
             deleteIfExists "$VERSIONED_MT_PATH/po"
+            deleteIfExists "$VERSIONED_MT_PATH/solib"
             deleteIfExists "$VERSIONED_MT_PATH/sounds"
             deleteIfExists "$VERSIONED_MT_PATH/util"
+            deleteIfExists "$VERSIONED_MT_PATH/LICENSE.txt"
+            deleteIfExists "$VERSIONED_MT_PATH/release.txt"
+            deleteIfExists "$VERSIONED_MT_PATH/readme.txt"
+            rmdir --ignore-fail-on-non-empty "$VERSIONED_MT_PATH/bin"
+            rmdir --ignore-fail-on-non-empty "$VERSIONED_MT_PATH"
         else
-            mv "$NEW_VERSION_PATH" "$INSTALL_PATH"
+            mv "$NEW_VERSION_PATH" "$install_dest"
         fi
-        # curl https://downloads.minetest.org/release.txt -o "$INSTALL_PATH/release.txt"
+
+        if [ "@$ENABLE_RELINK" = "@true" ]; then
+            if [ ! -d "$dest_programs/minetest" ]; then
+                echo "* removing old symlink $virtual_dest..."
+                rm "$virtual_dest" || customExit "Removing the old symlink failed: rm \"$virtual_dest\"."
+                echo "* creating new symlink to $install_dest directory as $virtual_dest..."
+                ln -s "$install_dest" "$virtual_dest"
+            fi
+        fi
+
+        if [ ! -f "$this_dst_flag_path" ]; then
+            customExit "ERROR: not complete--couldn't install binary as '$this_dst_flag_path'"
+        fi
+        # curl https://downloads.minetest.org/release.txt -o "$install_dest/release.txt"
     else
         customExit "There is no minetest directory $NEW_VERSION_PATH."
+    fi
+    if [ "@$new_release_version" != "@new" ]; then
+        echo "Release $new_release_version" > "$install_dest/release.txt"
+        echo "  * wrote \"`cat $install_dest/release.txt`\" to \"$install_dest/release.txt\"."
+    fi
+}
+
+install_git_mod_here(){
+    git_url="$1"
+    mod_name="$2"
+    if [ -z "$git_url" ]; then
+        customExit "install_git_mod_here requires a URL."
+    fi
+    if [ -z "$mod_name" ]; then
+        customExit "install_git_mod_here requires a mod name as the second parameter."
+    fi
+    if [ ! -d "$mod_name" ]; then
+        git clone "$git_url" "$mod_name"
+    else
+        cd "$mod_name" || customExit "(install_git_mod_here) 'cd \"$mod_name\"' failed in '`pwd`'"
+        echo "* updating '`pwd`' from git..."
+        git pull || echo "WARNING: (install_git_mod_here) 'git pull' failed in '`pwd`'"
+        cd .. || customExit "(install_git_mod_here) 'cd ..' failed in '`pwd`'"
     fi
 }
 
@@ -366,3 +523,362 @@ show_os_release(){
         #fi
     fi
 }
+
+addEnlivenMinetestPatches(){
+    # REPO_PATH is determined above.
+    if [ ! -z "$1" ]; then
+        install_dest="$1"
+    fi
+    if [ -z "$REPO_PATH" ]; then
+        customExit "[$addEnlivenMinetestPatches] The REPO_PATH is not set."
+    fi
+    if [ ! -d "$REPO_PATH" ]; then
+        customExit "[$addEnlivenMinetestPatches] The REPO_PATH does not exist: \"$REPO_PATH\""
+    fi
+    if [ -z "$PATCHES_PATH" ]; then
+        PATCHES_PATH="$REPO_PATH/patches"
+    fi
+    if [ ! -d "$PATCHES_PATH" ]; then
+        customExit "The PATCHES_PATH does not exist: \"$PATCHES_PATH\""
+    fi
+    if [ ! -d "$install_dest" ]; then
+        customExit "The install_dest does not exist: \"$install_dest\""
+    fi
+    src_menu="$PATCHES_PATH/subgame/menu"
+    dst_menu="$install_dest/games/ENLIVEN/menu"
+    echo "updating '$dst_menu' from '$src_menu/'..."
+    if [ -f "`command -v rsync`" ]; then
+        rsync -rt "$src_menu/" "$dst_menu"
+    else
+        echo "* WARNING: rsync is missing, so patching ENLIVEN/menu from \"$src_menu\" is being skipped."
+        cp -f "$src_menu/header.png" "$dst_menu/"
+        cp -f "$src_menu/menu.png" "$dst_menu/"
+    fi
+    echo "name = ENLIVEN" > "$install_dest/games/ENLIVEN/game.conf"
+    src_game="$PATCHES_PATH/Bucket_Game-patched"
+    dst_game="$install_dest/games/ENLIVEN"
+    echo "updating '$dst_game' from '$src_game/'..."
+    if [ -f "`command -v rsync`" ]; then
+        rsync -rt "$src_game/" "$dst_game"
+    else
+        echo "* WARNING: rsync is missing, so patching ENLIVEN from \"$src_game\" is being skipped."
+    fi
+    if [ -d "$dst_game/mods/coderfood/food_basic/etc" ]; then
+        rm -Rf "$dst_game/mods/coderfood/food_basic/etc"
+    fi
+
+    minetest_conf_dest="$install_dest/minetest.conf"
+    game_minetest_conf_dest="$install_dest/games/ENLIVEN/minetest.conf"
+
+    # Bucket_Game doesn't come with a minetest.conf, only minetest.conf.example* files
+    # if [ ! -f "$install_dest/minetest.Bucket_Game-example.conf" ]; then
+    #     cp -f "$$minetest_conf_dest" "$install_dest/minetest.Bucket_Game-example.conf"
+    # fi
+
+    client_example_dest="$install_dest/minetest.ENLIVEN.client-example.conf"
+
+    echo "Installing minetest.ENLIVEN.*-example.conf files..."
+    cp -f "$PATCHES_PATH/subgame/minetest.LAN-client-example.conf" "$install_dest/minetest.ENLIVEN.LAN-client-example.conf" || customExit "Cannot copy minetest.ENLIVEN.LAN-client-example.conf"
+    cp -f "$PATCHES_PATH/subgame/minetest.server-example.conf"     "$install_dest/minetest.ENLIVEN.server-example.conf" || customExit "Cannot copy minetest.ENLIVEN.server-example.conf"
+    cp -f "$PATCHES_PATH/subgame/minetest.client-example.conf"     "$install_dest/minetest.ENLIVEN.client-example.conf" || customExit "Cannot copy minetest.ENLIVEN.client-example.conf"
+
+    echo "Writing '$game_minetest_conf_dest'..."
+    cp -f "$PATCHES_PATH/subgame/minetest.conf" "$game_minetest_conf_dest"
+
+    # client conf writing only ever happens once, unless you manually delete $minetest_conf_dest:
+    if [ ! -f "$minetest_conf_dest" ]; then
+        # if [ -f "$minetest_conf_dest" ]; then
+            # echo "Backing up minetest.conf..."
+            # if [ ! -f "$minetest_conf_dest.1st" ]; then
+                # cp -f "$minetest_conf_dest" "$minetest_conf_dest.1st"
+            # else
+                # cp -f "$minetest_conf_dest" "$minetest_conf_dest.bak"
+            # fi
+        # fi
+        echo "Writing minetest.conf (client region)..."
+        cp -f "$PATCHES_PATH/subgame/minetest.client-example.conf" "$minetest_conf_dest"  || customExit "Cannot copy minetest.client-example.conf to $minetest_conf_dest"
+        echo "Appending example settings (server region) to '$minetest_conf_dest'..."
+        cat "$PATCHES_PATH/subgame/minetest.server-example.conf" >> "$minetest_conf_dest" || customExit "Cannot append minetest.server-example.conf"
+    else
+        echo "$minetest_conf_dest exists (remove it if you want the installer to write an example version)"
+    fi
+
+
+    if [ -f "$minetest_conf_dest" ]; then
+        cat << END
+NOTE: minetest.org releases allow you to put a world.conf file in your
+  world, so that is the file you should edit manually in your world
+  --this installer overwrites $minetest_conf_dest and
+  worlds/CenterOfTheSun settings (the author Poikilos' world).
+  Continue to place server settings such as announce in
+  $minetest_conf_dest.
+  Leave $game_minetest_conf_dest intact, as it defines the game.
+  If you have suggestions for changes or configurability, please use the
+  issue tracker at <https://github.com/poikilos/EnlivenMinetest>.
+
+END
+    fi
+
+
+    world_override_src="$REPO_PATH/overrides/CenterOfTheSun/minetest/worlds/CenterOfTheSun"
+    world_override_dst="$HOME/.minetest/worlds/CenterOfTheSun"
+    world_override_dst="$HOME/.minetest/worlds/CenterOfTheSun"
+    try_world_override_dst="$HOME/minetest/worlds/CenterOfTheSun"
+    if [ -d "$try_world_override_dst" ]; then
+        world_override_dst="$try_world_override_dst"
+    fi
+    world_conf_src="$world_override_src/world.conf"
+    world_conf_dst="$world_override_dst/world.conf"
+    world_mt_src="$world_override_src/world.mt"
+    world_mt_dst="$world_override_dst/world.mt"
+    override_more="$REPO_PATH/overrides/CenterOfTheSun/games/ENLIVEN"
+    appends="$REPO_PATH/overrides/CenterOfTheSun/append"
+    minetest_conf_append="$appends/minetest.conf"
+    if [ -d "$world_override_dst" ]; then
+        echo "You have the CenterOfTheSun world. Listing any changes..."
+        if [ -f "$world_conf_src" ]; then
+            if [ -f "$world_conf_dst" ]; then
+                echo " * overwrite $world_conf_dst with $world_conf_src"
+            else
+                echo " * add the world.conf from $world_conf_src"
+            fi
+            cp -f "$world_conf_src" "$world_conf_dst"
+        fi
+        if [ -z "`grep 'region overrides/CenterOfTheSun/append' $minetest_conf_dest`" ]; then
+            if [ -f "$minetest_conf_append" ]; then
+                cat "$minetest_conf_append" >> "$minetest_conf_dest"
+            fi
+        fi
+    fi
+
+    if [ "@$ENABLE_CLIENT" = "@true" ]; then
+        #params: _SRC_SHORTCUT_PATH, _DST_SHORTCUT_NAME, _EXEC, _WORKING_DIR, _ICON, _CAPTION:
+        SHORTCUT_PATH="$PATCHES_PATH/deploy-patched/misc/org.minetest.minetest.desktop"
+        EXEC_PATH="$install_dest/bin/minetest"
+        WORKING_DIR_PATH="$install_dest/bin"
+        MT_ICON="$install_dest/misc/minetest-xorg-icon-128.png"
+        install_shortcut "$SHORTCUT_PATH" "org.minetest.minetest.desktop" "$EXEC_PATH" "$WORKING_DIR_PATH" "$MT_ICON" "Final Minetest"
+    fi
+
+    if [ -f "`command -v rsync`" ]; then
+        if [ -f $install_dest/games/ENLIVEN/mods/codermobs/codermobs/animal_materials.lua ]; then
+            if [ -d $PATCHES_PATH/mods-stopgap/animal_materials_legacy ]; then
+                echo "* installing animal_materials_legacy (only needed for worlds created with old versions of Bucket_Game)"
+                rsync -rt $PATCHES_PATH/mods-stopgap/animal_materials_legacy $install_dest/games/ENLIVEN/mods/
+            else
+                echo "* MISSING $PATCHES_PATH/mods-stopgap/animal_materials"
+            fi
+        else
+            echo "* SKIPPING a stopgap mod since no animal_materials"
+        fi
+
+        if [ -f $install_dest/games/ENLIVEN/mods/codermobs/codermobs/elk.lua ]; then
+            if [ -d $PATCHES_PATH/mods-stopgap/elk_legacy ]; then
+                echo "* installing elk_legacy (only needed for worlds created with old versions of Bucket_Game)"
+                rsync -rt $PATCHES_PATH/mods-stopgap/elk_legacy $install_dest/games/ENLIVEN/mods/
+            else
+                echo "* MISSING $PATCHES_PATH/mods-stopgap/elk_legacy"
+            fi
+        else
+            echo "* SKIPPING a stopgap mod since no elk.lua"
+        fi
+
+        if [ -d "$install_dest/games/ENLIVEN/mods/coderbuild/nftools" ]; then
+            if [ -d $PATCHES_PATH/mods-stopgap/nftools_legacy ]; then
+                echo "* installing nftools_legacy (only needed for worlds created with old versions of Bucket_Game)"
+                rsync -rt $PATCHES_PATH/mods-stopgap/nftools_legacy $install_dest/games/ENLIVEN/mods/
+            else
+                echo "* MISSING $PATCHES_PATH/mods-stopgap/nftools_legacy"
+            fi
+        else
+            echo "* SKIPPING a stopgap mod since no nftools"
+        fi
+    else
+        echo "* WARNING: rsync is missing, so adding mods from \"$PATCHES_PATH/mods-stopgap\" to ENLIVEN/mods is being skipped."
+    fi
+}
+
+analyzeGameSettings() {
+    if [ ! -z "$1" ]; then
+        THIS_GAME_PATH=$1
+    fi
+    if [ ! -d "$THIS_GAME_PATH" ]; then
+        customExit "  [$MT_ENV_RUP_NAME: analyzeGameSettings] THIS_GAME_PATH \"$THIS_GAME_PATH\" is not present."
+    fi
+    this_dumps_name="`basename $THIS_GAME_PATH`"
+    this_dumps_path="$EM_CACHE_PATH/$this_dumps_name"
+    if [ ! -d "$this_dumps_path" ]; then
+        mkdir -p "$this_dumps_path"
+    fi
+    settings_dump="$this_dumps_path/settings-dump.txt"
+    settings_types_list="$this_dumps_path/settingtypes-list.txt"
+    if [ ! -f "$settings_dump" ]; then
+        echo "  - Creating $settings_dump..."
+        grep -r "$THIS_GAME_PATH" -e "setting_get" > $settings_dump
+        grep -r "$THIS_GAME_PATH" -e "minetest.settings:get" >> $settings_dump
+    else
+        echo "  - $settings_dump was already created"
+    fi
+    if [ ! -f "$settings_types_list" ]; then
+        echo "  - creating $settings_types_list..."
+        find "$THIS_GAME_PATH" -name "settingtypes.txt" > $settings_types_list
+    else
+        echo "  - $settings_types_list was already created"
+    fi
+}
+
+installOrUpgradeENLIVEN() {
+    PREV_DIR="`pwd`"
+    # REPO_PATH is detected above.
+    if [ -z "$REPO_PATH" ]; then
+        customExit "[installOrUpgradeENLIVEN] The REPO_PATH is not set."
+    fi
+    if [ ! -d "$REPO_PATH" ]; then
+        customExit "[installOrUpgradeENLIVEN] The REPO_PATH does not exist: \"$REPO_PATH\""
+    fi
+    if [ ! -z "$1" ]; then
+        install_dest="$1"
+    fi
+    if [ ! -d "$install_dest" ]; then
+        customExit "[installOrUpgradeENLIVEN] The install_dest is missing: \"$install_dest\""
+    fi
+    dest_official_game="$install_dest/games/Bucket_Game"
+    dest_enliven="$install_dest/games/ENLIVEN"
+    if [ ! -d "$dest_official_game" ]; then
+        customExit "[installOrUpgradeENLIVEN] \"$dest_official_game\" is missing."
+    fi
+    if [ ! -d "$dest_enliven" ]; then
+        echo "Copying $dest_official_game to $dest_enliven..."
+        cp -R "$dest_official_game" "$dest_enliven"
+    else
+        if [ -d "$dest_enliven" ]; then
+            if [ -d "$dest_official_game" ]; then
+                echo "* upgrading $dest_enliven components using $dest_official_game..."
+                upgradeAndMerge "mods" "$dest_official_game" "$dest_enliven" "inplace"
+            else
+                echo "* WARNING: Upgrading ENLIVEN is not possible since $dest_official_game is not present."
+            fi
+        fi
+    fi
+    dest_enliven_mods="$dest_enliven/mods"
+    enliven_warning=""
+    if [ -d "$dest_enliven_mods" ]; then
+        cd "$dest_enliven_mods" || customExit "[installOrUpgradeENLIVEN] 'cd \"$dest_enliven_mods\"' failed."
+        # install_git_mod_here https://github.com/BenjieFiftysix/sponge.git sponge
+        install_git_mod_here https://github.com/poikilos/metatools.git metatools
+        install_git_mod_here https://github.com/MinetestForFun/fishing.git fishing
+        install_git_mod_here https://github.com/minetest-mods/throwing.git throwing
+        install_git_mod_here https://github.com/minetest-mods/ccompass.git ccompass
+        install_git_mod_here https://github.com/minetest-mods/throwing_arrows.git throwing_arrows
+    else
+        enliven_warning="$enliven_warning* WARNING: Installing ENLIVEN mods was skipped since '$dest_enliven_mods' does not exist."
+    fi
+    cd "$PREV_DIR"
+    # PATCHES_DIR_NAME="patches"
+    PATCHES_PATH="$REPO_PATH/patches"
+    if [ -d "$PATCHES_PATH" ]; then
+        #pushd "$REPO_PATH"
+        addEnlivenMinetestPatches "$install_dest"
+        #popd
+    else
+        cat <<END
+    $PATCHES_PATH is missing. To fix this, set:
+
+        REPO_PATH=$HOME/git/EnlivenMinetest
+        # in \"$scripting_rc_path\" or the environment.
+END
+    fi
+}
+
+detect_installed_mt_version(){
+    if [ ! -z "$1" ]; then
+        BACKUP_NAME_1="$1"
+    fi
+    if [ ! -z "$2" ]; then
+        BACKUP_NAME_2="$2"
+    fi
+    if [ -z "$INSTALL_PATH" ]; then
+        customExit "[detect_installed_mt_version] INSTALL_PATH is missing"
+    fi
+    old_release_line=
+    old_release_version=
+    if [ -f "$INSTALL_PATH/release.txt" ]; then
+        old_release_line="`cat $INSTALL_PATH/release.txt | grep Release`"
+    fi
+    backup_msg=
+    if [ ! -z "$old_release_line" ]; then
+        old_release_version="${old_release_line##* }"  # get second word
+        backup_msg="  - using \"$INSTALL_PATH.$old_release_version\" for storing remnants."
+    else
+        if [ ! -z "$BACKUP_NAME_1" ]; then
+            old_release_version="$BACKUP_NAME_1"
+            if [ -d "$INSTALL_PATH.$old_release_version" ]; then
+                if [ ! -z "$BACKUP_NAME_2" ]; then
+                    old_release_version="$BACKUP_NAME_2"
+                #    echo "    - old_release_version:'$old_release_version'"
+                #else
+                #    echo "    - there is no second choice for the version."
+                fi
+            fi
+            backup_msg="    * using \"$INSTALL_PATH.$old_release_version\" instead of version for storing remnants since $INSTALL_PATH does not contain release.txt."
+        fi
+    fi
+    if [ ! -z "$backup_msg" ]; then
+        if [ -d "$INSTALL_PATH" ]; then
+            echo "$backup_msg"
+        fi
+    fi
+}
+
+detect_mt_version_at(){
+    # Sequential params:
+    # 1. (required) path to a minetest directory (the new one!)
+    # 2. (optional) a url to a release.txt file to use if the version
+    #    is not detected by other means.
+    # 3. (optional) the default version to set if no version is detected
+    #    (if blank, exit script on failure)
+    this_err=""
+    new_release_line=
+    new_release_version=
+    if [ -z "$1" ]; then
+        echo "You must set param 1 which is the new minetest directory"
+    fi
+    VERSION_ORIGIN="$1/release.txt"
+    if [ ! -f "$1/release.txt" ]; then
+        if [ ! -z "$2" ]; then
+            curl $RELEASE_TXT_URL -o "$1/release.txt" || this_err="curl $RELEASE_TXT_URL failed."
+            VERSION_ORIGIN="$RELEASE_TXT_URL"
+        fi
+    fi
+    if [ -f "$1/release.txt" ]; then
+        new_release_line="`cat $1/release.txt | grep Release`"
+        if [ ! -z "$new_release_line" ]; then
+            new_release_version="${new_release_line##* }"  # get second word
+        else
+            if [ -f "$1/release.txt" ]; then
+                cat "$1/release.txt"
+                this_err="Obtaining a Release line from $VERSION_ORIGIN failed (got '$new_release_line')."
+            fi
+        fi
+    else
+        if [ -z "$this_err" ]; then
+            this_err="\"$1/release.txt\" does not exist"
+        fi
+    fi
+    version_len=${#new_release_version}
+    if [ "$version_len" -ne "6" ]; then
+        if [ -z "$this_err" ]; then
+            this_err="Unexpected version scheme (not 6 characters): '$new_release_version' near '$new_release_line' in file $release_txt_path"
+        fi
+        if [ -z "$3" ]; then
+            customExit "$this_err"
+        else
+            new_release_version="$3"
+            customWarn "$this_err (Therefore, the new_release_version will be: \"$new_release_version\")"
+        fi
+    fi
+
+}
+INSTALL_PATH="$HOME/minetest"
+detect_installed_mt_version
+# ^ you must run it again with params such as "1st" "bak" to force install without knowing the old version.

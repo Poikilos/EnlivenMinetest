@@ -5,6 +5,27 @@ The format is based on [Keep a
 Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
+## [git] - 2020-05-07
+### Changed
+- Make both `install-minetest-linux64.sh` and
+  `install-mts.sh` use `minetestenv-in-place.rc`
+- Test and fix `minetestenv-in-place.rc`.
+- Rename variables.
+
+
+## [git] - 2020-05-07
+### Added
+- bash script library (`minetestenv-in-place.rc`)
+
+### Changed
+- Move most shared functionality to `minetestenv-in-place.sh`.
+- Rename variables.
+
+### Removed
+- sponge mod (since coderblocks now has one)
+
+
+
 ## [git] - 2020-03-29
 ### Added
 - Add "Linux Server Install or Upgrade" section to

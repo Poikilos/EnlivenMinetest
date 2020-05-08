@@ -1,9 +1,8 @@
 #!/bin/bash
 echo
 echo "Collecting version..."
-MY_NAME="versionize.sh"
 EM_CONFIG_PATH=$HOME/.config/EnlivenMinetest
-cd "$EM_CONFIG_PATH" || customExit "[$MY_NAME] cd \"$EM_CONFIG_PATH\" failed."
+cd "$EM_CONFIG_PATH" || customExit "[versionize.sh] cd \"$EM_CONFIG_PATH\" failed."
 if [ -z "$original_src_path" ]; then
     original_src_path="$1"
 fi
@@ -99,30 +98,16 @@ elif [ -d "$try_path" ]; then
 else
     customExit "$try_path is not a file or directory."
 fi
-release_txt_path="$src_path/minetest/release.txt"
-if [ ! -f "$release_txt_path" ]; then
-    try_release_txt_path="$src_path/release.txt"
-    if [ ! -f "$try_release_txt_path" ]; then
-        echo
-        echo
-        echo "* '$src_path' remains$destroy_msg."
-        customExit "Missing $release_txt_path (or $src_path/release.txt)"
-    else
-        echo "Missing $release_txt_path (usually copied from $try_release_txt_path by EnlivenMinetest compille script(s)); reverting to $try_release_txt_path"
-        release_txt_path="$try_release_txt_path"
-    fi
-fi
-release_line="`head -n 1 $release_txt_path`"
-version="${release_line##* }"  # get second word
-version_len=${#version}
-if [ "$version_len" -ne "6" ]; then
-    customExit "Unexpected version scheme (not 6 characters): '$version' near '$release_line' in file $release_txt_path"
-fi
+
+detect_mt_version_at "$src_path/minetest"
+# ^ DOES exit if no 6-digit version is detected when no 3rd param
+#   is provided.
+
 echo "src_name=$src_name"
 echo "src_path=$src_path"
-echo "version=$version"
-# dest_path="$versions_path/$src_name-$version"
-dest_path="$versions_path/linux-minetest-kit-$version"
+echo "new_release_version=$new_release_version"
+# dest_path="$versions_path/$src_name-$new_release_version"
+dest_path="$versions_path/linux-minetest-kit-$new_release_version"
 echo "dest_path=$dest_path"
 
 if [ ! -z "$src_archive" ]; then
@@ -133,7 +118,7 @@ if [ ! -z "$src_archive" ]; then
     filename=$(basename -- "$src_archive")
     extension="${filename##*.}"
     filename="${filename%.*}"
-    dst_archive="$versions_path/$filename-$version.$extension"
+    dst_archive="$versions_path/$filename-$new_release_version.$extension"
     if [ -f "$dst_archive" ]; then
         customWarn "This will overwrite '$dst_archive' with '$src_archive'."
     fi
