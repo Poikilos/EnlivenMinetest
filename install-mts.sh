@@ -29,6 +29,16 @@ else
     MT_BASH_RC_URL=https://raw.githubusercontent.com/poikilos/EnlivenMinetest/master/$MT_BASH_RC_NAME
     curl $MT_BASH_RC_URL -o "$MT_BASH_RC_PATH"
     if [ $? -ne 0 ]; then
+    #if [ ! -f "$MT_BASH_RC_PATH" ]; then
+        # This is necessary on cygwin for some reason.
+        curl $MT_BASH_RC_URL > "$MT_BASH_RC_PATH"
+    fi
+    if [ $? -ne 0 ]; then
+    #if [ ! -f "$MT_BASH_RC_PATH" ]; then
+        # This is necessary on cygwin for some reason.
+        wget -O "$MT_BASH_RC_PATH" $MT_BASH_RC_URL
+    fi
+    if [ $? -ne 0 ]; then
         echo
         echo "ERROR: Downloading $MT_BASH_RC_URL to $MT_BASH_RC_PATH failed."
         echo
