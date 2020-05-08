@@ -240,23 +240,27 @@ upgradeAndMerge(){
                     # Remove the old version (the one to upgrade and
                     # keep if $UPGRADE_MODE is not move, otherwise the
                     # one to upgrade and later move to upgrades_base_path!)
-                    rm -Rf "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "* rm -Rf \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" failed."
+                    rm -Rf "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "* rm -Rf \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" failed while replacing the destination."
                     if [ "@$UPGRADE_MODE" = "@move" ]; then
                         #if [ "@$QUIET" != "@true" ]; then
                         #    echo "    - moving $SUB_PATH..."
                         #fi
-                        mv "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "mv \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" failed for the SUB_PATH directory on the destination"
+                        mv "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "mv \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" failed for the SUB_PATH directory to replace the destination"
                     else
-                        cp -R "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "cp -R \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" failed for the SUB_PATH directory on the destination"
+                        # echo "    - copying \"$SUB_PATH\" to \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" to replace destination..."
+                        cp -R "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "cp -R \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" failed for the SUB_PATH directory to replace the destination"
                     fi
                 else
+                    if [ ! -d "$OLD_VERSION_PATH/$UPGRADE_TYPE" ]; then
+                        mkdir -p "$OLD_VERSION_PATH/$UPGRADE_TYPE"
+                    fi
                     if [ "@$UPGRADE_MODE" = "@move" ]; then
                         #echo "    - moving $SUB_PATH..."
-                        if [ ! -d "$OLD_VERSION_PATH/$UPGRADE_TYPE" ]; then
-                            mkdir -p "$OLD_VERSION_PATH/$UPGRADE_TYPE"
-                        fi
-                        mv "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "mv \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" for the SUB_PATH directory that is not on the destination."
+                        mv "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "mv \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" for the SUB_PATH directory that was not on the destination."
                         # ^ so that rmdir doesn't fail below.
+                    else
+                        # echo "    - copying \"$SUB_PATH\" to \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" not on destination..."
+                        cp -R "$SUB_PATH" "$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME" || customExit "mv \"$SUB_PATH\" \"$OLD_VERSION_PATH/$UPGRADE_TYPE/$SUB_NAME\" for the SUB_PATH directory that was not on the destination."
                     fi
                 fi
             else
