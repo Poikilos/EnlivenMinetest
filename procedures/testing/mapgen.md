@@ -1,8 +1,11 @@
 # "Map Generation" Test Documentation
 This documentation covers all testing in the category of "mapgen."
 
-NOTICE: I originally created this document for my Software Development
-II class. I didn't do it here first nor plagiarize.
+_NOTICE: I originally created the original version of this document (and
+the original document that led to creating the article [Minetest's
+Scope Issue](https://poikilos.org/minetest-scope-issue), and the
+initial version of general.md) for my Software Development II class. I
+didn't do it here nor elsewhere before that nor plagiarize._
 
 ## Test Design Guide
 Setting up an efficient map generation test environment requires

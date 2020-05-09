@@ -3,8 +3,12 @@ This documentation covers how to generate testing procedures. For an
 example of actual test documentation designed using this document, see
 [mapgen.md](mapgen.md).
 
-NOTICE: I originally created this document for my Software Development
-II class. I didn't do it here first nor plagiarize.
+_NOTICE: I originally created the original version of this document
+(and the original document that led to creating the article
+[Minetest's Scope Issue](https://poikilos.org/minetest-scope-issue),
+and the initial version of mapgen.md)
+for my Software Development II class. I didn't do it here nor elsewhere
+before that nor plagiarize._
 
 ## Overview
 Implementing each manual test document’s "Instructions for testers" as
@@ -33,3 +37,4 @@ test document.
    changing it in the case of non-mapgen test documents).
 4. Backup the world (for comparison with the original or for other kinds
    of analysis).
+
