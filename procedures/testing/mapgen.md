@@ -1,5 +1,7 @@
 # "Map Generation" Test Documentation
-This documentation covers all testing in the category of "mapgen."
+This documentation covers all testing in the category of "mapgen," and
+is is based on
+[general.md](https://github.com/poikilos/EnlivenMinetest/blob/master/procedures/testing/general.md).
 
 _NOTICE: I originally created the original version of this document (and
 the original document that led to creating the article [Minetest's
