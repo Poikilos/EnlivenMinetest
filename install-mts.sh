@@ -244,6 +244,8 @@ tmp_mt_copy=$EM_TMP/minetest
 if [ -d "$tmp_mt_copy" ]; then
     echo "* removing old $tmp_mt_copy..."
     rm -Rf "$tmp_mt_copy" || customExit "rm -Rf \"$tmp_mt_copy\" failed."
+elif [ ! -d "$EM_TMP" ]; then
+    mkdir -p "$EM_TMP" || customExit "mkdir -p \"$EM_TMP\" failed."
 fi
 old_release_line=
 old_release_version=
