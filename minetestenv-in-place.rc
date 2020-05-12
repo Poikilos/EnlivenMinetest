@@ -866,7 +866,7 @@ detect_mt_version_at(){
         fi
     else
         if [ -z "$this_err" ]; then
-            this_err="\"$1/release.txt\" does not exist"
+            this_err="\"$1/release.txt\" does not exist."
         fi
     fi
     version_len=${#new_release_version}

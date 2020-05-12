@@ -54,7 +54,7 @@ if [ ! -f "$MT_BASH_RC_PATH" ]; then
     exit 1
 fi
 source $MT_BASH_RC_PATH
-# ^ same as install-minetest-linux64.sh
+# ^ same as install-minetest-linux64.sh, versionize.sh
 
 INSTALL_MTS_NAME="install-mts.sh"
 

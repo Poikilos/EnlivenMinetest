@@ -1,4 +1,62 @@
 #!/bin/bash
+#!/bin/bash
+clear
+me=`basename "$0"`
+echo
+echo
+echo
+scripting_rc_path=~/.config/EnlivenMinetest/scripting.rc
+if [ -f "$EM_CONFIG_PATH/scripting.rc" ]; then
+    echo "* [$MT_ENV_RUP_NAME] using $scripting_rc_path..."
+    source $scripting_rc_path
+fi
+if [ -z "$REPO_PATH" ]; then
+    REPO_PATH="$HOME/git/EnlivenMinetest"
+fi
+MT_BASH_RC_NAME="minetestenv-in-place.rc"
+CURRENT_MT_SCRIPTS_DIR="$HOME/.local/bin"
+MT_BASH_RC_PATH="$CURRENT_MT_SCRIPTS_DIR/$MT_BASH_RC_NAME"
+TRY_CURRENT_MT_SCRIPTS_DIR="$REPO_PATH"
+TRY_MT_BASH_RC_PATH="$TRY_CURRENT_MT_SCRIPTS_DIR/$MT_BASH_RC_NAME"
+if [ -f "$TRY_MT_BASH_RC_PATH" ]; then
+    CURRENT_MT_SCRIPTS_DIR="$TRY_CURRENT_MT_SCRIPTS_DIR"
+    MT_BASH_RC_PATH="$TRY_MT_BASH_RC_PATH"
+#fi
+#if [ ! -f "$MT_BASH_RC_PATH" ]; then
+else
+    if [ ! -d "$CURRENT_MT_SCRIPTS_DIR" ]; then
+        mkdir -p "$CURRENT_MT_SCRIPTS_DIR"
+    fi
+    MT_BASH_RC_URL=https://raw.githubusercontent.com/poikilos/EnlivenMinetest/master/$MT_BASH_RC_NAME
+    curl $MT_BASH_RC_URL -o "$MT_BASH_RC_PATH"
+    if [ $? -ne 0 ]; then
+    #if [ ! -f "$MT_BASH_RC_PATH" ]; then
+        # This is necessary on cygwin for some reason.
+        curl $MT_BASH_RC_URL > "$MT_BASH_RC_PATH"
+    fi
+    #if [ $? -ne 0 ]; then
+    if [ ! -f "$MT_BASH_RC_PATH" ]; then
+        # This is necessary on cygwin for some reason.
+        wget -O "$MT_BASH_RC_PATH" $MT_BASH_RC_URL
+    fi
+    if [ $? -ne 0 ]; then
+        echo
+        echo "ERROR: Downloading $MT_BASH_RC_URL to $MT_BASH_RC_PATH failed."
+        echo
+        sleep 10
+        exit 1
+    fi
+fi
+if [ ! -f "$MT_BASH_RC_PATH" ]; then
+    echo
+    echo "$MT_BASH_RC_PATH is not present."
+    echo
+    sleep 10
+    exit 1
+fi
+source $MT_BASH_RC_PATH
+# ^ same as install-mts.sh, update-minetest-linux64.sh
+
 echo
 echo "Collecting version..."
 EM_CONFIG_PATH=$HOME/.config/EnlivenMinetest
@@ -99,9 +157,27 @@ else
     customExit "$try_path is not a file or directory."
 fi
 
-detect_mt_version_at "$src_path/minetest"
+KIT_RELEASE_TXT=$src_path/release.txt
+BIN_RELEASE_TXT=$src_path/minetest/release.txt
+if [ ! -f "$BIN_RELEASE_TXT" ]; then
+    if [ -f "$KIT_RELEASE_TXT" ]; then
+        # This is expected to occur since we only now unzipped it.
+        #if [ -d "BIN_RELEASE_TXT=$src_path/minetest" ]; then
+        cp "$KIT_RELEASE_TXT" "$BIN_RELEASE_TXT"
+        #fi
+    fi
+fi
+detect_mt_version_at "$src_path"
+if [ -z "$new_release_version" ]; then
+    detect_mt_version_at "$src_path/minetest"
+fi
 # ^ DOES exit if no 6-digit version is detected when no 3rd param
 #   is provided.
+
+if [ -z "$new_release_version" ]; then
+    echo "new_release_version from $src_path/minetest is blank."
+    exit 1
+fi
 
 echo "src_name=$src_name"
 echo "src_path=$src_path"

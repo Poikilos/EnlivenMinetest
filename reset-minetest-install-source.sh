@@ -76,43 +76,65 @@ if [ "@$compiled_version" != "@$installed_version" ]; then
     exit 2
 fi
 enable_offline=false
+enable_keep=false
 for var in "$@"
 do
     if [ "@$var" = "@--offline" ]; then
         enable_offline=true
+    elif [ "@$var" = "@--keep" ]; then
+        enable_keep=true
     else
         customExit "Invalid argument: $var"
     fi
 done
 cd "$EM_CONFIG_PATH" || customExit "[$MY_NAME] cd \"$EM_CONFIG_PATH\" failed."
-if [ -d "$extracted_path" ]; then
-    # NOTE: ls -lR provides a count, so it is not suitable unless output
-    # is parsed. `| wc -l` is easier (word count).
-    screenshot_count=0
-    if [ -d $extracted_path/screenshots ]; then
-        screenshot_count=`ls $extracted_path/screenshots/*.png | wc -l`
-    fi
-    if [ $screenshot_count -gt 0 ]; then
-        mv $extracted_path/screenshots/*.png ~/ || customExit "can't move screenshots from $extracted_path/screenshots/*.png"
-        rmdir --ignore-fail-on-non-empty "$extracted_path/screenshots"
-    fi
-    if [ `ls $extracted_path/minetest/bin/*.png | wc -l` -gt 0 ]; then
-        # if [ ! -d screenshots ]; then mkdir screenshots; fi
-        # NOTE: system-wide install of minetest puts screenshots in ~/ (cwd)
-        mv $extracted_path/minetest/bin/*.png ~/ || customExit "can't move screenshots from $extracted_path/minetest/bin/*.png"
-    fi
-    rm -Rf "$extracted_path" || customExit "can't remove $extracted_name"
+if [ "@$enable_keep" = "@true" ]; then
+    enable_offline=true
 fi
 
+if [ "@$enable_keep" != "@true" ]; then
+    if [ -d "$extracted_path" ]; then
+        # NOTE: ls -lR provides a count, so it is not suitable unless output
+        # is parsed. `| wc -l` is easier (word count).
+        screenshot_count=0
+        if [ -d $extracted_path/screenshots ]; then
+            screenshot_count=`ls $extracted_path/screenshots/*.png | wc -l`
+        fi
+        if [ $screenshot_count -gt 0 ]; then
+            mv $extracted_path/screenshots/*.png ~/ || customExit "can't move screenshots from $extracted_path/screenshots/*.png"
+            rmdir --ignore-fail-on-non-empty "$extracted_path/screenshots"
+        fi
+        if [ `ls $extracted_path/minetest/bin/*.png | wc -l` -gt 0 ]; then
+            # if [ ! -d screenshots ]; then mkdir screenshots; fi
+            # NOTE: system-wide install of minetest puts screenshots in ~/ (cwd)
+            mv $extracted_path/minetest/bin/*.png ~/ || customExit "can't move screenshots from $extracted_path/minetest/bin/*.png"
+        fi
+        rm -Rf "$extracted_path" || customExit "can't remove $extracted_name"
+    fi
+fi
 if [ "@$enable_offline" = "@true" ]; then
     if [ ! -f "$zip_name" ]; then
-        customExit "* Offline install is impossible without '`pwd`/$zip_name'."
+        if [ "@$enable_keep" = "@true" ]; then
+            if [ ! -d "$extracted_path" ]; then
+                customExit "* Offline install is impossible without '`pwd`/$zip_name' (or '$extracted_path' with the --keep option)."
+            else
+                echo "* keeping existing \"$extracted_path\"..."
+            fi
+        else
+            customExit "* Offline install is impossible without '`pwd`/$zip_name' (or '$extracted_path' when using the --keep option)."
+        fi
     fi
 else
     wget -O "$EM_CONFIG_PATH/$zip_name" $url/$zip_name || customExit "no $zip_name at $url"
 fi
-unzip -u $zip_name || customExit "Can't unzip $zip_name"
-cd "$extracted_name" || customExit "Unzipping \"$zip_name\" in \"`pwd`\" did not result in a readable directory named \"$extracted_name\" there."
+if [ "@$enable_keep" = "@true" ]; then
+    if [ ! -d "$extracted_path" ]; then
+        unzip -u $zip_name || customExit "Can't unzip $zip_name"
+        cd "$extracted_name" || customExit "Unzipping \"$zip_name\" in \"`pwd`\" did not result in a readable directory named \"$extracted_name\" there."
+    else
+        cd "$extracted_name" || customExit "There is no readable directory: \"`pwd`\" (that or the zip is necessary for --keep)."
+    fi
+fi
 cat "$extracted_path/release.txt"
 echo "compiling libraries..."
 date
