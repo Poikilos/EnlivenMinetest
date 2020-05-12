@@ -5,5 +5,5 @@ mkdir -p ~/Downloads \
   && chmod +x reset-minetest-install-source.sh \
   && wget -O install-mts https://raw.githubusercontent.com/poikilos/EnlivenMinetest/master/install-mts.sh \
   && chmod +x install-mts.sh \
-  && ./reset-minetest-install-source.sh
+  && ./reset-minetest-install-source.sh \
   && ./install-mts.sh
