@@ -68,9 +68,16 @@ dest_programs="$HOME"
 EXTRACTED_SRC_NAME="linux-minetest-kit"
 # EM_CONFIG_PATH is from "minetestenv-in-place.rc".
 EXTRACTED_SRC_PATH="$EM_CONFIG_PATH/$EXTRACTED_SRC_NAME"
-cd "$EM_CONFIG_PATH" || customExit "[$INSTALL_MTS_NAME] cd \"$EM_CONFIG_PATH\" failed."
 flag_dir_rel="$EXTRACTED_SRC_NAME/mtsrc"
 code_flag_dir_path="$EXTRACTED_SRC_PATH/mtsrc"
+if [ ! -d "$code_flag_dir_path" ]; then
+    echo
+    echo
+    echo "ERROR: The minetest sources directory \"$code_flag_dir_path\" is missing. Try running reset-minetest-install-source.sh first."
+    echo
+    exit 1
+fi
+cd "$EM_CONFIG_PATH" || customExit "[$INSTALL_MTS_NAME] cd \"$EM_CONFIG_PATH\" failed."
 if [ -z "$CUSTOM_SCRIPTS_PATH" ]; then
     CUSTOM_SCRIPTS_PATH="$HOME"
 fi

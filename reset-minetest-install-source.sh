@@ -1,4 +1,14 @@
 #!/bin/bash
+
+
+# ## Developer notes
+# ### Error checking
+# The following matches *may* be errors (no `$` before variable):
+# - `-d "[^$ 1234567890@]`
+# - `-f "[^$ 1234567890@]`
+# - `-z "[^$ 1234567890@]`
+# - `[ "[^$ 1234567890@]`
+# - `= "[^$ 1234567890@]`
 echo
 echo
 echo
@@ -8,6 +18,11 @@ MY_NAME="reset-minetest-install-source.sh"
 EM_CONFIG_PATH=$HOME/.config/EnlivenMinetest
 
 zip_name=linux-minetest-kit.zip
+EM_TMP=/tmp/EnlivenMinetest
+if [ ! -d "$EM_TMP" ]; then
+    mkdir -p "$EM_TMP"
+fi
+TMP_DL_PATH="$EM_TMP/$zip_name"
 extracted_name=linux-minetest-kit
 EM_CONFIG_PATH=~/.config/EnlivenMinetest
 extracted_path="$EM_CONFIG_PATH/$extracted_name"
@@ -47,9 +62,13 @@ END
 }
 
 customExit () {
-    echo "ERROR: Cannot continue since"
+    exitCode=1
+    if [ ! -z "$2" ]; then
+        exitCode=$2
+    fi
+    echo "ERROR:"
     echo "$1"
-    exit 1
+    exit $exitCode
 }
 available_release_line=`curl http://downloads.minetest.org/release.txt | head -n 1`
 # echo "Release data: $available_release_line"  # "Release *" where * is YYMMDD
@@ -59,59 +78,66 @@ available_version=$(echo $available_release_line | awk '{print $2}')
 if [ ${#available_version} -ne 6 ]; then
     customExit "The available version is not recognized: $available_version"
 fi
-installed_release_line=`head -n 1 ~/minetest/release.txt`
+INSTALL_PATH="$HOME/minetest"
+installed_release_line=`head -n 1 $INSTALL_PATH/release.txt`
 installed_version=$(echo $installed_release_line | awk '{print $2}')
-compiled_release_line=`head -n 1 ~/minetest/release.txt`
+compiled_release_line=`head -n 1 $extracted_path/release.txt`
+extracted_path_msg=
+if [ ! -d "$extracted_path" ]; then
+    extracted_path_msg="(not present)"
+fi
 compiled_version=$(echo $compiled_release_line | awk '{print $2}')
-echo "installed_version: $installed_version"
-echo "compiled_version: $compiled_version"
-echo "available_version: $available_version"
-if [ "@$installed_version" = "@$available_version" ]; then
-    echo "You already have the latest version installed."
-    exit 1
-fi
-if [ "@$compiled_version" != "@$installed_version" ]; then
-    echo "ERROR: You have not yet installed version $compiled_version which you already compiled (you have installed $installed_version)."
-    echo "You should run ./install-mts.sh instead (with --client option if you want more than minetestserver)"
-    exit 2
-fi
+echo "installed_version: $installed_version ($INSTALL_PATH/release.txt)"
+echo "compiled_version: $compiled_version$extracted_path_msg ($extracted_path/release.txt)"
+echo "available_version: $available_version ($release_txt_url)"
 enable_offline=false
 enable_keep=false
+enable_rebuild=false
 for var in "$@"
 do
     if [ "@$var" = "@--offline" ]; then
         enable_offline=true
     elif [ "@$var" = "@--keep" ]; then
         enable_keep=true
+    elif [ "@$var" = "@--rebuild" ]; then
+        enable_rebuild=true
     else
         customExit "Invalid argument: $var"
     fi
 done
+
+if [ "@$installed_version" = "@$available_version" ]; then
+    if [ "@$enable_rebuild" = "@false" ]; then
+        echo "You already have the latest version. Use the \"--rebuild\" option to rebuild anyway."
+        exit 1
+    fi
+fi
+if [ "@$compiled_version" != "@$installed_version" ]; then
+    if [ ! -z "$compiled_version" ]; then
+        echo "ERROR: You have not yet installed version $compiled_version which you already compiled (you have installed $installed_version)."
+        echo "You should run ./install-mts.sh instead (with --client option if you want more than minetestserver)"
+        exit 2
+    else
+        # You do not have the source code at all.
+        if [ "@$installed_version" = "@$available_version" ]; then
+            echo "WARNING: You already have release $installed_version, but the source code preparation will continue since you do not have a detectable version of the source code (no release.txt containing \"Release <release>\")."
+        else
+            echo "* The source code preparation will continue since you do not have a detectable version of the source code (no release.txt containing \"Release <release>\")."
+        fi
+    fi
+fi
+
 cd "$EM_CONFIG_PATH" || customExit "[$MY_NAME] cd \"$EM_CONFIG_PATH\" failed."
 if [ "@$enable_keep" = "@true" ]; then
     enable_offline=true
 fi
-
-if [ "@$enable_keep" != "@true" ]; then
-    if [ -d "$extracted_path" ]; then
-        # NOTE: ls -lR provides a count, so it is not suitable unless output
-        # is parsed. `| wc -l` is easier (word count).
-        screenshot_count=0
-        if [ -d $extracted_path/screenshots ]; then
-            screenshot_count=`ls $extracted_path/screenshots/*.png | wc -l`
-        fi
-        if [ $screenshot_count -gt 0 ]; then
-            mv $extracted_path/screenshots/*.png ~/ || customExit "can't move screenshots from $extracted_path/screenshots/*.png"
-            rmdir --ignore-fail-on-non-empty "$extracted_path/screenshots"
-        fi
-        if [ `ls $extracted_path/minetest/bin/*.png | wc -l` -gt 0 ]; then
-            # if [ ! -d screenshots ]; then mkdir screenshots; fi
-            # NOTE: system-wide install of minetest puts screenshots in ~/ (cwd)
-            mv $extracted_path/minetest/bin/*.png ~/ || customExit "can't move screenshots from $extracted_path/minetest/bin/*.png"
-        fi
-        rm -Rf "$extracted_path" || customExit "can't remove $extracted_name"
+if [ ! -z "$compiled_version" ]; then
+    if [ "$compiled_version" = "$available_version" ]; then
+        enable_offline=true
+        echo "* --offline has been automatically enabled since the compiled_version $compiled_version is the same as the available version."
     fi
 fi
+
 if [ "@$enable_offline" = "@true" ]; then
     if [ ! -f "$zip_name" ]; then
         if [ "@$enable_keep" = "@true" ]; then
@@ -125,25 +151,115 @@ if [ "@$enable_offline" = "@true" ]; then
         fi
     fi
 else
-    wget -O "$EM_CONFIG_PATH/$zip_name" $url/$zip_name || customExit "no $zip_name at $url"
+    if [ -d "$EM_CONFIG_PATH/$zip_name" ]; then
+        customExit "Remove the invalid directory \"$EM_CONFIG_PATH/$zip_name\" first so that a file with that path can be created."
+    fi
+    if [ -d "$TMP_DL_PATH" ]; then
+        customExit "Remove the invalid directory \"$TMP_DL_PATH\" first so that a file with that path can be created."
+    fi
+    if [ ! -f "`command -v wget`" ]; then
+        # if [ ! -f "`command -v curl`" ]; then
+        #     customExit "You must install curl or wget to use this script."
+        # fi
+        curl $url/$zip_name -o "$TMP_DL_PATH"
+        if [ $? -ne 0 ]; then
+            # This is necessary on cygwin for some reason.
+            curl $url/$zip_name > "$TMP_DL_PATH"
+            if [ $? -ne 0 ]; then
+                if [ -f "$TMP_DL_PATH" ]; then
+                    rm "$TMP_DL_PATH"
+                fi
+                customExit "curl $url/$zip_name failed."
+            fi
+        fi
+    else
+        wget -O "$TMP_DL_PATH" $url/$zip_name
+        if [ $? -ne 0 ]; then
+            if [ -f "$TMP_DL_PATH" ]; then
+                rm "$TMP_DL_PATH"
+            fi
+            customExit "wget $url/$zip_name failed to write $TMP_DL_PATH."
+        fi
+    fi
+    mv "$TMP_DL_PATH" "$EM_CONFIG_PATH/$zip_name"
+    if [ $? -ne 0 ]; then
+        customExit "mv \"$TMP_DL_PATH\" \"$EM_CONFIG_PATH/$zip_name\" failed."
+    fi
+    echo "* moved the sucessful download to \"$EM_CONFIG_PATH/$zip_name\""
 fi
+
 if [ "@$enable_keep" = "@true" ]; then
     if [ ! -d "$extracted_path" ]; then
-        unzip -u $zip_name || customExit "Can't unzip $zip_name"
-        cd "$extracted_name" || customExit "Unzipping \"$zip_name\" in \"`pwd`\" did not result in a readable directory named \"$extracted_name\" there."
-    else
-        cd "$extracted_name" || customExit "There is no readable directory: \"`pwd`\" (that or the zip is necessary for --keep)."
+        enable_keep=false
+        echo "* WARNING: --keep is not possible when $extracted_path does not exist, so the option has been automatically turned off."
     fi
 fi
+
+if [ "@$enable_keep" = "@true" ]; then
+    echo "* using existing $extracted_path since \"--keep\" is enabled"
+else
+    if [ -d "$extracted_path" ]; then
+        # NOTE: ls -lR provides a count, so it is not suitable unless output
+        # is parsed. `| wc -l` is easier (word count).
+        screenshot_count=0
+        if [ -d "$extracted_path/screenshots" ]; then
+            screenshot_count=`ls $extracted_path/screenshots/*.png | wc -l`
+        fi
+        if [ $screenshot_count -gt 0 ]; then
+            mv $extracted_path/screenshots/*.png ~/ || customExit "can't move screenshots from $extracted_path/screenshots/*.png"
+            rmdir --ignore-fail-on-non-empty "$extracted_path/screenshots"
+        fi
+        if [ `ls $extracted_path/minetest/bin/*.png | wc -l` -gt 0 ]; then
+            # if [ ! -d screenshots ]; then mkdir screenshots; fi
+            # NOTE: system-wide install of minetest puts screenshots in ~/ (cwd)
+            mv $extracted_path/minetest/bin/*.png ~/ || customExit "can't move png screenshots from $extracted_path/minetest/bin/*.png"
+        fi
+        if [ `ls $extracted_path/minetest/bin/*.jpg | wc -l` -gt 0 ]; then
+            # if [ ! -d screenshots ]; then mkdir screenshots; fi
+            # NOTE: system-wide install of minetest puts screenshots in ~/ (cwd)
+            mv $extracted_path/minetest/bin/*.jpg ~/ || customExit "can't move jpg screenshots from $extracted_path/minetest/bin/*.png"
+        fi
+        echo "* removing old \"$extracted_path\" (since you did not specify \"--keep\")"
+        rm -Rf "$extracted_path" || customExit "can't remove $extracted_name"
+    fi
+fi
+
+if [ ! -d "$extracted_path" ]; then
+    if [ ! -f "`command -v unzip`" ]; then
+        customExit "unzip is missing. You must install it or manually extract $zip_name to \"$extracted_path\" to use this script."
+    fi
+    unzip -u $zip_name || customExit "unzip \"$zip_name\" failed in \"`pwd`\". Try removing it and re-downloading it."
+    # if [ ! -d "" ]; then
+    #     customExit "Unzipping \"$zip_name\" in \"`pwd`\" did not result in a readable directory named \"$extracted_name\" there."
+    # fi
+    if [ ! -d "$extracted_name" ]; then
+        customExit "Unzipping \"$zip_name\" in \"`pwd`\" did not result in a readable directory named \"$extracted_name\" there."
+    fi
+#else
+#    if [ ! -d "$extracted_name" ]; then
+#        customExit "There is no readable directory: \"`pwd`\" (that or the zip is necessary for --keep)."
+#    fi
+fi
+
+cd "$extracted_path" || customExit "cd \"`pwd`\" failed."
+
 cat "$extracted_path/release.txt"
+echo "If you already compiled the libraries in `pwd`, run install-mts.sh to install minetest from source (with the --client option to include the client)"
 echo "compiling libraries..."
 date
 start=`date +%s`
+if [ ! -f "`command -v patch`" ]; then
+    customExit "patch is missing. You must install patch to use mtcompile-libraries.sh in linux-minetest-kit. Ubuntu: sudo apt install -y patch  Fedora: sudo dnf install -y patch"
+fi
 bash -e mtcompile-libraries.sh build >& libraries.log
+mtLibrariesCompileResult=$?
+if [ $mtLibrariesCompileResult -ne 0 ]; then
+    customExit "ERROR: Compiling libraries failed (code $mtLibrariesCompileResult). See $extracted_path/libraries.log" $mtLibrariesCompileResult
+fi
 end=`date +%s`
 compile_time=$((end-start))
 echo "Compiling libraries finished in $compile_time seconds."
-echo "  (see libraries.log in case of any errors)"
+echo "  (see $extracted_path/libraries.log in case of any errors)"
 #echo "compiling program..."
 #bash -e mtcompile-program.sh build >& program.log
 echo "done."
