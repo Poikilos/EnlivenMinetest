@@ -108,16 +108,30 @@ fi
 #pushd "$EXTRACTED_SRC_PATH" || customExit "pushd \"$EXTRACTED_SRC_PATH\" failed in \"`pwd`\""
 
 extra_options=""
+server_option="--server"
+#enable_client_only=false
+
+custom_src_option=""
+PATCH_BUILD=$REPO_PATH/mtcompile-program-local.py
+# ^ custom_src_option requires $PATCH_BUILD to exist.
+
 for var in "$@"
 do
-    if [ "@$var" = "@--client" ]; then
+    if [[ $var = --minetest* ]]; then
+        custom_src_option="$var"
+    elif [ "@$var" = "@--client" ]; then
         ENABLE_CLIENT=true
     elif [ "@$var" = "@--clean" ]; then
         enable_clean=true
         echo "* --clean is deprecated."
+    elif [ "@$var" = "@--no-server" ]; then
+        ENABLE_CLIENT=true
+        server_option=""
     elif [ "@$var" = "@--noclean" ]; then
         enable_clean=false
         echo "* --noclean is deprecated."
+    elif [ "@$var" = "@--portable" ]; then
+        extra_options="$extra_options --portable"
     else
         customExit "Invalid argument: $var"
     fi
@@ -200,15 +214,20 @@ END
 
     start=`date +%s`
     cd "$EXTRACTED_SRC_PATH" || customExit "cd \"$EXTRACTED_SRC_PATH\" failed."
-    if [ -f "mtcompile-program.pl" ]; then
+    if [ ! -z "$custom_src_option" ]; then
+        if [ ! -f "$PATCH_BUILD" ]; then
+            customExit "$PATCH_BUILD must exist when using the --minetest=<path> (custom local copy of minetest source) option")
+        fi
+        $PATCH_BUILD build $server_option $extra_options $custom_src_option >& program.log
+    elif [ -f "mtcompile-program.pl" ]; then
         # perl mtcompile-program.pl build >& program.log
         echo "Compiling via perl (this may take a while--output redirected to `pwd`/program.log)..."
-        perl mtcompile-program.pl build --server $extra_options >& program.log
+        perl mtcompile-program.pl build $server_option $extra_options >& program.log
     else
         # NOTE: no pl in $EXTRACTED_SRC_NAME, assuming bash:
         if [ -f mtcompile-program.sh ]; then
         echo "Compiling via bash (this may take a while--output redirected to `pwd`/program.log)..."
-            bash -e mtcompile-program.sh build --server $extra_options >& program.log
+            bash -e mtcompile-program.sh build $server_option $extra_options >& program.log
         else
             echo
             echo "ERROR: Install cannot finish since there is no"

@@ -253,8 +253,42 @@ if [ ! -f "`command -v patch`" ]; then
 fi
 bash -e mtcompile-libraries.sh build >& libraries.log
 mtLibrariesCompileResult=$?
+if [ -z "$DEPS" ]; then
+    DEPS=
+fi
+if [ -z "$DEPS_INSTALL" ]; then
+    DEPS_INSTALL=
+fi
+FEDORA_DEPS="gcc-c++ irrlicht-devel gettext freetype cmake bzip2-devel libpng libjpeg-turbo libXxf86vm mesa-libGLU libsqlite3x-devel libogg-devel libvorbis-devel openal-devel curl-devel luajit-devel lua-devel leveldb-devel ncurses-devel redis hiredis-devel gmp-devel libtool"
+FEDORA_DEPS_INSTALL="sudo dnf install -y $FEDORA_DEPS"
+UBUNTU_DEPS="libncurses5-dev libgettextpo-dev doxygen libspatialindex-dev libpq-dev postgresql-server-dev-all git build-essential libirrlicht-dev libgettextpo0 libfreetype6-dev cmake libbz2-dev libpng12-dev libjpeg8-dev libxxf86vm-dev libgl1-mesa-dev libsqlite3-dev libogg-dev libvorbis-dev libopenal-dev libcurl4-openssl-dev libluajit-5.1-dev liblua5.1-0-dev libleveldb-dev"
+UBUNTU_DEPS_INSTALL="sudo apt-get update && sudo apt-get install -y $UBUNTU_DEPS"
+DEPS_INSTALL_MSG="something like    $UBUNTU_DEPS_INSTALL     #or     $FEDORA_DEPS_INSTALL"
+if [ ! -f "`command -v dnf`" ]; then
+    DEPS_INSTALL="$FEDORA_DEPS_INSTALL"
+elif [ -f "`command -v yum`" ]; then
+    FEDORA_DEPS_INSTALL="sudo yum install -y $FEDORA_DEPS"
+    DEPS_INSTALL="$FEDORA_DEPS_INSTALL"
+elif [ -f "`command -v apt`" ]; then
+    UBUNTU_DEPS_INSTALL="sudo apt update && sudo apt install -y $UBUNTU_DEPS"
+    DEPS_INSTALL="$UBUNTU_DEPS_INSTALL"
+elif [ -f "`command -v apt-get`" ]; then
+    DEPS_INSTALL="$UBUNTU_DEPS_INSTALL"
+fi
+if [ ! -z "$DEPS_INSTALL" ]; then
+    DEPS_INSTALL_MSG="$DEPS_INSTALL"
+fi
 if [ $mtLibrariesCompileResult -ne 0 ]; then
-    customExit "ERROR: Compiling libraries failed (code $mtLibrariesCompileResult). See $extracted_path/libraries.log" $mtLibrariesCompileResult
+    cat "$extracted_path/libraries.log"
+    echo
+    INSTALL_SOURCE_LOG=$HOME/EnlivenMinetest-install-source.log
+    echo "Try running" > $INSTALL_SOURCE_LOG
+    echo "    $DEPS_INSTALL_MSG" >> $INSTALL_SOURCE_LOG
+    echo "Make sure you have installed the dependencies (listed in $INSTALL_SOURCE_LOG)."
+    if [ ! -z "`grep "libtoolize is needed" $extracted_path/libraries.log`" ]; then
+        echo "You need to install the libtool package to compile the libraries."
+    fi
+    customExit "Compiling libraries failed (code $mtLibrariesCompileResult). See the contents of $extracted_path/libraries.log shown above." $mtLibrariesCompileResult
 fi
 end=`date +%s`
 compile_time=$((end-start))

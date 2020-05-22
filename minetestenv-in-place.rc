@@ -142,7 +142,7 @@ install_shortcut(){
         fi
         if [ -f "`command -v kquitapp5`" ]; then
             echo "Refreshing KDE icons..."
-            if [ "`command -v kstart5`" ]; then
+            if [ -f "`command -v kstart5`" ]; then
                 kquitapp5 plasmashell && kstart5 plasmashell
             else
                 kquitapp5 plasmashell && kstart plasmashell
