@@ -215,6 +215,29 @@ mtcompile-program.pl.
 #                         program parameters
 #---------------------------------------------------------------------
 
+def streamEdit(inPath, replacements):
+    """
+    Replace parts similarly to sed ("stream editor").
+
+    See David Miller's Dec 13, 2010 answer edited by dpb Jul 23, 2013
+    on <https://stackoverflow.com/questions/4427542/how-to-do-sed-like-
+    text-replace-with-python>
+
+    Sequential arguments:
+    inPath -- Edit then save the file at this path.
+    replacements -- a replacements dict where the key is the string or
+        regex, and the value is the new string to use in cases of]
+        matches.
+
+    """
+    with open(inPath, "r") as sources:
+        lines = sources.readlines()
+    with open(inPath, "w") as sources:
+        for rawLine in lines:
+            line = rawLine
+            for k, v in replacements.items():
+                line = re.sub(k, v, line)
+            sources.write(line)
 
 def _UNUSED_evalSed(line, sedStr):
     """
@@ -316,20 +339,53 @@ def popd():
         os.chdir(DirStack[-1])
 
 
-def RunCmd(cmdParts, exitOnFail=True):
+def execute(cmd, shell=True):
+    """
+    Iterate output of a command.
+
+    See tokland's Dec 11, 2010 answer on <https://stackoverflow.com/
+    questions/4417546/constantly-print-subprocess-output-while-
+    process-is-running>
+    """
+    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                             universal_newlines=True,
+                             shell=shell)
+    for stdout_line in iter(popen.stdout.readline, ""):
+        yield stdout_line
+    popen.stdout.close()
+    return_code = popen.wait()
+    if return_code:
+        raise subprocess.CalledProcessError(return_code, cmd)
+
+
+def RunCmd(cmdParts, exitOnFail=True, shell=True):
     # Popen can get confused when arguments contain quotes
     # (see <https://stackoverflow.com/questions/14928860/passing-double-
     # quote-shell-commands-in-python-to-subprocess-popen>) such as
     # in "-DCMAKE_CXX_FLAG="+XCFLAGS where XCFLAGS contains quotes.
-    child = subprocess.Popen(cmdParts, shell=True,
-                             stdout=subprocess.PIPE)
-    streamdata = child.communicate()[0]
-    rc = child.returncode
-    if rc != 0:
+    # child = subprocess.Popen(cmdParts, shell=shell,
+    #                          stdout=subprocess.PIPE,
+    #                          universal_newlines=True)
+    # streamdata = child.communicate()[0]
+    # rc = child.returncode
+    # Instead of communicate, read the lines (See def execute)
+    # if rc != 0:
+    #     if exitOnFail:
+    #         exit(rc)
+    #     else:
+    #         print("WARNING: {} failed".format(' '.join(cmdParts)))
+    try:
+        for line in execute(cmdParts, shell=shell):
+            print(line, end="")
+    except subprocess.CalledProcessError as ex:
+        msg = ("The process '{}' ended with error code {}."
+               "".format(" ".join(ex.cmd), ex.returncode))
         if exitOnFail:
-            exit(rc)
+            print("ERROR: " + msg)
+            exit(ex.returncode)
         else:
-            print("WARNING: {} failed".format(' '.join(cmdParts)))
+            print("WARNING: " + msg)
+
 
 
 def FixStr(s):
@@ -940,33 +996,36 @@ again.
     cmdParts.append("-DCMAKE_CXX_FLAGS=\"{}\"".format(XCFLAGS))
     cmdParts.append("-DCMAKE_C_FLAGS_RELEASE=\"{}\"".format(XCFLAGS))
     cmdParts.append("-DCMAKE_CXX_FLAGS_RELEASE=\"{}\"".format(XCFLAGS))
+    cmdParts.append(".")
     print("")
     print("")
-    print("Running cmake in {}:".format(os.getcwd()))
+    print("* running cmake in {}:".format(os.getcwd()))
     print(" ".join(cmdParts))
     print("")
     print("")
-    RunCmd(cmdParts);
+    RunCmd(cmdParts[:1] + [" ".join(cmdParts[1:])], shell=False)
+    # ^ must be false to avoid inserting quotes automatically
 
     # TODO: use some absolute pathnames as the Perl version does
     #---------------------------------------------------------------------
     # Replace some "-l..." switches with absolute pathnames.
 
-    # cmd = << "END"
-    # sed -e "s:-lIrrlicht:$IRRLICHT_LIBRARY:g"
-    # -e "s:-lleveldb:$LEVELDB_LIBRARY:g"
-    # -e "s:-lluajit-5.1:$LUA_LIBRARY:g"
-    # -e "s:-lsqlite3:$SQLITE3_LIBRARY:g"
-    # END
-    # cmd . = << 'END'
-    # -i `find . -type f -name link.txt`
-    # END
-    # cmd = &FixStr ( + cmd + )
-    # RunCmd (cmd.split(" "))  #TODO use cmdParts after editing it
+    replacements = {
+        "-lIrrlicht": IRRLICHT_LIBRARY,
+        "-lleveldb": LEVELDB_LIBRARY,
+        "-lluajit-5.1": LUA_LIBRARY,
+        "-lsqlite3": SQLITE3_LIBRARY,
+    }
+    for root, dirs, files in os.walk(PRODDIR):
+        for name in files:
+            subPath = os.path.join(root, name)
+            if name == "link.txt":
+                streamEdit(subPath, replacements)
 
     #---------------------------------------------------------------------
     # Build the program.
     NUMJOBS = 3
+    print("* running make in {}...".format(os.getcwd()))
     RunCmd(["make", "clean"])
     RunCmd("make", "-j{}".format(NUMJOBS))
     serverlistDir = os.path.join(PRODDIR, "client", "serverlist")
@@ -997,6 +1056,7 @@ again.
         # Bucket_Game and do nothing else differently?
         # See mtcompile-program.pl
         gameNames.append("Bucket_Game")
+    gamePaths = [os.path.join(PRODDIR, gName) for gName in gameNames]
     print("* purging gamepaths: {}".format(gamePaths))
     for gameName in gameNames:
         gamePath = os.path.join(PRODDIR, gameName)

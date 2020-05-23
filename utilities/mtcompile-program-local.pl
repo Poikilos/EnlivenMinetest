@@ -270,7 +270,7 @@ sub GetProgDir
     }
 
     my $cwd     = getcwd();
-    chdir ($ProgTemp) || die;
+    #chdir ($ProgTemp) || die;
     my $ProgDir = getcwd();
     chdir ($cwd) || die "$IE #048837\n";
     $ProgDir;
@@ -648,27 +648,33 @@ END
         }
 
         $cmd = << "END";
-rm -fr  $PRODDIR minetest-newline*              || exit 1
-mkdir   $PRODDIR minetest-newline               || exit 1
-rmdir   $PRODDIR minetest-newline               || exit 1
+rm -fr  "$PRODDIR" minetest-newline*              || exit 1
+mkdir   "$PRODDIR" minetest-newline               || exit 1
+rmdir   "$PRODDIR" minetest-newline               || exit 1
 END
         my $CUSTOM_MT_SRC = "$ENV{'HOME'}/git/minetest";
         if (-d $CUSTOM_MT_SRC) {
             print("Using CUSTOM_MT_SRC $CUSTOM_MT_SRC as $PRODDIR\n");
-        $cmd = << "END";
-cp -R $CUSTOM_MT_SRC $PRODDIR                   || exit 1
+            $cmd = << "END";
+rm -fr "$PRODDIR"  minetest-newline*              || exit 1
+cp -R "$CUSTOM_MT_SRC" "$PRODDIR"                   || exit 1
 END
         }
         else {
-        $cmd = << "END" if     $FlagEdgy;
-tar jxf $BALLDIR/minetest-edgytest.tar.bz2      || exit 1
-mv               minetest-edgytest* $PRODDIR    || exit 1
+            $cmd = << "END" if     $FlagEdgy;
+tar jxf "$BALLDIR/minetest-edgytest.tar.bz2"      || exit 1
+mv               minetest-edgytest* "$PRODDIR"    || exit 1
 END
-        $cmd = << "END" unless $FlagEdgy;
-tar jxf $BALLDIR/minetest-newline.tar.bz2       || exit 1
-mv               minetest-newline*  $PRODDIR    || exit 1
+            $cmd = << "END" unless $FlagEdgy;
+tar jxf "$BALLDIR/minetest-newline.tar.bz2"       || exit 1
+mv               minetest-newline*  "$PRODDIR"    || exit 1
 END
         }
+        print("Running (in ");
+        print(getcwd());
+        print("):");
+        print($cmd);
+        print("\n");
         &RunCmd ($cmd);
     }
 
@@ -885,6 +891,10 @@ $redis_line
 .
 END
     $cmd = &FixStr ($cmd);
+    print("\n\nRunning (in ");
+    print(getcwd());
+    print("):");
+    print($cmd);
     &RunCmd ($cmd);
 
 #---------------------------------------------------------------------
@@ -900,7 +910,18 @@ END
     -i `find . -type f -name link.txt`
 END
     $cmd = &FixStr ($cmd);
+    print("\n\n\nBEFORE:\n");
+    &RunCmd ("find . -type f -name link.txt -exec tail +999 {} \\;");
+    print("\n\nRunning (in ");
+    print(getcwd());
+    print("):");
+    print($cmd);
     &RunCmd ($cmd);
+    print("\n\n\nAFTER, in ");
+    print(getcwd());
+    print(":\n");
+    &RunCmd ("find . -type f -name link.txt -exec tail +999 {} \\;");
+    # die("breakpoint");
 
 #---------------------------------------------------------------------
 # Build the program.
