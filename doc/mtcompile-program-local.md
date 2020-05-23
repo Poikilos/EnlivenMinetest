@@ -12,7 +12,7 @@
 
 
 ## Known Issues
-- [ ] Detect the number of cores instead of using `NUMJOBS = 2`
+- [ ] Detect the number of cores instead of using `NUMJOBS = 3`
   (enforce a range of 1 to 3 like the original?)
 
 
@@ -55,6 +55,7 @@ Then manually fix uses of:
 - [x] Implement a `pushd` function
 - [x] Implement a `popd` function
 - [x] Implement a `GetOptions` function
+- [x] (See new dict: `mapLongArgs`) Manually map argument aliases.
 - [x] use triple quotes for instances of `END` or other self-defined
       stream end after `<<`
 - [x] implement a `RunCmd` function

@@ -117,7 +117,7 @@ PATCH_BUILD=$REPO_PATH/mtcompile-program-local.py
 
 for var in "$@"
 do
-    if [[ $var = --minetest* ]]; then
+    if [[ $var = --MT_SRC* ]]; then
         custom_src_option="$var"
     elif [ "@$var" = "@--client" ]; then
         ENABLE_CLIENT=true
@@ -216,8 +216,9 @@ END
     cd "$EXTRACTED_SRC_PATH" || customExit "cd \"$EXTRACTED_SRC_PATH\" failed."
     if [ ! -z "$custom_src_option" ]; then
         if [ ! -f "$PATCH_BUILD" ]; then
-            customExit "$PATCH_BUILD must exist when using the --minetest=<path> (custom local copy of minetest source) option")
+            customExit "$PATCH_BUILD must exist when using the --MT_SRC=<path> (custom local copy of minetest source) option"
         fi
+        echo "* starting PATCH_BUILD ($PATCH_BUILD build $server_option $extra_options $custom_src_option"
         $PATCH_BUILD build $server_option $extra_options $custom_src_option >& program.log
     elif [ -f "mtcompile-program.pl" ]; then
         # perl mtcompile-program.pl build >& program.log
@@ -237,10 +238,13 @@ END
             echo
         fi
     fi
+    if [ $? -ne 0 ]; then
+        customExit "Building failed. See `pwd`/program.log"
+    fi
     end=`date +%s`
     compile_time=$((end-start))
     echo "Compiling the program finished in $compile_time seconds."
-    cp $EXTRACTED_SRC_PATH/release.txt $EXTRACTED_SRC_PATH/minetest/ || customWarn "Cannot copy $EXTRACTED_SRC_PATH/release.txt to $EXTRACTED_SRC_PATH/minetest/"
+    cp $EXTRACTED_SRC_PATH/release.txt $EXTRACTED_SRC_PATH/minetest/ || customWarn "[install-mts.sh] Cannot copy $EXTRACTED_SRC_PATH/release.txt to $EXTRACTED_SRC_PATH/minetest/"
 else
     echo "* using existing $EXTRACTED_SRC_PATH/minetest..."
 fi

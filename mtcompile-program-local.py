@@ -53,10 +53,15 @@ def isExecutableFile(path):
 
 
 def which(prog):
-    # for thisPath in os.environ["PATH"].split(os.pathsep):
-    for thisPath in sys.path:
-        # ^ sys.path includes BINDIR added before calling this!
+    """
+    Check for the given file within os.environ["PATH"], which contains
+    paths separated by os.pathsep.
+    NOTE: sys.path is NOT applicable, since it only has Python paths.
+    """
+    for thisPath in os.environ["PATH"].split(os.pathsep):
         sub_path = os.path.join(thisPath, prog)
+        if os.path.isfile(sub_path):
+            return sub_path
     return ""
 
 
@@ -189,7 +194,7 @@ Option switches:
  Aliases: --usage
 For full documentation, see "linux-minetest-kit.txt".
 
---minetest=<minetest> # Set the minetest source path to a
+--MT_SRC=<minetest> # Set the minetest source path to a
                       # locally-modified copy, such as
                       # $HOME/git/minetest
 
@@ -254,7 +259,7 @@ else:
 
 GITURL = 'http://git.minetest.org/minetest/minetest.git'
 IE = 'Internal error'
-FlagMinetest = None
+Flags = {}
 
 #---------------------------------------------------------------------
 #                          global variables
@@ -312,7 +317,11 @@ def popd():
 
 
 def RunCmd(cmdParts, exitOnFail=True):
-    child = subprocess.Popen(openRTSP+opts.split(),
+    # Popen can get confused when arguments contain quotes
+    # (see <https://stackoverflow.com/questions/14928860/passing-double-
+    # quote-shell-commands-in-python-to-subprocess-popen>) such as
+    # in "-DCMAKE_CXX_FLAG="+XCFLAGS where XCFLAGS contains quotes.
+    child = subprocess.Popen(cmdParts, shell=True,
                              stdout=subprocess.PIPE)
     streamdata = child.communicate()[0]
     rc = child.returncode
@@ -339,16 +348,14 @@ def GetProgDir():
     return os.getcwd()
 
 
-def GetOptions(nonBoolNames=[], TitleCaseAndFlag=False, bareArgs=[]):
+def GetOptions(nonBoolNames=[], bareArgs=[]):
     """
-    Convert command-line arguments to globals.
+    Convert command-line arguments to values in the global Flags dict.
 
     Keyword Arguments:
-    nonBoolNames -- You should set all of these to None in the global
-      namespace before calling this so that you can check them against
-      None later without getting an undefined variable error.
-    TitleCaseAndFlag -- Change '--something' to 'FlagSomething' if
-      TitleCaseAndFlag, otherwise change it to 'something'.
+    nonBoolNames -- Specify which arguments can have values. All others
+       are considered boolean, and will end the program if they contain
+       '='.
     bareArgs -- allowed arguments without "--" at the beginning.
 
     Returns:
@@ -371,9 +378,10 @@ def GetOptions(nonBoolNames=[], TitleCaseAndFlag=False, bareArgs=[]):
                           " {}.".format(nonBoolNames))
                     return False
                 val = arg[signI+1:]
-            if TitleCaseAndFlag:
-                name = "Flag" + name.title()
-            globals()[name] = val
+            # if TitleCaseAndFlag:
+            #     name = "Flag" + name.title()
+            print("* {} = {}".format(name, val))
+            Flags[name] = val
         else:
             print("The option is unknown: {}".format(arg))
             return False
@@ -387,7 +395,7 @@ USAGE_FMT = """
 """
 
 
-def UsageText():
+def UsageText(msg=""):
     """
     "UsageText" prints usage text for the current program,  then termin-
     ates the program with exit status one.
@@ -401,6 +409,10 @@ def UsageText():
                                   ))
     # USAGE_TEXT = evalSed('s@\s*\z@\n@s')
     print(THIS_USAGE)
+    print("")
+    print(msg)
+    print("")
+    print("")
     exit(1)
 
 
@@ -425,23 +437,23 @@ def main():
     #---------------------------------------------------------------------
     # Command-line option flags.
 
-    FlagBuild = False
-    FlagClient = False
-    FlagDebug = False
-    FlagEdgy = False
-    FlagGitPull = False
-    FlagGitReset = False
-    FlagHelp = False
-    FlagMakeProd = False
-    FlagFakeMT4 = False
-    FlagNoClean = False
-    FlagPortable = False
-    FlagPostgres = False
-    FlagRedis = False
-    FlagSafe = False
-    FlagServer = False
+    Flags["build"] = False
+    Flags["client"] = False
+    Flags["debug"] = False
+    Flags["edgy"] = False
+    Flags["gitpull"] = False
+    Flags["gitreset"] = False
+    Flags["help"] = False
+    Flags["makeprod"] = False
+    Flags["fakemt4"] = False
+    Flags["noclean"] = False
+    Flags["portable"] = False
+    Flags["postgres"] = False
+    Flags["redis"] = False
+    Flags["safe"] = False
+    Flags["server"] = False
 
-    FlagOldProto = True
+    Flags["oldproto"] = True
 
     #---------------------------------------------------------------------
     # Initial setup.
@@ -461,21 +473,35 @@ def main():
     #---------------------------------------------------------------------
     # Parse command-line arguments.
 
-    if not GetOptions(nonBoolNames=["minetest"], TitleCaseAndFlag=True,
-            bareArgs=["build"]):
+    if not GetOptions(nonBoolNames=["MT_SRC"], bareArgs=["build"]):
         UsageText()
+    mapLongArgs = {}
+    mapLongArgs["edgytest"] = "edgy"
+    mapLongArgs["notidy"] = "noclean"
+    mapLongArgs["oldprotocol"] = "oldproto"
+    mapLongArgs["postgresql"] = "postgres"
+    mapLongArgs["usage"] = "help"
+    for k, v in mapLongArgs.items():
+        old_v = Flags.get(k)
+        if old_v is not None:
+            Flags[v] = old_v
+            del Flags[k]
+
 
     # Handle usage-text exit
-    if (not FlagBuild) or FlagHelp:
-        UsageText()
+    if (not Flags["build"]) or Flags["help"]:
+        if not Flags["build"]:
+            msg = ("You did not specify build or --build (got:{})."
+                   "".format(Flags))
+        UsageText(msg=msg)
 
     #---------------------------------------------------------------------
     # Handle misc. flag issues.
-    if FlagEdgy:
-        FlagFakeMT4 = True
-    if FlagEdgy or FlagFakeMT4:
-        FlagOldProto = True
-    if FlagEdgy and FlagGitPull:
+    if Flags["edgy"]:
+        Flags["fakemt4"] = True
+    if Flags["edgy"] or Flags["fakemt4"]:
+        Flags["oldproto"] = True
+    if Flags["edgy"] and Flags["gitpull"]:
         customExit("Error: Can't use both --edgy and --gitpull")
 
     #---------------------------------------------------------------------
@@ -502,15 +528,16 @@ which contains the "mtsrc" directory.
 
     #---------------------------------------------------------------------
     # Misc. setup.
-    sys.path.insert(0, BINDIR)
+    if not BINDIR in os.environ["PATH"]:
+        os.environ["PATH"] = BINDIR + os.pathsep + os.environ["PATH"]
     which("g++")
     #---------------------------------------------------------------------
     # Handle some of the option flags.
-    if FlagDebug:
+    if Flags["debug"]:
         MAKEDEBUG = True
-    if FlagMakeProd:
+    if Flags["makeprod"]:
         MAKEPROD = True
-    if FlagNoClean:
+    if Flags["noclean"]:
         TIDYUP = False
 
     if MAKEPROD:
@@ -521,11 +548,11 @@ which contains the "mtsrc" directory.
     #---------------------------------------------------------------------
     # Handle "--gitreset".
 
-    if FlagGitReset:
-        if FlagGitPull:
+    if Flags["gitreset"]:
+        if Flags["gitpull"]:
             customExit("Error: Can't use both --gitreset and --gitpull\n")
 
-        if FlagSafe and os.path.isdir('minetest'):
+        if Flags["safe"] and os.path.isdir('minetest'):
             print("""
 Error:  "minetest" directory exists and  "--gitreset" needs  to delete
 it.  But can't because "--safe" was specified. If you wish to proceed,
@@ -547,8 +574,8 @@ move or rename the directory.
     #---------------------------------------------------------------------
     # Handle "--gitpull".
 
-    if FlagGitPull:
-        if FlagGitReset:
+    if Flags["gitpull"]:
+        if Flags["gitreset"]:
             customExit("Error: Can't use both --gitreset and --gitpull\n")
 
         TIDYUP = False
@@ -593,11 +620,11 @@ automatically.
     client_line = "-DBUILD_CLIENT=1"
     server_line = "-DBUILD_SERVER=1"
 
-    if FlagClient and not FlagServer:
+    if Flags["client"] and not Flags["server"]:
         client_line = "-DBUILD_CLIENT=1"
         server_line = "-DBUILD_SERVER=0"
 
-    if not FlagClient and FlagServer:
+    if not Flags["client"] and Flags["server"]:
         client_line = "-DBUILD_CLIENT=0"
         server_line = "-DBUILD_SERVER=1"
 
@@ -616,7 +643,7 @@ automatically.
 
     postgres_line = "-DENABLE_POSTGRESQL=0"
 
-    if FlagPostgres:
+    if Flags["postgres"]:
         print("* postgres (due to --postgresql)")
         postgres_line = "-DENABLE_POSTGRESQL=1"
     else:
@@ -627,7 +654,7 @@ automatically.
 
     redis_line = "-DENABLE_REDIS=0"
 
-    if FlagRedis:
+    if Flags["redis"]:
         print("* redis (due to --redis)")
         redis_line = "-DENABLE_REDIS=1"
     else:
@@ -662,11 +689,12 @@ gcc-bootstrap mode enabled.
     RESETDIR = (not os.path.isdir(PRODDIR)) or TIDYUP
 
     if RESETDIR:
-        if FlagSafe and os.path.isdir('minetest'):
+        if Flags["safe"] and os.path.isdir('minetest'):
             print("""
 
 Error:  We  need  to delete  the  existing "minetest"  directory,  but
-"--safe" is  specified.  If you'd like to preserve the directory, move#or rename it. Otherwise, drop the "--safe" switch.
+"--safe" is  specified.  If you'd like to preserve the directory, move
+or rename it. Otherwise, drop the "--safe" switch.
 """)
             exit(1)
         # PRODDIR is THISDIR/minetest
@@ -679,19 +707,23 @@ Error:  We  need  to delete  the  existing "minetest"  directory,  but
                 continue
             if sub_path == PRODDIR:
                 # ^ sub_path must be generated the same way as
-                #   PRODDIR (from THISDIR) for this to work.
+                #   PRODDIR (from THISDIR) for this to work (to
+                #   remove the linux-minetest-kit/minetest directory).
+                print("* removing old \"{}\"".format(sub_path))
                 shutil.rmtree(sub_path)
             elif sub.startswith("minetest-newline"):
                 shutil.rmtree(sub_path)
         print("* extracting in " + os.getcwd())
         mtNewLine = "minetest-newline"
-        if FlagEdgy:
+        if Flags["edgy"]:
             mtNewLine = "minetest-newline"
-        if FlagMinetest is not None:
-            if not os.path.isdir(FlagMinetest):
-                customExit("{} does not exist.".format(FlagMinetest))
-            print("* using \"{}\"".format(FlagMinetest))
-            shutil.copytree(FlagMinetest, PRODDIR, copy_function=copy2)
+        if Flags.get("MT_SRC") is not None:
+            if not os.path.isdir(Flags["MT_SRC"]):
+                customExit("{} does not exist.".format(Flags["MT_SRC"]))
+            print("* using \"{}\" (copying to \"{}\")"
+                  "".format(Flags["MT_SRC"], PRODDIR))
+            shutil.copytree(Flags["MT_SRC"], PRODDIR,
+                            copy_function=shutil.copy2)
         else:
             tarPath = os.path.join(BALLDIR, mtNewLine + ".tar.bz2")
             tar = tarfile.open(tarPath)
@@ -776,14 +808,14 @@ again.
     #---------------------------------------------------------------------
     # Set "$XCFLAGS" (extra compiler flags).
 
-    XCFLAGS = "-O2 -I" + INCDIR + ""
+    XCFLAGS = "-O2 -I" + INCDIR
     if MAKEDEBUG:
-        XCFLAGS = XCFLAGS + " -g"
+        XCFLAGS += " -g"
     if not PORTABLE:
         XCFLAGS = "-march=native " + XCFLAGS
-    XCFLAGS = XCFLAGS + " -Wl,-L" + LIBDIR + " -Wl,-R" + LIBDIR
+    XCFLAGS += " -Wl,-L" + LIBDIR + " -Wl,-R" + LIBDIR
     if os.path.isdir(LIB64DIR):
-        XCFLAGS = "$XCFLAGS -Wl,-L" + LIB64DIR + " -Wl,-R" + LIB64DIR
+        XCFLAGS += " -Wl,-L" + LIB64DIR + " -Wl,-R" + LIB64DIR
 
     print("XCFLAGS="+XCFLAGS)
 
@@ -793,17 +825,23 @@ again.
     WHICH_GCC = which("gcc")
     WHICH_GPP = which("g++")
     if not isExecutableFile(WHICH_GCC):
-        customExit("gcc is not present or not executable.")
+        if WHICH_GCC is not None:
+            print("gcc: {}".format(WHICH_GCC))
+        customExit("gcc is not present or not executable in {}."
+                   "".format(os.environ["PATH"]))
     if not isExecutableFile(WHICH_GPP):
-        customExit("g++ is not present or not executable.")
+        if WHICH_GPP is not None:
+            print("g++: {}".format(WHICH_GPP))
+        customExit("g++ is not present or not executable in {}."
+                   "".format(os.environ["PATH"]))
 
     #---------------------------------------------------------------------
     # Handle another "--edgy step".
 
-    if FlagEdgy:
+    if Flags["edgy"]:
         CM = 'src/defaultsettings.cpp'
         # TODO: finish converting this from perl
-        print("FlagEdgy changing {} is not yet implemented."
+        print("edgy changing {} is not yet implemented."
               "".format(CM))
         data = None
         try:
@@ -825,10 +863,10 @@ again.
     #---------------------------------------------------------------------
     # Handle "--fakemt4".
 
-    if FlagFakeMT4:
+    if Flags["fakemt4"]:
 
         CM = 'CMakeLists.txt'
-        print("FlagFakeMT4 changing {} is not yet implemented."
+        print("fakemt4 changing {} is not yet implemented."
               "".format(CM))
         # TODO: handle fakemt4
         # data = None
@@ -855,9 +893,9 @@ again.
     #---------------------------------------------------------------------
     # Handle "--oldproto".
 
-    if FlagOldProto:
+    if Flags["oldproto"]:
         CM = 'src/network/networkprotocol.h'
-        print("FlagOldProto changing {} is not yet implemented."
+        print("oldproto changing {} is not yet implemented."
               "".format(CM))
         # TODO: change protocol in CM:
         # data = None
@@ -902,27 +940,33 @@ again.
     cmdParts.append("-DCMAKE_CXX_FLAGS=\"{}\"".format(XCFLAGS))
     cmdParts.append("-DCMAKE_C_FLAGS_RELEASE=\"{}\"".format(XCFLAGS))
     cmdParts.append("-DCMAKE_CXX_FLAGS_RELEASE=\"{}\"".format(XCFLAGS))
+    print("")
+    print("")
+    print("Running cmake in {}:".format(os.getcwd()))
+    print(" ".join(cmdParts))
+    print("")
+    print("")
     RunCmd(cmdParts);
 
     # TODO: use some absolute pathnames as the Perl version does
     #---------------------------------------------------------------------
     # Replace some "-l..." switches with absolute pathnames.
 
-    #cmd = << "END"
-    #sed -e "s:-lIrrlicht:$IRRLICHT_LIBRARY:g"
-    #-e "s:-lleveldb:$LEVELDB_LIBRARY:g"
-    #-e "s:-lluajit-5.1:$LUA_LIBRARY:g"
-    #-e "s:-lsqlite3:$SQLITE3_LIBRARY:g"
-    #END
-    #cmd . = << 'END'
-    #-i `find . -type f -name link.txt`
-    #END
-    #cmd = &FixStr ( + cmd + )
-    #&RunCmd ($cmd);
+    # cmd = << "END"
+    # sed -e "s:-lIrrlicht:$IRRLICHT_LIBRARY:g"
+    # -e "s:-lleveldb:$LEVELDB_LIBRARY:g"
+    # -e "s:-lluajit-5.1:$LUA_LIBRARY:g"
+    # -e "s:-lsqlite3:$SQLITE3_LIBRARY:g"
+    # END
+    # cmd . = << 'END'
+    # -i `find . -type f -name link.txt`
+    # END
+    # cmd = &FixStr ( + cmd + )
+    # RunCmd (cmd.split(" "))  #TODO use cmdParts after editing it
 
     #---------------------------------------------------------------------
     # Build the program.
-    NUMJOBS = 2
+    NUMJOBS = 3
     RunCmd(["make", "clean"])
     RunCmd("make", "-j{}".format(NUMJOBS))
     serverlistDir = os.path.join(PRODDIR, "client", "serverlist")
@@ -948,8 +992,8 @@ again.
     pushd('games');
     cmd = ""
     gameNames = ["minimal", "amhi_game"]
-    if not FlagEdgy:
-        # TODO: What does FlagEdgy do here? Does it leave the old
+    if not Flags["edgy"]:
+        # TODO: What does Flags["edgy"] do here? Does it leave the old
         # Bucket_Game and do nothing else differently?
         # See mtcompile-program.pl
         gameNames.append("Bucket_Game")
@@ -973,7 +1017,7 @@ again.
         worldPath = os.path.join(WORLDS_PATH, worldName)
         if os.path.isdir(worldPath):
             shutil.rmtree(worldPath)
-        if FlagEdgy:
+        if Flags["edgy"]:
             continue
         tarPath = os.path.join(BALLDIR, worldName)
         if os.path.isfile(tarPath):
@@ -1104,7 +1148,7 @@ again.
             os.utime(ZIPFILE_PATH, (atime, latestStamp))
 
     print("Done\n")
-    #end main
+    # end main
 
 
 if __name__ == "__main__":
