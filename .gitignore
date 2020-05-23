@@ -12,3 +12,4 @@ nohup.out
 /webapp/settings-dump.txt
 /webapp/settingtypes-list.txt
 err.txt
+*.continuified.tmp
