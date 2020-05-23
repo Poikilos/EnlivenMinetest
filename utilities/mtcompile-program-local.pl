@@ -7,7 +7,8 @@
 # Name:     mtcompile-program.pl
 # Purpose:  Linux Minetest build script
 # License:  Creative Commons Attribution-NonCommercial-ShareAlike 4.0.
-#           Attribution: OldCoder (Robert Kiraly).
+#           Attribution: OldCoder (Robert Kiraly) and
+#                        Poikilos (Jake Gustafson)
 # Revision: See program parameters section
 
 #---------------------------------------------------------------------
@@ -651,6 +652,14 @@ rm -fr  $PRODDIR minetest-newline*              || exit 1
 mkdir   $PRODDIR minetest-newline               || exit 1
 rmdir   $PRODDIR minetest-newline               || exit 1
 END
+        my $CUSTOM_MT_SRC = "$ENV{'HOME'}/git/minetest";
+        if (-d $CUSTOM_MT_SRC) {
+            print("Using CUSTOM_MT_SRC $CUSTOM_MT_SRC as $PRODDIR\n");
+        $cmd = << "END";
+cp -R $CUSTOM_MT_SRC $PRODDIR                   || exit 1
+END
+        }
+        else {
         $cmd = << "END" if     $FlagEdgy;
 tar jxf $BALLDIR/minetest-edgytest.tar.bz2      || exit 1
 mv               minetest-edgytest* $PRODDIR    || exit 1
@@ -659,6 +668,7 @@ END
 tar jxf $BALLDIR/minetest-newline.tar.bz2       || exit 1
 mv               minetest-newline*  $PRODDIR    || exit 1
 END
+        }
         &RunCmd ($cmd);
     }
 
