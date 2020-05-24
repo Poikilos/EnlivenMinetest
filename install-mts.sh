@@ -227,7 +227,7 @@ END
         if [ ! -f "$PATCH_BUILD" ]; then
             customExit "$PATCH_BUILD must exist when using the --MT_SRC=<path> (custom local copy of minetest source) option"
         fi
-        echo "* starting PATCH_BUILD ($PATCH_BUILD build $server_option $extra_options $custom_src_option"
+        echo "* running PATCH_BUILD ($PATCH_BUILD build $server_option $extra_options $custom_src_option (writing output to `pwd`/program.log). This may take a while..."
         $PATCH_BUILD build $server_option $client_option $extra_options $custom_src_option >& program.log
     elif [ -f "mtcompile-program.pl" ]; then
         # perl mtcompile-program.pl build >& program.log

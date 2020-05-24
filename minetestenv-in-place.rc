@@ -51,8 +51,9 @@ ERROR:
 $1
 
 
+Waiting 3s before exit...
 END
-    sleep 10
+    sleep 3
     exit $errorCode
 }
 
