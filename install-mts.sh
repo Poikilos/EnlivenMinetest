@@ -122,14 +122,15 @@ do
     elif [ "@$var" = "@--client" ]; then
         ENABLE_CLIENT=true
     elif [ "@$var" = "@--clean" ]; then
-        enable_clean=true
+        #enable_clean=true
         echo "* --clean is deprecated."
     elif [ "@$var" = "@--no-server" ]; then
         ENABLE_CLIENT=true
         ENABLE_SERVER=false
     elif [ "@$var" = "@--noclean" ]; then
-        enable_clean=false
-        echo "* --noclean is deprecated."
+        #enable_clean=false
+        #echo "* --noclean is deprecated."
+        extra_options="$extra_options --noclean"
     elif [ "@$var" = "@--portable" ]; then
         extra_options="$extra_options --portable"
     else
@@ -137,9 +138,9 @@ do
     fi
 done
 
-if [ -z "$enable_clean" ]; then
-    enable_clean=true
-fi
+# if [ -z "$enable_clean" ]; then
+#     enable_clean=true
+# fi
 
 # echo "enable_clean=\"$enable_clean\"..."
 
