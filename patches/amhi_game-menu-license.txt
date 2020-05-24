@@ -1,0 +1,2 @@
+See https://git.minetest.org/minetest/minetest/raw/branch/master/LICENSE.txt
+and add 2020 Poikilos to the attribution.
