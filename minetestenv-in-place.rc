@@ -130,6 +130,7 @@ install_shortcut(){
     if [ -d "$HOME/Desktop" ]; then
         cp -f "$dest_icon" "$HOME/Desktop/$_DST_SHORTCUT_NAME"
     fi
+    chmod +x "$HOME/Desktop/$_DST_SHORTCUT_NAME"
     if [ "@$enable_clear_icon_cache" = "@true" ]; then
         if [ -f "`command -v gnome-shell`" ]; then
             echo "Refreshing Gnome icons..."
