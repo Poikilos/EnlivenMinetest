@@ -14,11 +14,13 @@ if [ -z "$KEEP_MAKE" ]; then
 fi
 if [ -f bin/minetest ]; then
     if [ "$KEEP_MAKE" != "1" ]; then
-        echo "* running 'make clean' in `pwd`..."
+        echo "* [build-minetest-here.sh] running 'make clean' in `pwd`..."
         make clean || customExit "$0: make clean failed in '`pwd`'."
     else
-        echo "* keeping existing intermediate build files in `pwd` (KEEP_MAKE=$KEEP_MAKE)..."
+        echo "* [build-minetest-here.sh] keeping existing intermediate build files in `pwd` (KEEP_MAKE=$KEEP_MAKE)..."
     fi
+else
+    echo "* [build-minetest-here.sh] There is no bin/minetest in `pwd`."
 fi
 # echo "BREAKPOINT 20s..."
 # sleep 20
@@ -43,7 +45,7 @@ elif [ "@$RUN_IN_PLACE" = "@no" ]; then
 elif [ "@$RUN_IN_PLACE" = "@0" ]; then
     RUN_IN_PLACE=0
 else
-    echo "ERROR: There is an unknown value for RUN_IN_PLACE: '$RUN_IN_PLACE'"
+    echo "[build-minetest-here.sh] ERROR: There is an unknown value for RUN_IN_PLACE: '$RUN_IN_PLACE'"
     exit 1
 fi
 echo "RUN_IN_PLACE=$RUN_IN_PLACE"
@@ -62,11 +64,11 @@ fi
 if [ ! -z "$BUILD_SERVER" ]; then
     server_line="-DBUILD_SERVER=$BUILD_SERVER"
 fi
-
+echo "* [build-minetest-here.sh] running cmake in `pwd`..."
 cmake . $server_line $client_line -DOpenGL_GL_PREFERENCE=GLVND -DENABLE_GETTEXT=1 -DENABLE_FREETYPE=1 -DENABLE_LEVELDB=1 -DENABLE_REDIS=1 -DRUN_IN_PLACE=$RUN_IN_PLACE && make -j$(grep -c processor /proc/cpuinfo)  || customExit "$0: Build failed in '`pwd`'."
 echo
 if [ "@$RUN_IN_PLACE" = "@1" ]; then
-    echo "WARNING: do not do make install with -DRUN_IN_PLACE=$RUN_IN_PLACE!"
+    echo "[build-minetest-here.sh] WARNING: do not do make install with -DRUN_IN_PLACE=$RUN_IN_PLACE!"
 fi
 echo
 #/home/owner/git/EnlivenMinetest/install-minetest.sh says:
