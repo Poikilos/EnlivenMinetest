@@ -61,7 +61,7 @@ INSTALL_MTS_NAME="install-mts.sh"
 echo "* starting install from source..."
 date
 
-enable_server=true
+ENABLE_SERVER=true
 dest_programs="$HOME"
 #NOTE: $HOME is still used further down, for $HOME/.* and $HOME/i_am_dedicated_minetest_server flag file (which can be empty)
 #TODO: change $HOME/i_am_dedicated_minetest_server to $HOME/.config/EnlivenMinetest/i_am_dedicated_minetest_server or rc file
@@ -108,11 +108,11 @@ fi
 #pushd "$EXTRACTED_SRC_PATH" || customExit "pushd \"$EXTRACTED_SRC_PATH\" failed in \"`pwd`\""
 
 extra_options=""
-server_option="--server"
 #enable_client_only=false
 
 custom_src_option=""
-PATCH_BUILD=$REPO_PATH/mtcompile-program-local.py
+#PATCH_BUILD=$REPO_PATH/utilities/mtcompile-program-local.pl
+PATCH_BUILD=$REPO_PATH/utilities/mtcompile-program-local.py
 # ^ custom_src_option requires $PATCH_BUILD to exist.
 
 for var in "$@"
@@ -126,7 +126,7 @@ do
         echo "* --clean is deprecated."
     elif [ "@$var" = "@--no-server" ]; then
         ENABLE_CLIENT=true
-        server_option=""
+        ENABLE_SERVER=false
     elif [ "@$var" = "@--noclean" ]; then
         enable_clean=false
         echo "* --noclean is deprecated."
@@ -161,7 +161,14 @@ fi
 if [ "@$ENABLE_CLIENT" = "@true" ]; then
     this_src_flag_path="$good_src_mt"
     this_dst_flag_path="$good_dst_mt"
-    extra_options="--client"
+fi
+server_option="--server"
+client_option="--client"
+if [ "@$ENABLE_SERVER" != "@true" ]; then
+    server_option=""
+fi
+if [ "@$ENABLE_CLIENT" != "@true" ]; then
+    client_option=""
 fi
 #if [ -f "$this_src_flag_path" ]; then
     #rm -f "$this_src_flag_path"
@@ -187,7 +194,7 @@ if [ "@$has_any_binary" == "@true" ]; then
             echo "* enabling compile (since no `pwd`/minetest/bin/minetest but client install is enabled)"
         fi
     fi
-    if [ "@$enable_server" = "@true" ]; then
+    if [ "@$ENABLE_SERVER" = "@true" ]; then
         if [ ! -f "$good_src_mts" ]; then
             enable_compile=true
             echo "* enabling compile (since no `pwd`/minetest/bin/minetestserver)"
@@ -196,6 +203,7 @@ if [ "@$has_any_binary" == "@true" ]; then
 else
     echo "* enabling compile since neither \"$good_src_mts\" nor \"$good_src_mt\" are present."
 fi
+
 if [ "@$enable_compile" = "@true" ]; then
     echo "* checking if the compile library script extracted the program source yet ($code_flag_dir_path)..."
     if [ ! -d "$code_flag_dir_path" ]; then
@@ -219,16 +227,16 @@ END
             customExit "$PATCH_BUILD must exist when using the --MT_SRC=<path> (custom local copy of minetest source) option"
         fi
         echo "* starting PATCH_BUILD ($PATCH_BUILD build $server_option $extra_options $custom_src_option"
-        $PATCH_BUILD build $server_option $extra_options $custom_src_option >& program.log
+        $PATCH_BUILD build $server_option $client_option $extra_options $custom_src_option >& program.log
     elif [ -f "mtcompile-program.pl" ]; then
         # perl mtcompile-program.pl build >& program.log
         echo "Compiling via perl (this may take a while--output redirected to `pwd`/program.log)..."
-        perl mtcompile-program.pl build $server_option $extra_options >& program.log
+        perl mtcompile-program.pl build $server_option $client_option $extra_options >& program.log
     else
         # NOTE: no pl in $EXTRACTED_SRC_NAME, assuming bash:
         if [ -f mtcompile-program.sh ]; then
         echo "Compiling via bash (this may take a while--output redirected to `pwd`/program.log)..."
-            bash -e mtcompile-program.sh build $server_option $extra_options >& program.log
+            bash -e mtcompile-program.sh build $server_option $client_option $extra_options >& program.log
         else
             echo
             echo "ERROR: Install cannot finish since there is no"
@@ -282,6 +290,13 @@ old_release_version=
 detect_installed_mt_version "1st" "bak"
 echo "* making temporary copy at $tmp_mt_copy..."
 cp -R "$EXTRACTED_SRC_PATH/minetest" "$tmp_mt_copy"
+if [ -f "$EXTRACTED_SRC_PATH/release.txt" ]; then
+    cp $EXTRACTED_SRC_PATH/release.txt "$tmp_mt_copy/"
+else
+    if [ ! -f "$tmp_mt_copy/release.txt" ]; then
+        echo "[install-mts.sh] WARNING: $tmp_mt_copy/release.txt and $EXTRACTED_SRC_PATH/release.txt are missing."
+    fi
+fi
 detect_mt_version_at "$tmp_mt_copy"
 installOrUpgradeMinetest "$tmp_mt_copy" "$INSTALL_PATH"
 echo "  - old:$old_release_version; new:$new_release_version"
@@ -313,7 +328,7 @@ ERROR: enable_run_after_compile is true, but
   '$scripting_rc_path'
 END
         fi
-        #popd
+        # popd
     else
         cat <<END
 ERROR: enable_run_after_compile is true, but
