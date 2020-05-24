@@ -207,16 +207,16 @@ for changes and progress on implementing features from
 mtcompile-program.pl.
 """
 
-#---------------------------------------------------------------------
+# ----------------------------------------------------------------------
 #                            module setup
-#---------------------------------------------------------------------
+# ----------------------------------------------------------------------
 
 # TODO: Trap warnings to mimic the Perl version?
 #SIG["__WARN__"] = sub { die @_; }
 
-#---------------------------------------------------------------------
+# ----------------------------------------------------------------------
 #                         program parameters
-#---------------------------------------------------------------------
+# ----------------------------------------------------------------------
 
 def streamEdit(inPath, replacements):
     """
@@ -288,16 +288,16 @@ GITURL = 'http://git.minetest.org/minetest/minetest.git'
 IE = 'Internal error'
 Flags = {}
 
-#---------------------------------------------------------------------
+# ----------------------------------------------------------------------
 #                          global variables
-#---------------------------------------------------------------------
+# ----------------------------------------------------------------------
 
 PROGNAME = None  # Program name without path
 DirStack = [os.getcwd()]  # Directory stack
 
-#---------------------------------------------------------------------
+# ----------------------------------------------------------------------
 #                        used by "--oldproto"
-#---------------------------------------------------------------------
+# ----------------------------------------------------------------------
 
 segment = """
 set(VERSION_MAJOR 0)
@@ -319,9 +319,9 @@ if VERSION_EXTRA:
     if CMAKE_BUILD_TYPE STREQUAL Debug:
 """
 
-#---------------------------------------------------------------------
+# ----------------------------------------------------------------------
 #                     low-level utility routines
-#---------------------------------------------------------------------
+# ----------------------------------------------------------------------
 
 
 
@@ -485,13 +485,13 @@ def UsageText(msg=""):
 
 def main():
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Misc. variables.
 
     #my $cmd;                    # Shell command string
     #my $tmpStr;                    # Scratch
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Mode flags.
 
     # These may be modified, indirectly, by command-line switches.
@@ -522,13 +522,13 @@ def main():
 
     Flags["oldproto"] = True
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Initial setup.
 
-#select STDERR; $| = ONE;    # Force STDERR flush on write
-#select STDOUT; $| = ONE;    # Force STDOUT flush on write
+    #select STDERR; $| = ONE;    # Force STDERR flush on write
+    #select STDOUT; $| = ONE;    # Force STDOUT flush on write
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Get absolute path for script directory.
 
     # As a side effect, this function call initializes the global variable
@@ -537,7 +537,7 @@ def main():
 
     THISDIR = GetProgDir()
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Parse command-line arguments.
 
     if not GetOptions(nonBoolNames=["MT_SRC"], bareArgs=["build"]):
@@ -562,7 +562,7 @@ def main():
                    "".format(Flags))
         UsageText(msg=msg)
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Handle misc. flag issues.
     if Flags["edgy"]:
         Flags["fakemt4"] = True
@@ -571,7 +571,7 @@ def main():
     if Flags["edgy"] and Flags["gitpull"]:
         customExit("Error: Can't use both --edgy and --gitpull")
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Confirm that script is running in the right place.
 
     if not os.path.isdir('mtsrc'):
@@ -581,7 +581,7 @@ which contains the "mtsrc" directory.
 """)
         exit(1)
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Additional directory paths.
 
     BALLDIR = os.path.join(THISDIR, "mtsrc", "newline")
@@ -593,12 +593,12 @@ which contains the "mtsrc" directory.
     LIBDIR = os.path.join(TOOLS_PREFIX, "lib")
     LIB64DIR = os.path.join(TOOLS_PREFIX, "lib64")
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Misc. setup.
     if not BINDIR in os.environ["PATH"]:
         os.environ["PATH"] = BINDIR + os.pathsep + os.environ["PATH"]
     which("g++")
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Handle some of the option flags.
     if Flags["debug"]:
         MAKEDEBUG = True
@@ -612,7 +612,7 @@ which contains the "mtsrc" directory.
         PORTABLE = True
         TIDYUP = True
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Handle "--gitreset".
 
     if Flags["gitreset"]:
@@ -638,7 +638,7 @@ move or rename the directory.
         print("  " + " ".join(cmdParts))
         RunCmd(cmdParts);
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Handle "--gitpull".
 
     if Flags["gitpull"]:
@@ -681,7 +681,7 @@ automatically.
             RunCmd(cmdParts, exit_on_fail=false)
             popd();
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Handle "--client" and "--server".
 
     client_line = "-DBUILD_CLIENT=1"
@@ -695,7 +695,7 @@ automatically.
         client_line = "-DBUILD_CLIENT=0"
         server_line = "-DBUILD_SERVER=1"
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Status messages.
 
     NUBDF = "not used by default in this version"
@@ -705,7 +705,7 @@ automatically.
 * sqlite3 (by default)
 """)
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Handle "--postgres".
 
     postgres_line = "-DENABLE_POSTGRESQL=0"
@@ -716,7 +716,7 @@ automatically.
     else:
         print("(skipping postgresql --"+NUBDF)
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Handle "--redis".
 
     redis_line = "-DENABLE_REDIS=0"
@@ -727,7 +727,7 @@ automatically.
     else:
         print("(skipping redis --"+NUBDF)
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # "--portable" requires the bootstrapped "gcc".
 
     if PORTABLE and not os.path.isfile(os.path.join(BINDIR, "gcc")):
@@ -738,7 +738,7 @@ gcc-bootstrap mode enabled.
 """)
         exit(1)
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Identify "gcc" major release number.
 
     #my ($GCCVER) = $tmpStr =~ m@\ngcc.* (\d+)*\.\d+\.@
@@ -750,7 +750,7 @@ gcc-bootstrap mode enabled.
     else:
         customExit("Error: Not able to identify gcc release")
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Replace existing "minetest" directory.
 
     RESETDIR = (not os.path.isdir(PRODDIR)) or TIDYUP
@@ -806,7 +806,7 @@ or rename it. Otherwise, drop the "--safe" switch.
     os.chdir(PRODDIR)
     # or die "$IE #505850\n";
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Sanity check.
 
     if not os.path.isfile('CMakeLists.txt'):
@@ -820,7 +820,7 @@ again.
 """)
         exit(1)
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Delete leftover temporary files.
     tmpFileNames = [
         "C.includecache",
@@ -864,7 +864,7 @@ again.
             elif endsWithAny(subPath, tmpFilePaths + tmpExtensions):
                 os.remove(subPath)
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Define paths for some ".a" library files.
 
     IRRLICHT_LIBRARY = os.path.join(LIBDIR, "libIrrlicht.a")
@@ -872,7 +872,7 @@ again.
     LUA_LIBRARY = os.path.join(LIBDIR, "libluajit-5.1.a")
     SQLITE3_LIBRARY = os.path.join(LIBDIR, "libsqlite3.a")
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Set "$XCFLAGS" (extra compiler flags).
 
     XCFLAGS = "-O2 -I" + INCDIR
@@ -886,7 +886,7 @@ again.
 
     print("XCFLAGS="+XCFLAGS)
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Get pathnames for "gcc" and "g++" compilers.
 
     WHICH_GCC = which("gcc")
@@ -902,7 +902,7 @@ again.
         customExit("g++ is not present or not executable in {}."
                    "".format(os.environ["PATH"]))
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Handle another "--edgy step".
 
     if Flags["edgy"]:
@@ -927,7 +927,7 @@ again.
         #         OFD.write(data)
         # except FileNotFoundError:
         #     customExit("Internal error 0777")
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Handle "--fakemt4".
 
     if Flags["fakemt4"]:
@@ -957,7 +957,7 @@ again.
         #     OFD.write(data)
         #     OFD.close()  # or die "Internal error 0808\n";
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Handle "--oldproto".
 
     if Flags["oldproto"]:
@@ -976,7 +976,7 @@ again.
         # with open("CM", 'w') as OFD:  # or  die "Internal error 0715\n";
         #     OFD.write(data)
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Run "cmake".
     cmdParts = ["cmake"]
     cmdParts.append("-DCMAKE_BUILD_TYPE=release")
@@ -1022,7 +1022,7 @@ again.
     os.system(" ".join(cmdParts))
 
     # TODO: use some absolute pathnames as the Perl version does
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Replace some "-l..." switches with absolute pathnames.
 
     replacements = {
@@ -1037,7 +1037,7 @@ again.
             if name == "link.txt":
                 streamEdit(subPath, replacements)
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Build the program.
     NUMJOBS = 3
     print("* running make in {}...".format(os.getcwd()))
@@ -1050,7 +1050,7 @@ again.
     dstAKPath = os.path.join(PRODDIR, "arrowkeys.txt")
     shutil.copy(os.path.join(BALLDIR, "arrowkeys.txt"), dstAKPath)
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Add preloaded cache.
     thisCache = os.path.join(PRODDIR, "cache")
     if os.path.isdir(thisCache):
@@ -1060,7 +1060,7 @@ again.
     tar.extractall(path=PRODDIR)
     tar.close()
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Add "_games".
 
     pushd('games');
@@ -1086,27 +1086,29 @@ again.
             zf.extractall(gamePath)  # pwd means password in this case
     popd();
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Add worlds.
 
-    #pushd('worlds');
+    # pushd('worlds');
     WORLDS_PATH = os.path.join(PRODDIR, "worlds")
     for worldName in ["Bucket_City", "Wonder_World"]:
         worldPath = os.path.join(WORLDS_PATH, worldName)
+        tarPath = os.path.join(BALLDIR, worldName + ".taz.bz2")
         if os.path.isdir(worldPath):
-            shutil.rmtree(worldPath)
+            if os.path.isfile(tarPath):
+                # Only remove the old one if there is a new one.
+                shutil.rmtree(worldPath)
         if Flags["edgy"]:
             continue
-        tarPath = os.path.join(BALLDIR, worldName)
         if os.path.isfile(tarPath):
             tar = tarfile.open(tarPath)
             tar.extractall(path=WORLDS_PATH)
             tar.close()
         else:
             print("WARNING: \"{}\" is missing.".format(tarPath))
-    #popd();
+    # popd();
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Strip the executable(s).
 
     if not MAKEDEBUG:
@@ -1124,7 +1126,7 @@ again.
                     print("strip (optimizing the executable size)"
                           " failed for {}".format(sub_path))
 
-    #---------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Additional cleanup.
 
     if TIDYUP:
@@ -1163,7 +1165,7 @@ again.
                     # .[a-z]\*
                     os.remove(subPath)
 
-        #---------------------------------------------------------------------
+        # --------------------------------------------------------------
         # Finish required "--portable" operations.
 
     if PORTABLE:
@@ -1196,7 +1198,7 @@ again.
             os.chmod(progWrapPath, 0o755)
 
         # popd()
-#---------------------------------------------------------------------
+        # --------------------------------------------------------------
 
         if MAKEPROD:
             # os.chdir(THISDIR)  # or die "$IE #505833\n";
