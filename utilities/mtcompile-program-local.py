@@ -61,6 +61,7 @@ def which(prog):
     for thisPath in os.environ["PATH"].split(os.pathsep):
         sub_path = os.path.join(thisPath, prog)
         if os.path.isfile(sub_path):
+            print("* using {} as {}".format(sub_path, prog))
             return sub_path
     return ""
 
@@ -87,7 +88,7 @@ def endsWithAny(haystack, needles):
 
 def containsAny(haystack, needles):
     for needle in needles:
-        if haystack.contains(needle):
+        if needle in haystack:
             return True
     return False
 
@@ -97,6 +98,8 @@ def startsWithAny(haystack, needles):
         if haystack.startswith(needle):
             return True
     return False
+
+
 # Label must be single-quoted here
 USAGE_TEXT = """
 Usage: {PROGNAME} --options --build
@@ -239,6 +242,7 @@ def streamEdit(inPath, replacements):
                 line = re.sub(k, v, line)
             sources.write(line)
 
+
 def _UNUSED_evalSed(line, sedStr):
     """
     Mimic sed.
@@ -358,7 +362,10 @@ def execute(cmd, shell=True):
         raise subprocess.CalledProcessError(return_code, cmd)
 
 
-def RunCmd(cmdParts, exitOnFail=True, shell=True):
+def RunCmd(cmdParts, shell=True):
+    """
+    :raises RuntimeError: The process returns a non-zero exit code.
+    """
     # Popen can get confused when arguments contain quotes
     # (see <https://stackoverflow.com/questions/14928860/passing-double-
     # quote-shell-commands-in-python-to-subprocess-popen>) such as
@@ -378,30 +385,34 @@ def RunCmd(cmdParts, exitOnFail=True, shell=True):
         for line in execute(cmdParts, shell=shell):
             print(line, end="")
     except subprocess.CalledProcessError as ex:
-        msg = ("The process '{}' ended with error code {}."
+        msg = ("The process '{}' failed with error code {}."
                "".format(" ".join(ex.cmd), ex.returncode))
-        if exitOnFail:
-            print("ERROR: " + msg)
-            exit(ex.returncode)
-        else:
-            print("WARNING: " + msg)
+        raise RuntimeError(msg)
 
 
 
 def FixStr(s):
-    # TODO: make sure this does everything the original does
-    # (see mtcompile-program.pl)
     if s is None:
         return ""
+    s = re.sub("\s+", " ", s).strip()
     return s.strip()
 
 
 def GetProgDir():
-    # TODO: finish converting this from Perl
-    # - [x] set PROGNAME
+    """
+    Set the PROGNAME global to this script's name and find the current
+    working directory in terms of its real path (following symbolic
+    links).
+
+    This differs from mtcompile-program.pl in that this version gets
+    the current directory, so that this script doesn't have to be in the
+    linux-minetest-kit directory. However, due to that, the current
+    directory must be linux-minetest-kit when running this function
+    (when running this script).
+    """
     global PROGNAME
     PROGNAME = os.path.basename(__file__)
-    return os.getcwd()
+    return os.path.realpath(os.getcwd())
 
 
 def GetOptions(nonBoolNames=[], bareArgs=[]):
@@ -776,7 +787,7 @@ or rename it. Otherwise, drop the "--safe" switch.
         if Flags.get("MT_SRC") is not None:
             if not os.path.isdir(Flags["MT_SRC"]):
                 customExit("{} does not exist.".format(Flags["MT_SRC"]))
-            print("* using \"{}\" (copying to \"{}\")"
+            print("* using custom MT_SRC \"{}\" (copying to \"{}\")"
                   "".format(Flags["MT_SRC"], PRODDIR))
             shutil.copytree(Flags["MT_SRC"], PRODDIR,
                             copy_function=shutil.copy2)
@@ -1003,8 +1014,12 @@ again.
     print(" ".join(cmdParts))
     print("")
     print("")
-    RunCmd(cmdParts[:1] + [" ".join(cmdParts[1:])], shell=False)
+    # RunCmd(cmdParts, shell=True)
+    # ^ fails due to excessive automatic quotes around params by python
+    # RunCmd(cmdParts[:1] + [" ".join(cmdParts[1:])], shell=False)
     # ^ must be false to avoid inserting quotes automatically
+    # ^ still has problems
+    os.system(" ".join(cmdParts))
 
     # TODO: use some absolute pathnames as the Perl version does
     #---------------------------------------------------------------------
@@ -1056,13 +1071,16 @@ again.
         # Bucket_Game and do nothing else differently?
         # See mtcompile-program.pl
         gameNames.append("Bucket_Game")
-    gamePaths = [os.path.join(PRODDIR, gName) for gName in gameNames]
-    print("* purging gamepaths: {}".format(gamePaths))
+    # gamePaths = [os.path.join(PRODDIR, gName) for gName in gameNames]
+    # print("* purging gamepaths: {}".format(gamePaths))
     for gameName in gameNames:
         gamePath = os.path.join(PRODDIR, gameName)
         if os.path.isdir(gamePath):
+            print("* replacing {}".format(gamePath))
             shutil.rmtree(gamePath)
-        zipPath = os.path.Join(BALLDIR, gameName + ".zip")
+        else:
+            print("* adding {}".format(gamePath))
+        zipPath = os.path.join(BALLDIR, gameName + ".zip")
         if os.path.isfile(zipPath):
             zf = ZipFile(zipPath)
             zf.extractall(gamePath)  # pwd means password in this case
@@ -1092,11 +1110,19 @@ again.
     # Strip the executable(s).
 
     if not MAKEDEBUG:
-        for thisBinName in ["minetest", "minetestserver"]:
-            thisBinPath = os.path.join(PRODDIR, "bin", thisBinName)
-            if not os.path.isfile(thisBinPath):
+        prodBinDir = os.path.join(PRODDIR, "bin")
+        for sub in os.listdir(prodBinDir):
+            if sub.startswith("."):
                 continue
-            RunCmd(["strip", thisBinPath])
+            sub_path = os.path.join(prodBinDir, sub)
+            if not os.path.isfile(sub_path):
+                continue
+            if sub.startswith("minetest"):
+                try:
+                    RunCmd(["strip", sub_path])
+                except RuntimeError:
+                    print("strip (optimizing the executable size)"
+                          " failed for {}".format(sub_path))
 
     #---------------------------------------------------------------------
     # Additional cleanup.
