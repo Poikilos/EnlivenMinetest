@@ -342,7 +342,8 @@ sub Main
 
 #---------------------------------------------------------------------
 # Command-line option flags.
-
+    my $MT_SRC       = FALSE ;
+    #my $MT_DST       = FALSE ;
     my $FlagBuild    = FALSE ;
     my $FlagClient   = FALSE ;
     my $FlagDebug    = FALSE ;
@@ -405,6 +406,8 @@ sub Main
         "safe"          => \$FlagSafe       ,
         "server"        => \$FlagServer     ,
         "usage"         => \$FlagHelp       ,
+        #"MT_SRC"        => \$MT_SRC         ,
+        #"MT_DST"        => \$MT_DST         ,
     );
                                 # Handle usage-text exit
     &UsageText() if !$FlagBuild || $FlagHelp || scalar (@ARGV);
@@ -652,12 +655,14 @@ rm -fr  "$PRODDIR" minetest-newline*              || exit 1
 mkdir   "$PRODDIR" minetest-newline               || exit 1
 rmdir   "$PRODDIR" minetest-newline               || exit 1
 END
-        my $CUSTOM_MT_SRC = "$ENV{'HOME'}/git/minetest";
-        if (-d $CUSTOM_MT_SRC) {
-            print("Using CUSTOM_MT_SRC $CUSTOM_MT_SRC as $PRODDIR\n");
+        my $MT_SRC = "$ENV{'HOME'}/git/minetest";
+        if (-d $MT_SRC) {
+        # if ($MT_SRC) {
+
+            print("Using MT_SRC $MT_SRC as $PRODDIR\n");
             $cmd = << "END";
 rm -fr "$PRODDIR"  minetest-newline*              || exit 1
-cp -R "$CUSTOM_MT_SRC" "$PRODDIR"                   || exit 1
+cp -R "$MT_SRC" "$PRODDIR"                        || exit 1
 END
         }
         else {
