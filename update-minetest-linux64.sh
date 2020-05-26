@@ -20,9 +20,14 @@ TRY_MT_BASH_RC_PATH="$TRY_CURRENT_MT_SCRIPTS_DIR/$MT_BASH_RC_NAME"
 if [ -f "$TRY_MT_BASH_RC_PATH" ]; then
     CURRENT_MT_SCRIPTS_DIR="$TRY_CURRENT_MT_SCRIPTS_DIR"
     MT_BASH_RC_PATH="$TRY_MT_BASH_RC_PATH"
-#fi
+fi
 #if [ ! -f "$MT_BASH_RC_PATH" ]; then
-else
+if [ ! -d "$REPO_PATH" ]; then
+    if [ -f "$MT_BASH_RC_PATH" ]; then
+        echo "* updating \"$MT_BASH_RC_PATH\"..."
+        rm $MT_BASH_RC_PATH
+    fi
+    # ^ Always upgrade the rc file manually if it is not in the repo.
     if [ ! -d "$CURRENT_MT_SCRIPTS_DIR" ]; then
         mkdir -p "$CURRENT_MT_SCRIPTS_DIR"
     fi
@@ -157,7 +162,9 @@ if [ "@$old_release_version" = "@$new_release_version" ]; then
     #show_os_release
     echo
     echo
-    echo "Version $new_release_version is already installed at $INSTALL_PATH. There is nothing to do."
+    echo "* Adding the icon is complete. See the Desktop or applications (under Games usually--otherwise, search for Final Minetest in the Activities menu if in GNOME or GNOME-based Ubuntu versions 18.04 or later and you do not have a desktop icons extension enabled)."
+    echo
+    echo "Version $new_release_version is already installed at $INSTALL_PATH. There is nothing more to do."
     echo
     exit 0
 fi
@@ -181,9 +188,23 @@ unzip "$DL_PATH" > /dev/null || customExit "Extracting $DL_PATH failed."
 
 UNUSED_MT_PATH="$INSTALL_PATH.$old_release_version"
 installOrUpgradeMinetest "$EXTRACTED_PATH" "$INSTALL_PATH" "$UNUSED_MT_PATH"
-echo "Installing Final Minetest $new_release_version to $INSTALL_PATH is complete."
+if [ $? -eq 2 ]; then
+    echo "Final Minetest wasn't upgraded. See the message above."
+elif [ $? -eq 0 ]; then
+    echo "Installing Final Minetest $new_release_version to $INSTALL_PATH is complete."
+else
+    echo "(installOrUpgradeMinetest failed with error code $?)"
+fi
 echo "  - old:$old_release_version; new:$new_release_version"
 echo "* installing ENLIVEN..."
 installOrUpgradeENLIVEN "$INSTALL_PATH"
+if [ $? -eq 2 ]; then
+    echo "  * skipped"
+elif [ $? -eq 0 ]; then
+    echo "  * Installing ENLIVEN to $INSTALL_PATH/games is complete."
+else
+    echo "(installOrUpgradeMinetest failed with error code $?)"
+fi
+
 install_mt_in_place_shortcut "$SHORTCUT_PATH" "$INSTALL_PATH"
 echo

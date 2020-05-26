@@ -326,6 +326,8 @@ deleteIfExists(){
     fi
 }
 
+
+
 installOrUpgradeMinetest(){
     # You must set the following variables or sequential parameters:
     # 1. NEW_VERSION_PATH
@@ -397,7 +399,8 @@ installOrUpgradeMinetest(){
             fi
 
             if [ -d "$VERSIONED_MT_PATH" ]; then
-                customExit "You already have an old copy of \"$VERSIONED_MT_PATH\". You must rename it or backup your world and other data then remove it before proceeding."
+                echo "You already have an old copy of \"$VERSIONED_MT_PATH\". You must rename it if you want to reinstall without losing any extra files you may have put there before upgrading to the current version."
+                return 2
             fi
             if [ ! -f "`command -v basename`" ]; then
                 customExit "Install cannot continue because the basename command is not present."
@@ -740,7 +743,8 @@ installOrUpgradeENLIVEN() {
         customExit "[installOrUpgradeENLIVEN] The REPO_PATH is not set."
     fi
     if [ ! -d "$REPO_PATH" ]; then
-        customExit "[installOrUpgradeENLIVEN] The REPO_PATH does not exist: \"$REPO_PATH\""
+        echo "  * INFO: [installOrUpgradeENLIVEN] Installing ENLIVEN to games will be skipped since you are not using \"$REPO_PATH\""
+        return 2
     fi
     if [ ! -z "$1" ]; then
         install_dest="$1"
