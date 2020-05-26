@@ -580,7 +580,7 @@ install_git_mod_here(){
         # echo "  * updating '`pwd`' from git..."
         GIT_OUTPUT=$(git pull)
         if [ "$GIT_OUTPUT" != "Already up to date." ]; then
-            echo "$GIT_OUTPUT"
+            echo "  $GIT_OUTPUT"
         fi
         if [ $? -ne 0 ]; then
             echo "WARNING: (install_git_mod_here) 'git pull' failed in '`pwd`'"
