@@ -50,6 +50,9 @@ if [ ! -d "$REPO_PATH" ]; then
         sleep 10
         exit 1
     fi
+else
+    echo "* using existing $MT_BASH_RC_PATH"
+    echo "  * to update it, run: cd \"$REPO_PATH\" && git pull"
 fi
 if [ ! -f "$MT_BASH_RC_PATH" ]; then
     echo
@@ -59,7 +62,7 @@ if [ ! -f "$MT_BASH_RC_PATH" ]; then
     exit 1
 fi
 source $MT_BASH_RC_PATH
-# ^ same as install-mts.sh, versionize.sh
+# ^ same as install-mts.sh, versionize.sh, minetestenv.rc
 
 #INSTALL_SCRIPT_NAME="update-minetest-linux64.sh"
 
@@ -79,7 +82,7 @@ fi
 SHORTCUT_PATH="$INSTALL_PATH/misc/net.minetest.minetest.desktop"
 TRY_ORG_PATH="$INSTALL_PATH/misc/org.minetest.minetest.desktop"
 if [ -f "$TRY_ORG_PATH" ]; then
-    SHORTCUT_PATH="$TRY_ORG_PATH"
+    SHORTCUT_PATH="$TRY_ORG_PATH"ungitify_mod
 fi
 
 mkdir -p "$EM_TMP"
@@ -155,6 +158,60 @@ fi
 RELEASE_TXT_URL="https://downloads.minetest.org/release.txt"
 detect_mt_version_at "$EM_TMP" "https://downloads.minetest.org/release.txt" "new"
 
+findAndInstallENLIVENOrAskDL() {
+    if [ ! -d "$INSTALL_PATH/games/ENLIVEN" ]; then
+        if [ ! -d "$REPO_PATH" ]; then
+            if [ -f "`command -v git`" ]; then
+                mkdir -p "$REPO_PATH"
+                rmdir --ignore-fail-on-non-empty "$REPO_PATH"
+                git clone https://github.com/poikilos/EnlivenMinetest "$REPO_PATH"
+            else
+                echo "* INFO: Installing ENLIVEN has been skipped. This script and the ENLIVEN build script require git for that. On Ubuntu or Debian, first try 'sudo apt-get -y install git' or if on Fedora, try 'sudo dnf -y install git'. Otherwise, try to find git in your \"Software\" or other software center application."
+            fi
+        else
+            echo "* ENLIVEN build scripts were detected in: $REPO_PATH"
+            echo "  To update them, run: cd \"$REPO_PATH\" && git pull"
+        fi
+    fi
+    if [ -d "$REPO_PATH" ]; then
+        # If it didn't
+        installOrUpgradeENLIVEN "$INSTALL_PATH"
+        code=$?
+        if [ $code -eq 2 ]; then
+            echo "  * skipped"
+        elif [ $code -eq 0 ]; then
+            echo "  * Installing ENLIVEN to $INSTALL_PATH/games is complete."
+        else
+            echo "(installOrUpgradeMinetest failed with error code $code)"
+        fi
+    fi
+}
+
+installAmhiPatchIfPresent() {
+    aGameID=amhi_game
+    aMinetest="$INSTALL_PATH"
+    if [ -d "$aMinetest/games/amhi_game" ]; then
+        if [ -d "$REPO_PATH/patches/$aGameID" ]; then
+            echo "* patching $aGameID from $REPO_PATH/patches/$aGameID..."
+            if [ "`command -v rsync`" ]; then
+                rsync -rt --ignore-times "$REPO_PATH/patches/$aGameID/" "$aMinetest/games/amhi_game/"
+            else
+                if [ ! -d "$aMinetest/games/amhi_game/menu" ]; then
+                    mkdir -p "$aMinetest/games/amhi_game/menu"
+                fi
+                "  using cp for known files since rsync is not present..."
+                cp -f $REPO_PATH/patches/$aGameID/menu/icon.* $aMinetest/games/amhi_game/menu/
+            fi
+            if [ $? -eq 0 ]; then
+                echo "  OK"
+            else
+                echo "  FAILED"
+            fi
+        fi
+    fi
+}
+
+
 if [ "@$old_release_version" = "@$new_release_version" ]; then
     install_mt_in_place_shortcut "$SHORTCUT_PATH" "$INSTALL_PATH"
     #if [ ! -f "$SHORTCUT_PATH" ]; then
@@ -164,7 +221,11 @@ if [ "@$old_release_version" = "@$new_release_version" ]; then
     echo
     echo "* Adding the icon is complete. See the Desktop or applications (under Games usually--otherwise, search for Final Minetest in the Activities menu if in GNOME or GNOME-based Ubuntu versions 18.04 or later and you do not have a desktop icons extension enabled)."
     echo
-    echo "Version $new_release_version is already installed at $INSTALL_PATH. There is nothing more to do."
+    installAmhiPatchIfPresent
+    findAndInstallENLIVENOrAskDL
+    echo
+    echo "Version $new_release_version is already installed at $INSTALL_PATH."
+    echo "There is nothing more to do."
     echo
     exit 0
 fi
@@ -188,23 +249,18 @@ unzip "$DL_PATH" > /dev/null || customExit "Extracting $DL_PATH failed."
 
 UNUSED_MT_PATH="$INSTALL_PATH.$old_release_version"
 installOrUpgradeMinetest "$EXTRACTED_PATH" "$INSTALL_PATH" "$UNUSED_MT_PATH"
-if [ $? -eq 2 ]; then
+code=$?
+if [ $code -eq 2 ]; then
     echo "Final Minetest wasn't upgraded. See the message above."
-elif [ $? -eq 0 ]; then
+elif [ $code -eq 0 ]; then
     echo "Installing Final Minetest $new_release_version to $INSTALL_PATH is complete."
 else
-    echo "(installOrUpgradeMinetest failed with error code $?)"
+    echo "(installOrUpgradeMinetest failed with error code $code)"
 fi
 echo "  - old:$old_release_version; new:$new_release_version"
-echo "* installing ENLIVEN..."
-installOrUpgradeENLIVEN "$INSTALL_PATH"
-if [ $? -eq 2 ]; then
-    echo "  * skipped"
-elif [ $? -eq 0 ]; then
-    echo "  * Installing ENLIVEN to $INSTALL_PATH/games is complete."
-else
-    echo "(installOrUpgradeMinetest failed with error code $?)"
-fi
+
+installAmhiPatchIfPresent
+findAndInstallENLIVENOrAskDL
 
 install_mt_in_place_shortcut "$SHORTCUT_PATH" "$INSTALL_PATH"
 echo

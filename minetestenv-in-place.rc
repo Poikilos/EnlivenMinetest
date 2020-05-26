@@ -1,6 +1,8 @@
 #!/bin/bash
 EM_CONFIG_PATH="$HOME/.config/EnlivenMinetest"
 EM_CACHE_PATH="$HOME/.cache/EnlivenMinetest"
+GIT_REPOS_PATH="$EM_CACHE_PATH/git"
+GIT_BRANCHES_PATH="$EM_CACHE_PATH/git-branches"
 MT_ENV_RUP_NAME="minetestenv-in-place.rc"
 if [ -z "$EM_TMP" ]; then
     EM_TMP=/tmp/EnlivenMinetest
@@ -502,24 +504,103 @@ installOrUpgradeMinetest(){
         echo "Release $new_release_version" > "$install_dest/release.txt"
         echo "  * wrote \"`cat $install_dest/release.txt`\" to \"$install_dest/release.txt\"."
     fi
+    return 0
+}
+
+minimize_mod() {
+    MTMOD_DEST_PATH=$1
+    MTMOD_DEST_NAME="a"
+    if [ ! -z "$2" ]; then
+        MTMOD_DEST_NAME=$2
+    fi
+    if [ ! -d "$MTMOD_DEST_PATH" ]; then
+        echo "  [minetestenv-in-place minimize_mod] ERROR: $MTMOD_DEST_PATH is missing."
+        return 1
+    fi
+    if [ -d "$MTMOD_DEST_PATH/.git" ]; then
+        rm -Rf "$MTMOD_DEST_PATH/.git"
+    fi
+    if [ -f "$MTMOD_DEST_PATH/.gitignore" ]; then
+        rm -Rf "$MTMOD_DEST_PATH/.gitignore"
+    fi
+    # remove etc to make users downloading mods faster:
+    if [ -d "$MTMOD_DEST_PATH/etc" ]; then
+        echo "  optimizing $MTMOD_DEST_NAME mod: removing non-game data at $MTMOD_DEST_PATH/etc..."
+        rm -Rf "$MTMOD_DEST_PATH/etc"
+    fi
+    if [ -d "$MTMOD_DEST_PATH/projects" ]; then
+        rm -Rf "$MTMOD_DEST_PATH/projects"
+        echo "  optimizing $MTMOD_DEST_NAME mod: removing non-game data at $MTMOD_DEST_PATH/projects..."
+    fi
+    if [ -d "$MTMOD_DEST_PATH/src" ]; then
+        if [ -z "`ls $MTMOD_DEST_PATH/src/*.lua`" ]; then
+            rm -Rf "$MTMOD_DEST_PATH/src"
+            echo "  optimizing $MTMOD_DEST_NAME mod: removing non-game data at $MTMOD_DEST_PATH/src since it contains no lua files..."
+        fi
+    fi
+    for EXTRA_NAME in screenshot.png screenshot.jpg screenshot.bmp screenshot.tif screenshot.gif
+    do
+        # if ls ${MTMOD_DEST_PATH}/*.png &>/dev/null
+        if [ -f "$MTMOD_DEST_PATH/$EXTRA_NAME" ]; then
+            echo "  optimizing $MTMOD_DEST_NAME mod: removing $MTMOD_DEST_PATH/$EXTRA_NAME..."
+            rm -f "$MTMOD_DEST_PATH/$EXTRA_NAME"
+        fi
+    done
 }
 
 install_git_mod_here(){
+    PREV_DIR="`pwd`"
+    THIS_MODS_PATH="`pwd`"
     git_url="$1"
     mod_name="$2"
     if [ -z "$git_url" ]; then
-        customExit "install_git_mod_here requires a URL."
+        customExit "  * ERROR: install_git_mod_here requires a URL."
     fi
     if [ -z "$mod_name" ]; then
-        customExit "install_git_mod_here requires a mod name as the second parameter."
+        customExit "  * ERROR: install_git_mod_here requires a mod name as the second parameter."
     fi
-    if [ ! -d "$mod_name" ]; then
-        git clone "$git_url" "$mod_name"
+    MTMOD_DEST_PATH="$THIS_MODS_PATH/$mod_name"
+
+    if [ ! -d "$GIT_REPOS_PATH" ]; then
+        mkdir -p "$GIT_REPOS_PATH"
+    fi
+    THIS_MOD_REPO="$GIT_REPOS_PATH/$mod_name"
+
+    if [ -d "$MTMOD_DEST_PATH/.git" ]; then
+        if [ ! -d "$THIS_MOD_REPO" ]; then
+            # Deal with remnants from old versions of this function
+            # that left git metadata in the mod directory.
+            mv "$MTMOD_DEST_PATH" "$THIS_MOD_REPO"
+        fi
+    fi
+    if [ ! -d "$THIS_MOD_REPO" ]; then
+        git clone "$git_url" "$THIS_MOD_REPO"
     else
-        cd "$mod_name" || customExit "(install_git_mod_here) 'cd \"$mod_name\"' failed in '`pwd`'"
-        echo "* updating '`pwd`' from git..."
-        git pull || echo "WARNING: (install_git_mod_here) 'git pull' failed in '`pwd`'"
-        cd .. || customExit "(install_git_mod_here) 'cd ..' failed in '`pwd`'"
+        cd "$THIS_MOD_REPO" || customExit "(install_git_mod_here) 'cd \"$THIS_MOD_REPO\"' failed in '`pwd`'"
+        # echo "  * updating '`pwd`' from git..."
+        GIT_OUTPUT=$(git pull)
+        if [ "$GIT_OUTPUT" != "Already up to date." ]; then
+            echo "$GIT_OUTPUT"
+        fi
+        if [ $? -ne 0 ]; then
+            echo "WARNING: (install_git_mod_here) 'git pull' failed in '`pwd`'"
+        fi
+    fi
+
+    cd "$PREV_DIR" || customExit "(install_git_mod_here) 'cd ..' failed in '`pwd`'"
+
+    if [ -d "$THIS_MOD_REPO" ]; then
+        echo "  * updating $mod_name from $THIS_MOD_REPO..."
+        if [ -f "`command -v rsync`" ]; then
+            rsync -rt "$THIS_MOD_REPO/" "$MTMOD_DEST_PATH"
+        else
+            echo "    removing old `pwd`/$mod_name since rsync is not present..."
+            rm -Rf "$MTMOD_DEST_PATH" || customExit "rm -Rf \"$MTMOD_DEST_PATH\" failed."
+            cp -R "$THIS_MOD_REPO" "$MTMOD_DEST_PATH" || customExit "cp -R \"$THIS_MOD_REPO\" \"$MTMOD_DEST_PATH\" failed."
+        fi
+        minimize_mod "$MTMOD_DEST_PATH"
+    else
+        customExit "  * ERROR: Creating $THIS_MOD_REPO failed."
     fi
 }
 
@@ -615,6 +696,7 @@ addEnlivenMinetestPatches(){
 
     if [ -f "$minetest_conf_dest" ]; then
         cat << END
+
 NOTE: minetest.org releases allow you to put a world.conf file in your
   world, so that is the file you should edit manually in your world
   --this installer overwrites $minetest_conf_dest and

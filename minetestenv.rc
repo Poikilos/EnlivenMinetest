@@ -1,3 +1,69 @@
+clear
+me=`basename "$0"`
+echo
+echo
+echo
+scripting_rc_path=~/.config/EnlivenMinetest/scripting.rc
+if [ -f "$EM_CONFIG_PATH/scripting.rc" ]; then
+    echo "* [$MT_ENV_RUP_NAME] using $scripting_rc_path..."
+    source $scripting_rc_path
+fi
+if [ -z "$REPO_PATH" ]; then
+    REPO_PATH="$HOME/git/EnlivenMinetest"
+fi
+MT_BASH_RC_NAME="minetestenv-in-place.rc"
+CURRENT_MT_SCRIPTS_DIR="$HOME/.local/bin"
+MT_BASH_RC_PATH="$CURRENT_MT_SCRIPTS_DIR/$MT_BASH_RC_NAME"
+TRY_CURRENT_MT_SCRIPTS_DIR="$REPO_PATH"
+TRY_MT_BASH_RC_PATH="$TRY_CURRENT_MT_SCRIPTS_DIR/$MT_BASH_RC_NAME"
+if [ -f "$TRY_MT_BASH_RC_PATH" ]; then
+    CURRENT_MT_SCRIPTS_DIR="$TRY_CURRENT_MT_SCRIPTS_DIR"
+    MT_BASH_RC_PATH="$TRY_MT_BASH_RC_PATH"
+fi
+#if [ ! -f "$MT_BASH_RC_PATH" ]; then
+if [ ! -d "$REPO_PATH" ]; then
+    if [ -f "$MT_BASH_RC_PATH" ]; then
+        echo "* updating \"$MT_BASH_RC_PATH\"..."
+        rm $MT_BASH_RC_PATH
+    fi
+    # ^ Always upgrade the rc file manually if it is not in the repo.
+    if [ ! -d "$CURRENT_MT_SCRIPTS_DIR" ]; then
+        mkdir -p "$CURRENT_MT_SCRIPTS_DIR"
+    fi
+    MT_BASH_RC_URL=https://raw.githubusercontent.com/poikilos/EnlivenMinetest/master/$MT_BASH_RC_NAME
+    curl $MT_BASH_RC_URL -o "$MT_BASH_RC_PATH"
+    if [ $? -ne 0 ]; then
+    #if [ ! -f "$MT_BASH_RC_PATH" ]; then
+        # This is necessary on cygwin for some reason.
+        curl $MT_BASH_RC_URL > "$MT_BASH_RC_PATH"
+    fi
+    #if [ $? -ne 0 ]; then
+    if [ ! -f "$MT_BASH_RC_PATH" ]; then
+        # This is necessary on cygwin for some reason.
+        wget -O "$MT_BASH_RC_PATH" $MT_BASH_RC_URL
+    fi
+    if [ $? -ne 0 ]; then
+        echo
+        echo "ERROR: Downloading $MT_BASH_RC_URL to $MT_BASH_RC_PATH failed."
+        echo
+        sleep 10
+        exit 1
+    fi
+else
+    echo "* using existing $MT_BASH_RC_PATH"
+    echo "  * to update it, run: cd \"$REPO_PATH\" && git pull"
+fi
+if [ ! -f "$MT_BASH_RC_PATH" ]; then
+    echo
+    echo "$MT_BASH_RC_PATH is not present."
+    echo
+    sleep 10
+    exit 1
+fi
+source $MT_BASH_RC_PATH
+# ^ same as install-mts.sh, versionize.sh, update-minetest-linux64.sh
+
+
 err_txt=$HOME/err-enliven.txt
 echo "# * minetestenv.rc started `date`" > "$err_txt"
 
@@ -398,13 +464,16 @@ add_git_mod()
     add_mod_from_here $MTMOD_DEST_NAME $MTMOD_GOT_NAME
 }
 
+
+
 add_mod_from_here()
 {
     MTMOD_DEST_NAME=$1
     MTMOD_GOT_NAME=$2
+    THIS_MODS_PATH=$MT_MYGAME_MODS_PATH
     if [ ! -f "$MOD_LIST" ]; then touch "$MOD_LIST"; fi
     echo "$MTMOD_DEST_NAME" >> "$MOD_LIST"
-    MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+    MTMOD_DEST_PATH=$THIS_MODS_PATH/$MTMOD_DEST_NAME
     if [ -z "$MTMOD_DEST_NAME" ]; then
         customExit "ERROR: nothing done since add_mod_from_here FAILED to receive 'MTMOD_DEST_NAME' (1st param)"
     fi
@@ -443,24 +512,7 @@ add_mod_from_here()
                 echo "    * synchronizing..."
                 rsync -rt "$MTMOD_GOT_NAME/" "$MTMOD_DEST_PATH"
             fi
-            if [ -d "$MTMOD_DEST_PATH/.git" ]; then
-                rm -Rf "$MTMOD_DEST_PATH/.git"
-            fi
-            if [ -f "$MTMOD_DEST_PATH/.gitignore" ]; then
-                rm -Rf "$MTMOD_DEST_PATH/.gitignore"
-            fi
-            # remove etc to make users downloading mods faster:
-            if [ -d "$MTMOD_DEST_PATH/etc" ]; then
-                rm -Rf "$MTMOD_DEST_PATH/etc"
-            fi
-            if [ -d "$MTMOD_DEST_PATH/src" ]; then
-                if [ -z "`ls $MTMOD_DEST_PATH/src/*.lua`" ]; then
-                    rm -Rf "$MTMOD_DEST_PATH/src"
-                fi
-            fi
-            if [ -f "$MTMOD_DEST_PATH/screenshot.png" ]; then
-                rm -f "$MTMOD_DEST_PATH/screenshot.png"
-            fi
+            minimize_mod $MTMOD_DEST_PATH $MTMOD_DEST_NAME
         fi
         if [ ! -d "$MTMOD_DEST_PATH" ]; then
             customExit "    MTMOD_DEST_PATH $MTMOD_DEST_PATH is not a directory."
@@ -480,7 +532,8 @@ remove_mod()
 {
     cd $HOME/Downloads
     MTMOD_DEST_NAME=$1
-    MTMOD_DEST_PATH=$MT_MYGAME_MODS_PATH/$MTMOD_DEST_NAME
+    THIS_MODS_PATH=$MT_MYGAME_MODS_PATH
+    MTMOD_DEST_PATH=$THIS_MODS_PATH/$MTMOD_DEST_NAME
     if [ -d "$MTMOD_DEST_PATH" ]; then
         rm -Rf "$MTMOD_DEST_PATH"
         if [ -d "$MTMOD_DEST_PATH" ]; then
