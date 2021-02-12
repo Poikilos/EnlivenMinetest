@@ -9,21 +9,27 @@ customExit(){
     # echo
 #fi
 # cd $mybuild || customExit "$0: cd build failed in '`pwd`'."
-
+printf "* detecting EnlivenMinetest..."
 if [ -z "$ENLIVEN_REPO" ]; then
     try_default_enliven_repo="$HOME/git/EnlivenMinetest"
     for try_enliven_repo in "$HOME/Downloads/poikilos/EnlivenMinetest" "$HOME/Downloads/EnlivenMinetest" "$try_default_enliven_repo"
     do
         if [ -d "$try_enliven_repo" ]; then
             ENLIVEN_REPO="$try_enliven_repo"
+            echo "Detected ENLIVEN_REPO=\"$try_enliven_repo\""
+        else
+            echo "Tried \"$try_enliven_repo\" (not found)"
         fi
     done
 fi
 source mtbuild.rc
 if [ $? -ne 0 ]; then
-    echo "Error:"
-    echo "source mtbuild.rc failed. Try adding it to the path or $try_default_enliven_repo (or set ENLIVEN_REPO)"
-    exit 1
+    source "$ENLIVEN_REPO/mtbuild.rc"
+    if [ $? -ne 0 ]; then
+        echo "Error:"
+        echo "source mtbuild.rc failed. Try adding it to the path or $try_default_enliven_repo (or set ENLIVEN_REPO)"
+        exit 1
+    fi
 fi
 
 
