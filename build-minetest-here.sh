@@ -9,9 +9,42 @@ customExit(){
     # echo
 #fi
 # cd $mybuild || customExit "$0: cd build failed in '`pwd`'."
+
+if [ -z "$ENLIVEN_REPO" ]; then
+    try_default_enliven_repo="$HOME/git/EnlivenMinetest"
+    for try_enliven_repo in "$HOME/Downloads/poikilos/EnlivenMinetest" "$HOME/Downloads/EnlivenMinetest" "$try_default_enliven_repo"
+    do
+        if [ -d "$try_enliven_repo" ]; then
+            ENLIVEN_REPO="$try_enliven_repo"
+        fi
+    done
+fi
+source mtbuild.rc
+if [ $? -ne 0 ]; then
+    echo "Error:"
+    echo "source mtbuild.rc failed. Try adding it to the path or $try_default_enliven_repo (or set ENLIVEN_REPO)"
+    exit 1
+fi
+
+
 if [ -z "$KEEP_MAKE" ]; then
     KEEP_MAKE=0
 fi
+INSTALL_DEPS=
+if [ ! -f "`command -v cmake`" ]; then
+    INSTALL_DEPS="$INSTALL_DEPS cmake"
+fi
+if [ ! -f "`command -v make`" ]; then
+    INSTALL_DEPS="$INSTALL_DEPS make"
+fi
+
+if [ ! -z "$INSTALL_DEPS" ]; then
+    $DEPS_INSTALL
+    if [ $? -ne 0 ]; then
+        echo "Installing dependencies failed."
+    fi
+fi
+
 if [ -f bin/minetest ]; then
     if [ "$KEEP_MAKE" != "1" ]; then
         echo "* [build-minetest-here.sh] running 'make clean' in `pwd`..."
@@ -66,6 +99,11 @@ if [ ! -z "$BUILD_SERVER" ]; then
 fi
 echo "* [build-minetest-here.sh] running cmake in `pwd`..."
 cmake . $server_line $client_line -DOpenGL_GL_PREFERENCE=GLVND -DENABLE_GETTEXT=1 -DENABLE_FREETYPE=1 -DENABLE_LEVELDB=1 -DENABLE_REDIS=1 -DRUN_IN_PLACE=$RUN_IN_PLACE && make -j$(grep -c processor /proc/cpuinfo)  || customExit "$0: Build failed in '`pwd`'."
+if [ $? -ne 0 ]; then
+    echo
+    echo "cmake failed. Try:"
+    echo "$DEPS_INSTALL"
+fi
 echo
 if [ "@$RUN_IN_PLACE" = "@1" ]; then
     echo "[build-minetest-here.sh] WARNING: do not do make install with -DRUN_IN_PLACE=$RUN_IN_PLACE!"

@@ -259,24 +259,20 @@ fi
 if [ -z "$DEPS_INSTALL" ]; then
     DEPS_INSTALL=
 fi
-FEDORA_DEPS="gcc-c++ irrlicht-devel gettext freetype cmake bzip2-devel libpng libjpeg-turbo libXxf86vm mesa-libGLU libsqlite3x-devel libogg-devel libvorbis-devel openal-devel curl-devel luajit-devel lua-devel leveldb-devel ncurses-devel redis hiredis-devel gmp-devel libtool"
-FEDORA_DEPS_INSTALL="sudo dnf install -y $FEDORA_DEPS"
-UBUNTU_DEPS="libncurses5-dev libgettextpo-dev doxygen libspatialindex-dev libpq-dev postgresql-server-dev-all git build-essential libirrlicht-dev libgettextpo0 libfreetype6-dev cmake libbz2-dev libpng12-dev libjpeg8-dev libxxf86vm-dev libgl1-mesa-dev libsqlite3-dev libogg-dev libvorbis-dev libopenal-dev libcurl4-openssl-dev libluajit-5.1-dev liblua5.1-0-dev libleveldb-dev"
-UBUNTU_DEPS_INSTALL="sudo apt-get update && sudo apt-get install -y $UBUNTU_DEPS"
-DEPS_INSTALL_MSG="something like    $UBUNTU_DEPS_INSTALL     #or     $FEDORA_DEPS_INSTALL"
-if [ ! -f "`command -v dnf`" ]; then
-    DEPS_INSTALL="$FEDORA_DEPS_INSTALL"
-elif [ -f "`command -v yum`" ]; then
-    FEDORA_DEPS_INSTALL="sudo yum install -y $FEDORA_DEPS"
-    DEPS_INSTALL="$FEDORA_DEPS_INSTALL"
-elif [ -f "`command -v apt`" ]; then
-    UBUNTU_DEPS_INSTALL="sudo apt update && sudo apt install -y $UBUNTU_DEPS"
-    DEPS_INSTALL="$UBUNTU_DEPS_INSTALL"
-elif [ -f "`command -v apt-get`" ]; then
-    DEPS_INSTALL="$UBUNTU_DEPS_INSTALL"
+if [ -z "$ENLIVEN_REPO" ]; then
+    try_default_enliven_repo="$HOME/git/EnlivenMinetest"
+    for try_enliven_repo in "$HOME/Downloads/poikilos/EnlivenMinetest" "$HOME/Downloads/EnlivenMinetest" "$try_default_enliven_repo"
+    do
+        if [ -d "$try_enliven_repo" ]; then
+            ENLIVEN_REPO="$try_enliven_repo"
+        fi
+    done
 fi
-if [ ! -z "$DEPS_INSTALL" ]; then
-    DEPS_INSTALL_MSG="$DEPS_INSTALL"
+source mtbuild.rc
+if [ $? -ne 0 ]; then
+    echo "Error:"
+    echo "source mtbuild.rc failed. Try adding it to the path or $try_default_enliven_repo (or set ENLIVEN_REPO)"
+    exit 1
 fi
 if [ $mtLibrariesCompileResult -ne 0 ]; then
     cat "$extracted_path/libraries.log"
