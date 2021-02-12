@@ -122,8 +122,9 @@ if [ $? -ne 0 ]; then
     echo "$DEPS_INSTALL"
 fi
 echo
+echo "RUN_IN_PLACE=$RUN_IN_PLACE"
 if [ "@$RUN_IN_PLACE" = "@1" ]; then
-    echo "[build-minetest-here.sh] WARNING: do not do make install with -DRUN_IN_PLACE=$RUN_IN_PLACE!"
+    echo "[build-minetest-here.sh] WARNING: do NOT run make install: -DRUN_IN_PLACE=$RUN_IN_PLACE!"
 fi
 echo
 #/home/owner/git/EnlivenMinetest/install-minetest.sh says:
