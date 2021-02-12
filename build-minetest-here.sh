@@ -51,6 +51,9 @@ fi
 
 if [ ! -z "$INSTALL_DEPS" ]; then
     echo "* missing $INSTALL_DEPS"
+    if [ ! -z "$REFRESH_OS_INSTALLER_CMD" ]; then
+        echo "  * Running '$REFRESH_OS_INSTALLER_CMD'"
+    fi
     echo "  * Running '$DEPS_INSTALL'..."
     $DEPS_INSTALL
     if [ $? -ne 0 ]; then
