@@ -9,6 +9,7 @@ customExit(){
     # echo
 #fi
 # cd $mybuild || customExit "$0: cd build failed in '`pwd`'."
+
 printf "* detecting EnlivenMinetest..."
 if [ -z "$ENLIVEN_REPO" ]; then
     try_default_enliven_repo="$HOME/git/EnlivenMinetest"
@@ -24,11 +25,15 @@ if [ -z "$ENLIVEN_REPO" ]; then
 fi
 source mtbuild.rc
 if [ $? -ne 0 ]; then
+    printf "* trying \"$ENLIVEN_REPO/mtbuild.rc\"..."
     source "$ENLIVEN_REPO/mtbuild.rc"
     if [ $? -ne 0 ]; then
+        echo "FAILED"
         echo "Error:"
         echo "source mtbuild.rc failed. Try adding it to the path or $try_default_enliven_repo (or set ENLIVEN_REPO)"
         exit 1
+    else
+        echo "OK"
     fi
 fi
 
@@ -45,9 +50,12 @@ if [ ! -f "`command -v make`" ]; then
 fi
 
 if [ ! -z "$INSTALL_DEPS" ]; then
+    echo "* missing $INSTALL_DEPS"
+    echo "  * Running '$DEPS_INSTALL'..."
     $DEPS_INSTALL
     if [ $? -ne 0 ]; then
         echo "Installing dependencies failed."
+        exit 1
     fi
 fi
 

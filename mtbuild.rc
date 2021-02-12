@@ -4,7 +4,7 @@ FEDORA_DEPS_INSTALL="sudo dnf install -y $FEDORA_DEPS"
 UBUNTU_DEPS="libncurses5-dev libgettextpo-dev doxygen libspatialindex-dev libpq-dev postgresql-server-dev-all git build-essential libirrlicht-dev libgettextpo0 libfreetype6-dev cmake libbz2-dev libpng12-dev libjpeg8-dev libxxf86vm-dev libgl1-mesa-dev libsqlite3-dev libogg-dev libvorbis-dev libopenal-dev libcurl4-openssl-dev libluajit-5.1-dev liblua5.1-0-dev libleveldb-dev"
 UBUNTU_DEPS_INSTALL="sudo apt-get update && sudo apt-get install -y $UBUNTU_DEPS"
 DEPS_INSTALL_MSG="something like    $UBUNTU_DEPS_INSTALL     #or     $FEDORA_DEPS_INSTALL"
-if [ ! -f "`command -v dnf`" ]; then
+if [ -f "`command -v dnf`" ]; then
     DEPS_INSTALL="$FEDORA_DEPS_INSTALL"
 elif [ -f "`command -v yum`" ]; then
     FEDORA_DEPS_INSTALL="sudo yum install -y $FEDORA_DEPS"

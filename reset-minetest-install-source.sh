@@ -275,13 +275,18 @@ if [ -z "$ENLIVEN_REPO" ]; then
 fi
 source mtbuild.rc
 if [ $? -ne 0 ]; then
+    printf "* trying \"$ENLIVEN_REPO/mtbuild.rc\"..."
     source "$ENLIVEN_REPO/mtbuild.rc"
     if [ $? -ne 0 ]; then
+        echo "FAILED"
         echo "Error:"
         echo "source mtbuild.rc failed. Try adding it to the path or $try_default_enliven_repo (or set ENLIVEN_REPO)"
         exit 1
+    else
+        echo "OK"
     fi
 fi
+
 if [ $mtLibrariesCompileResult -ne 0 ]; then
     cat "$extracted_path/libraries.log"
     echo
