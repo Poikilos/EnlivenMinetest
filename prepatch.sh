@@ -56,7 +56,9 @@ fi
 project0=Bucket_Game
 project1=Bucket_Game-base
 project2=Bucket_Game-branches
-project0_path="$HOME/git/EnlivenMinetest/webapp/linux-minetest-kit/minetest/games/$project0"
+# project0_path="$HOME/git/EnlivenMinetest/webapp/linux-minetest-kit/minetest/games/$project0"
+project0_path="$HOME/minetest/games/$project0"
+
 #patches="$HOME/git/EnlivenMinetest/patches"
 #patches="$HOME/git/1.pull-requests/Bucket_Game-branches"
 repo="$HOME/git/EnlivenMinetest"
