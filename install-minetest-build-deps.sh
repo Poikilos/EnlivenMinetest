@@ -1,12 +1,17 @@
 #!/bin/bash
 enable_postgres="false"
 enable_redis="false"
-if [ "$1" = "redis" ]; then enable_redis="true"; fi
-if [ "$2" = "redis" ]; then enable_redis="true"; fi
-if [ "$3" = "redis" ]; then enable_redis="true"; fi
-if [ "$1" = "postgres" ]; then enable_postgres="true"; fi
-if [ "$2" = "postgres" ]; then enable_postgres="true"; fi
-if [ "$3" = "postgres" ]; then enable_postgres="true"; fi
+enable_leveldb="false"
+for arg in "$@"
+do
+    if [ "$arg" = "redis" ]; then enable_redis="true"
+    elif [ "$arg" = "postgres" ]; then enable_postgres="true"
+    elif [ "$arg" = "leveldb" ]; then enable_leveldb="true"
+    fi
+done
+echo "enable_postgres:$enable_postgres"
+echo "enable_redis:$enable_redis"
+echo "enable_leveldb:$enable_leveldb"
 #if [ -f "`command -v minetest`" ]; then
 #echo "* trying to remove any non-git (packaged) version first (Press Ctrl C  to cancel)..."
 luajit_path="/usr/include/luajit-2.1"
@@ -39,7 +44,11 @@ else
     fi
 fi
 
+
+LEVELDB_DEV_PKG="leveldb-devel"
+# ^ yum- or dnf-based distros
 if [ ! -z "$this_apt" ]; then
+    LEVELDB_DEV_PKG="libleveldb-dev"
     echo "Using $this_apt..."
     # sudo $this_apt -y remove minetest-server
     # sudo $this_apt -y remove minetest
@@ -68,8 +77,8 @@ if [ ! -z "$this_apt" ]; then
         libgdk-pixbuf2.0-dev  \
         libglu1-mesa-dev      \
         libxml-parser-perl    \
-        xserver-xorg-dev
-
+        xserver-xorg-dev      \
+    ;
     #libcurl4-openssl-dev: for announce to work
 
 
@@ -79,6 +88,9 @@ if [ ! -z "$this_apt" ]; then
     if [ "$enable_postgres" = "true" ]; then
         sudo $this_apt -y install libpq-dev postgresql-server-dev-all
     fi
+    if [ "$enable_leveldb" = "true" ]; then
+        sudo $this_apt -y install $LEVELDB_DEV_PKG
+    fi
 
     # Some issues on Fedora ~27:
     # sudo apt -y install libncurses5-dev libgettextpo-dev doxygen libspatialindex-dev libpq-dev postgresql-server-dev-all
@@ -86,6 +98,7 @@ if [ ! -z "$this_apt" ]; then
 
 
 elif [ -f "`command -v pacman`" ]; then
+    LEVELDB_DEV_PKG="leveldb"
     echo "Using pacman..."
     # sudo pacman -R --noconfirm minetest-server
     # sudo pacman -R --noconfirm minetest
@@ -98,7 +111,7 @@ elif [ -f "`command -v pacman`" ]; then
         ncurses     openal         openssl      patch        \
         pkgconf     python         python2      readline     \
         ruby        tcl            which        xorg-server  \
-        xz          zlib
+        xz          zlib           sqlite
     # The above should work since taken from the build kit instructions
     # (When writing my old script, I somehow couldn't find equivalents of:
     # libjpeg8-dev libxxf86vm-dev mesa sqlite libogg vorbis -poikilos)
@@ -108,7 +121,10 @@ elif [ -f "`command -v pacman`" ]; then
     if [ "$enable_postgres" = "true" ]; then
         sudo pacman -Syu --noconfirm postgresql-libs
     fi
-
+    if [ "$enable_leveldb" = "true" ]; then
+        sudo pacman -Syu --noconfirm $LEVELDB_DEV_PKG
+    fi
+    echo "The dev package name is unknown for pacman."
 elif [ ! -z "$this_dnf" ]; then
     echo "Using $this_dnf..."
     # sudo $this_dnf -y remove minetest-server
@@ -126,13 +142,18 @@ elif [ ! -z "$this_dnf" ]; then
         openal-soft-devel  openssl-devel     patch            \
         pkgconf            readline-devel    ruby             \
         tcl                which             xz               \
-        zlib-devel         xorg-x11-server-devel
+        zlib-devel         xorg-x11-server-devel              \
+        sqlite-devel \
+    ;
 
     if [ "$enable_redis" = "true" ]; then
         sudo $this_dnf -y install redis hiredis-devel
     fi
     if [ "$enable_postgres" = "true" ]; then
         sudo $this_dnf -y install postgresql-devel
+    fi
+    if [ "$enable_leveldb" = "true" ]; then
+        sudo $this_dnf -y install $LEVELDB_DEV_PKG
     fi
 
 else
