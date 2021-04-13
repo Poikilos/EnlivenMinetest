@@ -61,3 +61,4 @@ add_git_mod handle_schematics handle_schematics https://github.com/Sokomine/hand
 #forum post (Sokomine's mg_villages provides villages for all mapgens and is based on is fork of Nores mg mapgen): https://forum.minetest.net/viewtopic.php?f=9&t=13116
 #add_git_mod mg_villages mg_villages https://github.com/Sokomine/mg_villages.git
 
+add_git_mod item_drop item_drop https://github.com/minetest-mods/item_drop.git

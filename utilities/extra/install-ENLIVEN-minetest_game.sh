@@ -859,6 +859,8 @@ add_git_mod woodcutting woodcutting https://github.com/minetest-mods/woodcutting
 add_git_mod homedecor_ua homedecor_ua https://github.com/poikilos/homedecor_ua.git
 
 
+add_git_mod item_drop item_drop https://github.com/minetest-mods/item_drop.git
+
 echo
 echo
 echo
