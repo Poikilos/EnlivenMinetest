@@ -64,7 +64,7 @@ if [ ! -z "$this_apt" ]; then
         libbz2-dev      libc6-dev-i386 libedit-dev    libexpat1-dev   \
         libgmp-dev      libjpeg-dev    libltdl-dev    libncurses5-dev \
         libogg-dev      libopenal-dev  libpng-dev     libreadline-dev \
-        libsqlite3-dev  libssl-dev     libtool        libtool-bin     \
+        libsqlite3-dev  libssl-dev     libtool             \
         libvorbis-dev   libx11-dev     libxxf86vm-dev lynx            \
         nano            nettle-dev     p7zip-full     patch           \
         perl            pkg-config     python3        python3-dev     \
@@ -79,6 +79,23 @@ if [ ! -z "$this_apt" ]; then
         libxml-parser-perl    \
         xserver-xorg-dev      \
     ;
+    if [ ! -f "`command -v libtool`" ]; then
+        . /etc/os-release
+        if [ ! -z "$VERSION_ID" ]; then
+            if [ -f "`command -v bc`" ]; then
+                # bc is bash calculator (-l: mathlib)
+                if [ `echo "$VERSION_ID>14.04" | bc -l` = 1 ]; then
+                    sudo $this_apt -y install libtool-bin
+                    # ^ not necessary on Trusty (See
+                    # <https://askubuntu.com/questions/989510/how-do-i-install-libtool-bin-on-ubuntu-14-04>).
+                fi
+            else
+                echo "* WARNING: The bc command isn't present, so the libtool-bin package will be skipped (it is only in Ubuntu >14.04 [not known in 15.x])"
+            fi
+        else
+            echo "* WARNING: VERSION_ID is not in /etc/os-release, so the libtool-bin package will be skipped (it is only in Ubuntu >14.04 [not known in 15.x])"
+        fi
+    fi
     #libcurl4-openssl-dev: for announce to work
 
 
