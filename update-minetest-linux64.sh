@@ -52,7 +52,9 @@ if [ ! -d "$REPO_PATH" ]; then
     fi
 else
     echo "* using existing $MT_BASH_RC_PATH"
-    echo "  * to update it, run: cd \"$REPO_PATH\" && git pull"
+    echo "  * To update it, run: cd \"$REPO_PATH\" && git pull"
+    echo "    * If that doesn't work run the following:"
+    echo "      mv $REPO_PATH /tmp/EnlivenMinetest.old && git clone https://github.com/poikilos/EnlivenMinetest $REPO_PATH"
 fi
 if [ ! -f "$MT_BASH_RC_PATH" ]; then
     echo
