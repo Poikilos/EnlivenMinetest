@@ -11,6 +11,7 @@ CMD_RMTREE = "rm -Rf"
 CMD_RM = "rm -f"
 CMD_COMMENT = "# "
 CMD_CP = "cp"
+CMD_MKDIR = "mkdir -p"
 
 if platform.system() == "Windows":
     CMD_RMTREE = "rd /S /Q"
@@ -21,6 +22,7 @@ if platform.system() == "Windows":
     # /F: Force deleting read-only files.
     CMD_COMMENT = "REM "
     CMD_CP = "COPY"
+    CMD_MKDIR = "MD"
 
 def path_join_all(names):
     result = names[0]
@@ -29,7 +31,7 @@ def path_join_all(names):
     return result
 
 
-def trim_branch(src, dst, dot_hidden=True):
+def trim_branch(src, dst, dot_hidden=True, verbose=True):
     '''
     Explore dst non-recursively and delete files
     and subdirectories recursively that are not present on src.
@@ -53,7 +55,8 @@ def trim_branch(src, dst, dot_hidden=True):
                 shutil.rmtree(dst_sub_path)
 
 
-def update_tree(src, dst, level=0, do_trim=False, dot_hidden=False):
+def update_tree(src, dst, level=0, do_trim=False, dot_hidden=False,
+                verbose=True):
     '''
     Creates dst if not present, then copies everything from src to dst
     recursively.
@@ -65,10 +68,13 @@ def update_tree(src, dst, level=0, do_trim=False, dot_hidden=False):
                    starting with '.'.
     '''
     folder_path = src
+    indent = " "*level
     if level <= 1:
-        print(CMD_COMMENT + " "*level + "synchronizing with \"{}\""
+        print(indent + CMD_COMMENT + "* synchronizing with \"{}\""
               "".format(dst))
     if not os.path.isdir(dst):
+        if verbose:
+            print(indent + CMD_MKDIR + " \"{}\"".format(dst))
         os.makedirs(dst)
     else:
         if do_trim:
@@ -80,14 +86,36 @@ def update_tree(src, dst, level=0, do_trim=False, dot_hidden=False):
             allow_copy = True
             if not dot_hidden:
                 allow_copy = not sub_name.startswith(".")
-            if allow_copy and os.path.isdir(sub_path):
-                update_tree(sub_path, dst_sub_path, level+1)
-            if allow_copy and os.path.isfile(sub_path):
+            if not allow_copy:
+                continue
+            if os.path.isdir(sub_path):
+                update_tree(sub_path, dst_sub_path, level=level+1,
+                            do_trim=do_trim, dot_hidden=dot_hidden,
+                            verbose=verbose)
+            elif os.path.isfile(sub_path):
+                mode = None
+                sub_mt = os.path.getmtime(sub_path)
+                dst_sub_mt = os.path.getmtime(dst_sub_path)
+                if not os.path.isfile(dst_sub_path):
+                    mode = "+"
+                elif sub_mt > dst_sub_mt:
+                    mode = ">"
+                elif sub_mt < dst_sub_mt:
+                    print(indent + CMD_COMMENT
+                          + "WARNING: \"{}\" is newer on destination!"
+                          "".format(dst_sub_path))
+                if mode is None:
+                    continue
                 try:
+                    if verbose:
+                        if mode == ">":
+                            print(indent + CMD_CP + "update:")
+                        print(indent + CMD_CP + " \"{}\" \"{}\""
+                              "".format(sub_path, dst_sub_path))
                     shutil.copyfile(sub_path, dst_sub_path)
                 except PermissionError:
-                    print(CMD_COMMENT + "PermissionError:")
-                    print(CMD_COMMENT + "  {} \"{}\" \"{}\""
+                    print(indent + CMD_COMMENT + "PermissionError:")
+                    print(indent + CMD_COMMENT + "    {} \"{}\" \"{}\""
                           "".format(CMD_CP, sub_path, dst_sub_path))
                     pass
 
@@ -107,25 +135,36 @@ def main():
     flags = {}
     flags["hidden"] = False
     flags["delete"] = False
-    if len(sys.argv) == 3:
-        pass
-    elif (len(sys.argv) == 4) and (sys.argv[3][:2] == "--"):
-        name = sys.argv[3][2:]
-        if name not in flags:
-            usage()
-            print("Error: The syntax is invalid. Expected:")
-            print("forwardfilesync.py <source> <destination>")
-            print("forwardfilesync.py <source> <destination> --hidden")
-            exit(1)
-        flags[name] = True
-    else:
+    
+    if len(sys.argv) < 3:
         usage()
-        print("Error: The syntax is invalid. Expected:")
-        print("forwardfilesync.py <source> <destination>")
-        print("forwardfilesync.py <source> <destination> --hidden --delete")
+        print("Error: You must provide at least a source and destination.")
         exit(1)
+
     src = sys.argv[1]
     dst = sys.argv[2]
+
+    for argI in range(3, len(sys.argv)):
+        arg = sys.argv[argI]
+        if (arg[:2] != "--"):
+            usage()
+            print("Error: The option \"{}\" is not formatted correctly"
+                  " since it doesn't start with \"--\". If it is part"
+                  " of a path with spaces, put the path in quotes."
+                  "".format(sys.argv[argI]))
+            exit(1)
+        name = arg[2:]
+        if name not in flags:
+            usage()
+            print("Error: There is no option \"{}\". If it is part of a"
+                  " path with spaces, put the path in quotes."
+                  "".format(sys.argv[argI]))
+            exit(1)
+        flags[name] = True
+    print(CMD_COMMENT + "Using options:")
+    for k,v in flags.items():
+        print(CMD_COMMENT + "{}: {}".format(k, v))
+
     update_tree(
         src,
         dst,
