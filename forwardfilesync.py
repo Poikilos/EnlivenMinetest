@@ -47,13 +47,13 @@ def trim_branch(src, dst, dot_hidden=True):
         if not os.path.exists(src_sub_path):
             if os.path.isfile(dst_sub_path):
                 print("{} \"{}\"...".format(CMD_RM, dst_sub_path))
-                # os.remove(dst_sub_path)
+                os.remove(dst_sub_path)
             else:
                 print("{} \"{}\"...".format(CMD_RMTREE, dst_sub_path))
-                # shutil.rmtree(dst_sub_path)
+                shutil.rmtree(dst_sub_path)
 
 
-def update_tree(src, dst, level=0, do_trim=True, dot_hidden=False):
+def update_tree(src, dst, level=0, do_trim=False, dot_hidden=False):
     '''
     Creates dst if not present, then copies everything from src to dst
     recursively.
@@ -91,27 +91,49 @@ def update_tree(src, dst, level=0, do_trim=True, dot_hidden=False):
                           "".format(CMD_CP, sub_path, dst_sub_path))
                     pass
 
+USAGE = '''
+Syntax:
+forwardfilesync.py <source> <destination> [options]
+
+--hidden    Process files & folders even if named starting with '.'.
+--delete    Delete files & folders on the destination if not in source.
+
+'''
+
+def usage():
+    print(USAGE)
 
 def main():
     flags = {}
     flags["hidden"] = False
+    flags["delete"] = False
     if len(sys.argv) == 3:
         pass
     elif (len(sys.argv) == 4) and (sys.argv[3][:2] == "--"):
         name = sys.argv[3][2:]
         if name not in flags:
+            usage()
             print("Error: The syntax is invalid. Expected:")
             print("forwardfilesync.py <source> <destination>")
             print("forwardfilesync.py <source> <destination> --hidden")
+            exit(1)
         flags[name] = True
     else:
+        usage()
         print("Error: The syntax is invalid. Expected:")
         print("forwardfilesync.py <source> <destination>")
-        print("forwardfilesync.py <source> <destination> --hidden")
+        print("forwardfilesync.py <source> <destination> --hidden --delete")
         exit(1)
     src = sys.argv[1]
     dst = sys.argv[2]
-    update_tree(src, dst, dot_hidden=flags["hidden"])
+    update_tree(
+        src,
+        dst,
+        do_trim=flags["delete"] is True,
+        dot_hidden=flags["hidden"] is True,
+    )
+    print(CMD_COMMENT + "Done.")
+    
 
 
 if __name__ == "__main__":
