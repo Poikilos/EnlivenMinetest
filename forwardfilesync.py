@@ -101,6 +101,8 @@ def update_tree(src, dst, level=0, do_trim=False, dot_hidden=False,
                 elif sub_mt > dst_sub_mt:
                     mode = ">"
                 elif sub_mt < dst_sub_mt:
+                    # mode = "<"
+                    # Don't set any mode, or the newer file will be overwritten!
                     print(indent + CMD_COMMENT
                           + "WARNING: \"{}\" is newer on destination!"
                           "".format(dst_sub_path))
@@ -112,7 +114,8 @@ def update_tree(src, dst, level=0, do_trim=False, dot_hidden=False,
                             print(indent + CMD_CP + "update:")
                         print(indent + CMD_CP + " \"{}\" \"{}\""
                               "".format(sub_path, dst_sub_path))
-                    shutil.copyfile(sub_path, dst_sub_path)
+                    # shutil.copyfile(sub_path, dst_sub_path)
+                    shutil.copy2(sub_path, dst_sub_path)
                 except PermissionError:
                     print(indent + CMD_COMMENT + "PermissionError:")
                     print(indent + CMD_COMMENT + "    {} \"{}\" \"{}\""
