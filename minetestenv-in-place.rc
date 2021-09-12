@@ -525,28 +525,32 @@ minimize_mod() {
     fi
     # remove etc to make users downloading mods faster:
     if [ -d "$MTMOD_DEST_PATH/etc" ]; then
-        echo "  optimizing $MTMOD_DEST_NAME mod: removing non-game data at $MTMOD_DEST_PATH/etc..."
+        echo "    optimizing $MTMOD_DEST_NAME mod: removing non-game data at $MTMOD_DEST_PATH/etc..."
         rm -Rf "$MTMOD_DEST_PATH/etc"
     fi
     if [ -d "$MTMOD_DEST_PATH/projects" ]; then
         rm -Rf "$MTMOD_DEST_PATH/projects"
-        echo "  optimizing $MTMOD_DEST_NAME mod: removing non-game data at $MTMOD_DEST_PATH/projects..."
+        echo "    optimizing $MTMOD_DEST_NAME mod: removing non-game data at $MTMOD_DEST_PATH/projects..."
     fi
     if [ -d "$MTMOD_DEST_PATH/src" ]; then
         if [ -z "`ls $MTMOD_DEST_PATH/src/*.lua`" ]; then
             rm -Rf "$MTMOD_DEST_PATH/src"
-            echo "  optimizing $MTMOD_DEST_NAME mod: removing non-game data at $MTMOD_DEST_PATH/src since it contains no lua files..."
+            echo "    optimizing $MTMOD_DEST_NAME mod: removing non-game data at $MTMOD_DEST_PATH/src since it contains no lua files..."
         fi
     fi
     for EXTRA_NAME in screenshot.png screenshot.jpg screenshot.bmp screenshot.tif screenshot.gif
     do
         # if ls ${MTMOD_DEST_PATH}/*.png &>/dev/null
         if [ -f "$MTMOD_DEST_PATH/$EXTRA_NAME" ]; then
-            echo "  optimizing $MTMOD_DEST_NAME mod: removing $MTMOD_DEST_PATH/$EXTRA_NAME..."
+            echo "    optimizing $MTMOD_DEST_NAME mod: removing $MTMOD_DEST_PATH/$EXTRA_NAME..."
             rm -f "$MTMOD_DEST_PATH/$EXTRA_NAME"
         fi
     done
 }
+
+if [ "@$EM_ONLINE" = "@" ]; then
+    EM_ONLINE="true"
+fi
 
 install_git_mod_here(){
     PREV_DIR="`pwd`"
@@ -578,12 +582,14 @@ install_git_mod_here(){
     else
         cd "$THIS_MOD_REPO" || customExit "(install_git_mod_here) 'cd \"$THIS_MOD_REPO\"' failed in '`pwd`'"
         # echo "  * updating '`pwd`' from git..."
-        GIT_OUTPUT=$(git pull)
-        if [ "$GIT_OUTPUT" != "Already up to date." ]; then
-            echo "  $GIT_OUTPUT"
-        fi
-        if [ $? -ne 0 ]; then
-            echo "WARNING: (install_git_mod_here) 'git pull' failed in '`pwd`'"
+        if [ "@$EM_ONLINE" != "@false" ]; then
+            GIT_OUTPUT=$(git pull)
+            if [ "$GIT_OUTPUT" != "Already up to date." ]; then
+                echo "  $GIT_OUTPUT"
+            fi
+            if [ $? -ne 0 ]; then
+                echo "WARNING: (install_git_mod_here) 'git pull' failed in '`pwd`'"
+            fi
         fi
     fi
 
