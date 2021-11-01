@@ -45,3 +45,5 @@ Wifi Chest
 
 A wacky chest that doesn't store it's items in the usual way, but instead, stores them remotely. For that reason, all wifi chests appear to have the same inventory. Due to not actually having an inventory, wifi chests can also be mined, even when they appear to have stuff in them. Lastly, as everyone gets their own wifi account, the items you see in the wifi chest are not the same items anyone else sees. This chest's properties make it nice for keeping secrets, as well as essentially almost doubling your inventory space, if you choose to carry one with you.
 ```
+
+The Wi-Fi chest was more "familiar" than it was "wacky", so Poikilos remade the texture from scratch (and added a separate bottom texture) 2021-10-31.
