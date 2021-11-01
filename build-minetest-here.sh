@@ -10,6 +10,22 @@ customExit(){
 #fi
 # cd $mybuild || customExit "$0: cd build failed in '`pwd`'."
 
+for var in "$@"
+do
+    if [ "@$var" = "@--run-in-place" ]; then
+        RUN_IN_PLACE=true
+    fi
+done
+
+usage(){
+cat <<END
+Set RUN_IN_PLACE to true:
+$0 --run-in-place
+# or
+# env RUN_IN_PLACE=1 $0
+END
+}
+
 printf "* detecting EnlivenMinetest..."
 if [ -z "$ENLIVEN_REPO" ]; then
     try_default_enliven_repo="$HOME/git/EnlivenMinetest"
@@ -98,8 +114,12 @@ else
     echo "[build-minetest-here.sh] ERROR: There is an unknown value for RUN_IN_PLACE: '$RUN_IN_PLACE'"
     exit 1
 fi
+echo
 echo "RUN_IN_PLACE=$RUN_IN_PLACE"
 if [ "$RUN_IN_PLACE" = "0" ]; then
+    echo "^ To change this, press Ctrl+C and use:"
+    usage()
+    echo
     echo "3..."
     sleep 1
     echo "2..."
@@ -125,6 +145,9 @@ echo
 echo "RUN_IN_PLACE=$RUN_IN_PLACE"
 if [ "@$RUN_IN_PLACE" = "@1" ]; then
     echo "[build-minetest-here.sh] WARNING: do NOT run make install: -DRUN_IN_PLACE=$RUN_IN_PLACE!"
+else
+    echo "^ If you didn't intend for this,"
+    usage
 fi
 echo
 #/home/owner/git/EnlivenMinetest/install-minetest.sh says:
