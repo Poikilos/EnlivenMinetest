@@ -1,0 +1,74 @@
+diff -ru Bucket_Game-base/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/api.lua Bucket_Game-branches/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/api.lua
+--- Bucket_Game-base/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/api.lua	2021-10-31 22:03:54.000000000 -0400
++++ Bucket_Game-branches/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/api.lua	2021-11-01 16:15:35.000000000 -0400
+@@ -1,4 +1,5 @@
+-local S = function (str) return str end
++local modpath = minetest.get_modpath("unified_inventory")
++local S, NS = dofile(modpath .. "/intllib.lua")
+ local F = minetest.formspec_escape
+ 
+ -- Create detached creative inventory after loading all mods
+diff -ru Bucket_Game-base/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/depends.txt Bucket_Game-branches/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/depends.txt
+--- Bucket_Game-base/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/depends.txt	2021-10-31 22:03:54.000000000 -0400
++++ Bucket_Game-branches/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/depends.txt	2021-11-01 15:46:30.000000000 -0400
+@@ -4,3 +4,4 @@
+ datastorage?
+ farming?
+ ocsethome?
++intllib?
+diff -ru Bucket_Game-base/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/group.lua Bucket_Game-branches/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/group.lua
+--- Bucket_Game-base/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/group.lua	2021-10-31 22:03:54.000000000 -0400
++++ Bucket_Game-branches/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/group.lua	2021-11-01 16:15:41.000000000 -0400
+@@ -1,4 +1,5 @@
+-local S = function (str) return str end
++local modpath = minetest.get_modpath("unified_inventory")
++local S, NS = dofile(modpath .. "/intllib.lua")
+ 
+ function unified_inventory.canonical_item_spec_matcher(spec)
+ 	local specname = ItemStack(spec):get_name()
+diff -ru Bucket_Game-base/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/internal.lua Bucket_Game-branches/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/internal.lua
+--- Bucket_Game-base/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/internal.lua	2021-10-31 22:03:54.000000000 -0400
++++ Bucket_Game-branches/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/internal.lua	2021-11-01 16:15:50.000000000 -0400
+@@ -1,4 +1,5 @@
+-local S = function (str) return str end
++local modpath = minetest.get_modpath("unified_inventory")
++local S, NS = dofile(modpath .. "/intllib.lua")
+ local F = minetest.formspec_escape
+ 
+ -- This pair of encoding functions is used where variable text must go in
+Only in Bucket_Game-branches/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory: intllib.lua
+diff -ru Bucket_Game-base/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/register.lua Bucket_Game-branches/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/register.lua
+--- Bucket_Game-base/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/register.lua	2021-10-31 22:03:54.000000000 -0400
++++ Bucket_Game-branches/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/register.lua	2021-11-01 19:50:02.231285695 -0400
+@@ -1,5 +1,6 @@
+-local S = function (str) return str end
+-local NS = function(s) return s end
++local modpath = minetest.get_modpath("unified_inventory")
++local S, NS = dofile(modpath .. "/intllib.lua")
++-- NS = S
+ local F = minetest.formspec_escape
+ 
+ minetest.register_privilege("creative", {
+@@ -233,8 +234,10 @@
+ end
+ 
+ local recipe_text = {
+-	recipe = NS("Recipe @1 of @2"),
+-	usage = NS("Usage @1 of @2"),
++	recipe = "Recipe @1 of @2",
++	usage = "Usage @1 of @2",
++  -- Don't use the "S" function yet:
++  -- * Use "S" later to fill numbered substitutions.
+ }
+ local no_recipe_text = {
+ 	recipe = S("No recipes"),
+diff -ru Bucket_Game-base/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/waypoints.lua Bucket_Game-branches/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/waypoints.lua
+--- Bucket_Game-base/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/waypoints.lua	2021-10-31 22:03:54.000000000 -0400
++++ Bucket_Game-branches/unified_inventory_recipe_fix-vs-211031/mods/codercore/unified_inventory/waypoints.lua	2021-11-01 19:48:39.043286310 -0400
+@@ -1,4 +1,5 @@
+-local S = function (str) return str end
++local modpath = minetest.get_modpath("unified_inventory")
++local S, NS = dofile(modpath .. "/intllib.lua")
+ local F = minetest.formspec_escape
+ 
+ local hud_colors = {
