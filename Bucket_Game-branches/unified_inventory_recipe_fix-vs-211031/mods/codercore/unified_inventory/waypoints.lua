@@ -1,4 +1,5 @@
-local S = function (str) return str end
+local modpath = minetest.get_modpath("unified_inventory")
+local S, NS = dofile(modpath .. "/intllib.lua")
 local F = minetest.formspec_escape
 
 local hud_colors = {
