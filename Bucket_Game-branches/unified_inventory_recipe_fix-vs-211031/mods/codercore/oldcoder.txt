@@ -1,0 +1,27 @@
+Name:     unified_inventory
+Source:   Fork of upstream mod - Do not replace
+License:  See "LICENSE.txt"
+
+----------------------------------------------------------------------
+
+1. This is a fork of an upstream mod.  The starting point was obtained
+initially as follows:
+
+      rm -fr unified_inventory
+      git clone https://github.com/minetest-mods/unified_inventory.git
+      cd unified_inventory
+      git reset --hard ca6d9a10df5110fd75d49785adf690ae270d5a31
+      
+Forked after: commit indicated above
+
+----------------------------------------------------------------------
+
+2. Partial list of changes:
+
+2a. Fixed  a few cases where  "@1" or "@2" was  printed instead of the
+correct output.
+
+2b. Modified the mod so that it stays synced with "ocsethome".
+
+2c. Removed  "bags" code,  which seems to be crashy.  "prestibags" mod
+has been added to the "_game" as a substitute for the "bags" feature.
