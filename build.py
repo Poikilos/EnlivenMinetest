@@ -70,7 +70,50 @@ gamespec['add_mods'] = [
     "https://github.com/BenjieFiftysix/sponge.git",
     "https://github.com/minetest-mods/throwing.git",
     "https://github.com/minetest-mods/throwing_arrows.git",
+    "https://gitlab.com/VanessaE/biome_lib.git",
+    {
+        'url': "https://github.com/Poikilos/vines.git",
+        'branch': "Bucket_Game", # git clone <url> --branch <branch>
+    },
 ]
+why = {}
+why_not["https://github.com/FaceDeer/vines.git"] = '''
+'''
+why["https://github.com/poikilos/vines.git"] = '''
+This Poikilos fork (The Bucket_Game branch) adds support for Bucket_Game
+jungle node names which are in a standard naming format (like other
+trees are).
+
+> I've finally done it, I've split this mod in twain. The new
+> stand-alone ropes mod has no dependency on biome_lib and no vine
+> content, though its crafting recipes remain compatible with the vines
+> produced by this mod.
+>
+> My fork of this vines mod has had the rope-related content removed
+> from it, leaving it as just a vines mod. Note that I haven't tested
+> it extensively - I have to admit, I've mainly been in this for the
+> ropes. :) I'll do what I can to maintain it, though, if anyone has
+> bug reports or requests.
+>
+> I've added a node upgrade function to the new ropes mod that will
+> convert the ropes from both my fork of the vines mod and the original
+> version of the vines mod by bas080 to the new ropes mod's ropes. So
+> if you wish to upgrade an existing world it should work.
+
+- FaceDeer on [[Mod] Vines and Rope [2.3] [vines]]
+  (https://forums.minetest.org/viewtopic.php?f=11&t=2344&start=50
+  &sid=bf15c996963e891cd3f2460c2525044a)
+
+Note that vines requires:
+
+default
+biome_lib
+moretrees?
+doc?
+intllib?
+mobs?
+creatures?
+'''
 gamespec['disable_mobs'] = [
     "old_lady",
 ]
