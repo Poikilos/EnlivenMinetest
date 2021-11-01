@@ -1,0 +1,21 @@
+diff -ru Bucket_Game-base/wifi-chest-remake-vs-211031/mods/coderbuild/more_chests/README.md Bucket_Game-branches/wifi-chest-remake-vs-211031/mods/coderbuild/more_chests/README.md
+--- Bucket_Game-base/wifi-chest-remake-vs-211031/mods/coderbuild/more_chests/README.md	2021-10-31 23:45:05.631819818 -0400
++++ Bucket_Game-branches/wifi-chest-remake-vs-211031/mods/coderbuild/more_chests/README.md	2021-10-31 23:43:12.000000000 -0400
+@@ -45,3 +45,5 @@
+ 
+ A wacky chest that doesn't store it's items in the usual way, but instead, stores them remotely. For that reason, all wifi chests appear to have the same inventory. Due to not actually having an inventory, wifi chests can also be mined, even when they appear to have stuff in them. Lastly, as everyone gets their own wifi account, the items you see in the wifi chest are not the same items anyone else sees. This chest's properties make it nice for keeping secrets, as well as essentially almost doubling your inventory space, if you choose to carry one with you.
+ ```
++
++The Wi-Fi chest was more "familiar" than it was "wacky", so Poikilos remade the texture from scratch (and added a separate bottom texture) 2021-10-31.
+Only in Bucket_Game-branches/wifi-chest-remake-vs-211031/mods/coderbuild/more_chests: textures
+diff -ru Bucket_Game-base/wifi-chest-remake-vs-211031/mods/coderbuild/more_chests/wifi.lua Bucket_Game-branches/wifi-chest-remake-vs-211031/mods/coderbuild/more_chests/wifi.lua
+--- Bucket_Game-base/wifi-chest-remake-vs-211031/mods/coderbuild/more_chests/wifi.lua	2019-03-21 08:30:52.000000000 -0400
++++ Bucket_Game-branches/wifi-chest-remake-vs-211031/mods/coderbuild/more_chests/wifi.lua	2021-10-31 23:40:32.000000000 -0400
+@@ -1,6 +1,6 @@
+ minetest.register_node("more_chests:wifi", {
+ 	description = "Wifi Chest",
+-	tiles = {"wifi_top.png", "wifi_top.png", "wifi_side.png",
++	tiles = {"wifi_top.png", "wifi_bottom.png", "wifi_side.png",
+ 		"wifi_side.png", "wifi_side.png", "wifi_front.png"},
+ 	paramtype2 = "facedir",
+ 	groups = {snappy=2, choppy=2, oddly_breakable_by_hand=2,},
