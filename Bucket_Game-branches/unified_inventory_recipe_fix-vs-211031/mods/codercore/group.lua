@@ -1,4 +1,5 @@
-local S = function (str) return str end
+local modpath = minetest.get_modpath("unified_inventory")
+local S, NS = dofile(modpath .. "/intllib.lua")
 
 function unified_inventory.canonical_item_spec_matcher(spec)
 	local specname = ItemStack(spec):get_name()

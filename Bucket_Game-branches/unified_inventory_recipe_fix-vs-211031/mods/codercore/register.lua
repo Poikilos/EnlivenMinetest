@@ -1,5 +1,6 @@
-local S = function (str) return str end
-local NS = function(s) return s end
+local modpath = minetest.get_modpath("unified_inventory")
+local S, NS = dofile(modpath .. "/intllib.lua")
+-- NS = S
 local F = minetest.formspec_escape
 
 minetest.register_privilege("creative", {
@@ -233,8 +234,8 @@ local function stack_image_button(x, y, w, h, buttonname_prefix, item)
 end
 
 local recipe_text = {
-	recipe = NS("Recipe @1 of @2"),
-	usage = NS("Usage @1 of @2"),
+	recipe = S("Recipe @1 of @2"),
+	usage = S("Usage @1 of @2"),
 }
 local no_recipe_text = {
 	recipe = S("No recipes"),
