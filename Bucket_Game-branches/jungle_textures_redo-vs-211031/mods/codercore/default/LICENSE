@@ -104,8 +104,13 @@ Player Falling Damage sound:
 (c) 2019 and CC-BY 4.0: Poikilos, cmusounddesign, Tomlija.
 player_falling_damage
 
+Redone jungle textures by OldCoder and Poikilos 2021-11-02:
+    default_jungle_trunk.png (and default_jungletree.png for use by older mods)
+    default_jungle_wood.png (and default_junglewood.png for use by older mods)
+    default_jungle_top.png (and default_jungletree_top.png)
+
+
 Cisoun's WTFPL texture pack:
-    default_jungletree.png
     default_lava.png
     default_leaves.png
     default_sapling.png
@@ -195,8 +200,6 @@ paramat (CC BY-SA 3.0):
     default_acacia_tree.png
     default_acacia_tree_top.png
     default_acacia_wood.png
-    default_junglewood.png
-    default_jungletree_top.png
     default_sandstone_brick.png
     default_obsidian_brick.png
     default_stone_brick.png
@@ -352,4 +355,4 @@ kilbith (CC BY-SA 3.0):
     default_tin_block.png
     default_mineral_tin.png
     default_tin_ingot.png
-    default_tin_lump.png  
+    default_tin_lump.png

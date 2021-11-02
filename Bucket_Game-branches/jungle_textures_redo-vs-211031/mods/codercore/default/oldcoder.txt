@@ -80,6 +80,11 @@ Maple
 
 * Support for a Winter Wonderland mode.
 
+* Jungle wood and trunk textures are redone by OldCoder and Poikilos 2021-11-02.
+  - default_jungle_trunk.png (and default_jungletree.png for use by older mods)
+  - default_jungle_wood.png (and default_junglewood.png for use by older mods)
+  - default_jungle_top.png (and default_jungletree_top.png)
+
 ----------------------------------------------------------------------
 
 2.7. player_falling_damage: redone based on default_break_glass .1 and
