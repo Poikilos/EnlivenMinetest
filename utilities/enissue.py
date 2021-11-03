@@ -101,6 +101,7 @@ class Repo:
             c_issues_name_fmt = "issues_page={p}{q}.json",
             c_issue_name_fmt = "issues_{issue_no}.json",
             default_query = {'state':'open'},
+            hide_events = ['renamed', 'assigned'],
         ):
         '''
         Keyword arguments:
@@ -123,6 +124,8 @@ class Repo:
         default_query -- This dictionary must contain all URL query
                          parameters that the API assumes and that don't
                          need to be provided in the URL.
+        hide_events -- Do not show these event types in an issue's
+                       timeline.
         '''
         self.page = None
         self.remote_user = remote_user
@@ -147,7 +150,7 @@ class Repo:
         self.label_ids = []  # all label ids in the repo
         self.labels = []  # all labels in the repo
         self.default_query = default_query
-
+        self.hide_events = hide_events
         self.issues = None
 
     def get_issues(self, query=None, issue_no=None):
@@ -313,7 +316,8 @@ class Repo:
                 "\\t",
                 "\t"
             )
-        left_w = 10
+        left_w = 11
+        # ^ left_w must be >=11 or "updated_at:" will push the next col.
         spacer = " "
         line_fmt = "{: <" + str(left_w) + "}" + spacer + "{}"
         print(line_fmt.format("html_url:",  issue["html_url"]))
@@ -344,28 +348,95 @@ class Repo:
             print('"""')
         else:
             print("(no description)")
-        if issue_data["comments"] > 0:
+
+        comments = issue_data.get("comments")
+        if comments is None:
+            comments = 0
+        if comments > 0:
             print("")
             print("")
-            print("({}) comment(s):".format(issue_data["comments"]))
+            print("({}) comment(s):".format(comments))
+
+        left_margin = "    "
+        c_prop_fmt = (left_margin + "{: <" + str(left_w) + "}"
+                      + spacer + "{}")
+        # ^ Ensure that the second column is justified
+        #   (in a Terminal using a monospaced font).
+
+
+        # NOTE: Timeline is nicer than events because it has both
+        #       comments and events.
+        '''
+        this_evts_json_url = issue_data.get('events_url')
+        if this_evts_json_url is not None:
+            evts_res = request.urlopen(this_evts_json_url)
+            evts_data_s = decode_safe(evts_res.read())
+            evts_data = json.loads(evts_data_s)
+        '''
+        this_tmln_json_url = issue_data.get('timeline_url')
+        data = []
+        if this_tmln_json_url is not None:
+            tmln_res = request.urlopen(this_tmln_json_url)
+            tmln_data_s = decode_safe(tmln_res.read())
+            tmln_data = json.loads(tmln_data_s)
+            data = tmln_data
+        elif comments > 0:
             this_cmts_json_url = issue_data["comments_url"]
             response = request.urlopen(this_cmts_json_url)
             cmts_data_s = decode_safe(response.read())
             cmts_data = json.loads(cmts_data_s)
-            left_margin = "    "
-            c_prop_fmt = (left_margin + "{: <" + str(left_w) + "}"
-                          + spacer + "{}")
-            for cmt in cmts_data:
+            data = cmts_data
+
+        for evt in data:
+            user = evt.get('user')
+            login = None
+            if user is not None:
                 print("")
                 print("")
-                print(c_prop_fmt.format("from:", cmt["user"]["login"]))
+                login = user.get('login')
+            if login is not None:
+                print(c_prop_fmt.format("from:", login))
+            updated_at = evt.get("updated_at")
+            if updated_at is not None:
                 print(c_prop_fmt.format("updated_at:",
-                                        cmt["updated_at"]))
+                                        updated_at))
+            body = evt.get("body")
+            if body is not None:
                 print("")
                 print(left_margin + '"""')
-                print(left_margin + cmt["body"])
+                print(left_margin + body)
                 print(left_margin + '"""')
                 print("")
+            rename = evt.get('rename')
+            event = evt.get('event')
+
+            ignore_events = ['commented', 'labeled']
+            if self.hide_events:
+                ignore_events.extend(self.hide_events)
+            if event is not None:
+                actor = evt.get('actor')
+                if actor is not None:
+                    login = actor.get('login')
+                created_at = evt.get('created_at')
+                if event == "cross-referenced":
+                    source = evt.get('source')
+                    source_type = source.get('type')
+                    source_issue = source.get('issue')
+                    if source_issue is not None:
+                        source_number = source_issue.get('number')
+                    print(left_margin
+                          +"cross-reference: {} referenced this issue"
+                          " in {} {}."
+                          "".format(login, source_type, source_number))
+                # elif (event == "closed") or (event == "reopened"):
+                elif event not in ignore_events:
+                    print(left_margin+"{} {} by {}"
+                          "".format(event.upper(), created_at, login))
+            if (rename is not None) and ('renamed' not in ignore_events):
+                # already said "RENAMED" above (evt.get('event'))
+                # print(left_margin+"renamed issue")
+                print(left_margin+"  from:{}".format(rename.get('from')))
+                print(left_margin+"  to:{}".format(rename.get('to')))
 
 
         closed_by = issue_data.get('closed_by')
@@ -373,9 +444,9 @@ class Repo:
         if (closed_by is not None) or (closed_at is not None):
             # INFO: closed_by may be present even if reopened
             # (determine this by getting 'state').
-            # - [ ] The same could be accomplished more clearly by
-            #   checking for "event" on 'events_url')
-            #   instead (that would replace the use of 'comments_url'.
+            # The "REOPENED" and "CLOSED" events also appear in the
+            # timeline (see this_tmln_json_url).
+            print()
             state = issue_data.get('state')
             closet_at_str = ""
             if closed_at is not None:
