@@ -372,6 +372,9 @@ class Repo:
             evts_res = request.urlopen(this_evts_json_url)
             evts_data_s = decode_safe(evts_res.read())
             evts_data = json.loads(evts_data_s)
+            # Example:
+            # <https://api.github.com/repos/poikilos/EnlivenMinetest/
+            # issues/202/events>
         '''
         this_tmln_json_url = issue_data.get('timeline_url')
         data = []
@@ -379,6 +382,10 @@ class Repo:
             tmln_res = request.urlopen(this_tmln_json_url)
             tmln_data_s = decode_safe(tmln_res.read())
             tmln_data = json.loads(tmln_data_s)
+            # Example:
+            # <https://api.github.com/repos/poikilos/EnlivenMinetest/
+            # issues/202/timeline>
+            #
             data = tmln_data
         elif comments > 0:
             this_cmts_json_url = issue_data["comments_url"]
@@ -410,7 +417,7 @@ class Repo:
             rename = evt.get('rename')
             event = evt.get('event')
 
-            ignore_events = ['commented', 'labeled']
+            ignore_events = ['commented']
             if self.hide_events:
                 ignore_events.extend(self.hide_events)
             if event is not None:
@@ -418,7 +425,9 @@ class Repo:
                 if actor is not None:
                     login = actor.get('login')
                 created_at = evt.get('created_at')
-                if event == "cross-referenced":
+                if event in ignore_events:
+                    pass
+                elif event == "cross-referenced":
                     source = evt.get('source')
                     source_type = source.get('type')
                     source_issue = source.get('issue')
@@ -428,8 +437,27 @@ class Repo:
                           +"cross-reference: {} referenced this issue"
                           " in {} {}."
                           "".format(login, source_type, source_number))
+                elif event == "labeled":
+                    label = evt.get('label')
+                    if label is not None:
+                        label_name = label.get('name')
+                        label_color = label.get('color')
+                    print(left_margin+"{}: {} by {} {}"
+                          "".format(event, label_name, login,
+                                    created_at))
                 # elif (event == "closed") or (event == "reopened"):
-                elif event not in ignore_events:
+                elif event == "unlabeled":
+                    # Example:
+                    # <https://api.github.com/repos/poikilos/
+                    # EnlivenMinetest/issues/448/timeline>
+                    label = evt.get('label')
+                    if label is not None:
+                        label_name = label.get('name')
+                        label_color = label.get('color')
+                    print(left_margin+"{}: {} by {} {}"
+                          "".format(event, label_name, login,
+                                    created_at))
+                else:
                     print(left_margin+"{} {} by {}"
                           "".format(event.upper(), created_at, login))
             if (rename is not None) and ('renamed' not in ignore_events):
