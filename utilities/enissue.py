@@ -302,8 +302,10 @@ def show_issue(issue):
         return False
     issue_data_s = decode_safe(issue_data_bytes)
     issue_data = json.loads(issue_data_s)
-    markdown = issue_data["body"]
-    markdown = markdown.replace("\\r\\n", "\n").replace("\\t", "\t")
+    markdown = issue_data.get("body")
+    # ^ It is (always?) present but allowed to be None by GitHub!
+    if markdown is not None:
+        markdown = markdown.replace("\\r\\n", "\n").replace("\\t", "\t")
     left_w = 10
     spacer = " "
     line_fmt = "{: <" + str(left_w) + "}" + spacer + "{}"
@@ -328,9 +330,12 @@ def show_issue(issue):
         labels_s = ", ".join(neat_labels)
     print(line_fmt.format("labels:", labels_s))
     print("")
-    print('"""')
-    print(markdown)
-    print('"""')
+    if markdown is not None:
+        print('"""')
+        print(markdown)
+        print('"""')
+    else:
+        print("(no description)")
     if issue_data["comments"] > 0:
         print("")
         print("")
