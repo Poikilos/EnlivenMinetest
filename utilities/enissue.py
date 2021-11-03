@@ -16,10 +16,15 @@ except ImportError:
 
 try:
     from urllib.parse import urlparse
+    # from urllib.parse import quote_plus
+    from urllib.parse import urlencode
     from urllib.parse import quote
     from urllib.parse import unquote
 except ImportError:
+    # Python 2
     from urlparse import urlparse
+    # from urlparse import quote_plus
+    from urllib import urlencode
     from urllib import quote
     from urllib import unquote
 
@@ -45,7 +50,7 @@ modes = {
                  " not case sensitive."),
         "examples": ["list", " list Bucket_Game",
                      " list Bucket_Game urgent", " Bucket_Game",
-                     " Bucket_Game urgent"]
+                     " Bucket_Game urgent", " Bucket_Game --closed"]
     },
     "labels": {
         "help": ("List all labels (just the labels themselves, not the"
@@ -55,7 +60,7 @@ modes = {
     "page": {
         "help": ("GitHub only lists 30 issues at a time. Type page"
                  " followed by a number to see additional pages."),
-        "examples": [" page 2"]
+        "examples": [" page 2", " page 2 --closed"]
     },
     "<#>": {
         "help": "Specify an issue number to see details.",
@@ -91,23 +96,33 @@ class Repo:
             remote_user = "poikilos",
             repo_name = "EnlivenMinetest",
             api_repo_url_fmt = "https://api.github.com/repos/{ru}/{rn}",
+            api_issue_url_fmt = "{api_url}/issues/{issue_no}",
             page_size = 30,
             c_issues_name_fmt = "issues_page={p}{q}.json",
+            c_issue_name_fmt = "issues_{issue_no}.json",
+            default_query = {'state':'open'},
         ):
         '''
         Keyword arguments:
         remote_user -- The repo user may be used in api_repo_url_fmt.
         repo_name -- The repo name may be used in api_repo_url_fmt.
         api_repo_url_fmt -- a format string where {ru} is where a repo
-                            user goes (if any), and {rn} is where a
-                            repo name goes (if any).
+                            user goes, and {rn} is where a
+                            repo name goes.
+        api_issue_url_fmt -- a format string where {issue_url} is
+                             determined by api_repo_url_fmt and
+                             {issue_no} is where an issue number goes.
         page_size -- This must be set to the page size that is
                      compatible with the URL in api_repo_url_fmt, such
                      as exactly 30 for GitHub.
-        c_issues_name_fmt -- This is the format of the URL query tail
-                             that shows a certain page by page number,
+        c_issues_name_fmt -- This converts a URL to a cache filename,
                              where {p} is the page number and {q} is any
-                             additional query such as "&label=bug".
+                             additional query such as "&state=closed".
+        c_issue_name_fmt -- This converts a URL to a cache filename,
+                            where {issue_no} is the issue number.
+        default_query -- This dictionary must contain all URL query
+                         parameters that the API assumes and that don't
+                         need to be provided in the URL.
         '''
         self.page = None
         self.remote_user = remote_user
@@ -116,10 +131,12 @@ class Repo:
                                                self.remote_user)
         self.c_repo_path = os.path.join(self.c_remote_user_path,
                                         self.repo_name)
+        self.c_issue_name_fmt = c_issue_name_fmt
         self.api_repo_url_fmt = api_repo_url_fmt
+        self.api_issue_url_fmt = api_issue_url_fmt
         self.repo_url = self.api_repo_url_fmt.format(
             ru=remote_user,
-            rn=repo_name
+            rn=repo_name,
         )
         self.issues_url = self.repo_url + "/issues"
         self.labels_url = self.repo_url + "/labels"
@@ -129,37 +146,92 @@ class Repo:
 
         self.label_ids = []  # all label ids in the repo
         self.labels = []  # all labels in the repo
+        self.default_query = default_query
 
-    def get_issues(self):
-        query_s = self.issues_url
+        self.issues = None
+
+    def get_issues(self, query=None, issue_no=None):
+        '''
+        Keyword arguments:
+        query -- Use keys & values in this dictionary to the URL query.
+        issue_no -- Match an exact issue number and convert the
+                    resulting json object into a list so it behaves
+                    like a list of matches (containing only 1
+                    though). The query must be None when using
+                    issue_no or a ValueError is raised.
+        '''
+        if issue_no is not None:
+            if query is not None:
+                raise ValueError("You cannot do a query when getting"
+                                 " only one issue because a single"
+                                 " issue has its own URL with only"
+                                 " one result (not a list).")
+        query_s = self.issues_url  # changed below if issue_no
         this_page = 1
 
         query_part = ""
-        # TODO: IF longer API query is implemented, put something in
-        #   query_part like "&label=Bucket_Game"
+        and_query_part = ""
+        if query is not None:
+            '''
+            for k,v in query.items():
+                if v is not None:
+                    # <https://stackoverflow.com/a/9345102/4541104>:
+                    #query_s += (
+                    #    "&{}={}".format(quote_plus(k), quote_plus(v))
+                    #)
+                    #
+                    # <https://stackoverflow.com/a/5607708/4541104>:
+            '''
+            query_part = urlencode(query)
+            and_query_part = "&" + query_part
+
         if self.page is not None:
             this_page = self.page
         c_issues_name = self.c_issues_name_fmt.format(p=this_page,
-                                                      q=query_part)
+                                                      q=and_query_part)
+
+        # print("c_issues_name: {}".format(c_issues_name))
+        # print("query_part: {}".format(query_part))
         c_issues_path = os.path.join(self.c_repo_path, c_issues_name)
+        make_list = False
+        c_path = c_issues_path
+
+        c_issue_name = self.c_issue_name_fmt.format(issue_no=issue_no)
+        c_issues_sub_path = os.path.join(self.c_repo_path, "issues")
+        if issue_no is not None:
+            if not os.path.isdir(c_issues_sub_path):
+                os.mkdir(c_issues_sub_path)
+            c_issue_path = os.path.join(c_issues_sub_path, c_issue_name)
+            c_path = c_issue_path
+            make_list = True
+            # Change query_s to the issue url (formerly issue_url):
+            query_s = self.api_issue_url_fmt.format(
+                api_url=self.repo_url,
+                issue_no=issue_no,
+            )
+
         p = self.log_prefix
-        if os.path.isfile(c_issues_path):
+        if os.path.isfile(c_path):
             # See <https://stackoverflow.com/questions/7430928/
             # comparing-dates-to-check-for-old-files>
             max_cache_delta = timedelta(hours=12)
             cache_delta = datetime.now() - max_cache_delta
-            c_issues_mtime = os.path.getmtime(c_issues_path)
+            c_issues_mtime = os.path.getmtime(c_path)
             filetime = datetime.fromtimestamp(c_issues_mtime)
             if filetime > cache_delta:
-                print(p+"Loading cache: \"{}\"".format(c_issues_path))
+                print(p+"Loading cache: \"{}\"".format(c_path))
                 # print(p+"Cache time limit: {}".format(max_cache_delta)
                 print(p+"Cache expires: {}".format(filetime
                                                    + max_cache_delta))
-                with open(c_issues_path) as json_file:
-                    results = json.load(json_file)
+                with open(c_path) as json_file:
+                    result = json.load(json_file)
                 # print(p+"The cache file has"
                 #       " {} issue(s).".format(len(results)))
                 max_issue = None
+                results = result
+                if hasattr(results, 'keys'):
+                    # It is an issue not a page, so convert to list:
+                    results = [result]
                 for issue in results:
                     issue_n = issue.get("number")
                     if issue_n is not None:
@@ -172,16 +244,20 @@ class Repo:
             else:
                 print(p+"Cache time limit: {}".format(max_cache_delta))
                 print(p+"The cache has expired: \"{}\"".format(
-                    c_issues_path
+                    c_path
                 ))
         else:
             print(p+"There is no cache for \"{}\"".format(
-                c_issues_path
+                c_path
             ))
 
         if self.page is not None:
             query_s = self.issues_url + "?page=" + str(self.page)
+            query_s += and_query_part
+        elif len(query_part) > 0:
+            query_s += "?" + query_part
         try:
+            print("query_s: {}".format(query_s))
             response = request.urlopen(query_s)
         except urllib.error.HTTPError as e:
             print(p+"You may be able to view the issues on GitHub")
@@ -194,10 +270,16 @@ class Repo:
         response_s = decode_safe(response.read())
         if not os.path.isdir(self.c_repo_path):
             os.makedirs(self.c_repo_path)
-        print(p+"Saving issues cache: {}".format(c_issues_path))
-        with open(c_issues_path, "w") as outs:
+        print(p+"Saving issues cache: {}".format(c_path))
+        with open(c_path, "w") as outs:
             outs.write(response_s)
-        results = json.loads(response_s)
+        result = json.loads(response_s)
+        if make_list:
+            # If an issue URL was used, there will be one dict only, so
+            # make it into a list.
+            results = [result]
+        else:
+            results = result
         return results
 
 
@@ -285,12 +367,53 @@ class Repo:
                 print(left_margin + '"""')
                 print("")
 
+
+        closed_by = issue_data.get('closed_by')
+        closed_at = issue_data.get('closed_at')
+        if (closed_by is not None) or (closed_at is not None):
+            # INFO: closed_by may be present even if reopened
+            # (determine this by getting 'state').
+            # - [ ] The same could be accomplished more clearly by
+            #   checking for "event" on 'events_url')
+            #   instead (that would replace the use of 'comments_url'.
+            state = issue_data.get('state')
+            closet_at_str = ""
+            if closed_at is not None:
+                closet_at_str = " {}".format(closed_at)
+            if state != "open":
+                closed_by_login = closed_by.get("login")
+                if closed_by_login is not None:
+                    print("    (CLOSED{} by {})".format(
+                        closet_at_str,
+                        closed_by_login
+                    ))
+                else:
+                    print("    (CLOSED{})".format(closet_at_str))
+            if state == "open":
+                print("    (REOPENED)")
+            elif closed_at is None:
+                print("    (The closing date is unknown.)")
+
         print("")
         print("")
         return True
 
-    def load_issues(self):
-        self.issues = self.get_issues()
+    def load_issues(self, query=None, issue_no=None):
+        '''
+        Keyword arguments:
+        query -- Use keys & values in this dictionary to the URL query.
+        issue_no -- Load only this issue (not compatible with query).
+
+        Raises:
+        ValueError if query is not None and issue_no is not None.
+        '''
+        if issue_no is not None:
+            if query is not None:
+                raise ValueError("You cannot do a query when getting"
+                                 " only one issue because a single"
+                                 " issue has its own URL with only"
+                                 " one result (not a list).")
+        self.issues = self.get_issues(query=query, issue_no=issue_no)
 
     def get_match(self, mode, match_number=None, match_all_labels_lower=[]):
         '''
@@ -344,6 +467,11 @@ class Repo:
                 if match_number == issue["number"]:
                     matching_issue = issue
                     issue['lower_labels'] = this_issue_labels_lower
+        if (mode == 'issue') and (matching_issue is None):
+            raise RuntimeError("You must first call get_issues with"
+                               " the issue_no option to ensure that"
+                               " the single issue is loaded.")
+
         return {'issue':matching_issue, 'count':match_count}
 
 
@@ -352,6 +480,7 @@ def main():
     repo = Repo()
     prev_arg = None
     match_number = None
+    state = repo.default_query.get('state')
     for i in range(1, len(sys.argv)):
         arg = sys.argv[i]
         if arg.startswith("#"):
@@ -375,7 +504,9 @@ def main():
                 if (mode is None) and (modes.get(arg) is not None):
                     mode = arg
                 else:
-                    if arg != "page":
+                    if arg == "--closed":
+                        state = 'closed'
+                    elif arg != "page":
                         # print("* adding criteria: {}".format(arg))
                         mode = "list"
                         match_all_labels.append(arg)
@@ -385,6 +516,7 @@ def main():
             mode = "list"
         if match_number is not None:
             mode = "issue"
+
     valid_modes = ["issue"]
     for k, v in modes.items():
         valid_modes.append(k)
@@ -405,13 +537,25 @@ def main():
         print()
         print()
         sys.exit(0)
+    elif mode == "list":
+        if match_number is not None:
+            print("Error: You must specify either an issue number"
+                  " or query criteria, not both.")
+            sys.exit(1)
 
     print("")
     # print("Loading...")
 
     # TODO: get labels another way, and make this conditional:
     # if mode == "list":
-    repo.load_issues()
+    if (mode != "issue") and (state != repo.default_query.get('state')):
+        query = {
+            'state': state
+        }
+        repo.load_issues(query)
+    else:
+        repo.load_issues(issue_no=match_number)
+
     if repo.issues is None:
         print("There were no issues.")
         sys.exit(0)
@@ -433,6 +577,30 @@ def main():
 
     if matching_issue is not None:
         repo.show_issue(matching_issue)
+        if state != "open":
+            print("(showing {} issue(s))".format(state.upper()))
+            # ^ such as CLOSED
+    else:
+        # This code doesn't work since it isn't cached.
+        if mode == 'issue':
+            state = 'closed'
+            repo.load_issues(query={'state':"closed"})
+            total_count = len(repo.issues)
+            match = repo.get_match(
+                mode,
+                match_number=match_number,
+                match_all_labels_lower=match_all_labels_lower,
+            )
+            matching_issue = match['issue']
+    if matching_issue is None:
+        if mode == "issue":
+            print("")
+            # print("mode: {}".format(mode))
+            # print("match_number: {}".format(match_number))
+            # print("match_all_labels_lower: {}"
+            #       "".format(match_all_labels_lower))
+            print("{}".format(match))
+            print("(the issue wasn't visible)")
 
     if mode == "labels":
         # print("Labels:")
@@ -482,11 +650,19 @@ def main():
                 print("    ./" + me + " page " + str(next_page))
                 print("to see additional pages.")
         if match['count'] > 0:
-            print()
-            print()
-            print("To view details, type")
-            print("    ./" + me)
-            print("followed by a number.")
+            # Note that if a label and issue number are both provided,
+            # the mode is still "list".
+            if match_number is not None:
+                print()
+                print()
+                print("Warning: The issue number was ignored since you"
+                      " used an option that lists multiple issues.")
+            else:
+                print()
+                print()
+                print("To view details, type")
+                print("    ./" + me)
+                print("followed by a number.")
     print("")
 
 
