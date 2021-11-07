@@ -1,0 +1,27 @@
+Name:    bonemeal
+Source:  Fork of modified upstream mod - Do not replace
+License: See "LICENSE"
+
+----------------------------------------------------------------------
+
+1. This is a fork of an upstream mod.  The starting point was obtained
+originally as follows:
+
+      rm -fr bonemeal
+      git clone https://notabug.org/TenPlus1/bonemeal.git
+
+----------------------------------------------------------------------
+
+2. Partial list of changes:
+
+* Removed "mod.conf" and screenshot file(s).
+
+* Changed newlines to UNIX format. Detabbed and/or trimmed other white
+space.
+
+* Patched function "pine_grow" to fix a crash.
+
+* Added the files "00README" and "oldcoder.txt" (this file).
+
+----------------------------------------------------------------------
+End of file.
