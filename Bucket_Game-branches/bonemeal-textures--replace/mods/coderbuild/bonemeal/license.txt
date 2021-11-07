@@ -1,3 +1,26 @@
+Media Licenses:
+
+The following bonemeal textures were remade 2021-11-07 by Poikilos from scratch:
+- bonemeal_gelatin_powder.png
+- bonemeal_particle.png
+
+(c) 2021 Poikilos CC BY-SA 3.0
+
+The following bonemeal textures were remade 2021-11-07 by Poikilos based on work by Phú Thịnh Co:
+- bonemeal_mulch.png
+- bonemeal_item*.*
+- bonemeal_fertiliser.png
+
+(c) 2012 [Phú Thịnh Co](https://flickr.com/photos/81249109@N04/7656583062) and 2021 Poikilos [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/deed.en)
+
+The following texture was replaced (used texture from OldCoder's animal_materials, originally animalmaterials_bone.png by sapier for animalmaterials):
+- bonemeal_bone.png
+
+(c) 2021 [sapier](https://github.com/AntumMT/mp-animalmaterials/commits/master/animalmaterials/textures/animalmaterials_bone.png) CC BY-SA 3.0
+
+
+Code License:
+
 The MIT License (MIT)
 
 Copyright (c) 2016 TenPlus1
@@ -19,3 +42,4 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+

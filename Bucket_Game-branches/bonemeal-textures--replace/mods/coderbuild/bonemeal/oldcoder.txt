@@ -23,5 +23,7 @@ space.
 
 * Added the files "00README" and "oldcoder.txt" (this file).
 
+* 2021-11-07 Replace all textures (See new "Media Licenses" section in license.txt)
+
 ----------------------------------------------------------------------
 End of file.
