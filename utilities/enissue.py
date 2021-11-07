@@ -203,7 +203,7 @@ class Repo:
         c_issues_sub_path = os.path.join(self.c_repo_path, "issues")
         if issue_no is not None:
             if not os.path.isdir(c_issues_sub_path):
-                os.mkdir(c_issues_sub_path)
+                os.makedirs(c_issues_sub_path)
             c_issue_path = os.path.join(c_issues_sub_path, c_issue_name)
             c_path = c_issue_path
             make_list = True
