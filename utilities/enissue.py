@@ -31,6 +31,16 @@ except ImportError:
 import urllib
 
 
+def error(msg):
+    sys.stderr.write("{}\n".format(msg))
+    sys.stderr.flush()
+
+verbose = False
+
+def debug(msg):
+    if verbose:
+        error("[debug] " + msg)
+
 def decode_safe(b):
     try:
         s = b.decode()
@@ -153,8 +163,25 @@ class Repo:
         self.hide_events = hide_events
         self.issues = None
 
-    def get_issues(self, query=None, issue_no=None):
+    def _get_issues(self, options, query=None, issue_no=None):
         '''
+        Load the issues matching the query into self.issues, or load
+        one issue (len(self.issues) is 1 in that case). Only one or the
+        other keyword argument can be specified. This method is used
+        for both purposes so that the caching code only has to be
+        written once. The cached copy of the issue or result list will
+        be loaded if the cache has not expired (unless 'refresh' is
+        True in options, then the data will always be from the
+        internet).
+
+        This method is used internally by load_issues and the result is
+        placed in self.issues.
+
+        Sequential arguments:
+        options -- This dictionary where all keys are optional may have:
+        - 'refresh': Set to True to refresh the cache (load the data
+          from the internet and re-save the cached data).
+
         Keyword arguments:
         query -- Place keys & values in this dictionary directly into
                  the query part of the URL.
@@ -163,7 +190,18 @@ class Repo:
                     like a list of matches (containing only 1
                     though). The query must be None when using
                     issue_no or a ValueError is raised.
+
+
+
+        Keyword arguments:
+        query -- Use keys & values in this dictionary to the URL query.
+        issue_no -- Load only this issue (not compatible with query).
+
+        Raises:
+        ValueError if query is not None and issue_no is not None.
+
         '''
+        refresh = options.get('refresh')
         if issue_no is not None:
             if query is not None:
                 raise ValueError("You cannot do a query when getting"
@@ -222,7 +260,8 @@ class Repo:
             cache_delta = datetime.now() - max_cache_delta
             c_issues_mtime = os.path.getmtime(c_path)
             filetime = datetime.fromtimestamp(c_issues_mtime)
-            if filetime > cache_delta:
+
+            if (refresh is not True) and (filetime > cache_delta):
                 print(p+"Loading cache: \"{}\"".format(c_path))
                 # print(p+"Cache time limit: {}".format(max_cache_delta)
                 print(p+"Cache expires: {}".format(filetime
@@ -246,10 +285,13 @@ class Repo:
                 ))
                 return results
             else:
-                print(p+"Cache time limit: {}".format(max_cache_delta))
-                print(p+"The cache has expired: \"{}\"".format(
-                    c_path
-                ))
+                if refresh is True:
+                    print(p+"Refreshing...".format(max_cache_delta))
+                else:
+                    print(p+"Cache time limit: {}".format(max_cache_delta))
+                    print(p+"The cache has expired: \"{}\"".format(
+                        c_path
+                    ))
         else:
             print(p+"There is no cache for \"{}\"".format(
                 c_path
@@ -261,7 +303,7 @@ class Repo:
         elif len(query_part) > 0:
             query_s += "?" + query_part
         try:
-            print("query_s: {}".format(query_s))
+            debug(p+"query_s: {}".format(query_s))
             response = request.urlopen(query_s)
         except urllib.error.HTTPError as e:
             print(p+"You may be able to view the issues on GitHub")
@@ -288,6 +330,10 @@ class Repo:
 
 
     def show_issue(self, issue):
+        '''
+        Display an issue dictionary as formatted text after getting the
+        issue body and other data from the internet.
+        '''
         p = self.log_prefix
         print("")
         print("#{} {}".format(issue["number"], issue["title"]))
@@ -498,14 +544,9 @@ class Repo:
         print("")
         return True
 
-    def load_issues(self, query=None, issue_no=None):
+    def load_issues(self, options, query=None, issue_no=None):
         '''
-        Keyword arguments:
-        query -- Use keys & values in this dictionary to the URL query.
-        issue_no -- Load only this issue (not compatible with query).
-
-        Raises:
-        ValueError if query is not None and issue_no is not None.
+        See _get_issues for documentation.
         '''
         if issue_no is not None:
             if query is not None:
@@ -513,13 +554,18 @@ class Repo:
                                  " only one issue because a single"
                                  " issue has its own URL with only"
                                  " one result (not a list).")
-        self.issues = self.get_issues(query=query, issue_no=issue_no)
+        self.issues = self._get_issues(
+            options,
+            query=query,
+            issue_no=issue_no,
+        )
 
     def get_match(self, mode, issue_no=None, match_all_labels_lower=[]):
         '''
-        Show all matching issues. Return one if one matches
-        issue_no, but use show_issue instead and change code to use that
-        from now on whenever a single issue is needed.
+        Show a summary of matching issues in list mode or get a single
+        issue that will instead by shown by the show_issue method. In
+        single issue mode, this method can be skipped since load_issues
+        would have placed only one issue in self.issues in that case.
 
         Sequential arguments:
         mode -- This must be a valid mode
@@ -572,7 +618,7 @@ class Repo:
                     matching_issue = issue
                     issue['lower_labels'] = this_issue_labels_lower
         if (mode == 'issue') and (matching_issue is None):
-            raise RuntimeError("You must first call get_issues with"
+            raise RuntimeError("You must first call load_issues with"
                                " the issue_no option to ensure that"
                                " the single issue is loaded.")
             # TODO: Do not use this method for getting a single issue
@@ -607,6 +653,12 @@ def main():
                 if prev_arg == "page":
                     repo.page = i
                 else:
+                    if issue_no is not None:
+                        usage()
+                        error("Error: Only one issue number can be"
+                              " specified but you also specified"
+                              " {}.".format(arg))
+                        exit(1)
                     issue_no = i
             except ValueError:
                 if (mode is None) and (modes.get(arg) is not None):
@@ -615,7 +667,12 @@ def main():
                     if arg == "--closed":
                         state = 'closed'
                     elif arg == "--refresh":
-                        refresh = True
+                        options['refresh'] = True
+                    elif arg.startswith("--"):
+                        usage()
+                        error("Error: The argument \"{}\" is not valid"
+                              "".format(arg))
+                        exit(1)
                     elif arg != "page":
                         # print("* adding criteria: {}".format(arg))
                         mode = "list"
@@ -662,9 +719,9 @@ def main():
         query = {
             'state': state
         }
-        repo.load_issues(query)
+        repo.load_issues(options, query=query)
     else:
-        repo.load_issues(issue_no=issue_no)
+        repo.load_issues(options, issue_no=issue_no)
 
     if repo.issues is None:
         print("There were no issues.")
@@ -694,7 +751,7 @@ def main():
         # TODO: This code doesn't work since it isn't cached.
         if mode == 'issue':
             state = 'closed'
-            repo.load_issues(query={'state':"closed"})
+            repo.load_issues(options, query={'state':"closed"})
             total_count = len(repo.issues)
             match = repo.get_match(
                 mode,
