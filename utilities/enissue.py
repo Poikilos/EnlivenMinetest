@@ -156,7 +156,8 @@ class Repo:
     def get_issues(self, query=None, issue_no=None):
         '''
         Keyword arguments:
-        query -- Use keys & values in this dictionary to the URL query.
+        query -- Place keys & values in this dictionary directly into
+                 the query part of the URL.
         issue_no -- Match an exact issue number and convert the
                     resulting json object into a list so it behaves
                     like a list of matches (containing only 1
@@ -514,14 +515,18 @@ class Repo:
                                  " one result (not a list).")
         self.issues = self.get_issues(query=query, issue_no=issue_no)
 
-    def get_match(self, mode, match_number=None, match_all_labels_lower=[]):
+    def get_match(self, mode, issue_no=None, match_all_labels_lower=[]):
         '''
+        Show all matching issues. Return one if one matches
+        issue_no, but use show_issue instead and change code to use that
+        from now on whenever a single issue is needed.
+
         Sequential arguments:
         mode -- This must be a valid mode
                 (a key in the modes dictionary).
 
         Keyword arguments:
-        match_number -- Match this issue number (None for multiple).
+        issue_no -- Match this issue number (None for multiple).
         match_all_labels_lower -- Only match where all of these labels
                                   are on the issue.
         '''
@@ -557,19 +562,22 @@ class Repo:
                 if this_issue_match_count == len(match_all_labels):
                     match_count += 1
                     print("#{} {}".format(issue["number"], issue["title"]))
-            elif (match_number is None) and (mode == "list"):
+            elif (issue_no is None) and (mode == "list"):
                 # Show all since no criteria is set.
                 match_count += 1
                 print("#{} {}".format(issue["number"], issue["title"]))
-            if match_number is not None:
-                # INFO: match_number & issue["number"] are ints
-                if match_number == issue["number"]:
+            if issue_no is not None:
+                # INFO: issue_no & issue["number"] are ints
+                if issue_no == issue["number"]:
                     matching_issue = issue
                     issue['lower_labels'] = this_issue_labels_lower
         if (mode == 'issue') and (matching_issue is None):
             raise RuntimeError("You must first call get_issues with"
                                " the issue_no option to ensure that"
                                " the single issue is loaded.")
+            # TODO: Do not use this method for getting a single issue
+            # since the page must be cached or it fails (use improved
+            # show_issue method instead).
 
         return {'issue':matching_issue, 'count':match_count}
 
@@ -578,8 +586,9 @@ def main():
     mode = None
     repo = Repo()
     prev_arg = None
-    match_number = None
+    issue_no = None
     state = repo.default_query.get('state')
+    options = {}
     for i in range(1, len(sys.argv)):
         arg = sys.argv[i]
         if arg.startswith("#"):
@@ -598,13 +607,15 @@ def main():
                 if prev_arg == "page":
                     repo.page = i
                 else:
-                    match_number = i
+                    issue_no = i
             except ValueError:
                 if (mode is None) and (modes.get(arg) is not None):
                     mode = arg
                 else:
                     if arg == "--closed":
                         state = 'closed'
+                    elif arg == "--refresh":
+                        refresh = True
                     elif arg != "page":
                         # print("* adding criteria: {}".format(arg))
                         mode = "list"
@@ -613,7 +624,7 @@ def main():
     if mode is None:
         if len(match_all_labels) > 1:
             mode = "list"
-        if match_number is not None:
+        if issue_no is not None:
             mode = "issue"
 
     valid_modes = ["issue"]
@@ -637,7 +648,7 @@ def main():
         print()
         sys.exit(0)
     elif mode == "list":
-        if match_number is not None:
+        if issue_no is not None:
             print("Error: You must specify either an issue number"
                   " or query criteria, not both.")
             sys.exit(1)
@@ -653,7 +664,7 @@ def main():
         }
         repo.load_issues(query)
     else:
-        repo.load_issues(issue_no=match_number)
+        repo.load_issues(issue_no=issue_no)
 
     if repo.issues is None:
         print("There were no issues.")
@@ -669,7 +680,7 @@ def main():
     total_count = len(repo.issues)
     match = repo.get_match(
         mode,
-        match_number=match_number,
+        issue_no=issue_no,
         match_all_labels_lower=match_all_labels_lower,
     )
     matching_issue = match['issue']
@@ -680,14 +691,14 @@ def main():
             print("(showing {} issue(s))".format(state.upper()))
             # ^ such as CLOSED
     else:
-        # This code doesn't work since it isn't cached.
+        # TODO: This code doesn't work since it isn't cached.
         if mode == 'issue':
             state = 'closed'
             repo.load_issues(query={'state':"closed"})
             total_count = len(repo.issues)
             match = repo.get_match(
                 mode,
-                match_number=match_number,
+                issue_no=issue_no,
                 match_all_labels_lower=match_all_labels_lower,
             )
             matching_issue = match['issue']
@@ -695,7 +706,7 @@ def main():
         if mode == "issue":
             print("")
             # print("mode: {}".format(mode))
-            # print("match_number: {}".format(match_number))
+            # print("issue_no: {}".format(issue_no))
             # print("match_all_labels_lower: {}"
             #       "".format(match_all_labels_lower))
             print("{}".format(match))
@@ -751,7 +762,7 @@ def main():
         if match['count'] > 0:
             # Note that if a label and issue number are both provided,
             # the mode is still "list".
-            if match_number is not None:
+            if issue_no is not None:
                 print()
                 print()
                 print("Warning: The issue number was ignored since you"
