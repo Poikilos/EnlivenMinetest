@@ -303,7 +303,7 @@ class Repo:
         elif len(query_part) > 0:
             query_s += "?" + query_part
         try:
-            debug(p+"query_s: {}".format(query_s))
+            debug(p+"Query URL (query_s): {}".format(query_s))
             response = request.urlopen(query_s)
         except urllib.error.HTTPError as e:
             print(p+"You may be able to view the issues on GitHub")
@@ -629,6 +629,7 @@ class Repo:
 
 
 def main():
+    global verbose
     mode = None
     repo = Repo()
     prev_arg = None
@@ -668,6 +669,11 @@ def main():
                         state = 'closed'
                     elif arg == "--refresh":
                         options['refresh'] = True
+                    elif arg == "--verbose":
+                        verbose = True
+                    elif arg == "--help":
+                        usage()
+                        exit(0)
                     elif arg.startswith("--"):
                         usage()
                         error("Error: The argument \"{}\" is not valid"
