@@ -22,6 +22,10 @@ context = bpy.context
 print("")
 print("[ EnlivenMinetest/utilities/blender/hierarchy_of_empties_to_bones.py ] started")
 
+# armature_display_type = 'STICK'
+armature_display_type = 'OCTAHEDRAL'
+# ^ Can be: ('OCTAHEDRAL', 'STICK', 'BBONE', 'ENVELOPE', 'WIRE')
+#   default: 'OCTAHEDRAL'
 
 def mat3_to_vec_roll(mat):
     '''
@@ -128,35 +132,35 @@ def getRealRotation(empty):
     - HENDRIX1 <https://blenderartists.org/t/needed-help-with-creating-bones-in-python-using-position-and-rotation-data/1209120/2>.
     '''
     ancestor = empty.parent
-    if (ancestor is None) or (ancestor != 'EMPTY'):
-        return Quaternion(empty.rotation_quaternion)
+    if (ancestor is None):
+        return empty.rotation_quaternion
     ancestor = empty.parent.parent
-    if (ancestor is None) or (ancestor != 'EMPTY'):
-        return Quaternion(empty.rotation_quaternion) @ Quaternion(empty.parent.rotation_quaternion)
+    if (ancestor is None):
+        return empty.rotation_quaternion @ empty.parent.rotation_quaternion
     ancestor = empty.parent.parent.parent
-    if (ancestor is None) or (ancestor != 'EMPTY'):
-        return Quaternion(empty.rotation_quaternion) @ Quaternion(empty.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.rotation_quaternion)
+    if (ancestor is None):
+        return empty.rotation_quaternion @ empty.parent.rotation_quaternion @ empty.parent.parent.rotation_quaternion
     ancestor = empty.parent.parent.parent.parent
-    if (ancestor is None) or (ancestor != 'EMPTY'):
-        return Quaternion(empty.rotation_quaternion) @ Quaternion(empty.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.rotation_quaternion)
+    if (ancestor is None):
+        return empty.rotation_quaternion @ empty.parent.rotation_quaternion @ empty.parent.parent.rotation_quaternion @ empty.parent.parent.parent.rotation_quaternion
     ancestor = empty.parent.parent.parent.parent.parent
-    if (ancestor is None) or (ancestor != 'EMPTY'):
-        return Quaternion(empty.rotation_quaternion) @ Quaternion(empty.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.rotation_quaternion)
+    if (ancestor is None):
+        return empty.rotation_quaternion @ empty.parent.rotation_quaternion @ empty.parent.parent.rotation_quaternion @ empty.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.rotation_quaternion
     ancestor = empty.parent.parent.parent.parent.parent.parent
-    if (ancestor is None) or (ancestor != 'EMPTY'):
-        return Quaternion(empty.rotation_quaternion) @ Quaternion(empty.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.parent.rotation_quaternion)
+    if (ancestor is None):
+        return empty.rotation_quaternion @ empty.parent.rotation_quaternion @ empty.parent.parent.rotation_quaternion @ empty.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.parent.rotation_quaternion
     ancestor = empty.parent.parent.parent.parent.parent.parent.parent
-    if (ancestor is None) or (ancestor != 'EMPTY'):
-        return Quaternion(empty.rotation_quaternion) @ Quaternion(empty.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.parent.parent.rotation_quaternion)
+    if (ancestor is None):
+        return empty.rotation_quaternion @ empty.parent.rotation_quaternion @ empty.parent.parent.rotation_quaternion @ empty.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.parent.parent.rotation_quaternion
     ancestor = empty.parent.parent.parent.parent.parent.parent.parent.parent
-    if (ancestor is None) or (ancestor != 'EMPTY'):
-        return Quaternion(empty.rotation_quaternion) @ Quaternion(empty.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.parent.parent.parent.rotation_quaternion)
+    if (ancestor is None):
+        return empty.rotation_quaternion @ empty.parent.rotation_quaternion @ empty.parent.parent.rotation_quaternion @ empty.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.parent.parent.parent.rotation_quaternion
     ancestor = empty.parent.parent.parent.parent.parent.parent.parent.parent.parent
-    if (ancestor is None) or (ancestor != 'EMPTY'):
-        return Quaternion(empty.rotation_quaternion) @ Quaternion(empty.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.parent.parent.parent.parent.rotation_quaternion)
+    if (ancestor is None):
+        return empty.rotation_quaternion @ empty.parent.rotation_quaternion @ empty.parent.parent.rotation_quaternion @ empty.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.parent.parent.parent.parent.rotation_quaternion
     ancestor = empty.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent
-    if (ancestor is None) or (ancestor != 'EMPTY'):
-        return Quaternion(empty.rotation_quaternion) @ Quaternion(empty.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.parent.parent.parent.parent.rotation_quaternion) @ Quaternion(empty.parent.parent.parent.parent.parent.parent.parent.parent.parent.rotation_quaternion)
+    if (ancestor is None):
+        return empty.rotation_quaternion @ empty.parent.rotation_quaternion @ empty.parent.parent.rotation_quaternion @ empty.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.parent.parent.parent.parent.rotation_quaternion @ empty.parent.parent.parent.parent.parent.parent.parent.parent.parent.rotation_quaternion
 
     raise NotImplementedError("Fake recursion isn't implemented for hierarchies this deep.")
 
@@ -306,7 +310,7 @@ def makeSameChildrenFromRootEmpty(obj):
     # needed-help-with-creating-bones-in-python-using-
     # position-and-rotation-data/1209120>:
     armature = bpy.data.armatures.new("Armature")
-    armature.display_type = 'STICK'
+    armature.display_type = armature_display_type
     rig = bpy.data.objects.new("Armature", armature)
     context.scene.collection.objects.link(rig)
     context.view_layer.objects.active = rig
