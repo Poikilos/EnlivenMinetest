@@ -1,7 +1,6 @@
 $ find -type f -exec ls -lh {} \;
 -rw-r--r-- 1 owner owner 7.3K Nov  8 20:26 ./mods/coderfood/unified_foods/sounds/unified_hunger_eat_generic.ogg
 -rw-r--r-- 1 owner owner 18K Nov  8 20:26 ./mods/coderbuild/christmas_craft/sounds/snowball_splash.4.ogg
--rw-r--r-- 1 owner owner 92K Nov  8 20:26 ./mods/coderbuild/lavender/sounds/lavender_mipiace.ogg
 -rw-r--r-- 1 owner owner 9.0K Nov  8 20:26 ./mods/coderbuild/travelnet/sounds/travelnet_bell.ogg
 -rw-r--r-- 1 owner owner 16K Nov  8 20:26 ./mods/coderbuild/castle/sounds/orbs_birds.ogg
 -rw-r--r-- 1 owner owner 4.6K Nov  8 20:28 ./mods/coderbuild/castle/sounds/castle_crossbow_click.ogg

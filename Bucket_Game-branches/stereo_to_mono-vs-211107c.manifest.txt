@@ -1,7 +1,6 @@
 $ find -type f
 ./mods/coderfood/unified_foods/sounds/unified_hunger_eat_generic.ogg
 ./mods/coderbuild/christmas_craft/sounds/snowball_splash.4.ogg
-./mods/coderbuild/lavender/sounds/lavender_mipiace.ogg
 ./mods/coderbuild/travelnet/sounds/travelnet_bell.ogg
 ./mods/coderbuild/castle/sounds/orbs_birds.ogg
 ./mods/coderbuild/castle/sounds/castle_crossbow_click.ogg
