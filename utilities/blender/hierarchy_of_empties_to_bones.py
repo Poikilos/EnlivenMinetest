@@ -18,6 +18,8 @@ Usage:
 '''
 import bpy
 from mathutils import Vector, Quaternion
+import mathutils
+import math
 context = bpy.context
 print("")
 print("[ EnlivenMinetest/utilities/blender/hierarchy_of_empties_to_bones.py ] started")
@@ -26,6 +28,7 @@ print("[ EnlivenMinetest/utilities/blender/hierarchy_of_empties_to_bones.py ] st
 armature_display_type = 'OCTAHEDRAL'
 # ^ Can be: ('OCTAHEDRAL', 'STICK', 'BBONE', 'ENVELOPE', 'WIRE')
 #   default: 'OCTAHEDRAL'
+
 
 def mat3_to_vec_roll(mat):
     '''
@@ -105,6 +108,7 @@ def vec_roll_to_mat3(vec, roll):
     mat = rMatrix * bMatrix
     return mat
 
+
 def getFirstChild(parentName):
     for obj in bpy.data.objects:
         if obj.parent is None:
@@ -112,6 +116,7 @@ def getFirstChild(parentName):
         if obj.parent.name == parentName:
             return obj
     return None
+
 
 def getRealRotation_broken(cumulative_rotation, empty):
     if cumulative_rotation is None:
@@ -164,6 +169,19 @@ def getRealRotation(empty):
 
     raise NotImplementedError("Fake recursion isn't implemented for hierarchies this deep.")
 
+
+def vectorDiff(v1, v2):
+    if len(v1) != len(v2):
+        raise ValueError("v1 length is {} but v2 length is {}".format(len(v1), len(v2)))
+    if len(v1) == 4:
+        return Vector((v1[0]-v2[0], v1[1]-v2[1], v1[2]-v2[2], v1[3]-v2[3]))
+    elif len(v1) == 3:
+        return Vector((v1[0]-v2[0], v1[1]-v2[1], v1[2]-v2[2]))
+    else:
+        raise ValueError("v1 and v1 are of length {} but that is not a known valid location vector length.".format(len(v1)))
+    return None
+
+
 def makeSameChildren(empty, armature, parent_bone, parent_empty, cumulative_rotation, cumulative_scale, depth=0):
     '''
     Make a new bone for the given empty, then do the same
@@ -212,8 +230,9 @@ def makeSameChildren(empty, armature, parent_bone, parent_empty, cumulative_rota
         
         # create bone at armature origin and set its length
         scale = cumulative_scale * empty.scale.z
+        boneLength = length * scale
         current_bone.head = [0, 0, 0]
-        current_bone.tail = [0, 0, length * scale]
+        current_bone.tail = [0, 0, boneLength]
 
         # rotate bone
         # print(depth*" "+"  - empty.rotation_quaternion:{}".format(Quaternion(empty.rotation_quaternion)))
@@ -231,15 +250,32 @@ def makeSameChildren(empty, armature, parent_bone, parent_empty, cumulative_rota
         # transform_quat = parent_bone_quat_armature_space @ current_bone_quat_parent_space
         # transform_quat = current_bone_quat_parent_space @ cumulative_rotation
         # transform_quat = Quaternion(empty.rotation_quaternion) @ Quaternion(empty.parent.rotation_quaternion)
-        transform_quat = getRealRotation(empty)
+        # transform_quat = getRealRotation(empty)
+        # ^ getRealRotation(emtpy) gives same result as current_bone_quat_parent_space @ cumulative_rotation
+        # transform_quat = current_bone_quat_parent_space
+        # transform_quat = getRealRotation(empty)
+        transform_quat = empty.rotation_quaternion
         current_bone.transform(transform_quat.to_matrix())
+        # current_bone.tail = transform_quat.to_matrix() @ current_bone.tail
+        
+        # matrix = transform_quat.to_matrix()
+        # tail, roll = mat3_to_vec_roll(matrix)
+        # current_bone.head = matrix.to_translation()
+        # ^ ValueError: Matrix.to_translation(): inappropriate matrix size
+        # tail, roll = mat3_to_vec_roll(matrix.to_3x3())
+        # current_bone.head = matrix.to_translation()
+        # ^ ValueError: Matrix.to_translation(): inappropriate matrix size
+        #current_bone.tail = tail*boneLength + bone.head
+        #current_bone.roll = roll
         
         # set position
         # new_relative_loc = Quaternion(empty.location)
         # ^ The empty.location is relative to the parent_empty's head
         # but must be made relative the parent_bone's tail.
-        old_to_new = Vector(parent_bone.tail) - Vector(parent_empty.location)
-        new_relative_loc = Vector(empty.location) - old_to_new
+        # old_to_new = Vector(parent_empty.location) - Vector(parent_bone.tail)
+        old_to_new = vectorDiff(parent_empty.location, parent_bone.tail)
+        # new_relative_loc = old_to_new - Vector(empty.location)
+        new_relative_loc = vectorDiff(old_to_new, empty.location)
         # uhoh_if_nonzero = Vector(parent_bone.head) - Vector(parent_empty.location)
         # print(depth*" "+"  - uhoh_if_nonzero:{}".format(uhoh_if_nonzero))
         # ^ It is nonzero :(
@@ -248,7 +284,7 @@ def makeSameChildren(empty, armature, parent_bone, parent_empty, cumulative_rota
         print(depth*" "+"  - old_to_new:{}".format(old_to_new))
         print(depth*" "+"  - new_relative_loc:{}".format(new_relative_loc))
         # print(depth*" "+"  - current_bone_offset:{}".format(current_bone_offset))
-        current_bone.translate(Vector(new_relative_loc))
+        current_bone.translate(new_relative_loc)
 
         # connect
         current_bone.parent = parent_bone
@@ -290,8 +326,11 @@ def makeSameChildren(empty, armature, parent_bone, parent_empty, cumulative_rota
                 continue
             makeSameChildren(child, armature, current_bone, empty, transform_quat, scale, depth=depth+1)
 
+
 def makeSameChildrenFromRootEmpty(obj):
-# for obj in bpy.data.objects:
+    if obj is None:
+        print("Nothing is selected.")
+        return
     if obj.type != 'EMPTY':
         print("non-Empty {} type: {} isn't compatible with this script".format(obj.name, obj.type))
         return
@@ -325,6 +364,7 @@ def makeSameChildrenFromRootEmpty(obj):
     context.view_layer.objects.active = rig
     # else:
     #     print("{} parent: {}".format(obj.name, obj.parent))
+
 
 makeSameChildrenFromRootEmpty(context.view_layer.objects.active)
 
