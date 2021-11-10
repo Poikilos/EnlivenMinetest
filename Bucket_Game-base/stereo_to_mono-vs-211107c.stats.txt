@@ -1,3 +1,8 @@
+$ find -type f -exec ls -lh {} \; > ~/EnlivenMinetest/Bucket_Game-base/stereo_to_mono-vs-211107c.stats.txt
+$ # ^ The file has all ogg files not just patched ones, so next do trimpatchstats.py:
+$ cd ~/EnlivenMinetest/Bucket_Game-base && trimpatchstats.py stereo_to_mono-vs-211107c.stats.txt > stereo_to_mono-vs-211107c.stats0.txt
+$ mv stereo_to_mono-vs-211107c.stats0.txt stereo_to_mono-vs-211107c.stats.txt
+$ # ^ Overwrite the one with all names with the one with only patched names.
 -rw-r--r-- 1 owner owner 9.3K Dec 14  2018 ./mods/coderfood/unified_foods/sounds/unified_hunger_eat_generic.ogg
 -rw-r--r-- 1 owner owner 24K Dec 16  2018 ./mods/coderbuild/christmas_craft/sounds/snowball_splash.4.ogg
 -rw-r--r-- 1 owner owner 19K Jun 22  2019 ./mods/coderbuild/travelnet/sounds/travelnet_bell.ogg
