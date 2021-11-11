@@ -1,0 +1,55 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# How the files in this version of the patch were converted is unknown, but I (Poikilos) probably used Audacity to combine the channels, and I know some of the files were re-recorded.
+$ cd ~/git/EnlivenMinetest/Bucket_Game-branches/mono-sounds-patch-190613
+$ find -type f -exec ls -lh {} \; > ../mono-sounds-patch-190613.stats.txt
+$ cd ..
+# apply:
+# Set BUCKET_GAME to Bucket_Game dir then: cd EnlivenMinetest && git pull && rsync -rt Bucket_Game-branches/mono-sounds-patch-190613/ $BUCKET_GAME
+
+
+
+
+
+
+
+#region files common between original 190613 and redo patch
+-rw-r--r-- 1 owner owner 21K Jun 13  2019 ./mods/codermobs/codermobs/sounds/codermobs_kitten.ogg
+-rw-r--r-- 1 owner owner 10K Jun 13  2019 ./mods/codermobs/codermobs/sounds/codermobs_roar.ogg
+-rw-r--r-- 1 owner owner 31K Jun 13  2019 ./mods/codermobs/codermobs/sounds/chicken_lay_egg.ogg
+-rw-r--r-- 1 owner owner 31K Jun 13  2019 ./mods/codermobs/codermobs/sounds/codermobs_wasp.ogg
+-rw-r--r-- 1 owner owner 41K Jun 13  2019 ./mods/codermobs/codermobs/sounds/hohoho.ogg
+-rw-r--r-- 1 owner owner 6.6K Jun 13  2019 ./mods/codermobs/codermobs/sounds/codermobs_denny.ogg
+-rw-r--r-- 1 owner owner 18K Jun 13  2019 ./mods/codermobs/codermobs/sounds/bellow.ogg
+-rw-r--r-- 1 owner owner 29K Jun 13  2019 ./mods/codermobs/codermobs/sounds/codermobs_pumpking.ogg
+-rw-r--r-- 1 owner owner 31K Jun 13  2019 ./mods/codermobs/codermobs/sounds/coderwasp.ogg
+-rw-r--r-- 1 owner owner 20K Jun 13  2019 ./mods/codermobs/codermobs/sounds/codermobs_fireball.ogg
+-rw-r--r-- 1 owner owner 18K Jun 13  2019 ./mods/codermobs/codermobs/sounds/codermobs_bellow.ogg
+#endregion files common between original 190613 and redo patch
+
+
+
+-rw-r--r-- 1 owner owner 19K May 26  2015 ./mods/codermobs/codermobs/src/oops-stereo/bellow.ogg
+-rw-r--r-- 1 owner owner 59K Apr  9  2019 ./mods/codermobs/codermobs/src/oops-stereo/chicken_lay_egg.ogg
+-rw-r--r-- 1 owner owner 19K May 26  2015 ./mods/codermobs/codermobs/src/oops-stereo/codermobs_bellow.ogg
+-rw-r--r-- 1 owner owner 9.6K May 24  2019 ./mods/codermobs/codermobs/src/oops-stereo/codermobs_denny.ogg
+-rw-r--r-- 1 owner owner 22K Aug 29  2015 ./mods/codermobs/codermobs/src/oops-stereo/codermobs_fireball.ogg
+-rwxr-xr-x 1 owner owner 38K Aug 29  2015 ./mods/codermobs/codermobs/src/oops-stereo/codermobs_kitten.ogg
+-rw-r--r-- 1 owner owner 45K Apr 28  2015 ./mods/codermobs/codermobs/src/oops-stereo/codermobs_pumpking.ogg
+-rw-r--r-- 1 owner owner 15K Nov 22  2016 ./mods/codermobs/codermobs/src/oops-stereo/codermobs_roar.ogg
+-rw-r--r-- 1 owner owner 37K Nov 22  2016 ./mods/codermobs/codermobs/src/oops-stereo/codermobs_wasp.ogg
+-rw-r--r-- 1 owner owner 37K Nov 11  2017 ./mods/codermobs/codermobs/src/oops-stereo/coderwasp.ogg
+-rw-r--r-- 1 owner owner 71K Dec 14  2012 ./mods/codermobs/codermobs/src/oops-stereo/hohoho.ogg
