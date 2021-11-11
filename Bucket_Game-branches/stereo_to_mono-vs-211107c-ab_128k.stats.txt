@@ -1,0 +1,38 @@
+$ ~/git/mtanalyze/findstereofiles.py ~/minetest/bucket_game-211107c --patch ~/git/EnlivenMinetest/Bucket_Game-branches/stereo_to_mono-vs-211107c-ab_128k
+$ # ^ Such as if hard-coded "-qscale:a 0" in findstereofiles.py.
+$ # Then analyze difference in size using meld like:
+$ cd ~/git/EnlivenMinetest/Bucket_Game-branches/stereo_to_mono-vs-211107c-ab_128k
+$ rm ./mods/coderbuild/lavender/sounds/lavender_mipiace.ogg ./mods/coderbuild/castle/src/original/castle_weapons/sounds/castle_crossbow_click.ogg ./mods/coderbuild/castle/src/original/orbs_of_time/sounds/orbs_birds.ogg ./mods/coderbuild/castle/src/original/orbs_of_time/sounds/orbs_owl.ogg ./mods/coderbuild/castle/src/original/orbs_of_time/sounds/orbs_ding.ogg ./mods/coderbuild/castle/src/original/ropes/sounds/ropes_creak.3.ogg ./mods/coderbuild/castle/src/original/ropes/sounds/ropes_creak.2.ogg
+$ find -type f -exec ls -lh {} \; > ../stereo_to_mono-vs-211107c-ab_128k.stats.txt
+$ cd ..
+$ meld stereo_to_mono-vs-211107c-ab_128k.stats.txt stereo_to_mono-vs-211107c.stats.txt
+# apply:
+# Set BUCKET_GAME to Bucket_Game dir then: cd EnlivenMinetest && git pull && rsync -rt Bucket_Game-branches/stereo_to_mono-vs-211107c-ab_128k/ $BUCKET_GAME
+-rw-r--r-- 1 owner owner 6.5K Nov 10 20:09 ./mods/coderfood/unified_foods/sounds/unified_hunger_eat_generic.ogg
+-rw-r--r-- 1 owner owner 15K Nov 10 20:09 ./mods/coderbuild/christmas_craft/sounds/snowball_splash.4.ogg
+-rw-r--r-- 1 owner owner 6.5K Nov 10 20:09 ./mods/coderbuild/travelnet/sounds/travelnet_bell.ogg
+-rw-r--r-- 1 owner owner 12K Nov 10 20:09 ./mods/coderbuild/castle/sounds/orbs_birds.ogg
+-rw-r--r-- 1 owner owner 4.4K Nov 10 20:09 ./mods/coderbuild/castle/sounds/castle_crossbow_click.ogg
+-rw-r--r-- 1 owner owner 5.0K Nov 10 20:09 ./mods/coderbuild/castle/sounds/ropes_creak.3.ogg
+-rw-r--r-- 1 owner owner 18K Nov 10 20:09 ./mods/coderbuild/castle/sounds/orbs_owl.ogg
+-rw-r--r-- 1 owner owner 5.7K Nov 10 20:09 ./mods/coderbuild/castle/sounds/ropes_creak.2.ogg
+-rw-r--r-- 1 owner owner 5.4K Nov 10 20:09 ./mods/coderbuild/castle/sounds/orbs_ding.ogg
+-rw-r--r-- 1 owner owner 5.3K Nov 10 20:09 ./mods/mtmachines/technic/sounds/item_drop_pickup.1.ogg
+-rw-r--r-- 1 owner owner 7.6K Nov 10 20:09 ./mods/mtmachines/technic/sounds/mining_drill.ogg
+-rw-r--r-- 1 owner owner 5.2K Nov 10 20:09 ./mods/mtmachines/technic/sounds/item_drop_pickup.4.ogg
+-rw-r--r-- 1 owner owner 5.1K Nov 10 20:09 ./mods/mtmachines/technic/sounds/item_drop_pickup.3.ogg
+-rw-r--r-- 1 owner owner 5.5K Nov 10 20:09 ./mods/mtmachines/technic/sounds/item_drop_pickup.2.ogg
+-rw-r--r-- 1 owner owner 24K Nov 10 20:09 ./mods/codercore/wiki/sounds/REALZulfikar.ogg
+-rw-r--r-- 1 owner owner 14K Nov 10 20:09 ./mods/codercore/tpr/sounds/whoosh.ogg
+-rw-r--r-- 1 owner owner 12K Nov 10 20:09 ./mods/codercore/unified_inventory/sounds/birds.ogg
+-rw-r--r-- 1 owner owner 18K Nov 10 20:09 ./mods/codercore/unified_inventory/sounds/owl.ogg
+-rw-r--r-- 1 owner owner 5.3K Nov 10 20:09 ./mods/codercore/item_drop/sounds/item_drop_pickup.1.ogg
+-rw-r--r-- 1 owner owner 5.2K Nov 10 20:09 ./mods/codercore/item_drop/sounds/item_drop_pickup.4.ogg
+-rw-r--r-- 1 owner owner 5.1K Nov 10 20:09 ./mods/codercore/item_drop/sounds/item_drop_pickup.3.ogg
+-rw-r--r-- 1 owner owner 5.5K Nov 10 20:09 ./mods/codercore/item_drop/sounds/item_drop_pickup.2.ogg
+-rw-r--r-- 1 owner owner 5.8K Nov 10 20:09 ./mods/codermobs/mobs/sounds/mobs_swing.ogg
+-rw-r--r-- 1 owner owner 21K Nov 10 20:09 ./mods/codermobs/codermobs/sounds/codermobs_trex1.ogg
+-rw-r--r-- 1 owner owner 18K Nov 10 20:09 ./mods/codermobs/codermobs/sounds/codermobs_trex2.ogg
+-rw-r--r-- 1 owner owner 8.9K Nov 10 20:09 ./mods/codermobs/codermobs/sounds/codermobs_tiger.ogg
+-rw-r--r-- 1 owner owner 5.9K Nov 10 20:09 ./mods/codermobs/codermobs/sounds/codermobs_mdskeleton_war_cry.ogg
+-rw-r--r-- 1 owner owner 5.1K Nov 10 20:09 ./mods/codermobs/codermobs/sounds/codermobs_mdskeleton_attack.2.ogg

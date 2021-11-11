@@ -1,9 +1,13 @@
 $ ~/git/mtanalyze/findstereofiles.py ~/minetest/games/Bucket_Game --patch ~/git/EnlivenMinetest/Bucket_Game-branches/stereo_to_mono-vs-211107c-ab_192k
-$ # ^ Such as if hard-coded "-ab 192k" in this py file.
+$ # ^ Such as if hard-coded "-ab 192k" in findstereofiles.py.
 $ # Then analyze difference in size using meld like:
 $ cd ~/git/EnlivenMinetest/Bucket_Game-branches/stereo_to_mono-vs-211107c-ab_192k
+$ rm ./mods/coderbuild/lavender/sounds/lavender_mipiace.ogg ./mods/coderbuild/castle/src/original/castle_weapons/sounds/castle_crossbow_click.ogg ./mods/coderbuild/castle/src/original/orbs_of_time/sounds/orbs_birds.ogg ./mods/coderbuild/castle/src/original/orbs_of_time/sounds/orbs_owl.ogg ./mods/coderbuild/castle/src/original/orbs_of_time/sounds/orbs_ding.ogg ./mods/coderbuild/castle/src/original/ropes/sounds/ropes_creak.3.ogg ./mods/coderbuild/castle/src/original/ropes/sounds/ropes_creak.2.ogg
 $ find -type f -exec ls -lh {} \; > ../stereo_to_mono-vs-211107c-ab_192k.stats.txt
-$ # cd .. && meld stereo_to_mono-vs-211107c-ab_192k.stats.txt stereo_to_mono-vs-211107c.stats.txt
+$ cd ..
+$ meld stereo_to_mono-vs-211107c-ab_192k.stats.txt stereo_to_mono-vs-211107c.stats.txt
+# apply:
+# Set BUCKET_GAME to Bucket_Game dir then: cd EnlivenMinetest && git pull && rsync -rt Bucket_Game-branches/stereo_to_mono-vs-211107c-ab_192k/ $BUCKET_GAME
 -rw-r--r-- 1 owner owner 17K Nov 10 15:09 ./mods/coderfood/unified_foods/sounds/unified_hunger_eat_generic.ogg
 -rw-r--r-- 1 owner owner 34K Nov 10 15:09 ./mods/coderbuild/christmas_craft/sounds/snowball_splash.4.ogg
 -rw-r--r-- 1 owner owner 18K Nov 10 15:09 ./mods/coderbuild/travelnet/sounds/travelnet_bell.ogg
