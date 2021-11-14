@@ -15,9 +15,9 @@ if platform.system() == "Windows":
 else:
     profile = os.environ.get('HOME')
 
-def error(msg):
-    sys.stderr.write("{}\n".format(msg))
-    sys.stderr.flush()
+# see <https://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python>
+def error(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 try:
     import mtanalyze
@@ -45,6 +45,7 @@ gamespec['remove_mods'] = [
     "facade", # no recipes
     "placecraft", # interferes with eating
     "more_chests", # See https://github.com/poikilos/EnlivenMinetest/issues/446
+    "emeralds", # See https://github.com/poikilos/EnlivenMinetest/issues/497
 ]
 myDir = os.path.dirname(__file__)
 mods_stopgap = os.path.join(myDir, "patches", "mods-stopgap")
