@@ -1,0 +1,39 @@
+diff -ru Bucket_Game-base/abriflame_fire_starter_graphic-vs-211114a/mods/coderbuild/abriflame/init.lua Bucket_Game-branches/abriflame_fire_starter_graphic-vs-211114a/mods/coderbuild/abriflame/init.lua
+--- Bucket_Game-base/abriflame_fire_starter_graphic-vs-211114a/mods/coderbuild/abriflame/init.lua	2020-04-21 21:20:35.000000000 -0400
++++ Bucket_Game-branches/abriflame_fire_starter_graphic-vs-211114a/mods/coderbuild/abriflame/init.lua	2021-11-14 08:59:46.069121053 -0500
+@@ -97,7 +97,7 @@
+ -- fire starter tool
+ minetest.register_tool("abriflame:flint", {
+ 	description = "Fire Starter",
+-	inventory_image = "fire_flint_steel.png",
++  inventory_image = "abriflame_fire_starter.png",
+ 	stack_max = 1,
+ 	liquids_pointable = false,
+ 
+diff -ru Bucket_Game-base/abriflame_fire_starter_graphic-vs-211114a/mods/coderbuild/abriflame/license.txt Bucket_Game-branches/abriflame_fire_starter_graphic-vs-211114a/mods/coderbuild/abriflame/license.txt
+--- Bucket_Game-base/abriflame_fire_starter_graphic-vs-211114a/mods/coderbuild/abriflame/license.txt	2020-04-21 21:20:35.000000000 -0400
++++ Bucket_Game-branches/abriflame_fire_starter_graphic-vs-211114a/mods/coderbuild/abriflame/license.txt	2021-11-14 08:49:10.917105057 -0500
+@@ -2,11 +2,12 @@
+ Textures:
+ Original textures from Semmett9's fake_fire, now found in the homedecor modpack (https://github.com/minetest-mods/homedecor_modpack),
+ with adjustments and recolouring by Shara RedCat.
++New fire starter graphic (abriflame_fire_starter.png) 2021 Poikilos
+ License: CC-BY-SA 3.0 or higher (https://creativecommons.org/licenses/by/3.0/).
+ 
+ Code:
+ License: MIT (https://opensource.org/licenses/MIT)
+-By Shara RedCat and tenplus1
++By Shara RedCat, tenplus1, and Poikilos
+ 
+ 
+ 
+@@ -14,7 +15,7 @@
+ 
+ The MIT License (MIT)
+ 
+-Copyright (c) 2017 Shara RedCat
++Copyright (c) 2017 Shara RedCat, 2021 Poikilos
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+Only in Bucket_Game-branches/abriflame_fire_starter_graphic-vs-211114a/mods/coderbuild/abriflame/textures: abriflame_fire_starter.png
