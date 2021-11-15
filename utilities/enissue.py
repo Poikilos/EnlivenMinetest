@@ -4,13 +4,14 @@ import sys
 import json
 import os
 from datetime import datetime, timedelta
-
+python_mr = sys.version_info.major
 try:
     import urllib.request
     request = urllib.request
 except ImportError:
     # python2
-    python_mr = 2
+    # python_mr = 2
+    print("* detected Python " + str(python_mr))
     import urllib2 as urllib
     request = urllib
 
@@ -20,15 +21,17 @@ try:
     from urllib.parse import urlencode
     from urllib.parse import quote
     from urllib.parse import unquote
+    from urllib.error import HTTPError
 except ImportError:
     # Python 2
+    # See <https://docs.python.org/2/howto/urllib2.html>
     from urlparse import urlparse
     # from urlparse import quote_plus
     from urllib import urlencode
     from urllib import quote
     from urllib import unquote
-
-import urllib
+    from urllib2 import HTTPError
+    # ^ urllib.error.HTTPError doesn't exist in Python 2
 
 
 # see <https://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python>
@@ -306,7 +309,7 @@ class Repo:
         try:
             debug(p+"Query URL (query_s): {}".format(query_s))
             response = request.urlopen(query_s)
-        except urllib.error.HTTPError as e:
+        except HTTPError as e:
             print(p+"You may be able to view the issues on GitHub")
             print(p+"at the 'html_url', and a login may be required.")
             print(p+"The URL \"{}\" is not accessible, so you may have"
@@ -345,7 +348,7 @@ class Repo:
         try:
             response = request.urlopen(this_issue_json_url)
             issue_data_bytes = response.read()
-        except urllib.error.HTTPError as e:
+        except HTTPError as e:
             print(str(e))
             print(p+"The URL \"{}\" is not accessible, so you may have"
                   " exceeded the rate limit and be blocked"
