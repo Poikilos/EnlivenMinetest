@@ -37,7 +37,7 @@ except ImportError:
 # see <https://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python>
 def error(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
-
+# https://api.github.com/repos/poikilos/EnlivenMinetest/issues/475/timeline
 
 verbose = False
 
@@ -447,6 +447,7 @@ class Repo:
 
         for evt in data:
             user = evt.get('user')
+
             login = None
             if user is not None:
                 print("")
@@ -517,6 +518,33 @@ class Repo:
                 print(left_margin+"  from:{}".format(rename.get('from')))
                 print(left_margin+"  to:{}".format(rename.get('to')))
 
+            reactions = evt.get('reactions')
+            reactions_url = None
+            if reactions is not None:
+                reactions_url = reactions.get('url')
+            if reactions_url is not None:
+                reac_data = None
+                try:
+                    reactions_res = request.urlopen(reactions_url)
+                    reac_data_s = decode_safe(reactions_res.read())
+                    reac_data = json.loads(reac_data_s)
+                    # print(left_margin + "downloaded " + reactions_url)
+                    # Example: <https://api.github.com/repos/poikilos/
+                    #   EnlivenMinetest/
+                    #   issues/comments/968357490/reactions>
+                    for reac in reac_data:
+                        reac_user = reac.get('user')
+                        reac_login = None
+                        if reac_user is not None:
+                            reac_login = reac_user.get('login')
+                        reac_content = reac.get('content')
+                        print(left_margin + "- <{}> :{}:"
+                              "".format(reac_login, reac_content))
+                except HTTPError as e:
+                    print(left_margin + "Error downloading {}:"
+                          "".format(reactions_url))
+                    print(left_margin + str(e))
+                    print(left_margin + "{}".format(reac_data))
 
         closed_by = issue_data.get('closed_by')
         closed_at = issue_data.get('closed_at')
