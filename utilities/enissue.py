@@ -34,12 +34,16 @@ except ImportError:
     # ^ urllib.error.HTTPError doesn't exist in Python 2
 
 
+
 # see <https://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python>
 def error(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
+
+
 # https://api.github.com/repos/poikilos/EnlivenMinetest/issues/475/timeline
 
 verbose = False
+
 
 def debug(msg):
     if verbose:
@@ -61,7 +65,9 @@ modes = {
         "help": ("List all issues. Provide one or more labels to narrow"
                  " down the list. Alternatively, provide a label only."
                  " Labels with spaces require quotes. The matching is"
-                 " not case sensitive."),
+                 " not case sensitive. The \"list\" command can be"
+                 " implied by not using a label (any word that isn't a"
+                 " command will select a label) and no command."),
         "examples": ["list", " list Bucket_Game",
                      " list Bucket_Game urgent", " Bucket_Game",
                      " Bucket_Game urgent", " Bucket_Game --closed"]
@@ -71,6 +77,35 @@ modes = {
                  " issues)."),
         "examples": [" labels"]
     },
+    "find": {
+        "help": ("To search using a keyword, say \"find\" or \"AND\""
+                 " before each term."),
+        "examples": [
+            " find mobs  # term=mobs",
+            " find mobs find walk  # term[0]=mobs, term[1]=walk",
+            " find mobs AND walk  # ^ same: term[0]=mobs, term[1]=walk",
+            " find \"open doors\"  # term=\"open doors\"",
+            " find mobs Bucket_Game  # term=mobs, label=Bucket_Game",
+            " find mobs # term=mobs",
+            (" find CREEPS find AND find WEIRDOS"
+             "  # specifies (3) terms = [CREEPS, AND, WEIRDOS]"),
+            (" find CREEPS AND AND AND WEIRDOS "
+             " # ^ same: specifies (3) terms = [CREEPS, AND, WEIRDOS]"),
+            (" find CREEPS AND WEIRDOS"
+             "  # specifies (2) terms = [CREEPS, WEIRDOS]"),
+        ],
+        "AND_EXAMPLES": [6, 7],  # indices in ['find']['examples'] list
+    },
+    "closed or open": {
+        "help": ("Only show a closed issue, or show closed & open"
+                 " (The default is open issues only)"),
+        "examples": [
+            " --closed",
+            " --closed --open",
+            " Bucket_Game --closed  # closed, label=Bucket_Game",
+            " Bucket_Game --closed open  # open, label=Bucket_Game",
+        ]
+    },
     "page": {
         "help": ("GitHub only lists 30 issues at a time. Type page"
                  " followed by a number to see additional pages."),
@@ -79,9 +114,24 @@ modes = {
     "<#>": {
         "help": "Specify an issue number to see details.",
         "examples": [" 1"]
-    }
+    },
 }
 match_all_labels = []
+
+
+def toSubQueryValue(value):
+    '''
+    Convert the value to one that will fit in a
+    key+urlencoded(colon)+value string for GitHub queries.
+
+    This function is copied to multiple scripts so they have no
+    dependencies:
+    - enissue.py
+    - enlynx.py
+    '''
+    if " " in value:
+        value = '"' + value.replace(" ", "+") + '"'
+    return value
 
 
 def usage():
@@ -109,8 +159,11 @@ class Repo:
             self,
             remote_user = "poikilos",
             repo_name = "EnlivenMinetest",
+            repository_id = "80873867",
             api_repo_url_fmt = "https://api.github.com/repos/{ru}/{rn}",
             api_issue_url_fmt = "{api_url}/issues/{issue_no}",
+            search_issues_url_fmt = "https://api.github.com/search/issues?q=repo%3A{ru}/{rn}+",
+            search_results_key="items",
             page_size = 30,
             c_issues_name_fmt = "issues_page={p}{q}.json",
             c_issue_name_fmt = "issues_{issue_no}.json",
@@ -140,10 +193,15 @@ class Repo:
                          need to be provided in the URL.
         hide_events -- Do not show these event types in an issue's
                        timeline.
+        search_results_key -- If the URL described by
+            search_issues_url_fmt returns a dict, specify the key in
+            the dict that is a list of issues.
         '''
+        self.search_results_key = search_results_key
         self.page = None
         self.remote_user = remote_user
         self.repo_name = repo_name
+        self.repository_id = repository_id
         self.c_remote_user_path = os.path.join(Repo.caches_path,
                                                self.remote_user)
         self.c_repo_path = os.path.join(self.c_remote_user_path,
@@ -152,6 +210,10 @@ class Repo:
         self.api_repo_url_fmt = api_repo_url_fmt
         self.api_issue_url_fmt = api_issue_url_fmt
         self.repo_url = self.api_repo_url_fmt.format(
+            ru=remote_user,
+            rn=repo_name,
+        )
+        self.search_issues_url = search_issues_url_fmt.format(
             ru=remote_user,
             rn=repo_name,
         )
@@ -167,7 +229,8 @@ class Repo:
         self.hide_events = hide_events
         self.issues = None
 
-    def _get_issues(self, options, query=None, issue_no=None):
+    def _get_issues(self, options, query=None, issue_no=None,
+                    search_terms=[]):
         '''
         Load the issues matching the query into self.issues, or load
         one issue (len(self.issues) is 1 in that case). Only one or the
@@ -200,11 +263,18 @@ class Repo:
         Keyword arguments:
         query -- Use keys & values in this dictionary to the URL query.
         issue_no -- Load only this issue (not compatible with query).
+        search_terms -- Search for each of these terms.
 
         Raises:
         ValueError if query is not None and issue_no is not None.
 
         '''
+        p = self.log_prefix
+        searchTermStr = ""
+        if search_terms is None:
+            search_terms = []
+        for search_term in search_terms:
+            searchTermStr += toSubQueryValue(search_term) + "+"
         refresh = options.get('refresh')
         if issue_no is not None:
             if query is not None:
@@ -230,6 +300,15 @@ class Repo:
             '''
             query_part = urlencode(query)
             and_query_part = "&" + query_part
+            and_query_part += searchTermStr
+        elif len(searchTermStr) > 0:
+            debug(p+"searchTermStr=\"{}\"".format(searchTermStr))
+            and_query_part = "&" + "q=" + searchTermStr
+            # NOTE: using urlencode(searchTermStr) causes
+            #  "TypeError: not a valid non-string sequence or mapping
+            #  object"
+            # - It should already be formed correctly by
+            #   toSubQueryValue anyway, so don't filter it here.
 
         if self.page is not None:
             this_page = self.page
@@ -244,6 +323,7 @@ class Repo:
 
         c_issue_name = self.c_issue_name_fmt.format(issue_no=issue_no)
         c_issues_sub_path = os.path.join(self.c_repo_path, "issues")
+        results_key = None
         if issue_no is not None:
             if not os.path.isdir(c_issues_sub_path):
                 os.makedirs(c_issues_sub_path)
@@ -255,8 +335,19 @@ class Repo:
                 api_url=self.repo_url,
                 issue_no=issue_no,
             )
+        else:
+            prev_query_s = query_s
+            if len(searchTermStr) > 0:
+                query_s = self.search_issues_url
+                results_key = self.search_results_key
+                if "?" not in query_s:
+                    query_s += "?q=" + searchTermStr
+                else:
+                    query_s += searchTermStr
+                debug("Changing query_s from {} to {}"
+                      "".format(prev_query_s, query_s))
 
-        p = self.log_prefix
+
         if os.path.isfile(c_path):
             # See <https://stackoverflow.com/questions/7430928/
             # comparing-dates-to-check-for-old-files>
@@ -324,12 +415,18 @@ class Repo:
         with open(c_path, "w") as outs:
             outs.write(response_s)
         result = json.loads(response_s)
+
+        if results_key is not None:
+            result = result[results_key]
+
         if make_list:
             # If an issue URL was used, there will be one dict only, so
             # make it into a list.
             results = [result]
         else:
             results = result
+
+
         return results
 
 
@@ -576,7 +673,8 @@ class Repo:
         print("")
         return True
 
-    def load_issues(self, options, query=None, issue_no=None):
+    def load_issues(self, options, query=None, issue_no=None,
+                    search_terms=None):
         '''
         See _get_issues for documentation.
         '''
@@ -590,6 +688,7 @@ class Repo:
             options,
             query=query,
             issue_no=issue_no,
+            search_terms=search_terms,
         )
 
     def get_match(self, mode, issue_no=None, match_all_labels_lower=[]):
@@ -668,8 +767,11 @@ def main():
     issue_no = None
     state = repo.default_query.get('state')
     options = {}
+    search_terms = []
+    SEARCH_COMMANDS = ['find', 'AND']
     for i in range(1, len(sys.argv)):
         arg = sys.argv[i]
+        isValue = False
         if arg.startswith("#"):
             arg = arg[1:]
         if (mode is None) and (arg in modes.keys()):
@@ -681,10 +783,12 @@ def main():
             else:
                 mode = arg
         else:
+            is_text = False
             try:
                 i = int(arg)
                 if prev_arg == "page":
                     repo.page = i
+                    isValue = True
                 else:
                     if issue_no is not None:
                         usage()
@@ -693,7 +797,12 @@ def main():
                               " {}.".format(arg))
                         exit(1)
                     issue_no = i
+                is_text = False
             except ValueError:
+                is_text = True
+                # It is not a number, so put all other usual code in
+                # this area
+            if is_text:
                 if (mode is None) and (modes.get(arg) is not None):
                     mode = arg
                 else:
@@ -703,6 +812,8 @@ def main():
                         options['refresh'] = True
                     elif arg == "--verbose":
                         verbose = True
+                    elif arg == "--debug":
+                        verbose = True
                     elif arg == "--help":
                         usage()
                         exit(0)
@@ -711,11 +822,34 @@ def main():
                         error("Error: The argument \"{}\" is not valid"
                               "".format(arg))
                         exit(1)
-                    elif arg != "page":
+                    elif prev_arg in SEARCH_COMMANDS:
+                        search_terms.append(arg)
+                        isValue = True
+                    elif arg == "find":
                         # print("* adding criteria: {}".format(arg))
+                        mode = "list"
+                    elif (arg == "AND"):
+                        # print("* adding criteria: {}".format(arg))
+                        if len(search_terms) < 1:
+                            usage()
+                            error("You can only specify \"AND\" after"
+                                  " the \"find\" command. To literally"
+                                  " search for the word \"AND\", place"
+                                  " the \"find\" command before it."
+                                  " Examples:")
+                            for andI in modes['find']['AND_EXAMPLES']:
+                                error(me
+                                      + modes['find']['examples'][andI])
+                            exit(1)
+                        mode = "list"
+                    elif arg != "page":
                         mode = "list"
                         match_all_labels.append(arg)
         prev_arg = arg
+        if isValue:
+            # It is not a command that will determine meaning for the
+            # next var.
+            prev_arg = None
     if mode is None:
         if len(match_all_labels) > 1:
             mode = "list"
@@ -757,9 +891,11 @@ def main():
         query = {
             'state': state
         }
-        repo.load_issues(options, query=query)
+        repo.load_issues(options, query=query,
+                         search_terms=search_terms)
     else:
-        repo.load_issues(options, issue_no=issue_no)
+        repo.load_issues(options, issue_no=issue_no,
+                         search_terms=search_terms)
 
     if repo.issues is None:
         print("There were no issues.")
@@ -789,7 +925,8 @@ def main():
         # TODO: This code doesn't work since it isn't cached.
         if mode == 'issue':
             state = 'closed'
-            repo.load_issues(options, query={'state':"closed"})
+            repo.load_issues(options, query={'state':"closed"},
+                             search_terms=search_terms)
             total_count = len(repo.issues)
             match = repo.get_match(
                 mode,
