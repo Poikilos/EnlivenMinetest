@@ -53,18 +53,22 @@ done
 if [ "@$enable_bare_param" = "@true" ]; then
     branch="$2"
 fi
-project0=Bucket_Game
-project1=Bucket_Game-base
-project2=Bucket_Game-branches
-# project0_path="$HOME/git/EnlivenMinetest/webapp/linux-minetest-kit/minetest/games/$project0"
-project0_path="$HOME/minetest/games/$project0"
+branchUpstream=bucket_game-211114a
+branchBase=Bucket_Game-base
+branchHead=Bucket_Game-branches
+# project0_path="$HOME/git/EnlivenMinetest/webapp/linux-minetest-kit/minetest/games/$branchUpstream"
+project0_path="$HOME/minetest/games/$branchUpstream"
+tryUnpatched="$HOME/minetest/$branchUpstream"
+if [ -d "$tryUnpatched" ]; then
+    project0_path="$tryUnpatched"
+fi
 
 #patches="$HOME/git/EnlivenMinetest/patches"
 #patches="$HOME/git/1.pull-requests/Bucket_Game-branches"
 repo="$HOME/git/EnlivenMinetest"
 patches="$HOME/git/EnlivenMinetest"
-project1_path="$repo/$project1/$branch"
-project2_path="$repo/$project2/$branch"
+branchBasePath="$repo/$branchBase/$branch"
+branchHeadPath="$repo/$branchHead/$branch"
 if [ "@$enable_meld" = "@true" ]; then
     echo "meld..."
     if [ -z "$branch" ]; then
@@ -72,15 +76,15 @@ if [ "@$enable_meld" = "@true" ]; then
     fi
     subgame=
     patch_game_src=
-    if [ -d "$project1_path/mods" ]; then
-        branch_basis="$project1_path"
+    if [ -d "$branchBasePath/mods" ]; then
+        branch_basis="$branchBasePath"
     fi
-    if [ -d "$project2_path/mods" ]; then
-        patch_game_src="$project2_path"
+    if [ -d "$branchHeadPath/mods" ]; then
+        patch_game_src="$branchHeadPath"
     else
-        customExit "Cannot detect mods directory in $project2_path/mods"
+        customExit "Cannot detect mods directory in $branchHeadPath/mods"
     fi
-    #below (commented part) should only happen if $project2_path already has been edited (diverged from $project1_path)
+    #below (commented part) should only happen if $branchHeadPath already has been edited (diverged from $branchBasePath)
     #echo "meld $patch_game_src/ $HOME/minetest/games/ENLIVEN..."
     #if [ -f "`command -v meld`" ]; then
         #if [ -f "`command -v nohup`" ]; then
@@ -124,12 +128,12 @@ elif [ "@$enable_install" = "@true" ]; then
     fi
     echo "* installing $branch branch..."
     subgame=
-    if [ -d "$project2_path/mods" ]; then
-        patch_game_src="$project2_path"
-    elif [ -d "$project2_path/patched/mods" ]; then
-        patch_game_src="$project2_path/patched"
+    if [ -d "$branchHeadPath/mods" ]; then
+        patch_game_src="$branchHeadPath"
+    elif [ -d "$branchHeadPath/patched/mods" ]; then
+        patch_game_src="$branchHeadPath/patched"
     else
-        customExit "Cannot detect mods directory in $project2_path/mods"
+        customExit "Cannot detect mods directory in $branchHeadPath/mods"
     fi
     echo "rsync -rt $patch_game_src/ $HOME/minetest/games/ENLIVEN..."
     rsync -rt "$patch_game_src/" "$HOME/minetest/games/ENLIVEN"
@@ -150,12 +154,12 @@ usage() {
     echo "Usage:"
     echo
     echo "$me <file_path> <new-fake-branch-name>"
-    echo "* will be copied to $project1 and $project2"
+    echo "* will be copied to $branchBase and $branchHead"
     echo
     echo "Example:"
     echo "$me mods/coderfood/food_basic/init.lua milk-patch"
     echo
-    echo "* copies the file to $project1 and $project2)"
+    echo "* copies the file to $branchBase and $branchHead)"
     echo "* also copies $licenses and same in .. and ../.."
     echo
     echo
@@ -172,111 +176,136 @@ if [ -z "$2" ]; then
     exit 1
 fi
 
-file0_path="$project0_path/$what"
-file1_path="$project1_path/$what"
-file2_path="$project2_path/$what"
-whatname=`basename $file0_path`
+branchUpstreamFilePath="$project0_path/$what"
+branchBaseFilePath="$branchBasePath/$what"
+branchHeadFilePath="$branchHeadPath/$what"
+whatname=`basename $branchUpstreamFilePath`
 date_string=$(date +%Y%m%d)
-patchcmd="diff -u $file1_path $file2_path > $patches/$project0-$date_string-$whatname.patch"
+patchcmd="diff -u $branchBaseFilePath $branchHeadFilePath > $patches/$branchUpstream-$date_string-$whatname.patch"
 echo
-echo "After editing $file2_path, then create a patch by running:"
+echo "After editing $branchHeadFilePath, then create a patch by running:"
 echo "$patchcmd"
 echo
-echo "* getting parent of $file0_path..."
-dir0="$(dirname -- "$(realpath -- "$file0_path")")"
+echo "* getting parent of $branchUpstreamFilePath..."
+dirUpstream="$(dirname -- "$(realpath -- "$branchUpstreamFilePath")")"
 # can't get realpath when directory doesn't exist yet (we make it):
-dir1="$(dirname -- "$file1_path")"
-dir2="$(dirname -- "$file2_path")"
+dirBase="$(dirname -- "$branchBaseFilePath")"
+dirHead="$(dirname -- "$branchHeadFilePath")"
 
-dir0_p="$(dirname -- "$(realpath -- "$dir0")")"
-dir1_p="$(dirname -- "$dir1")"
-dir2_p="$(dirname -- "$dir2")"
+dirUpstreamParent="$(dirname -- "$(realpath -- "$dirUpstream")")"
+dirBaseParent="$(dirname -- "$dirBase")"
+dirHeadParent="$(dirname -- "$dirHead")"
 
-dir0_pp="$(dirname -- "$(realpath -- "$dir0_p")")"
-dir1_pp="$(dirname -- "$dir1_p")"
-dir2_pp="$(dirname -- "$dir2_p")"
+dirUpstreamGrandParent="$(dirname -- "$(realpath -- "$dirUpstreamParent")")"
+dirBaseGrandParent="$(dirname -- "$dirBaseParent")"
+dirHeadGrandParent="$(dirname -- "$dirHeadParent")"
 
-#echo "* checking $dir0_pp..."
-#echo "* checking $dir1_pp..."
-#echo "* checking $dir2_pp..."
+#echo "* checking $dirUpstreamGrandParent..."
+#echo "* checking $dirBaseGrandParent..."
+#echo "* checking $dirHeadGrandParent..."
 
 if [ ! -d "$project0_path" ]; then
-    customExit "ERROR: You must have '$project0' installed as '$project0_path'"
+    customExit "ERROR: You must have '$branchUpstream' installed as '$project0_path'"
 fi
 
-if [ ! -f "$file0_path" ]; then
-    customExit "ERROR: Missing '$file0_path')"
+if [ ! -f "$branchUpstreamFilePath" ]; then
+    customExit "ERROR: Missing '$branchUpstreamFilePath')"
 fi
 
-if [ ! -d "$dir1" ]; then
-    mkdir -p "$dir1" || customExit "Cannot mkdir $dir1"
+if [ ! -d "$dirBase" ]; then
+    mkdir -p "$dirBase" || customExit "Cannot mkdir $dirBase"
 fi
 
-if [ ! -d "$dir2" ]; then
-    mkdir -p "$dir2" || customExit "Cannot mkdir $dir2"
+if [ ! -d "$dirHead" ]; then
+    mkdir -p "$dirHead" || customExit "Cannot mkdir $dirHead"
 fi
 
 # if file1 exists, overwriting is ok--update basis so diff will make patch correctly
-echo "* updating $file1_path"
-cp -f "$file0_path" "$file1_path" || customExit "Cannot cp '$file0_path' '$file1_path'"
+echo "* updating $branchBaseFilePath"
+cp -f "$branchUpstreamFilePath" "$branchBaseFilePath" || customExit "Cannot cp '$branchUpstreamFilePath' '$branchBaseFilePath'"
 
-if [ -f "$file2_path" ]; then
-    customExit "Nothing done since '$file2_path' already exists."
-fi
-echo "* creating $file2_path"
-cp -f "$file0_path" "$file2_path" || customExit "Cannot cp '$file0_path' '$file2_path'"
-if [ -f "`command -v zbstudio`" ]; then
-    nohup zbstudio "$file2_path" &
-else
-    if [ -f "`command -v geany`" ]; then
-        nohup geany "$file2_path" &
+openImageAsync(){
+    lximage-qt "$1" &
+}
+
+openTextAsync(){
+    if [ -f "`command -v zbstudio`" ]; then
+        nohup zbstudio "$1" &
+    else
+        if [ -f "`command -v geany`" ]; then
+            nohup geany "$1" &
+        fi
     fi
+}
+
+if [ -f "$branchHeadFilePath" ]; then
+    if [ -f "`command -v lximage-qt`" ]; then
+        openImageAsync "$branchHeadFilePath"
+    fi
+    customExit "Nothing done since '$branchHeadFilePath' already exists."
 fi
-if [ -d "$HOME/minetest/games/ENLIVEN" ]; then
-    if [ -f "`command -v meld`" ]; then
-        nohup meld "$file2_path" "$HOME/minetest/games/ENLIVEN/$what" &
+echo "* creating $branchHeadFilePath"
+cp -f "$branchUpstreamFilePath" "$branchHeadFilePath" || customExit "Cannot cp '$branchUpstreamFilePath' '$branchHeadFilePath'"
+gotMimeType="`mimetype -b $branchHeadFilePath`"
+if [ "$gotMimeType" = "image/png" ]; then
+    if [ -f "`command -v lximage-qt`" ]; then
+        openImageAsync "$branchHeadFilePath"
+    fi
+elif [ "$gotMimeType" = "image/jpeg" ]; then
+    if [ -f "`command -v lximage-qt`" ]; then
+        openImageAsync "$branchHeadFilePath"
+    fi
+elif [ "$gotMimeType" = "image/bmp" ]; then
+    if [ -f "`command -v lximage-qt`" ]; then
+        openImageAsync "$branchHeadFilePath"
+    fi
+else
+    openTextAsync "$branchHeadFilePath"
+    if [ -d "$HOME/minetest/games/ENLIVEN" ]; then
+        if [ -f "`command -v meld`" ]; then
+            nohup meld "$branchHeadFilePath" "$HOME/minetest/games/ENLIVEN/$what" &
+        fi
     fi
 fi
 
 eval "arr=($licenses)"
 for license in "${arr[@]}"; do
-    lic0="$dir0/$license"
-    lic1="$dir1/$license"
-    lic2="$dir2/$license"
-    if [ -f "$lic0" ]; then
-        echo "* updating LICENSE '$lic1'..."
-        cp -f "$lic0" "$lic1" || customExit "Cannot cp -f '$lic0' '$lic1'"
-        if [ ! -f "$lic2" ]; then
-            echo "  - also for $project2..."
-            cp --no-clobber "$lic0" "$lic2" || customExit "Cannot cp -f '$lic0' '$lic2'"
+    upstreamLicense="$dirUpstream/$license"
+    baseLicense="$dirBase/$license"
+    headLicense="$dirHead/$license"
+    if [ -f "$upstreamLicense" ]; then
+        echo "* updating LICENSE '$baseLicense'..."
+        cp -f "$upstreamLicense" "$baseLicense" || customExit "Cannot cp -f '$upstreamLicense' '$baseLicense'"
+        if [ ! -f "$headLicense" ]; then
+            echo "  - also for $branchHead..."
+            cp --no-clobber "$upstreamLicense" "$headLicense" || customExit "Cannot cp -f '$upstreamLicense' '$headLicense'"
         fi
     fi
-    lic0="$dir0_p/$license"
-    lic1="$dir1_p/$license"
-    lic2="$dir2_p/$license"
-    if [ -f "$lic0" ]; then
-        echo "* updating LICENSE '$lic1'..."
-        cp -f "$lic0" "$lic1" || customExit "Cannot cp -f '$lic0' '$lic1'"
-        if [ ! -f "$lic2" ]; then
-            echo "  - also for $project2..."
-            cp --no-clobber "$lic0" "$lic2" || customExit "Cannot cp -f '$lic0' '$lic2'"
+    upstreamLicense="$dirUpstreamParent/$license"
+    baseLicense="$dirBaseParent/$license"
+    headLicense="$dirHeadParent/$license"
+    if [ -f "$upstreamLicense" ]; then
+        echo "* updating LICENSE '$baseLicense'..."
+        cp -f "$upstreamLicense" "$baseLicense" || customExit "Cannot cp -f '$upstreamLicense' '$baseLicense'"
+        if [ ! -f "$headLicense" ]; then
+            echo "  - also for $branchHead..."
+            cp --no-clobber "$upstreamLicense" "$headLicense" || customExit "Cannot cp -f '$upstreamLicense' '$headLicense'"
         fi
     fi
-    lic0="$dir0_pp/$license"
-    lic1="$dir1_pp/$license"
-    lic2="$dir2_pp/$license"
-    if [ -f "$lic0" ]; then
-        echo "* updating '$lic1'..."
-        cp -f "$lic0" "$lic1" || customExit "Cannot cp -f '$lic0' '$lic1'"
-        if [ ! -f "$lic2" ]; then
-            echo "  - also for $project2..."
-            cp --no-clobber "$lic0" "$lic2" || customExit "Cannot cp -f '$lic0' '$lic2'"
+    upstreamLicense="$dirUpstreamGrandParent/$license"
+    baseLicense="$dirBaseGrandParent/$license"
+    headLicense="$dirHeadGrandParent/$license"
+    if [ -f "$upstreamLicense" ]; then
+        echo "* updating '$baseLicense'..."
+        cp -f "$upstreamLicense" "$baseLicense" || customExit "Cannot cp -f '$upstreamLicense' '$baseLicense'"
+        if [ ! -f "$headLicense" ]; then
+            echo "  - also for $branchHead..."
+            cp --no-clobber "$upstreamLicense" "$headLicense" || customExit "Cannot cp -f '$upstreamLicense' '$headLicense'"
         fi
     fi
 done
 
 echo "Done."
 echo "To apply, set BUCKET_GAME then:"
-echo "cd EnlivenMinetest && git pull && rsync -rt Bucket_Game-branches/$branch/ $BUCKET_GAME"
+echo "cd EnlivenMinetest && git pull && rsync -rt Bucket_Game-branches/$branch/ \$BUCKET_GAME"
 echo
-
