@@ -276,6 +276,7 @@ for license in "${arr[@]}"; do
 done
 
 echo "Done."
-echo
+echo "To apply, set BUCKET_GAME then:"
+echo "cd EnlivenMinetest && git pull && rsync -rt Bucket_Game-branches/$branch/ $BUCKET_GAME"
 echo
 
