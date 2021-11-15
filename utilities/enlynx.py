@@ -5,6 +5,8 @@ Specify a label or search term, optionally with a page #.
 Examples:
 # label:
     enlynx.py Bucket_Game
+# Use a different binary name or path other than lynx:
+    enlynx.py Bucket_Game --browser surfraw
 # label and page number:
     enlynx.py Bucket_Game page 2
 # multiple labels:
@@ -29,7 +31,7 @@ Examples:
 
 '''
 me = "enlynx.py"
-lynxCmd = "lynx"
+browserPath = "lynx"
 sessionPath = "/tmp/enlynx.lynx-session"
 import sys
 import subprocess
@@ -93,9 +95,11 @@ if __name__ == "__main__":
         # ^ skip arg 0 since it is self
         # Erase prev_arg in each case except "else" to turn off
         # context-sensitivity after the term after the command is found.
-        if prev_arg == "find":
+        if (prev_arg == "find") or (prev_arg == "AND"):
             findStrings.append(arg)
             prev_arg = None
+        elif prev_arg == "--browser":
+            browserPath = arg
         elif prev_arg == "page":
             page_param="&page=2"
             prev_arg = None
@@ -105,6 +109,8 @@ if __name__ == "__main__":
             elif arg == "--open":
                 _open = True
             elif arg == "find":
+                prev_arg = arg
+            elif arg == "--browser":
                 prev_arg = arg
             elif arg == "AND":
                 if len(findStrings) == 0:
@@ -152,4 +158,4 @@ if __name__ == "__main__":
     url = query_url + query
     print("URL: {}".format(url))
 
-    subprocess.call([lynxCmd, '-session=' + sessionPath, url])
+    subprocess.call([browserPath, '-session=' + sessionPath, url])
