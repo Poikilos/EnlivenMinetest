@@ -137,13 +137,20 @@ else
 end
 
 -- cooked porkchop
-minetest.register_craftitem(":mobs:pork_cooked", {
-    description = "Cooked Porkchop" ,
-    inventory_image = "codermobs_pork_cooked.png",
-
-    on_use = minetest.item_eat(8),
-    groups = {food_meat = 1, food_pork = 1, flammable = 2},
-})
+local dep_pork_cooked = nil
+if minetest.registered_items["cooking:meat_pork_cooked"] then
+    dep_pork_cooked = "cooking:meat_pork_cooked"
+end
+if not dep_pork_cooked then
+  minetest.register_craftitem(":mobs:pork_cooked", {
+      description = "Cooked Porkchop" ,
+      inventory_image = "codermobs_pork_cooked.png",
+      on_use = minetest.item_eat(8),
+      groups = {food_meat = 1, food_pork = 1, flammable = 2},
+  })
+else
+    minetest.register_alias("mobs:pork_cooked", dep_pork_cooked)
+end
 
 minetest.register_craft({
     type = "cooking",
