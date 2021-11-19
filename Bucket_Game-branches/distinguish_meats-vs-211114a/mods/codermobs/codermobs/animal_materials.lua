@@ -222,21 +222,39 @@ minetest.register_craftitem(":animal_materials:meat_ostrich", {
 })
 
 
-minetest.register_craftitem(":animal_materials:fish_bluewhite", {
-    description = S("Fish (bluewhite)"),
-    image = "animal_materials_meat_raw.png",
-    on_use = minetest.item_eat(1),
-    groups = { meat=1, eatable=1 },
-    stack_max=25
-})
+local dep_bluewhite_raw = nil
+if minetest.registered_items["animalmaterials:fish_bluewhite"] then
+    dep_bluewhite_raw = "animalmaterials:fish_bluewhite"
+end
 
-minetest.register_craftitem(":animal_materials:fish_clownfish", {
-    description = S("Fish (clownfish)"),
-    image = "animal_materials_meat_raw.png",
-    on_use = minetest.item_eat(1),
-    groups = { meat=1, eatable=1 },
-    stack_max=25
-})
+if not dep_bluewhite_raw then
+    minetest.register_craftitem(":animal_materials:fish_bluewhite", {
+        description = S("Raw Fish (cichlid)"),
+        image = "animal_materials_bluewhite_raw.png",
+        on_use = minetest.item_eat(1),
+        groups = { meat=1, eatable=1 },
+        stack_max=25
+    })
+else
+    minetest.register_alias("animal_materials:fish_bluewhite", dep_bluewhite_raw)
+end
+
+local dep_clownfish_raw = nil
+if minetest.registered_items["animalmaterials:fish_clownfish"] then
+    dep_clownfish_raw = "animalmaterials:fish_clownfish"
+end
+
+if not dep_clownfish_raw then
+    minetest.register_craftitem(":animal_materials:fish_clownfish", {
+        description = S("Raw Fish (clownfish)"),
+        image = "animal_materials_clownfish_raw.png",
+        on_use = minetest.item_eat(1),
+        groups = { meat=1, eatable=1 },
+        stack_max=25
+    })
+else
+    minetest.register_craftitem("animal_materials:fish_clownfish", dep_clownfish_raw)
+end
 
 -- ===================================================================
 -- feather

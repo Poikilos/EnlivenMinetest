@@ -1,3 +1,15 @@
+diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codercore/codersea/LICENSE Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codercore/codersea/LICENSE
+--- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codercore/codersea/LICENSE	2021-11-19 07:17:20.455845524 -0500
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codercore/codersea/LICENSE	2021-11-19 07:17:50.435846279 -0500
+@@ -41,7 +41,7 @@
+ 
+ Creative Commons Attribution Share-Alike 4.0
+ https://creativecommons.org/licenses/by-sa/4.0/
+-by Poikilos
++Copyright (c) 2019 Poikilos
+ 
+ ----------------------------------------------------------------------
+ 
 diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/coderfood/unified_foods/basefoods.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/coderfood/unified_foods/basefoods.lua
 --- Bucket_Game-base/distinguish_meats-vs-211114a/mods/coderfood/unified_foods/basefoods.lua	2021-11-15 13:20:34.671690986 -0500
 +++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/coderfood/unified_foods/basefoods.lua	2021-11-18 16:18:49.590487864 -0500
@@ -28,7 +40,7 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/coderfood/unified_fo
 Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/coderfood/unified_foods: textures
 diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/animal_materials.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/animal_materials.lua
 --- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/animal_materials.lua	2021-11-15 13:20:43.119691199 -0500
-+++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/animal_materials.lua	2021-11-18 19:03:00.402735941 -0500
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/animal_materials.lua	2021-11-19 07:08:41.543832456 -0500
 @@ -103,49 +103,95 @@
  -- ===================================================================
  -- meat
@@ -92,14 +104,6 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/
  minetest.register_craftitem(":animal_materials:meat_beef", {
 -    description = S("Beef (raw)"),
 -    image = "animal_materials_meat_raw.png",
--    on_use = minetest.item_eat(1),
--    groups = { meat=1, eatable=1 },
--    stack_max=25
--})
--
--minetest.register_craftitem(":animal_materials:meat_chicken", {
--    description = S("Chicken (raw)"),
--    image = "animal_materials_meat_raw.png",
 +    description = S("Raw Beef"),
 +    image = "codermobs_beef_raw.png",
      on_use = minetest.item_eat(1),
@@ -107,6 +111,14 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/
      stack_max=25
  })
  
+-minetest.register_craftitem(":animal_materials:meat_chicken", {
+-    description = S("Chicken (raw)"),
+-    image = "animal_materials_meat_raw.png",
+-    on_use = minetest.item_eat(1),
+-    groups = { meat=1, eatable=1 },
+-    stack_max=25
+-})
+-
 -minetest.register_craftitem(":animal_materials:meat_lamb", {
 -    description = S("Lamb (raw)"),
 -    image = "animal_materials_meat_raw.png",
@@ -159,7 +171,7 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/
      on_use = minetest.item_eat(1),
      groups = { meat=1, eatable=1 },
      stack_max=25
-@@ -168,20 +214,13 @@
+@@ -168,36 +214,47 @@
  })
  
  minetest.register_craftitem(":animal_materials:meat_ostrich", {
@@ -180,9 +192,58 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/
 -    stack_max=5
 -})
  
- minetest.register_craftitem(":animal_materials:fish_bluewhite", {
-     description = S("Fish (bluewhite)"),
-@@ -229,7 +268,7 @@
+-minetest.register_craftitem(":animal_materials:fish_bluewhite", {
+-    description = S("Fish (bluewhite)"),
+-    image = "animal_materials_meat_raw.png",
+-    on_use = minetest.item_eat(1),
+-    groups = { meat=1, eatable=1 },
+-    stack_max=25
+-})
+-
+-minetest.register_craftitem(":animal_materials:fish_clownfish", {
+-    description = S("Fish (clownfish)"),
+-    image = "animal_materials_meat_raw.png",
+-    on_use = minetest.item_eat(1),
+-    groups = { meat=1, eatable=1 },
+-    stack_max=25
+-})
++local dep_bluewhite_raw = nil
++if minetest.registered_items["animalmaterials:fish_bluewhite"] then
++    dep_bluewhite_raw = "animalmaterials:fish_bluewhite"
++end
++
++if not dep_bluewhite_raw then
++    minetest.register_craftitem(":animal_materials:fish_bluewhite", {
++        description = S("Raw Fish (cichlid)"),
++        image = "animal_materials_bluewhite_raw.png",
++        on_use = minetest.item_eat(1),
++        groups = { meat=1, eatable=1 },
++        stack_max=25
++    })
++else
++    minetest.register_alias("animal_materials:fish_bluewhite", dep_bluewhite_raw)
++end
++
++local dep_clownfish_raw = nil
++if minetest.registered_items["animalmaterials:fish_clownfish"] then
++    dep_clownfish_raw = "animalmaterials:fish_clownfish"
++end
++
++if not dep_clownfish_raw then
++    minetest.register_craftitem(":animal_materials:fish_clownfish", {
++        description = S("Raw Fish (clownfish)"),
++        image = "animal_materials_clownfish_raw.png",
++        on_use = minetest.item_eat(1),
++        groups = { meat=1, eatable=1 },
++        stack_max=25
++    })
++else
++    minetest.register_craftitem("animal_materials:fish_clownfish", dep_clownfish_raw)
++end
+ 
+ -- ===================================================================
+ -- feather
+@@ -229,7 +286,7 @@
  })
  
  minetest.register_craftitem(":animal_materials:egg_big", {
@@ -438,6 +499,8 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/
  local msname     = "codermobs_" .. lcname
  local obj_name   = "codermobs:" .. lcname
  
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: animal_materials_bluewhite_raw.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: animal_materials_clownfish_raw.png
 Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: animal_materials_egg_big.png
 Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: animal_materials_meat_raw.png
 Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: animal_materials_meat_toxic_raw.png
