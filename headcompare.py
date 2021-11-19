@@ -5,7 +5,7 @@ import os
 import platform
 
 me = os.path.basename(__file__)
-myDir = os.path.dirname(__file__)
+myDir = os.path.dirname(os.path.abspath(__file__))
 defaultVirtualReposDir = myDir
 
 def error(msg):
@@ -46,7 +46,7 @@ else:
 
 minetestPath = os.path.join(profile, "minetest")
 gamesPath = os.path.join(minetestPath, "games")
-gamePath = None
+defaultGamePath = None
 
 
 def compareBranch(branchName, gamePath=None, bgVersion=None,
@@ -83,6 +83,11 @@ def compareBranch(branchName, gamePath=None, bgVersion=None,
     versionMsg = "specified"
     if (len(parts) > 2) and (parts[-2] == "vs"):
         detectedBGVer = parts[-1]
+    if os.path.sep in branchName:
+        branchName = os.path.split(branchName)[1]
+
+    myDirSlash = myDir + os.path.sep
+
     if bgVersion is not None:
         if detectedBGVer is not None:
             print("WARNING: detected version {} but you specified {}"
@@ -90,24 +95,19 @@ def compareBranch(branchName, gamePath=None, bgVersion=None,
     else:
         bgVersion = detectedBGVer
         versionMsg = "detected"
-    '''
-    tryGame = "bucket_game"
-    tryGamePath = os.path.join(gamesPath, tryGame)
-    if not os.path.isdir(tryGamePath):
-        tryGame = "Bucket_Game"
-        tryGamePath = os.path.join(gamesPath, tryGame)
-    '''
-    if bgVersion is None:
-        raise ValueError("The game version was neither specified nor "
-                         " after \"-vs-\" in the patch name.")
+    if compareOld:
+        if bgVersion is None:
+            raise ValueError("The game version was neither specified "
+                             " nor after \"-vs-\" in the patch name.")
 
-    specifiedGame = "bucket_game-{}".format(bgVersion)
-    # os.path.join(bgVersionsPath, specifiedGame)
-    specifiedGamePath = os.path.join(bgVersionsPath, specifiedGame)
-    if not os.path.isdir(specifiedGamePath):
-        usage()
-        raise ValueError("The {} game version is not present at"
-                         " {}".format(versionMsg, specifiedGamePath))
+        detectedGame = "bucket_game-{}".format(bgVersion)
+        # os.path.join(bgVersionsPath, detected)
+        detectedPath = os.path.join(bgVersionsPath, detected)
+        if not os.path.isdir(detectedPath):
+            usage()
+            raise ValueError("The {} game version is not present at"
+                             " {}".format(versionMsg, detectedPath))
+
     if branchesPath is None:
         if compareOld:
             branchesPath = os.path.join(vReposDir,
@@ -115,27 +115,60 @@ def compareBranch(branchName, gamePath=None, bgVersion=None,
         else:
             branchesPath = os.path.join(vReposDir,
                                         "Bucket_Game-branches")
-    if os.path.sep in branchName:
-        branchName = os.path.split(branchName)[1]
+    if gamePath is None:
+        if compareOld:
+            gamePath = detectedPath
+            basePath = detectedPath
+        else:
+            tryGame = "bucket_game"
+            tryGamePath = os.path.join(gamesPath, tryGame)
+            if not os.path.isdir(tryGamePath):
+                tryGame = "Bucket_Game"
+                tryGamePath = os.path.join(gamesPath, tryGame)
+            gamePath = tryGamePath
+            basePath = os.path.join(vReposDir, "Bucket_Game-base",
+                                    branchName)
+            basePath = os.path.realpath(basePath)
+
+    if not os.path.isdir(gamePath):
+        usage()
+        raise ValueError("The {} game version is not present at"
+                         " {}".format(versionMsg, gamePath))
+
     branchPath = os.path.join(branchesPath, branchName)
     if not os.path.isdir(branchPath):
         raise ValueError("The branch wasn't found at \"{}\""
                          "".format(branchPath))
     branchPath = os.path.realpath(branchPath)
-    print("meld \"{}\" \"{}\"".format(specifiedGamePath, branchPath))
+
+    basePathRel = basePath
+    if basePathRel.startswith(myDirSlash):
+        basePathRel = basePathRel[len(myDirSlash):]
+
+    gamePathRel = gamePath
+    if gamePathRel.startswith(myDirSlash):
+        gamePathRel = gamePathRel[len(myDirSlash):]
+
+    branchPathRel = branchPath
+    if branchPathRel.startswith(myDirSlash):
+        branchPathRel = branchPathRel[len(myDirSlash):]
+
+
+    print("meld \"{}\" \"{}\"".format(gamePath, branchPath))
     patchFilePath = branchPath+".patch"
     print("diff -ru \"{}\" \"{}\" > \"{}\""
-          "".format(specifiedGamePath, branchPath, patchFilePath))
+          "".format(basePathRel, branchPathRel, patchFilePath))
+
     results = {
-        'gamePath': specifiedGamePath,
-        'branchPath': specifiedGamePath,
-        'patchFilePath': specifiedGamePath,
+        'gamePath': gamePath,
+        'branchPath': branchPath,
+        'patchFilePath': patchFilePath,
     }
     return results
 
 def main():
-    global gamePath
-    gamePath = None
+    global defaultGamePath
+    defaultGamePath = None
     if len(sys.argv) < 2:
         usage()
         error("Error: You must provide a branch name.\n")
@@ -146,9 +179,9 @@ def main():
               "".format(sys.argv))
         exit(1)
     if len(sys.argv) > 2:
-        gamePath = sys.argv[2]
+        defaultGamePath = sys.argv[2]
 
-    results = compareBranch(sys.argv[1], gamePath=gamePath)
+    results = compareBranch(sys.argv[1], gamePath=defaultGamePath)
     error("# ^ Do that to see the difference or generate a patch,"
       " but the first directory must be unmodified from the"
       " original release package.")

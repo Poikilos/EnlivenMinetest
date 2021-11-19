@@ -9,7 +9,7 @@ from headcompare import (
     defaultVirtualReposDir,
     minetestPath,
     gamesPath,
-    gamePath,
+    defaultGamePath,
     profile,
 )
 
@@ -34,8 +34,8 @@ def usage():
     error("")
 
 def main():
-    global gamePath
-    gamePath = None
+    global defaultGamePath
+    defaultGamePath = None
     if len(sys.argv) < 2:
         usage()
         error("Error: You must provide a branch name.\n")
@@ -46,9 +46,9 @@ def main():
               "".format(sys.argv))
         exit(1)
     if len(sys.argv) > 2:
-        gamePath = sys.argv[2]
+        defaultGamePath = sys.argv[2]
 
-    results = compareBranch(sys.argv[1], gamePath=gamePath,
+    results = compareBranch(sys.argv[1], gamePath=defaultGamePath,
                             compareOld=True)
     error("# ^ Do that to verify: they MUST match, and the first"
           " directory must be unmodified from the original"
