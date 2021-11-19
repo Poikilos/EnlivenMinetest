@@ -1,0 +1,15 @@
+After editing /home/owner/git/EnlivenMinetest/Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures/animal_materials_egg_big.png, then create a patch by running:
+diff -u /home/owner/git/EnlivenMinetest/Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures/animal_materials_egg_big.png /home/owner/git/EnlivenMinetest/Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures/animal_materials_egg_big.png > /home/owner/git/EnlivenMinetest/bucket_game-211114a-20211118-animal_materials_egg_big.png.patch
+
+* getting parent of /home/owner/minetest/bucket_game-211114a/mods/codermobs/codermobs/textures/animal_materials_egg_big.png...
+* updating /home/owner/git/EnlivenMinetest/Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures/animal_materials_egg_big.png
+* creating /home/owner/git/EnlivenMinetest/Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures/animal_materials_egg_big.png
+* updating LICENSE '/home/owner/git/EnlivenMinetest/Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE'...
+* updating LICENSE '/home/owner/git/EnlivenMinetest/Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/oldcoder.txt'...
+* updating '/home/owner/git/EnlivenMinetest/Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/oldcoder.txt'...
+Done.
+
+To apply, set BUCKET_GAME then:
+cd EnlivenMinetest && git pull && rsync -rt Bucket_Game-branches/distinguish_meats-vs-211114a/ $BUCKET_GAME
+mv $BUCKET_GAME/mods/codermobs/codermobs/textures/codermobs_ostrich_meat_raw.png $BUCKET_GAME/mods/codermobs/codermobs/textures/codermobs_ostrich_raw.png
+mv $BUCKET_GAME/mods/codermobs/codermobs/textures/codermobs_ostrich_meat_cooked.png $BUCKET_GAME/mods/codermobs/codermobs/textures/codermobs_ostrich_cooked.png

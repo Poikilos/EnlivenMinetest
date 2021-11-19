@@ -1,0 +1,237 @@
+Name:    unified_foods
+Source:  Original mod except for some "hbhunger" code
+License: See "LICENSE"
+
+----------------------------------------------------------------------
+
+1. "unified_foods" is a  largely original mod that provides a combined
+food registration and hunger system.
+
+The hunger system is based on a fork of "hbhunger".
+
+This mod supersedes the following mods,  though it doesn't replace all
+of the foods defined in the mods:
+
+food, food_basic, dessert, hbhunger, extra, mtfoods
+
+----------------------------------------------------------------------
+
+2. Overview of features.
+
+2.1. Unified Foods  supports  satiation, healing, poison, and replace-
+ment items as "hbhunger" did. It also offers numerous extra features.
+
+----------------------------------------------------------------------
+
+2.2. You  don't  need to  explicitly  hook foods any longer to support
+basic operation.
+
+Unified Foods intercepts calls to "minetest.item_eat". This means that
+satiation and replacement items are supported automatically for normal
+foods out of the box.
+
+You can still  hook foods to modify existing parameters or  to set new
+ones. However, this is optional.
+
+----------------------------------------------------------------------
+
+2.3. Unified Foods can merge similar items.    
+
+If there are,  for example,  three types of hamburgers,  Unified Foods
+retains all of the items or nodes, but it optionally assigns a similar
+image and food parameters to all of them.
+
+No permanent conversion is done. Just a temporary merge to promote the
+sense of smoother operation.  However,  permanent conversion  could be
+added as another feature.
+
+----------------------------------------------------------------------
+
+2.4. Eating a particular food  can optionally produce a specified mes-
+sage to the user. Lists of messages are supported. If a list is speci-
+fied, a random message is chosen from the list.
+
+----------------------------------------------------------------------
+
+2.5. "hbhunger" had a bug which prevented it from properly registering
+items that didn't set "on_use".  Unified Foods supports  items of that
+type. This means that, for example, you can make arbitrary items eata-
+ble.
+
+----------------------------------------------------------------------
+
+2.6. Eating works whether or not damage is enabled.
+
+If hunger is  enabled and damage is disabled,  the hunger time loop is
+stopped and poison does no damage at the Unified Foods level.
+
+----------------------------------------------------------------------
+
+2.7. Two new  commands  "/starve"  and  "/satiate"  have  been  added.
+"/starve" makes the user hungry.  "/satiate" makes him or her satiated
+instead. These commands are useful for debugging purposes.
+
+----------------------------------------------------------------------
+
+2.8. It's easy to add juices to Unified Foods.
+
+You  can create  a new juice, including merges with  existing objects,
+crafting  recipes,  and aliases, using just one simple statement.  For
+example, this statement:
+
+reg_juice ("apple",
+    { color = "#FFC929" } , { "mtfoods:apple_juice" })
+
+sets up and/or performs all of these steps:
+
+    * Create a glass of juice named "food:apple_juice"
+    * Alias the glass to "mtfoods:apple_juice" if that item exists
+    * Set "mtfoods:apple_juice" to new juice's image and satiation
+    * Add a crafting recipe for new juice
+    * Create aliases "apple_juice" and "applejuice"
+    * If the player drinks the juice, replace it with empty glass
+
+If a juice is a  uniform color, the API is able to create an appropri-
+ate juice image at runtime.  So, it's possible to have numerous juices
+without the need for numerous image files.
+
+However, juice image files may be specified as well.  This allows spe-
+cial cases such as rainbow juice or worm juice to be handled.
+
+----------------------------------------------------------------------
+
+2.9. Unified Foods allows craft-item foods to be placed. Two modes are
+supported:
+
+Craft-items  may  be  placed as static 2D sprites that always face the
+caller.
+
+This often looks better than the  "plantlike" or  "torchlike"  drawing
+modes that MT "_games" usually  use when 2D objects are placed.
+
+Or craft-items may be  placed as dynamic 2D sprites that work the same
+way but are "alive". For example, placed hamburgers may attempt to run
+away from hungry players.
+
+Craft-items may also be placed in "plantlike" or "torchlike" mode if a
+world developer prefers this.
+
+The mode in  which craft-items are to be placed can be specified glob-
+ally in "world.conf" or on a per-item basis in the mod source code for
+individual items.
+
+For more detailed documentation, see the comments preceding "register_
+food" in "foodcore.lua".
+
+----------------------------------------------------------------------
+
+3. This mod requires only "default" and "hud", but "bucket" and "farm-
+ing" are strongly recommended.
+
+----------------------------------------------------------------------
+
+4. This mod replaces the complicated API used by "food" v2 with an API
+that's easier to use.
+
+In particular, in Unified Foods, one subroutine call, in one place, is
+typically enough to set up a food.  Two calls, if a juice variation of
+the food is desired.
+
+Additionally,  this mod restores some of the foods that were discarded
+in "food" v2.
+
+Historical note: The last pre-v2 commit to "food" was:
+
+      22be9b83c3087e15eea8878c5aef9be0f12d6158
+
+----------------------------------------------------------------------
+
+5. Unified Foods creates food and utensils in the "food:" namespace.
+
+Most  of these objects are  original items that  fall back to existing
+items where possible.
+
+For example, if "farming" is installed,  "food:bread" becomes an alias
+for "farming:bread".  Otherwise, it's defined as a new and independent
+item.
+
+----------------------------------------------------------------------
+
+6. If "drawtype" is set to "sprite" or "mob" for an item,  "vsize" may
+set, as well, to scale the size of the item up or down.
+
+vsize = 0.50 will, for example,  scale the item to half size.  vsize =
+2.00 will scale it to twice normal size.
+
+The code  adjusts collision boxes and vertical positions for items ap-
+propriately.
+
+----------------------------------------------------------------------
+
+Appendix A. Partial list of objects supported.
+
+Fruits:
+
+Apple,  Banana,  Cherry, Orange, Pineapple, and Strawberry.  Plus  the
+associated juices.
+
+----------------------------------------------------------------------
+
+Misc.:
+
+Hamburger.  Hamburger juice. Rainbow and worm juices. OBOE (Open Blade
+of Exile)  potions in multiple colors. Taco.
+
+Raw  and  cooked pasta.  A  couple of  types of breakfast cereal.  Dog
+treats.
+
+Glass of Romulan Ale. Glass of Ginger Ale. Bottle of apple cider.
+
+----------------------------------------------------------------------
+
+Vegetables:
+
+Onion, onion rings, onion slices.
+
+Potato, potato juice, baked potato, potato slices, french fries, pota-
+to chips.
+
+Carrot, corn, rhubarb, and tomato. Plus most of the associated juices.
+
+----------------------------------------------------------------------
+
+Dairy:
+
+Glass or bucket of milk. Butter. Cheese.
+
+----------------------------------------------------------------------
+
+Chocolate:
+
+Cocoa bean,  chocolate powder, dark chocolate, milk chocolate, and cup
+or mug of chocolate milk.
+
+----------------------------------------------------------------------
+
+Coffee:
+
+Raw coffee beans, roasted coffee beans, and cup or mug of coffee.
+
+----------------------------------------------------------------------
+
+Dessert:
+
+Snackcake,  blueberry muffin, raw tart base, tart base, and strawberry
+tart.
+
+Banana split, shortbread, cream, strawberry shortcake, and cupcake.
+
+Moono desserts: Butterscotch Dillybar, Butterscotch Sundae, Heart on a
+Stick, Strawberry Bar, Strawberry Icecream, and Strawberry Star.
+
+There are also  some cakes,  but we encourage people  to use the cakes
+and pies from the "cakepie" mod instead.  The cakes  in  this mod  are
+provided primarily for legacy support purposes.
+
+----------------------------------------------------------------------
+End of file.

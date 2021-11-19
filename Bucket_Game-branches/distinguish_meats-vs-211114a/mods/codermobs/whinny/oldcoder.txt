@@ -1,0 +1,7 @@
+Name:    whinny
+Source:  Fork of an upstream mod (do not replace)
+License: See "LICENSE"
+
+----------------------------------------------------------------------
+
+To be documented.
