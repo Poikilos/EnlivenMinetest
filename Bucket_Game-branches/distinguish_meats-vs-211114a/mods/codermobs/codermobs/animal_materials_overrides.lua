@@ -5,7 +5,9 @@
 --   anywhere else.
 --   Any meats without a specific cooked version (craftitem) can
 --   go here, but only use register_mystery_meat if the item would
---   look like a leg roast after cooked.
+--   look like a leg roast after cooked (or if there is a more
+--   specific recipe elsewhere for cooking the craftitem rather
+--   than the group, which will override the group's outcome)
 --   If the cooking mod is not present, more such cooking recipes
 --   are added as well.
 
@@ -33,9 +35,11 @@ end
 
 register_mystery_meat(am_namespace..":meat_lamb")
 
--- register_mystery_meat(am_namespace..":meat_ostrich")
--- ^ commented since ostrich.lua registers a specific
---   meat & recipe
+register_mystery_meat(am_namespace..":meat_ostrich")
+-- ^ ok since ostrich.lua registers a specific
+--   meat & recipe, and that will override the group
+--   recipe and cooking won't result in the generic
+--   one.
 
 -- if not minetest.get_modpath("cooking") then
 -- ^ commented for reason below:
