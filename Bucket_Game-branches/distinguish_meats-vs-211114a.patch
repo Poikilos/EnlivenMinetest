@@ -252,6 +252,14 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/
      image = "animal_materials_egg_big.png",
      stack_max=5
  })
+diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/depends.txt Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/depends.txt
+--- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/depends.txt	2021-11-19 08:58:50.603998895 -0500
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/depends.txt	2021-11-19 08:59:12.507999446 -0500
+@@ -6,3 +6,4 @@
+ mobs
+ nri_bricks?
+ wool
++cooking?
 diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/hen.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/hen.lua
 --- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/hen.lua	2021-11-18 15:50:04.206444413 -0500
 +++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/hen.lua	2021-11-18 16:09:48.418474235 -0500
@@ -331,7 +339,7 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/
  minetest.register_craft ({
      type   = "cooking"          ,
 diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE
---- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE	2021-11-18 15:50:04.270444414 -0500
+--- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE	2021-11-19 08:58:50.659998896 -0500
 +++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE	2021-11-18 18:58:21.410728915 -0500
 @@ -36,13 +36,34 @@
  Additional meats:
@@ -615,6 +623,14 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/mobs/craft
  
  minetest.register_craft({
  	type = "cooking",
+diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/mobs/depends.txt Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/mobs/depends.txt
+--- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/mobs/depends.txt	2021-11-19 08:55:50.563994361 -0500
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/mobs/depends.txt	2021-11-19 08:56:27.375995288 -0500
+@@ -8,3 +8,4 @@
+ lucky_block?
+ tnt?
+ toolranks?
++animalmaterials?
 Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/mobs: textures
 diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/whinny/init.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/whinny/init.lua
 --- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/whinny/init.lua	2021-11-17 12:42:28.099985098 -0500
