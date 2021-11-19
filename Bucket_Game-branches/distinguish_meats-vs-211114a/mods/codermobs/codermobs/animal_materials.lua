@@ -20,7 +20,7 @@ else
   S = function ( s ) return s end
 end
 
-core.log("action","MOD: animal_materials loading ...")
+core.log("action","MOD: codermobs integrated animal_materials loading ...")
 local version = "0.1.3"
 
 animal_materialsdata = {}
