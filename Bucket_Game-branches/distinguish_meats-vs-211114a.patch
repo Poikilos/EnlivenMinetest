@@ -1,0 +1,588 @@
+diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/coderfood/unified_foods/basefoods.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/coderfood/unified_foods/basefoods.lua
+--- Bucket_Game-base/distinguish_meats-vs-211114a/mods/coderfood/unified_foods/basefoods.lua	2021-11-15 13:20:34.671690986 -0500
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/coderfood/unified_foods/basefoods.lua	2021-11-18 16:18:49.590487864 -0500
+@@ -169,7 +169,7 @@
+ 
+ needitem = reg_food ("meat_raw",
+     {
+-        description    = "Raw meat" ,
++        description    = "Raw Meat" ,
+         stack_max      = 25         ,
+         satiate        =  1         ,
+ 
+@@ -186,12 +186,12 @@
+ needitem = reg_food ("meat",
+     {
+         description    = "Cooked Meat" ,
+-        satiate        = 3             ,
++        satiate        = 6             ,
+         extra_groups   = { meat=1 }    ,
+ 
+         external_items = {
+             "mobs:meat"               , "jkanimals:meat"             ,
+-            "mobs:chicken_cooked"     , "mobfcooking:cooked_pork"    ,
++            "mobfcooking:cooked_pork"    ,
+             "mobfcooking:cooked_beef" , "mobfcooking:cooked_chicken" ,
+             "mobfcooking:cooked_lamb" , "mobfcooking:cooked_venison" ,
+         } ,
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/coderfood/unified_foods: textures
+diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/animal_materials.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/animal_materials.lua
+--- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/animal_materials.lua	2021-11-15 13:20:43.119691199 -0500
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/animal_materials.lua	2021-11-18 19:03:00.402735941 -0500
+@@ -103,49 +103,95 @@
+ -- ===================================================================
+ -- meat
+ 
+-minetest.register_craftitem(":animal_materials:meat_raw", {
+-    description = S("Raw meat"),
+-    image = "animal_materials_meat_raw.png",
+-    on_use = minetest.item_eat(1),
+-    groups = { meat=1, eatable=1 },
+-    stack_max=25
+-})
+-
+-minetest.register_craftitem(":animal_materials:meat_pork", {
+-    description = S("Pork (raw)"),
+-    image = "animal_materials_meat_raw.png",
+-    on_use = minetest.item_eat(1),
+-    groups = { meat=1, eatable=1 },
+-    stack_max=25
+-})
++local dep_meat_raw = nil
++if minetest.registered_items["mobs:meat"] then
++    dep_meat_raw = "mobs:meat"
++elseif minetest.registered_items["animalmaterials:meat"] then
++    dep_meat_raw = "animalmaterials:meat"
++end
++
++if not dep_meat_raw then
++    minetest.register_craftitem(":animal_materials:meat_raw", {
++        description = S("Raw Meat"),
++        image = "animal_materials_meat_raw.png",
++        on_use = minetest.item_eat(1),
++        groups = { meat=1, eatable=1 },
++        stack_max=25
++    })
++else
++    minetest.register_alias("animal_materials:meat_raw", dep_meat_raw)
++end
++
++local dep_pork_raw = nil
++if minetest.registered_items["mobs:pork_raw"] then
++    dep_pork_raw = "mobs:pork_raw"
++elseif minetest.registered_items["animalmaterials:meat_pork"] then
++    dep_pork_raw = "animalmaterials:meat_pork"
++end
++
++if not dep_pork_raw then
++    minetest.register_craftitem(":animal_materials:meat_pork", {
++        description = S("Raw Pork"),
++        image = "codermobs_pork_raw.png",
++        on_use = minetest.item_eat(1),
++        groups = { meat=1, eatable=1 },
++        stack_max=25
++    })
++
++    minetest.register_alias("animal_materials:pork_raw", "animal_materials:meat_pork")
++else
++    minetest.register_alias("animal_materials:pork_raw", dep_pork_raw)
++    minetest.register_alias("animal_materials:meat_pork", dep_pork_raw)
++end
+ 
+ minetest.register_craftitem(":animal_materials:meat_beef", {
+-    description = S("Beef (raw)"),
+-    image = "animal_materials_meat_raw.png",
+-    on_use = minetest.item_eat(1),
+-    groups = { meat=1, eatable=1 },
+-    stack_max=25
+-})
+-
+-minetest.register_craftitem(":animal_materials:meat_chicken", {
+-    description = S("Chicken (raw)"),
+-    image = "animal_materials_meat_raw.png",
++    description = S("Raw Beef"),
++    image = "codermobs_beef_raw.png",
+     on_use = minetest.item_eat(1),
+     groups = { meat=1, eatable=1 },
+     stack_max=25
+ })
+ 
+-minetest.register_craftitem(":animal_materials:meat_lamb", {
+-    description = S("Lamb (raw)"),
+-    image = "animal_materials_meat_raw.png",
+-    on_use = minetest.item_eat(1),
+-    groups = { meat=1, eatable=1 },
+-    stack_max=25
+-})
++local dep_chicken_raw = nil
++if minetest.registered_items["animalmaterials:meat_chicken"] then
++    dep_chicken_raw = "animalmaterials:meat_chicken"
++end
++
++if not dep_chicken_raw then
++    minetest.register_craftitem(":animal_materials:meat_chicken", {
++        description = S("Raw Chicken"),
++        image = "codermobs_chicken_raw.png",
++        on_use = minetest.item_eat(1),
++        groups = { meat=1, eatable=1 },
++        stack_max=25
++    })
++else
++    minetest.register_alias("animalmaterials:meat_chicken", dep_chicken_raw)
++    -- ^ The alias is only necessary for older versions of bucket_game--
++    --   as long as new ones always use the latter craftitem everywhere else,
++    --   they don't need the alias for any other reason.
++end
++
++local dep_lamb_raw = nil
++if minetest.registered_items["animalmaterials:meat_lamb"] then
++    dep_lamb_raw = "animalmaterials:meat_lamb"
++end
++
++if not dep_lamb_raw then
++    minetest.register_craftitem(":animal_materials:meat_lamb", {
++        description = S("Raw Lamb"),
++        image = "codermobs_lamb_raw.png",
++        on_use = minetest.item_eat(1),
++        groups = { meat=1, eatable=1 },
++        stack_max=25
++    })
++else
++    minetest.register_alias("animal_materials:meat_lamb", dep_lamb_raw)
++end
+ 
+ minetest.register_craftitem(":animal_materials:meat_venison", {
+-    description = S("Venison (raw)"),
+-    image = "animal_materials_meat_raw.png",
++    description = S("Raw Venison"),
++    image = "codermobs_venison_raw.png",
+     on_use = minetest.item_eat(1),
+     groups = { meat=1, eatable=1 },
+     stack_max=25
+@@ -168,20 +214,13 @@
+ })
+ 
+ minetest.register_craftitem(":animal_materials:meat_ostrich", {
+-    description = S("Ostrich Meat"),
+-    image = "animal_materials_meat_raw.png",
++    description = S("Raw Ostrich"),
++    image = "animal_materials_ostrich_meat_raw.png",
+     on_use = minetest.item_eat(3),
+     groups = { meat=1, eatable=1 },
+     stack_max=5
+ })
+ 
+-minetest.register_craftitem(":animal_materials:pork_raw", {
+-    description = S("Pork"),
+-    image = "animal_materials_pork_raw.png",
+-    on_use = minetest.item_eat(4),
+-    groups = { meat=1, eatable=1 },
+-    stack_max=5
+-})
+ 
+ minetest.register_craftitem(":animal_materials:fish_bluewhite", {
+     description = S("Fish (bluewhite)"),
+@@ -229,7 +268,7 @@
+ })
+ 
+ minetest.register_craftitem(":animal_materials:egg_big", {
+-    description = S("Egg (big)"),
++    description = S("Big Egg"),
+     image = "animal_materials_egg_big.png",
+     stack_max=5
+ })
+diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/hen.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/hen.lua
+--- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/hen.lua	2021-11-18 15:50:04.206444413 -0500
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/hen.lua	2021-11-18 16:09:48.418474235 -0500
+@@ -411,32 +411,52 @@
+ 
+ -- ===================================================================
+ -- Raw bird.
+-
+-minetest.register_craftitem (obj_name_raw, {
+-    description = "Raw " .. ucname   ,
+-    inventory_image = msname_raw_img ,
+-
+-    on_use = function (itemstack, player, pointed_thing)
+-        local name = player:get_player_name()
+-        local msg  = name .. " ate raw " .. ucname .. ". Salmonella!"
+-        minetest.chat_send_all (msg)
+-        player:set_hp (player:get_hp() - 2)
+-    end ,
+-})
+-
+-minetest.register_alias ("mobs:chicken_raw", obj_name_raw)
++local dep_chicken_raw = nil
++if minetest.registered_items["animal_materials:meat_chicken"] then
++    dep_chicken_raw = "animal_materials:meat_chicken"
++elseif minetest.registered_items["animalmaterials:meat_chicken"] then
++    dep_chicken_raw = "animalmaterials:meat_chicken"
++end
++if not dep_chicken_raw then
++    minetest.register_craftitem (obj_name_raw, {
++        description = "Raw " .. ucname   ,
++        inventory_image = msname_raw_img ,
++
++        on_use = function (itemstack, player, pointed_thing)
++            local name = player:get_player_name()
++            local msg  = name .. " ate raw " .. ucname .. ". Salmonella!"
++            minetest.chat_send_all (msg)
++            player:set_hp (player:get_hp() - 2)
++        end ,
++    })
++
++    minetest.register_alias ("mobs:chicken_raw", obj_name_raw)
++else
++    minetest.register_alias ("mobs:chicken_raw", dep_chicken_raw)
++    minetest.register_alias (obj_name_raw, dep_chicken_raw)
++end
+ 
+ -- ===================================================================
+ -- Cooked bird.
+ 
+-minetest.register_craftitem (obj_name_cooked, {
+-    description     = "Cooked " .. ucname ,
+-    inventory_image = msname_cooked_img   ,
+-    on_use = minetest.item_eat (6)        ,
+-})
+-
+-minetest.register_alias ("mobs:chicken_cooked",
+-                         obj_name_cooked)
++local dep_chicken_cooked = nil
++if minetest.registered_items["cooking:meat_chicken_cooked"] then
++    dep_chicken_cooked = "cooking:meat_chicken_cooked"
++end
++
++if not dep_chicken_cooked then
++    minetest.register_craftitem (obj_name_cooked, {
++        description     = "Cooked " .. ucname ,
++        inventory_image = msname_cooked_img   ,
++        on_use = minetest.item_eat (6)        ,
++    })
++
++    minetest.register_alias ("mobs:chicken_cooked",
++                             obj_name_cooked)
++else
++    minetest.register_alias ("mobs:chicken_cooked", dep_chicken_cooked)
++    minetest.register_alias (obj_name_cooked, dep_chicken_cooked)
++end
+ 
+ minetest.register_craft ({
+     type   = "cooking"          ,
+diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE
+--- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE	2021-11-18 15:50:04.270444414 -0500
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE	2021-11-18 18:58:21.410728915 -0500
+@@ -36,13 +36,34 @@
+ Additional meats:
+ - codermobs_beef.png
+ - codermobs_beef_raw.png
+-- codermobs_ostrich_meat.png
+-- codermobs_ostrich_meat_raw.png
++- codermobs_ostrich_cooked.png
++- codermobs_ostrich_raw.png
+ - codermobs_venison.png
+ - codermobs_venison_raw.png
++- codermobs_lamb_raw.png
++- codermobs_lamb_cooked.png
+ 
+ (c) 2021 Poikilos CC BY-SA 4.0
+ 
++Redrawn mobs meats and animal materials:
++- codermobs_pork_cooked.png
++- codermobs_pork_raw.png
++- animal_materials_pork_raw.png
++
++(c) 2021 Poikilos CC BY-SA 4.0
++
++Improved or adapted mobs meats and animal materials
++(based on image of same name unless specified):
++- animal_materials_egg_big.png (improved)
++- codermobs_ostrich_*.png (based on raw and cooked chicken **)
++- codermobs_ostrich_egg.png (based on sapier egg)
++- codermobs_egg_big_fried.* (based on fried egg **)
++- codermobs_ostrich_egg_fried.png (based on fried egg **)
++- codermobs_chicken_*.png (improved) **
++
++(c) 2011 sapier, 2021 Poikilos CC BY-SA 4.0
++
++`**` The author is assumed to be sapier due to context, but correct the author later if found.
+ 
+ Spider Meat:
+ - Edited by Poikilos, based on model and texture by AspireMint according to
+@@ -225,7 +246,10 @@
+ The MIT License (MIT)
+ 
+ (c) 2014 Krupnov Pavel -- bugs, kpgmobs, pmobs
+-(c) 2014 Krupnov Pavel and 2016 TenPlus1 -- mobs_animal
++(c) 2014 Krupnov Pavel and 2016 TenPlus1 -- mobs_animal (deer mesh,
++    dungeon master (hunched version), small rat, sand monster /
++    as mummy, sheep, stone monster / as dirt monster, treant)
++(c) 2011 sapier, 2021 Poikilos (redraw meats) -- animalmaterials
+ (c) 2016 TenPlus1 -- mobs_monster and mobs_npc
+ 
+ Permission is hereby granted,  free of charge, to any person obtaining
+diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/lott_spider.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/lott_spider.lua
+--- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/lott_spider.lua	2021-11-17 12:46:19.031990913 -0500
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/lott_spider.lua	2021-11-17 12:47:06.559992110 -0500
+@@ -42,13 +42,13 @@
+ -- ===================================================================
+ 
+ minetest.register_craftitem (obj_name .. "_meat", {
+-    description = "Cooked Meat",
++    description = "Cooked Spider",
+     inventory_image = msname .. "_meat.png",
+     on_use = minetest.item_eat (4),
+ })
+ 
+ minetest.register_craftitem (obj_name .. "_meat_raw", {
+-    description = "Raw Meat",
++    description = "Raw Spider",
+     inventory_image = msname .. "_meat_raw.png",
+ })
+ 
+diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/ostrich.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/ostrich.lua
+--- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/ostrich.lua	2021-11-18 10:37:47.357972555 -0500
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/ostrich.lua	2021-11-18 16:14:55.810481977 -0500
+@@ -55,25 +55,30 @@
+ 
+ -- ===================================================================
+ 
+--- Chicken-based  images  stand in for  ostrich-based  images  in some
+--- cases.
+-
+-local mcname                = "codermobs_chicken"
++-- local mcname                = "codermobs_chicken"
++local mcname                = "codermobs_ostrich"
+ 
+ local msname_cooked         = mcname           .. "_cooked"
+ local msname_raw            = mcname           .. "_raw"
+ 
+ local msname_img            = mcname           .. ".png"
+ local msname_cooked_img     = msname_cooked    .. ".png"
+-local msname_raw_img        = msname_raw       .. ".png"
++-- local msname_raw_img        = msname_raw       .. ".png"
++local msname_raw_img        = "animal_materials_ostrich_meat_raw.png"
+ 
+ local msname_egg            = mcname           .. "_egg"
+ local msname_egg_fried      = msname_egg       .. "_fried"
++-- local msname_egg_fried_img  = "animal_materials_egg_big_fried.png"
++-- ^ by Poikilos (no upstream)
++-- local msname_egg_img        = "animal_materials_egg_big.png"
++-- ^ upstream name is animalmaterials_egg_big.png (brown, but real ostrich eggs are offwhite)
+ local msname_egg_fried_img  = msname_egg_fried .. ".png"
+ local msname_egg_img        = msname_egg       .. ".png"
+ 
+ local obj_name_cooked       = obj_name         .. "_cooked"
+-local obj_name_raw          = obj_name         .. "_raw"
++-- local obj_name_raw          = obj_name         .. "_raw"
++-- ^ formerly codermobs:ostrich_raw (dup of animal_materials, see alias below)
++local obj_name_raw          = ":animal_materials:meat_ostrich"
+ 
+ local obj_name_egg          = obj_name         .. "_egg"
+ local obj_name_egg_entity   = obj_name_egg     .. "_entity"
+@@ -319,22 +324,33 @@
+ 
+ -- ===================================================================
+ -- Raw bird.
++if not minetest.registered_items[obj_name_raw] then
++    minetest.register_craftitem (obj_name_raw, {
++        description     = "Raw " .. ucname ,
++        inventory_image = msname_raw_img   ,
++
++        on_use = function (itemstack, player, pointed_thing)
++            local name = player:get_player_name()
++            local msg  = name .. " ate raw " .. ucname .. ". Salmonella!"
++            minetest.chat_send_all (msg)
++            player:set_hp (player:get_hp() - 2)
++        end ,
++    })
++end
+ 
+-minetest.register_craftitem (obj_name_raw, {
+-    description     = "Raw " .. ucname ,
+-    inventory_image = msname_raw_img   ,
+-
+-    on_use = function (itemstack, player, pointed_thing)
+-        local name = player:get_player_name()
+-        local msg  = name .. " ate raw " .. ucname .. ". Salmonella!"
+-        minetest.chat_send_all (msg)
+-        player:set_hp (player:get_hp() - 2)
+-    end ,
+-})
++minetest.register_alias("codermobs:ostrich_raw", "animal_materials:meat_ostrich")
++-- ^ only necessary for old versions of codermobs
+ 
+ -- ===================================================================
+ -- Cooked bird.
+ 
++-- For the register_craftitem and register_craft calls below,
++-- the cooking mod from the animals_modpack or animalmaterials modpacks
++-- do the same as below except for with ostrich:
++-- - raw craftitems are in the animalmaterials namespace,
++-- - cooked versions are in the cooking namespace
++--   - but cooking doesn't have ostrich
++
+ minetest.register_craftitem (obj_name_cooked, {
+     description     = "Cooked " .. ucname ,
+     inventory_image = msname_cooked_img   ,
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs: projects
+diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/rat_better.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/rat_better.lua
+--- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/rat_better.lua	2021-11-17 12:50:29.763997228 -0500
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/rat_better.lua	2021-11-17 15:56:52.384278844 -0500
+@@ -5,7 +5,7 @@
+ -- ===================================================================
+ 
+ local lcname     = "rat_better"
+-local ucname     = "Rat_Better"
++local ucname     = "Better Rat"
+ local msname     = "codermobs_" .. lcname
+ local obj_name   = "codermobs:" .. lcname
+ 
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: animal_materials_egg_big.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: animal_materials_meat_raw.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: animal_materials_meat_toxic_raw.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: animal_materials_meat_undead_raw.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: animal_materials_pork_raw.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: codermobs_chicken_cooked.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: codermobs_chicken_raw.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: codermobs_cooked_rat.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: codermobs_egg_big_fried.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: codermobs_lamb_cooked.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: codermobs_lamb_raw.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: codermobs_meat.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: codermobs_meat_raw.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: codermobs_ostrich_cooked.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: codermobs_ostrich_egg_fried.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: codermobs_ostrich_egg.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: codermobs_ostrich_raw.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: codermobs_pork_cooked.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: codermobs_pork_raw.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: codermobs_rat_better_inv.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: codermobs_rat_cooked.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: codermobs_rat_inv.png
+diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/warthog.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/warthog.lua
+--- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/warthog.lua	2021-11-18 15:27:30.406410319 -0500
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/warthog.lua	2021-11-18 15:30:32.610414908 -0500
+@@ -119,12 +119,22 @@
+ -- ===================================================================
+ 
+ -- raw porkchop
+-minetest.register_craftitem(":mobs:pork_raw", {
+-    description = "Raw Porkchop" ,
+-    inventory_image = "codermobs_pork_raw.png",
+-    on_use = minetest.item_eat(4),
+-    groups = {food_meat_raw = 1, food_pork_raw = 1, flammable = 2},
+-})
++local dep_pork_raw = nil
++if minetest.registered_items["animal_materials:meat_pork"] then
++    dep_pork_raw = "animal_materials:meat_pork"
++elseif minetest.registered_items["animalmaterials:meat_pork"] then
++    dep_pork_raw = "animalmaterials:meat_pork"
++end
++if not dep_pork_raw then
++    minetest.register_craftitem(":mobs:pork_raw", {
++        description = "Raw Porkchop" ,
++        inventory_image = "codermobs_pork_raw.png",
++        on_use = minetest.item_eat(4),
++        groups = {food_meat_raw = 1, food_pork_raw = 1, flammable = 2},
++    })
++else
++    minetest.register_alias("mobs:pork_raw", dep_pork_raw)
++end
+ 
+ -- cooked porkchop
+ minetest.register_craftitem(":mobs:pork_cooked", {
+diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/mobs/crafts.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/mobs/crafts.lua
+--- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/mobs/crafts.lua	2021-11-18 14:53:22.406358744 -0500
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/mobs/crafts.lua	2021-11-18 15:16:00.682392950 -0500
+@@ -23,21 +23,42 @@
+ 	groups = {flammable = 2},
+ })
+ 
+--- raw meat
+-minetest.register_craftitem("mobs:meat_raw", {
+-	description = S("Raw Meat"),
+-	inventory_image = "mobs_meat_raw.png",
+-	on_use = minetest.item_eat(3),
+-	groups = {food_meat_raw = 1, flammable = 2},
+-})
+ 
+--- cooked meat
+-minetest.register_craftitem("mobs:meat", {
+-	description = S("Meat"),
+-	inventory_image = "mobs_meat.png",
+-	on_use = minetest.item_eat(8),
+-	groups = {food_meat = 1, flammable = 2},
+-})
++local dep_meat_raw = nil
++if minetest.registered_items["animal_materials:meat_raw"] then
++	dep_meat_raw = "animal_materials:meat_raw"
++elseif minetest.registered_items["animalmaterials:meat_raw"] then
++	dep_meat_raw = "animalmaterials:meat_raw"
++end
++
++if not dep_meat_raw then
++	-- raw meat
++	minetest.register_craftitem("mobs:meat_raw", {
++		description = S("Raw Meat"),
++		inventory_image = "mobs_meat_raw.png",
++		on_use = minetest.item_eat(3),
++		groups = {food_meat_raw = 1, flammable = 2},
++	})
++else
++	minetest.register_alias("mobs:meat_raw", dep_meat_raw)
++end
++
++local dep_meat_cooked = nil
++if minetest.registered_items["cooking:meat_cooked"] then
++	dep_meat_cooked = "cooking:meat_cooked"
++end
++
++if not dep_meat_cooked then
++	-- cooked meat
++	minetest.register_craftitem("mobs:meat", {
++		description = S("Meat"),
++		inventory_image = "mobs_meat.png",
++		on_use = minetest.item_eat(8),
++		groups = {food_meat = 1, flammable = 2},
++	})
++else
++	minetest.register_alias("mobs:meat", dep_meat_cooked)
++end
+ 
+ minetest.register_craft({
+ 	type = "cooking",
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/mobs: textures
+diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/whinny/init.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/whinny/init.lua
+--- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/whinny/init.lua	2021-11-17 12:42:28.099985098 -0500
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/whinny/init.lua	2021-11-17 12:42:55.055985777 -0500
+@@ -2,13 +2,13 @@
+ dofile (minetest.get_modpath ("whinny").."/horse.lua" )
+ 
+ minetest.register_craftitem ("whinny:meat", {
+-    description = "Cooked Meat",
++    description = "Cooked Horsemeat",
+     inventory_image = "whinny_meat.png",
+     on_use = minetest.item_eat(4),
+ })
+ 
+ minetest.register_craftitem ("whinny:meat_raw", {
+-    description = "Raw Meat",
++    description = "Raw Horsemeat",
+     inventory_image = "whinny_meat_raw.png",
+ })
+ 
+diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/whinny/LICENSE Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/whinny/LICENSE
+--- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/whinny/LICENSE	2021-11-17 12:42:28.735985114 -0500
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/whinny/LICENSE	2021-11-18 18:39:40.574700689 -0500
+@@ -5,6 +5,8 @@
+ Copyright (c) 2014 Krupnov Pavel -- bugs, kpgmobs, pmobs
+ Copyright (c) 2014 Krupnov Pavel and 2016 TenPlus1 -- mobs_animal
+ Copyright (c) 2016 TenPlus1 -- mobs_monster and mobs_npc
++Copyright (c) 2021 Poikilos -- whinny meats (redone from scratch at 32x32)
++
+ 
+ Permission is hereby granted,  free of charge, to any person obtaining
+ a  copy  of  this  software  and  associated  documentation files (the
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/whinny: projects
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/whinny: textures
