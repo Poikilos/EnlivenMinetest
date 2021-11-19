@@ -76,9 +76,16 @@ local msname_egg_fried_img  = msname_egg_fried .. ".png"
 local msname_egg_img        = msname_egg       .. ".png"
 
 local obj_name_cooked       = obj_name         .. "_cooked"
+
 -- local obj_name_raw          = obj_name         .. "_raw"
--- ^ formerly codermobs:ostrich_raw (dup of animal_materials, see alias below)
-local obj_name_raw          = ":animal_materials:meat_ostrich"
+-- ^ formerly codermobs:ostrich_raw (It is a dup of the one in
+--   animal_materials.lua or animalmaterials/init.lua.
+--   See the alias further down.)
+local global_obj_name_raw          = "animal_materials:meat_ostrich"
+local obj_name_raw          = ":" .. global_obj_name_raw
+if not minetest.get_modpath("animalmaterials") then
+    obj_name_raw = ":animalmaterials:meat_ostrich"
+end
 
 local obj_name_egg          = obj_name         .. "_egg"
 local obj_name_egg_entity   = obj_name_egg     .. "_entity"
@@ -324,7 +331,8 @@ minetest.register_craft ({
 
 -- ===================================================================
 -- Raw bird.
-if not minetest.registered_items[obj_name_raw] then
+if not minetest.registered_items[global_obj_name_raw] then
+    minetest.log("warning", "ostrich.lua is registering a new "..global_obj_name_raw)
     minetest.register_craftitem (obj_name_raw, {
         description     = "Raw " .. ucname ,
         inventory_image = msname_raw_img   ,
@@ -351,6 +359,8 @@ minetest.register_alias("codermobs:ostrich_raw", "animal_materials:meat_ostrich"
 -- - cooked versions are in the cooking namespace
 --   - but cooking doesn't have ostrich
 
+-- minetest.log("action", "ostrich.lua is registering a new "..obj_name_cooked)
+
 minetest.register_craftitem (obj_name_cooked, {
     description     = "Cooked " .. ucname ,
     inventory_image = msname_cooked_img   ,
@@ -359,7 +369,7 @@ minetest.register_craftitem (obj_name_cooked, {
 
 minetest.register_craft ({
     type   = "cooking"          ,
-    recipe = obj_name_raw       ,
+    recipe = global_obj_name_raw,
     output = obj_name_cooked    ,
 })
 

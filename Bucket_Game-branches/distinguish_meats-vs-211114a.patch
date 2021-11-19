@@ -195,6 +195,7 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/
      image = "animal_materials_egg_big.png",
      stack_max=5
  })
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs: animal_materials_overrides.lua
 diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/depends.txt Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/depends.txt
 --- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/depends.txt	2021-11-19 08:58:50.603998895 -0500
 +++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/depends.txt	2021-11-19 08:59:12.507999446 -0500
@@ -283,23 +284,27 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/
      type   = "cooking"          ,
 diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/init.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/init.lua
 --- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/init.lua	2021-11-19 10:08:28.704104114 -0500
-+++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/init.lua	2021-11-19 10:17:43.868118095 -0500
-@@ -74,8 +74,22 @@
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/init.lua	2021-11-19 11:27:37.788223712 -0500
+@@ -73,11 +73,30 @@
+ dofile (mp .. "/globals.lua" )
  dofile (mp .. "/util.lua"    )
  
++
++local enable_animal_materials =  lua_exists("animal_materials")
  -- This is an object as opposed to a mob
 -if  lua_exists    ("animal_materials"       ) then
 -    dofile (mp .. "/animal_materials.lua"   )
 +if not minetest.get_modpath("animalmaterials") then
 +    -- ^ another way is: if not minetest.registered_items["animalmaterials:meat_raw"] then
-+    if  lua_exists    ("animal_materials"       ) then
++    if  enable_animal_materials then
 +        dofile (mp .. "/animal_materials.lua"   )
 +    end
 +else
 +    -- Someone added the animalmaterials mod in this case,
 +    -- so only create aliases:
-+    if  lua_exists    ("animal_materials"       ) then
-+        -- ^ check for the main file only, since OldCoder may
++    if  enable_animal_materials then
++        -- ^ Only consider the presence of themain file
++        --   (animal_materials.lua), since OldCoder may
 +        --   have added that condition further up in order to
 +        --   exclude the animal_materials namespace in
 +        --   differently-packaged copies of bucket_game.
@@ -308,7 +313,11 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/
 +    end
  end
  
++dofile (mp .. "/animal_materials_overrides.lua"   )
++
  -- This is an object as opposed to a mob
+ if  lua_exists    ("vombie_flame"           ) then
+     dofile (mp .. "/vombie_flame.lua"       )
 diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE
 --- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE	2021-11-19 10:08:28.836104117 -0500
 +++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE	2021-11-18 18:58:21.410728915 -0500
@@ -382,8 +391,8 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/
  
 diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/ostrich.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/ostrich.lua
 --- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/ostrich.lua	2021-11-18 10:37:47.357972555 -0500
-+++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/ostrich.lua	2021-11-18 16:14:55.810481977 -0500
-@@ -55,25 +55,30 @@
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/ostrich.lua	2021-11-19 12:22:10.444306129 -0500
+@@ -55,25 +55,37 @@
  
  -- ===================================================================
  
@@ -414,17 +423,25 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/
  
  local obj_name_cooked       = obj_name         .. "_cooked"
 -local obj_name_raw          = obj_name         .. "_raw"
++
 +-- local obj_name_raw          = obj_name         .. "_raw"
-+-- ^ formerly codermobs:ostrich_raw (dup of animal_materials, see alias below)
-+local obj_name_raw          = ":animal_materials:meat_ostrich"
++-- ^ formerly codermobs:ostrich_raw (It is a dup of the one in
++--   animal_materials.lua or animalmaterials/init.lua.
++--   See the alias further down.)
++local global_obj_name_raw          = "animal_materials:meat_ostrich"
++local obj_name_raw          = ":" .. global_obj_name_raw
++if not minetest.get_modpath("animalmaterials") then
++    obj_name_raw = ":animalmaterials:meat_ostrich"
++end
  
  local obj_name_egg          = obj_name         .. "_egg"
  local obj_name_egg_entity   = obj_name_egg     .. "_entity"
-@@ -319,22 +324,33 @@
+@@ -319,22 +331,36 @@
  
  -- ===================================================================
  -- Raw bird.
-+if not minetest.registered_items[obj_name_raw] then
++if not minetest.registered_items[global_obj_name_raw] then
++    minetest.log("warning", "ostrich.lua is registering a new "..global_obj_name_raw)
 +    minetest.register_craftitem (obj_name_raw, {
 +        description     = "Raw " .. ucname ,
 +        inventory_image = msname_raw_img   ,
@@ -462,9 +479,20 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/
 +-- - cooked versions are in the cooking namespace
 +--   - but cooking doesn't have ostrich
 +
++-- minetest.log("action", "ostrich.lua is registering a new "..obj_name_cooked)
++
  minetest.register_craftitem (obj_name_cooked, {
      description     = "Cooked " .. ucname ,
      inventory_image = msname_cooked_img   ,
+@@ -343,7 +369,7 @@
+ 
+ minetest.register_craft ({
+     type   = "cooking"          ,
+-    recipe = obj_name_raw       ,
++    recipe = global_obj_name_raw,
+     output = obj_name_cooked    ,
+ })
+ 
 Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs: projects
 diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/rat_better.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/rat_better.lua
 --- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/rat_better.lua	2021-11-17 12:50:29.763997228 -0500

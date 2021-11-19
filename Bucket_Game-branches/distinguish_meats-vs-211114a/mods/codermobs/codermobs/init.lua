@@ -73,17 +73,20 @@ local     textu_exists = codermobs.textu_exists
 dofile (mp .. "/globals.lua" )
 dofile (mp .. "/util.lua"    )
 
+
+local enable_animal_materials =  lua_exists("animal_materials")
 -- This is an object as opposed to a mob
 if not minetest.get_modpath("animalmaterials") then
     -- ^ another way is: if not minetest.registered_items["animalmaterials:meat_raw"] then
-    if  lua_exists    ("animal_materials"       ) then
+    if  enable_animal_materials then
         dofile (mp .. "/animal_materials.lua"   )
     end
 else
     -- Someone added the animalmaterials mod in this case,
     -- so only create aliases:
-    if  lua_exists    ("animal_materials"       ) then
-        -- ^ check for the main file only, since OldCoder may
+    if  enable_animal_materials then
+        -- ^ Only consider the presence of themain file
+        --   (animal_materials.lua), since OldCoder may
         --   have added that condition further up in order to
         --   exclude the animal_materials namespace in
         --   differently-packaged copies of bucket_game.
@@ -91,6 +94,8 @@ else
         dofile (mp .. "/animal_materials_aliases.lua"   )
     end
 end
+
+dofile (mp .. "/animal_materials_overrides.lua"   )
 
 -- This is an object as opposed to a mob
 if  lua_exists    ("vombie_flame"           ) then
