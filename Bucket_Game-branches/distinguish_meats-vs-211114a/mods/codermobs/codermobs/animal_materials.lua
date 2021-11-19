@@ -125,8 +125,6 @@ end
 local dep_pork_raw = nil
 if minetest.registered_items["mobs:pork_raw"] then
     dep_pork_raw = "mobs:pork_raw"
-elseif minetest.registered_items["animalmaterials:meat_pork"] then
-    dep_pork_raw = "animalmaterials:meat_pork"
 end
 
 if not dep_pork_raw then
@@ -144,162 +142,72 @@ else
     minetest.register_alias("animal_materials:meat_pork", dep_pork_raw)
 end
 
-local dep_beef_raw = nil
-if minetest.registered_items["animalmaterials:meat_beef"] then
-    dep_beef_raw = "animalmaterials:meat_beef"
-end
-if not dep_beef_raw then
-    minetest.register_craftitem(":animal_materials:meat_beef", {
-        description = S("Raw Beef"),
-        image = "codermobs_beef_raw.png",
-        on_use = minetest.item_eat(1),
-        groups = { meat=1, eatable=1 },
-        stack_max=25
-    })
-else
-    minetest.register_alias("animal_materials:meat_beef", dep_beef_raw)
-end
+minetest.register_craftitem(":animal_materials:meat_beef", {
+    description = S("Raw Beef"),
+    image = "codermobs_beef_raw.png",
+    on_use = minetest.item_eat(1),
+    groups = { meat=1, eatable=1 },
+    stack_max=25
+})
 
-local dep_chicken_raw = nil
-if minetest.registered_items["animalmaterials:meat_chicken"] then
-    dep_chicken_raw = "animalmaterials:meat_chicken"
-end
+minetest.register_craftitem(":animal_materials:meat_lamb", {
+    description = S("Raw Lamb"),
+    image = "codermobs_lamb_raw.png",
+    on_use = minetest.item_eat(1),
+    groups = { meat=1, eatable=1 },
+    stack_max=25
+})
 
-if not dep_chicken_raw then
-    minetest.register_craftitem(":animal_materials:meat_chicken", {
-        description = S("Raw Chicken"),
-        image = "codermobs_chicken_raw.png",
-        on_use = minetest.item_eat(1),
-        groups = { meat=1, eatable=1 },
-        stack_max=25
-    })
-else
-    minetest.register_alias("animalmaterials:meat_chicken", dep_chicken_raw)
-    -- ^ The alias is only necessary for older versions of bucket_game--
-    --   as long as new ones always use the latter craftitem everywhere else,
-    --   they don't need the alias for any other reason.
-end
+minetest.register_craftitem(":animal_materials:meat_venison", {
+    description = S("Raw Venison"),
+    image = "codermobs_venison_raw.png",
+    on_use = minetest.item_eat(1),
+    groups = { meat=1, eatable=1 },
+    stack_max=25
+})
 
-local dep_lamb_raw = nil
-if minetest.registered_items["animalmaterials:meat_lamb"] then
-    dep_lamb_raw = "animalmaterials:meat_lamb"
-end
+minetest.register_craftitem(":animal_materials:meat_undead", {
+    description = S("Meat (not quite dead)"),
+    image = "animal_materials_meat_undead_raw.png",
+    on_use = minetest.item_eat(-2),
+    groups = { meat=1, eatable=1 },
+    stack_max=5
+})
 
-if not dep_lamb_raw then
-    minetest.register_craftitem(":animal_materials:meat_lamb", {
-        description = S("Raw Lamb"),
-        image = "codermobs_lamb_raw.png",
-        on_use = minetest.item_eat(1),
-        groups = { meat=1, eatable=1 },
-        stack_max=25
-    })
-else
-    minetest.register_alias("animal_materials:meat_lamb", dep_lamb_raw)
-end
+minetest.register_craftitem(":animal_materials:meat_toxic", {
+    description = S("Toxic Meat"),
+    image = "animal_materials_meat_toxic_raw.png",
+    on_use = minetest.item_eat(-5),
+    groups = { meat=1, eatable=1 },
+    stack_max=5
+})
 
-local dep_venison_raw = nil
-if minetest.registered_items["animalmaterials:meat_venison"] then
-    dep_venison_raw = "animalmaterials:meat_venison"
-end
+minetest.register_craftitem(":animal_materials:meat_ostrich", {
+    description = S("Raw Ostrich"),
+    image = "animal_materials_ostrich_meat_raw.png",
+    on_use = minetest.item_eat(3),
+    groups = { food_meat_raw = 1, meat=1, eatable=1 },
+    stack_max=5
+})
 
-if not dep_venison_raw then
-    minetest.register_craftitem(":animal_materials:meat_venison", {
-        description = S("Raw Venison"),
-        image = "codermobs_venison_raw.png",
-        on_use = minetest.item_eat(1),
-        groups = { meat=1, eatable=1 },
-        stack_max=25
-    })
-else
-    minetest.register_alias("animal_materials:meat_venison", dep_venison_raw)
-end
+-- animal_materials:pork_raw is an alias now (to fix an upstream dup in
+-- animalmaterials)--see register_alias further up.
 
-local dep_undead_raw = nil
-if minetest.registered_items["animalmaterials:meat_undead"] then
-    dep_undead_raw = "animalmaterials:meat_undead"
-end
+minetest.register_craftitem(":animal_materials:fish_bluewhite", {
+    description = S("Raw Fish (cichlid)"),
+    image = "animal_materials_bluewhite_raw.png",
+    on_use = minetest.item_eat(1),
+    groups = { meat=1, eatable=1 },
+    stack_max=25
+})
 
-if not dep_undead_raw then
-    minetest.register_craftitem(":animal_materials:meat_undead", {
-        description = S("Meat (not quite dead)"),
-        image = "animal_materials_meat_undead_raw.png",
-        on_use = minetest.item_eat(-2),
-        groups = { meat=1, eatable=1 },
-        stack_max=5
-    })
-else
-    minetest.register_alias("animal_materials:meat_undead", dep_undead_raw)
-end
-
-
-local dep_toxic_raw = nil
-if minetest.registered_items["animalmaterials:meat_toxic"] then
-    dep_toxic_raw = "animalmaterials:meat_toxic"
-end
-
-if not dep_toxic_raw then
-    minetest.register_craftitem(":animal_materials:meat_toxic", {
-        description = S("Toxic Meat"),
-        image = "animal_materials_meat_toxic_raw.png",
-        on_use = minetest.item_eat(-5),
-        groups = { meat=1, eatable=1 },
-        stack_max=5
-    })
-else
-    minetest.register_alias("animal_materials:meat_toxic", dep_toxic_raw)
-end
-
-local dep_ostrich_raw = nil
-if minetest.registered_items["animalmaterials:meat_ostrich"] then
-    dep_ostrich_raw = "animalmaterials:meat_ostrich"
-end
-
-if not dep_ostrich_raw then
-  minetest.register_craftitem(":animal_materials:meat_ostrich", {
-      description = S("Raw Ostrich"),
-      image = "animal_materials_ostrich_meat_raw.png",
-      on_use = minetest.item_eat(3),
-      groups = { food_meat_raw = 1, meat=1, eatable=1 },
-      stack_max=5
-  })
-else
-    minetest.register_alias("animal_materials:meat_ostrich", dep_ostrich_raw)
-end
-
-
-local dep_bluewhite_raw = nil
-if minetest.registered_items["animalmaterials:fish_bluewhite"] then
-    dep_bluewhite_raw = "animalmaterials:fish_bluewhite"
-end
-
-if not dep_bluewhite_raw then
-    minetest.register_craftitem(":animal_materials:fish_bluewhite", {
-        description = S("Raw Fish (cichlid)"),
-        image = "animal_materials_bluewhite_raw.png",
-        on_use = minetest.item_eat(1),
-        groups = { meat=1, eatable=1 },
-        stack_max=25
-    })
-else
-    minetest.register_alias("animal_materials:fish_bluewhite", dep_bluewhite_raw)
-end
-
-local dep_clownfish_raw = nil
-if minetest.registered_items["animalmaterials:fish_clownfish"] then
-    dep_clownfish_raw = "animalmaterials:fish_clownfish"
-end
-
-if not dep_clownfish_raw then
-    minetest.register_craftitem(":animal_materials:fish_clownfish", {
-        description = S("Raw Fish (clownfish)"),
-        image = "animal_materials_clownfish_raw.png",
-        on_use = minetest.item_eat(1),
-        groups = { meat=1, eatable=1 },
-        stack_max=25
-    })
-else
-    minetest.register_alias("animal_materials:fish_clownfish", dep_clownfish_raw)
-end
+minetest.register_craftitem(":animal_materials:fish_clownfish", {
+    description = S("Raw Fish (clownfish)"),
+    image = "animal_materials_clownfish_raw.png",
+    on_use = minetest.item_eat(1),
+    groups = { meat=1, eatable=1 },
+    stack_max=25
+})
 
 -- ===================================================================
 -- feather
