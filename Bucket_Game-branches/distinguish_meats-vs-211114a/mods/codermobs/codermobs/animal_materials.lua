@@ -20,7 +20,7 @@ else
   S = function ( s ) return s end
 end
 
-core.log("action","MOD: codermobs integrated animal_materials loading ...")
+core.log("action","MOD: codermobs integrated animal_materials loading (no animalmaterials mod is loaded)...")
 local version = "0.1.3"
 
 animal_materialsdata = {}
@@ -106,8 +106,8 @@ minetest.register_craftitem(":animal_materials:contract", {
 local dep_meat_raw = nil
 if minetest.registered_items["mobs:meat"] then
     dep_meat_raw = "mobs:meat"
-elseif minetest.registered_items["animalmaterials:meat"] then
-    dep_meat_raw = "animalmaterials:meat"
+elseif minetest.registered_items["animalmaterials:meat_raw"] then
+    dep_meat_raw = "animalmaterials:meat_raw"
 end
 
 if not dep_meat_raw then

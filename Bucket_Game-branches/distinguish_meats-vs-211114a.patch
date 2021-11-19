@@ -38,15 +38,16 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/coderfood/unified_fo
              "mobfcooking:cooked_lamb" , "mobfcooking:cooked_venison" ,
          } ,
 Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/coderfood/unified_foods: textures
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs: animal_materials_aliases.lua
 diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/animal_materials.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/animal_materials.lua
 --- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/animal_materials.lua	2021-11-15 13:20:43.119691199 -0500
-+++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/animal_materials.lua	2021-11-19 09:33:30.208051266 -0500
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/animal_materials.lua	2021-11-19 10:27:04.584132215 -0500
 @@ -20,7 +20,7 @@
    S = function ( s ) return s end
  end
  
 -core.log("action","MOD: animal_materials loading ...")
-+core.log("action","MOD: codermobs integrated animal_materials loading ...")
++core.log("action","MOD: codermobs integrated animal_materials loading (no animalmaterials mod is loaded)...")
  local version = "0.1.3"
  
  animal_materialsdata = {}
@@ -64,8 +65,8 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/
 +local dep_meat_raw = nil
 +if minetest.registered_items["mobs:meat"] then
 +    dep_meat_raw = "mobs:meat"
-+elseif minetest.registered_items["animalmaterials:meat"] then
-+    dep_meat_raw = "animalmaterials:meat"
++elseif minetest.registered_items["animalmaterials:meat_raw"] then
++    dep_meat_raw = "animalmaterials:meat_raw"
 +end
  
 -minetest.register_craftitem(":animal_materials:meat_pork", {
@@ -433,8 +434,36 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/
  
  minetest.register_craft ({
      type   = "cooking"          ,
+diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/init.lua Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/init.lua
+--- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/init.lua	2021-11-19 10:08:28.704104114 -0500
++++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/init.lua	2021-11-19 10:17:43.868118095 -0500
+@@ -74,8 +74,22 @@
+ dofile (mp .. "/util.lua"    )
+ 
+ -- This is an object as opposed to a mob
+-if  lua_exists    ("animal_materials"       ) then
+-    dofile (mp .. "/animal_materials.lua"   )
++if not minetest.get_modpath("animalmaterials") then
++    -- ^ another way is: if not minetest.registered_items["animalmaterials:meat_raw"] then
++    if  lua_exists    ("animal_materials"       ) then
++        dofile (mp .. "/animal_materials.lua"   )
++    end
++else
++    -- Someone added the animalmaterials mod in this case,
++    -- so only create aliases:
++    if  lua_exists    ("animal_materials"       ) then
++        -- ^ check for the main file only, since OldCoder may
++        --   have added that condition further up in order to
++        --   exclude the animal_materials namespace in
++        --   differently-packaged copies of bucket_game.
++        --   -Poikilos (distinguish_meats-vs-211114a patch) 
++        dofile (mp .. "/animal_materials_aliases.lua"   )
++    end
+ end
+ 
+ -- This is an object as opposed to a mob
 diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE
---- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE	2021-11-19 08:58:50.659998896 -0500
+--- Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE	2021-11-19 10:08:28.836104117 -0500
 +++ Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/LICENSE	2021-11-18 18:58:21.410728915 -0500
 @@ -36,13 +36,34 @@
  Additional meats:
@@ -605,6 +634,7 @@ diff -ru Bucket_Game-base/distinguish_meats-vs-211114a/mods/codermobs/codermobs/
 Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: animal_materials_bluewhite_raw.png
 Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: animal_materials_clownfish_raw.png
 Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: animal_materials_egg_big.png
+Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: animal_materials_egg.png
 Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: animal_materials_meat_raw.png
 Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: animal_materials_meat_toxic_raw.png
 Only in Bucket_Game-branches/distinguish_meats-vs-211114a/mods/codermobs/codermobs/textures: animal_materials_meat_undead_raw.png
