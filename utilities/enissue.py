@@ -165,6 +165,11 @@ def usage():
                 print(" "*(left_w+len(spacer)+2) + "./" + me + s)
         print("")
         print("")
+    print("")
+    print("Options:")
+    print("--cache-base <dir>   Set the directory for cached files.")
+    print("--verbose            Enable verbose mode.")
+    print("--debug              Enable verbose mode (same as --debug).")
 
 
 class Repo:
@@ -173,9 +178,6 @@ class Repo:
         profile = os.environ['USERPROFILE']
     else:
         profile = os.environ['HOME']
-
-    caches_path = os.path.join(profile, ".cache", "enissue")
-
 
     def __init__(
             self,
@@ -191,6 +193,7 @@ class Repo:
             c_issue_name_fmt = "{issue_no}.json",
             default_query = {'state':'open'},
             hide_events = ['renamed', 'assigned'],
+            caches_path=None,
         ):
         '''
         Keyword arguments:
@@ -218,16 +221,25 @@ class Repo:
         search_results_key -- If the URL described by
             search_issues_url_fmt returns a dict, specify the key in
             the dict that is a list of issues.
+        caches_path -- Store cached json files here: Specifically, in an
+            "issues" directory or other directory under the user and
+            repo directory. For example, if caches_path is None and uses
+            the default ~/.cache/enissue, the numbered json files
+            (and numbered folders containing timeline.json or other
+            connected data) for issues will appear in
+            "~/.cache/enissue/poikilos/EnlivenMinetest/issues". To set
+            it later, use the setCachesPath method.
         '''
-        self.search_results_key = search_results_key
-        self.page = None
+        if caches_path is None:
+            caches_path = os.path.join(Repo.profile, ".cache",
+                                       "enissue")
         self.remote_user = remote_user
         self.repo_name = repo_name
+        self.setCachesPath(caches_path)
+
+        self.search_results_key = search_results_key
+        self.page = None
         self.repository_id = repository_id
-        self.c_remote_user_path = os.path.join(Repo.caches_path,
-                                               self.remote_user)
-        self.c_repo_path = os.path.join(self.c_remote_user_path,
-                                        self.repo_name)
         self.c_issue_name_fmt = c_issue_name_fmt
         self.api_repo_url_fmt = api_repo_url_fmt
         self.api_issue_url_fmt = api_issue_url_fmt
@@ -250,6 +262,19 @@ class Repo:
         self.default_query = default_query
         self.hide_events = hide_events
         self.issues = None
+
+    def setCachesPath(self, caches_path):
+        '''
+        This directory will contain <remote_user>/<repo_name>/
+        which will contain issues/ and potentially other directories
+        that mimic the API web URL structure (See _get_issues code for
+        subdirectories and files).
+        '''
+        self.caches_path = caches_path
+        self.c_remote_user_path = os.path.join(self.caches_path,
+                                               self.remote_user)
+        self.c_repo_path = os.path.join(self.c_remote_user_path,
+                                        self.repo_name)
 
     def _get_issues(self, options, query=None, issue_no=None,
                     search_terms=[]):
@@ -424,7 +449,7 @@ class Repo:
                     results = [result]
                 for issue in results:
                     issue_n = issue.get("number")
-                    debug("issue_n: {}".format(issue_n))
+                    # debug("issue_n: {}".format(issue_n))
                     if issue_n is not None:
                         if (max_issue is None) or (issue_n > max_issue):
                             max_issue = issue_n
@@ -482,7 +507,7 @@ class Repo:
     def getCachedJsonDict(self, url, refresh=False):
         '''
         This gets the cached page using the cache location
-        cache directory specified in Repo.caches_path and further
+        cache directory specified in self.caches_path and further
         narrowed down to self.c_repo_path then narrowed down using the
         URL. For example, https://api.github.com/repos/poikilos/EnlivenMinetest/issues?q=page:1
 
@@ -942,6 +967,7 @@ def main():
     options = {}
     search_terms = []
     SEARCH_COMMANDS = ['find', 'AND']
+    caches_path = None
     for i in range(1, len(sys.argv)):
         arg = sys.argv[i]
         isValue = False
@@ -991,6 +1017,9 @@ def main():
                     elif arg == "--help":
                         usage()
                         exit(0)
+                    elif arg == "--cache-base":
+                        pass
+                        # options['caches_path'] = None
                     elif arg.startswith("--"):
                         usage()
                         error("Error: The argument \"{}\" is not valid"
@@ -999,6 +1028,8 @@ def main():
                     elif prev_arg in SEARCH_COMMANDS:
                         search_terms.append(arg)
                         isValue = True
+                    elif prev_arg == "--cache-base":
+                        caches_path = arg
                     elif arg == "find":
                         # print("* adding criteria: {}".format(arg))
                         mode = "list"
@@ -1057,6 +1088,10 @@ def main():
             sys.exit(1)
 
     print("")
+    if caches_path is not None:
+        repo.setCachesPath(caches_path)
+        debug("The cache is now at {}"
+              "".format(repo.c_repo_path))
     # print("Loading...")
 
     # TODO: get labels another way, and make this conditional:
