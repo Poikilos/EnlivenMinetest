@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+'''
+Purpose: View and cache issues in the EnlivenMinetest repo.
+Author: 2020-2021 Jake Gustafson
+License: See license file at https://github.com/poikilos/EnlivenMinetest
+
+This script caches issues (To
+~/.cache/enissue/poikilos/EnlivenMinetest/issues
+by default).
+'''
 from __future__ import print_function
 import sys
 import json
@@ -78,6 +87,7 @@ modes = {
         "examples": [" labels"]
     },
     "find": {
+        "parent": "list",
         "help": ("To search using a keyword, say \"find\" or \"AND\""
                  " before each term."),
         "examples": [
@@ -96,7 +106,8 @@ modes = {
         ],
         "AND_EXAMPLES": [6, 7],  # indices in ['find']['examples'] list
     },
-    "closed or open": {
+    "open": {
+        "parent": "list",
         "help": ("Only show a closed issue, or show closed & open"
                  " (The default is open issues only)"),
         "examples": [
@@ -107,6 +118,7 @@ modes = {
         ]
     },
     "page": {
+        "parent": "list",
         "help": ("GitHub only lists 30 issues at a time. Type page"
                  " followed by a number to see additional pages."),
         "examples": [" page 2", " page 2 --closed"]
@@ -116,6 +128,10 @@ modes = {
         "examples": [" 1"]
     },
 }
+# ^ The parent mode is the actual operating mode whereas the submodes
+#   are only for documenting the keywords that apply to the parent mode.
+modes["closed"] = modes["open"]
+
 match_all_labels = []
 
 
@@ -250,10 +266,15 @@ class Repo:
         This method is used internally by load_issues and the result is
         placed in self.issues.
 
+        The consumer of this method must manually filter by label! The
+        page is cached regardless of label(s) because the page is the
+        same unless there is a query.
+
         Sequential arguments:
         options -- This dictionary where all keys are optional may have:
             - 'refresh': Set to True to refresh the cache (load the data
               from the internet and re-save the cached data).
+
 
         Keyword arguments:
         query -- Place keys & values in this dictionary directly into
@@ -264,10 +285,16 @@ class Repo:
             None when using issue_no or a ValueError is raised.
         search_terms -- Search for each of these terms.
 
+
         Raises:
         ValueError if query is not None and issue_no is not None.
 
         '''
+        debug("get_issues...")
+        debug("  options={}".format(options))
+        debug("  query={}".format(query))
+        debug("  issue_no={}".format(issue_no))
+        debug("  search_terms={}".format(search_terms))
         p = self.log_prefix
         searchTermStr = ""
         if search_terms is None:
@@ -297,11 +324,11 @@ class Repo:
                     #
                     # <https://stackoverflow.com/a/5607708/4541104>:
             '''
-            query_part = urlencode(query)
+            query_part = urlencode(query)  # urlencode takes a dict
             and_query_part = "&" + query_part
             and_query_part += searchTermStr
         elif len(searchTermStr) > 0:
-            debug(p+"searchTermStr=\"{}\"".format(searchTermStr))
+            debug("  searchTermStr=\"{}\"".format(searchTermStr))
             and_query_part = "&" + "q=" + searchTermStr
             # NOTE: using urlencode(searchTermStr) causes
             #  "TypeError: not a valid non-string sequence or mapping
@@ -309,6 +336,7 @@ class Repo:
             # - It should already be formed correctly by
             #   toSubQueryValue anyway, so don't filter it here.
 
+        debug("  and_query_part:{}".format(and_query_part))
         if self.page is not None:
             this_page = self.page
         c_issues_name = self.c_issues_name_fmt.format(p=this_page,
@@ -343,8 +371,24 @@ class Repo:
                     query_s += "?q=" + searchTermStr
                 else:
                     query_s += searchTermStr
-                debug("Changing query_s from {} to {}"
+                debug("  changing query_s from {} to {}"
                       "".format(prev_query_s, query_s))
+                debug("  (issues will be set to the content of the {}"
+                      " element)".format(results_key))
+
+        # Labels are NOT in the URL, but filtered later (See docstring).
+
+        if self.page is not None:
+            query_s = self.issues_url + "?page=" + str(self.page)
+            query_s += and_query_part
+            debug("  appended page query_part={} (c_path={})"
+                  "".format(query_part, c_path))
+        elif len(query_part) > 0:
+            query_s += "?" + query_part
+            debug("  appended custom query_part={} (c_path={})"
+                  "".format(query_part, c_path))
+        else:
+            debug("  There was no custom query.")
 
 
         if os.path.isfile(c_path):
@@ -357,7 +401,8 @@ class Repo:
 
             if (refresh is not True) and (filetime > cache_delta):
                 print(p+"Loading cache: \"{}\"".format(c_path))
-                # print(p+"Cache time limit: {}".format(max_cache_delta)
+                debug(p+"Cache time limit: {}".format(max_cache_delta))
+                debug(p+"  for URL: {}".format(query_s))
                 print(p+"Cache expires: {}".format(filetime
                                                    + max_cache_delta))
                 with open(c_path) as json_file:
@@ -366,17 +411,27 @@ class Repo:
                 #       " {} issue(s).".format(len(results)))
                 max_issue = None
                 results = result
+                if results_key is not None:
+                    if hasattr(results, results_key):
+                        debug("  loaded result[{}]"
+                              "".format(results_key))
+                        results = results[results_key]
+                    else:
+                        error("WARNING: expected {} in dict"
+                              "".format(results_key))
                 if hasattr(results, 'keys'):
-                    # It is an issue not a page, so convert to list:
+                    debug("  issue not page: converting to list")
                     results = [result]
                 for issue in results:
                     issue_n = issue.get("number")
+                    debug("issue_n: {}".format(issue_n))
                     if issue_n is not None:
                         if (max_issue is None) or (issue_n > max_issue):
                             max_issue = issue_n
-                print(p+"The highest cached issue# is {}.".format(
+                print("  The highest cached issue# is {}.".format(
                     max_issue
                 ))
+                debug("  returning {} issue(s)".format(len(results)))
                 return results
             else:
                 if refresh is True:
@@ -391,11 +446,6 @@ class Repo:
                 c_path
             ))
 
-        if self.page is not None:
-            query_s = self.issues_url + "?page=" + str(self.page)
-            query_s += and_query_part
-        elif len(query_part) > 0:
-            query_s += "?" + query_part
         try:
             debug(p+"Query URL (query_s): {}".format(query_s))
             response = request.urlopen(query_s)
@@ -790,6 +840,7 @@ class Repo:
         '''
         See _get_issues for documentation.
         '''
+        debug("load_issues...")
         if issue_no is not None:
             if query is not None:
                 raise ValueError("You cannot do a query when getting"
@@ -825,6 +876,16 @@ class Repo:
         # if mode == "list":
         for issue in self.issues:
             this_issue_labels_lower = []
+            try:
+                labels = issue["labels"]
+            except KeyError as ex:
+                dumpPath = os.path.join(Repo.profile,
+                                        "dump-issues.json")
+                with open(dumpPath, 'w') as outs:
+                    json.dump(self.issues, outs, indent=2)
+                print("Error: dumped self.issues as {}"
+                      "".format(dumpPath))
+                raise ex
             for label in issue["labels"]:
                 self.label_ids.append(label["id"])
                 if label["url"].startswith(self.labels_url):
@@ -890,8 +951,9 @@ def main():
             # don't set the command to list unless the enclosing case is
             # true. If a label was specified, paging is handled in the
             # other case.
-            if arg == "page":
-                mode = "list"
+            parent = modes[arg].get('parent')
+            if parent is not None:
+                mode = parent
             else:
                 mode = arg
         else:
@@ -1005,9 +1067,11 @@ def main():
         }
         repo.load_issues(options, query=query,
                          search_terms=search_terms)
+        debug("* done load_issues for list")
     else:
         repo.load_issues(options, issue_no=issue_no,
                          search_terms=search_terms)
+        debug("* done load_issues for single issue")
 
     if repo.issues is None:
         print("There were no issues.")
@@ -1118,6 +1182,8 @@ def main():
                 print("To view details, type")
                 print("    ./" + me)
                 print("followed by a number.")
+    else:
+        debug("There is no summary output due to mode={}".format(mode))
     print("")
 
 
