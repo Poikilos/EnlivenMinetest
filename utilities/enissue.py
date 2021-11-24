@@ -3,6 +3,7 @@ from __future__ import print_function
 import sys
 import json
 import os
+import platform
 from datetime import datetime, timedelta
 python_mr = sys.version_info.major
 try:
@@ -55,7 +56,6 @@ def decode_safe(b):
     except UnicodeDecodeError:
         s = b.decode('utf-8')
     return s
-
 
 
 # me = sys.argv[0]
@@ -152,8 +152,14 @@ def usage():
 
 
 class Repo:
+    profile = None
+    if platform.system() == "Windows":
+        profile = os.environ['USERPROFILE']
+    else:
+        profile = os.environ['HOME']
 
-    caches_path = "/tmp/enissue"
+    caches_path = os.path.join(profile, ".cache", "enissue")
+
 
     def __init__(
             self,
@@ -166,7 +172,7 @@ class Repo:
             search_results_key="items",
             page_size = 30,
             c_issues_name_fmt = "issues_page={p}{q}.json",
-            c_issue_name_fmt = "issues_{issue_no}.json",
+            c_issue_name_fmt = "{issue_no}.json",
             default_query = {'state':'open'},
             hide_events = ['renamed', 'assigned'],
         ):
@@ -246,23 +252,16 @@ class Repo:
 
         Sequential arguments:
         options -- This dictionary where all keys are optional may have:
-        - 'refresh': Set to True to refresh the cache (load the data
-          from the internet and re-save the cached data).
+            - 'refresh': Set to True to refresh the cache (load the data
+              from the internet and re-save the cached data).
 
         Keyword arguments:
         query -- Place keys & values in this dictionary directly into
-                 the query part of the URL.
+            the query part of the URL.
         issue_no -- Match an exact issue number and convert the
-                    resulting json object into a list so it behaves
-                    like a list of matches (containing only 1
-                    though). The query must be None when using
-                    issue_no or a ValueError is raised.
-
-
-
-        Keyword arguments:
-        query -- Use keys & values in this dictionary to the URL query.
-        issue_no -- Load only this issue (not compatible with query).
+            resulting json object into a list so it behaves like a list
+            of matches (containing only 1 though). The query must be
+            None when using issue_no or a ValueError is raised.
         search_terms -- Search for each of these terms.
 
         Raises:
@@ -430,7 +429,119 @@ class Repo:
         return results
 
 
-    def show_issue(self, issue):
+    def getCachedJsonDict(self, url, refresh=False):
+        '''
+        This gets the cached page using the cache location
+        cache directory specified in Repo.caches_path and further
+        narrowed down to self.c_repo_path then narrowed down using the
+        URL. For example, https://api.github.com/repos/poikilos/EnlivenMinetest/issues?q=page:1
+
+        should become something like:
+        ~/.cache/enissue/poikilos/EnlivenMinetest/
+        which may contain files like "issues_page=1.json"
+        and
+        ~/.cache/enissue/poikilos/EnlivenMinetest/
+
+        https://api.github.com/repos/poikilos/EnlivenMinetest/issues/515/timeline
+
+        Raises:
+        - ValueError: If the issues list itself is tried, it will be
+          refused since self.issues_url is known to only show a partial
+          list in the GitHub API (denoted by a list that is the same
+          length as the max results count). Therefore, this method
+          refuses to handle such URLs.
+        '''
+        result = None
+        p = self.log_prefix
+        # The known API URLs are already set as follows:
+        # self.issues_url = self.repo_url + "/issues"
+        # self.labels_url = self.repo_url + "/labels"
+
+        c_path = None
+        if "?" in url:
+            raise NotImplementedError("getCachedJsonDict can't query")
+        if url.startswith(self.issues_url):
+            subUrl = url[len(self.issues_url):]
+            if subUrl.startswith("/"):
+                subUrl = subUrl[1:]
+            if subUrl.endswith("/"):
+                if len(subUrl) == 0:
+                    raise ValueError("Refusing to cache partial list.")
+                subUrl += "index.json"
+            if len(subUrl) == 0:
+                raise ValueError("Refusing to cache partial list.")
+            subParts = subUrl.split("/")
+            c_path = os.path.join(self.c_repo_path, "issues")
+            for subPart in subParts:
+                c_path = os.path.join(c_path, subPart)
+            fn = os.path.split(c_path)[1]
+            if "." not in fn:
+                fn += ".json"
+                c_path += ".json"
+        elif url.startswith(self.labels_url):
+            subUrl = url[len(self.labels_url):]
+            if subUrl.startswith("/"):
+                subUrl = subUrl[1:]
+            if subUrl.endswith("/"):
+                if len(subUrl) == 0:
+                    raise ValueError("Refusing to cache partial list.")
+                subUrl += "index.json"
+            if len(subUrl) == 0:
+                raise ValueError("Refusing to cache partial list.")
+            subParts = subUrl.split("/")
+            c_path = os.path.join(self.c_repo_path, "labels")
+            for subPart in subParts:
+                c_path = os.path.join(c_path, subPart)
+            fn = os.path.split(c_path)[1]
+            if "." not in fn:
+                fn += ".json"
+                c_path += ".json"
+        else:
+            raise NotImplementedError("getCachedJsonDict doesn't"
+                                      " have a cache directory for"
+                                      " {}".format(url))
+
+        if os.path.isfile(c_path):
+            # See <https://stackoverflow.com/questions/7430928/
+            # comparing-dates-to-check-for-old-files>
+            max_cache_delta = timedelta(hours=12)
+            cache_delta = datetime.now() - max_cache_delta
+            c_issues_mtime = os.path.getmtime(c_path)
+            filetime = datetime.fromtimestamp(c_issues_mtime)
+
+            if (refresh is not True) and (filetime > cache_delta):
+                print(p+"Loading cache: \"{}\"".format(c_path))
+                debug(p+"  for URL: {}".format(url))
+                debug(p+"Cache time limit: {}".format(max_cache_delta))
+                print(p+"Cache expires: {}".format(filetime
+                                                   + max_cache_delta))
+                with open(c_path) as json_file:
+                    try:
+                        result = json.load(json_file)
+                    except json.decoder.JSONDecodeError as ex:
+                        error("")
+                        error(p+"The file {} isn't valid JSON"
+                              " and will be overwritten if loads"
+                              "".format(c_path))
+                        result = None
+        if result is not None:
+            return result
+
+        res = request.urlopen(url)
+        data_s = decode_safe(res.read())
+        parent = os.path.split(c_path)[0]
+        if not os.path.isdir(parent):
+            os.makedirs(parent)
+        data = json.loads(data_s)
+        # Only save if loads didn't raise an exception.
+        with open(c_path, 'w') as outs:
+            outs.write(data_s)
+            debug(p+"Wrote {}".format(c_path))
+
+        return data
+
+
+    def show_issue(self, issue, refresh=False):
         '''
         Display an issue dictionary as formatted text after getting the
         issue body and other data from the internet.
@@ -527,19 +638,20 @@ class Repo:
         this_tmln_json_url = issue_data.get('timeline_url')
         data = []
         if this_tmln_json_url is not None:
-            tmln_res = request.urlopen(this_tmln_json_url)
-            tmln_data_s = decode_safe(tmln_res.read())
-            tmln_data = json.loads(tmln_data_s)
+            tmln_data = self.getCachedJsonDict(
+                this_tmln_json_url,
+                refresh=refresh,
+            )
             # Example:
             # <https://api.github.com/repos/poikilos/EnlivenMinetest/
             # issues/202/timeline>
             #
             data = tmln_data
         elif comments > 0:
-            this_cmts_json_url = issue_data["comments_url"]
-            response = request.urlopen(this_cmts_json_url)
-            cmts_data_s = decode_safe(response.read())
-            cmts_data = json.loads(cmts_data_s)
+            cmts_data = self.getCachedJsonDict(
+                issue_data["comments_url"],
+                refresh=refresh,
+            )
             data = cmts_data
 
         for evt in data:
@@ -917,7 +1029,8 @@ def main():
     matching_issue = match['issue']
 
     if matching_issue is not None:
-        repo.show_issue(matching_issue)
+        refresh = options.get('refresh') is True
+        repo.show_issue(matching_issue, refresh=refresh)
         if state != "open":
             print("(showing {} issue(s))".format(state.upper()))
             # ^ such as CLOSED
