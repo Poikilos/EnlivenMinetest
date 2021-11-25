@@ -7,6 +7,15 @@ License: See license file at https://github.com/poikilos/EnlivenMinetest
 This script caches issues (To
 ~/.cache/enissue/poikilos/EnlivenMinetest/issues
 by default).
+
+Options:")
+--cache-base <dir>   Set the directory for cached files.
+--verbose            Enable verbose mode.
+--debug              Enable verbose mode (same as --debug).
+--copy-meta-to <dbname> --db-type <db-type) --db-user <user> --db-password <password>
+    Write database entries for the issue, timeline events, and reactions
+    to each timeline event (overwrite ANY existing data if same id!).
+    Only "PostgresQL" is implemented for db-type.
 '''
 from __future__ import print_function
 import sys
@@ -166,35 +175,37 @@ def usage():
         print("")
         print("")
     print("")
-    print("Options:")
-    print("--cache-base <dir>   Set the directory for cached files.")
-    print("--verbose            Enable verbose mode.")
-    print("--debug              Enable verbose mode (same as --debug).")
+    print(__doc__)
 
 
 class Repo:
     profile = None
+    os_user = None
     if platform.system() == "Windows":
         profile = os.environ['USERPROFILE']
+        os_user = os.environ.get('USERNAME')
     else:
         profile = os.environ['HOME']
+        os_user = os.environ.get('USER')
+
 
     def __init__(
             self,
-            remote_user = "poikilos",
-            repo_name = "EnlivenMinetest",
-            repository_id = "80873867",
-            api_repo_url_fmt = "https://api.github.com/repos/{ru}/{rn}",
-            api_issue_url_fmt = "{api_url}/issues/{issue_no}",
-            search_issues_url_fmt = "https://api.github.com/search/issues?q=repo%3A{ru}/{rn}+",
+            remote_user="poikilos",
+            repo_name="EnlivenMinetest",
+            repository_id="80873867",
+            instance_url="https://api.github.com",
+            api_repo_url_fmt="{instance_url}/repos/{ru}/{rn}",
+            api_issue_url_fmt="{instance_url}/repos/{ru}/{rn}/issues/{issue_no}",
+            search_issues_url_fmt="{instance_url}/search/issues?q=repo%3A{ru}/{rn}+",
             search_results_key="items",
-            page_size = 30,
-            c_issues_name_fmt = "issues_page={p}{q}.json",
-            c_issue_name_fmt = "{issue_no}.json",
-            default_query = {'state':'open'},
-            hide_events = ['renamed', 'assigned'],
+            page_size=30,
+            c_issues_name_fmt="issues_page={p}{q}.json",
+            c_issue_name_fmt="{issue_no}.json",
+            default_query={'state':'open'},
+            hide_events=['renamed', 'assigned'],
             caches_path=None,
-            api_comments_url_fmt="{repo_url}/issues/comments",
+            api_comments_url_fmt="{instance_url}/repos/{ru}/{rn}/issues/comments",
         ):
         '''
         Keyword arguments:
@@ -234,6 +245,7 @@ class Repo:
             "~/.cache/enissue/poikilos/EnlivenMinetest/issues". To set
             it later, use the setCachesPath method.
         '''
+        self.instance_url = instance_url
         self.rateLimitFmt = ("You may be able to view the issues"
                              " at the html_url, and a login may be"
                              " required. The URL \"{}\" is not"
@@ -253,17 +265,21 @@ class Repo:
         self.api_repo_url_fmt = api_repo_url_fmt
         self.api_issue_url_fmt = api_issue_url_fmt
         self.repo_url = self.api_repo_url_fmt.format(
+            instance_url=instance_url,
             ru=remote_user,
             rn=repo_name,
         )
         self.search_issues_url = search_issues_url_fmt.format(
+            instance_url=instance_url,
             ru=remote_user,
             rn=repo_name,
         )
 
         self.api_comments_url_fmt = api_comments_url_fmt
         self.comments_url = api_comments_url_fmt.format(
-            repo_url=self.repo_url,
+            instance_url=instance_url,
+            ru=remote_user,
+            rn=repo_name,
         )
 
         self.issues_url = self.repo_url + "/issues"
@@ -401,7 +417,9 @@ class Repo:
             make_list = True
             # Change query_s to the issue url (formerly issue_url):
             query_s = self.api_issue_url_fmt.format(
-                api_url=self.repo_url,
+                instance_url=self.instance_url,
+                ru=self.remote_user,
+                rn=self.repo_name,
                 issue_no=issue_no,
             )
         else:
@@ -1021,6 +1039,62 @@ class Repo:
         return {'issue':matching_issue, 'count':match_count}
 
 
+class GiteaRepo(Repo):
+    def __init__(
+            self,
+            repo_url,
+            # instance_url="https://api.github.com",
+            # repository_id="80873867",
+            # api_repo_url_fmt="{instance_url}/repos/{ru}/{rn}",
+            # api_issue_url_fmt="{instance_url}/repos/{ru}/{rn}/issues/{issue_no}",
+            # search_issues_url_fmt="{instance_url}/search/issues?q=repo%3A{ru}/{rn}+",
+            # search_results_key="items",
+            page_size=30,
+            # c_issues_name_fmt="issues_page={p}{q}.json",
+            # c_issue_name_fmt="{issue_no}.json",
+            default_query={'state':'open'},
+            hide_events=['renamed', 'assigned'],
+            caches_path=None,
+            # api_comments_url_fmt="{instance_url}/repos/{ru}/{rn}/issues/comments",
+        ):
+        if repo_url.endswith(".git"):
+            repo_url = repo_url[:-4]
+        urlParts = repo_url.split("/")
+        remote_user = urlParts[-2]
+        repo_name = urlParts[-1]
+        debug("* constructing GiteaRepo")
+        debug("  * detected remote_user \"{}\" in url"
+              "".format(remote_user))
+        debug("  * detected repo_name \"{}\" in url"
+              "".format(repo_name))
+        instance_url = "/".join(urlParts[:-2])
+        debug("  * detected Gitea url " + instance_url)
+        # NOTE: self.instance_url is set by super __init__ below.
+        base_query_fmt = "?q=repo%3A{ru}/{rn}+"
+        search_issues_url_fmt = \
+            "{instance_url}/api/v1/repos/issues/search"+base_query_fmt
+        Repo.__init__(
+            self,
+            remote_user=remote_user,
+            repo_name=repo_name,
+            repository_id=None,
+            instance_url=instance_url,
+            api_repo_url_fmt="{instance_url}/api/v1/repos/{ru}/{rn}",
+            api_issue_url_fmt="{instance_url}/api/v1/repos/{ru}/{rn}/issues/{issue_no}",
+            search_issues_url_fmt=search_issues_url_fmt,
+            search_results_key="items", # TODO: Change for Gitea ??
+            page_size=page_size,  # TODO: Change for Gitea ??
+            default_query=default_query,  # TODO: Change for Gitea ??
+            hide_events=hide_events,
+            caches_path=caches_path,
+            api_comments_url_fmt="{instance_url}/api/v1/repos/{ru}/{rn}/issues/comments",
+        )
+        # API documentation:
+        # https://docs.gitea.io/en-us/api-usage/ says:
+        # > API Reference guide is auto-generated by swagger and available on: https://gitea.your.host/api/swagger or on [gitea demo instance](https://try.gitea.io/api/swagger)
+        # > The OpenAPI document is at: https://gitea.your.host/swagger.v1.json
+
+
 def main():
     global verbose
     mode = None
@@ -1032,6 +1106,10 @@ def main():
     search_terms = []
     SEARCH_COMMANDS = ['find', 'AND']
     caches_path = None
+    logic = {}
+    save_key = None
+    collect_logic = ['--copy-meta-to', '--db-type', '--db-user',
+                     '--db-password', '--cache-base']
     for i in range(1, len(sys.argv)):
         arg = sys.argv[i]
         isValue = False
@@ -1081,9 +1159,8 @@ def main():
                     elif arg == "--help":
                         usage()
                         exit(0)
-                    elif arg == "--cache-base":
-                        pass
-                        # options['caches_path'] = None
+                    elif arg in collect_logic:
+                        save_key = arg.strip("-")
                     elif arg.startswith("--"):
                         usage()
                         error("Error: The argument \"{}\" is not valid"
@@ -1092,8 +1169,6 @@ def main():
                     elif prev_arg in SEARCH_COMMANDS:
                         search_terms.append(arg)
                         isValue = True
-                    elif prev_arg == "--cache-base":
-                        caches_path = arg
                     elif arg == "find":
                         # print("* adding criteria: {}".format(arg))
                         mode = "list"
@@ -1111,6 +1186,9 @@ def main():
                                       + modes['find']['examples'][andI])
                             exit(1)
                         mode = "list"
+                    elif save_key is not None:
+                        logic[save_key] = arg
+                        save_key = None
                     elif arg != "page":
                         mode = "list"
                         match_all_labels.append(arg)
@@ -1124,8 +1202,12 @@ def main():
             mode = "list"
         if issue_no is not None:
             mode = "issue"
-
+    if save_key is not None:
+        raise ValueError("--{} requires a space then a value."
+                         "".format(save_key))
+    caches_path = logic.get('cache-base')
     valid_modes = ["issue"]
+    print("command metadata: {}".format(logic))
     for k, v in modes.items():
         valid_modes.append(k)
 
@@ -1172,6 +1254,36 @@ def main():
         results, msg = repo.load_issues(options, issue_no=issue_no,
                                    search_terms=search_terms)
         debug("* done load_issues for single issue")
+    dstRepoUrl = logic.get('copy-meta-to')
+    if dstRepoUrl is not None:
+        if mode != "issue":
+            raise ValueError("Only rewriting one Gitea issue at a time"
+                             " is implemented. Specify a number.")
+        db_type = logic.get('db-type')
+        if db_type is None:
+            db_type = "PostgresQL"
+            error("WARNING: No db-type was specified, so db-type was"
+                  " set to the default: {}".format(db_type))
+        db_u = logic.get("db-user")
+        if db_u is None:
+            db_u = Repo.os_user
+            error("WARNING: No db-type was specified, so db-user was"
+                  " set to the default: {}".format(db_u))
+            pass
+        db_p = logic.get('db-password')
+        is_deleted = False
+        if msg is not None:
+            if "deleted" in msg:
+                is_deleted = True
+        if db_p is None:
+            error("WARNING: No db-password was specified, so the db"
+                  " operation will be attempted without it."
+                  " Success will depend on your database type and"
+                  " settings.")
+        dstRepo = GiteaRepo(dstRepoUrl)
+        # print("* rewriting Gitea issue {}...".format(issue_no))
+        sys.exit(0)  # Change based on return of the method.
+
     if msg is not None:
         error(msg)
         if "deleted" in msg:
