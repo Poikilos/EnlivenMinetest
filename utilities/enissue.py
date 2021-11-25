@@ -194,17 +194,21 @@ class Repo:
             default_query = {'state':'open'},
             hide_events = ['renamed', 'assigned'],
             caches_path=None,
+            api_comments_url_fmt="{repo_url}/issues/comments",
         ):
         '''
         Keyword arguments:
         remote_user -- The repo user may be used in api_repo_url_fmt.
         repo_name -- The repo name may be used in api_repo_url_fmt.
-        api_repo_url_fmt -- a format string where {ru} is where a repo
-                            user goes, and {rn} is where a
-                            repo name goes.
+        api_repo_url_fmt -- The format string where {ru} is where a repo
+                            user goes, and {rn} is where a repo name
+                            goes, is used for the format of
+                            self.repo_url.
         api_issue_url_fmt -- a format string where {issue_url} is
                              determined by api_repo_url_fmt and
                              {issue_no} is where an issue number goes.
+        api_comments_url_fmt -- Set the comments URL format (see the
+            default for an example).
         page_size -- This must be set to the page size that is
                      compatible with the URL in api_repo_url_fmt, such
                      as exactly 30 for GitHub.
@@ -230,6 +234,11 @@ class Repo:
             "~/.cache/enissue/poikilos/EnlivenMinetest/issues". To set
             it later, use the setCachesPath method.
         '''
+        self.rateLimitFmt = ("You may be able to view the issues"
+                             " at the html_url, and a login may be"
+                             " required. The URL \"{}\" is not"
+                             " accessible, so you may have exceeded the"
+                             " rate limit and be blocked temporarily")
         if caches_path is None:
             caches_path = os.path.join(Repo.profile, ".cache",
                                        "enissue")
@@ -251,6 +260,12 @@ class Repo:
             ru=remote_user,
             rn=repo_name,
         )
+
+        self.api_comments_url_fmt = api_comments_url_fmt
+        self.comments_url = api_comments_url_fmt.format(
+            repo_url=self.repo_url,
+        )
+
         self.issues_url = self.repo_url + "/issues"
         self.labels_url = self.repo_url + "/labels"
         self.page_size = page_size
@@ -310,6 +325,8 @@ class Repo:
             None when using issue_no or a ValueError is raised.
         search_terms -- Search for each of these terms.
 
+        Returns:
+        A 2-long tuple of: (results, error string (None if no error)).
 
         Raises:
         ValueError if query is not None and issue_no is not None.
@@ -432,8 +449,6 @@ class Repo:
                                                    + max_cache_delta))
                 with open(c_path) as json_file:
                     result = json.load(json_file)
-                # print(p+"The cache file has"
-                #       " {} issue(s).".format(len(results)))
                 max_issue = None
                 results = result
                 if results_key is not None:
@@ -447,6 +462,8 @@ class Repo:
                 if hasattr(results, 'keys'):
                     debug("  issue not page: converting to list")
                     results = [result]
+                debug(p+"The cache file has"
+                      " {} issue(s).".format(len(results)))
                 for issue in results:
                     issue_n = issue.get("number")
                     # debug("issue_n: {}".format(issue_n))
@@ -457,7 +474,7 @@ class Repo:
                     max_issue
                 ))
                 debug("  returning {} issue(s)".format(len(results)))
-                return results
+                return results, None
             else:
                 if refresh is True:
                     print(p+"Refreshing...".format(max_cache_delta))
@@ -475,13 +492,10 @@ class Repo:
             debug(p+"Query URL (query_s): {}".format(query_s))
             response = request.urlopen(query_s)
         except HTTPError as e:
-            print(p+"You may be able to view the issues on GitHub")
-            print(p+"at the 'html_url', and a login may be required.")
-            print(p+"The URL \"{}\" is not accessible, so you may have"
-                  " exceeded the rate limit and be blocked"
-                  " temporarily:".format(query_s))
-            print(str(e))
-            return None
+            if "Error 410" in str(e):
+                return None, "The issue was deleted."
+            msg = str(e) + ": " + self.rateLimitFmt.format(query_s)
+            return None, msg
         response_s = decode_safe(response.read())
         if not os.path.isdir(self.c_repo_path):
             os.makedirs(self.c_repo_path)
@@ -500,11 +514,9 @@ class Repo:
         else:
             results = result
 
+        return results, None
 
-        return results
-
-
-    def getCachedJsonDict(self, url, refresh=False):
+    def getCachedJsonDict(self, url, refresh=False, quiet=False):
         '''
         This gets the cached page using the cache location
         cache directory specified in self.caches_path and further
@@ -519,6 +531,13 @@ class Repo:
 
         https://api.github.com/repos/poikilos/EnlivenMinetest/issues/515/timeline
 
+        The reactions to a timeline event are from a URL such as:
+        https://api.github.com/repos/poikilos/EnlivenMinetest/issues/comments/968357490/reactions
+
+        Keyword arguments:
+        quiet -- Set to True to hide messages (verbose mode will
+            override this).
+
         Raises:
         - ValueError: If the issues list itself is tried, it will be
           refused since self.issues_url is known to only show a partial
@@ -531,10 +550,36 @@ class Repo:
         # The known API URLs are already set as follows:
         # self.issues_url = self.repo_url + "/issues"
         # self.labels_url = self.repo_url + "/labels"
+        shmsg = print
+        if quiet:
+            shmsg = debug
 
         c_path = None
         if "?" in url:
             raise NotImplementedError("getCachedJsonDict can't query")
+        '''
+        elif url.startswith(self.comments_url):
+            # This code is not necessary since it startswith
+            # self.issues_url and that case creates any subdirectories
+            # necessary such as issues/comments/<#>/reactions
+            subUrl = url[len(self.comments_url):]
+            if subUrl.startswith("/"):
+                subUrl = subUrl[1:]
+            if subUrl.endswith("/"):
+                if len(subUrl) == 0:
+                    raise ValueError("Refusing to cache partial list.")
+                subUrl += "index.json"
+            if len(subUrl) == 0:
+                raise ValueError("Refusing to cache partial list.")
+            subParts = subUrl.split("/")
+            c_path = os.path.join(self.c_repo_path, "issues")
+            for subPart in subParts:
+                c_path = os.path.join(c_path, subPart)
+            fn = os.path.split(c_path)[1]
+            if "." not in fn:
+                fn += ".json"
+                c_path += ".json"
+        '''
         if url.startswith(self.issues_url):
             subUrl = url[len(self.issues_url):]
             if subUrl.startswith("/"):
@@ -585,10 +630,10 @@ class Repo:
             filetime = datetime.fromtimestamp(c_issues_mtime)
 
             if (refresh is not True) and (filetime > cache_delta):
-                print(p+"Loading cache: \"{}\"".format(c_path))
+                shmsg(p+"Loading cache: \"{}\"".format(c_path))
                 debug(p+"  for URL: {}".format(url))
                 debug(p+"Cache time limit: {}".format(max_cache_delta))
-                print(p+"Cache expires: {}".format(filetime
+                shmsg(p+"Cache expires: {}".format(filetime
                                                    + max_cache_delta))
                 with open(c_path) as json_file:
                     try:
@@ -619,30 +664,38 @@ class Repo:
     def show_issue(self, issue, refresh=False):
         '''
         Display an issue dictionary as formatted text after getting the
-        issue body and other data from the internet.
+        issue body and other data from the internet. Gather all of the
+        additional metadata as well.
         '''
         p = self.log_prefix
         print("")
+        debug("show_issue...")
         print("#{} {}".format(issue["number"], issue["title"]))
         # print(issue["html_url"])
         print("")
-        this_issue_json_url = issue["url"]
-        issue_data_bytes = None
-        try:
-            response = request.urlopen(this_issue_json_url)
-            issue_data_bytes = response.read()
-        except HTTPError as e:
-            print(str(e))
-            print(p+"The URL \"{}\" is not accessible, so you may have"
-                  " exceeded the rate limit and be blocked"
-                  " temporarily:".format(this_issue_json_url))
-            html_url = issue.get("html_url")
-            print(p+"You may be able to view the issue on GitHub")
-            print(p+"at the 'html_url', and a login may be required:")
-            print(p+"html_url: {}".format(html_url))
-            return False
-        issue_data_s = decode_safe(issue_data_bytes)
-        issue_data = json.loads(issue_data_s)
+        issue_data = issue
+        html_url = issue['html_url']
+        if refresh:
+            issue_data = self.getCachedJsonDict(issue["url"],
+                                                refresh=refresh)
+            '''
+            this_issue_json_url = issue["url"]
+            issue_data_bytes = None
+            try:
+                response = request.urlopen(this_issue_json_url)
+                issue_data_bytes = response.read()
+            except HTTPError as e:
+                print(str(e))
+                print(p+self.rateLimitFmt.format(this_issue_json_url))
+                html_url = issue.get("html_url")
+                print(p+"You may be able to view the issue on GitHub")
+                print(p+"at the 'html_url', and a login may be required:")
+                print(p+"html_url: {}".format(html_url))
+                return False
+            issue_data_s = decode_safe(issue_data_bytes)
+            issue_data = json.loads(issue_data_s)
+            '''
+
         markdown = issue_data.get("body")
         # ^ It is (always?) present but allowed to be None by GitHub!
         if markdown is not None:
@@ -716,6 +769,7 @@ class Repo:
             tmln_data = self.getCachedJsonDict(
                 this_tmln_json_url,
                 refresh=refresh,
+                quiet=True,
             )
             # Example:
             # <https://api.github.com/repos/poikilos/EnlivenMinetest/
@@ -809,13 +863,21 @@ class Repo:
             if reactions_url is not None:
                 reac_data = None
                 try:
-                    reactions_res = request.urlopen(reactions_url)
-                    reac_data_s = decode_safe(reactions_res.read())
-                    reac_data = json.loads(reac_data_s)
-                    # print(left_margin + "downloaded " + reactions_url)
+                    debug(p+"  reactions_url: {}".format(reactions_url))
                     # Example: <https://api.github.com/repos/poikilos/
                     #   EnlivenMinetest/
                     #   issues/comments/968357490/reactions>
+                    reac_data = self.getCachedJsonDict(
+                        reactions_url,
+                        refresh=refresh,
+                        quiet=True,
+                    )
+                    '''
+                    reactions_res = request.urlopen(reactions_url)
+                    reac_data_s = decode_safe(reactions_res.read())
+                    reac_data = json.loads(reac_data_s)
+                    '''
+                    # print(left_margin + "downloaded " + reactions_url)
                     for reac in reac_data:
                         reac_user = reac.get('user')
                         reac_login = None
@@ -872,12 +934,14 @@ class Repo:
                                  " only one issue because a single"
                                  " issue has its own URL with only"
                                  " one result (not a list).")
-        self.issues = self._get_issues(
+        results, msg = self._get_issues(
             options,
             query=query,
             issue_no=issue_no,
             search_terms=search_terms,
         )
+        self.issues = results
+        return results, msg
 
     def get_match(self, mode, issue_no=None, match_all_labels_lower=[]):
         '''
@@ -1096,17 +1160,24 @@ def main():
 
     # TODO: get labels another way, and make this conditional:
     # if mode == "list":
+    msg = None
     if (mode != "issue") and (state != repo.default_query.get('state')):
         query = {
             'state': state
         }
-        repo.load_issues(options, query=query,
-                         search_terms=search_terms)
+        results, msg = repo.load_issues(options, query=query,
+                                   search_terms=search_terms)
         debug("* done load_issues for list")
     else:
-        repo.load_issues(options, issue_no=issue_no,
-                         search_terms=search_terms)
+        results, msg = repo.load_issues(options, issue_no=issue_no,
+                                   search_terms=search_terms)
         debug("* done load_issues for single issue")
+    if msg is not None:
+        error(msg)
+        if "deleted" in msg:
+            sys.exit(0)
+        else:
+            sys.exit(1)
 
     if repo.issues is None:
         print("There were no issues.")
@@ -1115,8 +1186,8 @@ def main():
     match_all_labels_lower = []
     p = repo.log_prefix
     for s in match_all_labels:
-        # print(p+"appending"
-        #       " {} to match_all_labels_lower.".format(s.lower()))
+        debug(p+"appending"
+              " {} to match_all_labels_lower.".format(s.lower()))
         match_all_labels_lower.append(s.lower())
 
     total_count = len(repo.issues)
@@ -1128,14 +1199,21 @@ def main():
     matching_issue = match['issue']
 
     if matching_issue is not None:
+        debug("* showing matching_issue...")
         refresh = options.get('refresh') is True
-        repo.show_issue(matching_issue, refresh=refresh)
+        repo.show_issue(
+            matching_issue,
+            refresh=False,
+        )
+        # ^ Never refresh, since that would already have been done.
         if state != "open":
             print("(showing {} issue(s))".format(state.upper()))
             # ^ such as CLOSED
     else:
+        debug("* There is no matching_issue; matching manually...")
         # TODO: This code doesn't work since it isn't cached.
         if mode == 'issue':
+            debug("mode:issue...")
             state = 'closed'
             repo.load_issues(options, query={'state':"closed"},
                              search_terms=search_terms)
@@ -1146,6 +1224,8 @@ def main():
                 match_all_labels_lower=match_all_labels_lower,
             )
             matching_issue = match['issue']
+        else:
+            debug("mode:{}...".format(mode))
     if matching_issue is None:
         if mode == "issue":
             print("")
