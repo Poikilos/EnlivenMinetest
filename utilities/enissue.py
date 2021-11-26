@@ -940,12 +940,26 @@ class Repo:
             #
             data = tmln_data
         elif comments > 0:
-            cmts_data = self.getCachedJsonDict(
-                issue_data["comments_url"],
-                refresh=refresh,
-                quiet=True,
-            )
-            data = cmts_data
+            comments_url = issue_data.get("comments_url")
+            if comments_url is None:
+                # if self.api_id == "Gitea":
+                comments_url = self.api_comments_url_fmt.format(
+                    instance_url = self.instance_url,
+                    ru=self.remote_user,
+                    rn=self.repo_name,
+                )
+            if comments_url is not None:
+                cmts_data = self.getCachedJsonDict(
+                    comments_url,
+                    refresh=refresh,
+                    quiet=True,
+                )
+                data = cmts_data
+            else:
+                error("WARNING: comments={} but there is no"
+                      " comments_url in:"
+                      "".format(comments))
+                error(json.dumps(issue_data, indent=4, sort_keys=True))
 
         for evt in data:
             user = evt.get('user')
@@ -1125,6 +1139,7 @@ class Repo:
         '''
         matching_issue = None
         match_count = 0
+        p = self.log_prefix
         # TODO: get labels another way, and make this conditional:
         # if mode == "list":
         for issue in self.issues:
@@ -1150,7 +1165,10 @@ class Repo:
                         self.labels.append(label_s)
                 else:
                     raise ValueError(p+"ERROR: The url '{}' does not"
-                                     " start with '{}'"
+                                     " start with '{}'. Try refresh"
+                                     " if you've changed the"
+                                     " repository URL after a cached"
+                                     " page was saved"
                                      "".format(label["url"],
                                      self.labels_url))
             if len(match_all_labels) > 0:
