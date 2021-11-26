@@ -1,0 +1,19 @@
+Name:    codermobs
+Source:  New mod using existing media files
+License: See "LICENSE"
+
+----------------------------------------------------------------------
+
+1. This is a  new mod which implements  a number of  Final Minetest 3D
+mobs.
+
+For general information,  see the "_game" documentation,  which covers
+this mod and the associated modpack in detail.
+
+----------------------------------------------------------------------
+
+2. The code is  largely new,  but it  includes elements  from existing
+mods.  The media files,  in most cases,  have been extracted  from the
+same or similar mods. 
+
+For license information, see "LICENSE".
