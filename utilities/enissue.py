@@ -315,9 +315,13 @@ class Repo:
         remote_user = urlParts[-2]
         self.api_id = options.get('api_id')
         if urlParts[-2] == "repo.or.cz":
-            # Such as https://repo.or.cz/minetest_treasurer.git
             remote_user = "almikes@aol.com"  # Wuzzy2
             self.api_id = "git_instaweb"
+            # Such as https://repo.or.cz/minetest_treasurer.git
+            # - locally, git instaweb is controlled via:
+            #   git instaweb --httpd=webrick --start
+            #   git instaweb --httpd=webrick --stop
+
         repo_name = urlParts[-1]
 
         if self.api_id is None:
