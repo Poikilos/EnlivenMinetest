@@ -69,16 +69,68 @@ gamespec['add_mods'] = [
     "nftools_legacy",
     "https://github.com/poikilos/slimenodes.git",
     "https://github.com/BenjieFiftysix/sponge.git",
-    "https://github.com/minetest-mods/throwing.git",
-    "https://github.com/minetest-mods/throwing_arrows.git",
+    "https://github.com/poikilos/throwing.git",  # Can utilize toolranks, toolranks_extras, wielded_light
+    "https://github.com/poikilos/throwing_arrows.git",  # Can utilize mesecons, mesecons_button
     "https://gitlab.com/VanessaE/biome_lib.git",
     {
         'url': "https://github.com/Poikilos/vines.git",
         'branch': "Bucket_Game", # git clone <url> --branch <branch>
     },
+    "https://github.com/MinetestForFun/unified_inventory",
 ]
+
+# Items with no URL below are from EnlivenMinetest
+minimum_live_server_based_on_bucket_game_200527 = [
+    {'dir_name': 'animal_materials_legacy'},
+    {'dir_name': 'ccompass', 'url': "https://github.com/minetest-mods/ccompass"},  # Remove this one or point to world-specific spawn area via settings? It is a regular spawn-pointing compass by default
+    {'dir_name': 'chat3', 'url': "https://github.com/octacian/chat3"},  #Doesn't seem to have any effect
+    {'dir_name': 'compassgps', 'url': "https://github.com/poikilos/compassgps"},
+    {'dir_name': 'elk_legacy'},
+    {'dir_name': 'fishing', 'url': "https://github.com/MinetestForFun/fishing"},
+    {'dir_name': 'glooptest_missing'},
+    {'dir_name': 'ircpack', 'url': ""},  # ONLY for servers!
+    # {'dir_name': 'item_drop', 'url': ""},  # In bucket_game now (but see mt_conf_by_mod['item_drop'] for settings)
+    {'dir_name': 'metatools', 'url': "https://github.com/poikilos/metatools"},
+    {'dir_name': 'nftools_legacy'},
+    {'dir_name': 'slimenodes', 'url': "https://github.com/poikilos/slimenodes"},
+    {'dir_name': 'sponge', 'url': "https://github.com/BenjieFiftysix/sponge"},  # In bucket_game but only in coderblocks
+    {'dir_name': 'throwing', 'url': "https://github.com/minetest-mods/throwing"},
+    {'dir_name': 'throwing_arrows', 'url': "https://github.com/minetest-mods/throwing_arrows"},
+]
+
+'''
+Remove server_only_mods from the client and packaged copies of
+ENLIVEN.
+'''
+server_only_mods = [
+    'ircpack',
+]
+
+'''
+mt_conf_by_mod settings should be placed in minetest.conf such as
+/opt/minebest/mtworlds/center/ENLIVEN/minetest.conf
+but for now just use
+- patches/subgame/minetest.conf
+  To define the game.
+  If minebest is present, combine minetest.conf and
+  minetest.server-example.conf
+  but maybe make an alternate version with stuff that isn't in
+  world.conf.
+  For other conf settings:
+- patches/subgame/minetest.server-example.conf goes in the server only.
+- patches/subgame/minetest.client-example.conf goes in clients only.
+'''
+mt_conf_by_mod = {
+    'item_drop': {
+        'item_drop.pickup_radius': "1.425",
+    }
+}
+
 why = {}
 why_not["https://github.com/FaceDeer/vines.git"] = '''
+'''
+why["https://github.com/MinetestForFun/unified_inventory"] = '''
+This fork makes a "nicer interface". The fork hasn't been tested yet.
 '''
 why["https://github.com/poikilos/vines.git"] = '''
 This Poikilos fork (The Bucket_Game branch) adds support for Bucket_Game
