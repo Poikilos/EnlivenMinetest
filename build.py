@@ -46,6 +46,7 @@ gamespec['remove_mods'] = [
     "placecraft", # interferes with eating
     "more_chests", # See https://github.com/poikilos/EnlivenMinetest/issues/446
     "emeralds", # See https://github.com/poikilos/EnlivenMinetest/issues/497
+    "give_initial_stuff",  # or make it configurable (It only uses a give_initial_stuff boolean, no configurable item list)
 ]
 myDir = os.path.dirname(__file__)
 mods_stopgap = os.path.join(myDir, "patches", "mods-stopgap")
