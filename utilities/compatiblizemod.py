@@ -21,9 +21,11 @@ def add_depends(mod_path):
             # shutil.copy(modpack_conf, modpack_txt)
             with open(modpack_txt, 'w') as outs:
                 wroteCount = 0
+                lineN = 0
                 with open(modpack_conf, 'r') as ins:
                     for rawL in ins:
-                        line = line.strip()
+                        lineN += 1  # Start counting at 1.
+                        line = rawL.strip()
                         signI = line.find("=")
                         if signI < 1:
                             continue
