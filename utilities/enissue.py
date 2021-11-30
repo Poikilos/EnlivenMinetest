@@ -24,6 +24,12 @@ Options:
     - PostgreSQL (su <dbusername> then):
     pg_dump dbname > outfile
 --test               Run unit tests then exit (0) if passed.
+
+Partial API documentation:
+options keys:
+- default_time_fmt: must be either a cross-platform (python) strftime
+  format (See https://strftime.org/) or the literal string
+  "unix_timestamp" to denote a unix timestamp.
 '''
 from __future__ import print_function
 import sys
@@ -110,6 +116,14 @@ github_defaults = {
     'default_query': {'state':'open'},
     'hide_events': ['renamed', 'assigned'],
     'api_comments_url_fmt': "{instance_url}/repos/{ru}/{rn}/issues/comments",
+    'known_issue_keys': {
+        'created_at': 'created_at',
+        'updated_at': 'updated_at',
+        'closed_at': 'closed_at',
+        'body': 'body',
+        'title': 'title',
+    },
+    'default_time_fmt': "%Y-%m-%dT%H:%M:%SZ",  # GitHub (Z for UTC): 2018-09-13T16:59:38Z
 }
 
 gitea_defaults = {
@@ -125,6 +139,14 @@ gitea_defaults = {
     'default_query': {'state':'open'},  # TODO: Change for Gitea ??
     'hide_events': ['renamed', 'assigned'],
     'api_comments_url_fmt': "{instance_url}/api/v1/repos/{ru}/{rn}/issues/comments",
+    'known_issue_keys': {
+        'created_at': 'created_at',
+        'updated_at': 'updated_at',
+        'closed_at': 'closed_at',
+        'body': 'body',
+        'title': 'title',
+    },
+    'default_time_fmt': "unix_timestamp",
 }
 
 # API documentation:
@@ -301,8 +323,14 @@ class Repo:
             repo_url -- This is required. It can be an API or web URL
                 as long as it ends with username/reponame (except where
                 there is no username in the URL).
-            remote_user -- The repo user may be used in api_repo_url_fmt.
-            repo_name -- The repo name may be used in api_repo_url_fmt.
+            remote_user -- The repo user is used in api_repo_url_fmt,
+                and cache path if caches is not on single_cache mode
+                (If present, remote_user overrides the one detected from
+                the repo_url).
+            repo_name -- The repo name is used in api_repo_url_fmt,
+                and cache path if caches is not on single_cache mode
+                (If present, repo_name overrides the one detected from
+                the repo_url).
             api_repo_url_fmt -- The format string where {ru} is where a repo
                                 user goes, and {rn} is where a repo name
                                 goes, is used for the format of
@@ -352,17 +380,28 @@ class Repo:
         if repo_url.endswith(".git"):
             repo_url = repo_url[:-4]
         urlParts = repo_url.split("/")
-        remote_user = urlParts[-2]
+        self.remote_user = urlParts[-2]
         self.api_id = options.get('api_id')
         if urlParts[-2] == "repo.or.cz":
-            remote_user = "almikes@aol.com"  # Wuzzy2
+            self.remote_user = "almikes@aol.com"  # Wuzzy2
             self.api_id = "git_instaweb"
             # Such as https://repo.or.cz/minetest_treasurer.git
             # - locally, git instaweb is controlled via:
             #   git instaweb --httpd=webrick --start
             #   git instaweb --httpd=webrick --stop
 
-        repo_name = urlParts[-1]
+        remote_user = options.get('remote_user')
+        if remote_user is not None:
+            self.remote_user = remote_user
+        del remote_user
+
+
+        self.repo_name = urlParts[-1]
+
+        repo_name = options.get('repo_name')
+        if repo_name is not None:
+            self.repo_name = repo_name
+        del repo_name
 
         if self.api_id is None:
             if len(urlParts) > 2:
@@ -394,9 +433,9 @@ class Repo:
 
         debug("* constructing {} Repo".format(self.api_id))
         debug("  * detected remote_user \"{}\" in url"
-              "".format(remote_user))
+              "".format(self.remote_user))
         debug("  * detected repo_name \"{}\" in url"
-              "".format(repo_name))
+              "".format(self.repo_name))
         if self.api_id == "Gitea":
             instance_url = "/".join(urlParts[:-2])
             debug("  * detected Gitea url " + instance_url)
@@ -414,9 +453,9 @@ class Repo:
         self.repository_id = options.get('repository_id')
         site_users_repos_meta = sites_users_repos_meta.get(instance_url)
         if site_users_repos_meta is not None:
-            user_repos_meta = site_users_repos_meta.get(remote_user)
+            user_repos_meta = site_users_repos_meta.get(self.remote_user)
             if user_repos_meta is not None:
-                repo_meta = user_repos_meta.get(repo_name)
+                repo_meta = user_repos_meta.get(self.repo_name)
                 if repo_meta is not None:
                     if self.repository_id is None:
                         self.repository_id = \
@@ -448,8 +487,6 @@ class Repo:
             self.setCachesPath(_caches_path, flat=False)
         del _caches_path
         del _single_cache
-        self.remote_user = remote_user
-        self.repo_name = repo_name
 
         self.search_results_key = options.get('search_results_key')
         self.page = options.get('page')
@@ -458,22 +495,22 @@ class Repo:
         self.api_issue_url_fmt = options['api_issue_url_fmt']
         self.repo_url = self.api_repo_url_fmt.format(
             instance_url=instance_url,
-            ru=remote_user,
-            rn=repo_name,
+            ru=self.remote_user,
+            rn=self.repo_name,
         )
         self.search_issues_url_fmt = \
             options.get('search_issues_url_fmt')
         self.search_issues_url = self.search_issues_url_fmt.format(
             instance_url=instance_url,
-            ru=remote_user,
-            rn=repo_name,
+            ru=self.remote_user,
+            rn=self.repo_name,
         )
 
         self.api_comments_url_fmt = options['api_comments_url_fmt']
         self.comments_url = self.api_comments_url_fmt.format(
             instance_url=instance_url,
-            ru=remote_user,
-            rn=repo_name,
+            ru=self.remote_user,
+            rn=self.repo_name,
         )
 
         self.issues_url = self.repo_url + "/issues"
@@ -488,6 +525,43 @@ class Repo:
         self.hide_events = options['hide_events']
         self.issues = None
         self.last_query_s = None
+        self.options = copy.deepcopy(options)
+
+    def getKnownKey(self, name):
+        '''
+        Get an API-specific key that matches the given name. The name
+        variable will only be considered valid if it exists in
+        self.options['known_issue_keys'].
+
+        Sequential arguments:
+        name -- a well-known issue key such as 'body' that will be
+                translated to an API-specific key.
+        '''
+        key = self.options['known_issue_keys'].get(name)
+        if key is None:
+            raise KeyError("{} is not a well-known key in"
+                           " known_issue_keys. Try _getIssueValue to"
+                           " forcefully get a value.")
+        return key
+
+    def _getIssueValue(self, index, key):
+        '''
+        Sequential arguments:
+        index -- an index in self.issues
+        key -- a key in self.options['known_issue_keys']
+        '''
+        return self.issues[index][key]
+
+    def getKnown(self, index, name):
+        '''
+        Sequential arguments:
+        index -- an index in self.issues
+        name -- a well-known issue key such as 'body' that will be
+                translated to an API-specific key.
+        '''
+        key = self.getKnownKey(name)
+        return self._getIssueValue(index, key)
+
 
     def setCachesPath(self, path, flat=True):
         '''
@@ -498,6 +572,9 @@ class Repo:
         directories that mimic the API web URL structure (See
         _get_issues code for subdirectories and files).
         '''
+        if self.remote_user is None:
+            raise RuntimeError("self.remote_user must be initialized"
+                               " before calling self.setCachesPath")
         if path is None:
             raise ValueError("path must not be None")
         self.caches_path = path
