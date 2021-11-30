@@ -8,6 +8,10 @@ This script caches issues (To
 ~/.cache/enissue/poikilos/EnlivenMinetest/issues
 by default).
 
+Known issues:
+- Get attachments from GitHub
+- Get inline files from GitHub (such as pasted images)
+
 Options:")
 --cache-base <dir>   Set the directory for cached files.
 --verbose            Enable verbose mode.
@@ -16,6 +20,10 @@ Options:")
     Write database entries for the issue, timeline events, and reactions
     to each timeline event (overwrite ANY existing data if same id!).
     Only "PostgresQL" is implemented for db-type.
+    The destination will be overwritten! Backup first:
+    - PostgreSQL (su <dbusername> then):
+    pg_dump dbname > outfile
+--test               Run unit tests then exit (0) if passed.
 '''
 from __future__ import print_function
 import sys
@@ -129,9 +137,17 @@ apis["GitHub"] = github_defaults
 apis["Gitea"] = gitea_defaults
 
 
+def tests():
+    for name, options in apis.items():
+        assert(options.get('default_query') is not None)
+        assert(isinstance(options.get('default_query'), dict))
+        assert(options['default_query'].get('state') is not None)
+
+
 def debug(msg):
     if verbose:
         error("[debug] " + msg)
+
 
 def decode_safe(b):
     try:
@@ -894,7 +910,7 @@ class Repo:
                 else:
                     neat_labels.append(label_s)
             labels_s = ", ".join(neat_labels)
-        print(line_fmt.format("labels:", labels_s))
+        # moved further down: print(line_fmt.format("labels:", labels_s))
         print("")
         if markdown is not None:
             print('"""')
@@ -1076,6 +1092,7 @@ class Repo:
 
         closed_by = issue_data.get('closed_by')
         closed_at = issue_data.get('closed_at')
+        print(line_fmt.format("labels:", labels_s))
         if (closed_by is not None) or (closed_at is not None):
             # INFO: closed_by may be present even if reopened
             # (determine this by getting 'state').
@@ -1083,6 +1100,8 @@ class Repo:
             # timeline (see this_tmln_json_url).
             print()
             state = issue_data.get('state')
+            if state is None:
+                state = options['default_query'].get('state')
             closet_at_str = ""
             if closed_at is not None:
                 closet_at_str = " {}".format(closed_at)
@@ -1221,6 +1240,8 @@ def main():
     caches_path = None
     logic = {}  # CLI-only values
     save_key = None
+    save_option = None
+    test_only = False
     collect_options = ['--repo-url']  # Repo init data
     collect_logic = ['--copy-meta-to', '--db-type', '--db-user',
                      '--db-password', '--cache-base']
@@ -1266,6 +1287,10 @@ def main():
                 else:
                     if arg == "--closed":
                         state = 'closed'
+                    elif arg == "--test":
+                        tests()
+                        error("All tests passed.")
+                        sys.exit(0)
                     elif arg == "--refresh":
                         options['refresh'] = True
                     elif arg == "--verbose":
@@ -1335,7 +1360,7 @@ def main():
                          "".format(save_option))
     caches_path = logic.get('cache-base')
     valid_modes = ["issue"]
-    print("command metadata: {}".format(logic))
+    debug("command metadata: {}".format(logic))
     for k, v in modes.items():
         valid_modes.append(k)
 
