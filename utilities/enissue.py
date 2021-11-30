@@ -495,6 +495,8 @@ class Repo:
         options -- This dictionary where all keys are optional may have:
             - 'refresh': Set to True to refresh the cache (load the data
               from the internet and re-save the cached data).
+            - 'never_expire': Never download unless 'refresh' is set
+              or there is no cache file.
 
 
         Keyword arguments:
@@ -529,6 +531,7 @@ class Repo:
         for search_term in search_terms:
             searchTermStr += toSubQueryValue(search_term) + "+"
         refresh = options.get('refresh')
+        never_expire = options.get('never_expire') is True
         if issue_no is not None:
             if query is not None:
                 raise ValueError("You cannot do a query when getting"
@@ -629,13 +632,17 @@ class Repo:
             cache_delta = datetime.now() - max_cache_delta
             c_issues_mtime = os.path.getmtime(c_path)
             filetime = datetime.fromtimestamp(c_issues_mtime)
-
-            if (refresh is not True) and (filetime > cache_delta):
+            is_fresh = filetime > cache_delta
+            max_cache_d_s = "{}".format(max_cache_delta)
+            expires_s = "{}".format(filetime + max_cache_delta)
+            if never_expire:
+                max_cache_d_s = "never_expire"
+                expires_s = "never_expire"
+            if (refresh is not True) and (is_fresh or never_expire):
                 print(p+"Loading cache: \"{}\"".format(c_path))
                 debug(p+"Cache time limit: {}".format(max_cache_delta))
                 debug(p+"  for URL: {}".format(query_s))
-                print(p+"Cache expires: {}".format(filetime
-                                                   + max_cache_delta))
+                print(p+"Cache expires: {}".format(expires_s))
                 with open(c_path) as json_file:
                     result = json.load(json_file)
                 max_issue = None
@@ -709,7 +716,8 @@ class Repo:
 
         return results, None
 
-    def getCachedJsonDict(self, url, refresh=False, quiet=False):
+    def getCachedJsonDict(self, url, refresh=False, never_expire=False,
+                          quiet=False):
         '''
         This gets the cached page using the cache location
         cache directory specified in self.caches_path and further
@@ -814,9 +822,11 @@ class Repo:
                 fn += ".json"
                 c_path += ".json"
         else:
-            raise NotImplementedError("getCachedJsonDict doesn't"
-                                      " have a cache directory for"
-                                      " {}".format(url))
+            raise NotImplementedError("getCachedJsonDict"
+                                      " doesn't have a cache directory"
+                                      " for {}. Try --refresh"
+                                      " if you changed repos."
+                                      "".format(url))
 
         if os.path.isfile(c_path):
             # See <https://stackoverflow.com/questions/7430928/
@@ -825,11 +835,16 @@ class Repo:
             cache_delta = datetime.now() - max_cache_delta
             c_issues_mtime = os.path.getmtime(c_path)
             filetime = datetime.fromtimestamp(c_issues_mtime)
-
-            if (refresh is not True) and (filetime > cache_delta):
+            is_fresh = filetime > cache_delta
+            max_cache_d_s = "{}".format(max_cache_delta)
+            expires_s = "{}".format(filetime + max_cache_delta)
+            if never_expire is True:
+                max_cache_d_s = "never_expire"
+                expires_s = "never_expire"
+            if (refresh is not True) and (is_fresh or never_expire):
                 shmsg(p+"Loading cache: \"{}\"".format(c_path))
                 debug(p+"  for URL: {}".format(url))
-                debug(p+"Cache time limit: {}".format(max_cache_delta))
+                debug(p+"Cache time limit: {}".format(max_cache_d_s))
                 shmsg(p+"Cache expires: {}".format(filetime
                                                    + max_cache_delta))
                 with open(c_path) as json_file:
@@ -858,7 +873,7 @@ class Repo:
         return data
 
 
-    def show_issue(self, issue, refresh=False):
+    def show_issue(self, issue, refresh=False, never_expire=False):
         '''
         Display an issue dictionary as formatted text after getting the
         issue body and other data from the internet. Gather all of the
@@ -872,26 +887,11 @@ class Repo:
         print("")
         issue_data = issue
         html_url = issue['html_url']
-        if refresh:
-            issue_data = self.getCachedJsonDict(issue["url"],
-                                                refresh=refresh)
-            '''
-            this_issue_json_url = issue["url"]
-            issue_data_bytes = None
-            try:
-                response = request.urlopen(this_issue_json_url)
-                issue_data_bytes = response.read()
-            except HTTPError as e:
-                print(str(e))
-                print(p+self.rateLimitFmt.format(this_issue_json_url))
-                html_url = issue.get("html_url")
-                print(p+"You may be able to view the issue on GitHub")
-                print(p+"at the 'html_url', and a login may be required:")
-                print(p+"html_url: {}".format(html_url))
-                return False
-            issue_data_s = decode_safe(issue_data_bytes)
-            issue_data = json.loads(issue_data_s)
-            '''
+        issue_data = self.getCachedJsonDict(
+            issue["url"],
+            refresh=refresh,
+            never_expire=never_expire,
+        )
 
         markdown = issue_data.get("body")
         # ^ It is (always?) present but allowed to be None by GitHub!
@@ -967,6 +967,7 @@ class Repo:
                 this_tmln_json_url,
                 refresh=refresh,
                 quiet=True,
+                never_expire=never_expire,
             )
             # Example:
             # <https://api.github.com/repos/poikilos/EnlivenMinetest/
@@ -987,6 +988,7 @@ class Repo:
                     comments_url,
                     refresh=refresh,
                     quiet=True,
+                    never_expire=never_expire,
                 )
                 data = cmts_data
             else:
@@ -1074,22 +1076,17 @@ class Repo:
                 reactions_url = reactions.get('url')
             if reactions_url is not None:
                 reac_data = None
-                try:
-                    debug(p+"  reactions_url: {}".format(reactions_url))
-                    # Example: <https://api.github.com/repos/poikilos/
-                    #   EnlivenMinetest/
-                    #   issues/comments/968357490/reactions>
-                    reac_data = self.getCachedJsonDict(
-                        reactions_url,
-                        refresh=refresh,
-                        quiet=True,
-                    )
-                    '''
-                    reactions_res = request.urlopen(reactions_url)
-                    reac_data_s = decode_safe(reactions_res.read())
-                    reac_data = json.loads(reac_data_s)
-                    '''
-                    # print(left_margin + "downloaded " + reactions_url)
+                debug(p+"  reactions_url: {}".format(reactions_url))
+                # Example: <https://api.github.com/repos/poikilos/
+                #   EnlivenMinetest/
+                #   issues/comments/968357490/reactions>
+                reac_data = self.getCachedJsonDict(
+                    reactions_url,
+                    refresh=refresh,
+                    quiet=True,
+                    never_expire=never_expire,
+                )
+                if reac_data is not None:
                     for reac in reac_data:
                         reac_user = reac.get('user')
                         reac_login = None
@@ -1098,11 +1095,6 @@ class Repo:
                         reac_content = reac.get('content')
                         print(left_margin + "- <{}> :{}:"
                               "".format(reac_login, reac_content))
-                except HTTPError as e:
-                    print(left_margin + "Error downloading {}:"
-                          "".format(reactions_url))
-                    print(left_margin + str(e))
-                    print(left_margin + "{}".format(reac_data))
         print("")
         print(left_margin+"labels: {}".format(labels_s))
         closed_by = issue_data.get('closed_by')
@@ -1256,11 +1248,16 @@ def main():
     save_key = None
     save_option = None
     test_only = False
-    collect_options = ['--repo-url']  # Repo init data
+    assume_values = {
+        'never_expire': True,
+        'refresh': True,
+    }
+    collect_options = ['--repo-url', '--never-expire', '--refresh']
+    # ^ Repo init data
+    # ^ These CLI arguments override default_options. For example:
+    #   - repo_url is initially set to default_options['repo_url']
     collect_logic = ['--copy-meta-to', '--db-type', '--db-user',
                      '--db-password', '--cache-base']
-    # ^ CLI arguments override default_options. For example:
-    #   - repo_url is initially set to default_options['repo_url']
     for i in range(1, len(sys.argv)):
         arg = sys.argv[i]
         isValue = False
@@ -1305,8 +1302,6 @@ def main():
                         tests()
                         error("All tests passed.")
                         sys.exit(0)
-                    elif arg == "--refresh":
-                        options['refresh'] = True
                     elif arg == "--verbose":
                         verbose = True
                     elif arg == "--debug":
@@ -1318,6 +1313,11 @@ def main():
                         save_key = arg.strip("-").replace("-", "_")
                     elif arg in collect_options:
                         save_option = arg.strip("-").replace("-", "_")
+                        assume_value = assume_values.get(save_option)
+                        if assume_value is not None:
+                            options[save_option] = assume_value
+                        save_option = None
+                        # else: the next arg will be the value.
                     elif arg.startswith("--"):
                         usage()
                         error("Error: The argument \"{}\" is not valid"
@@ -1484,6 +1484,7 @@ def main():
         match_all_labels_lower=match_all_labels_lower,
     )
     matching_issue = match['issue']
+    never_expire = options.get('never_expire') is True
 
     if matching_issue is not None:
         debug("* showing matching_issue...")
@@ -1491,6 +1492,7 @@ def main():
         repo.show_issue(
             matching_issue,
             refresh=False,
+            never_expire=never_expire,
         )
         # ^ Never refresh, since that would already have been done.
         state_msg = repo.default_query.get('state')
