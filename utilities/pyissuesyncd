@@ -46,6 +46,7 @@ pyissuesyncd --dst-repo https://example.com/git/repo
 import os
 import sys
 import json
+from datetime import datetime  #, timedelta
 # see <https://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python>
 def error(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -143,7 +144,9 @@ def start_issuesyncd(src_options, dst_options):
     non_issue = 1
     issue_no = non_issue - 1
     # while True:
-    while issue_no < non_issue: # for debug only
+    src_res_code = 0
+    # while issue_no < non_issue: # for debug only
+    while src_res_code != 404:
         issue_no += 1
         src_repo = Repo(src_options)
         src_issue, err = get_issue(src_repo, src_options, issue_no)
@@ -153,23 +156,51 @@ def start_issuesyncd(src_options, dst_options):
                             err.get('reason')))
             continue
 
-        print("[pyissuesyncd] src_issue:")
-        print(json.dumps(src_issue, indent=2))
+        # Example: ~/.cache/pyissuesyncd/source/issues/1.json
+        src_dt_parser = src_repo.options['default_dt_parser']
+        src_created_dt_s = src_repo.getKnown(0, 'created_at')
+        src_updated_dt_s = src_repo.getKnown(0, 'updated_at')
+        src_updated_dt = src_dt_parser(src_updated_dt_s)
+        src_updated_ts = int(src_updated_dt.strftime("%s"))
+        # ^ See <https://stackoverflow.com/questions/19801727/convert-
+        #   datetime-to-unix-timestamp-and-convert-it-back-in-python>
+        '''
+        print("* src_issue: {} updated: {} = {}"
+              "".format(issue_no, src_updated_ts, src_updated_dt))
+        '''
+        # print(json.dumps(src_issue, indent=2))
 
         enissue.set_verbose(True)
         dst_repo = Repo(dst_options)
         dst_issue, err = get_issue(dst_repo, dst_options, issue_no)
-        print("[pyissuesyncd] dst_issue:")
-        print(json.dumps(dst_issue, indent=2))
+        dst_dt_parser = dst_repo.options['default_dt_parser']
+        dst_created_dt_s = dst_repo.getKnown(0, 'created_at')
+        dst_updated_dt_s = dst_repo.getKnown(0, 'updated_at')
+        dst_updated_dt = dst_dt_parser(dst_updated_dt_s)
+        dst_updated_ts = int(dst_updated_dt.strftime("%s"))
+        # ^ See <https://stackoverflow.com/questions/19801727/convert-
+        #   datetime-to-unix-timestamp-and-convert-it-back-in-python>
+        '''
+        print("* dst_issue: {} updated: {} = {}"
+              "".format(issue_no, dst_updated_ts, dst_updated_dt))
+        '''
+        # Example: ~/.cache/pyissuesyncd/destination/issues/1.json
+        break  # for debug only
+        continue  # for debug only
+        # print("  * dst_issue:")
+        # print(json.dumps(dst_issue, indent=2))
         if err is not None:
             if err.get('code') == 404:
-                dst_repo.create_issue(src_issue, src_repo)
+                # dst_repo.create_issue(src_issue, src_repo)
                 continue
             error("Error accessing destination issue {}: {}: {}"
                   "".format(issue_no, err.get('code'),
                             err.get('reason')))
             continue
-        dst_repo.update_issue(src_issue, src_repo)
+        # if issue_differs:  # compare timestamp
+        if True:  # for debug only
+            pass
+            # dst_repo.update_issue(src_issue, src_repo)
 
 
 def usage():

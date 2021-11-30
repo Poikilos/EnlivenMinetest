@@ -27,9 +27,9 @@ Options:
 
 Partial API documentation:
 options keys:
-- default_time_fmt: must be either a cross-platform (python) strftime
-  format (See https://strftime.org/) or the literal string
-  "unix_timestamp" to denote a unix timestamp.
+- default_dt_parser: This must be a method that returns a python
+    datetime object by accepting a single argument, which is a string
+    from the style of the Repo's API.
 '''
 from __future__ import print_function
 import sys
@@ -102,6 +102,35 @@ if site_users_repos_meta is not None:
             if repository_id is None:
                 repository_id = repo_meta.get('repository_id')
 '''
+
+
+def github_ts_to_dt(timestamp_s):
+    '''
+    Use "%Y-%m-%dT%H:%M:%SZ"
+    GitHub example (Z for UTC): 2018-09-13T16:59:38Z
+    '''
+    return datetime.strptime(timestamp_s, "%Y-%m-%dT%H:%M:%SZ")
+
+
+def gitea_ts_to_dt(timestamp_s):
+    '''
+    Use "%Y-%m-%dT%H:%M:%SZ"
+    Gitea example (last : must be removed): "2021-11-25T12:00:13-05:00"
+    '''
+    example_s = "2021-11-25T12:00:13-05:00"
+    if len(timestamp_s) != len(example_s):
+        raise ValueError("Gitea {} is not like the expected {}"
+                         "".format(timestamp_s, example_s))
+    timestamp_s_raw = timestamp_s
+    timestamp_s = timestamp_s[:-3] + timestamp_s[-2:]
+    '''
+    Remove the non-python-like : from %z
+    %z is "+0000 UTC offset in the form ±HHMM[SS[.ffffff]] (empty
+    string if the object is naive)."
+    - <https://strftime.org/>
+    '''
+    return datetime.strptime(timestamp_s, "%Y-%m-%dT%H:%M:%S%z")
+
 github_defaults = {
     'repository_id': "80873867",
     'instance_url': "https://api.github.com",
@@ -123,7 +152,7 @@ github_defaults = {
         'body': 'body',
         'title': 'title',
     },
-    'default_time_fmt': "%Y-%m-%dT%H:%M:%SZ",  # GitHub (Z for UTC): 2018-09-13T16:59:38Z
+    'default_dt_parser': github_ts_to_dt,
 }
 
 gitea_defaults = {
@@ -146,7 +175,7 @@ gitea_defaults = {
         'body': 'body',
         'title': 'title',
     },
-    'default_time_fmt': "unix_timestamp",
+    'default_dt_parser': gitea_ts_to_dt,
 }
 
 # API documentation:
