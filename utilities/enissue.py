@@ -1543,7 +1543,7 @@ def main():
                         assume_value = assume_values.get(save_option)
                         if assume_value is not None:
                             options[save_option] = assume_value
-                        save_option = None
+                            save_option = None
                         # else: the next arg will be the value.
                     elif arg.startswith("--"):
                         usage()
