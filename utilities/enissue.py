@@ -157,6 +157,14 @@ def debug(msg):
     if verbose:
         error("[debug] " + msg)
 
+def set_verbose(on):
+    global verbose
+    if on is True:
+        verbose = True
+    elif on is False:
+        verbose = True
+    else:
+        raise ValueError("on must be True or False.")
 
 def decode_safe(b):
     try:
@@ -282,8 +290,7 @@ class Repo:
 
     def __init__(
             self,
-            options,
-            caches_path=None,
+            options
         ):
         '''
         Keyword arguments:
@@ -321,15 +328,23 @@ class Repo:
             search_results_key -- If the URL described by
                 search_issues_url_fmt returns a dict, specify the key in
                 the dict that is a list of issues.
-        caches_path -- Store cached json files here: Specifically, in an
-            "issues" directory or other directory under the user and
-            repo directory. For example, if caches_path is None and uses
-            the default ~/.cache/enissue, the numbered json files
-            (and numbered folders containing timeline.json or other
-            connected data) for issues will appear in
-            "~/.cache/enissue/poikilos/EnlivenMinetest/issues". To set
-            it later, use the setCachesPath method.
+            caches_path -- Store cached json files here: Specifically,
+                in an "issues" directory or other directory under the
+                user and repo directory. For example, if caches_path is
+                None and uses the default ~/.cache/enissue, the
+                numbered json files (and numbered folders containing
+                timeline.json or other connected data) for issues will
+                appear in
+                "~/.cache/enissue/poikilos/EnlivenMinetest/issues". To
+                set it later, use the setCachesPath method.
+                This is the default behavior, and  the default is
+                os.path.join(userprofile, ".cache").
+            single_cache -- Store all issue data in one flat directory
+                structure (except for issues and other subdirectories
+                which mimic the web API routes). Only use this option
+                if you set a different single_cache for each repo!
         '''
+        self.ERROR_410 = "Error 410"
         repo_url = options.get('repo_url')
         debug("* using URL {}".format(repo_url))
         if repo_url is None:
@@ -414,12 +429,27 @@ class Repo:
                              " required. The URL \"{}\" is not"
                              " accessible, so you may have exceeded the"
                              " rate limit and be blocked temporarily")
-        if caches_path is None:
-            caches_path = os.path.join(Repo.profile, ".cache",
-                                       "enissue")
+
+        _caches_path = options.get('caches_path')
+        _single_cache = options.get('single_cache')
+        if _caches_path is not None:
+            if _single_cache is not None:
+                raise ValueError("You can't set both caches_path and"
+                                 " single_cache. The caches_path option"
+                                 " creates a"
+                                 " <caches_path>/<user>/<repo>/"
+                                 " structure.")
+            self.setCachesPath(_caches_path, flat=False)
+        elif _single_cache is not None:
+            self.setCachesPath(_single_cache, flat=True)
+        else:
+            _caches_path = os.path.join(Repo.profile, ".cache",
+                                        "enissue")
+            self.setCachesPath(_caches_path, flat=False)
+        del _caches_path
+        del _single_cache
         self.remote_user = remote_user
         self.repo_name = repo_name
-        self.setCachesPath(caches_path)
 
         self.search_results_key = options.get('search_results_key')
         self.page = options.get('page')
@@ -459,18 +489,26 @@ class Repo:
         self.issues = None
         self.last_query_s = None
 
-    def setCachesPath(self, caches_path):
+    def setCachesPath(self, path, flat=True):
         '''
-        This directory will contain <remote_user>/<repo_name>/
-        which will contain issues/ and potentially other directories
-        that mimic the API web URL structure (See _get_issues code for
-        subdirectories and files).
+        This repo cache directory will be <remote_user>/<repo_name>/
+        unless flat is True, in which case it will be path.
+
+        The repo cache will contain issues/ and potentially other
+        directories that mimic the API web URL structure (See
+        _get_issues code for subdirectories and files).
         '''
-        self.caches_path = caches_path
-        self.c_remote_user_path = os.path.join(self.caches_path,
-                                               self.remote_user)
-        self.c_repo_path = os.path.join(self.c_remote_user_path,
-                                        self.repo_name)
+        if path is None:
+            raise ValueError("path must not be None")
+        self.caches_path = path
+        if flat:
+            self.c_remote_user_path = self.caches_path
+            self.c_repo_path = self.caches_path
+        else:
+            self.c_remote_user_path = os.path.join(self.caches_path,
+                                                   self.remote_user)
+            self.c_repo_path = os.path.join(self.c_remote_user_path,
+                                            self.repo_name)
 
     def _get_issues(self, options, query=None, issue_no=None,
                     search_terms=[]):
@@ -515,6 +553,7 @@ class Repo:
         ValueError if query is not None and issue_no is not None.
 
         '''
+        quiet = options.get('quiet') is True
         debug("get_issues...")
         debug("  options={}".format(options))
         debug("  query={}".format(query))
@@ -574,6 +613,11 @@ class Repo:
 
         # print("c_issues_name: {}".format(c_issues_name))
         # print("query_part: {}".format(query_part))
+        if self.c_repo_path is None:
+            raise RuntimeError("self.c_repo_path must not be None."
+                               " The __init__ method should call"
+                               " setCachesPath so this should never"
+                               " happen!")
         c_issues_path = os.path.join(self.c_repo_path, c_issues_name)
         make_list = False
         c_path = c_issues_path
@@ -639,10 +683,12 @@ class Repo:
                 max_cache_d_s = "never_expire"
                 expires_s = "never_expire"
             if (refresh is not True) and (is_fresh or never_expire):
-                print(p+"Loading cache: \"{}\"".format(c_path))
+                if not quiet:
+                    print(p+"Loading cache: \"{}\"".format(c_path))
                 debug(p+"Cache time limit: {}".format(max_cache_delta))
                 debug(p+"  for URL: {}".format(query_s))
-                print(p+"Cache expires: {}".format(expires_s))
+                if not quiet:
+                    print(p+"Cache expires: {}".format(expires_s))
                 with open(c_path) as json_file:
                     result = json.load(json_file)
                 max_issue = None
@@ -674,25 +720,29 @@ class Repo:
                 return results, None
             else:
                 if refresh is True:
-                    print(p+"Refreshing...".format(max_cache_delta))
+                    if not quiet:
+                        print(p+"Refreshing...".format(max_cache_delta))
                 else:
-                    print(p+"Cache time limit: {}".format(max_cache_delta))
-                    print(p+"The cache has expired: \"{}\"".format(
-                        c_path
-                    ))
+                    if not quiet:
+                        print(p+"Cache time limit: {}".format(max_cache_delta))
+                        print(p+"The cache has expired: \"{}\"".format(
+                            c_path
+                        ))
         else:
-            print(p+"There is no cache for \"{}\"".format(
-                c_path
-            ))
+            if not quiet:
+                print(p+"There is no cache for \"{}\"".format(
+                    c_path
+                ))
 
         try:
             debug(p+"Query URL (query_s): {}".format(query_s))
             response = request.urlopen(query_s)
         except HTTPError as e:
-            if "Error 410" in str(e):
+            if self.ERROR_410 in str(e):
                 return (
                     None,
-                    "The issue was apparently deleted (response 410)."
+                    ("The issue was apparently deleted ({})."
+                     "".format(self.ERROR_410))
                 )
             msg = str(e) + ": " + self.rateLimitFmt.format(query_s)
             return None, msg
@@ -720,7 +770,7 @@ class Repo:
                           quiet=False):
         '''
         This gets the cached page using the cache location
-        cache directory specified in self.caches_path and further
+        cache directory specified in options['caches_path'] and further
         narrowed down to self.c_repo_path then narrowed down using the
         URL. For example, https://api.github.com/repos/poikilos/EnlivenMinetest/issues?q=page:1
 
@@ -729,6 +779,10 @@ class Repo:
         which may contain files like "issues_page=1.json"
         and
         ~/.cache/enissue/poikilos/EnlivenMinetest/
+
+        ...unless options['single_path'] is set: then there will be no
+        automatically-created subdirectories (except for the usual
+        "issues" and other directories below that one described below).
 
         https://api.github.com/repos/poikilos/EnlivenMinetest/issues/515/timeline
 
