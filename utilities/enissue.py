@@ -30,6 +30,7 @@ import sys
 import json
 import os
 import platform
+import copy
 from datetime import datetime, timedelta
 python_mr = sys.version_info.major
 try:
@@ -139,9 +140,17 @@ apis["Gitea"] = gitea_defaults
 
 def tests():
     for name, options in apis.items():
-        assert(options.get('default_query') is not None)
-        assert(isinstance(options.get('default_query'), dict))
-        assert(options['default_query'].get('state') is not None)
+        if options.get('default_query') is None:
+            raise AssertionError("There must be a 'default_query'"
+                                 " in apis['{}']."
+                                 "".format(name))
+        if not isinstance(options.get('default_query'), dict):
+            raise AssertionError(" apis['{}']['default_query']"
+                                 " must be a dict."
+                                 "".format(name))
+        for k,v in options['default_query']:
+            if v is None:
+                raise AssertionError("{} is None".format(k))
 
 
 def debug(msg):
@@ -507,6 +516,10 @@ class Repo:
         debug("get_issues...")
         debug("  options={}".format(options))
         debug("  query={}".format(query))
+        if query is not None:
+            for k,v in query.items():
+                if v is None:
+                    raise ValueError("{} is None.".format(k))
         debug("  issue_no={}".format(issue_no))
         debug("  search_terms={}".format(search_terms))
         p = self.log_prefix
@@ -1398,10 +1411,14 @@ def main():
     msg = None
     if (mode != "issue"):
         query = None
-        if (state != repo.default_query.get('state')):
-            query = {
-                'state': state
-            }
+        if repo.default_query is not None:
+            if (state != repo.default_query.get('state')):
+                if state is not None:
+                    query = {
+                        'state': state
+                    }
+                else:
+                    query = copy.deepcopy(repo.default_query)
         results, msg = repo.load_issues(options, query=query,
                                    search_terms=search_terms)
         debug("* done load_issues for list")
@@ -1566,7 +1583,7 @@ def main():
             else:
                 print()
                 print()
-                print("To view details, type")
+                print("To view details of one of these issues, type")
                 print("    ./" + me)
                 print("followed by a number.")
     else:
