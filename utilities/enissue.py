@@ -659,9 +659,10 @@ class Repo:
                     if issue_n is not None:
                         if (max_issue is None) or (issue_n > max_issue):
                             max_issue = issue_n
-                print("  The highest cached issue# is {}.".format(
-                    max_issue
-                ))
+                if issue_no is None:
+                    # Only mention this if more than one issue
+                    debug("  The highest cached issue# (this run)"
+                          " is {}.".format(max_issue))
                 debug("  returning {} issue(s)".format(len(results)))
                 return results, None
             else:
@@ -1102,10 +1103,10 @@ class Repo:
                           "".format(reactions_url))
                     print(left_margin + str(e))
                     print(left_margin + "{}".format(reac_data))
-
+        print("")
+        print(left_margin+"labels: {}".format(labels_s))
         closed_by = issue_data.get('closed_by')
         closed_at = issue_data.get('closed_at')
-        print(line_fmt.format("labels:", labels_s))
         if (closed_by is not None) or (closed_at is not None):
             # INFO: closed_by may be present even if reopened
             # (determine this by getting 'state').
