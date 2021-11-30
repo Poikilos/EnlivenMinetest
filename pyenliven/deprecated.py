@@ -1,8 +1,9 @@
 #!/usr/bin/env
 class Repo:
     '''
-    The real one is in enliven.py
+    WARNING: The real Repo class is in enliven.py
     '''
+    print(__doc__)
     pass
 
 class GiteaRepo(Repo):
