@@ -12,7 +12,7 @@ Known issues:
 - Get attachments from GitHub
 - Get inline files from GitHub (such as pasted images)
 
-Options:")
+Options:
 --cache-base <dir>   Set the directory for cached files.
 --verbose            Enable verbose mode.
 --debug              Enable verbose mode (same as --debug).
@@ -737,15 +737,26 @@ class Repo:
         try:
             debug(p+"Query URL (query_s): {}".format(query_s))
             response = request.urlopen(query_s)
-        except HTTPError as e:
-            if self.ERROR_410 in str(e):
+        except HTTPError as ex:
+            msg = ex.reason
+            if ex.code == 410:
+                msg = ("The issue was apparently deleted ({})."
+                               "".format(self.ERROR_410))
                 return (
                     None,
-                    ("The issue was apparently deleted ({})."
-                     "".format(self.ERROR_410))
+                    {
+                        'code': ex.code,
+                        'reason': msg,
+                    }
                 )
-            msg = str(e) + ": " + self.rateLimitFmt.format(query_s)
-            return None, msg
+            # msg = str(ex) + ": " + self.rateLimitFmt.format(query_s)
+            return (
+                None,
+                {
+                    'code': ex.code,
+                    'reason': msg,
+                }
+            )
         response_s = decode_safe(response.read())
         if not os.path.isdir(self.c_repo_path):
             os.makedirs(self.c_repo_path)
@@ -769,7 +780,11 @@ class Repo:
     def getCachedJsonDict(self, url, refresh=False, never_expire=False,
                           quiet=False):
         '''
-        This gets the cached page using the cache location
+        Get a cached page, unless the 2nd returned param is not None in
+        which case that will contain a standard web response 'code'
+        (RFC 2616) number and 'reason' string.
+
+        The cached page is obtained using the cache location
         cache directory specified in options['caches_path'] and further
         narrowed down to self.c_repo_path then narrowed down using the
         URL. For example, https://api.github.com/repos/poikilos/EnlivenMinetest/issues?q=page:1
@@ -910,21 +925,34 @@ class Repo:
                               " and will be overwritten if loads"
                               "".format(c_path))
                         result = None
+                        # Do NOT set err NOR set to a tuple (A result
+                        # of None means it will load from the web
+                        # below)!
         if result is not None:
-            return result
+            return result, None
 
-        res = request.urlopen(url)
-        data_s = decode_safe(res.read())
-        parent = os.path.split(c_path)[0]
-        if not os.path.isdir(parent):
-            os.makedirs(parent)
-        data = json.loads(data_s)
-        # Only save if loads didn't raise an exception.
-        with open(c_path, 'w') as outs:
-            outs.write(data_s)
-            debug(p+"Wrote {}".format(c_path))
+        try:
+            res = request.urlopen(url)
+            data_s = decode_safe(res.read())
+            parent = os.path.split(c_path)[0]
+            if not os.path.isdir(parent):
+                os.makedirs(parent)
+            data = json.loads(data_s)
+            # Only save if loads didn't raise an exception.
+            with open(c_path, 'w') as outs:
+                outs.write(data_s)
+                debug(p+"Wrote {}".format(c_path))
+        except HTTPError as ex:
+            return (
+                None,
+                {
+                    'code': ex.code,
+                    'reason': ex.reason,
+                    'headers': ex.headers,
+                }
+            )
 
-        return data
+        return data, None
 
 
     def show_issue(self, issue, refresh=False, never_expire=False):
@@ -932,6 +960,21 @@ class Repo:
         Display an issue dictionary as formatted text after getting the
         issue body and other data from the internet. Gather all of the
         additional metadata as well.
+
+        Sequential arguments:
+        issue -- Provide a partial issue dict such as from a list result
+            page that can be used to identify and obtain the full issue.
+
+        Returns:
+        (full_issue_dict, None)
+        or
+        (full_issue_dict, error_dict) (where error_dict is something
+        non-fatal such as missing timeline)
+        or
+        (None, error_dict)
+        where (in both cases) error_dict contains a 'reason' key
+        and possibly a 'code' key (standard website error number, or
+        else 'code' is not present).
         '''
         p = self.log_prefix
         print("")
@@ -941,11 +984,14 @@ class Repo:
         print("")
         issue_data = issue
         html_url = issue['html_url']
-        issue_data = self.getCachedJsonDict(
+        issue_data, err = self.getCachedJsonDict(
             issue["url"],
             refresh=refresh,
             never_expire=never_expire,
         )
+
+        if err is not None:
+            return None, err
 
         markdown = issue_data.get("body")
         # ^ It is (always?) present but allowed to be None by GitHub!
@@ -1016,13 +1062,17 @@ class Repo:
         '''
         this_tmln_json_url = issue_data.get('timeline_url')
         data = []
+        msg = None
         if this_tmln_json_url is not None:
-            tmln_data = self.getCachedJsonDict(
+            tmln_data, err = self.getCachedJsonDict(
                 this_tmln_json_url,
                 refresh=refresh,
                 quiet=True,
                 never_expire=never_expire,
             )
+            if err is not None:
+                msg = ("Accessing the timeline URL failed: {}"
+                       "".format(err.get('reason')))
             # Example:
             # <https://api.github.com/repos/poikilos/EnlivenMinetest/
             # issues/202/timeline>
@@ -1038,18 +1088,30 @@ class Repo:
                     rn=self.repo_name,
                 )
             if comments_url is not None:
-                cmts_data = self.getCachedJsonDict(
+                cmts_data, err = self.getCachedJsonDict(
                     comments_url,
                     refresh=refresh,
                     quiet=True,
                     never_expire=never_expire,
                 )
+                if err is not None:
+                    msg = ("Accessing the timeline URL failed: {}"
+                           "".format(err.get('reason')))
+                    return (
+                        issue_data,
+                        {
+                            'code': err.code,
+                            'reason': msg,
+                            'headers': err.headers,
+                        }
+                    )
                 data = cmts_data
             else:
-                error("WARNING: comments={} but there is no"
-                      " comments_url in:"
-                      "".format(comments))
-                error(json.dumps(issue_data, indent=4, sort_keys=True))
+                msg = ("WARNING: comments={} but there is no"
+                       " comments_url in:"
+                       "".format(comments))
+                # error(msg)
+                # error(json.dumps(issue_data, indent=4, sort_keys=True))
 
         for evt in data:
             user = evt.get('user')
@@ -1134,12 +1196,15 @@ class Repo:
                 # Example: <https://api.github.com/repos/poikilos/
                 #   EnlivenMinetest/
                 #   issues/comments/968357490/reactions>
-                reac_data = self.getCachedJsonDict(
+                reac_data, err = self.getCachedJsonDict(
                     reactions_url,
                     refresh=refresh,
                     quiet=True,
                     never_expire=never_expire,
                 )
+                if err is not None:
+                    error("Accessing the reactions URL failed: {}"
+                          "".format(err.get('reason')))
                 if reac_data is not None:
                     for reac in reac_data:
                         reac_user = reac.get('user')
@@ -1181,7 +1246,13 @@ class Repo:
 
         print("")
         print("")
-        return True
+        err = None
+        if msg is not None:
+            err = {
+                'reason': msg,
+            }
+        return issue_data, err
+
 
     def load_issues(self, options, query=None, issue_no=None,
                     search_terms=None):
@@ -1284,6 +1355,31 @@ class Repo:
             # show_issue method instead).
 
         return {'issue':matching_issue, 'count':match_count}
+
+    def create_issue(self, src_issue, src_repo):
+        '''
+        Remotely create a new issue using the web API.
+
+        Sequential arguments:
+        src_issue -- The issue dictionary for one issue in the format of
+            the src_repo.
+        src_repo -- Provide the Repo object that originated the data
+            for the purpose of translating the issue format.
+        '''
+        raise NotImplementedError("create_issue")
+
+
+    def update_issue(self, src_issue, src_repo):
+        '''
+        Remotely update an existing issue using the web API.
+
+        Sequential arguments:
+        src_issue -- The issue dictionary for one issue in the format of
+            the src_repo.
+        src_repo -- Provide the Repo object that originated the data
+            for the purpose of translating the issue format.
+        '''
+        raise NotImplementedError("update_issue")
 
 
 def main():

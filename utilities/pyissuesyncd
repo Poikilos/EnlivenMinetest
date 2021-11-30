@@ -97,16 +97,23 @@ def get_issue(repo, options, issue_no):
     )
     if results is None:
         if err is not None:
-            if repo.ERROR_410 in err:
-                # The issue was deleted
+            if err.get('code') == 410:
+                # error("The issue was deleted")
                 pass
-            error(err)
+            elif err.get('code') == 404:
+                # error("The issue doesn't exist")
+                pass
             return None, err
         else:
             msg = ("Unknown error: Results should not be None unless"
                    " there is an error (issue_no={})."
                    "".format(issue_no))
-            return None, msg
+            return (
+                None,
+                {
+                    'reason': msg,
+                }
+            )
     elif not isinstance(results, list):
         raise RuntimeError("Results must be a list even if there is"
                            " only one result.")
@@ -133,20 +140,37 @@ def get_issue(repo, options, issue_no):
 
 def start_issuesyncd(src_options, dst_options):
     # src_never_expire = src_options.get('never_expire') is True
-    issue_no = 1
+    non_issue = 1
+    issue_no = non_issue - 1
     # while True:
-    src_repo = Repo(src_options)
-    src_issue, err = get_issue(src_repo, src_options, issue_no)
-    print("src_issue:")
-    print(json.dumps(src_issue, indent=2))
+    while issue_no < non_issue: # for debug only
+        issue_no += 1
+        src_repo = Repo(src_options)
+        src_issue, err = get_issue(src_repo, src_options, issue_no)
+        if err is not None:
+            error("Error accessing source issue {}: {}: {}"
+                  "".format(issue_no, err.get('code'),
+                            err.get('reason')))
+            continue
 
-    enissue.set_verbose(True)
-    dst_repo = Repo(dst_options)
-    dst_issue, err = get_issue(dst_repo, dst_options, issue_no)
-    print("dst_issue:")
-    print(json.dumps(dst_issue, indent=2))
+        print("[pyissuesyncd] src_issue:")
+        print(json.dumps(src_issue, indent=2))
 
-    issue_no += 1
+        enissue.set_verbose(True)
+        dst_repo = Repo(dst_options)
+        dst_issue, err = get_issue(dst_repo, dst_options, issue_no)
+        print("[pyissuesyncd] dst_issue:")
+        print(json.dumps(dst_issue, indent=2))
+        if err is not None:
+            if err.get('code') == 404:
+                dst_repo.create_issue(src_issue, src_repo)
+                continue
+            error("Error accessing destination issue {}: {}: {}"
+                  "".format(issue_no, err.get('code'),
+                            err.get('reason')))
+            continue
+        dst_repo.update_issue(src_issue, src_repo)
+
 
 def usage():
     print(__doc__)
