@@ -1,0 +1,216 @@
+#!/usr/bin/env python3
+'''
+Title: pyissuesyncd
+(c) 2021 Jake "Poikilos" Gustafson
+
+
+Purpose:
+This python-based daemon synchronizes issues (one-way) from one
+repository to another.
+
+
+License:
+See the license file in the included EnlivenMinetest directory or at
+[EnlivenMinetest](https://github.com/poikilos/EnlivenMinetest)
+
+
+Outputs:
+data_directory: The data directory for this service daemon is
+os.path.join(profile, ".cache", "pyissuesyncd").
+
+
+required arguments:
+--dst-repo (or set the DST_REPO environment variable)
+    Issues and dependent data will be overwritten at this API URL.
+
+
+optional arguments:
+Environment variables get be set, but a CLI argument will override the
+corresponding variable noted below in all caps.
+
+The two _CACHE directories below are used as the single_cache option
+for the Repo (see enissue.py's Repo class for documentation).
+
+--src-cache: Set the directory to store a cached version of the source repo's data.
+* defaults to SRC_CACHE or os.path.join(data_directory, "source")
+
+--dst-cache: Set the directory to store a cached version of the destination repo's data.
+* defaults to DST_CACHE or os.path.join(data_directory, "destination")
+
+
+Examples:
+DST_REPO=https://example.com/git/repo pyissuesyncd
+pyissuesyncd --dst-repo https://example.com/git/repo
+
+'''
+import os
+import sys
+import json
+# see <https://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python>
+def error(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+
+myFilePath = os.path.realpath(__file__)
+me = os.path.basename(__file__)
+myDir = os.path.dirname(myFilePath)
+
+try:
+    import enissue
+except ModuleNotFoundError as ex:
+    PATH = os.environ.get("PATH")
+    found_d = None
+    if PATH is not None:
+        more_paths = PATH.split(os.pathsep)
+        # ^ pathsep such as ':' (NOT dirsep such as '/'!)
+        more_paths
+        for this_d in more_paths:
+            tryF = os.path.join(this_d, "enissue.py")
+            if os.path.isfile(tryF):
+                found_d = this_d
+                break
+    if found_d is not None:
+        sys.path.append(found_d)
+        print("* detected enissue.py in {}".format(found_d))
+        # print("path: {}".format(sys.path))
+
+        try:
+            import eni
+        except ModuleNotFoundError as ex2:
+            error(ex2)
+            print("{} must be in the same directory as enissue.py or in"
+                  " PATH".format(me))
+            sys.exit(1)
+    else:
+        print("{} must be in the same directory as enissue.py or in"
+              " PATH".format(me))
+        raise ex
+
+from enissue import Repo
+
+data_directory = os.path.join(Repo.profile, ".cache", "pyissuesyncd")
+
+def get_issue(repo, options, issue_no):
+    results, err = repo.load_issues(
+        options,
+        issue_no=issue_no,
+    )
+    if results is None:
+        if err is not None:
+            if repo.ERROR_410 in err:
+                # The issue was deleted
+                pass
+            error(err)
+            return None, err
+        else:
+            msg = ("Unknown error: Results should not be None unless"
+                   " there is an error (issue_no={})."
+                   "".format(issue_no))
+            return None, msg
+    elif not isinstance(results, list):
+        raise RuntimeError("Results must be a list even if there is"
+                           " only one result.")
+    elif len(results) > 1:
+        raise RuntimeError("Results should have"
+                           " only one result.")
+    issue = results[0]
+    '''
+    match = repo.get_match(
+        mode,
+        issue_no=issue_no,
+        match_all_labels_lower=match_all_labels_lower,
+    )
+    matching_issue = match['issue']
+    if matching_issue is not None:
+        repo.show_issue(
+            matching_issue,
+            refresh=False,
+            never_expire=options.get('never_expire') is True,
+        )
+    '''
+    return issue, None
+
+
+def start_issuesyncd(src_options, dst_options):
+    # src_never_expire = src_options.get('never_expire') is True
+    issue_no = 1
+    # while True:
+    src_repo = Repo(src_options)
+    src_issue, err = get_issue(src_repo, src_options, issue_no)
+    print("src_issue:")
+    print(json.dumps(src_issue, indent=2))
+
+    enissue.set_verbose(True)
+    dst_repo = Repo(dst_options)
+    dst_issue, err = get_issue(dst_repo, dst_options, issue_no)
+    print("dst_issue:")
+    print(json.dumps(dst_issue, indent=2))
+
+    issue_no += 1
+
+def usage():
+    print(__doc__)
+
+if __name__ == "__main__":
+    src_options = {
+        'repo_url': "https://github.com/poikilos/EnlivenMinetest",
+        'never_expire': True,
+        'quiet': True,
+    }
+    dst_options = {
+        'never_expire': True,
+        'quiet': True,
+    }
+    DST_REPO = os.environ.get("DST_REPO")
+    if DST_REPO is not None:
+        dst_options['repo_url'] = DST_REPO
+        del DST_REPO
+    SRC_REPO = os.environ.get("SRC_REPO")
+    if DST_REPO is not None:
+        src_options['repo_url'] = SRC_REPO
+        del SRC_REPO
+
+    SRC_CACHE = os.environ.get("SRC_CACHE")
+    if SRC_CACHE is None:
+        SRC_CACHE = os.path.join(data_directory, "source")
+
+    DST_CACHE = os.environ.get("DST_CACHE")
+    if DST_CACHE is None:
+        DST_CACHE = os.path.join(data_directory, "destination")
+
+    prev_arg = None
+
+    manual_args = ['--dst-repo', '--src-repo', '--src-cache', '--dst-cache']
+
+    for arg in sys.argv[1:]:
+        if prev_arg == "--dst-repo":
+            dst_options['repo_url'] = arg
+        elif prev_arg == "--src-repo":
+            src_options['repo_url'] = arg
+        elif prev_arg == "--src_cache":
+            SRC_CACHE = arg
+        elif prev_arg == "--dst_cache":
+            DST_CACHE = arg
+        elif arg in manual_args:
+            pass
+        else:
+            usage()
+            error("Error: The argument is not valid: {}".format(arg))
+            sys.exit(1)
+        prev_arg = arg
+
+    src_options['single_cache'] = SRC_CACHE
+    dst_options['single_cache'] = DST_CACHE
+
+
+    error("SRC_REPO (--src-repo) is {}"
+          "".format(src_options.get('repo_url')))
+    error("DST_REPO (--dst-repo) is {}"
+          "".format(dst_options.get('repo_url')))
+    if dst_options.get('repo_url') is None:
+        error("Error: You must set DST_REPO in the environment or specify a url after --dst-repo")
+        sys.exit(1)
+
+    start_issuesyncd(src_options, dst_options)
+
+
