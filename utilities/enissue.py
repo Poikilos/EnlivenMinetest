@@ -400,8 +400,9 @@ class Repo:
                 structure (except for issues and other subdirectories
                 which mimic the web API routes). Only use this option
                 if you set a different single_cache for each repo!
+            api_id -- a key in the global apis dict which determines the
+                defaults for accessing the web API.
         '''
-        self.ERROR_410 = "Error 410"
         repo_url = options.get('repo_url')
         debug("* using URL {}".format(repo_url))
         if repo_url is None:
@@ -413,6 +414,10 @@ class Repo:
         self.api_id = options.get('api_id')
         if urlParts[-2] == "repo.or.cz":
             self.remote_user = "almikes@aol.com"  # Wuzzy2
+            if self.api_id is not None:
+                if self.api_id != 'git_instaweb':
+                    error("WARNING: URL has [] but self.api_id was {}"
+                          "".format(urlParts[-2], self.api_id))
             self.api_id = "git_instaweb"
             # Such as https://repo.or.cz/minetest_treasurer.git
             # - locally, git instaweb is controlled via:
@@ -448,7 +453,10 @@ class Repo:
             debug("* using specified API: {}".format(self.api_id))
         if self.api_id is None:
             self.api_id = "Gitea"
-            error("  * assuming API is {}".format(self.api_id))
+            if "github.com" in repo_url.lower():
+                error("WARNING: assuming Gitea but URL has github.com.")
+            error("  * assuming API is {} for {}"
+                  "".format(self.api_id, ))
         if self.api_id is None:
             raise RuntimeError("api_id is not set")
         api_meta = apis.get(self.api_id)
@@ -566,11 +574,16 @@ class Repo:
         name -- a well-known issue key such as 'body' that will be
                 translated to an API-specific key.
         '''
-        key = self.options['known_issue_keys'].get(name)
+        known_issue_keys = self.options.get('known_issue_keys')
+        if known_issue_keys is None:
+            raise RuntimeError("known_issue_keys shouldn't be None.")
+        key = known_issue_keys.get(name)
         if key is None:
             raise KeyError("{} is not a well-known key in"
                            " known_issue_keys. Try _getIssueValue to"
-                           " forcefully get a value.")
+                           " forcefully get a value but only if you"
+                           " ran load_issues first--otherwise use"
+                           " getKnown.")
         return key
 
     def _getIssueValue(self, index, key):
@@ -581,15 +594,36 @@ class Repo:
         '''
         return self.issues[index][key]
 
-    def getKnown(self, index, name):
+    def _getKnownAt(self, index, name):
         '''
         Sequential arguments:
         index -- an index in self.issues
         name -- a well-known issue key such as 'body' that will be
                 translated to an API-specific key.
         '''
+        if self.issues is None:
+            raise RuntimeError("You cannot use _getKnownAt when there"
+                               " no issues loaded (try getKnown).")
         key = self.getKnownKey(name)
+        if key is None:
+            raise RuntimeError("getKnownKey should not be None.")
         return self._getIssueValue(index, key)
+
+    def getKnown(self, issue, name):
+        '''
+        Sequential arguments:
+        issue -- a full issue dict such as obtained via get_issue
+        name -- a well-known issue key such as 'body' that will be
+                translated to an API-specific key.
+        '''
+        if issue is None:
+            raise ValueError("issue is None but must be an issue dict"
+                             " such as obtained via get_issue.")
+        if not isinstance(issue, dict):
+            raise ValueError("issue must be an issue dict such as"
+                             " obtained via get_issue.")
+        key = self.getKnownKey(name)
+        return issue[key]
 
 
     def setCachesPath(self, path, flat=True):
@@ -653,7 +687,10 @@ class Repo:
         search_terms -- Search for each of these terms.
 
         Returns:
-        A 2-long tuple of: (results, error string (None if no error)).
+        A 2-long tuple of: (results, error_dict) where error_dict is
+        None if there is no error, otherwise contains a 'reason',
+        possibly a 'code' (standard website error code), and possibly a
+        'url'.
 
         Raises:
         ValueError if query is not None and issue_no is not None.
@@ -847,12 +884,14 @@ class Repo:
             msg = ex.reason
             if ex.code == 410:
                 msg = ("The issue was apparently deleted ({})."
-                               "".format(self.ERROR_410))
+                               "".format(ex.reason))
                 return (
                     None,
                     {
                         'code': ex.code,
                         'reason': msg,
+                        'headers': ex.headers,
+                        'url': query_s,
                     }
                 )
             # msg = str(ex) + ": " + self.rateLimitFmt.format(query_s)
@@ -861,12 +900,15 @@ class Repo:
                 {
                     'code': ex.code,
                     'reason': msg,
+                    'headers': ex.headers,
+                    'url': query_s,
                 }
             )
         response_s = decode_safe(response.read())
         if not os.path.isdir(self.c_repo_path):
             os.makedirs(self.c_repo_path)
-        print(p+"Saving issues cache: {}".format(c_path))
+        if not quiet:
+            print(p+"Saving issues cache: {}".format(c_path))
         with open(c_path, "w") as outs:
             outs.write(response_s)
         result = json.loads(response_s)
@@ -1055,6 +1097,7 @@ class Repo:
                     'code': ex.code,
                     'reason': ex.reason,
                     'headers': ex.headers,
+                    'url': url,
                 }
             )
 
@@ -1372,14 +1415,14 @@ class Repo:
                                  " only one issue because a single"
                                  " issue has its own URL with only"
                                  " one result (not a list).")
-        results, msg = self._get_issues(
+        results, err = self._get_issues(
             options,
             query=query,
             issue_no=issue_no,
             search_terms=search_terms,
         )
         self.issues = results
-        return results, msg
+        return results, err
 
     def get_match(self, mode, issue_no=None, match_all_labels_lower=[]):
         '''

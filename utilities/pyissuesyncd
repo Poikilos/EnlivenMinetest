@@ -141,25 +141,86 @@ def get_issue(repo, options, issue_no):
 
 def start_issuesyncd(src_options, dst_options):
     # src_never_expire = src_options.get('never_expire') is True
-    non_issue = 1
-    issue_no = non_issue - 1
-    # while True:
+    max_issue = src_options.get('max_issue')
+    if max_issue is None:
+        max_issue = 1000
+        error("WARNING: SRC_MAX_ISSUE set to default: {}"
+              "".format(max_issue))
+    else:
+        max_issue = int(max_issue)
+
+    issue_no = 0  # This is incremented to 1 before use.
+    # issue_no = max_issue - 1  # debug only
     src_res_code = 0
-    # while issue_no < non_issue: # for debug only
-    while src_res_code != 404:
+    end_codes = [404, 403]
+    # while src_res_code not in end_codes:
+    while True:
+    # while (issue_no + 1) <= max_issue: # for debug only
         issue_no += 1
+        if max_issue is not None:
+            if issue_no > max_issue:
+                error("* ending due to setting: --src-max-issue={}"
+                      " (can also be set by SRC_MAX_ISSUE env var)"
+                      "".format({}))
+                break
         src_repo = Repo(src_options)
         src_issue, err = get_issue(src_repo, src_options, issue_no)
+        deleted = False
         if err is not None:
+            '''
             error("Error accessing source issue {}: {}: {}"
                   "".format(issue_no, err.get('code'),
                             err.get('reason')))
-            continue
+            '''
+            src_res_code = err.get('code')
+            url = err.get('url')
+            if src_res_code in end_codes:
+                if src_res_code == 403:
+                    error("#{}: stopping due to error {} ({})"
+                          "".format(issue_no, err.get('code'),
+                                    err.get('reason')))
+                    # error("  * reason: {}".format())
+                    # error("  * headers: {}".format(err.get('headers')))
+                    break
+                elif src_res_code == 404:
+                    error("#{}: Error 404: There is no {}"
+                          " so the end of the issues may have been"
+                          " reached.".format(issue_no, url))
+                    error("  * reason: {}".format(err.get('reason')))
+                    # error("  * headers: {}".format(err.get('headers')))
+                    continue
+                elif src_res_code == 410:
+                    error("#{}: The issue seems to have been deleted."
+                          "".format(issue_no))
+                    error("  * reason: {}".format(err.get('reason')))
+                    # error("  * headers: {}".format(err.get('headers')))
+                    deleted = False
+                    # TODO: delete on dest (carefully!)
+                    continue
+                else:
+                    error("#{}: stopping due to error code {}"
+                          "".format(issue_no, src_res_code))
+                break
+            else:
+                error("#{}: continuing anyway but got error code {}"
+                      "".format(issue_no, src_res_code))
 
+
+            if src_issue is None:
+                if src_res_code not in end_codes:
+                    error("#{}: Skipping due to unprocessed error {}"
+                          "".format(issue_no, src_res_code))
+                else:
+                    error("#{}: Stopping due to unprocessed error {}"
+                          "".format(issue_no, src_res_code))
+                continue
+            else:
+                error("However, an issue was returned.")
+        error("Got issue {}".format(issue_no))
         # Example: ~/.cache/pyissuesyncd/source/issues/1.json
         src_dt_parser = src_repo.options['default_dt_parser']
-        src_created_dt_s = src_repo.getKnown(0, 'created_at')
-        src_updated_dt_s = src_repo.getKnown(0, 'updated_at')
+        src_created_dt_s = src_repo.getKnown(src_issue, 'created_at')
+        src_updated_dt_s = src_repo.getKnown(src_issue, 'updated_at')
         src_updated_dt = src_dt_parser(src_updated_dt_s)
         src_updated_ts = int(src_updated_dt.strftime("%s"))
         # ^ See <https://stackoverflow.com/questions/19801727/convert-
@@ -170,12 +231,42 @@ def start_issuesyncd(src_options, dst_options):
         '''
         # print(json.dumps(src_issue, indent=2))
 
-        enissue.set_verbose(True)
+        # enissue.set_verbose(True)
         dst_repo = Repo(dst_options)
         dst_issue, err = get_issue(dst_repo, dst_options, issue_no)
+        if err is not None:
+            dst_res_code = err.get('code')
+            url = err.get('url')
+            '''
+            if dst_res_code in end_codes:
+                if dst_res_code == 403:
+                    error("* stopping due to: {}"
+                          "".format(err.get('reason')))
+                    break
+                elif dst_res_code == 404:
+                    error("* 404: There is no issue {} at {} so the end"
+                          " of the issues may have been reached."
+                          "".format(issue_no, url))
+                    error("  * reason: {}".format(err.get('reason')))
+                    # error("  * headers: {}".format(err.get('headers')))
+                    continue
+                elif dst_res_code == 410:
+                    error(err.get('reason'))
+                    error("* Issue {} seems to have been deleted."
+                          "".format(issue_no))
+                    continue
+                break
+            '''
+            if dst_issue is None:
+                # TODO: write the issue
+                continue
+        if dst_issue is None:
+            raise RuntimeError("dst_issue shouldn't be None when error"
+                               " is None.")
+
         dst_dt_parser = dst_repo.options['default_dt_parser']
-        dst_created_dt_s = dst_repo.getKnown(0, 'created_at')
-        dst_updated_dt_s = dst_repo.getKnown(0, 'updated_at')
+        dst_created_dt_s = dst_repo.getKnown(dst_issue, 'created_at')
+        dst_updated_dt_s = dst_repo.getKnown(dst_issue, 'updated_at')
         dst_updated_dt = dst_dt_parser(dst_updated_dt_s)
         dst_updated_ts = int(dst_updated_dt.strftime("%s"))
         # ^ See <https://stackoverflow.com/questions/19801727/convert-
@@ -185,7 +276,8 @@ def start_issuesyncd(src_options, dst_options):
               "".format(issue_no, dst_updated_ts, dst_updated_dt))
         '''
         # Example: ~/.cache/pyissuesyncd/destination/issues/1.json
-        break  # for debug only
+        # break  # for debug only
+
         continue  # for debug only
         # print("  * dst_issue:")
         # print(json.dumps(dst_issue, indent=2))
@@ -211,31 +303,36 @@ if __name__ == "__main__":
         'repo_url': "https://github.com/poikilos/EnlivenMinetest",
         'never_expire': True,
         'quiet': True,
+        'api_id': "GitHub",
     }
     dst_options = {
         'never_expire': True,
         'quiet': True,
+        'api_id': "Gitea",
     }
-    DST_REPO = os.environ.get("DST_REPO")
+    DST_REPO = os.environ.get('DST_REPO')
     if DST_REPO is not None:
         dst_options['repo_url'] = DST_REPO
         del DST_REPO
-    SRC_REPO = os.environ.get("SRC_REPO")
+    SRC_REPO = os.environ.get('SRC_REPO')
     if DST_REPO is not None:
         src_options['repo_url'] = SRC_REPO
         del SRC_REPO
 
-    SRC_CACHE = os.environ.get("SRC_CACHE")
+    SRC_CACHE = os.environ.get('SRC_CACHE')
     if SRC_CACHE is None:
         SRC_CACHE = os.path.join(data_directory, "source")
 
-    DST_CACHE = os.environ.get("DST_CACHE")
+    DST_CACHE = os.environ.get('DST_CACHE')
     if DST_CACHE is None:
         DST_CACHE = os.path.join(data_directory, "destination")
 
+    SRC_MAX_ISSUE = os.environ.get('SRC_MAX_ISSUE')
+
     prev_arg = None
 
-    manual_args = ['--dst-repo', '--src-repo', '--src-cache', '--dst-cache']
+    manual_args = ['--dst-repo', '--src-repo', '--src-cache',
+                   '--dst-cache', '--src-max-issue']
 
     for arg in sys.argv[1:]:
         if prev_arg == "--dst-repo":
@@ -246,6 +343,8 @@ if __name__ == "__main__":
             SRC_CACHE = arg
         elif prev_arg == "--dst_cache":
             DST_CACHE = arg
+        elif prev_arg == "--src-max-issue":
+            SRC_MAX_ISSUE = int(arg)
         elif arg in manual_args:
             pass
         else:
@@ -255,6 +354,8 @@ if __name__ == "__main__":
         prev_arg = arg
 
     src_options['single_cache'] = SRC_CACHE
+    src_options['max_issue'] = SRC_MAX_ISSUE
+    # ^ INFO: start_issuesyncd warns if SRC_MAX_ISSUE is None.
     dst_options['single_cache'] = DST_CACHE
 
 
