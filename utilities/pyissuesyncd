@@ -101,6 +101,9 @@ except ModuleNotFoundError as ex:
 from enissue import Repo
 
 data_directory = os.path.join(Repo.profile, ".cache", "pyissuesyncd")
+confs_directory = os.path.join(Repo.profile, ".config", "pyissuesyncd")
+src_conf_path = os.path.join(confs_directory, "source.conf")
+dst_conf_path = os.path.join(confs_directory, "destination.conf")
 
 def get_issue(repo, options, issue_no):
     results, err = repo.load_issues(
@@ -391,7 +394,9 @@ required_env_names = ['DST_REPO']
 
 def usage():
     print(__doc__)
-    print("All options:")
+    print("Source options:")
+    print("(Can also be set (lowercase names) in {})"
+          "".format(src_conf_path))
     arg_w = 17
     env_w = 27
     line_fmt = "{:"+str(arg_w)+"} {:"+str(env_w)+"}   {}"
@@ -418,6 +423,10 @@ def usage():
                 print(p+"(default: {})".format(env_default_help_msg))
             if envVarName in required_env_names:
                 print(p+"(required)")
+    print("")
+    print("Destination options:")
+    print("(Can also be set (lowercase names) in {})"
+          "".format(dst_conf_path))
 
     for _arg, option in dst_args.items():
         help_msg = "Set dst_options['{}']".format(option)
@@ -441,6 +450,57 @@ def usage():
 
     print("")
 
+def modify_dict_by_conf(options, conf_path, always_lower=False,
+                        no_file_error=True, no_value_error=True,
+                        quiet=True):
+    '''
+    Set values in the options dict using conf assignment operations
+    in the file at conf_path.
+
+    Keyword arguments:
+    always_lower -- If True, options in the conf file won't be added
+        if they aren't lowercase.
+    no_file_error -- Show an error if the file doesn't exist.
+    no_value_error -- Show an error if the value is blank. If False,
+        set the value to None.
+    quiet -- Do not show when a value is set.
+    '''
+    conf_name = os.path.basename(conf_path)
+    lineN = 0
+    if os.path.isfile(conf_path):
+        with open(conf_path, 'r') as ins:
+            for rawL in ins:
+                lineN += 1  # Counting numbers start at 1.
+                line = rawL.strip()
+                if len(line) == 0:
+                    continue
+                if line.startswith("#"):
+                    continue
+                signI = line.find("=")
+                if signI < 1:
+                    error("{}:{}: A value is expected before '='."
+                          "".format(conf_path, lineN))
+                name = line[:signI].strip()
+                value = line[signI+1:].strip()
+                if value == "":
+                    value = None
+                if always_lower:
+                    if name.lower() != name:
+                        error("{}:{}: A lowercase name is expected."
+                              "".format(conf_path, lineN))
+                        continue
+                if (value is None) and no_value_error:
+                    error("{}:{}: A value is expected."
+                              "".format(conf_path, lineN))
+                else:
+                    options[name] = value
+                    if not quiet:
+                        error("{}: Set {} to {}"
+                              "".format(conf_name, name, value))
+    else:
+        if no_file_error:
+            error("Error: \"{}\" Doesn't exist"
+                  "".format(conf_path, lineN))
 
 if __name__ == "__main__":
     src_options = {
@@ -454,6 +514,11 @@ if __name__ == "__main__":
         'quiet': True,
         'api_id': "Gitea",
     }
+
+    modify_dict_by_conf(dst_options, dst_conf_path, always_lower=True,
+                        no_file_error=False, quiet=False)
+    modify_dict_by_conf(src_options, src_conf_path, always_lower=True,
+                        no_file_error=False, quiet=False)
 
     for envVarName, option in collect_src_keys.items():
         _VAL = os.environ.get(envVarName)
@@ -518,7 +583,10 @@ if __name__ == "__main__":
     error("DST_REPO (--dst-repo) is {}"
           "".format(dst_options.get('repo_url')))
     if dst_options.get('repo_url') is None:
-        error("Error: You must set DST_REPO in the environment or specify a url after --dst-repo")
+        error("Error: You must set repo_url in {},"
+              " DST_REPO in the environment,"
+              " or specify a url after --dst-repo "
+              "".format(dst_conf_path))
         sys.exit(1)
 
     start_issuesyncd(src_options, dst_options)
