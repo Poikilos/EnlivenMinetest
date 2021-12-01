@@ -110,6 +110,15 @@ def get_issue(repo, options, issue_no):
         options,
         issue_no=issue_no,
     )
+    if err is None:
+        never_expire = options.get('never_expire') is True
+        result, err = repo.show_issue(
+            results[0],
+            never_expire=never_expire,
+            quiet=True,
+        )
+        results = [result]
+        # ^ Get all of the details.
     if results is None:
         if err is not None:
             if err.get('code') == 410:
@@ -299,7 +308,7 @@ def start_issuesyncd(src_options, dst_options):
               "".format(issue_no, src_updated_ts, src_updated_dt))
         '''
         # print(json.dumps(src_issue, indent=2))
-
+        continue  # for debug only (if stuff below isn't implemented)
         # enissue.set_verbose(True)
         dst_repo = Repo(dst_options)
         dst_issue, err = get_issue(dst_repo, dst_options, issue_no)

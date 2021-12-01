@@ -227,8 +227,11 @@ def tests():
                 raise AssertionError("{} is None".format(k))
 
 
-def debug(msg):
+def debug(*args, **kwargs):
+    msg = ""
     if verbose:
+        if len(args) > 0:
+            msg = args[0]
         error("[debug] " + msg)
 
 def set_verbose(on):
@@ -602,7 +605,7 @@ class Repo:
         self.default_query = options['default_query']
         self.hide_events = options['hide_events']
         self.issues = None
-        self.last_query_s = None
+        self.last_url = None
         self.options = copy.deepcopy(options)
 
     def getKnownKey(self, name):
@@ -765,7 +768,7 @@ class Repo:
                                  " only one issue because a single"
                                  " issue has its own URL with only"
                                  " one result (not a list).")
-        query_s = self.issues_url  # changed below if issue_no
+        url = self.issues_url  # changed below if issue_no
         this_page = 1
 
         query_part = ""
@@ -775,7 +778,7 @@ class Repo:
             for k,v in query.items():
                 if v is not None:
                     # <https://stackoverflow.com/a/9345102/4541104>:
-                    #query_s += (
+                    #url += (
                     #    "&{}={}".format(quote_plus(k), quote_plus(v))
                     #)
                     #
@@ -813,48 +816,49 @@ class Repo:
         c_issue_name = self.c_issue_name_fmt.format(issue_no=issue_no)
         c_issues_sub_path = os.path.join(self.c_repo_path, "issues")
         results_key = None
+        url = None
         if issue_no is not None:
             if not os.path.isdir(c_issues_sub_path):
                 os.makedirs(c_issues_sub_path)
             c_issue_path = os.path.join(c_issues_sub_path, c_issue_name)
             c_path = c_issue_path
             make_list = True
-            # Change query_s to the issue url (formerly issue_url):
-            query_s = self.api_issue_url_fmt.format(
+            # Change url to the issue url (formerly issue_url):
+            url = self.api_issue_url_fmt.format(
                 instance_url=self.instance_url,
                 ru=self.remote_user,
                 rn=self.repo_name,
                 issue_no=issue_no,
             )
         else:
-            prev_query_s = query_s
+            prev_query_s = url
             if len(searchTermStr) > 0:
-                query_s = self.search_issues_url
+                url = self.search_issues_url
                 results_key = self.search_results_key
-                if "?" not in query_s:
-                    query_s += "?q=" + searchTermStr
+                if "?" not in url:
+                    url += "?q=" + searchTermStr
                 else:
-                    query_s += searchTermStr
-                debug("  changing query_s from {} to {}"
-                      "".format(prev_query_s, query_s))
+                    url += searchTermStr
+                debug("  changing url from {} to {}"
+                      "".format(prev_query_s, url))
                 debug("  (issues will be set to the content of the {}"
                       " element)".format(results_key))
 
         # Labels are NOT in the URL, but filtered later (See docstring).
 
         if self.page is not None:
-            query_s = self.issues_url + "?page=" + str(self.page)
-            query_s += and_query_part
+            url = self.issues_url + "?page=" + str(self.page)
+            url += and_query_part
             debug("  appended page query_part={} (c_path={})"
                   "".format(query_part, c_path))
         elif len(query_part) > 0:
-            query_s += "?" + query_part
+            url += "?" + query_part
             debug("  appended custom query_part={} (c_path={})"
                   "".format(query_part, c_path))
         else:
             debug("  There was no custom query.")
 
-        self.last_query_s = query_s
+        self.last_url = url
         # ^ Differs from self.last_src, which can be a file.
 
 
@@ -876,7 +880,7 @@ class Repo:
                 if not quiet:
                     print(p+"Loading cache: \"{}\"".format(c_path))
                 debug(p+"Cache time limit: {}".format(max_cache_delta))
-                debug(p+"  for URL: {}".format(query_s))
+                debug(p+"  for URL: {}".format(url))
                 if not quiet:
                     print(p+"Cache expires: {}".format(expires_s))
                 with open(c_path) as json_file:
@@ -935,25 +939,25 @@ class Repo:
                     c_path
                 ))
 
-        self.last_src = query_s
+        self.last_src = url
         # ^ If didn't return yet, the source is a URL.
         req_is_complex = False
         try:
-            debug(p+"Query URL (query_s): {}".format(query_s))
+            debug(p+"Query URL (url): {}".format(url))
             headers = {}
             token = self.options.get('token')
             if token is not None:
                 headers['Authorization'] = "token " + token
             if len(headers) > 0:
                 req_is_complex = True
-                response = requests.get(query_s, headers=headers)
-                # response = req.urlopen(query_s)
-                res_text = response.text
-                # NOTE: In python3, response.content is in bytes
+                res = requests.get(url, headers=headers)
+                # res = req.urlopen(url)
+                res_text = res.text
+                # NOTE: In python3, res.content is in bytes
                 # (<https://stackoverflow.com/a/18810889/4541104>).
             else:
-                response = request.urlopen(query_s)
-                res_text = decode_safe(response.read())
+                res = request.urlopen(url)
+                res_text = decode_safe(res.read())
         except HTTPError as ex:
             msg = ex.reason
             if ex.code == 410:
@@ -965,17 +969,17 @@ class Repo:
                         'code': ex.code,
                         'reason': msg,
                         'headers': ex.headers,
-                        'url': query_s,
+                        'url': url,
                     }
                 )
-            # msg = str(ex) + ": " + self.rateLimitFmt.format(query_s)
+            # msg = str(ex) + ": " + self.rateLimitFmt.format(url)
             return (
                 None,
                 {
                     'code': ex.code,
                     'reason': msg,
                     'headers': ex.headers,
-                    'url': query_s,
+                    'url': url,
                 }
             )
 
@@ -1132,6 +1136,9 @@ class Repo:
                 fn += ".json"
                 c_path += ".json"
         else:
+            error("url: {}".format(url))
+            error("self.labels_url: {}".format(self.labels_url))
+            error("self.issues_url: {}".format(self.issues_url))
             raise NotImplementedError("getCachedJsonDict"
                                       " doesn't have a cache directory"
                                       " for {}. Try --refresh"
@@ -1187,10 +1194,10 @@ class Repo:
             if token is not None:
                 headers['Authorization'] = "token " + token
             if len(headers) > 0:
-                res = requests.get(query_s, headers=headers)
-                # res = req.urlopen(query_s)
-                res_text = response.text
-                # NOTE: In python3, response.content is in bytes
+                res = requests.get(url, headers=headers)
+                # res = req.urlopen(url)
+                res_text = res.text
+                # NOTE: In python3, res.content is in bytes
                 # (<https://stackoverflow.com/a/18810889/4541104>).
             else:
                 res = request.urlopen(url)
@@ -1223,7 +1230,8 @@ class Repo:
         return data, None
 
 
-    def show_issue(self, issue, refresh=False, never_expire=False):
+    def show_issue(self, issue, refresh=False, never_expire=False,
+                   quiet=False):
         '''
         Display an issue dictionary as formatted text after getting the
         issue body and other data from the internet. Gather all of the
@@ -1245,11 +1253,15 @@ class Repo:
         else 'code' is not present).
         '''
         p = self.log_prefix
-        print("")
+        shmsg = print
+        if quiet:
+            shmsg = debug
+
+        shmsg("")
         debug("show_issue...")
-        print("#{} {}".format(issue["number"], issue["title"]))
-        # print(issue["html_url"])
-        print("")
+        shmsg("#{} {}".format(issue["number"], issue["title"]))
+        # shmsg(issue["html_url"])
+        shmsg("")
         issue_data = issue
         html_url = issue['html_url']
         issue_data, err = self.getCachedJsonDict(
@@ -1272,42 +1284,54 @@ class Repo:
         # ^ left_w must be >=11 or "updated_at:" will push the next col.
         spacer = " "
         line_fmt = "{: <" + str(left_w) + "}" + spacer + "{}"
-        print(line_fmt.format("html_url:",  issue["html_url"]))
-        print(line_fmt.format("by:",  issue_data["user"]["login"]))
-        print(line_fmt.format("state:",  issue_data["state"]))
+        shmsg(line_fmt.format("html_url:",  issue["html_url"]))
+        shmsg(line_fmt.format("by:",  issue_data["user"]["login"]))
+        shmsg(line_fmt.format("state:",  issue_data["state"]))
         assignees = issue_data.get("assignees")
         if (assignees is not None) and len(assignees) > 1:
             assignee_names = [a["login"] for a in assignees]
-            print(line_fmt.format("assignees:",
+            shmsg(line_fmt.format("assignees:",
                                   " ".join(assignee_names)))
         elif issue_data.get("assignee") is not None:
             assignee_name = issue_data["assignee"]["login"]
-            print(line_fmt.format("assignee:", assignee_name))
+            shmsg(line_fmt.format("assignee:", assignee_name))
         labels_s = "None"
-        if len(issue['lower_labels']) > 0:
+        ll = None
+        if issue.get('labels') is not None:
+            if issue.get('lower_labels') is None:
+                issue['lower_labels'] = []
+                for oldL in issue.get('labels'):
+                    labelURL = oldL.get('url')
+                    if labelURL is not None:
+                        lastSlashI = labelURL.rfind('/')
+                        if lastSlashI > -1:
+                            ll = labelURL[lastSlashI+1:]
+                            issue['lower_labels'].append(ll)
+            lls = issue.get('lower_labels')
+        if (lls is not None) and (len(issue['lower_labels']) > 0):
             neat_labels = []
-            for label_s in issue['lower_labels']:
+            for label_s in lls:
                 if " " in label_s:
                     neat_labels.append('"' + label_s + '"')
                 else:
                     neat_labels.append(label_s)
             labels_s = ", ".join(neat_labels)
-        # moved further down: print(line_fmt.format("labels:", labels_s))
-        print("")
+        # moved further down: shmsg(line_fmt.format("labels:", labels_s))
+        shmsg("")
         if markdown is not None:
-            print('"""')
-            print(markdown)
-            print('"""')
+            shmsg('"""')
+            shmsg(markdown)
+            shmsg('"""')
         else:
-            print("(no description)")
+            shmsg("(no description)")
 
         comments = issue_data.get("comments")
         if comments is None:
             comments = 0
         if comments > 0:
-            print("")
-            print("")
-            print("({}) comment(s):".format(comments))
+            shmsg("")
+            shmsg("")
+            shmsg("({}) comment(s):".format(comments))
 
         left_margin = "    "
         c_prop_fmt = (left_margin + "{: <" + str(left_w) + "}"
@@ -1386,22 +1410,22 @@ class Repo:
 
             login = None
             if user is not None:
-                print("")
-                print("")
+                shmsg("")
+                shmsg("")
                 login = user.get('login')
             if login is not None:
-                print(c_prop_fmt.format("from:", login))
+                shmsg(c_prop_fmt.format("from:", login))
             updated_at = evt.get("updated_at")
             if updated_at is not None:
-                print(c_prop_fmt.format("updated_at:",
+                shmsg(c_prop_fmt.format("updated_at:",
                                         updated_at))
             body = evt.get("body")
             if body is not None:
-                print("")
-                print(left_margin + '"""')
-                print(left_margin + body)
-                print(left_margin + '"""')
-                print("")
+                shmsg("")
+                shmsg(left_margin + '"""')
+                shmsg(left_margin + body)
+                shmsg(left_margin + '"""')
+                shmsg("")
             rename = evt.get('rename')
             event = evt.get('event')
 
@@ -1421,7 +1445,7 @@ class Repo:
                     source_issue = source.get('issue')
                     if source_issue is not None:
                         source_number = source_issue.get('number')
-                    print(left_margin
+                    shmsg(left_margin
                           +"cross-reference: {} referenced this issue"
                           " in {} {}."
                           "".format(login, source_type, source_number))
@@ -1430,7 +1454,7 @@ class Repo:
                     if label is not None:
                         label_name = label.get('name')
                         label_color = label.get('color')
-                    print(left_margin+"{}: {} by {} {}"
+                    shmsg(left_margin+"{}: {} by {} {}"
                           "".format(event, label_name, login,
                                     created_at))
                 # elif (event == "closed") or (event == "reopened"):
@@ -1442,17 +1466,17 @@ class Repo:
                     if label is not None:
                         label_name = label.get('name')
                         label_color = label.get('color')
-                    print(left_margin+"{}: {} by {} {}"
+                    shmsg(left_margin+"{}: {} by {} {}"
                           "".format(event, label_name, login,
                                     created_at))
                 else:
-                    print(left_margin+"{} {} by {}"
+                    shmsg(left_margin+"{} {} by {}"
                           "".format(event.upper(), created_at, login))
             if (rename is not None) and ('renamed' not in ignore_events):
                 # already said "RENAMED" above (evt.get('event'))
-                # print(left_margin+"renamed issue")
-                print(left_margin+"  from:{}".format(rename.get('from')))
-                print(left_margin+"  to:{}".format(rename.get('to')))
+                # shmsg(left_margin+"renamed issue")
+                shmsg(left_margin+"  from:{}".format(rename.get('from')))
+                shmsg(left_margin+"  to:{}".format(rename.get('to')))
 
             reactions = evt.get('reactions')
             reactions_url = None
@@ -1480,10 +1504,10 @@ class Repo:
                         if reac_user is not None:
                             reac_login = reac_user.get('login')
                         reac_content = reac.get('content')
-                        print(left_margin + "- <{}> :{}:"
+                        shmsg(left_margin + "- <{}> :{}:"
                               "".format(reac_login, reac_content))
-        print("")
-        print(left_margin+"labels: {}".format(labels_s))
+        shmsg("")
+        shmsg(left_margin+"labels: {}".format(labels_s))
         closed_by = issue_data.get('closed_by')
         closed_at = issue_data.get('closed_at')
         if (closed_by is not None) or (closed_at is not None):
@@ -1491,7 +1515,7 @@ class Repo:
             # (determine this by getting 'state').
             # The "REOPENED" and "CLOSED" events also appear in the
             # timeline (see this_tmln_json_url).
-            print()
+            shmsg()
             state = issue_data.get('state')
             if state is None:
                 state = options['default_query'].get('state')
@@ -1499,21 +1523,23 @@ class Repo:
             if closed_at is not None:
                 closet_at_str = " {}".format(closed_at)
             if state != "open":
-                closed_by_login = closed_by.get("login")
+                closed_by_login = None
+                if closed_by is not None:
+                    closed_by_login = closed_by.get("login")
                 if closed_by_login is not None:
-                    print("    (CLOSED{} by {})".format(
+                    shmsg("    (CLOSED{} by {})".format(
                         closet_at_str,
                         closed_by_login
                     ))
                 else:
-                    print("    (CLOSED{})".format(closet_at_str))
+                    shmsg("    (CLOSED{})".format(closet_at_str))
             if state == "open":
-                print("    (REOPENED)")
+                shmsg("    (REOPENED)")
             elif closed_at is None:
-                print("    (The closing date is unknown.)")
+                shmsg("    (The closing date is unknown.)")
 
-        print("")
-        print("")
+        shmsg("")
+        shmsg("")
         err = None
         if msg is not None:
             err = {
@@ -1915,7 +1941,7 @@ def main():
         # ^ Never refresh, since that would already have been done.
         state_msg = repo.default_query.get('state')
         if state_msg is None:
-            state_msg = repo.last_query_s
+            state_msg = repo.last_url
         if state_msg != "open":
             print("(showing {} issue(s))".format(state_msg.upper()))
             # ^ such as CLOSED
