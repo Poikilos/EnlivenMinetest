@@ -218,12 +218,19 @@ def start_issuesyncd(src_options, dst_options):
                     # error("  * headers: {}".format(err.get('headers')))
                     break
                 elif src_res_code == 404:
-                    error("#{}: Error 404: There is no {}"
-                          " so the end of the issues may have been"
-                          " reached.".format(issue_no, url))
-                    error("  * reason: {}".format(err.get('reason')))
-                    # error("  * headers: {}".format(err.get('headers')))
-                    continue
+                    reason_msg = err.get('reason')
+                    if reason_msg is None:
+                        reason_msg = ""
+                    if "deleted" in reason_msg:
+                        error("#{}: Error 404: \"{}\""
+                              "".format(issue_no, reason_msg))
+                        continue
+                    else:
+                        error("#{}: Error 404: \"{}\" (Are there no more?)"
+                              "".format(issue_no, reason_msg))
+                        # error("  * reason: {}".format(err.get('reason')))
+                        # error("  * headers: {}".format(err.get('headers')))
+                        break
                 elif src_res_code == 410:
                     error("#{}: The issue seems to have been deleted."
                           "".format(issue_no))
@@ -251,26 +258,40 @@ def start_issuesyncd(src_options, dst_options):
                 continue
             else:
                 error("However, an issue was returned.")
+        elif src_issue is None:
+            raise RuntimeError("The issue was None but the error_dict was None")
         got_fmt = "#{}: got (source not recorded)"
         if src_repo.last_src is not None:
-            if src_repo.last_src.startswith("http:"):
+            if src_repo.last_src.startswith("http"):
                 got_fmt = "#{} downloaded"
             elif os.path.isfile(src_repo.last_src):
-                got_fmt = "#{} loaded from cache"
+                got_fmt = "#{} loaded from cache file"
+            else:
+                got_fmt = "#{} got " + src_repo.last_src
         error(got_fmt.format(issue_no))
         # Example: ~/.cache/pyissuesyncd/source/issues/1.json
         src_dt_parser = src_repo.options['default_dt_parser']
-        src_created_dt_s = src_repo.getKnown(src_issue, 'created_at')
-        src_updated_dt_s = src_repo.getKnown(src_issue, 'updated_at')
+        src_created_dt_s = None
         try:
-            src_updated_dt = src_dt_parser(src_updated_dt_s)
-        except ValueError as ex:
-            error("Error in {}".format(src_repo.last_src))
-            error(ex)
-            error("If you changed repos and used the same cache dir,"
-                  " manually delete the cache file or directory above.")
-            sys.exit(1)
-        src_updated_ts = int(src_updated_dt.strftime("%s"))
+            src_created_dt_s = src_repo.getKnown(src_issue, 'created_at')
+        except KeyError:
+            pass
+        src_updated_dt_s = None
+        try:
+            src_updated_dt_s = src_repo.getKnown(src_issue, 'updated_at')
+            try:
+                src_updated_dt = src_dt_parser(src_updated_dt_s)
+            except ValueError as ex:
+                error("Error in {}".format(src_repo.last_src))
+                error(ex)
+                error("If you changed repos and used the same cache dir,"
+                      " manually delete the cache file or directory above.")
+                sys.exit(1)
+            src_updated_ts = int(src_updated_dt.strftime("%s"))
+        except KeyError as ex:
+            error("Missing key: {}".format(ex))
+            error("src_issue: {}"
+                  "".format(json.dumps(src_issue, indent=2)))
         # ^ See <https://stackoverflow.com/questions/19801727/convert-
         #   datetime-to-unix-timestamp-and-convert-it-back-in-python>
         '''
