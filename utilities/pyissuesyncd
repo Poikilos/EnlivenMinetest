@@ -235,7 +235,8 @@ def start_issuesyncd(src_options, dst_options):
                               "".format(issue_no, reason_msg))
                         continue
                     else:
-                        error("#{}: Error 404: \"{}\" (Are there no more?)"
+                        error("#{}: Error 404: \"{}\""
+                              " (The end of the list is assumed.)"
                               "".format(issue_no, reason_msg))
                         # error("  * reason: {}".format(err.get('reason')))
                         # error("  * headers: {}".format(err.get('headers')))
@@ -480,12 +481,112 @@ def usage():
 
     print("")
 
+
+trues = ["true", "on", "yes"]
+falses = ["false", "off", "no"]
+
+def str_to_value(valueStr, typeName=None, lineN=-1, path="(generated)"):
+    '''
+    Convert a string such as from a conf file to a value that may be of
+    a different type than string. The type will be detected by the
+    content of the string as follows (in order):
+    - If it is the string "None" then it will become None.
+    - It is int if it converts to int without ValueError.
+    - It is float if it converts to float without ValueError.
+    - It is bool if the string is (case insensitively) in the trues or
+      falses list.
+    - It is a string in all other cases.    typeStr = None
+
+    Keyword arguments:
+    typeName -- Force it to be this type, otherwise raise ValueError.
+        If typeName is "bool", a number 0 or 1 will be converted to
+        False or True, respectively. Otherwise, the value has to be in
+        the global trues or falses list (case-insensitive). The typeName
+        must be: int, str, float, or bool, such as obtained via
+        `type(anotherValue).__name__`.
+    path -- The file (used for error reporting only).
+    lineN -- The line number in the file (used for error reporting only).
+    '''
+    valueL = None
+    if valueStr is not None:
+        valueL = valueStr.lower()
+
+    if typeName is not None:
+        if valueStr == "None":
+            error("{}:{}: WARNING: The program expected a(n) '{}' but"
+                                 " the value was 'None' and will become"
+                                 " None."
+                                 "".format(conf_path, lineN, typeName))
+            return None
+        elif typeName == "bool":
+            moreTrues = ['1'] + trues
+            moreFalses = ['0'] + falses
+            if valueL in moreTrues:
+                return True
+            elif valueL in moreFalses:
+                return False
+            else:
+                raise ValueError("{}:{}: A bool value is expected:"
+                                 " {} or {} (case insensitive) and if"
+                                 " the typeName is defined by the"
+                                 " program as 'bool' (which it is in"
+                                 " this case) then '0' or '1'"
+                                 " are also ok)."
+                                 "".format(conf_path, lineN, trues,
+                                           falses))
+        elif typeName == 'int':
+            try:
+                return int(valueStr)
+            except ValueError:
+                raise ValueError("{}:{}: An int value is expected:"
+                                 " the typeName is defined by the"
+                                 " program as 'int'."
+                                 "".format(conf_path, lineN, trues,
+                                           falses))
+        elif typeName == 'float':
+            try:
+                return float(valueStr)
+            except ValueError:
+                raise ValueError("{}:{}: A float value is expected:"
+                                 " the typeName is defined by the"
+                                 " program as 'float'."
+                                 "".format(conf_path, lineN, trues,
+                                           falses))
+        elif typeName == "str":
+            return valueStr
+        else:
+            raise NotImplementedError("The type {} isn't implemented"
+                                      " in str_to_value."
+                                      "".format(typeName))
+
+    if valueStr == "None":
+        return None
+    try:
+        return int(valueStr)
+    except ValueError:
+        pass
+    try:
+        return float(valueStr)
+    except ValueError:
+        pass
+    if valueL in trues:
+        return True
+    elif valueL in falses:
+        return False
+    return valueStr
+
+
+
 def modify_dict_by_conf(options, conf_path, always_lower=False,
                         no_file_error=True, no_value_error=True,
                         quiet=True):
     '''
     Set values in the options dict using conf assignment operations
-    in the file at conf_path.
+    in the file at conf_path. If the key is in the dict, that will
+    determine the type. Otherwise, the type will be detected by
+    str_to_value. If there is nothing after the equal sign on the line,
+    the value will be None (or if no_value_error is True it will be
+    ignored and an error will be displayed).
 
     Keyword arguments:
     always_lower -- If True, options in the conf file won't be added
@@ -511,21 +612,28 @@ def modify_dict_by_conf(options, conf_path, always_lower=False,
                     error("{}:{}: A value is expected before '='."
                           "".format(conf_path, lineN))
                 name = line[:signI].strip()
-                value = line[signI+1:].strip()
-                if value == "":
+                valueStr = line[signI+1:].strip()
+                value = None
+                if valueStr == "":
                     value = None
                 if always_lower:
                     if name.lower() != name:
                         error("{}:{}: A lowercase name is expected."
                               "".format(conf_path, lineN))
                         continue
-                if (value is None) and no_value_error:
+                if (valueStr is None) and no_value_error:
                     error("{}:{}: A value is expected."
                               "".format(conf_path, lineN))
                 else:
+                    typeName = None
+                    oldValue = options.get(name)
+                    if oldValue is not None:
+                        typeName = type(oldValue).__name__
+                    value = str_to_value(valueStr, typeName=typeName,
+                                         path=conf_path, lineN=lineN)
                     options[name] = value
                     if not quiet:
-                        error("{}: Set {} to {}"
+                        error("[settings] {}: Set {} to {}"
                               "".format(conf_name, name, value))
     else:
         if no_file_error:
