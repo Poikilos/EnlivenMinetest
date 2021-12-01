@@ -25,11 +25,20 @@ Options:
     pg_dump dbname > outfile
 --test               Run unit tests then exit (0) if passed.
 
-Partial API documentation:
-options keys:
+## Partial API documentation:
+This part covers the use of enissue itself as a Python API such as via
+`import enissue` (For using a web API, you must view the API
+documentation at the website of the specific web API).
+
+### options keys:
 - default_dt_parser: This must be a method that returns a python
     datetime object by accepting a single argument, which is a string
     from the style of the Repo's API.
+- token: This should be set to a token that you've generated using the
+  web interface of your repo. The token will cause you to "see your
+  rate limit bumped to 5,000 requests an hour" on Github according to
+  <https://docs.github.com/en/rest/guides/getting-started-with-the-rest-api>
+  2021-11-30.
 '''
 from __future__ import print_function
 import sys
@@ -345,10 +354,11 @@ class Repo:
         ):
         '''
         Keyword arguments:
-        options -- The options dict have any of the following keys (any
-                that aren't set will be detected based on the URL--if
-                there is an api name that corresponds to your site's
-                API in the apis global dict):
+        options -- Set self.options. Any that aren't set will be
+                detected based on the URL, otherwise from
+                options['api_id'] (if there is an api name that
+                corresponds to your site's API in the apis global dict).
+                The options dict may have any of the following keys:
             repo_url -- This is required. It can be an API or web URL
                 as long as it ends with username/reponame (except where
                 there is no username in the URL).
@@ -402,7 +412,11 @@ class Repo:
                 if you set a different single_cache for each repo!
             api_id -- a key in the global apis dict which determines the
                 defaults for accessing the web API.
+
         '''
+
+        if options is None:
+            raise ValueError("options cannot be None.")
         repo_url = options.get('repo_url')
         debug("* using URL {}".format(repo_url))
         if repo_url is None:
@@ -833,6 +847,7 @@ class Repo:
                 if not quiet:
                     print(p+"Cache expires: {}".format(expires_s))
                 with open(c_path) as json_file:
+                    self.last_src = c_path
                     result = json.load(json_file)
                 max_issue = None
                 results = result
@@ -876,7 +891,7 @@ class Repo:
                 print(p+"There is no cache for \"{}\"".format(
                     c_path
                 ))
-
+        self.last_src = query_s
         try:
             debug(p+"Query URL (query_s): {}".format(query_s))
             response = request.urlopen(query_s)
@@ -952,6 +967,13 @@ class Repo:
         The reactions to a timeline event are from a URL such as:
         https://api.github.com/repos/poikilos/EnlivenMinetest/issues/comments/968357490/reactions
 
+        This method uses the following options from self.options:
+        token -- If set, then the header gets a new line like:
+            "Authorization: token ghp_16C7e42F292c6912E7710c838347Ae178B4a"
+            where ghp_16C7e42F292c6912E7710c838347Ae178B4a is just an
+            example from the GitHub documentation but you must set a
+            real token you've generated.
+
         Keyword arguments:
         quiet -- Set to True to hide messages (verbose mode will
             override this).
@@ -963,6 +985,10 @@ class Repo:
           length as the max results count). Therefore, this method
           refuses to handle such URLs.
         '''
+        if self.options is None:
+            raise RuntimeError("You must set options before running"
+                               "getCachedJsonDict")
+        token = self.options.get('token')
         result = None
         p = self.log_prefix
         # The known API URLs are already set as follows:
@@ -1066,6 +1092,7 @@ class Repo:
                                                    + max_cache_delta))
                 with open(c_path) as json_file:
                     try:
+                        self.last_src = c_path
                         result = json.load(json_file)
                     except json.decoder.JSONDecodeError as ex:
                         error("")
@@ -1079,6 +1106,7 @@ class Repo:
         if result is not None:
             return result, None
 
+        self.last_src = url
         try:
             res = request.urlopen(url)
             data_s = decode_safe(res.read())
