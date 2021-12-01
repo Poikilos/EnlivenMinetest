@@ -319,6 +319,165 @@ modes["closed"] = modes["open"]
 
 match_all_labels = []
 
+trues = ["true", "on", "yes"]
+falses = ["false", "off", "no"]
+
+
+def str_to_value(valueStr, typeName=None, lineN=-1, path="(generated)"):
+    '''
+    Convert a string such as from a conf file to a value that may be of
+    a different type than string. The type will be detected by the
+    content of the string as follows (in order):
+    - If it is the string "None" then it will become None.
+    - It is int if it converts to int without ValueError.
+    - It is float if it converts to float without ValueError.
+    - It is bool if the string is (case insensitively) in the trues or
+      falses list.
+    - It is a string in all other cases.    typeStr = None
+
+    Keyword arguments:
+    typeName -- Force it to be this type, otherwise raise ValueError.
+        If typeName is "bool", a number 0 or 1 will be converted to
+        False or True, respectively. Otherwise, the value has to be in
+        the global trues or falses list (case-insensitive). The typeName
+        must be: int, str, float, or bool, such as obtained via
+        `type(anotherValue).__name__`.
+    path -- The file (used for error reporting only).
+    lineN -- The line number in the file (used for error reporting only).
+    '''
+    valueL = None
+    if valueStr is not None:
+        valueL = valueStr.lower()
+
+    if typeName is not None:
+        if valueStr == "None":
+            error("{}:{}: WARNING: The program expected a(n) '{}' but"
+                                 " the value was 'None' and will become"
+                                 " None."
+                                 "".format(conf_path, lineN, typeName))
+            return None
+        elif typeName == "bool":
+            moreTrues = ['1'] + trues
+            moreFalses = ['0'] + falses
+            if valueL in moreTrues:
+                return True
+            elif valueL in moreFalses:
+                return False
+            else:
+                raise ValueError("{}:{}: A bool value is expected:"
+                                 " {} or {} (case insensitive) and if"
+                                 " the typeName is defined by the"
+                                 " program as 'bool' (which it is in"
+                                 " this case) then '0' or '1'"
+                                 " are also ok)."
+                                 "".format(conf_path, lineN, trues,
+                                           falses))
+        elif typeName == 'int':
+            try:
+                return int(valueStr)
+            except ValueError:
+                raise ValueError("{}:{}: An int value is expected:"
+                                 " the typeName is defined by the"
+                                 " program as 'int'."
+                                 "".format(conf_path, lineN, trues,
+                                           falses))
+        elif typeName == 'float':
+            try:
+                return float(valueStr)
+            except ValueError:
+                raise ValueError("{}:{}: A float value is expected:"
+                                 " the typeName is defined by the"
+                                 " program as 'float'."
+                                 "".format(conf_path, lineN, trues,
+                                           falses))
+        elif typeName == "str":
+            return valueStr
+        else:
+            raise NotImplementedError("The type {} isn't implemented"
+                                      " in str_to_value."
+                                      "".format(typeName))
+
+    if valueStr == "None":
+        return None
+    try:
+        return int(valueStr)
+    except ValueError:
+        pass
+    try:
+        return float(valueStr)
+    except ValueError:
+        pass
+    if valueL in trues:
+        return True
+    elif valueL in falses:
+        return False
+    return valueStr
+
+
+
+def modify_dict_by_conf(options, conf_path, always_lower=False,
+                        no_file_error=True, no_value_error=True,
+                        quiet=True):
+    '''
+    Set values in the options dict using conf assignment operations
+    in the file at conf_path. If the key is in the dict, that will
+    determine the type. Otherwise, the type will be detected by
+    str_to_value. If there is nothing after the equal sign on the line,
+    the value will be None (or if no_value_error is True it will be
+    ignored and an error will be displayed).
+
+    Keyword arguments:
+    always_lower -- If True, options in the conf file won't be added
+        if they aren't lowercase.
+    no_file_error -- Show an error if the file doesn't exist.
+    no_value_error -- Show an error if the value is blank. If False,
+        set the value to None.
+    quiet -- Do not show when a value is set.
+    '''
+    conf_name = os.path.basename(conf_path)
+    lineN = 0
+    if os.path.isfile(conf_path):
+        with open(conf_path, 'r') as ins:
+            for rawL in ins:
+                lineN += 1  # Counting numbers start at 1.
+                line = rawL.strip()
+                if len(line) == 0:
+                    continue
+                if line.startswith("#"):
+                    continue
+                signI = line.find("=")
+                if signI < 1:
+                    error("{}:{}: A value is expected before '='."
+                          "".format(conf_path, lineN))
+                name = line[:signI].strip()
+                valueStr = line[signI+1:].strip()
+                value = None
+                if valueStr == "":
+                    value = None
+                if always_lower:
+                    if name.lower() != name:
+                        error("{}:{}: A lowercase name is expected."
+                              "".format(conf_path, lineN))
+                        continue
+                if (valueStr is None) and no_value_error:
+                    error("{}:{}: A value is expected."
+                              "".format(conf_path, lineN))
+                else:
+                    typeName = None
+                    oldValue = options.get(name)
+                    if oldValue is not None:
+                        typeName = type(oldValue).__name__
+                    value = str_to_value(valueStr, typeName=typeName,
+                                         path=conf_path, lineN=lineN)
+                    options[name] = value
+                    if not quiet:
+                        error("[settings] {}: Set {} to {}"
+                              "".format(conf_name, name, value))
+    else:
+        if no_file_error:
+            error("Error: \"{}\" Doesn't exist"
+                  "".format(conf_path, lineN))
+
 
 def toSubQueryValue(value):
     '''
@@ -1268,6 +1427,7 @@ class Repo:
             issue["url"],
             refresh=refresh,
             never_expire=never_expire,
+            quiet=quiet,
         )
 
         if err is not None:
@@ -1675,6 +1835,74 @@ class Repo:
         '''
         raise NotImplementedError("update_issue")
 
+    def get_issue(self, issue_no):
+        '''
+        Get a tuple of single issue dict and None, or if the second
+        value is not None, it is an error dict such as containing
+        'reason' and possibly 'code' (standard website error number)
+        and possibly 'url'.
+        '''
+        if self.options is None:
+            raise RuntimeError("options is not initialized.")
+        results, err = self.load_issues(
+            self.options,
+            issue_no=issue_no,
+        )
+        if err is None:
+            never_expire = self.options.get('never_expire') is True
+            result, err = self.show_issue(
+                results[0],
+                never_expire=never_expire,
+                quiet=True,
+            )
+            '''
+            ^ show_issue gets all of the attached data such as timeline
+              (issues/#/timeline.json) and reactions to comments
+              (issues/comments/<comment_id>/reactions.json) if present
+              online.
+            '''
+            results = [result]
+        if results is None:
+            if err is not None:
+                if err.get('code') == 410:
+                    # error("The issue was deleted")
+                    pass
+                elif err.get('code') == 404:
+                    # error("The issue doesn't exist")
+                    pass
+                return None, err
+            else:
+                msg = ("Unknown error: Results should not be None unless"
+                       " there is an error (issue_no={})."
+                       "".format(issue_no))
+                return (
+                    None,
+                    {
+                        'reason': msg,
+                    }
+                )
+        elif not isinstance(results, list):
+            raise RuntimeError("Results must be a list even if there is"
+                               " only one result.")
+        elif len(results) > 1:
+            raise RuntimeError("Results should have"
+                               " only one result.")
+        issue = results[0]
+        '''
+        match = self.get_match(
+            mode,
+            issue_no=issue_no,
+            match_all_labels_lower=match_all_labels_lower,
+        )
+        matching_issue = match['issue']
+        if matching_issue is not None:
+            self.show_issue(
+                matching_issue,
+                refresh=False,
+                never_expire=self.options.get('never_expire') is True,
+            )
+        '''
+        return issue, None
 
 def main():
     global verbose
