@@ -530,12 +530,15 @@ def usage():
 class Repo:
     profile = None
     os_user = None
+    AppDatas = None
     if platform.system() == "Windows":
         profile = os.environ['USERPROFILE']
         os_user = os.environ.get('USERNAME')
+        AppDatas = os.environ.get('APPDATA')
     else:
         profile = os.environ['HOME']
         os_user = os.environ.get('USER')
+        AppDatas = os.path.join(profile, ".config")
 
     def __init__(
             self,
@@ -1913,6 +1916,11 @@ def main():
     options = {}
     for k,v in default_options.items():
         options[k] = v
+    myAppData = os.path.join(Repo.AppDatas, "enissue")
+    conf_path = os.path.join(myAppData, "source.conf")
+    if os.path.isfile(conf_path):
+        modify_dict_by_conf(options, conf_path, always_lower=True,
+                        no_file_error=False, quiet=False)
     search_terms = []
     SEARCH_COMMANDS = ['find', 'AND']  # CLI-only commands
     caches_path = None
