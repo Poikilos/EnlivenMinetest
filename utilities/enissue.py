@@ -129,33 +129,46 @@ if site_users_repos_meta is not None:
 
 def github_ts_to_dt(timestamp_s):
     '''
-    Use "%Y-%m-%dT%H:%M:%SZ"
+    Use "%Y-%m-%dT%H:%M:%SZ" for GitHub.
     GitHub example (Z for UTC): 2018-09-13T16:59:38Z
     '''
     return datetime.strptime(timestamp_s, "%Y-%m-%dT%H:%M:%SZ")
 
 
+giteaSanitizedDtFmt = "%Y-%m-%dT%H:%M:%S%z"
+giteaDtExampleS = "2021-11-25T12:00:13-05:00"
+sanitizedDtExampleS = "2021-11-25T12:00:13-0500"
+giteaExtraColonAt = giteaDtExampleS.rfind(":")
+giteaColonNegI = -3
+if giteaExtraColonAt - len(giteaDtExampleS) != giteaColonNegI:
+    raise RuntimeError("The Gitea timestamp format description wasn't"
+                       " prepared correctly.")
+
 def gitea_ts_to_dt(timestamp_s):
     '''
-    Use "%Y-%m-%dT%H:%M:%SZ"
-    Gitea example (last : must be removed): "2021-11-25T12:00:13-05:00"
+    Use giteaSanitizedDtFmt BUT last ':' must be removed before
+    parsing (but: datetime still does it right somehow either way)
+    or added after formatting.
+    Gitea example: "2021-11-25T12:00:13-05:00"
     '''
-    example_s = "2021-11-25T12:00:13-05:00"
-    if len(timestamp_s) != len(example_s):
+    giteaSanitizedDtFmt = "%Y-%m-%dT%H:%M:%S%z"
+    if len(timestamp_s) != len(giteaDtExampleS):
         raise ValueError("Gitea {} is not like the expected {}"
-                         "".format(timestamp_s, example_s))
+                         "".format(timestamp_s, giteaDtExampleS))
     timestamp_s_raw = timestamp_s
-    timestamp_s = timestamp_s[:-3] + timestamp_s[-2:]
+    colonNegI = giteaColonNegI
+    timestamp_s = timestamp_s[:colonNegI] + timestamp_s[colonNegI+1:]
     '''
     Remove the non-python-like : from %z
     %z is "+0000 UTC offset in the form ±HHMM[SS[.ffffff]] (empty
     string if the object is naive)."
     - <https://strftime.org/>
     '''
-    return datetime.strptime(timestamp_s, "%Y-%m-%dT%H:%M:%S%z")
+    return datetime.strptime(timestamp_s, giteaSanitizedDtFmt)
+
 
 github_defaults = {
-    'repository_id': "80873867",
+    # 'repository_id': "",  # Use sites_users_repos_meta instead.
     'instance_url': "https://api.github.com",
     'api_repo_url_fmt': "{instance_url}/repos/{ru}/{rn}",
     'api_issue_url_fmt': "{instance_url}/repos/{ru}/{rn}/issues/{issue_no}",
@@ -179,7 +192,7 @@ github_defaults = {
 }
 
 gitea_defaults = {
-    'repository_id': None,
+    # 'repository_id': None,  # Use sites_users_repos_meta instead.
     'api_repo_url_fmt': "{instance_url}/api/v1/repos/{ru}/{rn}",
     'api_issue_url_fmt': "{instance_url}/api/v1/repos/{ru}/{rn}/issues/{issue_no}",
     'search_issues_url_fmt': "{instance_url}/api/v1/search/issues?q=repo%3A{ru}/{rn}+",
@@ -234,6 +247,7 @@ def debug(*args, **kwargs):
             msg = args[0]
         error("[debug] " + msg)
 
+
 def set_verbose(on):
     global verbose
     if on is True:
@@ -242,6 +256,7 @@ def set_verbose(on):
         verbose = True
     else:
         raise ValueError("on must be True or False.")
+
 
 def decode_safe(b):
     try:
@@ -348,6 +363,11 @@ def str_to_value(valueStr, typeName=None, lineN=-1, path="(generated)"):
     valueL = None
     if valueStr is not None:
         valueL = valueStr.lower()
+    else:
+        raise RuntimeError("A symbolic value is extracted from code or"
+                           " a conf file, so it should never be None."
+                           " If it were None in the source, it should"
+                           " be an empty string or the string \"None\"")
 
     if typeName is not None:
         if valueStr == "None":
@@ -391,6 +411,10 @@ def str_to_value(valueStr, typeName=None, lineN=-1, path="(generated)"):
                                  "".format(conf_path, lineN, trues,
                                            falses))
         elif typeName == "str":
+            if valueStr.startswith("'") and valueStr.endswith("'"):
+                return valueStr[1:-1]
+            if valueStr.startswith('"') and valueStr.endswith('"'):
+                return valueStr[1:-1]
             return valueStr
         else:
             raise NotImplementedError("The type {} isn't implemented"
@@ -411,6 +435,10 @@ def str_to_value(valueStr, typeName=None, lineN=-1, path="(generated)"):
         return True
     elif valueL in falses:
         return False
+    if valueStr.startswith("'") and valueStr.endswith("'"):
+        return valueStr[1:-1]
+    if valueStr.startswith('"') and valueStr.endswith('"'):
+        return valueStr[1:-1]
     return valueStr
 
 
