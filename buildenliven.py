@@ -136,13 +136,14 @@ but for now just use
 mt_conf_by_mod = {
     'item_drop': {
         'item_drop.pickup_radius': "1.425",
-    }
+    },
     'throwing_arrows': {
         'throwing.enable_arrow', "true",
-    }
+    },
 }
 
 why = {}
+why_not = {}
 why_not["https://github.com/FaceDeer/vines.git"] = '''
 '''
 why["https://github.com/MinetestForFun/unified_inventory"] = '''
@@ -195,7 +196,7 @@ WARNINGS:
 '''
 
 def main():
-    pass
+
     print(warnings)
     raise NotImplementedError("pyenliven build")
 
