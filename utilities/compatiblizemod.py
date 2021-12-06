@@ -122,7 +122,9 @@ def add_depends(mod_path):
             outs.write("{}\n".format(description))
         print("* wrote {}/description.txt".format(mod_dir_name))
 
-
-if __name__ == "__main__":
+def main():
     parent = os.path.realpath(".")
     add_depends(parent)
+
+if __name__ == "__main__":
+    main()

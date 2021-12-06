@@ -22,20 +22,21 @@ def error(*args, **kwargs):
 try:
     import mtanalyze
 except ModuleNotFoundError as ex:
-    tryMTA = os.path.join(profile, "git", "mtanalyze")
+    # tryMTA = os.path.join(profile, "git", "mtanalyze")
+    tryMTA = os.path.abspath(os.path.join("..", "mtanalyze"))
     if os.path.isdir(tryMTA):
         sys.path.append(tryMTA)
         import mtanalyze
     else:
         error("")
-        error("You must install mtanalyze in the directory alongside")
-        error("EnlivenMinetest or as ~/git/mtanalize")
+        error("You must install mtanalyze alongside")
+        error("EnlivenMinetest such that ../mtanalize/mtanalize exists")
         error("such as via:")
-        error("git clone https://github.com/poikilos/mtanalyze ~/git/mtanalize")
+        error("    git clone https://github.com/poikilos/mtanalyze {}"
+              "".format(tryMTA))
         error("")
         # raise tryMTA
         exit(1)
-print("This doesn't work (not yet implemented)")
 
 # from mtanalyze import profile_path
 
@@ -48,7 +49,7 @@ gamespec['remove_mods'] = [
     "emeralds", # See https://github.com/poikilos/EnlivenMinetest/issues/497
     "give_initial_stuff",  # or make it configurable (It only uses a give_initial_stuff boolean, no configurable item list)
 ]
-myDir = os.path.dirname(__file__)
+myDir = os.path.dirname(os.path.abspath(__file__))
 mods_stopgap = os.path.join(myDir, "patches", "mods-stopgap")
 if not os.path.isdir(mods_stopgap):
     error("Error: \"{}\" is missing.".format(mods_stopgap))
@@ -56,48 +57,56 @@ if not os.path.isdir(mods_stopgap):
 gamespec['local_mods_paths'] = []
 gamespec['local_mods_paths'].append(mods_stopgap)
 # NOTE: get a git repo's origin via: git remote show origin
+
+def getSGPath(stopgap_mod_name):
+    return os.path.join(mods_stopgap, stopgap_mod_name)
+
 gamespec['add_mods'] = [
-    # "https://github.com/poikilos/homedecor_ua",
-    "animal_materials_legacy",
-    "https://github.com/minetest-mods/ccompass.git",
-    "https://github.com/octacian/chat3.git",
-    "https://github.com/poikilos/compassgps.git",
-    "elk_legacy",
-    "https://github.com/MinetestForFun/fishing.git",
-    "glooptest_missing",
-    "https://github.com/minetest-mods/item_drop.git",
-    "https://github.com/poikilos/metatools.git",
-    "nftools_legacy",
-    "https://github.com/poikilos/slimenodes.git",
-    "https://github.com/BenjieFiftysix/sponge.git",
-    "https://github.com/poikilos/throwing.git",  # Can utilize toolranks, toolranks_extras, wielded_light
-    "https://github.com/poikilos/throwing_arrows.git",  # Can utilize mesecons, mesecons_button
-    "https://gitlab.com/VanessaE/biome_lib.git",
+    # {'repo':"https://github.com/poikilos/homedecor_ua"},
+    {'src_path': getSGPath("animal_materials_legacy")},
+    {'repo':"https://github.com/minetest-mods/ccompass.git"},
+    {'repo':"https://github.com/octacian/chat3.git"},
+    {'repo':"https://github.com/poikilos/compassgps.git"},
+    {'src_path': getSGPath("elk_legacy")},
+    {'repo':"https://github.com/MinetestForFun/fishing.git"},
+    {'src_path': getSGPath("glooptest_missing")},
+    {'repo':"https://github.com/minetest-mods/item_drop.git"},
+    {'repo':"https://github.com/poikilos/metatools.git"},
+    {'src_path': getSGPath("nftools_legacy")},
+    {'src_path': getSGPath("glooptest_missing")},
+    {'repo':"https://github.com/poikilos/slimenodes.git"},
+    {'repo':"https://github.com/BenjieFiftysix/sponge.git"},
+    {'repo':"https://github.com/poikilos/throwing.git"},  # Can utilize toolranks, toolranks_extras, wielded_light
+    {'repo':"https://github.com/poikilos/throwing_arrows.git"},  # Can utilize mesecons, mesecons_button
+    {'repo':"https://gitlab.com/VanessaE/biome_lib.git"},
     {
-        'url': "https://github.com/Poikilos/vines.git",
+        'repo': "https://github.com/Poikilos/vines.git",
         'branch': "Bucket_Game", # git clone <url> --branch <branch>
     },
-    "https://github.com/MinetestForFun/unified_inventory",
+    {"https://github.com/MinetestForFun/unified_inventory"},
 ]
 
+'''
 # Items with no URL below are from EnlivenMinetest
+# - [x] Ensure everything is in gamespec['add_mods']
 minimum_live_server_based_on_bucket_game_200527 = [
-    {'dir_name': 'animal_materials_legacy'},
-    {'dir_name': 'ccompass', 'url': "https://github.com/minetest-mods/ccompass"},  # Remove this one or point to world-specific spawn area via settings? It is a regular spawn-pointing compass by default
-    {'dir_name': 'chat3', 'url': "https://github.com/octacian/chat3"},  #Doesn't seem to have any effect
-    {'dir_name': 'compassgps', 'url': "https://github.com/poikilos/compassgps"},
-    {'dir_name': 'elk_legacy'},
-    {'dir_name': 'fishing', 'url': "https://github.com/MinetestForFun/fishing"},
-    {'dir_name': 'glooptest_missing'},
-    {'dir_name': 'ircpack', 'url': ""},  # ONLY for servers!
-    # {'dir_name': 'item_drop', 'url': ""},  # In bucket_game now (but see mt_conf_by_mod['item_drop'] for settings)
-    {'dir_name': 'metatools', 'url': "https://github.com/poikilos/metatools"},
-    {'dir_name': 'nftools_legacy'},
-    {'dir_name': 'slimenodes', 'url': "https://github.com/poikilos/slimenodes"},
-    {'dir_name': 'sponge', 'url': "https://github.com/BenjieFiftysix/sponge"},  # In bucket_game but only in coderblocks
-    {'dir_name': 'throwing', 'url': "https://github.com/minetest-mods/throwing"},
-    {'dir_name': 'throwing_arrows', 'url': "https://github.com/minetest-mods/throwing_arrows"},
+    {'name': 'animal_materials_legacy'},
+    {'name': 'ccompass', 'repo': "https://github.com/minetest-mods/ccompass"},  # Remove this one or point to world-specific spawn area via settings? It is a regular spawn-pointing compass by default
+    {'name': 'chat3', 'repo': "https://github.com/octacian/chat3"},  # Doesn't seem to have any effect
+    {'name': 'compassgps', 'repo': "https://github.com/poikilos/compassgps"},
+    {'name': 'elk_legacy'},
+    {'name': 'fishing', 'repo': "https://github.com/MinetestForFun/fishing"},
+    {'name': 'glooptest_missing'},
+    # {'name': 'ircpack', 'repo': ""},  # ONLY for servers!
+    # {'name': 'item_drop', 'repo': ""},  # In bucket_game now (but see mt_conf_by_mod['item_drop'] for settings)
+    {'name': 'metatools', 'repo': "https://github.com/poikilos/metatools"},
+    {'name': 'nftools_legacy'},
+    {'name': 'slimenodes', 'repo': "https://github.com/poikilos/slimenodes"},
+    {'name': 'sponge', 'repo': "https://github.com/BenjieFiftysix/sponge"},  # In bucket_game but only in coderblocks
+    {'name': 'throwing', 'repo': "https://github.com/poikilos/throwing"},
+    {'name': 'throwing_arrows', 'repo': "https://github.com/poikilos/throwing_arrows"},
 ]
+'''
 
 '''
 Remove server_only_mods from the client and packaged copies of
@@ -105,6 +114,7 @@ ENLIVEN.
 '''
 server_only_mods = [
     'ircpack',
+    'chat3',
 ]
 
 '''
@@ -119,11 +129,16 @@ but for now just use
   world.conf.
   For other conf settings:
 - patches/subgame/minetest.server-example.conf goes in the server only.
+  - Place the result in the game directory such as will result in
+    /opt/minebest/mtworlds/center/ENLIVEN/minetest.conf
 - patches/subgame/minetest.client-example.conf goes in clients only.
 '''
 mt_conf_by_mod = {
     'item_drop': {
         'item_drop.pickup_radius': "1.425",
+    }
+    'throwing_arrows': {
+        'throwing.enable_arrow', "true",
     }
 }
 
@@ -179,10 +194,10 @@ WARNINGS:
   See <https://github.com/poikilos/EnlivenMinetest/issues/444>
 '''
 
-
 def main():
     pass
     print(warnings)
+    raise NotImplementedError("pyenliven build")
 
 if __name__ == "__main__":
     main()
