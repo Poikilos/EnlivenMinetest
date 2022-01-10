@@ -1,0 +1,25 @@
+diff -u /home/owner/git/EnlivenMinetest/Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/init.lua /home/owner/git/EnlivenMinetest/Bucket_Game-branches/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/init.lua
+--- /home/owner/git/EnlivenMinetest/Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/init.lua	2022-01-10 17:45:31.016325626 -0500
++++ /home/owner/git/EnlivenMinetest/Bucket_Game-branches/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/init.lua	2022-01-10 17:46:31.140324280 -0500
+@@ -47,7 +47,7 @@
+ 	local pickup_particle =
+ 		minetest.settings:get_bool("item_drop.pickup_particle", true)
+ 	local pickup_radius = legacy_setting_getnumber("item_drop.pickup_radius",
+-		"item_pickup_radius", 0.75)
++		"item_pickup_radius", 1.425)
+ 	local magnet_radius = tonumber(
+ 		minetest.settings:get("item_drop.magnet_radius")) or -1
+ 	local magnet_time = tonumber(
+Only in /home/owner/git/EnlivenMinetest/Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop: LICENSE
+diff -u /home/owner/git/EnlivenMinetest/Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/settingtypes.txt /home/owner/git/EnlivenMinetest/Bucket_Game-branches/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/settingtypes.txt
+--- /home/owner/git/EnlivenMinetest/Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/settingtypes.txt	2022-01-10 17:45:45.764325296 -0500
++++ /home/owner/git/EnlivenMinetest/Bucket_Game-branches/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/settingtypes.txt	2022-01-10 17:46:17.892324576 -0500
+@@ -20,7 +20,7 @@
+ item_drop.pickup_particle (Pickup particle) bool true
+ 
+ #Player pickup radius, the maximum distance from which items can be collected
+-item_drop.pickup_radius (Pickup radius) float 0.75
++item_drop.pickup_radius (Pickup radius) float 1.425
+ 
+ #Magnet radius, items between pickup_radius and this begin flying to the player
+ #Set it to -1 (or something else smaller than pickup_radius) to disable item
