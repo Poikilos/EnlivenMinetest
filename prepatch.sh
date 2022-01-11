@@ -50,8 +50,12 @@ do
         echo "selected branch: $var"
     fi
 done
+auto_branch="$branchUpstream-$date_string-$whatname"
 if [ "@$enable_bare_param" = "@true" ]; then
     branch="$2"
+else
+    branch="$auto_branch"
+    echo "* The branch name defaulted to \"$auto_branch\" since you didn't provide a second sequential argument."
 fi
 branchUpstream=bucket_game-211114a
 branchBase=Bucket_Game-base
@@ -67,6 +71,10 @@ fi
 #patches="$HOME/git/1.pull-requests/Bucket_Game-branches"
 repo="$HOME/git/EnlivenMinetest"
 patches="$HOME/git/EnlivenMinetest"
+branchesName="Bucket_Game-branches"
+if [ -d "$branchesName" ]; then
+    patches="`realpath $branchesName`"
+fi
 branchBasePath="$repo/$branchBase/$branch"
 branchHeadPath="$repo/$branchHead/$branch"
 if [ "@$enable_meld" = "@true" ]; then
@@ -181,7 +189,8 @@ branchBaseFilePath="$branchBasePath/$what"
 branchHeadFilePath="$branchHeadPath/$what"
 whatname=`basename $branchUpstreamFilePath`
 date_string=$(date +%Y%m%d)
-patchcmd="diff -u $branchBaseFilePath $branchHeadFilePath > $patches/$branchUpstream-$date_string-$whatname.patch"
+# patchcmd="diff -u $branchBaseFilePath $branchHeadFilePath > $patches/$auto_branch.patch"
+patchcmd="diff -u $branchBaseFilePath $branchHeadFilePath > $patches/$branch.patch"
 echo
 echo "After editing $branchHeadFilePath, then create a patch by running:"
 echo "$patchcmd"
