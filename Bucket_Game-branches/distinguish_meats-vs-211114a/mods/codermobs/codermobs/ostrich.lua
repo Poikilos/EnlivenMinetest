@@ -63,8 +63,7 @@ local msname_raw            = mcname           .. "_raw"
 
 local msname_img            = mcname           .. ".png"
 local msname_cooked_img     = msname_cooked    .. ".png"
--- local msname_raw_img        = msname_raw       .. ".png"
-local msname_raw_img        = "animal_materials_ostrich_meat_raw.png"
+local msname_raw_img        = msname_raw       .. ".png"
 
 local msname_egg            = mcname           .. "_egg"
 local msname_egg_fried      = msname_egg       .. "_fried"
