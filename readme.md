@@ -22,6 +22,19 @@ by [Poikilos](https://github.com/poikilos)
 * automatically install Minetest client with a usable minetest.conf (for
   improved graphics)
 
+The [Issues](https://github.com/poikilos/EnlivenMinetest/issues) page
+of the repo's web interface is used to track issues in ENLIVEN, the
+Center of the Sun server that uses it, Bucket_Game on which it is
+based, and Final Minetest which runs it. In many cases the issues are
+upstream and fixes can lead to pull requests, or resolve issues that
+are ignored or tagged as `wontfix` upstream. In several cases the
+upstream mod related to the issue is no longer maintained or only works
+with backward compatibility present in Final Minetest or MultiCraft2
+code.
+
+For notes on current development discussions, see the "Work in
+Progress" section at the bottom of this file.
+
 
 ## Primary Features of ENLIVEN subgame
 * birthstones, improved fork: <https://github.com/poikilos/birthstones>
@@ -52,7 +65,6 @@ Disable or remove these Bucket_Game mods/features potentially (not matching them
     <https://pastebin.com/dDBg40vf>) or saving playereffects
   * detect restarts (even if no 'separator'--see
     <https://pastebin.com/Jv3vkhFA>)
-
 
 ## DISCLAIMERS
 * Please read the Sources and License section of this document. You must
@@ -402,14 +414,17 @@ Qt5Widgets.dll
   ~/ownCloud/Student/LinkedIn/Node.js-DesignPatterns/notes.md
 
 ### minetest.org build speeds
+
+#### linux-minetest-kit ~200527
 * Intel i7-4770K
   * libraries ~3m
   * program ~4m
 
 ### Regression Tests
 * Use of input in python, where should never be used except in
-  poikilos.py and minetestinfo.py for first-time setup or when
-  `interactive_enable` is `True`
+  poikilos.py (some/all of that may be moved to parsing.py in
+  <https://github.com/poikilos/pycodetool>) and minetestinfo.py for
+  first-time setup or when `interactive_enable` is `True`
 
 ### C++ Debugging
 These steps are only needed for debug builds:
@@ -425,3 +440,83 @@ These steps are only needed for debug builds:
   * When you are done debugging, type:
     quit
 * Try debugging again after the proper packages are installed.
+
+### Work in Progress
+This section is a temporary dev discussion record for the purpose of tracking meta (issues about issues). In other words, this section has version-specific points that clarify reasoning such as prioritization, difficulty, or impact of issues or solutions. It may clarify why some issues are undecided, need feedback, are lowered in priority (such as via "Bucket_Game-future", "non-trivial"), etc.
+
+On 1/14/22 3:13 AM, Robert Kiraly wrote:
+(except changed 0 to # so GitHub creates links to issue pages)
+
+> #497 RJK could fix this but he has questions. TBD.
+> #498 RJK could fix this but he has questions. TBD.
+
+> #510 Poikilos needs to review next snapshot first
+> #511 Poikilos needs to review next snapshot first
+> #512 Doable but TBD
+
+> #516 Poikilos needs to review next snapshot first
+
+> #523 Q. Oily Patch: Can you put the patch in the ENI?
+
+[see next e-mail below]
+
+> #530 Q. Is the fix to modify the images or the models?
+
+Modifying the models would be complicated. They were never designed to align with the pixels on different resolutions. This may require lots of model editing or image editing to use mobile-sized textures. The problem is that even if you make some edges right, the pixel, at a low res, may be shared with another face. We could try reverting to the old higher resolution then upscaling instead of downscaling and see if the pixels line up, and if not then hand editing would work since there would be enough pixels that they aren't used twice on more than one polygon. I can try it.
+
+
+On 1/22/22 3:21 AM, Robert Kiraly wrote:
+
+(except added # so GitHub creates links to issue pages)
+
+>
+> * ENI #486 Dye shapes:
+>
+> So, this is a simple incorrect-images issue. I'd thought that it might be the dingy-colors issue.
+>
+> Poikilos said: The actual images are in bucket_game/mods/codercore/dye/textures and either aren't all used by the dye mod code or unifieddyes reverts them to its image. The latter is probably the case. It is probably best to revert the images there to the ones in the dye mod in..."
+>
+> I follow that we can just change the images. However, I'm not certain of what "there" refers to. I assume that you mean "unifieddyes". Are you able to provide a patch?
+
+`<Poikilos>` there: bucket_game/mods/codercore/dye/textures
+
+`<Poikilos>` I'll provide a patch. A good compromise would be to to some resizing and editing to make a better dye pile rather than reverting the nice bowls to the 16x16 MTG dye piles. The patch would also have to cover unifieddyes since that seems to override some of them since they aren't uniform. In any case, dye and unifieddyes images should be uniform anyway.
+
+> * ENI #487 Revert a change:
+>
+> Are you able to provide a patch relative to the latest snapshot that does the revert?
+
+`<Poikilos>` Ok can do.
+
+
+
+
+Issues where discussion was requested by RJK:
+- #500
+
+Issues where discussion was requested by Poikilos:
+- #517 (see discussion below):
+
+On 1/10/22 6:31 PM, Jake Gustafson wrote:
+> > `<OldCoder>` 0517 Animal Materials: Should we just factor the mod out?
+>
+> Factoring it out would be like factoring out default or basic_materials. Factoring it out would make several mods much more complex to maintain. Such mods exist for good reasons: See my comments at the two links ...
+
+1. #517
+2. [readme.md](https://github.com/poikilos/animalmaterials/blob/master/readme.md) in https://github.com/poikilos/animalmaterials.git
+
+Issues deferred pending a previous issue but ready to address:
+
+On 1/10/22 6:31 PM, Jake Gustafson wrote:
+>> `<OldCoder>` 0510 Animal materials
+>> `<OldCoder>` 0511 Meat
+>> `<OldCoder>` 0516 Meat
+> `<Poikilos>` 510-511 & 516: I'm waiting on incremental change so I don't desync from you (same reasons as under 0508 above, including my suggestion to add animalmaterials).
+
+
+Issues deferred pending a current issue:
+- #508 (requires a decision on #517)
+
+#### copypasta
+(This section provides out-of-context copypasta lines that have no meaning relevant to this document except to prevent retyping them over and over)
+This is resolved in bucket_game snapshot 220114.
