@@ -1,0 +1,17 @@
+Name:    unifieddyes
+Source:  Slightly modified upstream mod
+License: See "README.txt"
+
+----------------------------------------------------------------------
+
+1. This is a slightly modified version of an upstream mod.  The start-
+ing point was obtained originally as follows:
+
+      rm -fr unifieddyes
+      git clone https://gitlab.com/VanessaE/unifieddyes.git
+
+----------------------------------------------------------------------
+
+2. Changes include:
+
+2a. Added the files "00README" and "oldcoder.txt" (this file).

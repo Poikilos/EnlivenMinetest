@@ -1,0 +1,66 @@
+--- /home/owner/minetest/games/bucket_game/mods/coderbuild/unifieddyes/init.lua	2022-02-02 15:50:11.886988899 -0500
++++ /home/owner/git/EnlivenMinetest/Bucket_Game-branches/dye-redrawn-vs-220114/mods/coderbuild/unifieddyes/init.lua	2022-02-02 17:17:40.290915016 -0500
+@@ -640,7 +640,7 @@
+ 	if not item then return end
+ 	local inv_image = item.inventory_image
+ 	if not inv_image then return end
+-	return string.match(inv_image,"colorize:#(......):128")
++	return string.match(inv_image,"multiply:#(......)")
+ end
+ 
+ -- punch-to-recolor using the airbrush
+@@ -1232,14 +1232,14 @@
+ 		local color = string.format("%02x", r2)..string.format("%02x", g2)..string.format("%02x", b2)
+ 		if minetest.registered_items["dye:"..val..hue] then
+ 			minetest.override_item("dye:"..val..hue, {
+-				inventory_image = "unifieddyes_dye.png^[colorize:#"..color..":128",
++				inventory_image = "unifieddyes_dye.png^[multiply:#"..color,
+ 			})
+ 		else
+ 			if (val..hue) ~= "medium_orange"
+ 			  and (val..hue) ~= "light_red" then
+ 				minetest.register_craftitem(":dye:"..val..hue, {
+ 					description = S(desc),
+-					inventory_image = "unifieddyes_dye.png^[colorize:#"..color..":128",
++					inventory_image = "unifieddyes_dye.png^[multiply:#"..color,
+ 					groups = { dye=1, not_in_creative_inventory=1 },
+ 				})
+ 			end
+@@ -1261,7 +1261,7 @@
+ 
+ 			minetest.register_craftitem(":dye:"..val..hue.."_s50", {
+ 				description = S(desc.." (low saturation)"),
+-				inventory_image = "unifieddyes_dye.png^[colorize:#"..color..":128",
++				inventory_image = "unifieddyes_dye.png^[multiply:#"..color,
+ 				groups = { dye=1, not_in_creative_inventory=1 },
+ 			})
+ 			minetest.register_alias("unifieddyes:"..val..hue.."_s50", "dye:"..val..hue.."_s50")
+@@ -1281,7 +1281,7 @@
+ 
+ 		minetest.register_craftitem(":dye:"..name, {
+ 			description = S(desc),
+-			inventory_image = "unifieddyes_dye.png^[colorize:#"..rgb..":128",
++			inventory_image = "unifieddyes_dye.png^[multiply:#"..rgb,
+ 			groups = { dye=1, not_in_creative_inventory=1 },
+ 		})
+ 		minetest.register_alias("unifieddyes:"..name, "dye:"..name)
+@@ -1289,16 +1289,16 @@
+ end
+ 
+ minetest.override_item("dye:grey", {
+-	inventory_image = "unifieddyes_dye.png^[colorize:#888888:128",
++	inventory_image = "unifieddyes_dye.png^[multiply:#888888",
+ })
+ 
+ minetest.override_item("dye:dark_grey", {
+-	inventory_image = "unifieddyes_dye.png^[colorize:#444444:128",
++	inventory_image = "unifieddyes_dye.png^[multiply:#444444",
+ })
+ 
+ minetest.register_craftitem(":dye:light_grey", {
+ 	description = S("Light grey Dye"),
+-	inventory_image = "unifieddyes_dye.png^[colorize:#cccccc:128",
++	inventory_image = "unifieddyes_dye.png^[multiply:#cccccc",
+ 	groups = { dye=1, not_in_creative_inventory=1 },
+ })
+ 
