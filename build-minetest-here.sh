@@ -118,7 +118,7 @@ echo
 echo "RUN_IN_PLACE=$RUN_IN_PLACE"
 if [ "$RUN_IN_PLACE" = "0" ]; then
     echo "^ To change this, press Ctrl+C and use:"
-    usage()
+    usage
     echo
     echo "3..."
     sleep 1

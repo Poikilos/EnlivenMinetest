@@ -72,6 +72,7 @@ UNINSTALL=false
 CLEAN=false
 GET_WHAT=false
 USE_WHAT=false
+USE_2=false
 for var in "$@"
 do
     if [ "@$var" = "@--offline" ]; then
@@ -84,6 +85,8 @@ do
         CLEAN=true
     elif [ "@$var" = "@--what" ]; then
         GET_WHAT=true
+    elif [ "@$var" = "@--2" ]; then
+        USE_2=true
     elif [ "@$GET_WHAT" = "@true" ]; then
         if [ -d "$var" ]; then
             BUILD_WHAT="$var"
@@ -101,10 +104,16 @@ if [ "@$USE_WHAT" = "@true" ]; then
 fi
 
 BUILD_WHAT_DEFAULT=MultiCraft
+REPO_NAME=MultiCraft
+
+if [ "@$USE_2" = "@true" ]; then
+    BUILD_WHAT_DEFAULT=MultiCraft2
+    REPO_NAME=MultiCraft2
+fi
 
 # This is NOT a mistake (MultiCraft is the git username)...
 GIT_REPOS_DIR="$HOME/Downloads/git/MultiCraft"
-# ...so srcRepo should be MultiCraft/MultiCraft in this case
+# ...so srcRepo should be MultiCraft/$REPO_NAME in this case
 # (unless user ran script from a directory containing their own
 # MultiCraft directory).
 
@@ -119,10 +128,10 @@ if [ ! -d "$srcRepo" ]; then
     fi
 fi
 echo "* Using $srcRepo..."
-if [ ! -d /tmp/MultiCraft ]; then
-    mkdir /tmp/MultiCraft || customExit echo "mkdir -p '/tmp/MultiCraft' FAILED."
+if [ ! -d /tmp/$REPO_NAME ]; then
+    mkdir /tmp/$REPO_NAME || customExit echo "mkdir -p '/tmp/$REPO_NAME' FAILED."
 fi
-artifactsPath=/tmp/MultiCraft/src.txt
+artifactsPath=/tmp/$REPO_NAME/src.txt
 cat > $artifactsPath <<END
 .git
 .clang-format
@@ -151,15 +160,15 @@ END
 
 srcBin=$srcRepo/bin
 srcExe=$srcBin/MultiCraft
-iconCaption=MultiCraft
+iconCaption=$REPO_NAME
 dstShortcuts=$PREFIX/share/applications
-dstShortcut=$dstShortcuts/MultiCraft.desktop
+dstShortcut=$dstShortcuts/$REPO_NAME.desktop
 #dstPrograms="$HOME"
-#DESTINATION="$dstPrograms/MultiCraft"
-DESTINATION="$HOME/MultiCraft"
+#DESTINATION="$dstPrograms/$REPO_NAME"
+DESTINATION="$HOME/$REPO_NAME"
 dstIcon=minetest
 #tryIcon="$HOME/minetest/misc/minetest-xorg-icon-128.png"
-tryIcon="$DESTINATION/misc/MultiCraft-xorg-icon-128.png"
+tryIcon="$DESTINATION/misc/$REPO_NAME-xorg-icon-128.png"
 dstBin=$DESTINATION/bin
 dstExe=$dstBin/MultiCraft
 
@@ -175,10 +184,10 @@ if [ "@$UNINSTALL" = "@true" ]; then
     prevDir="`pwd`"
     echo "Uninstalling $DESTINATION..."
     cd "$DESTINATION" || customExit echo "cd $DESTINATION FAILED."
-    if [ ! -d /tmp/MultiCraft ]; then
-        mkdir /tmp/MultiCraft || customExit echo "mkdir -p '/tmp/MultiCraft' FAILED."
+    if [ ! -d /tmp/$REPO_NAME ]; then
+        mkdir /tmp/$REPO_NAME || customExit echo "mkdir -p '/tmp/MultiCraft' FAILED."
     fi
-    manifestPath=/tmp/MultiCraft/manifest.txt
+    manifestPath=/tmp/$REPO_NAME/manifest.txt
 cat > $manifestPath <<END
 games/default/files/bluestone/mesecons_pistons/textures/mesecons_piston_pusher_front_sticky.png
 games/default/files/bluestone/mesecons_pistons/textures/mesecons_piston_pusher_front.png
@@ -1815,7 +1824,7 @@ if [ "@$INSTALL" = "@true" ]; then
         rsync -rt --info=progress2 --exclude-from "$artifactsPath" "$srcRepo/" "$DESTINATION" || customExit "rsync failed."
     fi
     rm $artifactsPath
-    rmdir --ignore-fail-on-non-empty /tmp/MultiCraft
+    rmdir --ignore-fail-on-non-empty /tmp/$REPO_NAME
 
     if [ -f "$tryIcon" ]; then
         dstIcon="$tryIcon"
@@ -1884,18 +1893,20 @@ fi
 if [ ! -d "$srcRepo" ]; then
     cd "$GIT_REPOS_DIR" || customExit "cd '$GIT_REPOS_DIR' FAILED"
 fi
-goodFlagFile=MultiCraft/CMakeLists.txt
+goodFlagFile=$REPO_NAME/CMakeLists.txt
 if [ -f "`command -v git`" ]; then
     echo "In `pwd`..."
     if [ ! -d "$BUILD_WHAT" ]; then
         if [ "@$OFFLINE" = "@false" ]; then
-            git clone https://github.com/MultiCraft/MultiCraft.git || customExit "Cannot clone MultiCraft from `pwd`"
+            git clone https://github.com/MultiCraft/$REPO_NAME.git || customExit "Cannot clone $REPO_NAME from `pwd`"
         fi
         cd "$BUILD_WHAT" || customExit "Cannot cd '$BUILD_WHAT' from `pwd`"
     else
         cd "$BUILD_WHAT" || customExit "Cannot cd '$BUILD_WHAT' from `pwd`"
         if [ "@$OFFLINE" = "@false" ]; then
-            git pull || dieIfOnline "WARNING: Cannot pull '$BUILD_WHAT' from `pwd`"
+            echo "* origin of `pwd`:"
+            git remote show origin
+            git pull --verbose --ff-only || dieIfOnline "WARNING: Cannot pull '$BUILD_WHAT' from `pwd`"
         fi
     fi
 else
@@ -1922,7 +1933,9 @@ if [ ! -d "default" ]; then
 else
     if [ "@$OFFLINE" = "@false" ]; then
         cd default || customExit "cd default FAILED in `pwd`"
-        git pull || customExit "git pull FAILED in `pwd`"
+        echo "* origin of `pwd`:"
+        git remote show origin
+        git pull --verbose --ff-only || customExit "git pull FAILED in `pwd`"
         cd .. || customExit "cd .. FAILED in `pwd`"
     fi
 fi

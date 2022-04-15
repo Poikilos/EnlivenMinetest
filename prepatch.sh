@@ -143,8 +143,8 @@ elif [ "@$enable_install" = "@true" ]; then
     else
         customExit "Cannot detect mods directory in $branchHeadPath/mods"
     fi
-    echo "rsync -rt $patch_game_src/ $HOME/minetest/games/ENLIVEN..."
-    rsync -rt "$patch_game_src/" "$HOME/minetest/games/ENLIVEN"
+    echo "rsync -rtv $patch_game_src/ $HOME/minetest/games/ENLIVEN..."
+    rsync -rtv "$patch_game_src/" "$HOME/minetest/games/ENLIVEN"
     # echo "#patches:$patches"
     # echo "#branch:$branch"
     echo "Done."
@@ -316,5 +316,5 @@ done
 
 echo "Done."
 echo "To apply, set BUCKET_GAME then:"
-echo "cd EnlivenMinetest && git pull && rsync -rt Bucket_Game-branches/$branch/ \$BUCKET_GAME"
+echo "cd EnlivenMinetest && git pull && rsync -rtv Bucket_Game-branches/$branch/ \$BUCKET_GAME"
 echo
