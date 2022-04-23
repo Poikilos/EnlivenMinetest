@@ -1,0 +1,28 @@
+diff -ru Bucket_Game-branches/hippo_eye_uv_fix-vs-220114/mods/codermobs/codermobs/hippo.lua Bucket_Game-base/hippo_eye_uv_fix-vs-220114/mods/codermobs/codermobs/hippo.lua
+--- Bucket_Game-branches/hippo_eye_uv_fix-vs-220114/mods/codermobs/codermobs/hippo.lua	2022-04-23 17:06:04.657673354 -0400
++++ Bucket_Game-base/hippo_eye_uv_fix-vs-220114/mods/codermobs/codermobs/hippo.lua	2022-04-23 17:05:02.113674234 -0400
+@@ -15,13 +15,6 @@
+ 
+ -- ===================================================================
+ 
+-local dup_texture_count = 16
+-local multimesh_textures = {}
+-for multimesh_texture_i = 1,dup_texture_count,1
+-do
+-    multimesh_textures[multimesh_texture_i] = msname .. "_mesh.png"
+-end
+-
+ mobs_param = {
+     lcname       = lcname       ,
+     ucname       = ucname       ,
+@@ -108,7 +101,7 @@
+     rotate        = 180                                       ,
+     scale         = 8                                         ,
+     visual        = "mesh"                                    ,
+-    textures      = multimesh_textures                        ,
++    textures      = {{ msname .. "_mesh.png" }}               ,
+ 
+     animation     = {
+         stand_start  = 40 ,
+Binary files Bucket_Game-branches/hippo_eye_uv_fix-vs-220114/mods/codermobs/codermobs/models/codermobs_hippo.b3d and Bucket_Game-base/hippo_eye_uv_fix-vs-220114/mods/codermobs/codermobs/models/codermobs_hippo.b3d differ
+Binary files Bucket_Game-branches/hippo_eye_uv_fix-vs-220114/mods/codermobs/codermobs/textures/codermobs_hippo_mesh.png and Bucket_Game-base/hippo_eye_uv_fix-vs-220114/mods/codermobs/codermobs/textures/codermobs_hippo_mesh.png differ
