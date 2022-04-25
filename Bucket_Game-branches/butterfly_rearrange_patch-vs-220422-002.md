@@ -14,12 +14,11 @@ E-mail from Poikilos to OldCoder 2022-04-25:
 > unused images to fix the problem.
 
 To apply, set BUCKET_GAME then:
-cd EnlivenMinetest && git pull \
- && rsync -rtv Bucket_Game-branches/butterfly_rearrange_patch-vs-220422-002/ $BUCKET_GAME
+cd EnlivenMinetest && git pull && rsync -rtv Bucket_Game-branches/butterfly_rearrange_patch-vs-220422-002/ $BUCKET_GAME
 
 
-# Omit the following commands in case they can be used for something (like better 3d butterflies):
-rm $BUCKET_GAME/mods/codermobs/codermobs/textures/codermobs_butterfly1.png
-rm $BUCKET_GAME/mods/codermobs/codermobs/textures/codermobs_butterfly2.png
-rm $BUCKET_GAME/mods/codermobs/codermobs/textures/codermobs_butterfly3.png
-rm $BUCKET_GAME/mods/codermobs/codermobs/textures/codermobs_butterfly4.png
+# Omit the following commands in case they are now used by the better 3d butterflies (the textures now all have the same orientation if the patch above was applied):
+#rm $BUCKET_GAME/mods/codermobs/codermobs/textures/codermobs_butterfly1.png
+#rm $BUCKET_GAME/mods/codermobs/codermobs/textures/codermobs_butterfly2.png
+#rm $BUCKET_GAME/mods/codermobs/codermobs/textures/codermobs_butterfly3.png
+#rm $BUCKET_GAME/mods/codermobs/codermobs/textures/codermobs_butterfly4.png
