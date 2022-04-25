@@ -1,0 +1,8 @@
+Name:    codersea
+Source:  Largely original mod (do not replace)
+License: See "LICENSE"
+
+The  Android-compatible version of this mod omits the turtle and asso-
+ciated media.
+
+For full documentation, see the files "codersea.md" and "LICENSE".
