@@ -1,0 +1,124 @@
+Name:    default
+Source:  Fork of upstream mod - Do not replace
+License: See this file and "LICENSE" in the source tree
+
+----------------------------------------------------------------------
+
+1. Overview.
+
+This is a Bucket Game  "default" mod  based on  multiple upstream "de-
+fault" mods and original patches.
+
+This mod should not be  upgraded to,  or replaced with,  any mod but a
+Bucket Game "default" mod.
+
+This mod includes a large number of improvements.
+
+----------------------------------------------------------------------
+
+2. Partial (very partial) list of changes:
+
+2.1. This mod supports 64x64 skins.
+
+----------------------------------------------------------------------
+
+2.2. "New" chests (from the 0.4.17 era) are gone  because they're bug-
+gy and frustrating to deal with. They're mapped to "classic" chests.
+
+The file "ocutil.lua"  includes some  utility functions written and/or
+added by OldCoder.
+
+----------------------------------------------------------------------
+
+2.3. Bucket API: The "bucket" mod in Bucket Game includes major exten-
+sions by OldCoder. The "default" mod defines  one routine that is part
+of that API:
+
+      default.register_node_bucketable
+
+----------------------------------------------------------------------
+
+2.4. Water API: Major new API by Poikilos, Slopsbucket, and OldCoder.
+
+----------------------------------------------------------------------
+
+2.5. Trees:  Lots of new trees.  Some from  More Trees,  one from Cool
+Trees, some original.
+
+Some of the trees have been edited to make improvements or largely re-
+done.
+
+Partial list:
+
+From "moretrees" mod:
+
+Beech, Birch, Cedar, Date Palm, Fir, Oak, Palm, Poplar, Rubber, Sequo-
+ia, Spruce, Willow
+
+* From "irokotree" mod: Iroko Tree
+
+Might be from "moretrees" or from other mods:
+
+Jungle, Rubber
+
+Others, to be documented:
+
+Acacia,  Aspen,  Axinite,  Big Apple,  Cherry, Christmas Tree,  Lemon,
+Maple
+
+----------------------------------------------------------------------
+
+2.6. Misc. changes:
+
+* default:ice -- Adjust groups
+* nodes.lua   -- Add Cave Ice
+* mapgen.lua  -- Add "icesheet" biome
+
+* default_grass_side.png     -- Less-Dirt version
+* default_dry_grass_side.png -- Less-Dirt version
+* default_snow_side.png      -- Adjusted by OldCoder
+
+* Support for a Winter Wonderland mode.
+
+* Jungle wood and trunk textures are redone by OldCoder and Poikilos 2021-11-02.
+  - default_jungle_trunk.png (and default_jungletree.png for use by older mods)
+  - default_jungle_wood.png (and default_junglewood.png for use by older mods)
+  - default_jungle_top.png (and default_jungletree_top.png)
+
+----------------------------------------------------------------------
+
+2.7. player_falling_damage: redone based on default_break_glass .1 and
+ .2.
+
+Changes by Poikilos: change timing to blend both sounds, overall tonal
+range, temporal tonal range.
+
+----------------------------------------------------------------------
+
+3. New textures identified by md5sum numbers:
+
+md5sum:   f9ba02526b68cd7be42d0129cfe9418d
+License:  CC BY-SA 3.0: Poikilos
+Name:     default_mese_block.png
+Source:   http://axlemedia.net/poikilos/images/\
+default_mese_block-8D.png
+
+md5sum:   db5e9366cb3d90d4a5538aef92882150
+License:  CC BY-SA 3.0: Paramat and Dr. Frankenstone
+Name:     default_grass_side.png
+source:   Less-Dirt mod
+
+md5sum:   9bd1a007236b3cbb8933253dd6f37fc8
+License:  CC BY-SA 3.0: Paramat and Dr. Frankenstone
+Name:     default_dry_grass_side.png
+Source:   Less-Dirt mod
+
+md5sum:   1bda98db7d77d1d438bc95ede5026501
+License:  CC BY-SA 3.0: Gambit and OldCoder
+Name:     default_snow_side.png
+Source:   OldCoder
+
+Filenames may vary and  links may no longer go to the same versions of
+the files.
+
+(end of document)
