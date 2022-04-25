@@ -25,6 +25,9 @@ next_var=
 enable_bare_param=false
 param1="$1"
 #what=$1
+branchUpstreamBare=bucket_game
+branchUpstream=$branchUpstreamBare-211114a
+tryBranchUpstream=""
 for var in "$@"
 do
     if [ "@$next_var" = "@--install" ]; then
@@ -48,16 +51,19 @@ do
         #branch="$var"
         enable_bare_param=true
         echo "selected branch: $var"
+        _patch_colon_upstream="`echo $var | sed 's/-vs-/:/g'`"
+        tryBranchUpstream="$branchUpstreamBare-`echo "$_patch_colon_upstream" | cut -d: -f2`"
     fi
 done
-auto_branch="$branchUpstream-$date_string-$whatname"
+auto_branch="$branchUpstreamBare-$date_string-$whatname"
 if [ "@$enable_bare_param" = "@true" ]; then
     branch="$2"
 else
     branch="$auto_branch"
     echo "* The branch name defaulted to \"$auto_branch\" since you didn't provide a second sequential argument."
 fi
-branchUpstream=bucket_game-211114a
+
+
 branchBase=Bucket_Game-base
 branchHead=Bucket_Game-branches
 # project0_path="$HOME/git/EnlivenMinetest/webapp/linux-minetest-kit/minetest/games/$branchUpstream"
@@ -66,6 +72,14 @@ tryUnpatched="$HOME/minetest/$branchUpstream"
 if [ -d "$tryUnpatched" ]; then
     project0_path="$tryUnpatched"
 fi
+tryUnpatched="$HOME/minetest/$tryBranchUpstream"
+if [ -d "$tryUnpatched" ]; then
+    project0_path="$tryUnpatched"
+else
+    echo "* there is no $tryUnpatched, so $project0_path will be used"
+fi
+
+echo "* upstream branch: $project0_path"
 
 #patches="$HOME/git/EnlivenMinetest/patches"
 #patches="$HOME/git/1.pull-requests/Bucket_Game-branches"
