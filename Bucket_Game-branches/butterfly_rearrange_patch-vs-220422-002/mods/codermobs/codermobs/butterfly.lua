@@ -58,7 +58,7 @@ mobs_param.core_param = {
     hp_min = 1,
     hp_max = 2,
     armor = 100,
-    collisionbox = {-1, -0.3, -1, 1, 0.3, 1},
+    collisionbox = {-.5, -0.3, -.5, .5, 0.3, .5},
     visual = "mesh",
     mesh = msname .. ".b3d" ,
     textures = mob_skins,
@@ -73,11 +73,17 @@ mobs_param.core_param = {
     view_range = 10,
     blood_texture = "lott_spider_blood.png",
 
+
     animation = {
-        speed_normal = 90,  speed_run = 90,
-        -- stand_start = 0,    stand_end = 7, stand_speed = 2, -- only move antennae (not suitable for mobs redo since "stand" can happen in the air :(
-        stand_start = 8,     stand_end = 19, stand_speed = 60,
-        walk_start = 8,     walk_end = 19,
+        -- speed_normal = 22,
+        --stand_start = 8, stand_end = 19, stand_speed = 60,
+        --run_start = 8, run_end = 19, run_speed = 22,
+        stand_start = 0, stand_end = 7, stand_speed = 2,
+        walk_start = 0, walk_end = 7, walk_speed = 2,
+        run_start = 0, run_end = 7, run_speed = 3,
+        -- walk_start = 8, walk_end = 19, walk_speed = 22,
+        fly_start = 8, fly_end = 19, fly_speed = 22,
+        -- TODO (if hover gets added to mobs--see EnlivenMinetest issue #556): hover_start = 8, hover_end = 19, hover_speed = 15,
     },
 
     on_rightclick = function(self, clicker)
