@@ -2,8 +2,8 @@
 
 -- ===================================================================
 
-local lcname     = "butterfly"
-local ucname     = "Butterfly"
+local lcname     = "single_butterfly"
+local ucname     = "Single Butterfly"
 local msname     = "codermobs_" .. lcname
 local obj_name   = "codermobs:" .. lcname
 
@@ -34,7 +34,7 @@ mobs_param = {
     } ,
 
     add_egg   = true                    ,
-    egg_image = "codermobs_butterfly_inv.png"     ,
+    egg_image = msname .. "_inv.png"     ,
 }
 
 -- ===================================================================
@@ -58,7 +58,7 @@ mobs_param.core_param = {
     hp_min = 1,
     hp_max = 2,
     armor = 100,
-    collisionbox = {-.5, -0.3, -.5, .5, 0.3, .5},
+    collisionbox = {-.25, -0.15, -.25, .25, 0.15, .25},
     visual = "mesh",
     mesh = msname .. ".b3d" ,
     textures = mob_skins,
@@ -71,8 +71,7 @@ mobs_param.core_param = {
     light_damage = 0,
     fall_damage = 0,
     view_range = 10,
-    blood_texture = "lott_spider_blood.png",
-
+    blood_texture = "",
 
     animation = {
         -- speed_normal = 22,
