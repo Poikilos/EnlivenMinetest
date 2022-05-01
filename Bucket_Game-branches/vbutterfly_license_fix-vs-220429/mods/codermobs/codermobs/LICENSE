@@ -1,0 +1,307 @@
+All of the files involved are  used and distributed under FOSS licens-
+es.
+
+----------------------------------------------------------------------
+
+License: CC0 aka CC Public Domain
+is, or was, described by:
+https://creativecommons.org/publicdomain/zero/1.0/
+
+License: CC BY-SA 4.0
+is, or was, described by:
+https://creativecommons.org/licenses/by-sa/4.0/
+
+License: CC BY-SA 3.0
+is, or was, described by:
+https://creativecommons.org/licenses/by-sa/3.0/
+
+License: CC BY-NC-SA 4.0
+is, or was, described by:
+https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+License: CC BY-NC-SA 3.0
+is, or was, described by:
+https://creativecommons.org/licenses/by-nc-sa/3.0/
+
+----------------------------------------------------------------------
+
+Original components  which are not covered under other  copyrights and
+licenses are copyright and licensed as follows:
+
+(c) 2019 and CC BY-NC-SA 4.0: OldCoder (Robert Kiraly).
+
+
+----------------------------------------------------------------------
+
+Additional meats:
+- codermobs_beef.png
+- codermobs_beef_raw.png
+- codermobs_ostrich_cooked.png
+- codermobs_ostrich_raw.png
+- codermobs_venison.png
+- codermobs_venison_raw.png
+- codermobs_lamb_raw.png
+- codermobs_lamb_cooked.png
+
+(c) 2021 Poikilos CC BY-SA 4.0
+
+Redrawn mobs meats and animal materials:
+- codermobs_pork_cooked.png
+- codermobs_pork_raw.png
+- animal_materials_pork_raw.png
+- codermobs_ostrich_*.png
+- codermobs_chicken_*.png
+
+(c) 2021 Poikilos CC BY-SA 4.0
+
+Improved or adapted mobs meats and animal materials
+(based on image of same name unless specified):
+- animal_materials_egg_big.png (improved)
+- codermobs_ostrich_egg.png (based on sapier egg)
+- codermobs_egg_big_fried.* (based on fried egg **)
+- codermobs_ostrich_egg_fried.png (based on fried egg **)
+
+(c) 2011 sapier, 2021 Poikilos CC BY-SA 4.0
+
+`**` The author is assumed to be sapier due to context, but correct the author later if found.
+
+Spider Meat:
+- Edited by Poikilos, based on model and texture by AspireMint according to
+  <https://forums.minetest.org/viewtopic.php?f=9&t=9301> and
+  possibly implied by
+  <https://git.minetest.org/minetest-LOTR/Lord-of-the-Test/src/branch/master/README.md>.
+- codermobs_lott_spider_meat_raw.png
+- codermobs_lott_spider_meat.png
+
+(c) ~2014 AspireMint and 2021 Poikilos (edited by) CC BY-SA 3.0
+- history: <https://git.minetest.org/minetest-LOTR/Lord-of-the-Test/commits/branch/master/mods/lottmobs/textures/lottmobs_spider.png>
+
+----------------------------------------------------------------------
+
+More Creeps and Weirdos for Mobs Redo
+https://github.com/22i/amcaw
+(Poikilos fork: https://github.com/poikilos/amcaw)
+includes: baby, blorp, bubblescum, camel, castle critter, castle guard,
+castle king, cavelady, caveman, desert lizard, digibug, discomole,
+flobmothership, floob, g, googoat, growbotgreg, guineapig, hippo,
+hotdog, hunchback, lawyer, loliman, mandog, oldlady, ponie, ponygirl,
+ragingbull, ratman, robotted, robottod, rocketgirafe, rockmonster,
+sneaky sal, snowdevil and zebra.
+
+(c) Astromojang,  RickWeek84, amcaw CC BY-SA 3.0
+
+except:
+- codermobs_oldlady_sea_hag_mesh.png
+  (c) Astromojang,  RickWeek84, amcaw and 2021 Poikilos (edited by)
+  CC BY-SA 3.0
+
+
+----------------------------------------------------------------------
+
+
+Skeletons:
+
+mdskeleton model:
+Mdoege
+
+mdskeleton texture (replaced 2019):
+(c) 2019 Poikilos CC BY-SA 4.0
+
+mdskeleton sounds  (replaced 2019):
+(c) 2019 Poikilos CC BY-SA 4.0
+
+---------------------------------------------------------------------
+
+Models and mesh textures for "baby_chick", "bom", and "icebom":
+
+(c) 2019 and CC-BY-NC-SA 4.0: Poikilos. OldCoder as well for the "ice-
+bom" mesh texture.
+
+For sound-file information, see the Lua files.
+
+----------------------------------------------------------------------
+
+Denny code and media:
+See "denny.lua"
+
+----------------------------------------------------------------------
+
+Improved Spider/Bug Sounds:
+codermobs_damage_giant_exoskeleton, codermobs_death_giant_bug,
+codermobs_use_giant_exoskeleton
+(c) 2019 and CC BY-SA 4.0: Poikilos
+
+Improved Particles:
+codermobs_blood, codermobs_damage_stone, codermobs_lott_spider_blood
+(c) 2019 and CC BY-SA 4.0: Poikilos
+
+codermobs_fireball:
+(c) 2012 to 2019 and CC-BY-SA 3.0: Sapier, Poikilos
+
+----------------------------------------------------------------------
+
+Media for "animal_materials", "deer", "elk", and "ostrich":
+
+See  the  5 associated  Lua  source files.  In general,  the media is:
+(c) 2012 to 2019 and CC-BY-SA 3.0: Sapier and Poikilos.
+
+The "ostrich" texture is as described above but also attribution: Old-
+Coder.
+
+Code for "animal_materials": Same as media.  The  other 4 mobs  listed
+here use new code.
+
+More about the Elk:
+
+Pixel Art Elk texture:
+(c) 2012 to 2019 and CC BY-SA 3.0: Sapier, Polikilos (skinned by)
+
+HD (video-based) and Lo-fi (16-color video-based) Elk Textures:
+based on Elk video "Elk.webm.360p.vp9" (CC BY 2.0 Generic)
+Stephen Baker [BLM/Oregon](blm.gov/yg5c).jpg, Poikilos (skinned by)
+
+Additionally, "chicken.lua" uses Sapier's 3D egg.  See that Lua source
+file as well.
+
+----------------------------------------------------------------------
+
+Egg texture:
+MIT License
+(c) 2016-2019 TenPlus1 and Poikilos
+
+----------------------------------------------------------------------
+
+Car model:
+(c) 2015 and CC-BY-NC-SA 3.0: Melkor.
+
+----------------------------------------------------------------------
+
+mdoege   code and/or media
+-----------------------------
+WTFPL
+
+PilzAdam code and/or media
+-----------------------------
+WTFPL
+
+Bat
+-----------------------------
+Code: GPL
+Model and texture: CC BY-SA 3.0. Attribution: Defense Subgame.
+Sound file: WTFPL
+
+Birds
+-----------------------------
+(c) 2012-2019  and  CC-BY-SA  3.0:  Sapier,  Poikilos.  Sapier created
+the original models. Poikilos derived new models from them and created
+new textures.
+
+Butterfly (made of planes with colorized overlays)
+-----------------------------
+(c) 2012 to 2019 and CC BY-SA 3.0: AspireMint.
+
+Butterfly V (redone voxel art)
+-----------------------------
+(c) 2022 and CC BY-SA 4.0: Poikilos
+
+Butterfly (voxel art) textures
+-----------------------------
+CC BY-SA 3.0 (C) 2016 D00Med (for LegendofMinetest mapgen)
+
+Realistic Milk Bucket
+-----------------------------
+(c) 2015-2019 and CC BY-SA 3.0: ElementW, Poikilos (modified by).
+
+D00Med code
+-----------------------------
+GNU Lesser General Public License 2.1
+
+D00Med models and/or textures
+-----------------------------
+Originals: CC BY-SA 3.0 Unported. Attribution: D00Med.
+New panda texture: CC BY SA 3.0 2016 D00Med and 2021 Poikilos
+
+Mr. Goat
+-----------------------------
+(c) 2016 to 2019 and CC BY-SA 3.0: Don Batman.  OldCoder worked on the
+eyes.
+
+NSSM components
+-----------------------------
+No NSSM are believed  presently to be used.  If  they're  used  in the
+future, the applicable license will be GPL3.
+
+Sapier components
+-----------------------------
+(c) 2012-2019 and CC-BY-SA 3.0: Sapier.
+
+"mobs_mc" components
+-----------------------------
+Code and models: GNU GPL V3
+
+Other "mobs_mc" Polar Bear media: CC BY-SA 4.0. Attribution: "mobs_mc"
+team.
+
+Skandarella components
+-----------------------------
+For snail, kangaroo, tiger, and T-Rex media license information, see:
+license-skandarella.txt
+
+----------------------------------------------------------------------
+
+Krupnov Pavel and TenPlus1 components:
+
+The MIT License (MIT)
+
+(c) 2014 Krupnov Pavel -- bugs, kpgmobs, pmobs
+(c) 2014 Krupnov Pavel and 2016 TenPlus1 -- mobs_animal (deer mesh,
+    dungeon master (hunched version), small rat, sand monster /
+    as mummy, sheep, stone monster / as dirt monster, treant)
+(c) 2011 sapier, 2021 Poikilos (redraw meats) -- animalmaterials
+(c) 2016 TenPlus1 -- mobs_monster and mobs_npc
+
+Permission is hereby granted,  free of charge, to any person obtaining
+a  copy  of  this  software  and  associated  documentation files (the
+"Software"),  to deal  in the Software without restriction,  including
+without limitation the rights to use,  copy,  modify,  merge, publish,
+distribute,  sublicense,  and/or sell  copies of the Software,  and to
+permit persons to whom the Software is furnished to do so,  subject to
+the following conditions:
+
+The  above  copyright  notice  and  this  permission  notice  shall be
+included in all copies or substantial portions of the Software.
+
+THE  SOFTWARE  IS  PROVIDED  "AS  IS",  WITHOUT  WARRANTY OF ANY KIND,
+EXPRESS  OR  IMPLIED,  INCLUDING  BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN  NO  EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM,  DAMAGES OR OTHER LIABILITY,  WHETHER IN AN ACTION OF CONTRACT,
+TORT  OR  OTHERWISE,  ARISING  FROM,  OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+----------------------------------------------------------------------
+
+Blockmen components:
+
+(c) 2015-2016 BlockMen <blockmen2015@gmail.com>
+
+This  software  is  provided  'as-is',  without any express or implied
+warranty.  In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission  is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1.  The origin  of  this software must not be misrepresented; you must
+not claim  that  you  wrote  the  original  software.  If you use this
+software in a product,  an acknowledgment in the product documentation
+is required.
+
+2.  Altered source versions  must be plainly marked as such,  and must
+not be misrepresented as being the original software.
+
+3.  This notice  may  not  be  removed  or  altered  from  any  source
+distribution.
+
+(end of document)
