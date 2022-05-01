@@ -1,8 +1,16 @@
 --- /home/owner/git/EnlivenMinetest/Bucket_Game-base/vbutterfly_license_fix-vs-220429/mods/codermobs/codermobs/LICENSE	2022-05-01 15:44:14.808012258 -0400
-+++ /home/owner/git/EnlivenMinetest/Bucket_Game-branches/vbutterfly_license_fix-vs-220429/mods/codermobs/codermobs/LICENSE	2022-05-01 15:44:49.264011773 -0400
-@@ -206,8 +206,7 @@
++++ /home/owner/git/EnlivenMinetest/Bucket_Game-branches/vbutterfly_license_fix-vs-220429/mods/codermobs/codermobs/LICENSE	2022-05-01 15:52:19.716005431 -0400
+@@ -200,14 +200,13 @@
+ -----------------------------
+ (c) 2012 to 2019 and CC BY-SA 3.0: AspireMint.
  
- Butterfly (voxel art) textures
+-Butterfly V (redone voxel art)
++Vivid Butterfly (redone voxel art)
+ -----------------------------
+ (c) 2022 and CC BY-SA 4.0: Poikilos
+ 
+-Butterfly (voxel art) textures
++Vivid Butterfly textures
  -----------------------------
 -unknown
 -- please submit author info to Poikilos or OldCoder
