@@ -949,7 +949,8 @@ class Repo:
         '''
         quiet = options.get('quiet') is True
         debug("get_issues...")
-        debug("  options={}".format(options))
+        # debug("  options={}".format(options))
+        # ^ By now, options is populated with defaults as well.
         debug("  query={}".format(query))
         if query is not None:
             for k,v in query.items():
@@ -1046,12 +1047,13 @@ class Repo:
                       "".format(prev_query_s, url))
                 debug("  (issues will be set to the content of the {}"
                       " element)".format(results_key))
-            else:
-                raise ValueError(
-                    "The url is unknown for the action."
-                    " Maybe the code is trying to get labels instead"
-                    " of issues and should call _get_labels."
-                )
+            # else:
+            #     raise ValueError(
+            #         "The url is unknown for the action."
+            #         " Maybe the code is trying to get labels instead"
+            #         " of issues and should call _get_labels."
+            #     )
+            # else issues list, it seems
 
         # Labels are NOT in the URL, but filtered later (See docstring).
 
@@ -1062,7 +1064,8 @@ class Repo:
                   "".format(query_part, c_path))
         elif len(query_part) > 0:
             if url is None:
-                raise RuntimeError("url is None")
+                url = self.issues_url
+                # raise RuntimeError("url is None")
             if query_part is None:
                 raise RuntimeError("query_part is None")
             url += "?" + query_part
@@ -1221,11 +1224,12 @@ class Repo:
 
         return results, None
 
-    def _get_url(self, url, c_path=None):
+    def _get_url(self, url, c_path=None, comment_prefix=""):
         '''
         Keyword arguments:
         c_path -- If not None, save the results as JSON to this path.
         '''
+        p = comment_prefix
         self.last_src = url
         try:
             headers = {}
@@ -1305,7 +1309,7 @@ class Repo:
             quiet=quiet,
         )
         '''
-        result, err = self._get_url(query_url)
+        result, err = self._get_url(query_url, comment_prefix="  * ")
         return result, err
 
     def getCachedJsonDict(self, url, refresh=False, never_expire=False,
@@ -1499,7 +1503,11 @@ class Repo:
         if result is not None:
             return result, None
 
-        result, err = self._get_url(url, c_path=c_path)
+        result, err = self._get_url(
+            url,
+            c_path=c_path,
+            comment_prefix="  * ",
+        )
         return result, err
 
     def show_issue(self, issue, refresh=False, never_expire=False,
@@ -2177,10 +2185,12 @@ def main():
         elif len(match_all_labels) > 1:
             mode = "list"
         else:
-            raise RuntimeError(
-                "The command combination is not implemented"
-                " (The mode couldn't be determined)."
-            )
+            mode = "list"
+            debug("* defaulting to list mode (no command)")
+            # raise RuntimeError(
+            #     "The command combination is not implemented"
+            #     " (The mode couldn't be determined)."
+            # )
     if save_key is not None:
         raise ValueError("--{} requires a space then a value."
                          "".format(save_key))
