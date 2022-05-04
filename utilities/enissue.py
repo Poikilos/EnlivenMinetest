@@ -2307,6 +2307,9 @@ def main():
         else:
             sys.exit(1)
     total_count = 0
+    print()
+    # ^ This blank line goes after "@ Cache" messages and before
+    #   the issues list.
     if mode == "labels":
         if repo.labels is None:
             print("There were no labels.")
@@ -2404,19 +2407,22 @@ def main():
     elif mode == "list":
         print()
         if len(match_all_labels) > 0:
-            print("{} issue(s) matched {}".format(
-                match['count'],
-                " + ".join("'{}'".format(s) for s in match_all_labels)
-            ))
             if total_count >= repo.page_size:
-                print("{} searched, which is the maximum number"
-                      " per page.".format(total_count))
+                print("{} found but only {} searched, which is the"
+                      " maximum number per page."
+                      "".format(match['count'], total_count))
                 next_page = 2
                 if repo.page is not None:
                     next_page = repo.page + 1
                 print("    ./" + me + " " + " ".join(match_all_labels)
                       + " page " + str(next_page))
                 print("to see additional pages.")
+
+            else:
+                print("{} issue(s) matched {}".format(
+                    match['count'],
+                    " + ".join("'{}'".format(s) for s in match_all_labels)
+                ))
 
         else:
             if repo.page is not None:
