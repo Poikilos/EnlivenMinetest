@@ -2421,9 +2421,13 @@ def main(custom_args=None):
                 print("to see additional pages.")
 
             else:
-                print("{} issue(s) matched {}".format(
+                pageMsg = "."
+                if repo.page is not None:
+                    pageMsg = " (There are no more pages)."
+                print("{} issue(s) matched {}{}".format(
                     match['count'],
-                    " + ".join("'{}'".format(s) for s in match_all_labels)
+                    " + ".join("'{}'".format(s) for s in match_all_labels),
+                    pageMsg,
                 ))
 
         else:
@@ -2453,6 +2457,8 @@ def main(custom_args=None):
                 print()
                 print("To view details of one of these issues, type")
                 print("    ./" + me)
+                # print("    {}".format(custom_args[0]))
+                # ^ Doesn't help: changes to full path including $PATH
                 print("followed by a number.")
         elif total_count >= repo.page_size:
             print("* There were {} matches by the end of the page so"
