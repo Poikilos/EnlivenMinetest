@@ -2040,7 +2040,9 @@ class Repo:
         return issue, None
 
 
-def main():
+def main(custom_args=None):
+    if custom_args is None:
+        custom_args = sys.argv
     global verbose
     mode = None
     prev_arg = None
@@ -2071,8 +2073,8 @@ def main():
     #   - repo_url is initially set to default_options['repo_url']
     collect_logic = ['--copy-meta-to', '--db-type', '--db-user',
                      '--db-password', '--cache-base']
-    for i in range(1, len(sys.argv)):
-        arg = sys.argv[i]
+    for i in range(1, len(custom_args)):
+        arg = custom_args[i]
         isValue = False
         if arg.startswith("#"):
             arg = arg[1:]
@@ -2437,6 +2439,7 @@ def main():
                     next_page = repo.page + 1
                 print("    ./" + me + " page " + str(next_page))
                 print("to see additional pages.")
+
         if match['count'] > 0:
             # Note that if a label and issue number are both provided,
             # the mode is still "list".
@@ -2451,6 +2454,28 @@ def main():
                 print("To view details of one of these issues, type")
                 print("    ./" + me)
                 print("followed by a number.")
+        elif total_count >= repo.page_size:
+            print("* There were {} matches by the end of the page so"
+                  " page {} will appear automatically..."
+                  "".format(match['count'], next_page))
+            new_args = []
+            prevArg = None
+            pageDone = False
+            for arg in custom_args:
+                if prevArg == "page":
+                    pageDone = True
+                    new_args.append(str(next_page))
+                else:
+                    new_args.append(arg)
+                prevArg = arg
+            if not pageDone:
+                new_args.append("page")
+                new_args.append(str(next_page))
+            debug("* constructed new_args {} from {}"
+                  "".format(new_args, custom_args))
+            ret = main(custom_args=new_args)
+            print("")
+            return ret
     else:
         debug("There is no summary output due to mode={}".format(mode))
     print("")
