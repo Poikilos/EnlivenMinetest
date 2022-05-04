@@ -160,8 +160,8 @@ def gitea_ts_to_dt(timestamp_s):
     timestamp_s = timestamp_s[:colonNegI] + timestamp_s[colonNegI+1:]
     '''
     Remove the non-python-like : from %z
-    %z is "+0000 UTC offset in the form ±HHMM[SS[.ffffff]] (empty
-    string if the object is naive)."
+    %z is "+0000 UTC offset in the form ?HHMM[SS[.ffffff]] (empty
+    string if the object is naive)." where '?' is +/-
     - <https://strftime.org/>
     '''
     return datetime.strptime(timestamp_s, giteaSanitizedDtFmt)
@@ -2311,7 +2311,7 @@ def main(custom_args=None):
     total_count = 0
     print()
     # ^ This blank line goes after "@ Cache" messages and before
-    #   the issues list.
+    #   the list items or other output.
     if mode == "labels":
         if repo.labels is None:
             print("There were no labels.")
