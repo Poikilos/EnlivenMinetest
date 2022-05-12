@@ -1,4 +1,12 @@
 #!/bin/bash
+# Do not use sudo, in case sudo is not installed (such as in some
+# default installations including the dyne/devuan:chimaera docker image
+# on docker hub.
+me=install-minetest-build-deps.sh
+if [ "$EUID" -ne 0 ]; then
+    echo "Error: $me must run as root."
+    exit 1
+fi
 enable_postgres="false"
 enable_redis="false"
 enable_leveldb="false"
@@ -50,10 +58,11 @@ LEVELDB_DEV_PKG="leveldb-devel"
 if [ ! -z "$this_apt" ]; then
     LEVELDB_DEV_PKG="libleveldb-dev"
     echo "Using $this_apt..."
-    # sudo $this_apt -y remove minetest-server
-    # sudo $this_apt -y remove minetest
-    sudo $this_apt update
-    sudo $this_apt -y install \
+    # $this_apt -y remove minetest-server
+    # $this_apt -y remove minetest
+    $this_apt update
+    if [ $? -ne 0 ]; then exit 1; fi
+    $this_apt -y install \
         autoconf        automake       autopoint      autotools-dev   \
         bash            binutils       bison          bzip2           \
         cmake           coreutils      e2fsprogs      expat           \
@@ -79,13 +88,14 @@ if [ ! -z "$this_apt" ]; then
         libxml-parser-perl    \
         xserver-xorg-dev      \
     ;
+    if [ $? -ne 0 ]; then exit 1; fi
     if [ ! -f "`command -v libtool`" ]; then
         . /etc/os-release
         if [ ! -z "$VERSION_ID" ]; then
             if [ -f "`command -v bc`" ]; then
                 # bc is bash calculator (-l: mathlib)
                 if [ `echo "$VERSION_ID>14.04" | bc -l` = 1 ]; then
-                    sudo $this_apt -y install libtool-bin
+                    $this_apt -y install libtool-bin
                     # ^ not necessary on Trusty (See
                     # <https://askubuntu.com/questions/989510/how-do-i-install-libtool-bin-on-ubuntu-14-04>).
                 fi
@@ -100,26 +110,28 @@ if [ ! -z "$this_apt" ]; then
 
 
     if [ "$enable_redis" = "true" ]; then
-        sudo $this_apt -y install libhiredis-dev
+        $this_apt -y install libhiredis-dev
     fi
     if [ "$enable_postgres" = "true" ]; then
-        sudo $this_apt -y install libpq-dev postgresql-server-dev-all
+        $this_apt -y install libpq-dev postgresql-server-dev-all
     fi
     if [ "$enable_leveldb" = "true" ]; then
-        sudo $this_apt -y install $LEVELDB_DEV_PKG
+        $this_apt -y install $LEVELDB_DEV_PKG
     fi
+    # ^ Don't fail on these commands, in case the user installed them
+    #   a different way.
 
     # Some issues on Fedora ~27:
-    # sudo apt -y install libncurses5-dev libgettextpo-dev doxygen libspatialindex-dev libpq-dev postgresql-server-dev-all
+    # apt -y install libncurses5-dev libgettextpo-dev doxygen libspatialindex-dev libpq-dev postgresql-server-dev-all
     # if you skip the above, the next step says missing: GetText, Curses, ncurses, Redis, SpatialIndex, Doxygen
 
 
 elif [ -f "`command -v pacman`" ]; then
     LEVELDB_DEV_PKG="leveldb"
     echo "Using pacman..."
-    # sudo pacman -R --noconfirm minetest-server
-    # sudo pacman -R --noconfirm minetest
-    sudo pacman -Syu --noconfirm \
+    # pacman -R --noconfirm minetest-server
+    # pacman -R --noconfirm minetest
+    pacman -Syu --noconfirm \
         autoconf    automake       bzip2        cmake        \
         curl        expat          flex         freetype2    \
         gcc         git            gmp          libedit      \
@@ -129,24 +141,25 @@ elif [ -f "`command -v pacman`" ]; then
         pkgconf     python         python2      readline     \
         ruby        tcl            which        xorg-server  \
         xz          zlib           sqlite
+    if [ $? -ne 0 ]; then exit 1; fi
     # The above should work since taken from the build kit instructions
     # (When writing my old script, I somehow couldn't find equivalents of:
     # libjpeg8-dev libxxf86vm-dev mesa sqlite libogg vorbis -poikilos)
     if [ "$enable_redis" = "true" ]; then
-        sudo pacman -Syu --noconfirm hiredis redis
+        pacman -Syu --noconfirm hiredis redis
     fi
     if [ "$enable_postgres" = "true" ]; then
-        sudo pacman -Syu --noconfirm postgresql-libs
+        pacman -Syu --noconfirm postgresql-libs
     fi
     if [ "$enable_leveldb" = "true" ]; then
-        sudo pacman -Syu --noconfirm $LEVELDB_DEV_PKG
+        pacman -Syu --noconfirm $LEVELDB_DEV_PKG
     fi
     echo "The dev package name is unknown for pacman."
 elif [ ! -z "$this_dnf" ]; then
     echo "Using $this_dnf..."
-    # sudo $this_dnf -y remove minetest-server
-    # sudo $this_dnf -y remove minetest
-    sudo $this_dnf -y install \
+    # $this_dnf -y remove minetest-server
+    # $this_dnf -y remove minetest
+    $this_dnf -y install \
         autoconf           automake          bzip2            \
         bzip2-devel        cmake             expat-devel      \
         flex               fontconfig-devel  freetype-devel   \
@@ -162,15 +175,16 @@ elif [ ! -z "$this_dnf" ]; then
         zlib-devel         xorg-x11-server-devel              \
         sqlite-devel \
     ;
+    if [ $? -ne 0 ]; then exit 1; fi
 
     if [ "$enable_redis" = "true" ]; then
-        sudo $this_dnf -y install redis hiredis-devel
+        $this_dnf -y install redis hiredis-devel
     fi
     if [ "$enable_postgres" = "true" ]; then
-        sudo $this_dnf -y install postgresql-devel
+        $this_dnf -y install postgresql-devel
     fi
     if [ "$enable_leveldb" = "true" ]; then
-        sudo $this_dnf -y install $LEVELDB_DEV_PKG
+        $this_dnf -y install $LEVELDB_DEV_PKG
     fi
 
 else
