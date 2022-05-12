@@ -1,6 +1,6 @@
 [Unit]
 description="Job that runs mts-ENLIVEN minetest server as specific user"
-After=network.target
+After=local-fs.target network.target
 
 [Service]
 Type=simple
