@@ -227,8 +227,9 @@ How to use the image:
   sudo docker rmi $library_image
   # ^ Remove a docker image (This is necessary after updating the unversioned Docker image to avoid cached RUN commands from doing nothing when the script after RUN changes).
 
-  sudo docker image prune
+  sudo docker image prune --force
   # ^ Prune unused images (For this to do anything, first delete containers using the image).
+  # --force: Do not ask for confirmation.
 
   sudo docker ps -a
   # ^ List containers and show NAMES (The name is necessary for certain subcommands such as exec which operate on a running container).
