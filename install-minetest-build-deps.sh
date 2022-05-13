@@ -85,10 +85,11 @@ if [ ! -z "$this_apt" ]; then
         libsqlite3-dev  libssl-dev     libtool             \
         libvorbis-dev   libx11-dev     libxxf86vm-dev lynx            \
         nano            nettle-dev     p7zip-full     patch           \
-        perl            pkg-config     python3        python3-dev     \
+        perl            pkgconf        python3        python3-dev     \
         python-dev      rake           ruby           sed             \
         tar             tcl            unzip          util-linux      \
-        wget            xz-utils       zip                            \
+        wget            xz-utils       zip            perl            \
+        dnsutils        make \
     \
         libcurl4-openssl-dev  \
         libfreetype6-dev      \
@@ -97,6 +98,17 @@ if [ ! -z "$this_apt" ]; then
         libxml-parser-perl    \
         xserver-xorg-dev      \
     ;
+    # NOTE: installing pkgconf removes pkg-config:
+    # "pkgconf is a newer, actively maintained implementation of pkg-config that supports more aspects of the pkg-config file specification and provides a library interface that applications can use to incorporate intelligent handling of pkg-config files into themselves (such as build file generators, IDEs, and compilers)."
+    # -<https://fedoraproject.org/wiki/Changes/pkgconf_as_system_pkg-config_implementation#:~:text=pkgconf%20is%20a%20newer%2C%20actively,%2C%20IDEs%2C%20and%20compilers).>
+    # NOTE: build-essentials installs the following according to <https://www.cyberciti.biz/faq/debian-linux-install-gnu-gcc-compiler/>:
+    cat > /dev/null <<END
+    build-essential dpkg-dev fakeroot g++ g++-4.7 gcc gcc-4.7
+    libalgorithm-diff-perl libalgorithm-diff-xs-perl
+    libalgorithm-merge-perl libc-dev-bin libc6-dev libdpkg-perl
+    libfile-fcntllock-perl libitm1 libstdc++6-4.7-dev libtimedate-perl
+    linux-libc-dev make manpages-dev
+END
     if [ $? -ne 0 ]; then exit 1; fi
     if [ ! -f "`command -v libtool`" ]; then
         . /etc/os-release
@@ -112,7 +124,9 @@ if [ ! -z "$this_apt" ]; then
                 echo "* WARNING: The bc command isn't present, so the libtool-bin package will be skipped (it is only in Ubuntu >14.04 [not known in 15.x])"
             fi
         else
-            echo "* WARNING: VERSION_ID is not in /etc/os-release, so the libtool-bin package will be skipped (it is only in Ubuntu >14.04 [not known in 15.x])"
+            echo "* WARNING: VERSION_ID is not in /etc/os-release, so the libtool-bin package name is unknown (it is only in Ubuntu >14.04 [not known in 15.x])"
+            echo "  * trying libtool-bin..."
+            $this_apt -y install libtool-bin
         fi
     fi
     #libcurl4-openssl-dev: for announce to work

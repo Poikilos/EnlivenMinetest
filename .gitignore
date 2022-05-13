@@ -14,3 +14,4 @@ nohup.out
 err.txt
 *.continuified.tmp
 linux-minetest-kit.zip
+/containers/lmk.devuan-chimaera/install-minetest-build-deps.sh

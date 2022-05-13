@@ -1,8 +1,7 @@
 #!/bin/bash
 # See https://nextbreakpoint.com/posts/article-compile-code-with-docker.html
 # sudo docker build -t lmk-devuan-chimaera-img dyne/devuan:chimaera
-me=lmk.devuan-chimera.sh
-docker_path="`sudo command -v docker`"
+docker_path="`sudo bash -c 'command -v docker'`"
 if [ ! -f "$docker_path" ]; then
     cat <<END
 This script requires docker. For help, see
@@ -13,11 +12,30 @@ END
 fi
 container_name="lmk-devuan-chimaera"
 image_name="lmk-devuan-chimaera-img"
+docker_image_dir="lmk.devuan-chimaera"
+if [ ! -d "$docker_image_dir" ]; then
+    echo "* $me must run from the directory containing the container image directory: $docker_image_dir"
+    exit 1
+fi
+container_build_blob=$docker_image_dir/linux-minetest-kit.zip
+# ^ docker_image_dir has to be in the same directory as Dockerfile or
+#   the COPY command in the Dockerfile won't work.
 
-source $image_name/project.rc
+source $docker_image_dir/lmk.rc
 if [ $? -ne 0 ]; then
     exit 1
 fi
+me=lmk.devuan-chimaera.sh
+
+if [ "@$DL_SRC_PATH" = "@" ]; then
+    # DL_SRC_PATH="$HOME/Downloads/$DL_SRC_NAME"
+    DL_SRC_PATH="$docker_image_dir"
+    # ^ $DL_SRC_PATH has to be in the same directory as Dockerfile or
+    #   the COPY command in the Dockerfile won't work.
+    #   The file should be added to .gitignore for the reason that it
+    #   is in the repo in the docker image directory.
+fi
+
 
 # sudo docker image inspect $image_name > /dev/null
 sudo docker image inspect $image_name --format "* docker is looking for the image..."
@@ -25,8 +43,8 @@ sudo docker image inspect $image_name --format "* docker is looking for the imag
 # ^ Get matching images as a JSON list (where each has "Id" and other
 #   metadata).
 if [ $? -ne 0 ]; then
-    if [ ! -d "$local_img_dir" ]; then
-        echo "Error: \"$local_img_dir\" (local_img_dir for storing $SRC_URL) doesn't exist."
+    if [ ! -d "$docker_image_dir" ]; then
+        echo "Error: \"$docker_image_dir\" (docker_image_dir for storing $SRC_URL) doesn't exist in \"`pwd`\"."
         exit 1
     fi
 
@@ -43,6 +61,12 @@ if [ $? -ne 0 ]; then
     else
         echo "* using existing \"$container_build_blob\" to build the container image"
     fi
+    cp ../install-minetest-build-deps.sh $docker_image_dir/
+    # ^ This copy of it is in .gitignore.
+    if [ $? -ne 0 ]; then
+        echo "Error: 'cp ../install-minetest-build-deps.sh $docker_image_dir/' failed."
+        exit 1
+    fi
     move_back="false"
     prerelease_path=~/Downloads/minetest.org/insider-prerelease/linux-minetest-kit-220509.zip
     if [ ! -f $container_build_blob ]; then
@@ -56,7 +80,7 @@ if [ $? -ne 0 ]; then
             fi
         fi
     fi
-    sudo docker build -t $image_name $local_img_dir
+    sudo docker build -t $image_name $docker_image_dir
     code=$?
     if [ "@move_back" = "@true" ]; then
         echo "mv \"$prerelease_path\" \"$container_build_blob\""
@@ -97,8 +121,10 @@ How to use the image:
   # ^ "run" is merely a combination of "create" and "start"
 
   sudo docker -w $contained_repo exec $container_name ls -l $contained_repos
+  sudo docker -w $contained_repo exec $container_name $run_all_build_commands_script
   # ^ Execute a command in a running container (exec shows an error if the container isn't running).
   # This will not work if the run/start command that started the container isn't a command that keeps it open (runs indefinitely)!
+  # If you need a container that has changes after $run_all_build_commands_script runs, you must use the "commit" subcommand.
   # w: working directory
 
   sudo docker stop $container_name
@@ -142,113 +168,39 @@ fi
 echo "container_Id=$container_Id"
 END
 
-printf "starting the docker image..."
+echo "building within the container..."
 # sudo docker start $container_name
 # ^ NOTE: start is useless here since it won't stay open unless the
 #   command is set to "bash" or something, which isn't desirable.
 #   Therefore, use run instead of exec below.
 # ^ output is $container_name
-sudo docker run --name $container_name $image_name /opt/build-lmk.sh
+sudo docker run --name $container_name $image_name $run_all_build_commands_script
 if [ $? -ne 0 ]; then
-    echo "FAILED"
+    cat <<END
+* building within the container FAILED
+
+
+- Update the image as follows:
+  sudo docker rm --force $container_name
+  sudo docker rmi $image_name
+  sudo docker image prune --force
+  # --force: Don't prompt for confirmation.
+
+- Then try again:
+  $0
+
+END
     exit 1
 else
-    echo "OK"
+    echo "* building within the container completed OK"
 fi
 # ^ NOTE: start is useless here since it won't stay open unless the
 #   command is set to "bash" or something, which isn't desirable.
 #   Therefore, use run instead of exec below.
 
-
-if [ "@$contained_repo" = "@" ]; then
-    echo "Error: contained_repo can't be blank or checking for its files in the container won't work."
-    exit 1
-fi
-
-contained_good_repo_flag_path="$contained_repo/$good_repo_flag_name"
-
-# sudo docker exec $container_name ls $contained_repo
-echo "* checking for $contained_good_repo_flag_path on the destination..."
-sudo docker exec $container_name ls $contained_good_repo_flag_path > /dev/null
-if [ $? -ne 0 ]; then
-    printf "NO...checking for unzip..."
-    container_unzip="`sudo docker exec $container_name which unzip`"
-    if [ "@$container_unzip" = "@" ]; then
-        echo "NO. Installing..."
-        # This should never happen if the Dockerfile was used.
-        sudo docker exec $container_name apt-get update
-        if [ $? -ne 0 ]; then exit 1; fi
-        sudo docker exec $container_name apt-get install -y unzip
-        if [ $? -ne 0 ]; then exit 1; fi
-        container_unzip="`sudo docker exec $container_name which unzip`"
-        if [ "@$container_unzip" = "@" ]; then
-            echo "Error: Installing unzip in the container did not succeed. Install unzip inside the container manually then try again, or extract linux-minetest-kit such that $contained_good_repo_flag_path exists."
-            exit 1
-        fi
-    else
-        echo "FOUND"
-    fi
-    # sudo docker container run $image_name unzip xvf $contained_arc -d $contained_repos
-    echo "* extracting $contained_arc"
-    sudo docker exec $container_name unzip $contained_arc -d $contained_repos
-    # -d: is destination, like -C or --directory for tar.
-    # -v: verbose (prevents extraction)
-    if [ $? -ne 0 ]; then
-        echo "Error: unzip failed within the container. Install unzip inside the container manually then try again, or extract linux-minetest-kit such that $contained_good_repo_flag_path exists."
-        exit 1
-    fi
-else
-    echo "FOUND (already extracted)"
-fi
-
-# sudo docker exec $container_name ls $contained_repo > /dev/null
-sudo docker exec $container_name ls $contained_good_repo_flag_path > /dev/null
-if [ $? -ne 0 ]; then
-    echo "Error: extracting linux-minetest-kit.zip in the container didn't work. Extract linux-minetest-kit.zip to $contained_repos such that $contained_good_repo_flag_path exists in the container and try again."
-    exit 1
-else
-    echo "* detected $contained_good_repo_flag_path (So the source directory is assumed to be ok)"
-fi
-
-
-
-if [ "@$contained_user" = "@" ]; then
-    echo "Error: contained_user can't be blank, or checking for the user within the container will not work."
-    exit 1
-fi
-
-sudo docker exec $container_name id -u $contained_user
-if [ $? -ne 0 ]; then
-    printf "* creating $contained_user in container $container_name..."
-    sudo docker exec $container_name adduser --disabled-password --gecos "" $contained_user --home $contained_home
-    if [ $? -ne 0 ]; then
-        echo "FAILED"
-        exit 1
-    else
-        echo "OK"
-    fi
-else
-    echo "* using the $container_name container's existing contained_user: $contained_user"
-fi
-
-# sudo docker container run --name $container_name $image_name ls $contained_repos
-
-# sudo docker exec $container_name chown -R $contained_user $contained_repos
-# ^ Usually you could do this, but run as root since this script is used to test the safety of linux-minetest-kit:
-
-# sudo docker exec $container_name curl https://raw.githubusercontent.com/poikilos/EnlivenMinetest/master/install-minetest-build-deps.sh --output /opt/install-minetest-build-deps.sh
-# sudo docker exec $container_name chmod +x $repo_build_assumptions_cmd
-# sudo docker exec $container_name $repo_build_assumptions_cmd
-
-# ^ moved to Dockerfile
-
-echo "* building libraries using $repo_build_libs_cmd..."
-sudo docker exec -w $contained_src $container_name $repo_build_libs_cmd
-if [ $? -ne 0 ]; then exit 1; fi
-# echo "* building program using $repo_build_cmd..."
-# sudo docker exec -w $contained_src $container_name $repo_build_cmd
-if [ $? -ne 0 ]; then exit 1; fi
-# -w: working directory
+# - Run again as follows:
+#   sudo docker start $container_name
+# ^ doesn't work (The script specified by "run" earlier doesn't run).
 
 
 # How to use docker-compose (See <https://docs.docker.com/compose/>):
