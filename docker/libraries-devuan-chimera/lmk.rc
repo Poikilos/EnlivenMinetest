@@ -8,7 +8,9 @@ contained_user=minebest
 # ^ must match the useradd command in Dockerfile
 contained_home=/home/$contained_user
 # client_bin_path=/opt/linux-minetest-kit/minetest/bin/minetest
-server_bin_path=/opt/linux-minetest-kit/finetest/bin/minetestserver
+server_bin_path=/opt/linux-minetest-kit/finetest/bin/multicraftserver
+# ^ since ./mtcompile-program.pl --build --finetest --server says:
+# "Built target multicraftserver"
 if [ "@$SRC_URL" = "@" ]; then
     SRC_URL="https://downloads.minetest.org/linux-minetest-kit.zip"
 fi
@@ -22,8 +24,9 @@ repo_build_assumptions_cmd="/opt/install-minetest-build-deps.sh"
 # ^ moved to the Dockerfile for the libraries image
 # build_finetest_server_cmd="./mtcompile-program.pl --build --classic --client"
 # build_finetest_server_cmd="./mtcompile-program.pl --build --finetest --server"
-# ^ moved to server-finetest-devuan-chimera/Dockerfile
+# ^ moved to server-finetest-devuan-chimaera/Dockerfile
 contained_good_repo_flag_path="$contained_repo/$good_repo_flag_name"
 
 # run_all_build_commands_script=/opt/build-lmk.sh
+# ^ deprecated: Now the library Dockerfile builds libraries, and the server Dockerfile builds the server.
 echo "lmk.rc finished loading."

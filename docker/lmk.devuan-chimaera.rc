@@ -1,0 +1,12 @@
+container_name="finetest-devuan-chimaera-lmk"
+library_image="linux-minetest-kit/libraries-devuan-chimaera"
+docker_finetest_server_image_name="linux-minetest-kit/server-finetest-devuan-chimaera"
+# ^ This must match the one used in the "FROM" statement in server-finetest-devuan-chimaera/Dockerfile
+# client_classic_image=linux-minetest-kit/client-classic
+server_finetest_image="linux-minetest-kit/server-finetest-devuan-chimaera"
+# client_classic_container="minetest-client-classic"
+server_container="minetestserver-finetest"
+docker_libraries_image_dir="libraries-devuan-chimaera"
+docker_finetest_server_image_dir="server-finetest-devuan-chimaera"
+container_build_blob=$docker_libraries_image_dir/linux-minetest-kit.zip
+prerelease_path=~/Downloads/minetest.org/insider-prerelease/linux-minetest-kit-220509.zip
