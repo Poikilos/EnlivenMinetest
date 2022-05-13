@@ -103,64 +103,6 @@ else
     echo "* The container will be built using the existing docker image $library_image"
 fi
 
-cat <<END
-How to use the image:
-  # docker options:
-  # -i: is interactive (attach STDIN).
-  # -d: is daemon mode.
-
-  sudo docker image ls
-  # ^ See what images are installed (one image can be used for many containers).
-
-  sudo docker rmi $library_image
-  # ^ Remove a docker image (This is necessary after updating the unversioned Docker image to avoid cached RUN commands from doing nothing when the script after RUN changes).
-
-  sudo docker image prune
-  # ^ Prune unused images (For this to do anything, first delete containers using the image).
-
-  sudo docker ps -a
-  # ^ List containers and show NAMES (The name is necessary for certain subcommands such as exec which operate on a running container).
-
-  sudo docker start $container_name
-  # ^ Start a container. This will merely run $run_all_build_commands_script again since that is the container's main process.
-
-  sudo docker attach $container_name
-  # ^ attach the current terminal to a running container.
-
-  sudo docker run $container_name
-  # ^ "run" is merely a combination of "create" and "start"
-
-  sudo docker -w $contained_repo exec $container_name ls -l $contained_repos
-  # ^ Execute a command in a running container (exec shows an error if the container isn't running).
-  # This will not work if the run/start command that started the container isn't a command that keeps it open (runs indefinitely)!
-  # That is because the Dockerfile ENTRYPOINT (or if customized on a per-container basis, the "docker run" command) specifies the entry point (permanently) for the container.
-  # If you need a container that has changes after $run_all_build_commands_script runs or runs a different command, you must use the "commit" subcommand to create a new image.
-  # w: working directory
-
-  sudo docker stop $container_name
-  # ^ Stop a container by name (See <https://www.tecmint.com/name-docker-containers/>)
-  #   You must use the container name (as determined using the "ps" subcommand), not the image name.
-
-  sudo docker container run -it $library_image /bin/bash
-  # ^ Run an interactive terminal (Type 'exit' to exit)
-  #   (based on <https://phoenixnap.com/kb/docker-run-command-with-examples>)
-
-  sudo docker commit $container_Id $server_finetest_image
-  sudo docker container run --name tmp_test_im -it $server_finetest_image /bin/bash
-  # ^ Transform the container into an image and inspect the internals manually
-  #   (based on <https://www.thorsten-hans.com/how-to-run-commands-in-stopped-docker-containers/>).
-  #   Then: sudo docker rm --force tmp_test_im
-
-  sudo docker attach $container_name
-  # ^ Attach your current terminal to a running container (See
-  #   <https://docs.docker.com/engine/reference/commandline/attach/>).
-
-  sudo docker rm --force $container_name
-  # ^ Delete a container by its name.
-  # --force: kill and delete running containers as well.
-
-END
-
 # sudo docker container run -d --name $library_image unzip xvf $contained_arc -C $contained_repos
 container_Id=`sudo docker ps -aqf "name=$container_name"`
 # ^ ONLY works with container_name not library_image
@@ -271,6 +213,66 @@ echo
 #     echo "FAILED (sudo docker container run --name $server_container $server_finetest_image $server_bin_path)"
 # fi
 # ^ Build the server as a separate step instead (see further up)
+
+
+cat <<END
+How to use the image:
+  # docker options:
+  # -i: is interactive (attach STDIN).
+  # -d: is daemon mode.
+
+  sudo docker image ls
+  # ^ See what images are installed (one image can be used for many containers).
+
+  sudo docker rmi $library_image
+  # ^ Remove a docker image (This is necessary after updating the unversioned Docker image to avoid cached RUN commands from doing nothing when the script after RUN changes).
+
+  sudo docker image prune
+  # ^ Prune unused images (For this to do anything, first delete containers using the image).
+
+  sudo docker ps -a
+  # ^ List containers and show NAMES (The name is necessary for certain subcommands such as exec which operate on a running container).
+
+  sudo docker start $container_name
+  # ^ Start a container. This will merely run $run_all_build_commands_script again since that is the container's main process.
+
+  sudo docker attach $container_name
+  # ^ attach the current terminal to a running container.
+
+  sudo docker run $container_name
+  # ^ "run" is merely a combination of "create" and "start"
+
+  sudo docker -w $contained_repo exec $container_name ls -l $contained_repos
+  # ^ Execute a command in a running container (exec shows an error if the container isn't running).
+  # This will not work if the run/start command that started the container isn't a command that keeps it open (runs indefinitely)!
+  # That is because the Dockerfile ENTRYPOINT (or if customized on a per-container basis, the "docker run" command) specifies the entry point (permanently) for the container.
+  # If you need a container that has changes after $run_all_build_commands_script runs or runs a different command, you must use the "commit" subcommand to create a new image.
+  # w: working directory
+
+  sudo docker stop $container_name
+  # ^ Stop a container by name (See <https://www.tecmint.com/name-docker-containers/>)
+  #   You must use the container name (as determined using the "ps" subcommand), not the image name.
+
+  sudo docker container run -it $library_image /bin/bash
+  # ^ Run an interactive terminal (Type 'exit' to exit)
+  #   (based on <https://phoenixnap.com/kb/docker-run-command-with-examples>)
+
+  sudo docker commit $container_Id $server_finetest_image
+  sudo docker container run --name tmp_test_im -it $server_finetest_image /bin/bash
+  # ^ Transform the container into an image and inspect the internals manually
+  #   (based on <https://www.thorsten-hans.com/how-to-run-commands-in-stopped-docker-containers/>).
+  #   Then: sudo docker rm --force tmp_test_im
+
+  sudo docker attach $container_name
+  # ^ Attach your current terminal to a running container (See
+  #   <https://docs.docker.com/engine/reference/commandline/attach/>).
+
+  sudo docker rm --force $container_name
+  # ^ Delete a container by its name.
+  # --force: kill and delete running containers as well.
+
+END
+
 
 # How to use docker-compose (See <https://docs.docker.com/compose/>):
 # "1. Define your app’s environment with a Dockerfile so it can be reproduced anywhere."
