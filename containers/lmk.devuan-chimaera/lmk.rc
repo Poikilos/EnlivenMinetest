@@ -1,0 +1,33 @@
+contained_repos=/opt
+contained_arc="$contained_repos/linux-minetest-kit.zip"
+# ^ This must always be in sync with "COPY linux-minetest-kit.zip /opt" in Dockerfile
+contained_repo=$contained_repos/linux-minetest-kit
+contained_user=minebest
+contained_home=/home/$contained_user
+if [ "@$SRC_URL" = "@" ]; then
+    SRC_URL="https://downloads.minetest.org/linux-minetest-kit.zip"
+fi
+#if [ "@$DL_SRC_NAME" = "@" ]; then
+DL_SRC_NAME=linux-minetest-kit.zip
+#fi
+local_img_dir="lmk.devuan-chimaera"
+if [ ! -d "$local_img_dir" ]; then
+    echo "* $me must run from the directory containing the container image directory: $local_img_dir"
+    exit 1
+fi
+container_build_blob=$local_img_dir/linux-minetest-kit.zip
+# ^ local_img_dir has to be in the same directory as Dockerfile or
+#   the COPY command in the Dockerfile won't work.
+if [ "@$DL_SRC_PATH" = "@" ]; then
+    # DL_SRC_PATH="$HOME/Downloads/$DL_SRC_NAME"
+    DL_SRC_PATH="$local_img_dir"
+    # ^ $DL_SRC_PATH has to be in the same directory as Dockerfile or
+    #   the COPY command in the Dockerfile won't work.
+    #   The file should be added to .gitignore for the reason that it
+    #   is in the repo in the docker image directory.
+fi
+
+good_repo_flag_name="mtcompile-program.pl"
+repo_build_assumptions_cmd="/opt/install-minetest-build-deps.sh"
+repo_build_libs_cmd="./mtcompile-libraries.sh"
+repo_build_cmd="./mtcompile-program.pl --build --classic --client"

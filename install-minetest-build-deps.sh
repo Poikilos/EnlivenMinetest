@@ -2,9 +2,18 @@
 # Do not use sudo, in case sudo is not installed (such as in some
 # default installations including the dyne/devuan:chimaera docker image
 # on docker hub.
+customExit(){
+    >&2 echo "Error:"
+    echo "$1"
+    code=1
+    if [ "@$2" -ne "@" ]; then
+        code=$2
+    fi
+    exit $code
+}
 me=install-minetest-build-deps.sh
 if [ "$EUID" -ne 0 ]; then
-    echo "Error: $me must run as root."
+    >&2 echo "Error: $me must run as root."
     exit 1
 fi
 enable_postgres="false"
