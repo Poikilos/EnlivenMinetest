@@ -8,7 +8,10 @@ RUN apt-get update
 RUN apt-get install -y unzip
 RUN apt-get install -y perl
 RUN unzip /opt/linux-minetest-kit.zip -d /opt
+# RUN adduser --disabled-password --gecos "" minebest
 # RUN  apt-get install -y sudo
 # RUN curl https://raw.githubusercontent.com/poikilos/EnlivenMinetest/master/install-minetest-build-deps.sh --output /opt/install-minetest-build-deps.sh
 # RUN chmod +x /opt/install-minetest-build-deps.sh
 RUN /opt/install-minetest-build-deps.sh
+WORKDIR /opt/linux-minetest-kit
+RUN bash -e ./mtcompile-libraries.sh build

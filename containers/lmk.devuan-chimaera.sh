@@ -1,7 +1,17 @@
 #!/bin/bash
 # See https://nextbreakpoint.com/posts/article-compile-code-with-docker.html
 # sudo docker build -t lmk-devuan-chimaera-img dyne/devuan:chimaera
+echo "* This container is only for the server, not the client."
+sleep 10
 docker_path="`sudo bash -c 'command -v docker'`"
+ENABLE_RUN_CLIENT=false
+for var in "$@"
+do
+    if [ "@$var" = "@--run-client" ]; then
+        ENABLE_RUN_CLIENT=true
+    fi
+done
+
 if [ ! -f "$docker_path" ]; then
     cat <<END
 This script requires docker. For help, see
@@ -12,6 +22,10 @@ END
 fi
 container_name="lmk-devuan-chimaera"
 image_name="lmk-devuan-chimaera-img"
+# client_classic_image=linux-minetest-kit/client-classic
+server_finetest_image=linux-minetest-kit/server-finetest
+# client_classic_container="minetest-client-classic"
+server_container="minetestserver-finetest"
 docker_image_dir="lmk.devuan-chimaera"
 if [ ! -d "$docker_image_dir" ]; then
     echo "* $me must run from the directory containing the container image directory: $docker_image_dir"
@@ -115,7 +129,10 @@ How to use the image:
   # ^ List containers and show NAMES (The name is necessary for certain subcommands such as exec which operate on a running container).
 
   sudo docker start $container_name
-  # ^ Start a container.
+  # ^ Start a container. This will merely run $run_all_build_commands_script again since that is the container's main process.
+
+  sudo docker attach $container_name
+  # ^ attach the current terminal to a running container.
 
   sudo docker run $container_name
   # ^ "run" is merely a combination of "create" and "start"
@@ -124,7 +141,7 @@ How to use the image:
   sudo docker -w $contained_repo exec $container_name $run_all_build_commands_script
   # ^ Execute a command in a running container (exec shows an error if the container isn't running).
   # This will not work if the run/start command that started the container isn't a command that keeps it open (runs indefinitely)!
-  # If you need a container that has changes after $run_all_build_commands_script runs, you must use the "commit" subcommand.
+  # If you need a container that has changes after $run_all_build_commands_script runs or runs a different command, you must use the "commit" subcommand to create a new image.
   # w: working directory
 
   sudo docker stop $container_name
@@ -135,10 +152,15 @@ How to use the image:
   # ^ Run an interactive terminal (Type 'exit' to exit)
   #   (based on <https://phoenixnap.com/kb/docker-run-command-with-examples>)
 
+  sudo docker commit $container_Id $server_finetest_image
+  sudo docker container run --name tmp_test_im -it $server_finetest_image /bin/bash
+  # ^ Transform the container into an image and inspect the internals manually
+  #   (based on <https://www.thorsten-hans.com/how-to-run-commands-in-stopped-docker-containers/>).
+  #   Then: sudo docker rm --force tmp_test_im
+
   sudo docker attach $container_name
   # ^ Attach your current terminal to a running container (See
   #   <https://docs.docker.com/engine/reference/commandline/attach/>).
-
 
   sudo docker rm --force $container_name
   # ^ Delete a container by its name.
@@ -165,21 +187,24 @@ if [ "@$container_Id" = "@" ]; then
         exit 1
     fi
 fi
-echo "container_Id=$container_Id"
-END
 
-echo "building within the container..."
+END
+echo "container_Id=$container_Id"
+# echo "building within the container..."
 # sudo docker start $container_name
 # ^ NOTE: start is useless here since it won't stay open unless the
 #   command is set to "bash" or something, which isn't desirable.
 #   Therefore, use run instead of exec below.
 # ^ output is $container_name
-sudo docker run --name $container_name $image_name $run_all_build_commands_script
-if [ $? -ne 0 ]; then
-    cat <<END
+if [ "@$container_Id" = "@" ]; then
+    sudo docker run --name $container_name $image_name $run_all_build_commands_script
+    code=$?
+    if [ $code -ne 0 ]; then
+        cat <<END
 * building within the container FAILED
 
-
+- Remove the container as follows:
+  sudo docker rm --force $container_name
 - Update the image as follows:
   sudo docker rm --force $container_name
   sudo docker rmi $image_name
@@ -190,18 +215,45 @@ if [ $? -ne 0 ]; then
   $0
 
 END
-    exit 1
+        # exit $code
+    else
+        echo "* building within the container completed OK"
+    fi
 else
-    echo "* building within the container completed OK"
+    echo "* The build container already appears to be set up."
 fi
-# ^ NOTE: start is useless here since it won't stay open unless the
-#   command is set to "bash" or something, which isn't desirable.
-#   Therefore, use run instead of exec below.
+echo
+# echo "If the build output appeared successful, ignore the error above and create the minetest client image as follows:"
+# echo "$0 --client"
 
-# - Run again as follows:
+# NOTE: The "start" subcommand is useless here since it won't stay open
+# unless the command is set to "bash" or something, which wouldn't be
+# an automated image. The proper way to modify a container is to make
+# a new image from it
+# and
 #   sudo docker start $container_name
-# ^ doesn't work (The script specified by "run" earlier doesn't run).
+# doesn't work (The script specified by "run" earlier doesn't run) so:
 
+# echo "* Creating client image..."
+# docker commit $container_Id $client_classic_image
+# sudo docker container run --name $client_classic_container $client_classic_image $client_bin_path
+# ^ This doesn't work for the client due to:
+# "2022-05-13 03:59:00: ERROR[Main]: Subgame specified in default_game [Bucket_Game] is invalid.
+# 2022-05-13 03:59:00: ERROR[Main]: Irrlicht: Error: Need running XServer to start Irrlicht Engine.
+# 2022-05-13 03:59:00: ERROR[Main]: Irrlicht: Could not open display, set DISPLAY variable"
+# as expected. See <https://www.howtogeek.com/devops/how-to-run-gui-applications-in-a-docker-container/>.
+# Therefore:
+
+echo "* Creating server image..."
+sudo docker commit $container_Id $server_finetest_image
+if [ $? -ne 0 ]; then
+    echo "FAILED (sudo docker commit $container_Id $server_finetest_image)"
+fi
+echo "* Running $server_bin_path in container \"$server_container\""
+sudo docker container run --name $server_container $server_finetest_image $server_bin_path
+if [ $? -ne 0 ]; then
+    echo "FAILED (sudo docker container run --name $server_container $server_finetest_image $server_bin_path)"
+fi
 
 # How to use docker-compose (See <https://docs.docker.com/compose/>):
 # "1. Define your app’s environment with a Dockerfile so it can be reproduced anywhere."
