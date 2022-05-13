@@ -27,6 +27,8 @@ if [ ! -f "$this_rc" ]; then
 fi
 source $this_rc
 if [ $? -ne 0 ]; then exit 1; fi
+source finetestserver.rc
+if [ $? -ne 0 ]; then exit 1; fi
 if [ ! -d "$libraries_image_dir" ]; then
     echo "Error: $0 must run from the directory containing the container image directory: $libraries_image_dir"
     exit 1
@@ -139,37 +141,41 @@ END
 # ^ output is $container_name
 
 if [ "@$container_Id" != "@" ]; then
-    echo "* The container already appears to be set up."
-    exit 0
-fi
-echo "There is no container_Id for container_name=$container_name, so checking for image:"
-sudo docker image inspect $server_image --format "* docker is looking for the image..."
-if [ $? -ne 0 ]; then
-    echo "NOT FOUND, so:"
-    echo "* building $server_image ($server_image_dir inherits $libraries_image, so using built libraries from that should work)..."
-    if [ ! -d "$server_image_dir" ]; then
-        echo "Error: \"$server_image_dir\" doesn't exist in `pwd`."
-        exit 1
-    fi
-    sudo docker build -t $server_image $server_image_dir
-    # ^ ./mtcompile-program.pl --build --finetest --server returns 1 for some reason, so there is a custom build script used in the Dockerfile
-    # -t: Name and optionally a tag in the 'name:tag' format
-    if [ $? -ne 0 ]; then
-        exit 1
-    fi
+    echo "* The container already appears to be set up, so checking for the image will not be attempted."
 else
-    echo "* using existing $server_image"
+    echo "There is no container_Id for container_name=$container_name, so checking for image:"
+    sudo docker image inspect $server_image --format "* docker is looking for the image..."
+    if [ $? -ne 0 ]; then
+        echo "NOT FOUND, so:"
+        echo "* building $server_image ($server_image_dir inherits $libraries_image, so using built libraries from that should work)..."
+        if [ ! -d "$server_image_dir" ]; then
+            echo "Error: \"$server_image_dir\" doesn't exist in `pwd`."
+            exit 1
+        fi
+        sudo docker build -t $server_image $server_image_dir
+        # ^ ./mtcompile-program.pl --build --finetest --server returns 1 for some reason, so there is a custom build script used in the Dockerfile
+        # -t: Name and optionally a tag in the 'name:tag' format
+        if [ $? -ne 0 ]; then
+            exit 1
+        fi
+    else
+        echo "* using existing $server_image"
+    fi
 fi
 
 if [ "@$container_Id" = "@" ]; then
     # sudo docker run --name $container_name $libraries_image $run_all_build_commands_script
     # ^ build was moved to the Dockerfile
+    if [ "@$finetestserver_bin" = "@" ]; then
+        echo "Error: The image is not fully described since finetestserver_bin is blank. No container will be created."
+        exit 1
+    fi
     echo "* creating container $container_name from image $server_image"
-    sudo docker run --name $container_name $server_image /opt/linux-minetest-kit/minetest/minetestserver
+    sudo docker run --name $container_name $server_image $finetestserver_bin
     code=$?
     if [ $code -ne 0 ]; then
         cat <<END
-* building within the container FAILED
+* $finetestserver_bin FAILED
 
 - Remove the container as follows:
   sudo docker rm --force $container_name
@@ -179,17 +185,23 @@ if [ "@$container_Id" = "@" ]; then
   sudo docker image prune --force
   # --force: Don't prompt for confirmation.
 
-- Then try again:
+- Then you may try again:
   $0
 
+- However, first view errors and note the reason for the problem.
+  - If the program didn't complete startup view the startup error via:
+    sudo docker start $container_name --attach
+  - If the progam has an "ERROR[Main]" error, you need to edit
+    minetest.conf and then try the start subcommand above again.
+
 END
-        # exit $code
+        exit $code
     else
-        echo "* building within the container completed OK"
+        echo "* $finetestserver_bin completed OK"
     fi
 else
-    echo "* The container already appears to be set up."
-    exit 0
+    echo "* using existing container named $container_name with Id $container_Id."
+    # exit 0
 fi
 echo
 # echo "If the build output appeared successful, ignore the error above and create the minetest client image as follows:"
@@ -244,14 +256,21 @@ How to use the image:
 
   sudo docker ps -a
   # ^ List containers and show NAMES (The name is necessary for certain subcommands such as exec which operate on a running container).
+  # -a: Show all containers including stopped ones.
 
   sudo docker start $container_name
   # ^ Start a container. This will merely run $run_all_build_commands_script again since that is the container's main process.
 
+  sudo docker start $container_name --attach
+  # ^ Show messages while starting a container.
+
+  sudo docker logs $container_Id
+  # ^ Show logs for a container.
+
   sudo docker attach $container_name
   # ^ attach the current terminal to a running container.
 
-  sudo docker run $container_name
+  sudo docker run --name $container_name $server_image $finetestserver_bin
   # ^ "run" is merely a combination of "create" and "start"
 
   sudo docker -w $contained_repo exec $container_name ls -l $contained_repos
@@ -282,6 +301,18 @@ How to use the image:
   sudo docker rm --force $container_name
   # ^ Delete a container by its name.
   # --force: kill and delete running containers as well.
+
+  sudo docker image inspect $libraries_image
+  sudo docker image inspect $server_image
+  # ^ Get JSON metadata for the image.
+
+  sudo docker container inspect $container_name
+  # ^ Get JSON metadata for the container.
+
+  - If the program didn't complete startup view the startup error via:
+    sudo docker start $container_name --attach
+  - If the progam has any "ERROR[Main]" error(s), you need to edit
+    minetest.conf and then try the start subcommand above again.
 
 END
 
