@@ -1,12 +1,13 @@
 container_name="finetest-devuan-chimaera-lmk"
-library_image="linux-minetest-kit/libraries-devuan-chimaera"
-docker_finetest_server_image_name="linux-minetest-kit/server-finetest-devuan-chimaera"
-# ^ This must match the one used in the "FROM" statement in server-finetest-devuan-chimaera/Dockerfile
+libraries_image="linux-minetest-kit/libraries-devuan-chimaera"
+server_image_dir="server-finetest-devuan-chimaera"
+server_image="linux-minetest-kit/server-finetest-devuan-chimaera"
+# ^ formerly server_finetest_image
+# ^ This must match the one used in the "FROM" statement in $server_image_dir/Dockerfile
 # client_classic_image=linux-minetest-kit/client-classic
-server_finetest_image="linux-minetest-kit/server-finetest-devuan-chimaera"
 # client_classic_container="minetest-client-classic"
-server_container="minetestserver-finetest"
-docker_libraries_image_dir="libraries-devuan-chimaera"
-docker_finetest_server_image_dir="server-finetest-devuan-chimaera"
-container_build_blob=$docker_libraries_image_dir/linux-minetest-kit.zip
+# server_container="minetestserver-finetest"
+# ^ deprecated since: Only container_name is necessary since there is no container based on libraries_image--a libraries container is not necessary since Dockerfile builds the libraries now.
+libraries_image_dir="libraries-devuan-chimaera"
+libraries_image_build_blob=$libraries_image_dir/linux-minetest-kit.zip
 prerelease_path=~/Downloads/minetest.org/insider-prerelease/linux-minetest-kit-220509.zip
