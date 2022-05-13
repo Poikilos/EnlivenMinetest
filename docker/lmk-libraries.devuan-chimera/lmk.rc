@@ -2,7 +2,7 @@
 contained_repos=/opt
 docker_image_build_script_name="lmk.devuan-chimaera.sh"
 contained_arc="$contained_repos/linux-minetest-kit.zip"
-# ^ This must always be in sync with "COPY linux-minetest-kit.zip /opt" in Dockerfile
+# ^ This must match the name in "COPY linux-minetest-kit.zip /opt" in Dockerfile
 contained_repo=$contained_repos/linux-minetest-kit
 contained_user=minebest
 # ^ must match the useradd command in Dockerfile
@@ -20,9 +20,10 @@ good_repo_flag_name="mtcompile-program.pl"
 repo_build_assumptions_cmd="/opt/install-minetest-build-deps.sh"
 # repo_build_libs_cmd="bash -e ./mtcompile-libraries.sh build"
 # ^ moved to the Dockerfile for the libraries image
-# repo_build_cmd="./mtcompile-program.pl --build --classic --client"
-repo_build_cmd="./mtcompile-program.pl --build --finetest --server"
+# build_finetest_server_cmd="./mtcompile-program.pl --build --classic --client"
+# build_finetest_server_cmd="./mtcompile-program.pl --build --finetest --server"
+# ^ moved to server-finetest-devuan-chimera/Dockerfile
 contained_good_repo_flag_path="$contained_repo/$good_repo_flag_name"
 
-run_all_build_commands_script=/opt/build-lmk.sh
+# run_all_build_commands_script=/opt/build-lmk.sh
 echo "lmk.rc finished loading."

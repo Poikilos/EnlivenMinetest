@@ -1,44 +1,18 @@
 #!/usr/bin/env python
 '''
 This script is a remake of the ENLIVEN build script in Python using
-Bucket_Game as the basis.
+bucket_game as the basis.
 '''
 from __future__ import print_function
-
 import sys
-import platform
 import os
+import configparser
 
-profile = None
-if platform.system() == "Windows":
-    profile = os.environ.get('USERPROFILE')
-else:
-    profile = os.environ.get('HOME')
-
-# see <https://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python>
-def error(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-
-try:
-    import mtanalyze
-except ModuleNotFoundError as ex:
-    # tryMTA = os.path.join(profile, "git", "mtanalyze")
-    tryMTA = os.path.abspath(os.path.join("..", "mtanalyze"))
-    if os.path.isdir(tryMTA):
-        sys.path.append(tryMTA)
-        import mtanalyze
-    else:
-        error("")
-        error("You must install mtanalyze alongside")
-        error("EnlivenMinetest such that ../mtanalize/mtanalize exists")
-        error("such as via:")
-        error("    git clone https://github.com/poikilos/mtanalyze {}"
-              "".format(tryMTA))
-        error("")
-        # raise tryMTA
-        exit(1)
-
-# from mtanalyze import profile_path
+from pyenliven import (
+    error,
+    getSGPath,
+    profile,
+)
 
 gamespec = {}
 gamespec['remove_mods'] = [
@@ -48,32 +22,25 @@ gamespec['remove_mods'] = [
     "more_chests", # See https://github.com/poikilos/EnlivenMinetest/issues/446
     "emeralds", # See https://github.com/poikilos/EnlivenMinetest/issues/497
     "give_initial_stuff",  # or make it configurable (It only uses a give_initial_stuff boolean, no configurable item list)
+    # TODO: more are at https://github.com/poikilos/EnlivenMinetest/issues/310
 ]
-myDir = os.path.dirname(os.path.abspath(__file__))
-mods_stopgap = os.path.join(myDir, "patches", "mods-stopgap")
-if not os.path.isdir(mods_stopgap):
-    error("Error: \"{}\" is missing.".format(mods_stopgap))
-    exit(1)
-gamespec['local_mods_paths'] = []
-gamespec['local_mods_paths'].append(mods_stopgap)
-# NOTE: get a git repo's origin via: git remote show origin
 
-def getSGPath(stopgap_mod_name):
-    return os.path.join(mods_stopgap, stopgap_mod_name)
+gamespec['local_mods_paths'] = []
+gamespec['local_mods_paths'].append("mods_stopgap")
 
 gamespec['add_mods'] = [
     # {'repo':"https://github.com/poikilos/homedecor_ua"},
-    {'src_path': getSGPath("animal_materials_legacy")},
+    {'name': "animal_materials_legacy"},
     {'repo':"https://github.com/minetest-mods/ccompass.git"},
     {'repo':"https://github.com/octacian/chat3.git"},
     {'repo':"https://github.com/poikilos/compassgps.git"},
-    {'src_path': getSGPath("elk_legacy")},
+    {'name': "elk_legacy"},
     {'repo':"https://github.com/MinetestForFun/fishing.git"},
-    {'src_path': getSGPath("glooptest_missing")},
+    {'name': "glooptest_missing"},
     {'repo':"https://github.com/minetest-mods/item_drop.git"},
     {'repo':"https://github.com/poikilos/metatools.git"},
-    {'src_path': getSGPath("nftools_legacy")},
-    {'src_path': getSGPath("glooptest_missing")},
+    {'name': "nftools_legacy"},
+    {'name': "glooptest_missing"},
     {'repo':"https://github.com/poikilos/slimenodes.git"},
     {'repo':"https://github.com/BenjieFiftysix/sponge.git"},
     {'repo':"https://github.com/poikilos/throwing.git"},  # Can utilize toolranks, toolranks_extras, wielded_light
@@ -188,16 +155,52 @@ gamespec['disable_mobs'] = [
     "old_lady",
 ]
 
-warnings = '''
+"""
+warning = '''
 WARNINGS:
 (Bucket_Game 200527)
 - The "rope" required for making a fishing rod has no recipe!
   See <https://github.com/poikilos/EnlivenMinetest/issues/444>
 '''
+"""
+warnings = []
+valid_bases = ['Bucket_Game', "bucket_ game"]
 
 def main():
 
-    print(warnings)
+    for warning in warnings:
+        error(warning)
+    tryGameDir = os.getcwd()
+    error('* examining "{}"'.format(tryGameDir))
+    gameConfName = "game.conf"
+    gameConfPath = os.path.join(tryGameDir, gameConfName)
+    if not os.path.isfile(gameConfPath):
+        raise ValueError(
+            'You must run this command from bucket_game, but there is'
+            ' no "{}" in "{}"'
+            ''.format(gameConfName, tryGameDir)
+        )
+    config = configparser.ConfigParser()
+    with open(gameConfPath, 'r') as ins:
+        config.read_string('[top]\n' + ins.read())
+        # ^ insert a section since ConfigParser requires sections.
+    gameName = config['top'].get("name")
+    error('  * detected {} from {}'
+          ''.format(gameName, gameConfName))
+    if gameName not in valid_bases:
+        raise ValueError(
+            '{} does not appear to be compatible with the enliven build'
+            ' script. You must run this in a directory with one of the'
+            ' following name'
+            ' strings in {}: {}'
+            ''.format(tryGameDir, gameConfName, valid_bases)
+        )
+
+    targetMT = os.path.join(profile, "minetest")
+    # ^ TODO: Get this from mtanalyze?
+    targetGames = os.path.join(targetMT, "games")
+    target = os.path.join(targetGames, "ENLIVEN")
+    centerOfTheSunTarget =
     raise NotImplementedError("pyenliven build")
 
 if __name__ == "__main__":

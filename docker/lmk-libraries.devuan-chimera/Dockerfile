@@ -2,7 +2,7 @@ FROM dyne/devuan:chimaera
 # An absolute path for COPY doesn't work ('/' is removed from the beginning).
 COPY linux-minetest-kit.zip /opt
 COPY lmk.rc /opt
-COPY build-lmk.sh /opt
+# COPY build-lmk.sh /opt
 COPY install-minetest-build-deps.sh /opt
 RUN apt-get update
 RUN apt-get install -y unzip

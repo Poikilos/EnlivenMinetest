@@ -43,11 +43,11 @@ if [ $? -ne 0 ]; then exit 1; fi
 # $repo_build_libs_cmd
 # if [ $? -ne 0 ]; then exit 1; fi
 echo
-echo "* building program using $repo_build_cmd..."
-$repo_build_cmd
+echo "* building program using $build_finetest_server_cmd..."
+$build_finetest_server_cmd
 code=$?
 if [ $code -ne 0 ]; then
-    echo "$repo_build_cmd FAILED (code $code)"
+    echo "$build_finetest_server_cmd FAILED (code $code)"
     exit $code
 else
     echo "SUCCESS"

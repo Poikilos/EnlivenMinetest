@@ -20,15 +20,16 @@ or Docker's own documentation at
 <https://docs.docker.com/engine/install/>.
 END
 fi
-container_name="lmk-devuan-chimaera"
-image_name="lmk-devuan-chimaera-img"
+container_name="linux-minetest-kit-build-libraries-devuan-chimaera"
+image_name="linux-minetest-kit/libraries-devuan-chimaera"
+# ^ This must match the one used in the "FROM" statement in server-finetest-devuan-chimera/Dockerfile
 # client_classic_image=linux-minetest-kit/client-classic
-server_finetest_image=linux-minetest-kit/server-finetest
+server_finetest_image="linux-minetest-kit/server-finetest-devuan-chimera"
 # client_classic_container="minetest-client-classic"
 server_container="minetestserver-finetest"
-docker_image_dir="lmk.devuan-chimaera"
+docker_image_dir="lmk-libraries.devuan-chimaera"
 if [ ! -d "$docker_image_dir" ]; then
-    echo "* $me must run from the directory containing the container image directory: $docker_image_dir"
+    echo "* $0 must run from the directory containing the container image directory: $docker_image_dir"
     exit 1
 fi
 container_build_blob=$docker_image_dir/linux-minetest-kit.zip
@@ -39,7 +40,6 @@ source $docker_image_dir/lmk.rc
 if [ $? -ne 0 ]; then
     exit 1
 fi
-me=lmk.devuan-chimaera.sh
 
 if [ "@$DL_SRC_PATH" = "@" ]; then
     # DL_SRC_PATH="$HOME/Downloads/$DL_SRC_NAME"
