@@ -1,1 +1,2 @@
+#!/bin/bash
 finetestserver_bin=/opt/linux-minetest-kit/minetest/bin/finetestserver
