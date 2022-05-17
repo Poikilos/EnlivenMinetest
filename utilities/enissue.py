@@ -100,6 +100,15 @@ def error(*args, **kwargs):
 # https://api.github.com/repos/poikilos/EnlivenMinetest/issues/475/timeline
 
 verbose = False
+
+for argI in range(1, len(sys.argv)):
+    arg = sys.argv[argI]
+    if arg.startswith("--"):
+        if arg == "--debug":
+            verbose = True
+        elif arg == "--verbose":
+            verbose = True
+
 default_options = {
     # 'repo_url': "https://api.github.com/repos/poikilos/EnlivenMinetest",
     'repo_url': "https://github.com/poikilos/EnlivenMinetest",
