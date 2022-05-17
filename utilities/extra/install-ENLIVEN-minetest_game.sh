@@ -517,7 +517,7 @@ fi
 
 add_git_mod moreblocks moreblocks https://github.com/minetest-mods/moreblocks.git
 # plantlife_modpack: includes bushes:* with fruit and fruit recipes
-add_git_mod plantlife_modpack plantlife_modpack https://gitlab.com/VanessaE/plantlife_modpack.git
+add_git_mod plantlife_modpack plantlife_modpack https://github.com/mt-mods/plantlife_modpack.git
 add_git_mod bushes_soil bushes_soil https://github.com/poikilos/bushes_soil.git
 
 # forum_url="https://forum.minetest.net/viewtopic.php?f=9&t=12368"
@@ -562,12 +562,12 @@ add_git_mod lapis LapisLazuli https://github.com/Napiophelios/LapisLazuli.git
 
 echo "not installing helicopter--crashes 0.4.14-git, but was updated on 2017-06-08 and was not tested since then"
 # add_git_mod helicopter helicopter https://github.com/SokolovPavel/helicopter.git
-add_git_mod biome_lib biome_lib https://gitlab.com/VanessaE/biome_lib.git
-add_git_mod moretrees moretrees https://gitlab.com/VanessaE/moretrees.git
+add_git_mod biome_lib biome_lib https://github.com/mt-mods/biome_lib.git
+add_git_mod moretrees moretrees https://github.com/mt-mods/moretrees.git
 
 # in order of dependency (also, clicking armor in unified inventory crashes the game without technic installed since checks radation):
 add_git_mod mesecons mesecons https://github.com/minetest-mods/mesecons
-add_git_mod pipeworks pipeworks https://gitlab.com/VanessaE/pipeworks.git
+add_git_mod pipeworks pipeworks https://github.com/mt-mods/pipeworks.git
 add_git_mod technic technic https://github.com/minetest-mods/technic.git
 #add_git_mod technic technic https://github.com/t4im/technic.git
 
@@ -677,9 +677,9 @@ add_git_mod ts_furniture ts_furniture https://github.com/minetest-mods/ts_furnit
 #mv minetest-3d_armor_MODPACK/wieldview $MT_MYGAME_MODS_PATH/wieldview
 #mv minetest-3d_armor_MODPACK/3d_armor $MT_MYGAME_MODS_PATH/3d_armor
 #mv minetest-3d_armor_MODPACK/shields $MT_MYGAME_MODS_PATH/shields
-add_git_mod basic_materials basic_materials https://gitlab.com/VanessaE/basic_materials.git
-add_git_mod homedecor_modpack homedecor_modpack https://gitlab.com/VanessaE/homedecor_modpack.git
-add_git_mod unifieddyes unifieddyes https://gitlab.com/VanessaE/unifieddyes.git
+add_git_mod basic_materials basic_materials https://github.com/mt-mods/basic_materials.git
+add_git_mod homedecor_modpack homedecor_modpack https://github.com/mt-mods/homedecor_modpack.git
+add_git_mod unifieddyes unifieddyes https://github.com/mt-mods/unifieddyes.git
 #Sokomine's original version has no security ( https://forum.minetest.net/viewtopic.php?id=4877 )
 #    https://github.com/Sokomine/travelnet/archive/master.zip
 # manually get branch with sound:
@@ -690,7 +690,7 @@ add_git_mod sling sling https://github.com/minetest-mods/sling.git
 #REPLACES PilzAdam's, modified by kaeza, maintained by VenessaE; FORMERLY in homedecor_modpack
 #forum post: https://forum.minetest.net/viewtopic.php?t=13762
 # kaeza's signs_lib (forked from PilzAdam's and TheXYZ's code) was moved here from: https://github.com/kaeza/minetest-signs_lib-extrafonts/archive/master.zip
-add_git_mod signs_lib signs_lib https://gitlab.com/VanessaE/signs_lib.git
+add_git_mod signs_lib signs_lib https://github.com/mt-mods/signs_lib.git
 
 farming_redo_enable="false"
 echo "farming_redo_enable=\"$farming_redo_enable\"" >> "$release_rc"

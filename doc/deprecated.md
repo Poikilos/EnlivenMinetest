@@ -1,5 +1,25 @@
 # Deprecated
 
+
+## Forks
+- https://gitlab.com/poikilos/ilights
+  - Poikilos' copy: ~/metaprojects/deprecated
+  - Revert to 5a4cc589434de2e24b9f2b128cfb5f5ccef7f385 (CC BY-SA version of code before change to LGPL v3.0)
+    - The revert doesn't seem complete, because newer commits are present (up to "fix the 'fix'" 51a4625).
+    - For the details of how the fork was constructed, see the modified ilights readme link discussed under the "Merge branch..." point below.
+    - The fork still had the "LICENSE" file with the separate licenses for code and media.
+  - `lighten "off" bulb a bit (way too dark) + update license` (manually cherry pick commit 6398d89 by VanessaE but change the commit to add a copy of the license)
+  - "Merge branch 'old-license-branch' into 'master'":
+    - Change readme (See [deprecated/ilights/readme.md](deprecated/ilights/readme.md). The upstream version only says "Repo for ilights mod.")
+    - Add license.txt (Attribution-ShareAlike 4.0 International).
+- https://gitlab.com/poikilos/moretrees
+  - Poikilos' copy: ~/metaprojects/deprecated
+  - only adds depends.txt
+- https://gitlab.com/poikilos/plantlife_modpack
+  - Poikilos' copy: ~/metaprojects/deprecated
+  - only adds depends.txt files
+
+
 ## enissue.py
 ### argparse
 Why: making mutually exclusive arguments or subcommands optional

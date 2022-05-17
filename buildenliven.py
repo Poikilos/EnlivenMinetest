@@ -45,7 +45,7 @@ gamespec['add_mods'] = [
     {'repo':"https://github.com/BenjieFiftysix/sponge.git"},
     {'repo':"https://github.com/poikilos/throwing.git"},  # Can utilize toolranks, toolranks_extras, wielded_light
     {'repo':"https://github.com/poikilos/throwing_arrows.git"},  # Can utilize mesecons, mesecons_button
-    {'repo':"https://gitlab.com/VanessaE/biome_lib.git"},
+    {'repo':"https://github.com/mt-mods/biome_lib.git"},
     {
         'repo': "https://github.com/Poikilos/vines.git",
         'branch': "Bucket_Game", # git clone <url> --branch <branch>
