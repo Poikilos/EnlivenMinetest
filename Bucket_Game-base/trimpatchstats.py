@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 '''
-Remove the lines from the from the input file in Bucket_Game-base that are not in the matching list file in Bucket_Game-branches.
+Remove the lines from the from the input file in Bucket_Game-base that
+are not in the matching list file in Bucket_Game-branches.
 The resulting modified list is written to standard output.
 
-The provided filename must exist in both the Bucket_Game-base directory and the parallel Bucket_Game-branches directory.
+The provided filename must exist in both the Bucket_Game-base directory
+and the parallel Bucket_Game-branches directory.
 
 The file must contain output such as from ls or find executing ls. Examples:
-    find -type f -name "*.ogg" -exec ls -lh {} \;
-    find -type f -exec ls -lh {} \;
+    find -type f -name "*.ogg" -exec ls -lh {} \\;
+    find -type f -exec ls -lh {} \\;
 
 Usage:
 ./trimpatchstats.py <filename>
@@ -16,15 +18,16 @@ import sys
 import os
 import json
 
-def error(msg):
-    sys.stderr.write("{}\n".format(msg))
-    sys.stderr.flush()
+
+def echo0(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
 
 def usage():
-    error("")
-    error("trimpatchstats.py")
-    error("-----------------")
-    error(__doc__)
+    echo0("")
+    echo0("trimpatchstats.py")
+    echo0("-----------------")
+    echo0(__doc__)
 
 
 def splitFirst(line, delimiter):
@@ -196,6 +199,7 @@ class LSFileInfo:
     def __str__(self):
         return json.dumps(self.to_dict())
 
+
 def getFileNumber(path, num):
     '''
     Get a file from a listfile that contains ls -l or ls -n output.
@@ -251,7 +255,7 @@ def printOnlyPatched(baseListPath):
     if fid is None:
         print("Error: \"{}\" contained no filenames."
               "".format(patchedListPath))
-        exit(1)
+        return 1
     tryFilePath = os.path.join(targetDirPath, fid['name'])
     if not os.path.isfile(tryFilePath):
         print("Error: \"{}\" doesn't exist. Run again from the"
@@ -260,9 +264,9 @@ def printOnlyPatched(baseListPath):
               " directory name in the \"{}\" directory and run in a"
               " directory parallel to that."
               "".format(tryFilePath, fid['name'], patchedPath))
-        exit(1)
+        return 2
 
-    error("* analyzing \"{}\"".format(patchedListPath))
+    echo0("* analyzing \"{}\"".format(patchedListPath))
     patchedFIs = []
     rawNames = []
     with open(patchedListPath, 'r') as ins:
@@ -279,9 +283,9 @@ def printOnlyPatched(baseListPath):
             fid = parse_ls(line)
             rawNames.append(fid['name'])
             # fill_file_dict_path(fid, targetDirPath)
-            # error(fid)
+            # echo0(fid)
 
-    error("* analyzing \"{}\"".format(baseListPath))
+    echo0("* analyzing \"{}\"".format(baseListPath))
     allCount = 0
     matchCount = 0
     with open(baseListPath, 'r') as ins:
@@ -300,13 +304,19 @@ def printOnlyPatched(baseListPath):
             if fid['name'] in rawNames:
                 print(line)
                 matchCount += 1
-    error("{} of {} in {} were also in {}"
+    echo0("{} of {} in {} were also in {}"
           "".format(matchCount, allCount, baseListPath,
                     patchedListPath))
+    return 0
 
-if __name__ == "__main__":
+
+def main():
     if len(sys.argv) < 2:
         usage()
-        error("Error: You are missing the required list filename argument.\n")
-        exit(1)
-    printOnlyPatched(sys.argv[1])
+        echo0("Error: You are missing the required list filename argument.\n")
+        return 1
+    return printOnlyPatched(sys.argv[1])
+
+
+if __name__ == "__main__":
+    sys.exit(main())

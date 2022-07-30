@@ -1,10 +1,11 @@
-#!/usr/bin/env
+#!/usr/bin/env python3
 class Repo:
     '''
     WARNING: The real Repo class is in enliven.py
     '''
     print(__doc__)
     pass
+
 
 class GiteaRepo(Repo):
     '''
@@ -28,7 +29,7 @@ class GiteaRepo(Repo):
             # hide_events=['renamed', 'assigned'],
             caches_path=None,
             # api_comments_url_fmt="{instance_url}/repos/{ru}/{rn}/issues/comments",
-        ):
+            ):
         print(GiteaRepo.__doc__)
         if repo_url.endswith(".git"):
             repo_url = repo_url[:-4]

@@ -4,45 +4,46 @@ import sys
 import os
 import platform
 
+from pyenliven import (
+    echo0,
+)
+
+
 me = os.path.basename(__file__)
 myDir = os.path.dirname(os.path.abspath(__file__))
 defaultVirtualReposDir = myDir
 
-def error(msg):
-    sys.stderr.write("{}\n".format(msg))
-    sys.stderr.flush()
-
 
 def usage():
-    error("Usage:")
+    echo0("Usage:")
     sys.stderr.write("Specify a branch")
     parent = "Bucket_Game-branches"
     if os.path.isdir(parent):
-        error(" from Bucket_Game-branches:")
+        echo0(" from Bucket_Game-branches:")
         for sub in os.listdir(parent):
             subPath = os.path.join(parent, sub)
             if sub.startswith("."):
                 continue
             if os.path.isdir(subPath):
-                error(subPath)
+                echo0(subPath)
     else:
-        error(" from Bucket_Game-branches.")
+        echo0(" from Bucket_Game-branches.")
 
-    error("{} <branch name (see above)> [<bucket_game path>]".format(me))
-    error("")
+    echo0("{} <branch name (see above)> [<bucket_game path>]".format(me))
+    echo0("")
 
 
 profile = None
 if platform.system() == "Windows":
     profile = os.environ.get('USERPROFILE')
     if profile is None:
-        error("Error: USERPROFILE is not set.")
-        exit(1)
+        echo0("Error: USERPROFILE is not set.")
+        sys.exit(1)
 else:
     profile = os.environ.get('HOME')
     if profile is None:
-        error("Error: HOME is not set.")
-        exit(1)
+        echo0("Error: HOME is not set.")
+        sys.exit(1)
 
 minetestPath = os.path.join(profile, "minetest")
 gamesPath = os.path.join(minetestPath, "games")
@@ -153,7 +154,6 @@ def compareBranch(branchName, gamePath=None, bgVersion=None,
     if branchPathRel.startswith(myDirSlash):
         branchPathRel = branchPathRel[len(myDirSlash):]
 
-
     print("meld \"{}\" \"{}\"".format(gamePath, branchPath))
     patchFilePath = branchPath+".patch"
     print("diff -ru \"{}\" \"{}\" > \"{}\""
@@ -166,26 +166,28 @@ def compareBranch(branchName, gamePath=None, bgVersion=None,
     }
     return results
 
+
 def main():
     global defaultGamePath
     defaultGamePath = None
     if len(sys.argv) < 2:
         usage()
-        error("Error: You must provide a branch name.\n")
-        exit(1)
+        echo0("Error: You must provide a branch name.\n")
+        return 1
     if len(sys.argv) > 3:
         usage()
-        error("Error: There are too many arguments: {}.\n"
+        echo0("Error: There are too many arguments: {}.\n"
               "".format(sys.argv))
-        exit(1)
+        return 1
     if len(sys.argv) > 2:
         defaultGamePath = sys.argv[2]
 
     results = compareBranch(sys.argv[1], gamePath=defaultGamePath)
-    error("# ^ Do that to see the difference or generate a patch,"
-      " but the first directory must be unmodified from the"
-      " original release package.")
+    echo0("# ^ Do that to see the difference or generate a patch,"
+          " but the first directory must be unmodified from the"
+          " original release package.")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

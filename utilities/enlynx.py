@@ -30,31 +30,31 @@ Examples:
 
 
 '''
+import sys
+import subprocess
 me = "enlynx.py"
 browserPath = "lynx"
 sessionPath = "/tmp/enlynx.lynx-session"
-import sys
-import subprocess
 
 enc = {}  # URL Encoded single characters
 enc[':'] = '%3A'
 # ^ Do this with urllib if there are many more
 
-# see <https://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python>
-def error(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-
 verbose = True
 
-def debug(msg):
+
+def echo0(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+
+def echo1(*args, **kwargs):
     if not verbose:
         return
-    sys.stderr.write("{}\n".format(msg))
-    sys.stderr.flush()
+    print(*args, file=sys.stderr, **kwargs)
 
 
 def usage():
-    error(__doc__)
+    echo0(__doc__)
 
 
 def toSubQueryValue(value):
@@ -83,7 +83,8 @@ any_q = "?q=" + toSubQuery("is", "issue")
 closed_q = "?q=" + toSubQuery("is", "issue") + '+' + toSubQuery("is", "closed")
 
 
-if __name__ == "__main__":
+def main():
+    global browserPath
     prev_arg = None
     findStrings = []
     base_q = open_q + "+"
@@ -101,7 +102,7 @@ if __name__ == "__main__":
         elif prev_arg == "--browser":
             browserPath = arg
         elif prev_arg == "page":
-            page_param="&page=2"
+            page_param = "&page=2"
             prev_arg = None
         else:
             if arg == "--closed":
@@ -115,31 +116,31 @@ if __name__ == "__main__":
             elif arg == "AND":
                 if len(findStrings) == 0:
                     usage()
-                    error("Error: You can only use AND after find"
+                    echo0("Error: You can only use AND after find"
                           " and after another keyword. To literally"
                           " search for the word \"AND\" itself,"
                           " say find before the word:\n"
                           "    {} find CREEPS find AND find WEIRDOS\n"
                           "".format(me))
-                    exit(1)
+                    return 1
                 prev_arg = arg
             elif arg == "page":
                 prev_arg = arg
             else:
                 encArg = toSubQueryValue(arg)
                 # if encArg != arg:
-                #     debug("* encoding label as '{}'".format(encArg))
+                #     echo1("* encoding label as '{}'".format(encArg))
                 # else:
-                debug("* adding label {}".format(encArg))
+                echo1("* adding label {}".format(encArg))
 
                 labels_subqueries += toSubQuery('label', encArg) + "+"
 
     # Ensure there aren't any dangling commands *after* the loop:
     if prev_arg is not None:
         usage()
-        error("Error: You must specify a search term after {}."
+        echo0("Error: You must specify a search term after {}."
               "".format(prev_arg))
-        exit(1)
+        return 1
 
     if (_closed is True) and (_open is True):
         base_q = any_q + '+'
@@ -147,8 +148,6 @@ if __name__ == "__main__":
         base_q = open_q + '+'  # This is the default
     elif _closed is True:
         base_q = closed_q + '+'
-
-
 
     for find_str in findStrings:
         base_q += find_str + "+"
@@ -159,3 +158,7 @@ if __name__ == "__main__":
     print("URL: {}".format(url))
 
     subprocess.call([browserPath, '-session=' + sessionPath, url])
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

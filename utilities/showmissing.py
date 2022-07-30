@@ -11,16 +11,6 @@ def usage():
     print("")
 
 
-argCount = len(sys.argv) - 1
-
-if argCount < 2:
-    usage()
-    exit(1)
-
-oldPath = sys.argv[1]
-newPath = sys.argv[2]
-
-
 def getStrings(path, delimiter='"', unique=True):
     ret = []
     got = ""
@@ -46,8 +36,23 @@ def getStrings(path, delimiter='"', unique=True):
     return ret
 
 
-olds = getStrings(oldPath)
-news = getStrings(newPath)
-for v in olds:
-    if v not in news:
-        print(v)
+def main():
+    argCount = len(sys.argv) - 1
+
+    if argCount < 2:
+        usage()
+        return 1
+
+    oldPath = sys.argv[1]
+    newPath = sys.argv[2]
+
+    olds = getStrings(oldPath)
+    news = getStrings(newPath)
+    for v in olds:
+        if v not in news:
+            print(v)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -9,8 +9,9 @@ comparison purposes and link.txt files).
 import sys
 import os
 
+
 def continuify(inPath, outPath, continueStr="  \\", indent="    ",
-        sep=" "):
+               sep=" "):
     with open(outPath, 'w') as outs:
         with open(inPath) as ins:
             rawLine = True
@@ -28,21 +29,23 @@ def continuify(inPath, outPath, continueStr="  \\", indent="    ",
                     if i >= 0:
                         starter = indent
 
+
 def main():
     if len(sys.argv) < 2:
         print("You must specify file(s).")
-        exit(1)
+        return 1
     for i in range(1, len(sys.argv)):
         arg = sys.argv[i]
         if not os.path.isfile(arg):
             print("ERROR: {} is not a file.".format(arg))
-            exit(1)
+            return 2
         # parts = os.path.splitext(arg)
         # outPath = parts[0] + ".tmp" + parts[1]
         outPath = arg + ".continuified.tmp"
         continuify(arg, outPath)
         print("* wrote \"{}\"".format(outPath))
-    pass
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

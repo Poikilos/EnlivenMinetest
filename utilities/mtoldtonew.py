@@ -92,20 +92,28 @@ def oldToNew(path, quotechar='"'):
     print("* wrote '%s'" % newName)
 
 
-if __name__ == "__main__":
+def main():
     for i in range(1, len(sys.argv)):
         try_path = sys.argv[i]
         if os.path.isfile(try_path):
             files.append(try_path)
         else:
             print("MISSING file: '" + try_path + "'")
+            return 1
 
     if len(files) < 1:
         usage()
         print("")
         print("You must specify a plain-text schem such as a\n"
               ".we file, or any file containing double-quoted node names.")
+        return 2
 
     for oldName in files:
         print("Processing %s..." % oldName)
         oldToNew(oldName)
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

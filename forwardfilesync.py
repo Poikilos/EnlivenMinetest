@@ -24,6 +24,7 @@ if platform.system() == "Windows":
     CMD_CP = "COPY"
     CMD_MKDIR = "MD"
 
+
 def path_join_all(names):
     result = names[0]
     for i in range(1, len(names)):
@@ -35,7 +36,7 @@ def trim_branch(src, dst, dot_hidden=True, verbose=True):
     '''
     Explore dst non-recursively and delete files
     and subdirectories recursively that are not present on src.
-    
+
     Keyword arguments:
     dot_hidden -- Operate on files and directories even if they are
                   hidden by starting with '.'.
@@ -60,7 +61,7 @@ def update_tree(src, dst, level=0, do_trim=False, dot_hidden=False,
     '''
     Creates dst if not present, then copies everything from src to dst
     recursively.
-    
+
     Keyword arguments:
     do_trim -- Delete files and directories from dst that are not on
                src.
@@ -122,6 +123,7 @@ def update_tree(src, dst, level=0, do_trim=False, dot_hidden=False,
                           "".format(CMD_CP, sub_path, dst_sub_path))
                     pass
 
+
 USAGE = '''
 Syntax:
 forwardfilesync.py <source> <destination> [options]
@@ -131,18 +133,20 @@ forwardfilesync.py <source> <destination> [options]
 
 '''
 
+
 def usage():
     print(USAGE)
+
 
 def main():
     flags = {}
     flags["hidden"] = False
     flags["delete"] = False
-    
+
     if len(sys.argv) < 3:
         usage()
         print("Error: You must provide at least a source and destination.")
-        exit(1)
+        return 1
 
     src = sys.argv[1]
     dst = sys.argv[2]
@@ -155,17 +159,17 @@ def main():
                   " since it doesn't start with \"--\". If it is part"
                   " of a path with spaces, put the path in quotes."
                   "".format(sys.argv[argI]))
-            exit(1)
+            return 1
         name = arg[2:]
         if name not in flags:
             usage()
             print("Error: There is no option \"{}\". If it is part of a"
                   " path with spaces, put the path in quotes."
                   "".format(sys.argv[argI]))
-            exit(1)
+            return 1
         flags[name] = True
     print(CMD_COMMENT + "Using options:")
-    for k,v in flags.items():
+    for k, v in flags.items():
         print(CMD_COMMENT + "{}: {}".format(k, v))
 
     update_tree(
@@ -175,8 +179,8 @@ def main():
         dot_hidden=flags["hidden"] is True,
     )
     print(CMD_COMMENT + "Done.")
-    
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

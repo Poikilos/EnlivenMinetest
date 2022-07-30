@@ -18,3 +18,4 @@ linux-minetest-kit.zip
 /docker/lmk-libraries.devuan-chimera/install-minetest-build-deps.sh
 /docker/libraries-devuan-chimera/install-minetest-build-deps.sh
 /docker/libraries-devuan-chimaera/install-minetest-build-deps.sh
+/debug.txt

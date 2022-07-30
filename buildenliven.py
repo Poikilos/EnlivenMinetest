@@ -9,46 +9,48 @@ import os
 import configparser
 
 from pyenliven import (
-    error,
+    echo0,
     getSGPath,
     profile,
+    MODS_STOPGAP_DIR,
 )
 
 gamespec = {}
 gamespec['remove_mods'] = [
     "coderblocks",  # includes lmb blocks; no recipes
-    "facade", # no recipes
-    "placecraft", # interferes with eating
-    "more_chests", # See https://github.com/poikilos/EnlivenMinetest/issues/446
-    "emeralds", # See https://github.com/poikilos/EnlivenMinetest/issues/497
+    "facade",  # no recipes
+    "placecraft",  # interferes with eating
+    "more_chests",  # See https://github.com/poikilos/EnlivenMinetest/issues/446
+    "emeralds",  # See https://github.com/poikilos/EnlivenMinetest/issues/497
     "give_initial_stuff",  # or make it configurable (It only uses a give_initial_stuff boolean, no configurable item list)
     # TODO: more are at https://github.com/poikilos/EnlivenMinetest/issues/310
 ]
 
 gamespec['local_mods_paths'] = []
 gamespec['local_mods_paths'].append("mods_stopgap")
+# ^ See also MODS_STOPGAP_DIR (full path) in pyenliven
 
 gamespec['add_mods'] = [
-    # {'repo':"https://github.com/poikilos/homedecor_ua"},
+    # {'repo': "https://github.com/poikilos/homedecor_ua"},
     {'name': "animal_materials_legacy"},
-    {'repo':"https://github.com/minetest-mods/ccompass.git"},
-    {'repo':"https://github.com/octacian/chat3.git"},
-    {'repo':"https://github.com/poikilos/compassgps.git"},
+    {'repo': "https://github.com/minetest-mods/ccompass.git"},
+    {'repo': "https://github.com/octacian/chat3.git"},
+    {'repo': "https://github.com/poikilos/compassgps.git"},
     {'name': "elk_legacy"},
-    {'repo':"https://github.com/MinetestForFun/fishing.git"},
+    {'repo': "https://github.com/MinetestForFun/fishing.git"},
     {'name': "glooptest_missing"},
-    {'repo':"https://github.com/minetest-mods/item_drop.git"},
-    {'repo':"https://github.com/poikilos/metatools.git"},
+    {'repo': "https://github.com/minetest-mods/item_drop.git"},
+    {'repo': "https://github.com/poikilos/metatools.git"},
     {'name': "nftools_legacy"},
     {'name': "glooptest_missing"},
-    {'repo':"https://github.com/poikilos/slimenodes.git"},
-    {'repo':"https://github.com/BenjieFiftysix/sponge.git"},
-    {'repo':"https://github.com/poikilos/throwing.git"},  # Can utilize toolranks, toolranks_extras, wielded_light
-    {'repo':"https://github.com/poikilos/throwing_arrows.git"},  # Can utilize mesecons, mesecons_button
-    {'repo':"https://github.com/mt-mods/biome_lib.git"},
+    {'repo': "https://github.com/poikilos/slimenodes.git"},
+    {'repo': "https://github.com/BenjieFiftysix/sponge.git"},
+    {'repo': "https://github.com/poikilos/throwing.git"},  # Can utilize toolranks, toolranks_extras, wielded_light
+    {'repo': "https://github.com/poikilos/throwing_arrows.git"},  # Can utilize mesecons, mesecons_button
+    {'repo': "https://github.com/mt-mods/biome_lib.git"},
     {
         'repo': "https://github.com/Poikilos/vines.git",
-        'branch': "Bucket_Game", # git clone <url> --branch <branch>
+        'branch': "Bucket_Game",  # git clone <url> --branch <branch>
     },
     {"https://github.com/MinetestForFun/unified_inventory"},
 ]
@@ -164,14 +166,15 @@ WARNINGS:
 '''
 """
 warnings = []
-valid_bases = ['Bucket_Game', "bucket_ game"]
+valid_bases = ['Bucket_Game', "bucket_game"]
+
 
 def main():
 
     for warning in warnings:
-        error(warning)
+        echo0(warning)
     tryGameDir = os.getcwd()
-    error('* examining "{}"'.format(tryGameDir))
+    echo0('* examining "{}"'.format(tryGameDir))
     gameConfName = "game.conf"
     gameConfPath = os.path.join(tryGameDir, gameConfName)
     if not os.path.isfile(gameConfPath):
@@ -185,7 +188,7 @@ def main():
         config.read_string('[top]\n' + ins.read())
         # ^ insert a section since ConfigParser requires sections.
     gameName = config['top'].get("name")
-    error('  * detected {} from {}'
+    echo0('  * detected "{}" from "{}"'
           ''.format(gameName, gameConfName))
     if gameName not in valid_bases:
         raise ValueError(
@@ -200,8 +203,10 @@ def main():
     # ^ TODO: Get this from mtanalyze?
     targetGames = os.path.join(targetMT, "games")
     target = os.path.join(targetGames, "ENLIVEN")
-    centerOfTheSunTarget =
+    centerOfTheSunTarget = None
     raise NotImplementedError("pyenliven build")
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

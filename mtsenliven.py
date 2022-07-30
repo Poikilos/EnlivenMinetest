@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from __future__ import print_function
 
 # runs minetestserver using the paths defined by minetestinfo
@@ -7,7 +7,7 @@ from __future__ import print_function
 #   dr4Ke on
 #   https://forum.minetest.net/viewtopic.php?f=11&t=13138&start=50
 import os
-from mtanalyze.minetestinfo import *
+import sys
 import subprocess
 import signal
 try:
@@ -20,55 +20,26 @@ try:
 except ImportError:
     from queue import Queue  # Python 3
 
-key_exit_msg = "SIGINT should shut down server safely...\n"
-game_id = "ENLIVEN"
-# screen -S MinetestServer $mts --gameid ENLIVEN --worldname ...
-print()
-print()
-print()
+REPO_PATH = os.path.dirname(os.path.realpath(__file__))
+# ^ realpath follows symlinks
+REPOS_PATH = os.path.dirname(REPO_PATH)
+TRY_REPO_PATH = os.path.join(REPOS_PATH, "mtanalyze")
+if os.path.isfile(os.path.join(TRY_REPO_PATH, "mtanalyze", "__init__.py")):
+    # ^ Yes, it is 2 mtanalyze deep,
+    #   such as "$HOME/git/mtanalyze/mtanalyze/__init__.py"
+    sys.path.insert(0, TRY_REPO_PATH)
 
-if not minetestinfo.contains("minetestserver_path"):
-    print("[ mtsenliven.py ] ERROR: minetestserver_path"
-          " was not found in your version of minetestinfo.py")
-    exit(1)
+from pyenliven import (
+    echo0,
+    echo1,
+)
 
-mts = minetestinfo.get_var("minetestserver_path")
-if not minetestinfo.contains("primary_world_path"):
-    print("[ mtsenliven.py ] ERROR: primary_world_path"
-          "was selected by minetestinfo.py")
-    exit(2)
-wp = minetestinfo.get_var("primary_world_path")
-wn = os.path.basename(wp)
-print("Using minetestserver: " + mts)
-print("Using primary_world_path: " + wp)
-print("Using world_name: " + wn)
-print()
-process = None
-try:
-    # get both stdout and stderr (see
-    # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-
-    # stderr-using-python-subprocess-module/)
-    process = subprocess.Popen(
-        [mts, '--gameid', game_id, '--worldname', wn],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        bufsize=1
-    )
-    # bufsize=1 as per jfs on <https://stackoverflow.com/questions/
-    #   31833897/python-read-from-subprocess-stdout-and-stderr-
-    #   separately-while-preserving-order>
-except Exception as e:
-    print(mts + " could not be executed. Try installing the "
-          " minetest-server package or compiling from git instructions"
-          " on minetest.net")
-    print(e)
-    exit(1)
-msgprefix_flags = ["WARNING[Server]: ", "ACTION[Server]: "]
-msgprefix_lists = {}  # where flag is key
-for flag in msgprefix_flags:
-    msgprefix_lists[flag] = []
-# see https://www.endpoint.com/blog/2015/01/28/getting-realtime-output-
-# using-python
+
+# from mtanalyze.minetestinfo import *
+from mtanalyze import (
+    mti,
+    get_var_and_check,
+)
 
 non_unique_wraps = []
 non_unique_wraps.append(
@@ -82,6 +53,11 @@ unique_flags = [
     "leaves game",
     "joins game"
 ]
+
+msgprefix_flags = ["WARNING[Server]: ", "ACTION[Server]: "]
+msgprefix_lists = {}  # where flag is key
+for flag in msgprefix_flags:
+    msgprefix_lists[flag] = []
 
 
 def print_unique_only(output, err_flag=False):
@@ -124,7 +100,7 @@ def print_unique_only(output, err_flag=False):
     if show_enable:
         print(output_strip)
         if found_flag is not None:
-            print("  [ mtsenliven.py ] " + msg_msg
+            echo0("  [ mtsenliven.py ] " + msg_msg
                   + " will be suppressed")
 
 
@@ -158,7 +134,7 @@ def reader(pipe, q):
         finally:
             q.put(None)
     except KeyboardInterrupt:
-        print("[ mtsenliven.py ] " + key_exit_msg)
+        echo0("[ mtsenliven.py ] " + key_exit_msg)
         pass
 
 
@@ -167,44 +143,100 @@ def decode_safe(b):
         s = b.decode()
     except UnicodeDecodeError:
         s = b.decode('utf-8')
+    '''
+    except AttributeError as ex:
+        if "'str' object has no attribute" in str(ex):
+            return b
+        raise ex
+    '''
     return s
 
 
-q = Queue()
-Thread(target=reader, args=[process.stdout, q]).start()
-Thread(target=reader, args=[process.stderr, q]).start()
-try:
-    for _ in range(2):
-        for source, line in iter(q.get, None):
-            # print "%s: %s" % (source, line),
-            s = source
-            l_s = line
-            # NOTE: source is a string such as
-            # "<_io.BufferedReader name=5>"
-            l_s = decode_safe("utf-8")
-            process_msg("%s: %s" % (s, l_s))
-except KeyboardInterrupt:
-    print("[ mtsenliven.py ] " + key_exit_msg)
-    pass
+def main():
+    key_exit_msg = "SIGINT should shut down server safely...\n"
+    game_id = "ENLIVEN"
+    # screen -S MinetestServer $mts --gameid ENLIVEN --worldname ...
+    echo0()
+    echo0()
+    echo0()
 
-exit(0)
+    mts, code = get_var_and_check("minetestserver_path", code=1)
+    if code != 0:
+        return code
 
-while True:
+    wp, code = get_var_and_check("primary_world_path", code=1)
+    if code != 0:
+        return code
+
+    wn = os.path.basename(wp)
+    echo0("Using minetestserver: " + mts)
+    echo0("Using primary_world_path: " + wp)
+    echo0("Using world_name: " + wn)
+    echo0()
+    process = None
     try:
-        # can deadlock on high volume--use communicate instead
-        # as per https://docs.python.org/2/library/subprocess.html
-        out_bytes = process.stdout.readline()
-        # err_bytes = process.stderr.readline()
-        #    (err_bytes == '') and \
-        if (out_bytes == '') and \
-           (process.poll() is not None):
-            break
-        if out_bytes:
-            process_msg(out_bytes)
-        # if err_bytes:
-        #     process_msg(err_bytes)
-        rc = process.poll()
+        # get both stdout and stderr (see
+        # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-
+        # stderr-using-python-subprocess-module/)
+        process = subprocess.Popen(
+            [mts, '--gameid', game_id, '--worldname', wn],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            bufsize=1
+        )
+        # bufsize=1 as per jfs on <https://stackoverflow.com/questions/
+        #   31833897/python-read-from-subprocess-stdout-and-stderr-
+        #   separately-while-preserving-order>
+    except Exception as e:
+        echo0(mts + " could not be executed. Try installing the "
+              " minetest-server package or compiling from git instructions"
+              " on minetest.net")
+        echo0(e)
+        return 2
+    # see https://www.endpoint.com/blog/2015/01/28/getting-realtime-output-
+    # using-python
+
+    q = Queue()
+    Thread(target=reader, args=[process.stdout, q]).start()
+    Thread(target=reader, args=[process.stderr, q]).start()
+    try:
+        for _ in range(2):
+            for source, line in iter(q.get, None):
+                # print "%s: %s" % (source, line),
+                s = source
+                l_s = line
+                # NOTE: source is a string such as
+                # "<_io.BufferedReader name=5>"
+                l_s = decode_safe(line)  # line.decode("utf-8")
+                process_msg("%s: %s" % (s, l_s))
     except KeyboardInterrupt:
         print("[ mtsenliven.py ] " + key_exit_msg)
-        break
-# process.kill()
+        pass
+
+    return 0
+    '''
+    while True:
+        try:
+            # can deadlock on high volume--use communicate instead
+            # as per https://docs.python.org/2/library/subprocess.html
+            out_bytes = process.stdout.readline()
+            # err_bytes = process.stderr.readline()
+            #    (err_bytes == '') and \
+            if (out_bytes == '') and \
+               (process.poll() is not None):
+                break
+            if out_bytes:
+                process_msg(out_bytes)
+            # if err_bytes:
+            #     process_msg(err_bytes)
+            rc = process.poll()
+        except KeyboardInterrupt:
+            echo0("[ mtsenliven.py ] " + key_exit_msg)
+            break
+    # process.kill()
+    return 0
+    '''
+
+
+if __name__ == "__main__":
+    sys.exit(main())

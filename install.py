@@ -11,9 +11,10 @@ if platform.system() == "Windows":
 else:
     profile = os.environ.get('HOME')
 
-def error(msg):
-    sys.stderr.write("{}\n".format(msg))
-    sys.stderr.flush()
+
+def echo0(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
 
 try:
     import mtanalyze
@@ -23,12 +24,20 @@ except ModuleNotFoundError as ex:
         sys.path.append(tryMTA)
         import mtanalyze
     else:
-        error("")
-        error("You must install mtanalyze in the directory alongside")
-        error("EnlivenMinetest or as ~/git/mtanalize")
-        error("such as via:")
-        error("git clone https://github.com/poikilos/mtanalyze ~/git/mtanalize")
-        error("")
+        echo0("")
+        echo0("You must install mtanalyze in the directory alongside")
+        echo0("EnlivenMinetest or as ~/git/mtanalize")
+        echo0("such as via:")
+        echo0("git clone https://github.com/poikilos/mtanalyze ~/git/mtanalize")
+        echo0("")
         # raise tryMTA
-        exit(1)
-print("This doesn't work (not yet implemented). See build.py.")
+        sys.exit(1)
+
+
+def main():
+    echo0("This doesn't work (not yet implemented). See build.py.")
+    return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

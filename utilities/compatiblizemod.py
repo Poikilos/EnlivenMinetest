@@ -8,13 +8,13 @@ import re
 import sys
 import os
 
-myDir = os.path.dirname(os.path.realpath(__file__))
-repoDir = os.path.dirname(myDir)
+UTILITIES_DIR = os.path.dirname(os.path.realpath(__file__))
+REPO_DIR = os.path.dirname(UTILITIES_DIR)
 # try:
 #     from pyenliven.compatiblizemod import main
 # except ModuleNotFoundError:
-if os.path.isdir(os.path.join(repoDir, "pyenliven")):
-    sys.path.append(repoDir)
+if os.path.isfile(os.path.join(REPO_DIR, "pyenliven", "__init__.py")):
+    sys.path.append(REPO_DIR)
 
 from pyenliven.compatiblizemod import main
 

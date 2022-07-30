@@ -39,13 +39,13 @@ import platform
 import os
 
 
-def error(msg):
-    sys.stderr.write(msg + "\n")
+def echo0(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 
 def customExit(msg):
-    error(msg)
-    exit(1)
+    echo0(msg)
+    sys.exit(1)
 
 
 def isExecutableFile(path):
@@ -575,7 +575,7 @@ def main():
     # Confirm that script is running in the right place.
 
     if not os.path.isdir('mtsrc'):
-        error("""
+        echo0("""
 Error:  This script should be stored,  and executed,  in the directory
 which contains the "mtsrc" directory.
 """)
@@ -1237,7 +1237,8 @@ again.
 
     print("Done\n")
     # end main
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

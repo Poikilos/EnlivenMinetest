@@ -93,7 +93,7 @@ except ImportError:
 
 
 # see <https://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python>
-def error(*args, **kwargs):
+def echo0(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
@@ -261,7 +261,7 @@ def debug(*args, **kwargs):
     if verbose:
         if len(args) > 0:
             msg = args[0]
-        error("[debug] " + msg)
+        echo0("[debug] " + msg)
 
 
 def set_verbose(on):
@@ -353,6 +353,8 @@ match_all_labels = []
 trues = ["true", "on", "yes"]
 falses = ["false", "off", "no"]
 
+# TODO: Consider from pycodetool import to_syntax_error
+#  (to replace instances of {}:{}: formatted by `path, line` below).
 
 def str_to_value(valueStr, typeName=None, lineN=-1, path="(generated)"):
     '''
@@ -387,7 +389,7 @@ def str_to_value(valueStr, typeName=None, lineN=-1, path="(generated)"):
 
     if typeName is not None:
         if valueStr == "None":
-            error("{}:{}: WARNING: The program expected a(n) '{}' but"
+            echo0("{}:{}: WARNING: The program expected a(n) '{}' but"
                                  " the value was 'None' and will become"
                                  " None."
                                  "".format(conf_path, lineN, typeName))
@@ -490,7 +492,7 @@ def modify_dict_by_conf(options, conf_path, always_lower=False,
                     continue
                 signI = line.find("=")
                 if signI < 1:
-                    error("{}:{}: A value is expected before '='."
+                    echo0("{}:{}: A value is expected before '='."
                           "".format(conf_path, lineN))
                 name = line[:signI].strip()
                 valueStr = line[signI+1:].strip()
@@ -499,11 +501,11 @@ def modify_dict_by_conf(options, conf_path, always_lower=False,
                     value = None
                 if always_lower:
                     if name.lower() != name:
-                        error("{}:{}: A lowercase name is expected."
+                        echo0("{}:{}: A lowercase name is expected."
                               "".format(conf_path, lineN))
                         continue
                 if (valueStr is None) and no_value_error:
-                    error("{}:{}: A value is expected."
+                    echo0("{}:{}: A value is expected."
                               "".format(conf_path, lineN))
                 else:
                     typeName = None
@@ -514,11 +516,11 @@ def modify_dict_by_conf(options, conf_path, always_lower=False,
                                          path=conf_path, lineN=lineN)
                     options[name] = value
                     if not quiet:
-                        error("[settings] {}: Set {} to {}"
+                        echo0("[settings] {}: Set {} to {}"
                               "".format(conf_name, name, value))
     else:
         if no_file_error:
-            error("Error: \"{}\" Doesn't exist"
+            echo0("Error: \"{}\" Doesn't exist"
                   "".format(conf_path, lineN))
 
 
@@ -664,7 +666,7 @@ class Repo:
             self.remote_user = "almikes@aol.com"  # Wuzzy2
             if self.api_id is not None:
                 if self.api_id != 'git_instaweb':
-                    error("WARNING: URL has [] but self.api_id was {}"
+                    echo0("WARNING: URL has [] but self.api_id was {}"
                           "".format(urlParts[-2], self.api_id))
             self.api_id = "git_instaweb"
             # Such as https://repo.or.cz/minetest_treasurer.git
@@ -701,8 +703,8 @@ class Repo:
         if self.api_id is None:
             self.api_id = "Gitea"
             if "github.com" in repo_url.lower():
-                error("WARNING: assuming Gitea but URL has github.com.")
-            error("  * assuming API is {} for {}"
+                echo0("WARNING: assuming Gitea but URL has github.com.")
+            echo0("  * assuming API is {} for {}"
                   "".format(self.api_id, ))
         if self.api_id is None:
             raise RuntimeError("api_id is not set")
@@ -1113,7 +1115,7 @@ class Repo:
                 results = result
                 err = to_error(result)
                 if err is not None:
-                    error("WARNING: a website error was saved"
+                    echo0("WARNING: a website error was saved"
                           " as an issue, so it will be deleted:"
                           " \"{}\""
                           "".format(c_path))
@@ -1126,7 +1128,7 @@ class Repo:
                               "".format(results_key))
                         results = results[results_key]
                     else:
-                        error("WARNING: expected {} in dict"
+                        echo0("WARNING: expected {} in dict"
                               "".format(results_key))
                 if result is not None:
                     if hasattr(results, 'keys'):
@@ -1461,9 +1463,9 @@ class Repo:
                 fn += ".json"
                 c_path += ".json"
         else:
-            error("url: {}".format(url))
-            error("self.labels_url: {}".format(self.labels_url))
-            error("self.issues_url: {}".format(self.issues_url))
+            echo0("url: {}".format(url))
+            echo0("self.labels_url: {}".format(self.labels_url))
+            echo0("self.issues_url: {}".format(self.issues_url))
             raise NotImplementedError("getCachedJsonDict"
                                       " doesn't have a cache directory"
                                       " for {}. Try --refresh"
@@ -1494,8 +1496,8 @@ class Repo:
                     try:
                         result = json.load(json_file)
                     except json.decoder.JSONDecodeError as ex:
-                        error("")
-                        error(p+"The file {} isn't valid JSON"
+                        echo0("")
+                        echo0(p+"The file {} isn't valid JSON"
                               " and will be overwritten if loads"
                               "".format(c_path))
                         result = None
@@ -1505,7 +1507,7 @@ class Repo:
                 err = to_error(result)
                 if err is not None:
                     result = None
-                    error("Error: An error was saved as an issue"
+                    echo0("Error: An error was saved as an issue"
                           " so it will be deleted: {}"
                           "".format(c_path))
                     os.remove(c_path)
@@ -1691,8 +1693,8 @@ class Repo:
                 msg = ("WARNING: comments={} but there is no"
                        " comments_url in:"
                        "".format(comments))
-                # error(msg)
-                # error(json.dumps(issue_data, indent=4, sort_keys=True))
+                # echo0(msg)
+                # echo0(json.dumps(issue_data, indent=4, sort_keys=True))
 
         for evt in data:
             user = evt.get('user')
@@ -1784,7 +1786,7 @@ class Repo:
                     never_expire=never_expire,
                 )
                 if err is not None:
-                    error("Accessing the reactions URL failed: {}"
+                    echo0("Accessing the reactions URL failed: {}"
                           "".format(err.get('reason')))
                 if reac_data is not None:
                     for reac in reac_data:
@@ -2009,10 +2011,10 @@ class Repo:
         if results is None:
             if err is not None:
                 if err.get('code') == 410:
-                    # error("The issue was deleted")
+                    # echo0("The issue was deleted")
                     pass
                 elif err.get('code') == 404:
-                    # error("The issue doesn't exist")
+                    # echo0("The issue doesn't exist")
                     pass
                 return None, err
             else:
@@ -2111,10 +2113,10 @@ def main(custom_args=None):
                 else:
                     if issue_no is not None:
                         usage()
-                        error("Error: Only one issue number can be"
+                        echo0("Error: Only one issue number can be"
                               " specified but you also specified"
                               " {}.".format(arg))
-                        exit(1)
+                        return 1
                     issue_no = i
                 is_text = False
             except ValueError:
@@ -2129,15 +2131,15 @@ def main(custom_args=None):
                         state = 'closed'
                     elif arg == "--test":
                         tests()
-                        error("All tests passed.")
-                        sys.exit(0)
+                        echo0("All tests passed.")
+                        return 0
                     elif arg == "--verbose":
                         verbose = True
                     elif arg == "--debug":
                         verbose = True
                     elif arg == "--help":
                         usage()
-                        exit(0)
+                        return 0
                     elif arg in collect_logic:
                         save_key = arg.strip("-").replace("-", "_")
                     elif arg in collect_options:
@@ -2149,9 +2151,9 @@ def main(custom_args=None):
                         # else: the next arg will be the value.
                     elif arg.startswith("--"):
                         usage()
-                        error("Error: The argument \"{}\" is not valid"
+                        echo0("Error: The argument \"{}\" is not valid"
                               "".format(arg))
-                        exit(1)
+                        return 2
                     elif prev_arg in SEARCH_COMMANDS:
                         search_terms.append(arg)
                         isValue = True
@@ -2162,15 +2164,15 @@ def main(custom_args=None):
                         # print("* adding criteria: {}".format(arg))
                         if len(search_terms) < 1:
                             usage()
-                            error("You can only specify \"AND\" after"
+                            echo0("You can only specify \"AND\" after"
                                   " the \"find\" command. To literally"
                                   " search for the word \"AND\", place"
                                   " the \"find\" command before it."
                                   " Examples:")
                             for andI in modes['find']['AND_EXAMPLES']:
-                                error(me
+                                echo0(me
                                       + modes['find']['examples'][andI])
-                            exit(1)
+                            return 3
                         mode = "list"
                     elif save_key is not None:
                         logic[save_key] = arg
@@ -2220,7 +2222,7 @@ def main(custom_args=None):
         usage()
         print()
         print()
-        sys.exit(0)
+        return 0
     elif mode not in valid_modes:
         print()
         print()
@@ -2229,12 +2231,12 @@ def main(custom_args=None):
         print(mode + " is not a valid command.")
         print()
         print()
-        sys.exit(0)
+        return 0
     elif mode == "list":
         if issue_no is not None:
             print("Error: You must specify either an issue number"
                   " or query criteria, not both.")
-            sys.exit(1)
+            return 4
 
     print("")
     if caches_path is not None:
@@ -2287,12 +2289,12 @@ def main(custom_args=None):
         db_type = logic.get('db-type')
         if db_type is None:
             db_type = "PostgresQL"
-            error("WARNING: No db-type was specified, so db-type was"
+            echo0("WARNING: No db-type was specified, so db-type was"
                   " set to the default: {}".format(db_type))
         db_u = logic.get("db-user")
         if db_u is None:
             db_u = Repo.os_user
-            error("WARNING: No db-type was specified, so db-user was"
+            echo0("WARNING: No db-type was specified, so db-user was"
                   " set to the default: {}".format(db_u))
             pass
         db_p = logic.get('db-password')
@@ -2301,7 +2303,7 @@ def main(custom_args=None):
             if "deleted" in msg:
                 is_deleted = True
         if db_p is None:
-            error("WARNING: No db-password was specified, so the db"
+            echo0("WARNING: No db-password was specified, so the db"
                   " operation will be attempted without it."
                   " Success will depend on your database type and"
                   " settings.")
@@ -2309,14 +2311,14 @@ def main(custom_args=None):
             'repo_url': dstRepoUrl,
         })
         # print("* rewriting Gitea issue {}...".format(issue_no))
-        sys.exit(0)  # Change based on return of the method.
+        return 5  # TODO: Change based on return of the method.
 
     if msg is not None:
-        error(msg)
+        echo0(msg)
         if "deleted" in msg:
-            sys.exit(0)
+            return 0
         else:
-            sys.exit(1)
+            return 6
     total_count = 0
     print()
     # ^ This blank line goes after "@ Cache" messages and before
@@ -2324,11 +2326,11 @@ def main(custom_args=None):
     if mode == "labels":
         if repo.labels is None:
             print("There were no labels.")
-            sys.exit(0)
+            return 0
     else:
         if repo.issues is None:
             print("There were no issues.")
-            sys.exit(0)
+            return 0
 
         match_all_labels_lower = []
         p = repo.log_prefix
@@ -2494,7 +2496,8 @@ def main(custom_args=None):
     else:
         debug("There is no summary output due to mode={}".format(mode))
     print("")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

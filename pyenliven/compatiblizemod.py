@@ -4,9 +4,10 @@ import sys
 import os
 import shutil
 
-def error(msg):
-    sys.stderr.write("{}\n".format(msg))
-    sys.stderr.flush()
+
+def echo0(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
 
 def add_depends(mod_path):
     mod_dir_name = os.path.basename(mod_path)
@@ -41,10 +42,10 @@ def add_depends(mod_path):
             print("* created {}/modpack.txt"
                   "".format(mod_dir_name))
         else:
-            error("{}/modpack.txt already exists for compatibility."
+            echo0("{}/modpack.txt already exists for compatibility."
                   "".format(mod_dir_name))
     if os.path.isfile(modpack_txt):
-        error("{}/{} indicates it is a modpack."
+        echo0("{}/{} indicates it is a modpack."
               "".format(mod_dir_name, found_modpack_file))
         for sub in os.listdir(mod_path):
             if sub.startswith('.'):
@@ -52,19 +53,19 @@ def add_depends(mod_path):
             subPath = os.path.join(mod_path, sub)
             add_depends(subPath)
         # It must be a modpack, so return after doing subdirectories.
-        return
+        return 1
     depends_path = os.path.join(mod_path, "depends.txt")
     description_path = os.path.join(mod_path, "description.txt")
     if os.path.isfile(depends_path):
-        error("WARNING: Writing {} will be skipped since it exists."
+        echo0("WARNING: Writing {} will be skipped since it exists."
               "".format(depends_path))
-        return
+        return 0
     mod_conf = os.path.join(mod_path, "mod.conf")
     if not os.path.isfile(mod_conf):
-        error("WARNING: Writing {} will be skipped since {} does"
+        echo0("WARNING: Writing {} will be skipped since {} does"
               " not exist."
               "".format(depends_path, mod_conf))
-        return
+        return 1
     optional_depends = None
     depends = None
     description = None
@@ -117,14 +118,17 @@ def add_depends(mod_path):
         if os.path.isfile(description_path):
             print("* INFO: There is already a description.txt so it"
                   " will be left intact.")
-            return
+            return 0
         with open(description_path, 'w') as outs:
             outs.write("{}\n".format(description))
         print("* wrote {}/description.txt".format(mod_dir_name))
+    return 0
+
 
 def main():
     parent = os.path.realpath(".")
-    add_depends(parent)
+    return add_depends(parent)
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
