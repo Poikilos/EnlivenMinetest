@@ -184,6 +184,7 @@ def main():
             ''.format(gameConfName, tryGameDir)
         )
     config = configparser.ConfigParser()
+    # ^ or: from pycodetool.parsing import ConfigParser
     with open(gameConfPath, 'r') as ins:
         config.read_string('[top]\n' + ins.read())
         # ^ insert a section since ConfigParser requires sections.

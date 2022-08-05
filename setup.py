@@ -28,7 +28,9 @@ if os.path.isfile("requirements.txt"):
                 continue
             install_requires.append(line)
 
-description = '''Manage Minetest using Python.'''
+description = (
+    "Manage Minetest using Python."
+)
 long_description = description
 if os.path.isfile("readme.md"):
     with open("readme.md", "r") as fh:
@@ -47,6 +49,7 @@ setuptools.setup(
          ' GNU General Public License v2 or later (GPLv2+)'),
         'Operating System :: POSIX :: Linux',
         'Topic :: Software Development :: Version Control',
+        'Topic :: System :: Installation/Setup',
     ],
     keywords=('minetest repo management commit data analyzer'
               ' meld merge compare files diff'),
