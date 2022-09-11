@@ -1,0 +1,207 @@
+Name:    coderskins
+Source:  Largely original mod
+License: See notes in "oldcoder.txt"
+
+----------------------------------------------------------------------
+
+1. Overview.
+
+"CoderSkins" is a Minetest "skins" mod that is  designed  to work with
+the  Bucket World "_game" or derived "_games".  It won't work in other
+contexts.
+
+The  mod is largely original,  but  includes Unified Inventory support
+code from other mods.
+
+The  Unified Inventory  support code is based on GPL3 code that is (c)
+2012 CoRNeRNoTe and Dean Montgomery.
+
+As this  module incorporates GPL3 code,  the code as a whole is  GPL3.
+However, the rest of the code is  (c) 2017-2020 OldCoder (Robert Kira-
+ly).
+
+If  individual media files, i.e., skin textures, included with the mod
+are  discovered  to be  incompatible  with GPL3, the files in question
+should be removed.
+
+----------------------------------------------------------------------
+
+2. CoderSkins features.
+
+2.1. CoderSkins  supports both  64x64 Minecraft (tm) skins  and  64x32
+Minetest skins.
+
+It's compatible,  despite the use of 64x64,  with the Bucket Game ver-
+sion of 3D Armor.
+
+As of 2020, old MT skin systems only support 64x32.  CoderSkins is be-
+lieved  to be the  only one that supports 64x64   (and that works with
+a patched 3D Armor as well).
+
+2.2. The  world owner can install skins for individual players manual-
+ly.  Or builders can choose their own skins using U.I. GUI screens. Or
+both.
+
+2.3. The world owner can set the order of skins displayed in the GUI.
+
+2.4. By default, the main CoderSkins U.I. page displays a short 1-line
+description of the  player's current skin based on the associated PNG-
+file name.
+
+The world owner can specify a 2nd line. Additionally, he/she can over-
+ride the default for the 1st line.
+
+2.5. New players get random gender-neutral skins by default.
+
+2.6. CoderSkins adds extra navigation buttons to the GUI.
+
+The extra buttons  include  first page, last page, and -- if there are
+6 or more pages -- 2 more buttons that  jump to 1/3 and 2/3 of the way
+through the page list.
+
+2.7. CoderSkins  fixes  a bug  in the  old  U.I. code related  to  the
+"Change" button.
+
+Specifically,  the  "Change" button now takes you to the last  "skins"
+screen  that you  visited in the current session.  The old version al-
+ways took you to the first page.
+
+2.8. Minor feature: The U.I. GUI includes a tooltip.  "u_skins" and/or
+other old skin mods seem to be missing this feature.
+
+2.9. CoderSkins  supports  its own spacesuits, NC virus masks,  and 3D
+armor.
+
+The  spacesuits and  NC virus masks are functional.  3D armor is still
+under development.
+
+Documentation for these features will be added here.
+
+----------------------------------------------------------------------
+
+3. CoderSkins limitations.
+
+3.1. CoderSkins requires Bucket Game.
+
+3.2. While 3D Armor, the old mod as opposed to the new CoderSkins fea-
+ture,  is being worn,  64x64 skins will  drop the level of detail dis-
+played down to the 64x32 level.
+
+3.3. 2D sprite skins aren't supported.
+
+----------------------------------------------------------------------
+
+4. Adding new skins.
+
+Players will  usually select their skins from the  set that comes with
+the mod.
+
+To do this,  they'll use Unified Inventory.  There's  a button for the
+purpose in the U.I. "buttons" row.
+
+The in-game command "/skin" can also be used to change skins.
+
+If  you're a world host,  the mod allows you to add skins and/or change
+them for players in multiple ways:
+
+4.1. You can add a new PNG file just for one player.
+
+This  procedure,  4.1,  is discussed in  Appendix A.  Most experienced
+world hosts should be able to do it.
+
+4.2. You  can use the  in-game command "/pskin"  to set the skin for a
+player who is too inexperienced to set his or her own skin.
+
+4.3. You can add new skins to the CoderSkins GUI. This procedure, 4.3,
+is discussed in Appendix B.
+
+----------------------------------------------------------------------
+
+5. Changing skin display order.
+
+CoderSkins includes a Lua file named "skinlist.lua".  The file defines
+a table named "coderskins.list".
+
+The CoderSkins GUI displays predefined skins in the order that the ta-
+ble lists them.
+
+To change  the order in which the GUI displays skins,  edit "skinlist.
+lua" and change the order of the entries in the table.
+
+----------------------------------------------------------------------
+
+Appendix A. Adding a PNG file just for one player.
+
+The  world owner can add a  specific skin  just for a specific player.
+If this is done, the new skin won't appear in the list of skin options
+for other players.
+
+This procedure bypasses the "skins" GUI in Unified Inventory.
+
+To do this, proceed as follows:
+
+A.1. Start with a PNG file that contains a valid MC or MT skin. It can
+be either 64x64 or 64x32.
+
+A.2. Rename the PNG file to a filename of the following form:
+
+      player_NAME.png
+
+NAME  should  be the  player's in-game nickname.  For example,  if the
+player  uses  the  nickname  "Salad",  the name of the PNG file should
+be:
+      player_Salad.png
+
+Limitation:  If the player's nickname contains unusual characters, you
+may not be able to do this.
+
+A.3. Copy the renamed PNG file into the mod's "textures" directory.
+
+A.4. Restart the world.
+
+----------------------------------------------------------------------
+
+Appendix B. Adding new public skins.
+
+A world host can add local skins.
+
+B.1. A local skin is a PNG file with a name of the form "skin_MeowCat.
+png" or "skin_PizzaWolf.png".
+
+CoderSkins supports both standard  64x64 and 64x32 Minecraft (tm) skin
+formats.
+
+B.2. To add a local skin,  drop  appropriate PNG files,  with names of
+the form "skin_*.png", into the "textures" directory.
+
+If this is done,  the  GUI will  display  local skins first. The local
+skins will be displayed in alpha betical order based on filename.
+
+B.3. To disable  support  for  local skins,  add the following setting
+to "world.conf":
+
+      local_skins = false
+
+B.4. The  CoderSkins GUI  displays a  front and back preview image for
+each skin. For  this to work, two additional PNG files must be present
+in addition to a given skin PNG file.
+
+The two preview PNG files should have filenames of the form:
+
+      skin_PizzaWolf_preview.png
+      skin_PizzaWolf_preview_back.png
+
+In  other words,  for the front preview, take the  original  skin-file
+name and insert "_preview" right before ".png".  For the back preview,
+insert "_preview_back" instead.
+
+The preview image files should be 16x32 images that display the assoc-
+iated skin as it looks from the front and the back, respectively.
+
+CoderSkins  doesn't  presently provide a tool to generate previews.  A
+tool of this type may be added in the future.
+
+If skin preview files are omitted, "not available" images will be dis-
+played instead.
+
+(end of document)

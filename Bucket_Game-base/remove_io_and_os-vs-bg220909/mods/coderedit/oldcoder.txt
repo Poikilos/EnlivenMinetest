@@ -1,0 +1,16 @@
+Name:    worldedit
+Source:  Fork of upstream modpack (do not replace)
+License: See "LICENSE.txt"
+
+----------------------------------------------------------------------
+
+This is a fork of the  Minetest "worldedit" modpack that includes sig-
+nificant changes.
+
+This modpack should not be  replaced or  updated except to  future re-
+leases of the Bucket World "_game" series.
+
+The "brush" component has been removed, at least temporarily,  for the
+sake of backwards compatibility.
+
+To be added: Descriptions of new commands and/or features.

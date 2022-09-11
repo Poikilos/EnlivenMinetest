@@ -1,0 +1,42 @@
+Name:    coderskins
+Source:  Original mod
+
+License: (c) 2019 and CC BY-NC-SA 4.0 International:  OldCoder (Robert
+Kiraly).
+
+----------------------------------------------------------------------
+
+"coderskins" is a Minetest "skins" mod that is  designed  to work with
+the  Bucket World "_game" or derived "_games".  It won't work in other
+contexts.
+
+This mod  is  inspired by  older Minetest  "skins" mods, but is suffi-
+ciently different that it should be viewed as a new mod.
+
+----------------------------------------------------------------------
+
+The mod supports 64x64 skins and,  additionally,  sets  random default
+skins for new players.
+
+To install  a specific skin  for a specific player,  name the PNG file
+to be used as follows:
+
+      player_NAME.png
+
+where NAME is  the player's in-game nick.  Then copy the PNG file into
+the mod's "textures" directory.
+
+The PNG file should be  a standard  Minetest 64x32 or  Minecraft 64x64
+"skin" file.
+
+Or, if you prefer,  create a text file, in the mod's "textures" direc-
+tory with a similar filename:
+
+      player_NAME.skin
+
+In the text file,  put the filename of the PNG file to be used for the
+associated player's skin.  The  PNG file should  be stored in the same
+directory.
+
+If  a "player_NAME.png" file and a  "player_NAME.skin"  file  are both
+present for a particular player, the PNG file takes precedence.
