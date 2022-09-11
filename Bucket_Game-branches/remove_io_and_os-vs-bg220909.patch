@@ -1,0 +1,28 @@
+diff -ru /home/owner/git/EnlivenMinetest/Bucket_Game-base/remove_io_and_os-vs-bg220909/mods/codercore/coderskins/skinlist.lua /home/owner/git/EnlivenMinetest/Bucket_Game-branches/remove_io_and_os-vs-bg220909/mods/codercore/coderskins/skinlist.lua
+--- /home/owner/git/EnlivenMinetest/Bucket_Game-base/remove_io_and_os-vs-bg220909/mods/codercore/coderskins/skinlist.lua	2022-09-10 22:55:04.012660836 -0400
++++ /home/owner/git/EnlivenMinetest/Bucket_Game-branches/remove_io_and_os-vs-bg220909/mods/codercore/coderskins/skinlist.lua	2022-09-10 23:01:29.768657461 -0400
+@@ -303,11 +303,10 @@
+ 
+     local ktable  = ocutil.vtable_to_ktable (coderskins.list)
+     local dir     = coderskins.textdir
+-    local popen   = io.popen
+     local newlist = {}
+     local ofname, dfname
+ 
+-    for ofname in popen ('ls "' .. dir .. '"skin_*.png'):lines()
++    for _, ofname in ipairs(minetest.get_dir_list(dir, false))
+     do
+         ofname = ofname:gsub (".*/"         , "")
+         ofname = ofname:gsub ("%.png$"      , "")
+diff -ru /home/owner/git/EnlivenMinetest/Bucket_Game-base/remove_io_and_os-vs-bg220909/mods/coderedit/worldedit/manipulations.lua /home/owner/git/EnlivenMinetest/Bucket_Game-branches/remove_io_and_os-vs-bg220909/mods/coderedit/worldedit/manipulations.lua
+--- /home/owner/git/EnlivenMinetest/Bucket_Game-base/remove_io_and_os-vs-bg220909/mods/coderedit/worldedit/manipulations.lua	2022-09-10 22:55:56.228660379 -0400
++++ /home/owner/git/EnlivenMinetest/Bucket_Game-branches/remove_io_and_os-vs-bg220909/mods/coderedit/worldedit/manipulations.lua	2022-09-10 22:58:43.820658913 -0400
+@@ -1,8 +1,6 @@
+ -- Generic node manipulations
+ -- @module worldedit.manipulations
+ 
+-require "os"
+-
+ -- ===================================================================
+ 
+ local                      coderedit_debug            =
