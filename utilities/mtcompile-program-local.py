@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------
                           file information
@@ -27,6 +28,7 @@
                               overview
 ---------------------------------------------------------------------
 """
+from __future__ import print_function
 import sys
 import subprocess
 import shutil

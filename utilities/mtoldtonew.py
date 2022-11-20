@@ -1,16 +1,12 @@
 #!/usr/bin/env python
-import os
-import csv
-import sys
+'''
+mtoldtonew
+----------
+This script uses mtoldtonew.csv to convert node names in "we" schem
+file(s). The destination filename(s) are generated automatically. Each
+will have "new" instead of "old" if the original file had "old" in the
+name. Otherwise, it will have "new" added to the beginning of the name.
 
-mtdeltas_csv = "mtoldtonew.csv"
-if not os.path.isfile(mtdeltas_csv):
-    print("ERROR: missing " + mtdeltas_csv)
-    # exit(1)
-
-files = []
-
-usageStr = '''
 Usage:
    python3 mtoldtonew.py <filename>
    or
@@ -29,12 +25,22 @@ Examples:
     from mtoldtonew import oldToNew
     oldToNew('file.we', quotechar='')
 
+edit '%s' as needed (old name in column 1, new name in 2)
 '''
-usageStr += "edit '%s' as needed (old name in column 1, new name in 2)"
+from __future__ import print_function
+import os
+import csv
+import sys
 
+mtdeltas_csv = "mtoldtonew.csv"
+if not os.path.isfile(mtdeltas_csv):
+    print("ERROR: missing " + mtdeltas_csv)
+    # exit(1)
+
+files = []
 
 def usage():
-    print(usageStr)
+    print(__doc__)
 
 
 mtdeltas = {}

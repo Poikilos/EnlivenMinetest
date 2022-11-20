@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 '''
 Specify a label or search term, optionally with a page #.
 
@@ -30,6 +31,7 @@ Examples:
 
 
 '''
+from __future__ import print_function
 import sys
 import subprocess
 me = "enlynx.py"

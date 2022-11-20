@@ -4,17 +4,12 @@
 This script uses the pyenliven.compatiblizemod submodule to try to make
 the mod
 '''
+from __future__ import print_function
 import re
 import sys
 import os
 
-UTILITIES_DIR = os.path.dirname(os.path.realpath(__file__))
-REPO_DIR = os.path.dirname(UTILITIES_DIR)
-# try:
-#     from pyenliven.compatiblizemod import main
-# except ModuleNotFoundError:
-if os.path.isfile(os.path.join(REPO_DIR, "pyenliven", "__init__.py")):
-    sys.path.append(REPO_DIR)
+from find_pyenliven import pyenliven
 
 from pyenliven.compatiblizemod import main
 

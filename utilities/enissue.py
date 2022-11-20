@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 '''
 Purpose: View and cache issues in the EnlivenMinetest repo.
 Author: 2020-2021 Jake Gustafson

@@ -1,4 +1,33 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+'''
+generatemod
+___________
+This script is part of <https://github.com/poikilos/EnlivenMinetest>.
+
+Usage:
+generatemod mod [options]
+
+Options:
+--fill      adds only missing files to an existing mod (instead of
+            failing when directory exists).
+
+[alias to]  (do not actually use brackets) If you specify any two
+            options without --, the first will be an alias and the
+            second will be convert_to. The alias options are only for
+            mods that are aliases, as a shortcut to creating a mostly
+            complete mod (other than copyright information and
+            description) with only this script.
+
+Examples:
+generatemod mod_name
+generatemod mod_name --fill
+generatemod mod_name modname:item_name other_modname:convert_to
+generatemod mod_name mobsmod:mob_name other_mobsmod:convert_to
+
+
+'''
+from __future__ import print_function
 import sys
 import os
 import shutil
@@ -17,31 +46,7 @@ def show_error(msg, code=1):
 
 
 def usage():
-    print("Usage:")
-    print(sys.argv[0] + " mod [options]")
-    print("")
-    print("Options:")
-    print(
-        '''
---fill      adds only missing files to an existing mod (instead of
-            failing when directory exists).
-
-[alias to]  (do not actually use brackets) If you specify any two
-            options without --, the first will be an alias and the
-            second will be convert_to. The alias options are only for
-            mods that are aliases, as a shortcut to creating a mostly
-            complete mod (other than copyright information and
-            description) with only this script.
-'''
-    )
-    print("")
-    print("Examples:")
-    print(sys.argv[0] + " mod_name")
-    print(sys.argv[0] + " mod_name --fill")
-    print(sys.argv[0] + " mod_name modname:item_name other_modname:convert_to")
-    print(sys.argv[0] + " mod_name mobsmod:mob_name other_mobsmod:convert_to")
-    print("")
-    print("")
+    print(__doc__)
 
 
 def main():
@@ -170,7 +175,7 @@ def main():
     print("")
     print("")
     print(step0)
-    print("The new mod is the " + thisName + " folder. Remember to:")
+    print("The new mod is tgeneratemod.pyhe " + thisName + " folder. Remember to:")
     ender = "."
     if (toMod is not None) and (len(toMod) > 0):
         ender = ""
