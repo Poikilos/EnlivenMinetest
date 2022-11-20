@@ -1,0 +1,13 @@
+#!/bin/sh
+if [ "x$1" != "x" ]; then
+    LMK_MODE="$1"
+fi
+if [ "x$LMK_MODE" = "x" ]; then
+    echo "Error: (or LMK_MODE in environment). It should be classic, finetest, or trolltest."
+    exit 1
+fi
+if [ ! -d "linux-minetest-kit" ]; then
+    echo "Error: linux-minetest-kit is not a directory in `pwd`. Run get-lmk.sh first."
+    exit 1
+fi
+sudo -u minebest perl mtcompile-program.pl build --$LMK_MODE --server
