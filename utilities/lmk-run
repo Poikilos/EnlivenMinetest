@@ -6,14 +6,23 @@ usage(){
 lmk-run
 -------
 This script is part of <https://github.com/poikilos/EnlivenMinetest>.
+
+Does all of the following
+- Gets and unzips linux-minetest-kit.zip if possible if there is no
+  linux-minetest-kit in the current working directory.
+- Compile libraries if there is no linux-minetest-kit/toolstree.
+- Compile minetest if there is no exe matching the specified options.
+
 Suggested setup for a user in the sudo group:
 '''
 chgrp sudo /opt
+# continue to Further setup
 '''
 
 Suggested setup for minebest user:
 '''
 chgrp minebest /opt
+# continue to Further setup
 '''
 
 Further setup:
@@ -26,6 +35,12 @@ ln -s ~/git/EnlivenMinetest/utilities/fix-lmk-permissions.sh
 '''
 
 Examples:
+lmk-run classic client ~/minetest/worlds/center
+# ^ creates classic client and opens the world ~/minetest/worlds/center
+#   - requires that the game is in linux-minetest-kit/minetest/games
+#     that has the gameid matching the one in the world (same goes for
+#     any of the automatically checked world paths).
+
 lmk-run classic server
 # ^ creates minetestserver
 
@@ -43,6 +58,8 @@ lmk-run finetest client
 
 lmk-run trolltest client
 # ^ creates trolltest
+
+
 
 END
 }
@@ -130,10 +147,51 @@ fi
 if [ ! -f minetest/bin/$EXE_NAME ]; then
     echo "[lmk-run] compiling..."
     $PRE_CMD perl mtcompile-program.pl build --$LMK_MODE $APP_ARG
-    if [ $? -ne 0 ]; then
-        >&2 echo "[lmk-run] Error: '$PRE_CMD perl mtcompile-program.pl build --$LMK_MODE  $APP_ARG' failed in `pwd`."
+    code=$?
+    if [ $code -ne 0 ]; then
+        >&2 echo "[lmk-run] Error: '$PRE_CMD perl mtcompile-program.pl build --$LMK_MODE  $APP_ARG' failed in `pwd` with code $code."
         exit 1
     fi
 else
     echo "[lmk-run] using existing `pwd`/minetest/bin/$EXE_NAME"
 fi
+cd minetest/bin
+if [ $? -ne 0 ]; then
+    PRE_CMD=""
+    >&2 echo "[lmk-run] 'cd minebest/bin' failed in `pwd`."
+fi
+#if "x$APP" = "xserver" ]; then
+echo "* Looking for a test world to copy..."
+if [ "x$SRC_WORLD" = "x" ]; then
+    SRC_WORLD="$3"
+else
+    SRC_WORLD=
+fi
+if [ "x$SRC_WORLD" = "x" ]; then
+    for dir in ~/minetest-220509/worlds/bg190406 /home/owner/bg190406
+    do
+        printf "* checking for \"$dir\"..."
+        if [ -d $dir ]; then
+            SRC_WORLD="$dir"
+            break
+        fi
+    done
+fi
+if [ "x$SRC_WORLD" = "x" ]; then
+    echo "No known test world was found. Try making a small world first, and specify it as the 3rd parameter or set SRC_WORLD in the environment. Note that the gameid in the file must exist."
+    exit 1
+else
+    echo "[lmk-run] found $SRC_WORLD to copy"
+fi
+world_name="`basename $SRC_WORLD`"
+mkdir -p ~/tmp
+dst_world="$HOME/tmp/${world_name}-$EXE_NAME"
+echo "[lmk-run] syncing to $dst_world destructively..."
+rsync -rt --erase $SRC_WORLD/ $dst_world
+if [ $? -ne 0 ]; then
+    >&2 echo "[lmk-run] 'rsync -rt --erase $SRC_WORLD/ $dst_world' failed in `pwd`."
+fi
+echo "[lmk-run] running $EXE_NAME --world $dst_world"
+./$EXE_NAME --world $dst_world
+#else
+#fi
