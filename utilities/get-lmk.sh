@@ -4,7 +4,7 @@ if [ -d "linux-minetest-kit" ]; then
     >&2 echo "    rm -rf '`pwd`/linux-minetest-kit'"
     exit 1
 fi
-cd ~
+# cd ~
 ZIP_NAME=linux-minetest-kit.zip
 REMOTE_ZIP=mtio:/opt/minebest/assemble/prod/linux-minetest-kit.zip
 rsync -tvP $REMOTE_ZIP .
