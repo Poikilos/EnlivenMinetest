@@ -168,56 +168,62 @@ fi
 if [ ! -f minetest/bin/$EXE_NAME ]; then
     if [ -d minetest ]; then
         OLD_MODE=
+        OLD_EXE_NAME=
         if [ -f minetest/bin/finetestserver ]; then
             OLD_MODE=finetest
+            OLD_EXE_NAME=finetestserver
         elif [ -f minetest/bin/finetest ]; then
             OLD_MODE=finetest
+            OLD_EXE_NAME=finetest
         elif [ -f minetest/bin/minetestserver ]; then
             OLD_MODE=minetest
+            OLD_EXE_NAME=minetestserver
         elif [ -f minetest/bin/minetest ]; then
             OLD_MODE=minetest
+            OLD_EXE_NAME=minetest
         elif [ -f minetest/bin/trolltestserver ]; then
             OLD_MODE=trolltest
+            OLD_EXE_NAME=trolltestserver
         elif [ -f minetest/bin/trolltest ]; then
             OLD_MODE=trolltest
+            OLD_EXE_NAME=trolltest
         else
             >&2 echo "[lmk-run] Error: mode couldn't be detected for the old minetest directory, so it will become minetest-. Its bin dir contains: `ls minetest/bin` one of the following was expected: minetest minetestserver finetest finetestserver trolltest trolltestserver"
-
         fi
-        if [ ! -d minetest-$OLD_MODE ]; then
-            mv minetest minetest-$OLD_MODE
+        if [ ! -d minetest-$OLD_EXE_NAME ]; then
+            mv minetest minetest-$OLD_EXE_NAME
         else
-            if [ ! -d minetest-$LMK_MODE/games/bucket_game ]; then
+            if [ ! -d minetest-$EXE_NAME/games/bucket_game ]; then
                 if [ -d minetest/games/bucket_game ]; then
-                    mkdir -p minetest-$LMK_MODE/games/
-                    echo "[lmk-run] mv minetest/games/bucket_game minetest-$LMK_MODE/games/"
-                    mv minetest/games/bucket_game minetest-$LMK_MODE/games/
+                    mkdir -p minetest-$EXE_NAME/games/
+                    echo "[lmk-run] mv minetest/games/bucket_game minetest-$EXE_NAME/games/"
+                    mv minetest/games/bucket_game minetest-$EXE_NAME/games/
                 else
                     echo "[lmk-run] There is no minetest/games/bucket_game to back up."
                 fi
             else
-                echo "[lmk-run] There is already a backup minetest-$LMK_MODE/games/bucket_game"
+                echo "[lmk-run] There is already a backup minetest-$EXE_NAME/games/bucket_game"
             fi
             echo "[lmk-run] removing `pwd`/minetest!"
             rm -rf minetest
         fi
     fi
-    if [ -f minetest-$LMK_MODE/bin/$EXE_NAME ]; then
-        echo "[lmk-run] reusing minetest-$LMK_MODE..."
-        mv minetest-$LMK_MODE minetest
+    if [ -f minetest-$EXE_NAME/bin/$EXE_NAME ]; then
+        echo "[lmk-run] reusing minetest-$EXE_NAME..."
+        mv minetest-$EXE_NAME minetest
     else
-        echo "[lmk-run] there is no file minetest-$LMK_MODE/bin/$EXE_NAME so compiling to minetest/bin..."
+        echo "[lmk-run] there is no file minetest-$EXE_NAME/bin/$EXE_NAME so compiling to minetest/bin..."
         $PRE_CMD perl mtcompile-program.pl build --$LMK_MODE $APP_ARG --safe
-        if [ -f "minetest-$LMK_MODE/bin/$OTHER_EXE_NAME" ]; then
-            echo "[lmk-run] mv minetest-$LMK_MODE/bin/$OTHER_EXE_NAME minetest/bin/"
-            mv "minetest-$LMK_MODE/bin/$OTHER_EXE_NAME" "minetest/bin/"
-        fi
+        # if [ -f "minetest-$EXE_NAME/bin/$OTHER_EXE_NAME" ]; then
+        #     echo "[lmk-run] mv minetest-$EXE_NAME/bin/$OTHER_EXE_NAME minetest/bin/"
+        #     mv "minetest-$EXE_NAME/bin/$OTHER_EXE_NAME" "minetest/bin/"
+        # fi
     fi
     if [ ! -d minetest/games/bucket_game ]; then
-        if [ -d minetest-$LMK_MODE/games/bucket_game ]; then
+        if [ -d minetest-$EXE_NAME/games/bucket_game ]; then
             mkdir -p minetest/games/
-            echo "[lmk-run] rsync -rt minetest-$LMK_MODE/games/bucket_game/ minetest/games/bucket_game"
-            rsync -rt minetest-$LMK_MODE/games/bucket_game/ minetest/games/bucket_game
+            echo "[lmk-run] rsync -rt minetest-$EXE_NAME/games/bucket_game/ minetest/games/bucket_game"
+            rsync -rt minetest-$EXE_NAME/games/bucket_game/ minetest/games/bucket_game
             if [ $? -ne 0 ]; then
                 exit 1
             fi
@@ -274,11 +280,11 @@ dst_world="$LMK_DIR/minetest/worlds/${world_name}-$EXE_NAME"
 echo "[lmk-run] syncing to $dst_world destructively..."
 rsync -rt --delete $SRC_WORLD/ $dst_world
 if [ ! -d "$LMK_DIR/minetest/games/bucket_game" ]; then
-    if [ -d "$LMK_DIR/minetest-$LMK_MODE/games/bucket_game" ]; then
+    if [ -d "$LMK_DIR/minetest-$EXE_NAME/games/bucket_game" ]; then
         mkdir -p $LMK_DIR/minetest/games/
-        # echo "[lmk-run] rsync -rt $LMK_DIR/minetest-$LMK_MODE/games/bucket_game/ minetest/games/bucket_game"
-        echo "[lmk-run] mv $LMK_DIR/minetest-$LMK_MODE/games/bucket_game $LMK_DIR/minetest/games/"
-        mv $LMK_DIR/minetest-$LMK_MODE/games/bucket_game $LMK_DIR/minetest/games/
+        # echo "[lmk-run] rsync -rt $LMK_DIR/minetest-$EXE_NAME/games/bucket_game/ minetest/games/bucket_game"
+        echo "[lmk-run] mv $LMK_DIR/minetest-$EXE_NAME/games/bucket_game $LMK_DIR/minetest/games/"
+        mv $LMK_DIR/minetest-$EXE_NAME/games/bucket_game $LMK_DIR/minetest/games/
         if [ $? -ne 0 ]; then
             exit 1
         fi
