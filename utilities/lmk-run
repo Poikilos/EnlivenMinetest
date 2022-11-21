@@ -149,7 +149,11 @@ if [ ! -f minetest/bin/$EXE_NAME ]; then
     $PRE_CMD perl mtcompile-program.pl build --$LMK_MODE $APP_ARG
     code=$?
     if [ $code -ne 0 ]; then
-        >&2 echo "[lmk-run] Error: '$PRE_CMD perl mtcompile-program.pl build --$LMK_MODE  $APP_ARG' failed in `pwd` with code $code."
+        extra_msg=""
+        if [ -f "minetest/bin/$EXE_NAME" ]; then
+            extra_msg=", but minetest/bin/$EXE_NAME exists, so you can probably run lmk-run again and it will probably run (after syncing to the tmp world as usual)."
+        fi
+        >&2 echo "[lmk-run] Error: '$PRE_CMD perl mtcompile-program.pl build --$LMK_MODE  $APP_ARG' failed in `pwd` with code $code"
         exit 1
     fi
 else
