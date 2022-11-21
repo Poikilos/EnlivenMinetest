@@ -1,13 +1,139 @@
 #!/bin/sh
+usage(){
+    >&2 cat<<END
+
+
+lmk-run
+-------
+This script is part of <https://github.com/poikilos/EnlivenMinetest>.
+Suggested setup for a user in the sudo group:
+'''
+chgrp sudo /opt
+'''
+
+Suggested setup for minebest user:
+'''
+chgrp minebest /opt
+'''
+
+Further setup:
+'''
+chmod g+w /opt
+cd /opt
+ln -s ~/git/EnlivenMinetest/utilities/lmk-run
+ln -s ~/git/EnlivenMinetest/utilities/get-lmk.sh
+ln -s ~/git/EnlivenMinetest/utilities/fix-lmk-permissions.sh
+'''
+
+Examples:
+lmk-run classic server
+# ^ creates minetestserver
+
+lmk-run finetest server
+# ^ creates finetestserver
+
+lmk-run trolltest server
+# ^ creates trolltestserver
+
+lmk-run classic client
+# ^ creates minetest
+
+lmk-run finetest client
+# ^ creates finetest
+
+lmk-run trolltest client
+# ^ creates trolltest
+
+END
+}
+if [ "x$1" = "x--help" ]; then
+    usage
+    exit 0
+fi
+PREV_DIR="`pwd`"
 if [ "x$1" != "x" ]; then
     LMK_MODE="$1"
 fi
 if [ "x$LMK_MODE" = "x" ]; then
-    echo "Error: (or LMK_MODE in environment). It should be classic, finetest, or trolltest."
+    usage
+    >&2 echo "[lmk-run] Error: (or LMK_MODE in environment). It should be classic, finetest, or trolltest."
     exit 1
 fi
+_RAW_APP="$APP"
+EXE_NAME=
+
+if [ "x$LMK_MODE" = "xclassic" ]; then
+    EXE_NAME="minetest"
+elif [ "x$LMK_MODE" = "xfinetest" ]; then
+    EXE_NAME="finetest"
+elif [ "x$LMK_MODE" = "xtrolltest" ]; then
+    EXE_NAME="trolltest"
+fi
+
+if [ "x$2" != "x" ]; then
+    APP="$2"
+    echo "[lmk-run] set APP to $2"
+fi
+
+APP_ARG=
+if [ "x$APP" = "xclient" ]; then
+    APP_ARG="--client"
+elif [ "x$APP" = "xserver" ]; then
+    APP_ARG="--server"
+    EXE_NAME="${EXE_NAME}server"
+else
+    usage
+    echo "[lmk-run] Error: You must specify client or server after mode (APP=$APP, \$2=$2)."
+    exit 1
+fi
+
+echo "[lmk-run] building $EXE_NAME, or running if already exists"
+if [ "x$APP" = "x" ]; then
+    usage
+    >&2 echo "[lmk-run] Error: specify client or server after the mode."
+    exit 1
+fi
+
+
+
 if [ ! -d "linux-minetest-kit" ]; then
-    echo "Error: linux-minetest-kit is not a directory in `pwd`. Run get-lmk.sh first."
+    echo "[lmk-run] Running ./get-lmk.sh since there is no linux-minetest-kit directory in `pwd`..."
+    ./get-lmk.sh
+    code=$?
+    exit $code
+fi
+cd linux-minetest-kit
+if [ $? -ne 0 ]; then
+    >&2 echo "[lmk-run] Error: cd linux-minetest-kit failed in `pwd`. Try running: ./get-lmk.sh"
     exit 1
 fi
-sudo -u minebest perl mtcompile-program.pl build --$LMK_MODE --server
+if [ ! -f "mtcompile-program.pl" ]; then
+    >&2 echo "[lmk-run] Error: missing mtcompile-program.pl in `pwd`"
+    exit 1
+fi
+$PRE_CMD="sudo -u minebest"
+$PRE_CMD ls > /dev/null
+if [ $? -ne 0 ]; then
+    PRE_CMD=""
+    >&2 echo "[lmk-run] Warning: running as $USER since 'sudo -u minebest' failed."
+fi
+if [ ! -d toolstree ]; then
+    $PRE_CMD bash -e mtcompile-libraries.sh build
+    if [ $? -ne 0 ]; then
+        >&2 echo "[lmk-run] Error: '$PRE_CMD bash -e mtcompile-libraries.sh' failed in `pwd`."
+        exit 1
+    fi
+else
+    echo "[lmk-run] using existing toolstree in `pwd`"
+fi
+
+if [ ! -f minetest/bin/$EXE_NAME ]; then
+    echo "[lmk-run] compiling..."
+    $PRE_CMD perl mtcompile-program.pl build --$LMK_MODE $APP_ARG
+    if [ $? -ne 0 ]; then
+        >&2 echo "[lmk-run] Error: '$PRE_CMD perl mtcompile-program.pl build --$LMK_MODE  $APP_ARG' failed in `pwd`."
+        exit 1
+    fi
+else
+    echo "[lmk-run] using existing `pwd`/minetest/bin/$EXE_NAME"
+fi
