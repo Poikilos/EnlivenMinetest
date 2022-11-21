@@ -13,6 +13,21 @@ Does all of the following
 - Compile libraries if there is no linux-minetest-kit/toolstree.
 - Compile minetest if there is no exe matching the specified options.
 
+This script requires that the game is in linux-minetest-kit/minetest/games
+that has the gameid matching the one in the world (same goes for
+any of the automatically checked world paths). However, trying to
+download bucket_game will occur automatically.
+
+Available games in linux-minetest-kit/minetest/games:
+`ls linux-minetest-kit/minetest/games`
+(end of list)
+
+Available worlds in linux-minetest-kit/minetest/worlds:
+`ls linux-minetest-kit/minetest/worlds`
+(end of list)
+
+These lists may change if the script proceeds further if an error has occurred.
+
 Suggested setup for a user in the sudo group:
 '''
 chgrp sudo /opt
@@ -37,9 +52,8 @@ ln -s ~/git/EnlivenMinetest/utilities/fix-lmk-permissions.sh
 Examples:
 lmk-run classic client ~/minetest/worlds/center
 # ^ creates classic client and opens the world ~/minetest/worlds/center
-#   - requires that the game is in linux-minetest-kit/minetest/games
-#     that has the gameid matching the one in the world (same goes for
-#     any of the automatically checked world paths).
+
+
 
 lmk-run classic server
 # ^ creates minetestserver
@@ -79,6 +93,7 @@ fi
 _RAW_APP="$APP"
 EXE_NAME=
 
+OTHER_EXE_NAME=
 if [ "x$LMK_MODE" = "xclassic" ]; then
     EXE_NAME="minetest"
 elif [ "x$LMK_MODE" = "xfinetest" ]; then
@@ -95,8 +110,10 @@ fi
 APP_ARG=
 if [ "x$APP" = "xclient" ]; then
     APP_ARG="--client"
+    OTHER_EXE_NAME="${EXE_NAME}server"
 elif [ "x$APP" = "xserver" ]; then
     APP_ARG="--server"
+    OTHER_EXE_NAME="$EXE_NAME"
     EXE_NAME="${EXE_NAME}server"
 else
     usage
@@ -117,13 +134,17 @@ if [ ! -d "linux-minetest-kit" ]; then
     echo "[lmk-run] Running ./get-lmk.sh since there is no linux-minetest-kit directory in `pwd`..."
     ./get-lmk.sh
     code=$?
-    exit $code
+    if [ $code -ne 0 ]; then
+        echo "[lmk-run] ./get-lmk.sh failed with code $code"
+        exit $code
+    fi
 fi
 cd linux-minetest-kit
 if [ $? -ne 0 ]; then
     >&2 echo "[lmk-run] Error: cd linux-minetest-kit failed in `pwd`. Try running: ./get-lmk.sh"
     exit 1
 fi
+LMK_DIR=`pwd`
 if [ ! -f "mtcompile-program.pl" ]; then
     >&2 echo "[lmk-run] Error: missing mtcompile-program.pl in `pwd`"
     exit 1
@@ -145,25 +166,83 @@ else
 fi
 
 if [ ! -f minetest/bin/$EXE_NAME ]; then
-    echo "[lmk-run] compiling..."
-    $PRE_CMD perl mtcompile-program.pl build --$LMK_MODE $APP_ARG
+    if [ -d minetest ]; then
+        OLD_MODE=
+        if [ -f minetest/bin/finetestserver ]; then
+            OLD_MODE=finetest
+        elif [ -f minetest/bin/finetest ]; then
+            OLD_MODE=finetest
+        elif [ -f minetest/bin/minetestserver ]; then
+            OLD_MODE=minetest
+        elif [ -f minetest/bin/minetest ]; then
+            OLD_MODE=minetest
+        elif [ -f minetest/bin/trolltestserver ]; then
+            OLD_MODE=trolltest
+        elif [ -f minetest/bin/trolltest ]; then
+            OLD_MODE=trolltest
+        else
+            >&2 echo "[lmk-run] Error: mode couldn't be detected for the old minetest directory, so it will become minetest-. Its bin dir contains: `ls minetest/bin` one of the following was expected: minetest minetestserver finetest finetestserver trolltest trolltestserver"
+
+        fi
+        if [ ! -d minetest-$OLD_MODE ]; then
+            mv minetest minetest-$OLD_MODE
+        else
+            if [ ! -d minetest-$LMK_MODE/games/bucket_game ]; then
+                if [ -d minetest/games/bucket_game ]; then
+                    mkdir -p minetest-$LMK_MODE/games/
+                    echo "[lmk-run] mv minetest/games/bucket_game minetest-$LMK_MODE/games/"
+                    mv minetest/games/bucket_game minetest-$LMK_MODE/games/
+                else
+                    echo "[lmk-run] There is no minetest/games/bucket_game to back up."
+                fi
+            else
+                echo "[lmk-run] There is already a backup minetest-$LMK_MODE/games/bucket_game"
+            fi
+            echo "[lmk-run] removing `pwd`/minetest!"
+            rm -rf minetest
+        fi
+    fi
+    if [ -f minetest-$LMK_MODE/bin/$EXE_NAME ]; then
+        echo "[lmk-run] reusing minetest-$LMK_MODE..."
+        mv minetest-$LMK_MODE minetest
+    else
+        echo "[lmk-run] there is no file minetest-$LMK_MODE/bin/$EXE_NAME so compiling to minetest/bin..."
+        $PRE_CMD perl mtcompile-program.pl build --$LMK_MODE $APP_ARG --safe
+        if [ -f "minetest-$LMK_MODE/bin/$OTHER_EXE_NAME" ]; then
+            echo "[lmk-run] mv minetest-$LMK_MODE/bin/$OTHER_EXE_NAME minetest/bin/"
+            mv "minetest-$LMK_MODE/bin/$OTHER_EXE_NAME" "minetest/bin/"
+        fi
+    fi
+    if [ ! -d minetest/games/bucket_game ]; then
+        if [ -d minetest-$LMK_MODE/games/bucket_game ]; then
+            mkdir -p minetest/games/
+            echo "[lmk-run] rsync -rt minetest-$LMK_MODE/games/bucket_game/ minetest/games/bucket_game"
+            rsync -rt minetest-$LMK_MODE/games/bucket_game/ minetest/games/bucket_game
+            if [ $? -ne 0 ]; then
+                exit 1
+            fi
+        fi
+    fi
+    # --safe: Don't delete existing source trees automatically.
+    # --noclean: If --noclean is specified,  this script tries to reuse
+    #     the existing source tree,  if there is one,  and doesn't
+    #     deleted "build" files afterward. The "--git*" and "--debug"
+    #     switches  imply this switch. Aliases: --notidy
+
     code=$?
     if [ $code -ne 0 ]; then
         extra_msg=""
         if [ -f "minetest/bin/$EXE_NAME" ]; then
             extra_msg=", but minetest/bin/$EXE_NAME exists, so you can probably run lmk-run again and it will probably run (after syncing to the tmp world as usual)."
         fi
-        >&2 echo "[lmk-run] Error: '$PRE_CMD perl mtcompile-program.pl build --$LMK_MODE  $APP_ARG' failed in `pwd` with code $code"
+        >&2 echo "[lmk-run] Error: '$PRE_CMD perl mtcompile-program.pl build --$LMK_MODE $APP_ARG --safe' failed in `pwd` with code $code"
         exit 1
     fi
 else
     echo "[lmk-run] using existing `pwd`/minetest/bin/$EXE_NAME"
 fi
-cd minetest/bin
-if [ $? -ne 0 ]; then
-    PRE_CMD=""
-    >&2 echo "[lmk-run] 'cd minebest/bin' failed in `pwd`."
-fi
+LMK_DIR="`pwd`"
+
 #if "x$APP" = "xserver" ]; then
 echo "* Looking for a test world to copy..."
 if [ "x$SRC_WORLD" = "x" ]; then
@@ -182,6 +261,7 @@ if [ "x$SRC_WORLD" = "x" ]; then
     done
 fi
 if [ "x$SRC_WORLD" = "x" ]; then
+    usage
     echo "No known test world was found. Try making a small world first, and specify it as the 3rd parameter or set SRC_WORLD in the environment. Note that the gameid in the file must exist."
     exit 1
 else
@@ -189,11 +269,57 @@ else
 fi
 world_name="`basename $SRC_WORLD`"
 mkdir -p ~/tmp
-dst_world="$HOME/tmp/${world_name}-$EXE_NAME"
+# dst_world="$HOME/tmp/${world_name}-$EXE_NAME"
+dst_world="$LMK_DIR/minetest/worlds/${world_name}-$EXE_NAME"
 echo "[lmk-run] syncing to $dst_world destructively..."
-rsync -rt --erase $SRC_WORLD/ $dst_world
+rsync -rt --delete $SRC_WORLD/ $dst_world
+if [ ! -d "$LMK_DIR/minetest/games/bucket_game" ]; then
+    if [ -d "$LMK_DIR/minetest-$LMK_MODE/games/bucket_game" ]; then
+        mkdir -p $LMK_DIR/minetest/games/
+        # echo "[lmk-run] rsync -rt $LMK_DIR/minetest-$LMK_MODE/games/bucket_game/ minetest/games/bucket_game"
+        echo "[lmk-run] mv $LMK_DIR/minetest-$LMK_MODE/games/bucket_game $LMK_DIR/minetest/games/"
+        mv $LMK_DIR/minetest-$LMK_MODE/games/bucket_game $LMK_DIR/minetest/games/
+        if [ $? -ne 0 ]; then
+            exit 1
+        fi
+    else
+        echo "[lmk-run] Downloading bucket_game as linux-minetest-kit/minetest/games/bucket_game"
+        cd "$LMK_DIR"
+        cd minetest/games
+        if [ $? -ne 0 ]; then
+            >&2 echo "[lmk-run] 'cd minetest/games' failed in `pwd`."
+            exit 1
+        fi
+        rsync -rt mtio:/opt/minebest/assemble/prod/bucket_game.zip .
+        if [ $? -ne 0 ]; then
+            >&2 echo "[lmk-run] 'rsync -rt mtio:/opt/minebest/assemble/prod/bucket_game.zip .' failed in `pwd`."
+            # TODO: try wget
+            exit 1
+        fi
+        unzip bucket_game.zip
+        if [ $? -ne 0 ]; then
+            >&2 echo "[lmk-run] Error: 'unzip bucket_game.zip' failed in `pwd`"
+            exit 1
+        fi
+        if [ ! -d "bucket_game" ]; then
+            >&2 echo "[lmk-run] Error: 'unzip bucket_game.zip' didn't produce bucket_game in `pwd`"
+            exit 1
+        fi
+    fi
+fi
+
+cd "$LMK_DIR"
+cd minetest/bin
 if [ $? -ne 0 ]; then
-    >&2 echo "[lmk-run] 'rsync -rt --erase $SRC_WORLD/ $dst_world' failed in `pwd`."
+    PRE_CMD=""
+    >&2 echo "[lmk-run] 'cd minebest/bin' failed in `pwd`."
+fi
+
+if [ $? -ne 0 ]; then
+    >&2 echo "[lmk-run] 'rsync -rt --delete $SRC_WORLD/ $dst_world' failed in `pwd`."
+fi
+if [ ! -d "$dst_world" ]; then
+    >&2 echo "[lmk-run] Error: '$dst_world' doesn't exist."
 fi
 echo "[lmk-run] running $EXE_NAME --world $dst_world"
 ./$EXE_NAME --world $dst_world
