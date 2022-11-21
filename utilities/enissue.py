@@ -48,18 +48,16 @@ import os
 import platform
 import copy
 from datetime import datetime, timedelta
-python_mr = sys.version_info.major
-try:
+if sys.version_info.major >= 3:
     import urllib.request
     request = urllib.request
-except ImportError:
+else:
     # python2
-    # python_mr = 2
-    print("* detected Python " + str(python_mr))
+    print("* detected Python " + str(sys.version_info.major))
     import urllib2 as urllib
     request = urllib
 
-try:
+if sys.version_info.major >= 3:
     from urllib.parse import urlparse
     # from urllib.parse import quote_plus
     from urllib.parse import urlencode
@@ -73,7 +71,7 @@ try:
                          " requests package for python3 such as via:\n"
                          "    sudo apt-get install python3-requests")
         sys.stderr.flush()
-except ImportError:
+else:
     # Python 2
     # See <https://docs.python.org/2/howto/urllib2.html>
     from urlparse import urlparse
