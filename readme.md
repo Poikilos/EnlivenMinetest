@@ -137,6 +137,40 @@ or I'm uncredited for unspecified reasons :), such as:
 - https://notabug.org/TenPlus1/pie/commits/master/textures/pie_inv.png
   - fixes https://notabug.org/TenPlus1/pie/issues/1
 
+In some cases I may use maintained versions of unmaintained mods or ones where I have differences of direction such as:
+- https://github.com/Poikilos/slimenodes
+- https://github.com/Poikilos/prestibags
+- https://github.com/Poikilos/mobs_sky
+- https://github.com/Poikilos/metatools
+- https://github.com/Poikilos/orichalcum
+- https://github.com/Poikilos/throwing
+- https://github.com/Poikilos/throwing_arrows
+- https://github.com/Poikilos/titanium
+- https://github.com/Poikilos/vines (still not working for me, forked or not, on any version of Minetest)
+- https://github.com/Poikilos/compassgps
+- https://github.com/Poikilos/whinny (mostly for Bucket_Game)
+- https://github.com/Poikilos/travelnet -- see:
+  - https://github.com/Sokomine/travelnet/pull/45
+  - https://github.com/Sokomine/travelnet/pull/46
+  - https://github.com/Sokomine/travelnet/pull/47
+- https://github.com/Poikilos/birthstones
+- https://github.com/Poikilos/xtraarmor
+- https://github.com/Poikilos/tsm_pyramids (mostly for Bucket_Game)
+- https://github.com/Poikilos/ts_furniture
+- https://github.com/Poikilos/filter (@MoNTE48 proposed it to comission me, but though it was exactly to his specifications it had ~547 lines instead of 500 so he rejected it :clown_face: )
+- https://github.com/Poikilos/loot
+- https://github.com/Poikilos/nether (provides nodes separately from the realm--See  [Use animalmaterials and basic_materials for Minetest mods: low-level dependencies for better architecture](https://poikilos.org/2022/05/04/use-animalmaterials-and-basic_materials-for-minetest-mods-low-level-dependencies-for-better-architecture/))
+- https://github.com/Poikilos/hbsprint (WIP)
+- https://github.com/Poikilos/bushes_soil (for multiplayer balancing)
+- https://github.com/Poikilos/emeralds (mostly for Bucket_Game)
+- https://github.com/Poikilos/camera (WIP)
+- https://github.com/Poikilos/homedecor_ua (for schools, so teachers don't get in trouble for game content :) )
+- and several improvements in [Bucket_Game-branches](Bucket_Game-branches) folder
+
+Or new mods, such as:
+- https://github.com/Poikilos/trmp_minetest_game
+- and several mods that assist with transition between mods in the 
+
 You can apply whatever patches here you want (if applicable), but they
 are already in ENLIVEN (at least if you build it, otherwise the old
 installer may not have the latest changes). Most of the patches are
