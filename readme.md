@@ -28,6 +28,9 @@ The [EnlivenMinetest project](https://github.com/Poikilos/EnlivenMinetest)
 maintaining (such as developer scripts) the ENLIVEN and Minetest
 (engine) itself.
 
+The official game server (world) is called **center** (or "Center of
+the Sun"). The address and port for that and other worlds are listed at
+[minetest.io](https://minetest.io).
 
 To better understand what the issue board covers, see
 [Project Status](#project-status) below.
