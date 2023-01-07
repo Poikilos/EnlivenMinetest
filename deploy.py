@@ -43,6 +43,10 @@ def main():
     elif "USERPROFILE" in os.environ:
         profile_path = os.environ["USERPROFILE"]
     else:
+        raise ValueError(
+            "HOME and USERPROFILE aren't set. This should never happen."
+        )
+        '''
         try_path = "C:\\Users\\jgustafson"
         if not os.path.isdir(try_path):
             try_path = "C:\\Users\\Owner"
@@ -50,13 +54,20 @@ def main():
         echo0("WARNING: no HOME or USERPROFILE found, reverting to '" +
               try_path + "'")
         profile_path = try_path
+        '''
     # TODO: Make a settings file for values in the next region.
-    # region user settings
+    #   region user settings
+
     deploy_path = "C:\\Games\\ENLIVEN-deploy"
+    '''
     try_path = "C:\\Games\\Minetest"
-    if (not os.path.isdir(deploy_path)) and os.path.isdir(try_path):
-        deploy_path = try_path
-    installer_deploy_path = path_join_all([profile_path, "ownCloud", "www",
+    if (not os.path.isdir(deploy_path)):
+        if os.path.isdir(try_path):
+            deploy_path = try_path
+        # else make the default one further down
+    '''
+    # ^ The path must match the one in projects/setup-ENLIVEN-win64.iss
+    installer_deploy_path = path_join_all([profile_path, "Nextcloud", "www",
                                           "expertmultimedia", "downloads"])
     installer_name = "install-ENLIVEN.exe"
     # endregion user settings
@@ -74,6 +85,11 @@ def main():
     #     print(".".join([str (i) for i in numbers]))
 
     if not os.path.isdir(deploy_path):
+        if platform.system() != "Windows":
+            raise RuntimeError(
+                "A proper tmp deploy path for {} is not defined."
+                "".format(platform.system())
+            )
         os.makedirs(deploy_path)
     games_path = os.path.join(deploy_path, "games")
     minetest_game_path = os.path.join(games_path, "minetest_game")
