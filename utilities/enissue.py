@@ -703,8 +703,8 @@ class Repo:
             self.api_id = "Gitea"
             if "github.com" in repo_url.lower():
                 echo0("WARNING: assuming Gitea but URL has github.com.")
-            echo0("  * assuming API is {} for {}"
-                  "".format(self.api_id, ))
+            echo0("  * assuming API is {} due to non-GitHub URL {}"
+                  "".format(self.api_id, repo_url))
         if self.api_id is None:
             raise RuntimeError("api_id is not set")
         api_meta = apis.get(self.api_id)
