@@ -3,10 +3,10 @@
 '''
 Purpose: View and cache issues in the EnlivenMinetest repo.
 Author: 2020-2021 Jake Gustafson
-License: See license file at https://github.com/poikilos/EnlivenMinetest
+License: See license file at https://github.com/Poikilos/EnlivenMinetest
 
 This script caches issues (To
-~/.cache/enissue/poikilos/EnlivenMinetest/issues
+~/.cache/enissue/Poikilos/EnlivenMinetest/issues
 by default).
 
 Known issues:
@@ -96,7 +96,7 @@ def echo0(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-# https://api.github.com/repos/poikilos/EnlivenMinetest/issues/475/timeline
+# https://api.github.com/repos/Poikilos/EnlivenMinetest/issues/475/timeline
 
 verbose = False
 
@@ -109,13 +109,13 @@ for argI in range(1, len(sys.argv)):
             verbose = True
 
 default_options = {
-    # 'repo_url': "https://api.github.com/repos/poikilos/EnlivenMinetest",
-    'repo_url': "https://github.com/poikilos/EnlivenMinetest",
+    # 'repo_url': "https://api.github.com/repos/Poikilos/EnlivenMinetest",
+    'repo_url': "https://github.com/Poikilos/EnlivenMinetest",
 }
 
 sites_users_repos_meta = {
     'https://api.github.com': {
-        'poikilos': {
+        'Poikilos': {
             'EnlivenMinetest': {
                 'repository_id': "80873867"
             }
@@ -638,7 +638,7 @@ class Repo:
                 numbered json files (and numbered folders containing
                 timeline.json or other connected data) for issues will
                 appear in
-                "~/.cache/enissue/poikilos/EnlivenMinetest/issues". To
+                "~/.cache/enissue/Poikilos/EnlivenMinetest/issues". To
                 set it later, use the setCachesPath method.
                 This is the default behavior, and  the default is
                 os.path.join(userprofile, ".cache").
@@ -1333,22 +1333,22 @@ class Repo:
         cache directory specified in options['caches_path'] and further
         narrowed down to self.c_repo_path then narrowed down using the
         URL. For example,
-        https://api.github.com/repos/poikilos/EnlivenMinetest/issues?q=page:1
+        https://api.github.com/repos/Poikilos/EnlivenMinetest/issues?q=page:1
 
         should become something like:
-        ~/.cache/enissue/poikilos/EnlivenMinetest/
+        ~/.cache/enissue/Poikilos/EnlivenMinetest/
         which may contain files like "issues_page=1.json"
         and
-        ~/.cache/enissue/poikilos/EnlivenMinetest/
+        ~/.cache/enissue/Poikilos/EnlivenMinetest/
 
         ...unless options['single_path'] is set: then there will be no
         automatically-created subdirectories (except for the usual
         "issues" and other directories below that one described below).
 
-        https://api.github.com/repos/poikilos/EnlivenMinetest/issues/515/timeline
+        https://api.github.com/repos/Poikilos/EnlivenMinetest/issues/515/timeline
 
         The reactions to a timeline event are from a URL such as:
-        https://api.github.com/repos/poikilos/EnlivenMinetest/issues/comments/968357490/reactions
+        https://api.github.com/repos/Poikilos/EnlivenMinetest/issues/comments/968357490/reactions
 
         This method uses the following options from self.options:
         token -- If set, then the header gets a new line like:
@@ -1639,7 +1639,7 @@ class Repo:
             evts_data_s = decode_safe(evts_res.read())
             evts_data = json.loads(evts_data_s)
             # Example:
-            # <https://api.github.com/repos/poikilos/EnlivenMinetest/
+            # <https://api.github.com/repos/Poikilos/EnlivenMinetest/
             # issues/202/events>
         '''
         this_tmln_json_url = issue_data.get('timeline_url')
@@ -1656,7 +1656,7 @@ class Repo:
                 msg = ("Accessing the timeline URL failed: {}"
                        "".format(err.get('reason')))
             # Example:
-            # <https://api.github.com/repos/poikilos/EnlivenMinetest/
+            # <https://api.github.com/repos/Poikilos/EnlivenMinetest/
             # issues/202/timeline>
             #
             data = tmln_data
@@ -1750,7 +1750,7 @@ class Repo:
                 # elif (event == "closed") or (event == "reopened"):
                 elif event == "unlabeled":
                     # Example:
-                    # <https://api.github.com/repos/poikilos/
+                    # <https://api.github.com/repos/Poikilos/
                     # EnlivenMinetest/issues/448/timeline>
                     label = evt.get('label')
                     if label is not None:
@@ -1775,7 +1775,7 @@ class Repo:
             if reactions_url is not None:
                 reac_data = None
                 debug(p+"  reactions_url: {}".format(reactions_url))
-                # Example: <https://api.github.com/repos/poikilos/
+                # Example: <https://api.github.com/repos/Poikilos/
                 #   EnlivenMinetest/
                 #   issues/comments/968357490/reactions>
                 reac_data, err = self.getCachedJsonDict(
@@ -2398,7 +2398,7 @@ def main(custom_args=None):
             # print(label_s)
             # Each item in repo.label_metas is formatted like:
             # {'id': 1285230160, 'node_id': 'MDU6TGFiZWwxMjg1MjMwMTYw',
-            # 'url': 'https://api.github.com/repos/poikilos/
+            # 'url': 'https://api.github.com/repos/Poikilos/
             # EnlivenMinetest/labels/
             # 2016-2018%20unconfirmed%20on%20minetest.org',
             # 'name': '2016-2018 unconfirmed on minetest.org',
