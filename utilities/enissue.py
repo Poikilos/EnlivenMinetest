@@ -1016,8 +1016,8 @@ class Repo:
         c_issues_name = self.c_issues_name_fmt.format(p=this_page,
                                                       q=and_query_part)
 
-        # print("c_issues_name: {}".format(c_issues_name))
-        # print("query_part: {}".format(query_part))
+        # echo0("c_issues_name: {}".format(c_issues_name))
+        # echo0("query_part: {}".format(query_part))
         if self.c_repo_path is None:
             raise RuntimeError("self.c_repo_path must not be None."
                                " The __init__ method should call"
@@ -1103,11 +1103,11 @@ class Repo:
                 expires_s = "never_expire"
             if (refresh is not True) and (is_fresh or never_expire):
                 if not quiet:
-                    print(p+"Loading cache: \"{}\"".format(c_path))
+                    echo0(p+"Loading cache: \"{}\"".format(c_path))
                 debug(p+"Cache time limit: {}".format(max_cache_delta))
                 debug(p+"  for URL: {}".format(url))
                 if not quiet:
-                    print(p+"Cache expires: {}".format(expires_s))
+                    echo0(p+"Cache expires: {}".format(expires_s))
                 with open(c_path) as json_file:
                     result = json.load(json_file)
                 max_issue = None
@@ -1151,16 +1151,16 @@ class Repo:
             else:
                 if refresh is True:
                     if not quiet:
-                        print(p+"Refreshing...".format(max_cache_delta))
+                        echo0(p+"Refreshing...".format(max_cache_delta))
                 else:
                     if not quiet:
-                        print(p+"Cache time limit: {}".format(max_cache_delta))
-                        print(p+"The cache has expired: \"{}\"".format(
+                        echo0(p+"Cache time limit: {}".format(max_cache_delta))
+                        echo0(p+"The cache has expired: \"{}\"".format(
                             c_path
                         ))
         else:
             if not quiet:
-                print(p+"There is no cache for \"{}\"".format(
+                echo0(p+"There is no cache for \"{}\"".format(
                     c_path
                 ))
 
@@ -1211,7 +1211,7 @@ class Repo:
         if not os.path.isdir(self.c_repo_path):
             os.makedirs(self.c_repo_path)
         # if not quiet:
-        #     print(p+"Saving issues cache: {}".format(c_path))
+        #     echo0(p+"Saving issues cache: {}".format(c_path))
         # with open(c_path, "w") as outs:
         #     outs.write(res_text)
         result = json.loads(res_text)
@@ -2095,7 +2095,7 @@ def main(custom_args=None):
             parent = modes[arg].get('parent')
             if parent is not None:
                 if mode is None:
-                    print("* setting mode to {} for {}"
+                    echo0("* setting mode to {} for {}"
                           "".format(parent, mode))
                     mode = parent
                 # else the mode is already set explicitly. Example:
@@ -2157,10 +2157,10 @@ def main(custom_args=None):
                         search_terms.append(arg)
                         isValue = True
                     elif arg == "find":
-                        # print("* adding criteria: {}".format(arg))
+                        # echo0("* adding criteria: {}".format(arg))
                         mode = "list"
                     elif (arg == "AND"):
-                        # print("* adding criteria: {}".format(arg))
+                        # echo0("* adding criteria: {}".format(arg))
                         if len(search_terms) < 1:
                             usage()
                             echo0("You can only specify \"AND\" after"
@@ -2237,12 +2237,12 @@ def main(custom_args=None):
                   " or query criteria, not both.")
             return 4
 
-    print("")
+    echo0("")
     if caches_path is not None:
         repo.setCachesPath(caches_path)
         debug("The cache is now at {}"
               "".format(repo.c_repo_path))
-    # print("Loading...")
+    # echo0("Loading...")
 
     # TODO: get labels another way, and make this conditional:
     # if mode == "list":
@@ -2254,7 +2254,7 @@ def main(custom_args=None):
         # if repo.default_labels_query is not None:
         #     query = copy.deepcopy(repo.default_labels_query)
         # if options.get('page') is None
-        # print("* query: {}".format(query))
+        # echo0("* query: {}".format(query))
         results, msg = repo.load_labels(
             options,
             # query=query,
@@ -2309,7 +2309,7 @@ def main(custom_args=None):
         dstRepo = Repo({
             'repo_url': dstRepoUrl,
         })
-        # print("* rewriting Gitea issue {}...".format(issue_no))
+        # echo0("* rewriting Gitea issue {}...".format(issue_no))
         return 5  # TODO: Change based on return of the method.
 
     if msg is not None:
@@ -2319,7 +2319,7 @@ def main(custom_args=None):
         else:
             return 6
     total_count = 0
-    print()
+    echo0()
     # ^ This blank line goes after "@ Cache" messages and before
     #   the list items or other output.
     if mode == "labels":
@@ -2413,11 +2413,11 @@ def main(custom_args=None):
             next_page = 2
             if repo.page is not None:
                 next_page = repo.page + 1
-            print("    ./" + me + " labels page " + str(next_page))
-            print("to see labels on additional pages.")
+            echo0("    ./" + me + " labels page " + str(next_page))
+            echo0("to see labels on additional pages.")
 
     elif mode == "list":
-        print()
+        echo0()
         if len(match_all_labels) > 0:
             if total_count >= repo.page_size:
                 print("{} found but only {} searched, which is the"
@@ -2426,15 +2426,15 @@ def main(custom_args=None):
                 next_page = 2
                 if repo.page is not None:
                     next_page = repo.page + 1
-                print("    ./" + me + " " + " ".join(match_all_labels)
+                echo0("    ./" + me + " " + " ".join(match_all_labels)
                       + " page " + str(next_page))
-                print("to see additional pages.")
+                echo0("to see additional pages.")
 
             else:
                 pageMsg = "."
                 if repo.page is not None:
                     pageMsg = " (There are no more pages)."
-                print("{} issue(s) matched {}{}".format(
+                echo0("{} issue(s) matched {}{}".format(
                     match['count'],
                     " + ".join("'{}'".format(s) for s in match_all_labels),
                     pageMsg,
@@ -2442,36 +2442,36 @@ def main(custom_args=None):
 
         else:
             if repo.page is not None:
-                print("{} issue(s) are showing for page"
+                echo0("{} issue(s) are showing for page"
                       " {}.".format(match['count'], repo.page))
             else:
-                print("{} issue(s) are showing.".format(match['count']))
+                echo0("{} issue(s) are showing.".format(match['count']))
             if total_count >= repo.page_size:
-                print("That is the maximum number per page. Type")
+                echo0("That is the maximum number per page. Type")
                 next_page = 2
                 if repo.page is not None:
                     next_page = repo.page + 1
-                print("    ./" + me + " page " + str(next_page))
-                print("to see additional pages.")
+                echo0("    ./" + me + " page " + str(next_page))
+                echo0("to see additional pages.")
 
         if match['count'] > 0:
             # Note that if a label and issue number are both provided,
             # the mode is still "list".
             if issue_no is not None:
-                print()
-                print()
+                echo0()
+                echo0()
                 print("Warning: The issue number was ignored since you"
                       " used an option that lists multiple issues.")
             else:
-                print()
-                print()
-                print("To view details of one of these issues, type")
-                print("    ./" + me)
+                echo0()
+                echo0()
+                echo0("To view details of one of these issues, type")
+                echo0("    ./" + me)
                 # print("    {}".format(custom_args[0]))
                 # ^ Doesn't help: changes to full path including $PATH
-                print("followed by a number.")
+                echo0("followed by a number.")
         elif total_count >= repo.page_size:
-            print("* There were {} matches by the end of the page so"
+            echo0("* There were {} matches by the end of the page so"
                   " page {} will appear automatically..."
                   "".format(match['count'], next_page))
             new_args = []
@@ -2490,11 +2490,11 @@ def main(custom_args=None):
             debug("* constructed new_args {} from {}"
                   "".format(new_args, custom_args))
             ret = main(custom_args=new_args)
-            print("")
+            echo0("")
             return ret
     else:
         debug("There is no summary output due to mode={}".format(mode))
-    print("")
+    echo0("")
     return 0
 
 
