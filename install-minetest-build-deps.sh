@@ -2,6 +2,18 @@
 # Do not use sudo, in case sudo is not installed (such as in some
 # default installations including the dyne/devuan:chimaera docker image
 # on docker hub.
+me=`basename $0`
+usage(){
+    cat <<END
+Usage:
+$0 [redis] [postgres] [leveldb]
+
+Examples:
+sudo ./$me
+sudo ./$me leveldb
+
+END
+}
 customExit(){
     >&2 echo "Error:"
     echo "$1"
@@ -26,6 +38,9 @@ do
     elif [ "$arg" = "leveldb" ]; then enable_leveldb="true"
     fi
 done
+usage
+echo
+echo "Current Options:"
 echo "enable_postgres:$enable_postgres"
 echo "enable_redis:$enable_redis"
 echo "enable_leveldb:$enable_leveldb"
