@@ -1,0 +1,19 @@
+#!/bin/bash
+rsync -rt --info=progress2 mtio:/opt/minebest/ ~/linux-minetest-kit-rsync
+code=$?
+if [ $code -eq 0 ]; then
+    echo "Updating ~/linux-minetest-kit-rsync...OK"
+else
+    echo "Updating ~/linux-minetest-kit-rsync...FAILED"
+fi
+cd ~/linux-minetest-kit-rsync
+cat <<END
+
+Next do:
+
+cd ~/linux-minetest-kit-rsync/mtkit
+./mtcompile-libraries.sh
+perl mtcompile-program --build --finetest --client
+cd ~/linux-minetest-kit-rsync/mtkit/minetest/bin
+nopackage install finetest --version rsync --caption "Finetest (rsync)"
+END
