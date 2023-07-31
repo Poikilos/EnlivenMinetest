@@ -20,7 +20,6 @@ for chunk_col in range(10):
         #obj = bpy.data.objects["Cube"]
         obj = bpy.context.object
 
-
         #select vertex
         obj = bpy.context.active_object
         bpy.ops.object.mode_set(mode = 'EDIT')
