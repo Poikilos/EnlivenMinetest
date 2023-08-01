@@ -1,0 +1,468 @@
+#!/usr/bin/env python
+"""
+Usage:
+deploy-minetest-kit <project name> [--from <built dir>] [options]
+
+The available project names are:
+classic (or final) to install ~/minetest-rsync,
+finetest (or fine) to install ~/finetest-rsync
+    (for the game that ripped off Multicraft.org's name), or
+trolltest (or troll) to install ~/trolltest-rsync (based on MT5).
+
+Options:
+--from <built dir>    Install from this directory. Defaults to
+                      "$HOME/linux-minetest-kit-rsync/mtkit/minetest".
+--server              Require a binary ending with "server" to be
+                      present in built dir. Defaults to False.
+--client              Require a binary ending with "server" to be
+                      present in built dir. Defaults to True, but False
+                      if --server is used without --client.
+"""
+from __future__ import print_function
+import sys
+import platform
+import os
+import shutil
+import tempfile
+import stat
+
+if platform.system() == "Windows":
+    HOME = os.environ['USERPROFILE']
+    SHORTCUTS_DIR = os.path.join(HOME, "Desktop")
+elif platform.system() == "Darwin":
+    HOME = os.environ['HOME']
+    SHORTCUTS_DIR = os.path.join(HOME, "Desktop")
+else:
+    HOME = os.environ['HOME']
+    SHORTCUTS_DIR = os.path.join(HOME, ".local", "share", "applications")
+
+if sys.version_info.major < 3:
+    FileNotFoundError = IOError
+    ModuleNotFoundError = ImportError
+
+
+INSTALL_SRC = os.path.join(HOME, "linux-minetest-kit-rsync", "mtkit", "minetest")
+VERSION = "rsync"
+
+mode_of_path = {
+    os.path.join("bin", "finetest"): {
+        'name': "finetest",
+        'appender': "",
+        'executable': "finetest",
+    },
+    os.path.join("bin", "finetestserver"): {
+        'name': "finetest",
+        'appender': "server",
+        'executable': "finetestserver",
+    },
+    # indeterminate if bin/minetest: same exe for classic & trolltest
+}
+
+KEYWORDS = ("sandbox;world;mining;crafting;blocks;nodes;multiplayer;"
+            "roleplaying;minetest;")
+
+project_metas = {
+    'classic': {
+        'name_fmt': "Final Minetest ({})",
+        'GenericName': "Final Minetest",
+        'exe_relpath': os.path.join("bin", "minetest"),
+        'platform_icon_relpath': {
+            'Linux': os.path.join("misc", "minetest.svg"),
+            'Darwin': os.path.join("misc", "minetest-icon.icns"),
+            'Windows': os.path.join("misc", "minetest-icon-24x24.png"),
+        },
+        'shortcut_relpath': os.path.join("misc", "net.minetest.minetest.desktop"),
+        'shortcut_name_noext': "org.minetest.minetest",
+    },
+    'finetest': {
+        'name_fmt': "Finetest ({})",
+        'GenericName': "Finetest",
+        'exe_relpath': os.path.join("bin", "finetest"),
+        'platform_icon_relpath': {
+            'Linux': os.path.join("misc", "multicraft-xorg-icon-128.png"),
+            'Darwin': os.path.join("misc", "minetest-icon.icns"),
+            'Windows': os.path.join("misc", "multicraft-xorg-icon-128.png"),
+        },
+        'shortcut_relpath': os.path.join("misc", "net.minetest.minetest.desktop"),
+        'shortcut_name_noext': "org.minetest.finetest",
+    },
+    'trolltest': {
+        'name_fmt': "Trolltest (minetest.org {})",
+        'GenericName': "Trolltest",
+        'platform_icon_relpath': {
+            'Linux': os.path.join("misc", "minetest.svg"),
+            'Darwin': os.path.join("misc", "minetest-icon.icns"),
+            'Windows': os.path.join("misc", "minetest-icon-24x24.png"),
+        },
+        'shortcut_relpath': os.path.join("misc", "net.minetest.minetest.desktop"),
+        'shortcut_name_noext': "org.minetest.trolltest",
+    },
+}
+
+
+def write0(*args):
+    sys.stderr.write(*args)
+    sys.stderr.flush()
+
+def echo0(*args):
+    print(*args, file=sys.stderr)
+
+
+def usage():
+    echo0(__doc__)
+
+
+def main():
+    appenders = None
+    # project_info = detect_project_info(INSTALL_SRC)
+    key_arg = None
+    install_from = None
+    if len(sys.argv) < 2:
+        usage()
+        # if project_info is None:
+        echo0("Error: You must specify one of the names above.")
+        return 1
+        # TODO: maybe detect it:
+        # else:
+        #     echo0("using detected project: {}".format(project_info))
+    elif len(sys.argv) == 2:
+        pass  # 1st arg (arg [1]) is always handled further down
+    else:
+        for argi in range(2, len(sys.argv)):
+            arg = sys.argv[argi]
+            if key_arg is not None:
+                if arg.startswith("--"):
+                    usage()
+                    echo0("Error: {} must be followed by a value but got {}."
+                          "".format(key_arg, arg))
+                    return 1
+                if key_arg == "--from":
+                    install_from = arg
+                else:
+                    usage()
+                    echo0("Error: unknown argument {}".format(key_arg))
+                    return 1
+            elif arg == "--server":
+                if appenders is None:
+                    appenders = ["server"]
+                else:
+                    appenders.append("server")
+            elif arg == "--client":
+                if appenders is None:
+                    appenders = [""]
+                else:
+                    appenders.append("")
+            elif arg == "--from":
+                key_arg = arg
+            else:
+                usage()
+                echo0('Error: The 2nd argument must be "server" or left out')
+                return 1
+    if key_arg is not None:
+        usage()
+        echo0("Error: {} must be followed by a value."
+              "".format(key_arg))
+        return 1
+    if appenders is None:
+        appenders = [""]  # Always require at least the plain exe name.
+    if install_from is None:
+        install_from = INSTALL_SRC
+    project_name = sys.argv[1]
+    results = install_minetest(
+        project_name,
+        install_from,
+        appenders=appenders,
+    )
+    return 0
+
+
+def install_minetest(project_name, src, dst=None, versioned_dirname=None,
+    appenders=[""]):
+    """Install Minetest & generate a shortcut based on the destination.
+
+    The metadata written to shortcut must be the installed metadata!
+    - except the shortcut path itself:
+      - shortcut_src generated below based on OS given relative path
+      - shortcut_dst generated based on OS and shortcut_name_noext
+
+    Args:
+        project_name (string): Must be classic, finetest, or trolltest.
+        src (string): The location of the minetest install source to
+            copy.
+        dst (Optional[string]): Install here. If None, it will become
+            the default. Defaults to versioned_dirname under C:\games on
+            Windows, otherwise under HOME.
+        versioned_dirname (Optional[string]): Set the install directory
+            name (ignored if dst is set). If None, it will become the
+            default. Defaults to project_name + "-" + VERSION (such as
+            minetest-rsync).
+        appenders (list): Install client if [""],  or server if
+            ["server"]. Include both to require that both were built.
+
+    Returns:
+        dict: "destination" is where it was installed if at all. See
+            "warning" in case there was something incorrect about the
+            install.
+    """
+    arg = project_name
+    project_name = arg_to_mode(arg)
+    if project_name is None:
+        usage()
+        echo0("{} is not a valid project name.".format(arg))
+        return 1
+    src_files = expected_src_files(src, project_name, appenders)
+    if src_files is None:
+        usage()
+        raise NotImplementedError(
+            "There are no source files for {}"
+            "".format(project_name)
+        )
+        return 1
+
+    missing_files = []
+    for src_file in src_files:
+        if not os.path.isfile(src_file):
+            missing_files.append(src_file)
+
+    if len(missing_files) > 0:
+        echo0("Error: The following files are required to be compiled"
+              " {} before install but are not present: {}"
+              "".format(project_name, missing_files))
+        return 1
+
+    versioned_dirname = project_name + "-" + VERSION
+    if dst is None:
+        if platform.system() == "Windows":
+            GAMES = "C:\\games"
+            if not os.path.isdir(GAMES):
+                os.mkdir(GAMES)
+            dst = os.path.join(GAMES, versioned_dirname)
+        else:
+            dst = os.path.join(HOME, versioned_dirname)
+    warning = None
+    if not os.path.isdir(dst):
+        write0('Installing {} to "{}"...'.format(project_name, dst))
+        shutil.copytree(src, dst)
+        echo0("Done")
+        result_path = dst
+    else:
+        # Leave result_path as None
+        warning = 'Skipping installed "{}".'.format(dst)
+        echo0('WARNING: {}'.format(warning))
+
+
+    project_meta = project_metas[project_name]
+
+    Name = project_meta['name_fmt'].format(VERSION)
+    GenericName = project_meta['GenericName']
+    Exec = os.path.join(dst, project_meta['exe_relpath'])
+    icon_relpath = project_meta['platform_icon_relpath'].get(platform.system())
+    if icon_relpath is None:
+        raise NotImplementedError(
+            "There is no platform icon for {}.".format(platform.system())
+        )
+    Icon = os.path.join(dst, icon_relpath)
+    shortcut_src = os.path.join(src, project_meta['shortcut_relpath'])
+    changes = {
+        "Name": Name,
+        "GenericName": GenericName,
+        "Exec": Exec,
+        "Icon": Icon,
+        "Keywords": KEYWORDS,
+    }
+
+    if platform.system() == "Linux":
+        shortcut_src = os.path.join(dst, project_meta['shortcut_relpath'])
+        shortcut_name = project_meta['shortcut_name_noext'] + ".desktop"
+        shortcut_dst = os.path.join(SHORTCUTS_DIR, shortcut_name)
+        if not os.path.isdir(SHORTCUTS_DIR):
+            os.makedirs(SHORTCUTS_DIR)  # default mode is 511
+        write0('Installing icon to "{}"...'.format(shortcut_dst))
+        rewrite_conf(
+            shortcut_src,
+            shortcut_dst,
+            changes=changes,
+        )
+        echo0("OK")
+    elif platform.system() == "Darwin":
+        shortcut_name = Name + ".command"
+        shortcut_dst = os.path.join(SHORTCUTS_DIR, shortcut_name)
+        with open(shortcut_dst) as stream:
+            stream.write('"%s"\n' % Exec)
+            # ^ Run the game & close Command Prompt immediately.
+            # ^ First arg is Command Prompt title, so leave it blank.
+        st = os.stat(shortcut_dst)
+        os.chmod(shortcut_dst, st.st_mode | stat.S_IXUSR)
+        # ^ same as stat.S_IEXEC: "Unix V7 synonym for S_IXUSR."
+    elif platform.system() == "Windows":
+        shortcut_name = Name + ".bat"
+        shortcut_dst = os.path.join(SHORTCUTS_DIR, shortcut_name)
+        with open(shortcut_dst) as stream:
+            stream.write('start "" "%s"\n' % Exec)
+            # ^ Run the game & close Command Prompt immediately.
+            # ^ First arg is Command Prompt title, so leave it blank.
+    else:
+        echo0("Icon install isn't implemented for {}."
+              "".format(platform.system()))
+    return {
+        "warning": warning,  # may be None
+        "destination": dst,
+    }
+
+
+# def get_missing_subs(mt_share_path, subs):
+#     """Get a list of any missing files for a source *or* destination.
+#     """
+
+
+def arg_to_mode(arg):
+    if arg == "final":
+        return "classic"
+    elif arg == "classic":
+        return "classic"
+    elif arg == "trolltest":
+        return "trolltest"
+    elif arg == "troll":
+        return "trolltest"
+    elif arg == "finetest":
+        return "finetest"
+    elif arg == "fine":
+        return "finetest"
+    return None
+
+
+def detect_project_info(mt_share_path):
+    """Detect the project name from a source *or* destination.
+    """
+    for sub, project_info in mode_of_path.items():
+        sub_path = os.path.join(mt_share_path, sub)
+        if os.path.isfile(sub_path):
+            return project_info
+    return None
+
+
+def expected_src_files(src, project_name, appenders=[""]):
+    """Get full paths of required files.
+
+    Args:
+        appenders (list): Usually either [""] or ["server"], but if
+            the list contains both, both will be required
+
+    Returns:
+        list: Files that are required for install to continue.
+    """
+    if ((appenders is None) or (len(appenders) < 1)
+            or (not isinstance(appenders, list))):
+        appenders = [""]
+        echo0('Warning: reverting to appenders=[""] since {}'
+              ''.format(appenders))
+
+    src_files = None
+
+    for appender in appenders:
+        src_file = None
+        if project_name == "classic":
+            src_file = os.path.join(src, "bin", "minetest"+appender)
+        elif project_name == "trolltest":
+            src_file = os.path.join(src, "bin", "minetest"+appender)
+        elif project_name == "finetest":
+            src_file = os.path.join(src, "bin", "finetest"+appender)
+        else:
+            break
+        if src_file is not None:
+            if src_files is None:
+                src_files = []
+            src_files.append(src_file)
+        # else caller must say project_name is not valid.
+    return src_files
+
+
+def rewrite_conf(src, dst, changes={}):
+    """Install a conf such as an XDG desktop shortcut with changes.
+
+    Args:
+        src (string): The conf file to read.
+        dst (string): The conf file to write or overwrite.
+        changes (dict): A set of values to change by name. For any value
+            that is None, the line will be removed!
+    """
+    # This function is redefined further down in the case of Python 2.
+    fd, path = tempfile.mkstemp()
+    try:
+        with os.fdopen(fd, 'wb') as tmp:
+            # ^ ensure still exists when moving
+            write0("Generating temporary icon %s..." % path)
+            # NOTE: tmp.name is just some number (int)!
+            with open(src, "rb") as stream:
+                for rawL in stream:
+                    signI = rawL.find(b'=')
+                    # commentI = rawl.find(b'#')
+                    if rawL.strip().startswith(b"#"):
+                        tmp.write(rawL)
+                        continue
+                    if rawL.strip().startswith(b"["):
+                        tmp.write(rawL)
+                        continue
+                    if signI < 0:
+                        tmp.write(rawL)
+                        continue
+                    key_bytes = rawL[:signI].strip()
+                    key = key_bytes.decode("utf-8")
+                    value = changes.get(key)
+                    if key not in changes:
+                        # The value wasn't changed so write it as-is
+                        # echo0("%s not in %s" % (key, changes))
+                        tmp.write(rawL)
+                        continue
+                    if value is None:
+                        echo0("%s was excluded from the icon" % key)
+                        continue
+                    line = "%s=%s\n" % (key, value)
+                    tmp.write(line.encode("utf-8"))
+        shutil.copy(path, dst)
+    finally:
+        write0("removing tmp file...")
+        os.remove(path)
+
+
+if sys.version_info.major < 3:
+    # Python 2 (strings are bytes)
+    def rewrite_conf(src, dst, changes={}):
+        """Install a conf such as an XDG desktop shortcut with changes.
+        """
+        fd, path = tempfile.mkstemp()
+        try:
+            with os.fdopen(fd, 'wb') as tmp:
+                write0("Generating temporary icon %s..." % path)
+                with open(src, "rb") as stream:
+                    for rawL in stream:
+                        signI = rawL.find('=')
+                        # commentI = rawl.find('#')
+                        if rawL.strip().startswith("#"):
+                            tmp.write(rawL)
+                            continue
+                        if rawL.strip().startswith("["):
+                            tmp.write(rawL)
+                            continue
+                        if signI < 0:
+                            tmp.write(rawL)
+                            continue
+                        key_bytes = rawL[:signI].strip()
+                        key = key_bytes
+                        value = changes.get(key)
+                        if key not in changes:
+                            # The value wasn't changed so write it as-is
+                            tmp.write(rawL)
+                            continue
+                        if value is None:
+                            echo0("%s was excluded from the icon" % key)
+                            continue
+                        line = "%s=%s\n" % (key, value)
+                        tmp.write(line)
+            shutil.copy(path, dst)
+        finally:
+            write0("removing tmp file...")
+            os.remove(path)
+
+if __name__ == "__main__":
+    sys.exit(main())
