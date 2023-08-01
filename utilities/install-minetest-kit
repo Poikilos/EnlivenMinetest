@@ -4,7 +4,7 @@ Usage:
 deploy-minetest-kit <project name> [--from <built dir>] [options]
 
 The available project names are:
-classic (or final) to install ~/minetest-rsync,
+classic (or final or minetest) to install ~/minetest-rsync,
 finetest (or fine) to install ~/finetest-rsync
     (for the game that ripped off Multicraft.org's name), or
 trolltest (or troll) to install ~/trolltest-rsync (based on MT5).
@@ -62,8 +62,10 @@ KEYWORDS = ("sandbox;world;mining;crafting;blocks;nodes;multiplayer;"
             "roleplaying;minetest;")
 
 project_metas = {
-    'classic': {
-        'name_fmt': "Final Minetest ({})",
+    'minetest': {  # minetest is the project name (in mtsrc/newline dir)
+        'dirname': "minetest",
+        'name_and_version_fmt': "Final Minetest ({})",
+        'name': "Final Minetest",
         'GenericName': "Final Minetest",
         'exe_relpath': os.path.join("bin", "minetest"),
         'platform_icon_relpath': {
@@ -75,7 +77,9 @@ project_metas = {
         'shortcut_name_noext': "org.minetest.minetest",
     },
     'finetest': {
-        'name_fmt': "Finetest ({})",
+        'dirname': "finetest",
+        'name_and_version_fmt': "Finetest ({})",
+        'name': "Finetest",
         'GenericName': "Finetest",
         'exe_relpath': os.path.join("bin", "finetest"),
         'platform_icon_relpath': {
@@ -87,7 +91,9 @@ project_metas = {
         'shortcut_name_noext': "org.minetest.finetest",
     },
     'trolltest': {
-        'name_fmt': "Trolltest (minetest.org {})",
+        'dirname': "trolltest",
+        'name_and_version_fmt': "Trolltest ({}) (minetest.org)",
+        'name': "Trolltest (minetest.org)",
         'GenericName': "Trolltest",
         'platform_icon_relpath': {
             'Linux': os.path.join("misc", "minetest.svg"),
@@ -173,11 +179,14 @@ def main():
         install_from,
         appenders=appenders,
     )
+    error = results.get('error')
+    if error is not None:
+        echo0("Error: %s" % error)
     return 0
 
 
 def install_minetest(project_name, src, dst=None, versioned_dirname=None,
-    appenders=[""]):
+    appenders=[""], version=VERSION):
     """Install Minetest & generate a shortcut based on the destination.
 
     The metadata written to shortcut must be the installed metadata!
@@ -186,7 +195,7 @@ def install_minetest(project_name, src, dst=None, versioned_dirname=None,
       - shortcut_dst generated based on OS and shortcut_name_noext
 
     Args:
-        project_name (string): Must be classic, finetest, or trolltest.
+        project_name (string): Must be minetest, finetest, or trolltest.
         src (string): The location of the minetest install source to
             copy.
         dst (Optional[string]): Install here. If None, it will become
@@ -195,9 +204,12 @@ def install_minetest(project_name, src, dst=None, versioned_dirname=None,
         versioned_dirname (Optional[string]): Set the install directory
             name (ignored if dst is set). If None, it will become the
             default. Defaults to project_name + "-" + VERSION (such as
-            minetest-rsync).
+            minetest-rsync). If VERSION is blank or None, the
+            versioned_dirname will become the same as the dirname
+            (such as minetest).
         appenders (list): Install client if [""],  or server if
             ["server"]. Include both to require that both were built.
+        version (string): Version to append to the dirname.
 
     Returns:
         dict: "destination" is where it was installed if at all. See
@@ -205,19 +217,17 @@ def install_minetest(project_name, src, dst=None, versioned_dirname=None,
             install.
     """
     arg = project_name
-    project_name = arg_to_mode(arg)
+    project_name = arg_to_project_name(arg)
     if project_name is None:
         usage()
-        echo0("{} is not a valid project name.".format(arg))
-        return 1
+        return {
+            'error': "{} is not a valid project name.".format(arg),
+        }
     src_files = expected_src_files(src, project_name, appenders)
     if src_files is None:
         usage()
-        raise NotImplementedError(
-            "There are no source files for {}"
-            "".format(project_name)
-        )
-        return 1
+        error = "There are no source files for {}".format(project_name)
+        raise NotImplementedError(error)
 
     missing_files = []
     for src_file in src_files:
@@ -225,12 +235,22 @@ def install_minetest(project_name, src, dst=None, versioned_dirname=None,
             missing_files.append(src_file)
 
     if len(missing_files) > 0:
-        echo0("Error: The following files are required to be compiled"
-              " {} before install but are not present: {}"
-              "".format(project_name, missing_files))
-        return 1
+        error = ("Error: The following files are required to be compiled"
+                 " {} before install but are not present: {}"
+                 "".format(project_name, missing_files))
+        return {
+            'error': error,
+        }
 
-    versioned_dirname = project_name + "-" + VERSION
+    project_meta = project_metas[project_name]
+    dirname = project_meta['dirname']
+    versioned_dirname = dirname
+    append_version = False
+    if (version is not None) and (len(version.strip()) > 0):
+        versioned_dirname += "-" + version
+        append_version = True
+
+
     if dst is None:
         if platform.system() == "Windows":
             GAMES = "C:\\games"
@@ -240,6 +260,8 @@ def install_minetest(project_name, src, dst=None, versioned_dirname=None,
         else:
             dst = os.path.join(HOME, versioned_dirname)
     warning = None
+
+
     if not os.path.isdir(dst):
         write0('Installing {} to "{}"...'.format(project_name, dst))
         shutil.copytree(src, dst)
@@ -251,9 +273,10 @@ def install_minetest(project_name, src, dst=None, versioned_dirname=None,
         echo0('WARNING: {}'.format(warning))
 
 
-    project_meta = project_metas[project_name]
 
-    Name = project_meta['name_fmt'].format(VERSION)
+    Name = project_meta['name']
+    if append_version:
+        Name = project_meta['name_and_version_fmt'].format(version)
     GenericName = project_meta['GenericName']
     Exec = os.path.join(dst, project_meta['exe_relpath'])
     icon_relpath = project_meta['platform_icon_relpath'].get(platform.system())
@@ -302,8 +325,8 @@ def install_minetest(project_name, src, dst=None, versioned_dirname=None,
             # ^ Run the game & close Command Prompt immediately.
             # ^ First arg is Command Prompt title, so leave it blank.
     else:
-        echo0("Icon install isn't implemented for {}."
-              "".format(platform.system()))
+        warning = ("Icon install isn't implemented for {}."
+                   "".format(platform.system()))
     return {
         "warning": warning,  # may be None
         "destination": dst,
@@ -315,11 +338,13 @@ def install_minetest(project_name, src, dst=None, versioned_dirname=None,
 #     """
 
 
-def arg_to_mode(arg):
+def arg_to_project_name(arg):
     if arg == "final":
-        return "classic"
+        return "minetest"
     elif arg == "classic":
-        return "classic"
+        return "minetest"
+    elif arg == "minetest":
+        return "minetest"
     elif arg == "trolltest":
         return "trolltest"
     elif arg == "troll":
@@ -361,7 +386,7 @@ def expected_src_files(src, project_name, appenders=[""]):
 
     for appender in appenders:
         src_file = None
-        if project_name == "classic":
+        if project_name == "minetest":
             src_file = os.path.join(src, "bin", "minetest"+appender)
         elif project_name == "trolltest":
             src_file = os.path.join(src, "bin", "minetest"+appender)
