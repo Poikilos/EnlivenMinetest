@@ -25,6 +25,8 @@ import os
 import shutil
 import tempfile
 import stat
+import copy
+from pprint import pformat
 
 if platform.system() == "Windows":
     HOME = os.environ['USERPROFILE']
@@ -42,7 +44,7 @@ if sys.version_info.major < 3:
 
 
 INSTALL_SRC = os.path.join(HOME, "linux-minetest-kit-rsync", "mtkit", "minetest")
-VERSION = "rsync"
+VARIANT = "rsync"
 
 mode_of_path = {
     os.path.join("bin", "finetest"): {
@@ -58,16 +60,21 @@ mode_of_path = {
     # indeterminate if bin/minetest: same exe for classic & trolltest
 }
 
-KEYWORDS = ("sandbox;world;mining;crafting;blocks;nodes;multiplayer;"
-            "roleplaying;minetest;")
+MINETEST_KEYWORDS = ("sandbox;world;mining;crafting;blocks;nodes;multiplayer;"
+                     "roleplaying;")
 
 project_metas = {
     'minetest': {  # minetest is the project name (in mtsrc/newline dir)
+        'shortcut': {
+            'GenericName': "Final Minetest",
+            'Keywords': MINETEST_KEYWORDS,
+        },
         'dirname': "minetest",
-        'name_and_version_fmt': "Final Minetest ({})",
+        'name_and_variant_fmt': "Final Minetest ({})",
         'name': "Final Minetest",
-        'GenericName': "Final Minetest",
-        'exe_relpath': os.path.join("bin", "minetest"),
+        'shortcut_exe_relpaths': [
+            os.path.join("bin", "minetest"),
+        ],
         'platform_icon_relpath': {
             'Linux': os.path.join("misc", "minetest.svg"),
             'Darwin': os.path.join("misc", "minetest-icon.icns"),
@@ -77,11 +84,17 @@ project_metas = {
         'shortcut_name_noext': "org.minetest.minetest",
     },
     'finetest': {
+        'shortcut': {
+            'GenericName': "Finetest",
+            'Keywords': MINETEST_KEYWORDS+"minetest;",
+        },
         'dirname': "finetest",
-        'name_and_version_fmt': "Finetest ({})",
+        'name_and_variant_fmt': "Finetest ({})",
         'name': "Finetest",
-        'GenericName': "Finetest",
-        'exe_relpath': os.path.join("bin", "finetest"),
+        'shortcut_exe_relpaths': [
+            # os.path.join("bin", "multicraft"),
+            os.path.join("bin", "finetest"),
+        ],
         'platform_icon_relpath': {
             'Linux': os.path.join("misc", "multicraft-xorg-icon-128.png"),
             'Darwin': os.path.join("misc", "minetest-icon.icns"),
@@ -91,11 +104,16 @@ project_metas = {
         'shortcut_name_noext': "org.minetest.finetest",
     },
     'trolltest': {
+        'shortcut': {
+            'GenericName': "Trolltest",
+            'Keywords': MINETEST_KEYWORDS+"minetest;",
+        },
         'dirname': "trolltest",
-        'name_and_version_fmt': "Trolltest ({}) (minetest.org)",
+        'name_and_variant_fmt': "Trolltest ({}) (minetest.org)",
         'name': "Trolltest (minetest.org)",
-        'GenericName': "Trolltest",
-        'exe_relpath': os.path.join("bin", "minetest"),
+        'shortcut_exe_relpaths': [
+            os.path.join("bin", "minetest"),
+        ],
         'platform_icon_relpath': {
             'Linux': os.path.join("misc", "minetest.svg"),
             'Darwin': os.path.join("misc", "minetest-icon.icns"),
@@ -120,7 +138,7 @@ def usage():
 
 
 def main():
-    appenders = None
+    required_bin_suffixes = None
     # project_info = detect_project_info(INSTALL_SRC)
     key_arg = None
     install_from = None
@@ -150,15 +168,15 @@ def main():
                     echo0("Error: unknown argument {}".format(key_arg))
                     return 1
             elif arg == "--server":
-                if appenders is None:
-                    appenders = ["server"]
+                if required_bin_suffixes is None:
+                    required_bin_suffixes = ["server"]
                 else:
-                    appenders.append("server")
+                    required_bin_suffixes.append("server")
             elif arg == "--client":
-                if appenders is None:
-                    appenders = [""]
+                if required_bin_suffixes is None:
+                    required_bin_suffixes = [""]
                 else:
-                    appenders.append("")
+                    required_bin_suffixes.append("")
             elif arg == "--from":
                 key_arg = arg
             else:
@@ -170,15 +188,15 @@ def main():
         echo0("Error: {} must be followed by a value."
               "".format(key_arg))
         return 1
-    if appenders is None:
-        appenders = [""]  # Always require at least the plain exe name.
+    if required_bin_suffixes is None:
+        required_bin_suffixes = [""]  # Always require at least the plain exe name.
     if install_from is None:
         install_from = INSTALL_SRC
     project_name = sys.argv[1]
     results = install_minetest(
         project_name,
         install_from,
-        appenders=appenders,
+        required_bin_suffixes=required_bin_suffixes,
     )
     error = results.get('error')
     if error is not None:
@@ -186,31 +204,36 @@ def main():
     return 0
 
 
-def install_minetest(project_name, src, dst=None, versioned_dirname=None,
-    appenders=[""], version=VERSION):
-    """Install Minetest & generate a shortcut based on the destination.
+def install_minetest(project_name, src, dst=None, variant_dirname=None,
+    required_bin_suffixes=[""], variant=VARIANT):
+    """Install Minetest
 
-    The metadata written to shortcut must be the installed metadata!
-    - except the shortcut path itself:
-      - shortcut_src generated below based on OS given relative path
-      - shortcut_dst generated based on OS and shortcut_name_noext
+    Requires globals:
+        project_meta (dict[string]): The information necessary
+            to install the program. It must have the keys:
+            - 'dirname' (string): The directory under the
+              OS program files.
+            - There are more required keys for shortcut
+              generation (See install_shortcut).
 
     Args:
         project_name (string): Must be minetest, finetest, or trolltest.
         src (string): The location of the minetest install source to
             copy.
         dst (Optional[string]): Install here. If None, it will become
-            the default. Defaults to versioned_dirname under C:\games on
+            the default. Defaults to variant_dirname under C:\games on
             Windows, otherwise under HOME.
-        versioned_dirname (Optional[string]): Set the install directory
+        variant_dirname (Optional[string]): Set the install directory
             name (ignored if dst is set). If None, it will become the
-            default. Defaults to project_name + "-" + VERSION (such as
-            minetest-rsync). If VERSION is blank or None, the
-            versioned_dirname will become the same as the dirname
+            default. Defaults to project_name + "-" + VARIANT (such as
+            minetest-rsync). If VARIANT is blank or None, the
+            variant_dirname will become the same as the dirname
             (such as minetest).
-        appenders (list): Install client if [""],  or server if
-            ["server"]. Include both to require that both were built.
-        version (string): Version to append to the dirname.
+        required_bin_suffixes (list): Install client if [""],  or server if
+            ["server"]. Include both to require that both are in
+            os.path.join(src, "bin").
+        variant (string): Append this to the dirname. It also
+            affects the shortcut--see "variant" under install_shortcut.
 
     Returns:
         dict: "destination" is where it was installed if at all. See
@@ -224,7 +247,7 @@ def install_minetest(project_name, src, dst=None, versioned_dirname=None,
         return {
             'error': "{} is not a valid project name.".format(arg),
         }
-    src_files = expected_src_files(src, project_name, appenders)
+    src_files = expected_src_files(src, project_name, required_bin_suffixes)
     if src_files is None:
         usage()
         error = "There are no source files for {}".format(project_name)
@@ -245,11 +268,11 @@ def install_minetest(project_name, src, dst=None, versioned_dirname=None,
 
     project_meta = project_metas[project_name]
     dirname = project_meta['dirname']
-    versioned_dirname = dirname
-    append_version = False
-    if (version is not None) and (len(version.strip()) > 0):
-        versioned_dirname += "-" + version
-        append_version = True
+    variant_dirname = dirname
+    if (variant is not None) and (len(variant.strip()) > 0):
+        variant_dirname += "-" + variant
+    else:
+        variant = None
 
 
     if dst is None:
@@ -257,9 +280,9 @@ def install_minetest(project_name, src, dst=None, versioned_dirname=None,
             GAMES = "C:\\games"
             if not os.path.isdir(GAMES):
                 os.mkdir(GAMES)
-            dst = os.path.join(GAMES, versioned_dirname)
+            dst = os.path.join(GAMES, variant_dirname)
         else:
-            dst = os.path.join(HOME, versioned_dirname)
+            dst = os.path.join(HOME, variant_dirname)
     warning = None
 
 
@@ -272,56 +295,127 @@ def install_minetest(project_name, src, dst=None, versioned_dirname=None,
         # Leave result_path as None
         warning = 'Skipping installed "{}".'.format(dst)
         echo0('WARNING: {}'.format(warning))
+    for Exec_relpath in project_meta['shortcut_exe_relpaths']:
+        Exec = os.path.join(dst, Exec_relpath)
+        sc_results = install_shortcut(Exec, dst, project_meta, variant)
+        sc_warning = sc_results.get('warning')
+        if sc_warning is not None:
+            if warning is not None:
+                warning += "; " + sc_warning
+            else:
+                warning = sc_warning
+    return {
+        'dst': dst,
+        'warning': warning,
+    }
 
 
+def install_shortcut(Exec, dst, project_meta, variant):
+    """Install a shortcut to any program on any understood platform.
 
+    - sc_template_path is determined based on dst and shortcut_relpath
+    - sc_installed_path (path) is determined from OS and shortcut_name_noext
+      (and variant if not None).
+    - sc_template_path is read, Exec string is filled based on dst
+      (the selected destination where the program is installed)
+      then the resulting shortcut is saved to sc_installed_path
+      (only after temp file is complete).
+
+    Args:
+        Exec (string): The executable path where the shortcut
+            should point.
+        dst (string): The directory path where the program is
+            installed.
+        project_meta (dict): All metadata describing the program.
+            For this method, it must have the keys:
+            - 'name': The entire name (except variant) that
+              should be displayed as the shortcut's caption.
+            - 'name_and_variant_fmt': Should either be not
+              present or contain the name and the placeholder
+              "{}" where the variant should go. If not present,
+              " " and variant will be added to the end of Name.
+            - 'shortcut' (dict): contains:
+              - 'GenericName' (Optional[string]): A simplified
+                name for the program. If None, the GenericName
+                line will be removed from the shortcut. This
+                option is only for GNU/Linux systems or other
+                systems using XDG.
+              - 'Keywords' (Optional[string]): If None, Keywords
+                line will be removed from the shortcut. This
+                option is only for GNU/Linux systems or other
+                systems using XDG.
+            - 'shortcut_relpath': The location of an existing
+              shortcut file to use and modify.
+            - 'platform_icon_relpath' (dict[string]): A dict
+              where the key is platform.system() (Must have
+              at least 'Linux', 'Windows', *AND* 'Darwin')
+              and the value is the relative path from
+              dst to the icon image file.
+        variant (string): The special string to put in parenthesis
+            after the name to denote what kind of package or source was
+            used to obtain the program, such as "rsync" if a local
+            custom build, or more commonly "git", "deb", etc. If it is
+            an official binary archive, set this to "release". However,
+            if the package type (such as deb) is native to your distro,
+            set this to None to indicate it is the package supported
+            for your distro.
+            - Name is constructed using
+              project_meta['name_and_variant_fmt'] if present, otherwise
+              Name will be project_meta['name] + " (" + 'variant' + ")".
+              If variant is None, name is project_meta['name'].
+    Raises:
+        FileNotFoundError: If src does not exist.
+    """
+    warning = None
     Name = project_meta['name']
-    if append_version:
-        Name = project_meta['name_and_version_fmt'].format(version)
-    GenericName = project_meta['GenericName']
-    Exec = os.path.join(dst, project_meta['exe_relpath'])
-    icon_relpath = project_meta['platform_icon_relpath'].get(platform.system())
+    if variant is not None:
+        name_and_variant_fmt = project_meta.get('name_and_variant_fmt')
+        if name_and_variant_fmt is not None:
+            Name = name_and_variant_fmt.format(variant)
+        else:
+            Name += " (" + project_meta['variant'] + ")"  # raise if None
+    platform_icon_relpath = project_meta.get('platform_icon_relpath')
+    icon_relpath = None
+    if platform_icon_relpath is not None:
+        icon_relpath = platform_icon_relpath.get(platform.system())
     if icon_relpath is None:
         raise NotImplementedError(
             "There is no platform icon for {}.".format(platform.system())
         )
     Icon = os.path.join(dst, icon_relpath)
-    shortcut_src = os.path.join(src, project_meta['shortcut_relpath'])
-    changes = {
-        "Name": Name,
-        "GenericName": GenericName,
-        "Exec": Exec,
-        "Icon": Icon,
-        "Keywords": KEYWORDS,
-    }
+    shortcut_meta = copy.deepcopy(project_meta.get('shortcut'))
+    shortcut_meta['Name'] = Name
+    shortcut_meta['Exec'] = Exec
+    shortcut_meta['Icon'] = Icon
+    # ^ rewrite_conf *removes* any lines where value is None
 
     if platform.system() == "Linux":
-        shortcut_src = os.path.join(dst, project_meta['shortcut_relpath'])
+        sc_template_path = os.path.join(dst, project_meta['shortcut_relpath'])
         shortcut_name = project_meta['shortcut_name_noext'] + ".desktop"
-        shortcut_dst = os.path.join(SHORTCUTS_DIR, shortcut_name)
+        sc_installed_path = os.path.join(SHORTCUTS_DIR, shortcut_name)
         if not os.path.isdir(SHORTCUTS_DIR):
             os.makedirs(SHORTCUTS_DIR)  # default mode is 511
-        write0('Installing icon to "{}"...'.format(shortcut_dst))
+        write0('Installing icon to "{}"...'.format(sc_installed_path))
         rewrite_conf(
-            shortcut_src,
-            shortcut_dst,
-            changes=changes,
+            sc_template_path,
+            sc_installed_path,
+            changes=shortcut_meta,
         )
         echo0("OK")
     elif platform.system() == "Darwin":
         shortcut_name = Name + ".command"
-        shortcut_dst = os.path.join(SHORTCUTS_DIR, shortcut_name)
-        with open(shortcut_dst) as stream:
+        sc_installed_path = os.path.join(SHORTCUTS_DIR, shortcut_name)
+        with open(sc_installed_path) as stream:
             stream.write('"%s"\n' % Exec)
             # ^ Run the game & close Command Prompt immediately.
             # ^ First arg is Command Prompt title, so leave it blank.
-        st = os.stat(shortcut_dst)
-        os.chmod(shortcut_dst, st.st_mode | stat.S_IXUSR)
+        st = os.stat(sc_installed_path)
+        os.chmod(sc_installed_path, st.st_mode | stat.S_IXUSR)
         # ^ same as stat.S_IEXEC: "Unix V7 synonym for S_IXUSR."
     elif platform.system() == "Windows":
         shortcut_name = Name + ".bat"
-        shortcut_dst = os.path.join(SHORTCUTS_DIR, shortcut_name)
-        with open(shortcut_dst) as stream:
+        sc_installed_path = os.path.join(SHORTCUTS_DIR, shortcut_name)
+        with open(sc_installed_path) as stream:
             stream.write('start "" "%s"\n' % Exec)
             # ^ Run the game & close Command Prompt immediately.
             # ^ First arg is Command Prompt title, so leave it blank.
@@ -367,25 +461,25 @@ def detect_project_info(mt_share_path):
     return None
 
 
-def expected_src_files(src, project_name, appenders=[""]):
+def expected_src_files(src, project_name, required_bin_suffixes=[""]):
     """Get full paths of required files.
 
     Args:
-        appenders (list): Usually either [""] or ["server"], but if
+        required_bin_suffixes (list): Usually either [""] or ["server"], but if
             the list contains both, both will be required
 
     Returns:
         list: Files that are required for install to continue.
     """
-    if ((appenders is None) or (len(appenders) < 1)
-            or (not isinstance(appenders, list))):
-        appenders = [""]
-        echo0('Warning: reverting to appenders=[""] since {}'
-              ''.format(appenders))
+    if ((required_bin_suffixes is None) or (len(required_bin_suffixes) < 1)
+            or (not isinstance(required_bin_suffixes, list))):
+        required_bin_suffixes = [""]
+        echo0('Warning: reverting to required_bin_suffixes=[""] since {}'
+              ''.format(required_bin_suffixes))
 
     src_files = None
 
-    for appender in appenders:
+    for appender in required_bin_suffixes:
         src_file = None
         if project_name == "minetest":
             src_file = os.path.join(src, "bin", "minetest"+appender)
