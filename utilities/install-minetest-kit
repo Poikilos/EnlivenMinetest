@@ -95,6 +95,7 @@ project_metas = {
         'name_and_version_fmt': "Trolltest ({}) (minetest.org)",
         'name': "Trolltest (minetest.org)",
         'GenericName': "Trolltest",
+        'exe_relpath': os.path.join("bin", "minetest"),
         'platform_icon_relpath': {
             'Linux': os.path.join("misc", "minetest.svg"),
             'Darwin': os.path.join("misc", "minetest-icon.icns"),
