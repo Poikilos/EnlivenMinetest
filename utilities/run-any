@@ -1,0 +1,195 @@
+#!/usr/bin/env python
+"""
+Run any program and show the output. The purpose is to allow VSCode's
+python runner to run a minetest binary (such as if you are using VSCode
+to edit Lua but want to run Minetest to test the Lua).
+
+Usage:
+run-any <minetest_executable_path>
+"""
+from __future__ import print_function
+import os
+import sys
+import subprocess
+import copy
+import shlex
+from collections import OrderedDict
+
+
+def echo0(*args):
+    print(*args, file=sys.stderr)
+    return True
+
+
+def usage():
+    echo0(__doc__)
+
+
+def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
+    """Show the output of a process while it is running & get return code.
+
+    Warning: Minetest doesn't start flushing data until the server
+    starts. Output from mainmenu is flushed around when server starts
+    (or when user exits main menu, whichever comes first). This behavior
+    is the same whether or not shell is True.
+
+    If running minetest, set cmd to [minetest_path, "--logfile", ""]
+    and set cwd to minetest directory (not "bin"!).
+
+    Args:
+        cmd (Union[list[string], string]): The command to run, either as
+            list of args where first is command and no quotes are
+            necessary, or space-separated string formatted the same way
+            except with quotes where necessary (if an arg
+            contains spaces).
+            - If is *not* str and shell is True, cmd is converted to
+            str.
+        enable_collect (Optional[boolean]): Enable collecting lines
+            in the 'lines' key of the return.
+        cwd (Optional[string]): Set a new current working dir.
+        shell (boolean): If True, run a shell (processes globs and
+            shell options that occur within cmd).
+
+    Returns:
+        dict: 'code' is return code of the command.
+    """
+    # (See
+    # <https://cyberciti.biz/faq/python-run-external-command-and-get-output/>)
+    if shell not in [None, True, False]:
+        raise ValueError("Expected None, True, or False for shell but got %s"
+                         % pformat(shell))
+    if cwd is None:
+        cwd = os.getcwd()
+    if shell and not hasattr(cmd, "split"):
+        # shell cannot correctly utilize a list/tuple (somehow program
+        #   runs but doesn't get the blank argument in
+        #   [path, "--logfile, ""] because debug.txt still gets created)
+        #   so convert to string:
+        cmd = shlex.join(cmd)
+    proc = subprocess.Popen(cmd, shell=shell, stderr=subprocess.PIPE,
+                            stdout=subprocess.PIPE, cwd=cwd)
+    code = None
+    # Do not wait for finish--start displaying output immediately
+    out = {
+        'bytes': None,  # current line bytes
+        'string': "",  # current line string (same as bytes if Python 2 running)
+        'buffer': "",  # cumulative buffer
+    }
+    if enable_collect:
+        out['lines'] = []  # already-shown lines
+    err = copy.deepcopy(out)
+    if enable_collect:
+        if id(err['lines']) == id(out['lines']):
+            raise RuntimeError(
+                "deepcopy filed. lines are same in both streams"
+            )
+    out['source'] = proc.stdout
+    err['source'] = proc.stderr
+    out['stream'] = sys.stdout
+    err['stream'] = sys.stderr
+    stream_metas = OrderedDict({
+        'out': out,
+        'err': err,
+    })
+
+    while True:
+        for name, meta in stream_metas.items():
+            # meta['bytes'] = err['source'].read(1)
+            # ^ scrambles letters (mixes stderr and stdout) somehow, so:
+            if name == "out":
+                meta['bytes'] = proc.stdout.read(1)
+            elif name == "err":
+                meta['bytes'] = proc.stderr.read(1)
+            meta['string'] = meta['bytes']
+            if (meta['string'] is not None) and (sys.version_info.major >= 3):
+                meta['string'] = meta['bytes'].decode("utf-8")
+            meta['buffer'] += meta['string']
+
+        code = proc.poll()  # None if command isn't finished
+        if out['string'] == '' and err['string'] == '' and code is not None:
+            # If no more to write *and* there is a return code (finished)
+            for name, meta in stream_metas.items():
+                if len(meta['buffer']) > 0:
+                    if name == "out":
+                        print(meta['buffer'])
+                    else:
+                        echo0(meta['buffer'])
+            break
+
+        for _, meta in stream_metas.items():
+            # Write out['string'] to stdout then err['string'] to stderr
+            if meta['buffer'] == '':
+                continue
+            lastI = meta['buffer'].rfind("\n")
+            if lastI >= 0:
+                # Only show finished lines (avoid mixing stdout and
+                #   stderr on the same line).
+                if code is not None:
+                    # The program ended, so show everything.
+                    lastI = len(meta['buffer']) - 1
+                    # ^ -1 since inclusive (+1 below)
+
+                this_chunk = meta['buffer'][:lastI+1]
+                if enable_collect:
+                    meta['lines'] += this_chunk.split("\n")
+                meta['stream'].write(this_chunk)
+                meta['stream'].flush()
+                meta['buffer'] = meta['buffer'][lastI+1:]
+            # else:
+            #     echo0("Incomplete line:%s" % meta['buffer'])
+    for _, meta in stream_metas.items():
+        del meta['source']
+        del meta['stream']
+        del meta['bytes']
+        # del meta['string']
+    return {
+        'code': code,
+        'streams': stream_metas,
+    }
+
+
+def main():
+    if len(sys.argv) < 2:
+        usage()
+        echo0("Error: You didn't specify what program to run.")
+        return 1
+    # subprocess.call(sys.argv[1])
+    path = sys.argv[1]
+    cwd = None
+    if os.path.isfile(path):
+        cwd = os.path.dirname(path)
+        if os.path.basename(cwd) == "bin":
+            # Minetest must run from minetest not from minetest/bin
+            # (especially when minetest is a script in minetest.org
+            # builds)
+            cwd = os.path.dirname(cwd)
+    # else:
+    #     cwd = os.dirname(hierosoft.which(path))  # TODO: uncomment this case?
+    basename = os.path.basename(path)
+    project_name = basename.replace("server", "")
+    cmd = path
+    if project_name in ["minetest", "finetest", "trolltest", "multicraft"]:
+        cmd = [path, "--logfile", ""]
+        # Do not write debug.txt to cwd, since Python code will read
+        #   stdout and stderr.
+        echo0("Running %s" % shlex.join(cmd))
+    else:
+        echo0("Running %s" % path)
+    enable_collect = False
+    results = show_and_return(
+        cmd,
+        enable_collect=enable_collect,
+        cwd=cwd
+    )
+    if enable_collect:
+        echo0("\nLINES:")
+        for line in results['streams']['out']['lines']:
+            print(line)
+        for line in results['streams']['err']['lines']:
+            echo0(line)
+    # else 'lines' lists will not be in the streams!
+    return results['code']
+
+
+if __name__ == "__main__":
+    sys.exit(main())
