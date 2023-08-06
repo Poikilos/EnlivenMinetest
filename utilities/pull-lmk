@@ -1,5 +1,5 @@
 #!/bin/bash
-rsync -rtv mtio:/opt/minebest/ ~/linux-minetest-kit-rsync --exclude "mtkit/minetest/" --exclude "assemble/"
+rsync -rtv mtio:/opt/minebest/ ~/linux-minetest-kit-rsync --exclude "mtkit/minetest/" --exclude "assemble/" --exclude "mtkit0/"
 # ^ exclude mtkit/minetest/ and assemble/ since they are remotely-built copies of the program.
 # --info=progress2
 code=$?
