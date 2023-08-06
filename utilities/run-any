@@ -61,10 +61,8 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
     if cwd is None:
         cwd = os.getcwd()
     if shell and not hasattr(cmd, "split"):
-        # shell cannot correctly utilize a list/tuple (somehow program
-        #   runs but doesn't get the blank argument in
-        #   [path, "--logfile, ""] because debug.txt still gets created)
-        #   so convert to string:
+        # shell cannot correctly utilize a list/tuple (only first
+        #   element is used!) so join as string to use all arguments:
         cmd = shlex.join(cmd)
     proc = subprocess.Popen(cmd, shell=shell, stderr=subprocess.PIPE,
                             stdout=subprocess.PIPE, cwd=cwd)
