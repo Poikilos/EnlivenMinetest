@@ -13,8 +13,45 @@ import sys
 import subprocess
 import copy
 import shlex
+from pprint import pformat
 from collections import OrderedDict
 
+SCRIPTS_DIR = os.path.dirname(os.path.realpath(__file__))
+REPO_DIR = os.path.dirname(SCRIPTS_DIR)
+REPOS_DIR = os.path.dirname(REPO_DIR)
+for try_dirname in ["outputinspector-python", "outputinspector"]:
+    try_path = os.path.join(REPOS_DIR, try_dirname)
+    if os.path.isfile(os.path.join(try_path, "outputinspector",
+                                    "__init__.py")):
+        # ^ Yes, it is in outputinspector/outputinspector/
+        #   If in same git dir as REPO_DIR rather than installed as a module
+        sys.path.insert(0, try_path)
+        break
+
+if sys.version_info.major < 3:
+    ModuleNotFoundError = ImportError
+    FileNotFoundError = IOError
+    input = raw_input
+
+inspector = None
+try:
+    import outputinspector
+    print("OutputInspector...FOUND.", file=sys.stderr)
+    from outputinspector import (
+        OutputInspector,
+        ROLE_COLLECTED_FILE,
+        ROLE_ROW,
+        ROLE_COL,
+        ROLE_LOWER,
+        ROLE_COLLECTED_LINE,
+        ROLE_DETAILS,
+    )
+    inspector = OutputInspector()
+except ModuleNotFoundError as ex:
+    print(ex, file=sys.stderr)
+    print("INFO: Install outputinspector or clone to %s"
+          " for clickable Lua traceback lines"
+          % REPOS_DIR, file=sys.stderr)
 
 def echo0(*args):
     print(*args, file=sys.stderr)
@@ -64,6 +101,7 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
         # shell cannot correctly utilize a list/tuple (only first
         #   element is used!) so join as string to use all arguments:
         cmd = shlex.join(cmd)
+    echo0("Running %s" % pformat(cmd))
     proc = subprocess.Popen(cmd, shell=shell, stderr=subprocess.PIPE,
                             stdout=subprocess.PIPE, cwd=cwd)
     code = None
@@ -75,7 +113,7 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
     }
     if enable_collect:
         out['lines'] = []  # already-shown lines
-    err = copy.deepcopy(out)
+    err = copy.deepcopy(out)  # sets err['lines'] if enable_collect
     if enable_collect:
         if id(err['lines']) == id(out['lines']):
             raise RuntimeError(
@@ -109,9 +147,10 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
             for name, meta in stream_metas.items():
                 if len(meta['buffer']) > 0:
                     if name == "out":
-                        print(meta['buffer'])
+                        print(meta['buffer'].rstrip("\n\r"))
                     else:
-                        echo0(meta['buffer'])
+                        echo0(meta['buffer'].rstrip("\n\r"))
+                    meta['lines'] += this_chunk.split("\n")
             break
 
         for _, meta in stream_metas.items():
@@ -128,7 +167,11 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
                     # ^ -1 since inclusive (+1 below)
 
                 this_chunk = meta['buffer'][:lastI+1]
+
+                
                 if enable_collect:
+                    # Don't use append (since split always returns a list
+                    #   even if 1-long).
                     meta['lines'] += this_chunk.split("\n")
                 meta['stream'].write(this_chunk)
                 meta['stream'].flush()
@@ -140,6 +183,11 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
         del meta['stream']
         del meta['bytes']
         # del meta['string']
+        if len(meta['string']) > 0:
+            raise NotImplementedError(
+                "The remaining %s wasn't processed: %s"
+                % (_, pformat(meta['string']))
+            )
     return {
         'code': code,
         'streams': stream_metas,
@@ -147,12 +195,15 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
 
 
 def main():
+    enablePush = True  # collect the line in the inspector ui right away
     if len(sys.argv) < 2:
         usage()
         echo0("Error: You didn't specify what program to run.")
         return 1
     # subprocess.call(sys.argv[1])
     path = sys.argv[1]
+    if path.lower().endswith(".txt"):
+        raise ValueError("expected an executable!")
     cwd = None
     if os.path.isfile(path):
         cwd = os.path.dirname(path)
@@ -166,28 +217,122 @@ def main():
     basename = os.path.basename(path)
     project_name = basename.replace("server", "")
     cmd = path
+    exeDir = os.path.dirname(path)
     if project_name in ["minetest", "finetest", "trolltest", "multicraft"]:
         cmd = [path, "--logfile", ""]
+        targetBaseDir = os.path.dirname(exeDir)
+        # minetest/ not minetest/bin/ is the root of paths in tracebacks
         # Do not write debug.txt to cwd, since Python code will read
         #   stdout and stderr.
         echo0("Running %s" % shlex.join(cmd))
     else:
+        targetBaseDir = exeDir
         echo0("Running %s" % path)
-    enable_collect = False
+    if inspector:
+        OutputInspector.addRoot(targetBaseDir)
+    enable_collect = True
     results = show_and_return(
         cmd,
         enable_collect=enable_collect,
-        cwd=cwd
+        cwd=cwd,
+        # TODO: silent=not inspector,  # If there is no outputinspector, show in realtime
     )
+    # ^ TODO: push to outputinspector in realtime
     if enable_collect:
-        echo0("\nLINES:")
-        for line in results['streams']['out']['lines']:
-            print(line)
-        for line in results['streams']['err']['lines']:
-            echo0(line)
+        # echo0("\nLINES:")
+        # for line in results['streams']['out']['lines']:
+        #     print(line)
+        # for line in results['streams']['err']['lines']:
+        #     echo0(line)
+        out = results['streams']['out']
+        err = results['streams']['err']
     # else 'lines' lists will not be in the streams!
+
+    if results['code'] == 0:
+        echo0("No errors (return code 0)")
+        # return results['code']
+
+    err_index = len(out['lines'])
+    all_lines = out['lines'] + err['lines']
+
+    if inspector:
+        print("\nOutputInspector:")
+        vcsode_fmt = 'File "{file}", line {row} <- outputinspector <- {line}'
+        # ^ resolves https://github.com/Poikilos/outputinspector/issues/26
+        # such as 'File "/home/owner/git/world_clock/worldclocktk/__init__.py", line 232, in <module>'
+        fmt = vcsode_fmt
+        for line in all_lines:
+            inspector.addLine(line, enablePush)
+        # NOTE: addLine adds all of the metadata!
+
+        # inspector.processAllAddedLines()  # ONLY post-processing such as TODOs
+        # In CLI mode of outputinspector, the line info must be
+        #   processed since there is no GUI equivalent to lineinfo
+        #   in this mode.
+        #   mainListWidget is usually a subclass of tk.Listbox,
+        #   but in CLI mode, it is using the notk submodule so
+        #   access the dummy items:
+        for i, item in enumerate(inspector._ui.mainListWidget._items):
+            # lvi is a QtListViewItem, but in CLI mode it is only
+            #   a dummy, so do something useful and make a properly-
+            #   formatted line to be clickable in VSCode.
+
+            # This would actually open the text editor (!):
+            # inspector.on_mainListWidget_itemDoubleClicked(item)
+
+            # The code below is from on_mainListWidget_itemDoubleClicked:
+            actualJump = item.data(ROLE_COLLECTED_FILE).toString()
+            filePath = item.data(ROLE_COLLECTED_FILE).toString()
+            # FIXME: ^ why does it get the wrong thing?
+            #   - gets "2023-08-12 20" when file is
+            # TODO: ^ Eliminate one of these in this code and
+            #   in OutputInspector.
+            actualJumpLine = item.data(ROLE_COLLECTED_LINE).toString() #data not row!
+            citedRowS = (item.data(ROLE_ROW)).toString()
+            citedColS = (item.data(ROLE_COL)).toString()
+            info = inspector.getLineInfo(line, actualJump,
+                                         actualJumpLine, False)
+            if os.path.isfile(filePath):  # Should already be unmangled
+                # FIXME: this basically always triggers:
+                # if info.get('file') is None:
+                #     raise NotImplementedError("info['file'] and info['file'] = '%s' is missing" % filePath)
+                # elif not os.path.isfile(info['file']):
+                #     raise NotImplementedError("info['file'] = '%s' is missing" % filePath)
+                if ((info.get('file') is None) or
+                        (not os.path.isfile(info['file']))):
+                    info['file'] = filePath.strip()
+                if (info.get('row') is None) or (not info['row'].strip()):
+                    # FIXME: why isn't this in info......
+                    info['row'] = item.data(ROLE_ROW).toString().strip()
+                
+                less_info = {}
+                for key, value in info.items():
+                    if value is None:
+                        continue
+                    if "{%s}" % key in fmt:
+                        less_info[key] = str(value).strip()
+                showLine = fmt.format(**info)
+                if "\n" in showLine:
+                    raise RuntimeError("Line wasn't clean of newlines.")
+                if "\r" in showLine:
+                    raise RuntimeError("Line wasn't clean of returns.")
+                indentI = len(actualJumpLine.lstrip()) - len(actualJumpLine)
+                indent = actualJumpLine[:indentI]
+                print(indent+showLine, file=sys.stderr)
+            else:
+                print(actualJumpLine.rstrip(), file=sys.stderr)
+            # info has: {'file': '', 'row': '', 'line': '',
+            # 'column': '', 'language': '', 'good': 'False',
+            # 'lower': 'False', 'master': 'False', 'color': 'Default'}
+
+        # raise SyntaxError(
+        #     "{} line(s)".format(len(all_lines))+"\n".join(all_lines)
+        # )
+    # else output should already have been shown in realtime.
     return results['code']
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    code = main()
+    #sys.exit(code)
+    sys.exit(0)  # Don't confuse VSCode. If nonzero, a popup will point here.
