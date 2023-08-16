@@ -168,7 +168,7 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
 
                 this_chunk = meta['buffer'][:lastI+1]
 
-                
+
                 if enable_collect:
                     # Don't use append (since split always returns a list
                     #   even if 1-long).
@@ -255,75 +255,14 @@ def main():
     err_index = len(out['lines'])
     all_lines = out['lines'] + err['lines']
 
+
     if inspector:
         print("\nOutputInspector:")
-        vcsode_fmt = 'File "{file}", line {row} <- outputinspector <- {line}'
-        # ^ resolves https://github.com/Poikilos/outputinspector/issues/26
-        # such as 'File "/home/owner/git/world_clock/worldclocktk/__init__.py", line 232, in <module>'
-        fmt = vcsode_fmt
         for line in all_lines:
             inspector.addLine(line, enablePush)
         # NOTE: addLine adds all of the metadata!
-
-        # inspector.processAllAddedLines()  # ONLY post-processing such as TODOs
-        # In CLI mode of outputinspector, the line info must be
-        #   processed since there is no GUI equivalent to lineinfo
-        #   in this mode.
-        #   mainListWidget is usually a subclass of tk.Listbox,
-        #   but in CLI mode, it is using the notk submodule so
-        #   access the dummy items:
-        for i, item in enumerate(inspector._ui.mainListWidget._items):
-            # lvi is a QtListViewItem, but in CLI mode it is only
-            #   a dummy, so do something useful and make a properly-
-            #   formatted line to be clickable in VSCode.
-
-            # This would actually open the text editor (!):
-            # inspector.on_mainListWidget_itemDoubleClicked(item)
-
-            # The code below is from on_mainListWidget_itemDoubleClicked:
-            actualJump = item.data(ROLE_COLLECTED_FILE).toString()
-            filePath = item.data(ROLE_COLLECTED_FILE).toString()
-            # FIXME: ^ why does it get the wrong thing?
-            #   - gets "2023-08-12 20" when file is
-            # TODO: ^ Eliminate one of these in this code and
-            #   in OutputInspector.
-            actualJumpLine = item.data(ROLE_COLLECTED_LINE).toString() #data not row!
-            citedRowS = (item.data(ROLE_ROW)).toString()
-            citedColS = (item.data(ROLE_COL)).toString()
-            info = inspector.getLineInfo(line, actualJump,
-                                         actualJumpLine, False)
-            if os.path.isfile(filePath):  # Should already be unmangled
-                # FIXME: this basically always triggers:
-                # if info.get('file') is None:
-                #     raise NotImplementedError("info['file'] and info['file'] = '%s' is missing" % filePath)
-                # elif not os.path.isfile(info['file']):
-                #     raise NotImplementedError("info['file'] = '%s' is missing" % filePath)
-                if ((info.get('file') is None) or
-                        (not os.path.isfile(info['file']))):
-                    info['file'] = filePath.strip()
-                if (info.get('row') is None) or (not info['row'].strip()):
-                    # FIXME: why isn't this in info......
-                    info['row'] = item.data(ROLE_ROW).toString().strip()
-                
-                less_info = {}
-                for key, value in info.items():
-                    if value is None:
-                        continue
-                    if "{%s}" % key in fmt:
-                        less_info[key] = str(value).strip()
-                showLine = fmt.format(**info)
-                if "\n" in showLine:
-                    raise RuntimeError("Line wasn't clean of newlines.")
-                if "\r" in showLine:
-                    raise RuntimeError("Line wasn't clean of returns.")
-                indentI = len(actualJumpLine.lstrip()) - len(actualJumpLine)
-                indent = actualJumpLine[:indentI]
-                print(indent+showLine, file=sys.stderr)
-            else:
-                print(actualJumpLine.rstrip(), file=sys.stderr)
-            # info has: {'file': '', 'row': '', 'line': '',
-            # 'column': '', 'language': '', 'good': 'False',
-            # 'lower': 'False', 'master': 'False', 'color': 'Default'}
+        for info in inspector.getLineInfos():
+            print(info['all'], file=sys.stderr)
 
         # raise SyntaxError(
         #     "{} line(s)".format(len(all_lines))+"\n".join(all_lines)
