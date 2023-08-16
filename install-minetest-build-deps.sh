@@ -101,7 +101,7 @@ if [ ! -z "$this_apt" ]; then
         libvorbis-dev   libx11-dev     libxxf86vm-dev lynx            \
         nano            nettle-dev     p7zip-full     patch           \
         perl            pkgconf        python3        python3-dev     \
-        python-dev      rake           ruby           sed             \
+        make           ruby           sed             \
         tar             tcl            unzip          util-linux      \
         wget            xz-utils       zip            perl            \
         dnsutils        make \
@@ -176,7 +176,7 @@ elif [ -f "`command -v pacman`" ]; then
         libgccjit   libjpeg-turbo  libogg       libpng       \
         libstdc++5  libtool        libvorbis    make         \
         ncurses     openal         openssl      patch        \
-        pkgconf     python         python2      readline     \
+        pkgconf     python         readline     \
         ruby        tcl            which        xorg-server  \
         xz          zlib           sqlite
     if [ $? -ne 0 ]; then exit 1; fi
