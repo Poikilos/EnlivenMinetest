@@ -134,12 +134,61 @@ fi
 if [ ! -z "$BUILD_SERVER" ]; then
     server_line="-DBUILD_SERVER=$BUILD_SERVER"
 fi
-echo "* [build-minetest-here.sh] running cmake in `pwd`..."
-cmake . $server_line $client_line -DOpenGL_GL_PREFERENCE=GLVND -DENABLE_GETTEXT=1 -DENABLE_FREETYPE=1 -DENABLE_LEVELDB=1 -DENABLE_REDIS=1 -DRUN_IN_PLACE=$RUN_IN_PLACE && make -j$(grep -c processor /proc/cpuinfo)  || customExit "$0: Build failed in '`pwd`'."
-if [ $? -ne 0 ]; then
+grep -q "irrlichtmt" CMakeLists.txt
+if [ $? -eq 0 ]; then
+    if [ -d lib/irrlichtmt/.git ]; then
+        echo "Error: The git version of lib/irrlichtmt isn't usable."
+        echo "Try again after:"
+        echo "    rm -rf lib/irrlichtmt"
+        exit 1
+    fi
+    IRR_VER=1.9.0
+    IRR_SUB_VER=mt10
+    # minetest 5.7.0 requires minetest/irrlicht 1.9.0mt10
+    if [ ! -d lib/irrlichtmt ]; then
+        if [ -d lib/irrlicht-$IRR_VER$IRR_SUB_VER ]; then
+            mv lib/irrlicht-$IRR_VER$IRR_SUB_VER lib/irrlichtmt
+        fi
+    fi
+    if [ ! -d lib/irrlichtmt ]; then
+        cd lib || exit 1
+        # git clone --depth=1 https://github.com/minetest/irrlicht lib/irrlichtmt
+        # wget -O $IRR_VERmt10.zip https://github.com/minetest/irrlicht/archive/refs/tags/$IRR_VERmt10.zip
+        wget -O $IRR_VER$IRR_SUB_VER.zip https://github.com/minetest/irrlicht/archive/refs/tags/$IRR_VER$IRR_SUB_VER.zip
+        unzip $IRR_VER$IRR_SUB_VER.zip
+        mv irrlicht-$IRR_VER$IRR_SUB_VER irrlichtmt
+        cd .. || exit 1
+    fi
+fi
+mkdir -p "build" || exit 1
+BUILD_DIR_NAME=build
+BUILD_DIR=`realpath $BUILD_DIR_NAME`
+PREV_DIR=`pwd`
+make clean || exit 1
+# cd $BUILD_DIR || exit 1
+echo "* [build-minetest-here.sh] in `pwd` running: cmake $server_line $client_line -DOpenGL_GL_PREFERENCE=GLVND -DENABLE_GETTEXT=1 -DENABLE_FREETYPE=1 -DENABLE_LEVELDB=1 -DENABLE_REDIS=1 -DRUN_IN_PLACE=$RUN_IN_PLACE"
+cmake $server_line $client_line -DOpenGL_GL_PREFERENCE=GLVND -DENABLE_GETTEXT=1 -DENABLE_FREETYPE=1 -DENABLE_LEVELDB=1 -DENABLE_REDIS=1 -DRUN_IN_PLACE=$RUN_IN_PLACE || exit 1
+# FIXME: cmake -B$BUILD_DIR -S$PREV_DIR doesn't help...The generated files say CMAKE_BINARY_DIR = /home/owner/minetest-5.7.0/build
+#   but the binary files still end up in $PREV_DIR!
+# -B: build dir
+# -S: source dir
+#   - for cmake older than 3.13, must use undocumented -H instead of -S
+# cd "$BUILD_DIR" || exit 1
+
+make -j$(grep -c processor /proc/cpuinfo)  || customExit "$0: Build failed in '`pwd`'."
+code=$?
+cd "$PREV_DIR"
+
+if [ $code -ne 0 ]; then
     echo
     echo "cmake failed. Try:"
     echo "$DEPS_INSTALL"
+else
+    if [ -f "minetest/bin/minetest" ]; then
+        echo "A binary distribution of Minetest is now in the minetest directory in `pwd`."
+    else
+        echo "Error: There was no cmake error but minetest/bin/minetest doesn't exist."
+    fi
 fi
 echo
 echo "RUN_IN_PLACE=$RUN_IN_PLACE"
