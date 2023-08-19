@@ -126,7 +126,7 @@ def add_depends(mod_path):
 
 
 def main():
-    parent = os.path.realpath(".")
+    parent = os.getcwd()
     return add_depends(parent)
 
 
