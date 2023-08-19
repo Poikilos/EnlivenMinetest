@@ -11,7 +11,7 @@ trolltest (or troll) to install ~/trolltest-rsync (based on MT5).
 
 Options:
 --from <built dir>    Install from this directory. Defaults to
-                      "$HOME/linux-minetest-kit-rsync/mtkit/minetest".
+                      "$HOME/minebest-rsync/mtkit/minetest".
 --server              Require a binary ending with "server" to be
                       present in built dir. Defaults to False.
 --client              Require a binary ending with "server" to be
@@ -43,7 +43,7 @@ if sys.version_info.major < 3:
     ModuleNotFoundError = ImportError
 
 
-INSTALL_SRC = os.path.join(HOME, "linux-minetest-kit-rsync", "mtkit", "minetest")
+INSTALL_SRC = os.path.join(HOME, "minebest-rsync", "mtkit", "minetest")
 VARIANT = "rsync"
 
 MINETEST_KEYWORDS = ("sandbox;world;mining;crafting;blocks;nodes;multiplayer;"

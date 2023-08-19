@@ -1,21 +1,21 @@
 #!/bin/bash
-rsync -rtv mtio:/opt/minebest/ ~/linux-minetest-kit-rsync --exclude "mtkit/minetest/" --exclude "assemble/" --exclude "mtkit0/"
+rsync -rtv mtio:/opt/minebest/ ~/minebest-rsync --exclude "mtkit/minetest/" --exclude "assemble/" --exclude "mtkit0/"
 # ^ exclude mtkit/minetest/ and assemble/ since they are remotely-built copies of the program.
 # --info=progress2
 code=$?
 if [ $code -eq 0 ]; then
-    echo "Updating ~/linux-minetest-kit-rsync...OK"
+    echo "Updating ~/minebest-rsync...OK"
 else
-    echo "Updating ~/linux-minetest-kit-rsync...FAILED"
+    echo "Updating ~/minebest-rsync...FAILED"
 fi
-cd ~/linux-minetest-kit-rsync
+cd ~/minebest-rsync
 cat <<END
 
 Next do:
 
-cd ~/linux-minetest-kit-rsync/mtkit
+cd ~/minebest-rsync/mtkit
 bash -e mtcompile-libraries.sh build
 perl mtcompile-program.pl --build --finetest --client
-cd ~/linux-minetest-kit-rsync/mtkit/minetest/bin
+cd ~/minebest-rsync/mtkit/minetest/bin
 nopackage install finetest --version rsync --caption "Finetest (rsync)"
 END
