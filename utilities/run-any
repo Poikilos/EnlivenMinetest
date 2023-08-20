@@ -13,6 +13,7 @@ import sys
 import subprocess
 import copy
 import shlex
+import platform
 from pprint import pformat
 from collections import OrderedDict
 
@@ -90,6 +91,7 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
     Returns:
         dict: 'code' is return code of the command.
     """
+    prefix = "[show_and_return] "
     # (See
     # <https://cyberciti.biz/faq/python-run-external-command-and-get-output/>)
     if shell not in [None, True, False]:
@@ -101,16 +103,59 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
         # shell cannot correctly utilize a list/tuple (only first
         #   element is used!) so join as string to use all arguments:
         cmd = shlex.join(cmd)
-    echo0("Running %s" % pformat(cmd))
+    remove_bin = False  # FIXME: True for debug only
+    # ^ Either True/False succeeds in bash, either fails in vscode
+    #   with https://github.com/Poikilos/EnlivenMinetest/issues/616
+    if remove_bin:
+        cwd = os.path.join(cwd, "bin")
+        bin_rel = "./bin/"
+        if isinstance(cmd, list):
+            if cmd[0].startswith(bin_rel):
+                cmd[0] = "./" + cmd[0][len(bin_rel):]
+        else:
+            if cmd.startswith(bin_rel):
+                cmd = "./" + cmd[len(bin_rel):]
+    force_shell = False
+    # ^ Either True/False succeeds in bash, either fails in vscode
+    #   with https://github.com/Poikilos/EnlivenMinetest/issues/616
+    if not shell and force_shell:
+        # force_shell fails with shell=True (just hangs
+        #   near `meta['bytes'] = err['source'].read(1)`,
+        #   even if run-any is run from bash prompt manually)
+        if platform.system() == "Linux":
+            if isinstance(cmd, list):
+                cmd = ["bash", "-c", "cd '" + cwd + "'; " + shlex.join(cmd)]
+            else:
+                cmd = ["bash", "-c", "cd '" + cwd + "'; " + cmd]
+    run_msg = "Running %s" % pformat(cmd)
+    run_msg += '  # shell=%s in "%s"' % (shell, cwd)
+    echo0(run_msg)
+    if cwd is not None:
+        os.chdir(cwd)
+    enable_call = False
+    if enable_call:  # FIXME: True for debug only--issue #616 (doesn't fix)
+        out = {
+            'bytes': None,  # current line bytes
+            'string': "",  # current line string
+            # ^ (same as bytes if Python 2 running)
+            'buffer': "",  # cumulative buffer
+            'lines': [],
+        }
+        err = copy.deepcopy(out)
+        out['source'] = []
+        stream_metas = OrderedDict({
+            'out': out,
+            'err': err,
+        })
+        code = subprocess.call(cmd)
+        return {  # FIXME: for debug issue #616 only
+            'code': code,
+            'streams': stream_metas,
+        }
     proc = subprocess.Popen(cmd, shell=shell, stderr=subprocess.PIPE,
                             stdout=subprocess.PIPE, cwd=cwd)
     code = None
     # Do not wait for finish--start displaying output immediately
-    out = {
-        'bytes': None,  # current line bytes
-        'string': "",  # current line string (same as bytes if Python 2 running)
-        'buffer': "",  # cumulative buffer
-    }
     if enable_collect:
         out['lines'] = []  # already-shown lines
     err = copy.deepcopy(out)  # sets err['lines'] if enable_collect
@@ -150,7 +195,7 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
                         print(meta['buffer'].rstrip("\n\r"))
                     else:
                         echo0(meta['buffer'].rstrip("\n\r"))
-                    meta['lines'] += this_chunk.split("\n")
+                    meta['lines'] += meta['buffer'].split("\n")
             break
 
         for _, meta in stream_metas.items():
@@ -206,14 +251,20 @@ def main():
         raise ValueError("expected an executable!")
     cwd = None
     if os.path.isfile(path):
-        cwd = os.path.dirname(path)
-        if os.path.basename(cwd) == "bin":
+        cwd = os.path.dirname(os.path.realpath(path))
+        dir_name = os.path.basename(cwd)
+        if dir_name == "bin":
             # Minetest must run from minetest not from minetest/bin
             # (especially when minetest is a script in minetest.org
             # builds)
             cwd = os.path.dirname(cwd)
+        else:
+            echo0("Warning: not Minetest-like dir_name=%s" % dir_name)
+    else:
+        raise ValueError('missing "%s"--use absolute path if not in cwd'
+                         % path)
     # else:
-    #     cwd = os.dirname(hierosoft.which(path))  # TODO: uncomment this case?
+    #     cwd = os.dirname(hierosoft.which(path))  # TODO:uncomment this case?
     basename = os.path.basename(path)
     project_name = basename.replace("server", "")
     cmd = path
@@ -224,10 +275,8 @@ def main():
         # minetest/ not minetest/bin/ is the root of paths in tracebacks
         # Do not write debug.txt to cwd, since Python code will read
         #   stdout and stderr.
-        echo0("Running %s" % shlex.join(cmd))
     else:
         targetBaseDir = exeDir
-        echo0("Running %s" % path)
     if inspector:
         OutputInspector.addRoot(targetBaseDir)
     enable_collect = True
