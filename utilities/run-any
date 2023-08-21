@@ -133,14 +133,14 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
     if cwd is not None:
         os.chdir(cwd)
     enable_call = False
+    out = {
+        'bytes': None,  # current line bytes
+        'string': "",  # current line string
+        # ^ (same as bytes if Python 2 running)
+        'buffer': "",  # cumulative buffer
+        'lines': [],
+    }
     if enable_call:  # FIXME: True for debug only--issue #616 (doesn't fix)
-        out = {
-            'bytes': None,  # current line bytes
-            'string': "",  # current line string
-            # ^ (same as bytes if Python 2 running)
-            'buffer': "",  # cumulative buffer
-            'lines': [],
-        }
         err = copy.deepcopy(out)
         out['source'] = []
         stream_metas = OrderedDict({
