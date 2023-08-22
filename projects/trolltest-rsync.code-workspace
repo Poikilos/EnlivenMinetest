@@ -1,7 +1,7 @@
 {
 	"folders": [
 		{
-			"path": "../../../minetest-rsync"
+			"path": "../../../trolltest-rsync"
 		}
 	],
 	"settings": {},
@@ -9,14 +9,12 @@
 		"version": "0.2.0",
 		"configurations": [
 			{
-				"type":"python",
+				"type": "python",
 				"request": "launch",
-				"name": "Launch minetest-rsync",
+				"name": "Launch trolltest-rsync",
 				"program": "../git/EnlivenMinetest/utilities/run-any",
-				"args": ["./bin/minetest"],
-				"env": {
-					"LD_LIBRARY_PATH": "/usr/lib64",
-				},
+				"args": ["./bin/trolltest"],
+				"cwd": "./trolltest-rsync"
 			}
 		]
 	}

@@ -28,7 +28,10 @@ for try_dirname in ["outputinspector-python", "outputinspector"]:
         #   If in same git dir as REPO_DIR rather than installed as a module
         sys.path.insert(0, try_path)
         break
-
+if platform.system() == "Windows":
+    HOME = os.environ['USERPROFILE']
+else:
+    HOME = os.environ['HOME']
 if sys.version_info.major < 3:
     ModuleNotFoundError = ImportError
     FileNotFoundError = IOError
@@ -115,45 +118,102 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
         else:
             if cmd.startswith(bin_rel):
                 cmd = "./" + cmd[len(bin_rel):]
+    pre_bin = "export LD_LIBRARY_PATH=/usr/lib64 " # doesn't fix #616
     force_shell = False
-    # ^ Either True/False succeeds in bash, either fails in vscode
-    #   with https://github.com/Poikilos/EnlivenMinetest/issues/616
+    # ^ Either True/False succeeds in bash, either way LD_LIBRARY_PATH
+    #   fails in vscode:
+    #   https://github.com/Poikilos/EnlivenMinetest/issues/616
     if not shell and force_shell:
         # force_shell fails with shell=True (just hangs
         #   near `meta['bytes'] = err['source'].read(1)`,
         #   even if run-any is run from bash prompt manually)
         if platform.system() == "Linux":
             if isinstance(cmd, list):
-                cmd = ["bash", "-c", "cd '" + cwd + "'; " + shlex.join(cmd)]
+                pre_bin = "LD_LIBRARY_PATH=/usr/lib64; export LD_LIBRARY_PATH; " # doesn't fix #616
+                # ^ adding "export " causes bad identifier error later in command
+                cmd = ["bash", "-c", "cd '" + cwd + "'; " + pre_bin + shlex.join(cmd)]
             else:
-                cmd = ["bash", "-c", "cd '" + cwd + "'; " + cmd]
-    run_msg = "Running %s" % pformat(cmd)
+                cmd = ["bash", "-c", "cd '" + cwd + "'; " + pre_bin + cmd]
+    run_msg = prefix+"Running %s" % pformat(cmd)
     run_msg += '  # shell=%s in "%s"' % (shell, cwd)
     echo0(run_msg)
     if cwd is not None:
         os.chdir(cwd)
-    enable_call = False
     out = {
         'bytes': None,  # current line bytes
         'string': "",  # current line string
         # ^ (same as bytes if Python 2 running)
         'buffer': "",  # cumulative buffer
-        'lines': [],
     }
+    good_path = (
+        "{HOME}/.rvm/gems/ruby-3.0.0/bin:"
+        "{HOME}/.rvm/gems/ruby-3.0.0@global/bin:"
+        "{HOME}/.rvm/rubies/ruby-3.0.0/bin:"
+        "{HOME}/.nvm/versions/node/v14.21.2/bin:"
+        "/usr/lib64/ccache:{HOME}/.cargo/bin:"
+        "/usr/local/bin:/usr/bin:/bin:"
+        "{HOME}/.local/bin:/usr/local/sbin:/usr/sbin:"
+        "{HOME}/.local/bin:"
+        "{HOME}/git/linux-preinstall/utilities:"
+        "{HOME}/git/linux-preinstall/utilities-developer:"
+        "{HOME}/git/linux-preinstall/utilities-server:"
+        "{HOME}/.rvm/bin:{HOME}/.local/bin:{HOME}/bin:"
+        "{HOME}/git/linux-preinstall/utilities:"
+        "{HOME}/git/linux-preinstall/utilities-server:"
+        "{HOME}/git/linux-preinstall/utilities-developer:"
+        "{HOME}/.local/bin:{HOME}/git/linux-preinstall/utilities:"
+        "{HOME}/git/linux-preinstall/utilities-developer:"
+        "{HOME}/git/linux-preinstall/utilities-server:"
+        "{HOME}/.rvm/bin"
+        "".format(HOME=HOME)
+    )
+    # ^ known good path in working bash that can run run-any
+    # os.environ['PATH'] = good_path  # still doesn't fix issue #616
+    this_env = os.environ.copy()
+    if platform.system() == "Linux":
+        # For diagnosing issue #616
+        LD_LIBRARY_PATH = "/usr/lib64"
+        if "LD_LIBRARY_PATH" not in this_env:
+            print(prefix+"adding LD_LIBRARY_PATH=%s" % LD_LIBRARY_PATH)
+            this_env["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH
+        elif LD_LIBRARY_PATH not in this_env['LD_LIBRARY_PATH']:
+            print(prefix+"LD_LIBRARY_PATH=%s"
+                  % (os.environ['LD_LIBRARY_PATH']))
+            print(prefix+"appending %s to LD_LIBRARY_PATH" % LD_LIBRARY_PATH)
+            if not this_env["LD_LIBRARY_PATH"].endswith(os.pathsep):
+                this_env["LD_LIBRARY_PATH"] += os.pathsep
+                os.environ["LD_LIBRARY_PATH"] += os.pathsep
+            this_env["LD_LIBRARY_PATH"] += LD_LIBRARY_PATH
+            os.environ["LD_LIBRARY_PATH"] += LD_LIBRARY_PATH
+            print(prefix+"LD_LIBRARY_PATH=%s"
+                  % (os.environ['LD_LIBRARY_PATH']))
+        else:
+            print(prefix+"detected %s in LD_LIBRARY_PATH=%s"
+                  % (LD_LIBRARY_PATH, os.environ['LD_LIBRARY_PATH']))
+    enable_call = False
     if enable_call:  # FIXME: True for debug only--issue #616 (doesn't fix)
+        out['lines'] = []
+        # source, stream, and bytes members are discarded before return
+        #   in non-dummy case (not enable_call) & not necessary for caller.
         err = copy.deepcopy(out)
-        out['source'] = []
         stream_metas = OrderedDict({
             'out': out,
             'err': err,
         })
-        code = subprocess.call(cmd)
+        print(prefix+"calling (shell=%s): %s" % (shell, cmd),
+              file=sys.stderr)
+        code = subprocess.run(cmd, shell=shell, env=this_env)
         return {  # FIXME: for debug issue #616 only
             'code': code,
             'streams': stream_metas,
         }
+    if shell:
+        cmd = pre_bin + cmd
+    print(prefix+"opening (shell=%s): %s" % (shell, cmd),
+          file=sys.stderr)
     proc = subprocess.Popen(cmd, shell=shell, stderr=subprocess.PIPE,
-                            stdout=subprocess.PIPE, cwd=cwd)
+                            stdout=subprocess.PIPE, cwd=cwd,
+                            env=this_env)
     code = None
     # Do not wait for finish--start displaying output immediately
     if enable_collect:
@@ -239,6 +299,9 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
     }
 
 
+issue_616_flag = "cannot open shared object file: No such file or directory"
+
+
 def main():
     enablePush = True  # collect the line in the inspector ui right away
     if len(sys.argv) < 2:
@@ -261,8 +324,8 @@ def main():
         else:
             echo0("Warning: not Minetest-like dir_name=%s" % dir_name)
     else:
-        raise ValueError('missing "%s"--use absolute path if not in cwd'
-                         % path)
+        raise ValueError('missing "%s" (cwd="%s")--use absolute path if not in cwd'
+                         % (path, os.getcwd()))
     # else:
     #     cwd = os.dirname(hierosoft.which(path))  # TODO:uncomment this case?
     basename = os.path.basename(path)
@@ -277,6 +340,8 @@ def main():
         #   stdout and stderr.
     else:
         targetBaseDir = exeDir
+    if targetBaseDir == "":
+        targetBaseDir = os.getcwd()
     if inspector:
         OutputInspector.addRoot(targetBaseDir)
     enable_collect = True
@@ -304,15 +369,31 @@ def main():
     err_index = len(out['lines'])
     all_lines = out['lines'] + err['lines']
 
-
     if inspector:
-        print("\nOutputInspector:")
+        sys.stdout.write("\nOutputInspector:")
+        sys.stdout.flush()
+        count = 0
         for line in all_lines:
             inspector.addLine(line, enablePush)
+            count += 1
         # NOTE: addLine adds all of the metadata!
+        if count < 1:
+            cmd_msg = cmd if isinstance(cmd, str) else shlex.join(cmd)
+            print(" (Output of `%s` had %s line(s) of output.)"
+                  % (pformat(cmd_msg), count),
+                  file=sys.stderr)
+        else:
+            print("", file=sys.stderr)
+
         for info in inspector.getLineInfos():
             print(info['all'], file=sys.stderr)
-
+            if issue_616_flag in info['all']:
+                print("- detected issue #616.")
+                print("  See <https://"
+                      "github.com/Poikilos/EnlivenMinetest/issues/616>",
+                      file=sys.stderr)
+                pass
+            
         # raise SyntaxError(
         #     "{} line(s)".format(len(all_lines))+"\n".join(all_lines)
         # )
