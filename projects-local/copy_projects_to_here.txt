@@ -4,14 +4,15 @@ file will be ignored by git to prevent git pull issues, so backup any
 `code-workspace` files or other files you add to this folder.
 
 Edit `code-workspace` files to include your relative path to minetest,
-but you must leave the path to `run-any` intact unless you change it to
-an absolute path which is required to put your `run-any`
-`code-workspace` file somewhere else (This subfolder is here so relative
-paths in the included code-workspaces for run-any will work when copied
-here)
+but you must leave the path to `run-any` intact--unless you change it to
+an absolute path (required if you put your `code-workspace` file
+somewhere else; This subfolder is here as relative paths in the included
+code-workspaces for run-any will only resolve if the code-workspace is
+in a direct subfolder of the repo).
 
 The purpose is:
 - You can click on paths in your IDE to jump to the Lua code.
-  - outputinspector unmangles errors if installed as described in readme.md.
+  - To make this possible consistently, install outputinspector
+    as described in readme.md, as it can unmangle paths & lines.
 - For details and troubleshooting, see "run-any" in readme.md:
   <https://github.com/Poikilos/EnlivenMinetest#run-any>
