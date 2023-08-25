@@ -118,7 +118,12 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
         else:
             if cmd.startswith(bin_rel):
                 cmd = "./" + cmd[len(bin_rel):]
-    pre_bin = "export LD_LIBRARY_PATH=/usr/lib64 " # doesn't fix #616
+    # pre_bin = "export LD_LIBRARY_PATH=/usr/lib64 " # doesn't fix #616
+    # Somehow #616 gone, even shell, force_shell, force_env False & no pre_bin
+    #   Maybe restart computer or run `sudo ldconfig` but I did neither
+    #   (unless installing a package triggered it--I installed lsb before the
+    #   problem went away I think).
+    pre_bin = ""
     force_shell = False
     # ^ Either True/False succeeds in bash, either way LD_LIBRARY_PATH
     #   fails in vscode:
@@ -129,7 +134,7 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
         #   even if run-any is run from bash prompt manually)
         if platform.system() == "Linux":
             if isinstance(cmd, list):
-                pre_bin = "LD_LIBRARY_PATH=/usr/lib64; export LD_LIBRARY_PATH; " # doesn't fix #616
+                # pre_bin = "LD_LIBRARY_PATH=/usr/lib64; export LD_LIBRARY_PATH; " # doesn't fix #616
                 # ^ adding "export " causes bad identifier error later in command
                 cmd = ["bash", "-c", "cd '" + cwd + "'; " + pre_bin + shlex.join(cmd)]
             else:
@@ -170,7 +175,8 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
     # ^ known good path in working bash that can run run-any
     # os.environ['PATH'] = good_path  # still doesn't fix issue #616
     this_env = os.environ.copy()
-    if platform.system() == "Linux":
+    force_env = False
+    if force_env and platform.system() == "Linux":
         # For diagnosing issue #616
         LD_LIBRARY_PATH = "/usr/lib64"
         if "LD_LIBRARY_PATH" not in this_env:

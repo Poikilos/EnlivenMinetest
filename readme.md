@@ -32,7 +32,7 @@ The official game server (world) is called **center** (or "Center of
 the Sun"). The address and port for that and other worlds are listed at
 [minetest.io](https://minetest.io).
 
-To better understand what the issue board covers, see
+To better understand what the **Issues** section covers, see
 [Project Status](#project-status) below.
 
 For notes on current development discussions, see the
@@ -60,6 +60,16 @@ tone mapping and other graphical improvements that are basically
 universal to gaming and intuitively expected (such as is clear from
 vision biology in the case of tone mapping).
 * See also overrides/worlds/CenterOfTheSun/world.conf
+
+The EnlivenMinetest repo has tools for:
+- building ENLIVEN game for Minetest
+  - ENLIVEN is designed to be built from other sources instead of being monolithic.
+  - It needs to be reworked as of August 2023; only bucket_game build works currently.
+  - The copy in "releases" only works in versions close to 0.4.13.
+- building Minetest
+- installing Minetest (some features may be superceded by
+  <https://github.com/Hierosoft/hierosoft>, which is pre-alpha as of Aug 2023)
+- Some specific tools are listed in the [Scripts](#scripts) section below.
 
 **Q**: "Why not make it compatible with versions from the .net site to get [feature x]?"
 
@@ -206,26 +216,50 @@ Disable or remove these Bucket_Game mods/features potentially (not matching them
 * https://github.com/Poikilos/EnlivenMinetest/issues/594
 
 
-## Building Minetest
+## Scripts
+### Building Minetest
 This project is mostly for building ENLIVEN, but there are some scripts
 here to help build the engine as well: See [doc/building-minetest.md](doc/building-minetest.md).
+
+### run-any
+`run-any` is a shim to run binaries (instead of compile) in VSCode. The
+purpose is:
+- You can click on errors in the VSCode shell to navigate to the line(s) of
+  Lua involved in a crash.
+- If you clone/extract
+  [outputinspector](https://github.com/Poikilos/outputinspector)
+  to the same parent folder as EnlivenMinetest, `run-any` will use it to
+  convert paths in Lua tracebacks to clickable paths. For example:
+  - `...../games/ENLIVEN/mods/coderfood/unified_foods/hunger.lua:342: in function ...`
+    - becomes:
+      `/home/user/minetest/games/ENLIVEN/mods/coderfood/unified_foods/hunger.lua:342: in function ...`
+      (If paths including working directory are set correctly such as in
+      `code-workspace` if using VSCode)
+  - See also "tests" directory in
+    [outputinspector](https://github.com/Poikilos/outputinspector)
+- If you have a missing library error in Linux when running using VSCode
+  (even when `run-any` works outside of VSCode), try `sudo ld-config` & see:
+  - [projects-local/copy_projects_to_here.txt](projects-local/copy_projects_to_here.txt)
+  - <https://github.com/Poikilos/EnlivenMinetest/issues/616>
+- A future version of `run-any` may require outputinspector such as if the main
+  function is moved to a submodule there.
 
 
 ## Configuration Files
 (configuring the build of ELIVEN [the mod set only, not binaries])
 You can place zero or more of the following variables in
-$HOME/.config/EnlivenMinetest/scripting.rc:
-```
+`$HOME/.config/EnlivenMinetest/scripting.rc`:
+```bash
 CUSTOM_SCRIPTS_PATH
 MT_POST_INSTALL_SCRIPT_2  # relative to CUSTOM_SCRIPTS_PATH
 REPO_PATH  # Set this if your copy of the repo is not ~/git/EnlivenMinetest
 ENABLE_CLIENT  # =true if you want install-mts.sh to install the client.
 ```
 - If ~/minetest/bin/minetest is present, that has the same effect as
-  `ENABLE_CLIENT=true`.
+  `ENABLE_CLIENT=true`
 
 You can place a script called mts.sh in your home (or
-CUSTOM_SCRIPTS_PATH) directory to run it after install (you can put
+`CUSTOM_SCRIPTS_PATH`) directory to run it after install (you can put
 archive-minetestserver-debug.sh there too to run first). A suggested use
 is to put a line in mts.sh that starts the server, so that the server
 starts after the installation or upgrade is complete.
@@ -337,6 +371,7 @@ README.txt in Minetest's doc folder which is provided in releases.
   application), ENLIVEN subgame (including optional child-friendly
   changes for schools), other files, and licenses of added files.
 
+
 ## Development
 For future plans and how you can contribute or build the game (Lua) or package (Lua+engine+conf) see [doc/development.md](doc/development.md) and [issues](https://github.com/Poikilos/EnlivenMinetest/issues).
 
@@ -386,9 +421,6 @@ On 1/22/22 3:21 AM, Robert Kiraly wrote:
 > Are you able to provide a patch relative to the latest snapshot that does the revert?
 
 `<Poikilos>` Ok can do.
-
-
-
 
 Issues where discussion was requested by RJK:
 - #500

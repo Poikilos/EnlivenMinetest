@@ -20,3 +20,5 @@ linux-minetest-kit.zip
 /docker/libraries-devuan-chimaera/install-minetest-build-deps.sh
 /debug.txt
 linux-minetest-kit/
+/projects-local/*
+!/projects-local/copy_projects_to_here.txt
