@@ -1,8 +1,18 @@
 #!/bin/bash
-rsync -rtv mtio:/opt/minebest/ ~/minebest-rsync --exclude "mtkit/minetest/" --exclude "assemble/" --exclude "mtkit0/"
-# ^ exclude mtkit/minetest/ and assemble/ since they are remotely-built copies of the program.
-# --info=progress2
+rsync -rtv mtio:/opt/minebest/ ~/minebest-rsync \
+    --exclude "mtkit/minetest/" \
+    --exclude "mtkit0/" \
+    --exclude "git-trees.save/" \
+    --exclude "tmp/" \
+;
 code=$?
+# ^ exclude remotely-built copies of the program:
+#   - mtkit/minetest/
+#   - prod/ ?
+# ^ The real git-trees is in assemble/ so do not exclude
+#     --exclude "assemble/" \
+#     --info=progress2 \
+#
 if [ $code -eq 0 ]; then
     echo "Updating ~/minebest-rsync...OK"
 else
