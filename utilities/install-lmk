@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 """
 Usage:
-deploy-minetest-kit <project name> [--from <built dir>] [options]
+install-lmk <project name> [--from <built dir>] [options]
 
 The available project names are:
 classic (or final or minetest) to install ~/minetest-rsync,
 finetest (or fine) to install ~/finetest-rsync
     (for the game that ripped off Multicraft.org's name), or
 trolltest (or troll) to install ~/trolltest-rsync (based on MT5).
+
+If the current directory is not ~/minetest-rsync, the suffix "local"
+will be used for installed directories and shortcuts instead of rsync to
+indicate you are using a downloaded copy (not using a copy obtained via
+rsync access to the build server).
 
 Options:
 --from <built dir>    Install from this directory. Defaults to
@@ -19,13 +24,14 @@ Options:
                       if --server is used without --client.
 """
 from __future__ import print_function
-import sys
-import platform
-import os
-import shutil
-import tempfile
-import stat
 import copy
+import json
+import os
+import platform
+import shutil
+import stat
+import sys
+import tempfile
 from pprint import pformat
 
 if platform.system() == "Windows":
@@ -44,7 +50,11 @@ if sys.version_info.major < 3:
 
 
 INSTALL_SRC = os.path.join(HOME, "minebest-rsync", "mtkit", "minetest")
-VARIANT = "rsync"
+# ^ Changed later if detected in current dir (in use_if_source).
+DETECT_KIT_SUBDIRS = ["minetest", "mtsrc"]  # Use via detect_source
+# ^ First entry of DETECT_KIT_SUBDIRS has to be the new INSTALL_SRC!
+
+VARIANT = "rsync"  # Changed to "local" if not in universal directory!
 
 MINETEST_KEYWORDS = ("sandbox;world;mining;crafting;blocks;nodes;multiplayer;"
                      "roleplaying;")
@@ -136,8 +146,61 @@ def usage():
     echo0(__doc__)
 
 
+
+def detect_source(path):
+    """Get a built minetest directory inside of path if present.
+    It must contain all DETECT_KIT_SUBDIRS for the subdirectory to be
+    detected.
+
+    Returns:
+        str: minetest subdirectory. If path does not have
+            all DETECT_KIT_SUBDIRS, result is None.
+    """
+    for sub in DETECT_KIT_SUBDIRS:
+        sub_path = os.path.join(path, sub)
+        if not os.path.isdir(sub_path):
+            return None
+    return os.path.join(path, DETECT_KIT_SUBDIRS[0])
+
+
+def use_if_source(path):
+    """Use the path as INSTALL_SRC if it contains a minetest install.
+    See detect_source for details. A message is shown regarding the
+    status.
+
+    Affects globals:
+    - INSTALL_SRC
+    - VARIANT
+
+    Returns:
+        bool: True if is a source (even if INSTALL_SRC is already the
+            same).
+    """
+    global INSTALL_SRC
+    global VARIANT
+    detected_src = detect_source(path)
+    if detected_src:
+        if detected_src != INSTALL_SRC:
+            echo0('Switching from "{}" to local copy:'
+                  '\n  "{}"'
+                  ''.format(INSTALL_SRC, detected_src))
+            INSTALL_SRC = detected_src
+            VARIANT = "local"
+        else:
+            echo0('Using standard source location (same as current dir):'
+                  '\n  "{}"'
+                  ''.format(INSTALL_SRC))
+        return True
+    else:
+        echo0('Using standard source location'
+              ' (since current dir does not have both "mtsrc and "minetest"):'
+              '\n  "{}"'
+              ''.format(INSTALL_SRC))
+    return False
+
 def main():
     prefix = "[main] "
+    use_if_source(os.getcwd())
     required_bin_suffixes = None
     why_meta = "detected"
     project_meta = detect_project_meta(INSTALL_SRC)
@@ -154,7 +217,13 @@ def main():
                   " to determine what project is being installed.")
             return 1
         else:
-            echo0("using detected project: {}".format(project_meta))
+            echo0("using detected project: {}".format(
+                json.dumps(project_meta, indent=2),
+            ))
+            # NOTE: ^ shows name_and_variant_fmt with literal "{}" still
+            #   (unavoidable without messing with it), so see
+            #   "Name={}" further down for that output (Only possible
+            #   after `variant` is set).
     elif len(sys.argv) == 2:
         pass  # 1st arg (arg [1]) is always handled further down
     else:
@@ -271,7 +340,7 @@ def main():
 
 
 def install_minetest(src, project_meta, dst=None, variant_dirname=None,
-                     variant=VARIANT):
+                     variant=None):
     """Install Minetest
 
     Args:
@@ -294,18 +363,21 @@ def install_minetest(src, project_meta, dst=None, variant_dirname=None,
             minetest-rsync). If VARIANT is blank or None, the
             variant_dirname will become the same as the dirname
             (such as minetest).
-        variant (string): Append this to the dirname. It also
+        variant (str): Append this to the dirname. It also
             affects the shortcut--see "variant" under install_shortcut.
             On desktops environments following the XDG standard,
             also appended to the icon filename so the variant's can
             co-exist with other variants (such as deb and AppImage and
-            so on).
+            so on). Defaults to VARIANT (which is set automatically to
+            "rsync" or "local" elsewhere).
 
     Returns:
         dict: "destination" is where it was installed if at all. See
             "warning" in case there was something incorrect about the
             install.
     """
+    if variant is None:
+        variant = VARIANT
     project_name = project_meta.get('name')
     project_msg = project_name
     if project_msg is None:
@@ -375,6 +447,23 @@ def install_minetest(src, project_meta, dst=None, variant_dirname=None,
         'warning': warning,
     }
 
+def generate_caption(project_meta, variant):
+    """Generate the icon caption.
+
+    Args:
+        project_meta (dict): The dict containing 'name' and
+            'name_and_variant_fmt' where 'name' is like
+            "Trolltest (minetest.org)", and 'name_and_variant_fmt' is
+            like 'Trolltest ({}) (minetest.org build)'.
+    """
+    Name = project_meta['name']
+    if variant is not None:
+        name_and_variant_fmt = project_meta.get('name_and_variant_fmt')
+        if name_and_variant_fmt is not None:
+            Name = name_and_variant_fmt.format(variant)
+        else:
+            Name += " (" + project_meta['variant'] + ")"  # raise if None
+    return Name
 
 def install_shortcut(Exec, dst, project_meta, variant):
     """Install a shortcut to any program on any understood platform.
@@ -433,13 +522,8 @@ def install_shortcut(Exec, dst, project_meta, variant):
         FileNotFoundError: If src does not exist.
     """
     warning = None
-    Name = project_meta['name']
-    if variant is not None:
-        name_and_variant_fmt = project_meta.get('name_and_variant_fmt')
-        if name_and_variant_fmt is not None:
-            Name = name_and_variant_fmt.format(variant)
-        else:
-            Name += " (" + project_meta['variant'] + ")"  # raise if None
+    Name = generate_caption(project_meta, variant)
+    echo0("Name={}".format(Name))
     platform_icon_relpath = project_meta.get('platform_icon_relpath')
     icon_relpath = None
     if platform_icon_relpath is not None:
@@ -457,7 +541,10 @@ def install_shortcut(Exec, dst, project_meta, variant):
 
     if platform.system() == "Linux":
         sc_template_path = os.path.join(dst, project_meta['shortcut_relpath'])
-        shortcut_name = project_meta['shortcut_name_noext'] + ".desktop"
+        shortcut_name = "{}.{}.desktop".format(
+            project_meta['shortcut_name_noext'],
+            variant,
+        )
         sc_installed_path = os.path.join(SHORTCUTS_DIR, shortcut_name)
         if not os.path.isdir(SHORTCUTS_DIR):
             os.makedirs(SHORTCUTS_DIR)  # default mode is 511
