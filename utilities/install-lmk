@@ -198,6 +198,7 @@ def use_if_source(path):
               ''.format(INSTALL_SRC))
     return False
 
+
 def main():
     prefix = "[main] "
     use_if_source(os.getcwd())
@@ -426,6 +427,13 @@ def install_minetest(src, project_meta, dst=None, variant_dirname=None,
         write0('Installing %s to %s...'
                % (pformat(project_msg), pformat(dst)))
         shutil.copytree(src, dst)
+        version_path = project_meta.get('version_path')
+        if version_path and os.path.isfile(version_path):
+            version_name = os.path.basename(version_path)
+            shutil.copy(
+                version_path,
+                os.path.join(dst, version_name),
+            )
         echo0("Done")
         result_path = dst
     else:
@@ -447,6 +455,7 @@ def install_minetest(src, project_meta, dst=None, variant_dirname=None,
         'warning': warning,
     }
 
+
 def generate_caption(project_meta, variant):
     """Generate the icon caption.
 
@@ -464,6 +473,7 @@ def generate_caption(project_meta, variant):
         else:
             Name += " (" + project_meta['variant'] + ")"  # raise if None
     return Name
+
 
 def install_shortcut(Exec, dst, project_meta, variant):
     """Install a shortcut to any program on any understood platform.
@@ -638,6 +648,31 @@ def detect_project_meta(mt_share_path):
                 # For example, remove "minetest" if not present (but
                 #   install can still proceed if "minetestserver" was
                 #   added to the required list).
+            mt_share_path = os.path.realpath(mt_share_path)
+            version_paths = [
+                os.path.join(mt_share_path, "release.txt"),
+                os.path.join(os.path.dirname(mt_share_path), "release.txt"),
+            ]
+            for version_path in version_paths:
+                if os.path.isfile(version_path):
+                    new_meta['version_path'] = version_path
+                    version = None
+                    with open(version_path, 'r') as stream:
+                        for rawL in stream:
+                            if version is None:
+                                version = rawL.strip()
+                        # ^ Use `for` to avoid Exception on empty file.
+                    if version is None:
+                        echo0('Warning: "{}" is empty!'.format(version_path))
+                        continue
+                    elif not version:
+                        echo0('Warning: "{}" had a blank line not version'
+                              ''.format(version_path))
+                        version = None
+                        continue
+                    if version:
+                        new_meta['version'] = version
+                        break
             if found_any:
                 matches.append(new_meta)
                 break  # only first entry will be used & get "server" added
@@ -733,6 +768,7 @@ if sys.version_info.major < 3:
         finally:
             write0("removing tmp file...")
             os.remove(path)
+
 
 if __name__ == "__main__":
     sys.exit(main())
