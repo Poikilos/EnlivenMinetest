@@ -13,6 +13,10 @@ Usage:
   the utilities/blender directory at
   github.com/poikilos/EnlivenMinetest).
 - "Text", "Run Script".
+
+Alternatives:
+OBJ files can be analyzed in the terminal with a terminal Python script:
+objanalyze <file>
 '''
 import bpy
 
