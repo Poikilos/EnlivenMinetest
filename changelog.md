@@ -5,6 +5,11 @@ The format is based on [Keep a
 Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
+## [git] - 2024-01-06
+### Removed
+- Move mock_tnt to its own repo (https://github.com/Poikilos/mock_tnt).
+
+
 ## [git] - 2020-05-07
 ### Changed
 - Make both `install-minetest-linux64.sh` and
@@ -343,13 +348,7 @@ mv unmounter unmounter.sh
 
 ## [git] - 2017-05-15
 ### Added
-* mock_tnt: doesn't destroy blocks, can coexist with regular tnt mod
-  (all tnt is replaced with mock_tnt if tnt is disabled). This mod is
-  helpful for when multiplayer servers have tnt disabled but players
-  have acquired 'unknown item' (tnt:tnt) as loot. The Unknown Explosive
-  says 'unknown item' on it, as a seemless replacement :)
-  (see patches/mods-multiplayer/mock_tnt/)
-
+* mock_tnt
 
 
 ## [git] - 2017-04-20
