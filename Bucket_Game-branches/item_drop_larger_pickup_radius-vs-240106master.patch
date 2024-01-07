@@ -1,0 +1,34 @@
+diff -ru Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/init.lua Bucket_Game-branches/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/init.lua
+--- Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/init.lua	2024-01-07 15:31:52.094924122 -0500
++++ Bucket_Game-branches/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/init.lua	2024-01-07 15:30:18.254688388 -0500
+@@ -47,9 +47,9 @@
+ 	local pickup_particle =
+ 		minetest.settings:get_bool("item_drop.pickup_particle", true)
+ 	local pickup_radius = legacy_setting_getnumber("item_drop.pickup_radius",
+-		"item_pickup_radius", 0.75)
++		"item_pickup_radius", 1.425)
+ 	local magnet_radius = tonumber(
+-		minetest.settings:get("item_drop.magnet_radius")) or -1
++		minetest.settings:get("item_drop.magnet_radius")) or 2.0
+ 	local magnet_time = tonumber(
+ 		minetest.settings:get("item_drop.magnet_time")) or 5.0
+ 	local pickup_age = tonumber(
+Only in Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop: LICENSE
+diff -ru Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/settingtypes.txt Bucket_Game-branches/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/settingtypes.txt
+--- Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/settingtypes.txt	2022-01-10 17:45:45.764325296 -0500
++++ Bucket_Game-branches/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/settingtypes.txt	2024-01-07 15:30:22.042697904 -0500
+@@ -20,12 +20,12 @@
+ item_drop.pickup_particle (Pickup particle) bool true
+ 
+ #Player pickup radius, the maximum distance from which items can be collected
+-item_drop.pickup_radius (Pickup radius) float 0.75
++item_drop.pickup_radius (Pickup radius) float 1.425
+ 
+ #Magnet radius, items between pickup_radius and this begin flying to the player
+ #Set it to -1 (or something else smaller than pickup_radius) to disable item
+ #flying
+-item_drop.magnet_radius (Magnet radius) float -1
++item_drop.magnet_radius (Magnet radius) float 2.0
+ 
+ #Item flight duration, items flying for more than this time are added to the
+ #player's inventory

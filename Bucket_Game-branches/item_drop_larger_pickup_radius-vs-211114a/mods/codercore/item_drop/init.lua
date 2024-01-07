@@ -49,7 +49,7 @@ if legacy_setting_getbool("item_drop.enable_item_pickup",
 	local pickup_radius = legacy_setting_getnumber("item_drop.pickup_radius",
 		"item_pickup_radius", 1.425)
 	local magnet_radius = tonumber(
-		minetest.settings:get("item_drop.magnet_radius")) or -1
+		minetest.settings:get("item_drop.magnet_radius")) or 2.0
 	local magnet_time = tonumber(
 		minetest.settings:get("item_drop.magnet_time")) or 5.0
 	local pickup_age = tonumber(
@@ -99,7 +99,7 @@ if legacy_setting_getbool("item_drop.enable_item_pickup",
 		minetest.sound_play("item_drop_pickup", {
 			pos = pos,
 			gain = pickup_gain,
-		})
+		}, true)
 		if pickup_particle then
 			local item = minetest.registered_nodes[
 				ent.itemstring:gsub("(.*)%s.*$", "%1")]
