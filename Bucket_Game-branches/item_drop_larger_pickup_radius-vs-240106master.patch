@@ -1,34 +1,120 @@
 diff -ru Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/init.lua Bucket_Game-branches/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/init.lua
---- Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/init.lua	2024-01-07 15:31:52.094924122 -0500
-+++ Bucket_Game-branches/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/init.lua	2024-01-07 15:30:18.254688388 -0500
-@@ -47,9 +47,9 @@
+--- Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/init.lua	2024-01-07 23:20:48.643320471 -0500
++++ Bucket_Game-branches/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/init.lua	2024-01-07 23:59:02.314765227 -0500
+@@ -47,11 +47,11 @@
  	local pickup_particle =
  		minetest.settings:get_bool("item_drop.pickup_particle", true)
  	local pickup_radius = legacy_setting_getnumber("item_drop.pickup_radius",
 -		"item_pickup_radius", 0.75)
-+		"item_pickup_radius", 1.425)
++		"item_pickup_radius", .4)  -- 1.425 is better if magnet_radius < than it.
  	local magnet_radius = tonumber(
 -		minetest.settings:get("item_drop.magnet_radius")) or -1
-+		minetest.settings:get("item_drop.magnet_radius")) or 2.0
++		minetest.settings:get("item_drop.magnet_radius")) or 1.4
  	local magnet_time = tonumber(
- 		minetest.settings:get("item_drop.magnet_time")) or 5.0
+-		minetest.settings:get("item_drop.magnet_time")) or 5.0
++		minetest.settings:get("item_drop.magnet_time")) or 0.0
  	local pickup_age = tonumber(
+ 		minetest.settings:get("item_drop.pickup_age")) or 0.5
+ 	local key_triggered = legacy_setting_getbool("item_drop.enable_pickup_key",
+@@ -181,23 +181,31 @@
+ 			if not ent then
+ 				return
+ 			end
+-			local item = ItemStack(ent.itemstring)
+-			if inv
+-			and inv:room_for_item("main", item)
+-			and item_drop.can_pickup(ent, player) then
+-				collect_item(ent, object:get_pos(), player)
+-			else
++            -- Case below is commented so player does *not* collect it
++            --   unless in collect range!
++            --   -Poikilos 2024-01-07
++			-- local item = ItemStack(ent.itemstring)
++			-- if inv
++			-- and inv:room_for_item("main", item)
++			-- and item_drop.can_pickup(ent, player) then
++			-- 	collect_item(ent, object:get_pos(), player)
++			-- else
+ 				-- the acceleration will be reset by the object's on_step
+-				object:set_velocity({x=0,y=0,z=0})
+ 				ent.is_magnet_item = false
+-			end
++				object:set_velocity({x=0,y=0,z=0})
++				object:set_physics_override({["gravity"] = 1.0})  -- let item fall
++                -- -Poikilos 2024-01-07
++			-- end
+ 		end
+ 
+ 		-- disable velocity and acceleration changes of items flying to players
+ 		minetest.after(0, function()
+ 			local ObjectRef
+-			local blocked_methods = {"set_acceleration", "set_velocity",
+-				"setacceleration", "setvelocity"}
++			-- local blocked_methods = {"set_acceleration", "set_velocity",
++			-- 	"setacceleration", "setvelocity"}
++            local blocked_methods = {}  -- empty (blocking no functions) is hard-coded way to allow both normal&custom physics of flying item
++            -- -Poikilos 2024-01-07
++
+ 			local itemdef = minetest.registered_entities["__builtin:item"]
+ 			local old_on_step = itemdef.on_step
+ 			local function do_nothing() end
+@@ -298,13 +306,16 @@
+ 					end
+ 					-- The item is not too far a way but near enough to be
+ 					-- magnetised, make it fly to the player
+-					local vel = vector.multiply(vector.subtract(pos, pos2), 3)
+-					vel.y = vel.y + 0.6
++					local vel = vector.multiply(vector.subtract(pos, pos2), 2)
++                    -- ^ upstream mod uses 3 but that is too fast (which cancels out distance-based difficulty curve)
++					--   vel.y = vel.y + 0.6
++                    --   ^ Commented since a slight challenge is more fun
++                    --     (having to get close to item adds to gameplay)
++                    --   -Poikilos 2024-01-07
+ 					object:set_velocity(vel)
+ 					if not ent.is_magnet_item then
+ 						ent.object:set_acceleration({x=0, y=0, z=0})
+ 						ent.is_magnet_item = true
+-
+ 						minetest.after(magnet_time, afterflight,
+ 							object, inv, player)
+ 					end
 Only in Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop: LICENSE
+diff -ru Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/README.md Bucket_Game-branches/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/README.md
+--- Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/README.md	2024-01-07 23:21:01.047355071 -0500
++++ Bucket_Game-branches/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/README.md	2024-01-07 23:21:28.719432256 -0500
+@@ -20,7 +20,7 @@
+   is `true` (true by default)
+   * Multiple items are picked in a quick succession instead of all at once which
+     is indicated by the pickup sound.
+-  * It uses a node radius set in `item_drop.pickup_radius` (default 0.75),
++  * It uses a node radius set in `item_drop.pickup_radius`,
+     if items are within this radius around the player's belt, they're picked.
+   * If `item_drop.pickup_age` is something positive, items dropped by players
+     are ignored for this time to avoid instantly picking up when dropping.
 diff -ru Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/settingtypes.txt Bucket_Game-branches/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/settingtypes.txt
---- Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/settingtypes.txt	2022-01-10 17:45:45.764325296 -0500
-+++ Bucket_Game-branches/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/settingtypes.txt	2024-01-07 15:30:22.042697904 -0500
-@@ -20,12 +20,12 @@
+--- Bucket_Game-base/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/settingtypes.txt	2024-01-07 23:20:55.086338442 -0500
++++ Bucket_Game-branches/item_drop_larger_pickup_radius-vs-211114a/mods/codercore/item_drop/settingtypes.txt	2024-01-07 23:55:14.238139711 -0500
+@@ -20,18 +20,18 @@
  item_drop.pickup_particle (Pickup particle) bool true
  
  #Player pickup radius, the maximum distance from which items can be collected
 -item_drop.pickup_radius (Pickup radius) float 0.75
-+item_drop.pickup_radius (Pickup radius) float 1.425
++item_drop.pickup_radius (Pickup radius) float .4
  
  #Magnet radius, items between pickup_radius and this begin flying to the player
  #Set it to -1 (or something else smaller than pickup_radius) to disable item
  #flying
 -item_drop.magnet_radius (Magnet radius) float -1
-+item_drop.magnet_radius (Magnet radius) float 2.0
++item_drop.magnet_radius (Magnet radius) float 1.4
  
- #Item flight duration, items flying for more than this time are added to the
- #player's inventory
+-#Item flight duration, items flying for more than this time are added to the
+-#player's inventory
+-item_drop.magnet_time (Magnet time) float 5.0
++#Item flight duration, items flying for more than this time are allowed to fall).
++item_drop.magnet_time (Magnet time) float 0.0
+ 
+ #Time delay in seconds after autopicking an item if it's dropped by a player
++#(if -1 then zero_velocity_mode is used which requires item_drop.magnet_radius = -1)
+ item_drop.pickup_age (Pickup age) float 0.5
+ 
+ #Enable manual item pickups by mouse
