@@ -1,11 +1,45 @@
 #!/bin/bash
-rsync -rtv mtio:/opt/minebest/ ~/minebest-rsync \
+rsync -rtlv mtio:/opt/minebest/ /opt/minebest \
     --exclude "mtkit/minetest/" \
     --exclude "mtkit0/" \
     --exclude "git-trees.save/" \
     --exclude "tmp/" \
+    --exclude "mtkit/" \
 ;
+# ^ exclude mtkit because it is downstream from linux-minetest-kit.zip
+#   in prod (symlink to assemble/prod)!
+#   (mtkit is the installed copy in the case of a server, and is used as
+#   the install source when using the maintainer rsync copy as the
+#   install source)
 code=$?
+
+if [ -L /opt/minebest/mtkit ]; then
+    rm -f /opt/minebest/mtkit
+elif [ -d /opt/minebest/mtkit ]; then
+    rm -rf /opt/minebest/mtkit
+fi
+
+if [ -L /tmp/lmk ]; then
+    rm -f /tmp/lmk
+elif [ -d /tmp/lmk ]; then
+    rm -rf /tmp/lmk
+fi
+
+unzip /opt/minebest/prod/linux-minetest-kit.zip -d /tmp/lmk
+mv /tmp/lmk/linux-minetest-kit /opt/minebest/mtkit
+GOOD_MTKIT_FLAG="/opt/minebest/mtkit/mtcompile-program.sh"
+if [ ! -f "$GOOD_MTKIT_FLAG" ]; then
+    echo "Error: extracting /opt/minebest/prod/linux-minetest-kit.zip didn't seem to work. There is no '$GOOD_MTKIT_FLAG'."
+    exit 1
+fi
+
+# mtkit
+# - is the INSTALLED copy,
+# - maybe OLDER than linux-minetest-kit.zip!
+
+# prod
+# - delete prod/* to test building prod using "bash -e buildskipwin.sh"
+
 # ^ exclude remotely-built copies of the program:
 #   - mtkit/minetest/
 #   - prod/ ?
@@ -14,18 +48,24 @@ code=$?
 #     --info=progress2 \
 #
 if [ $code -eq 0 ]; then
-    echo "Updating ~/minebest-rsync...OK"
+    echo "Updating /opt/minebest...OK"
 else
-    echo "Updating ~/minebest-rsync...FAILED"
+    echo "Updating /opt/minebest...FAILED"
 fi
-cd ~/minebest-rsync
+cd /opt/minebest
 cat <<END
 
 Next do:
 
-cd ~/minebest-rsync/mtkit
+cd /opt/minebest/mtkit
 bash -e mtcompile-libraries.sh build
 perl mtcompile-program.pl --build --finetest --client
-cd ~/minebest-rsync/mtkit/minetest/bin
-nopackage install finetest --version rsync --caption "Finetest (rsync)"
+# cd /opt/minebest/mtkit/minetest/bin
+# nopackage install finetest --version rsync --caption "Finetest (rsync)"
+# install-lmk
+# ^ located in EnlivenMinetest/utilities
+# or upgrade but don't mess with worlds (other than builtin ones), nor mods etc:
+rsync -rt --exclude 'mods' --exclude 'minetest.conf' /opt/minebest/mtkit/minetest/ ~/finetest-rsync
+# AND:
+rsync -rt --delete /opt/minebest/mtkit/minetest/games/bucket_game/ ~/finetest-rsync/games/bucket_game
 END

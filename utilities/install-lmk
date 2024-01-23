@@ -16,7 +16,8 @@ rsync access to the build server).
 
 Options:
 --from <built dir>    Install from this directory. Defaults to
-                      "$HOME/minebest-rsync/mtkit/minetest".
+                      "/opt/minebest/mtkit/minetest" (from home not opt
+                      if using Windows).
 --server              Require a binary ending with "server" to be
                       present in built dir. Defaults to False.
 --client              Require a binary ending with "server" to be
@@ -48,13 +49,18 @@ if sys.version_info.major < 3:
     FileNotFoundError = IOError
     ModuleNotFoundError = ImportError
 
-
-INSTALL_SRC = os.path.join(HOME, "minebest-rsync", "mtkit", "minetest")
+INSTALL_SRC = os.path.join("/opt", "minebest-rsync", "mtkit", "minetest")
+if platform.system() == "Windows":
+    INSTALL_SRC = os.path.join(HOME, "minebest-rsync", "mtkit", "minetest")
 # ^ Changed later if detected in current dir (in use_if_source).
 DETECT_KIT_SUBDIRS = ["minetest", "mtsrc"]  # Use via detect_source
 # ^ First entry of DETECT_KIT_SUBDIRS has to be the new INSTALL_SRC!
 
-VARIANT = "rsync"  # Changed to "local" if not in universal directory!
+VARIANT = "rsync"  # ^ Changed to "local" if not in default INSTALL_SRC
+# - "local" copy of linux-minetest-kit.zip is for end users
+# - "rsync" copy from /opt/minebest/ is for maintainers
+#   (linux-minetest-kit.zip is built by /assemble/util/buildskipwin.sh
+#   and then must be manually extracted to /opt/minebest/mtkit)
 
 MINETEST_KEYWORDS = ("sandbox;world;mining;crafting;blocks;nodes;multiplayer;"
                      "roleplaying;")
