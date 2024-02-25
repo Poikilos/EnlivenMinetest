@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ElivenMinetest"
+version = "0.2.0"
+authors = [
+  { name="Jake Gustafson", email="7557867+poikilos@users.noreply.github.com" },
+]
+# requires-python = ">=3.3"
+# TODO: (shutil.which requires 3.3 but) may need newer version,
+#   & other code may run on older version
+#   so leave commented to not block install.
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
+    "Operating System :: OS Independent",
+]
