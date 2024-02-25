@@ -88,7 +88,7 @@ class TestMTPatches(unittest.TestCase):
         self.assertFalse(diffs)  # assert same (ignoring base extra file(s))
 
     def test_find_mod(self):
-        game_path = os.path.join(TESTS_DATA_DIR, "game")
+        game_path = os.path.join(TESTS_DATA_DIR, "mod_game")
         self.assertEqual(
             find_mod(game_path, "wrong_mod"),
             None
