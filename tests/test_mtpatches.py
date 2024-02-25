@@ -31,7 +31,7 @@ class TestMTPatches(unittest.TestCase):
             os.path.join(TESTS_DATA_DIR, "base", "unused", "sub", "has_file"),
             log_level=1,
         )
-        self.assertEqual(sub, None)
+        self.assertEqual(sub, "")
         # ^ should be "has_file" dir, since that contains
         #   "shallowest_in_base.txt"
 

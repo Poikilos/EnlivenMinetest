@@ -196,35 +196,58 @@ def diff_only_head(base, head, rel=None, more_1char_args=None, depth=0):
     return diffs  # folder, so return every sub's diff(s) ([] if None)
 
 
-def get_shallowest_files_sub(root, log_level=0, filter=None):
+def get_shallowest_files_sub(root, log_level=0, mask=None, name=None):
     """Get the shallowest folder relative to root that contains file(s).
 
     Args:
         root (str): The folder to check for files recursively.
-        rel (str, optional): Leave blank (set automatically during
-            recursion).
-        depth (int, optional): Leave as 0 (set automatically during
-            recursion).
-        filter (Union[str,list[str]], optional): Filename or list of
+            NOTE: "" or paths ending with "." will be converted to a
+            real path (following symlinks if any).
+        log_level (int, optional): 0 for only errors. 1 for info.
+        mask (Union[str,list[str]], optional): Filename or list of
             filenames to find (None/0/""/False/"*"/[] will match any
-            file).
+            file). If a folder contains the files, the folder path
+            relative to root will be returned.
+        name (str, optional): What parent folder name to return, or None
+            for any with files (see mask). Defaults to None.
 
     Returns:
-        Union(str, None): Get the relative dir that contains file(s).
+        str: Get the relative dir that contains file(s) ("" for root,
+            None if not found).
     """
+    if (root == "") or root.endswith("."):
+        root = os.path.realpath(root)
     return _get_shallowest_files_sub(
         root,
         log_level=log_level,
-        filter=filter,
+        mask=mask,
+        name=name,
     )
 
 
 def _get_shallowest_files_sub(root, rel=None, depth=0, log_level=0,
-                              filter=None):
-    if isinstance(filter, str):
-        if filter == "*":
-            filter = None
-        filter = [filter]
+                              mask=None, name=None):
+    """Get the shallowest folder relative to root that contains file(s).
+    See get_shallowest_files_sub for other arguments.
+
+    Args:
+        rel (str, optional): Leave blank (set automatically during
+            recursion).
+        depth (int, optional): Leave as 0 (set automatically during
+            recursion).
+
+    Raises:
+        ValueError: root is None
+        ValueError: _description_
+
+    Returns:
+        str: Get the relative dir that contains file(s) ("" for root,
+            None if not found).
+    """
+    if isinstance(mask, str):
+        if mask == "*":
+            mask = None
+        mask = [mask]
     if root is None:
         raise ValueError("root is {}".format(root))
     if rel and rel.startswith(os.path.sep):
@@ -235,10 +258,17 @@ def _get_shallowest_files_sub(root, rel=None, depth=0, log_level=0,
         )
 
     parent = os.path.join(root, rel) if rel else root
+    _, parent_name = os.path.split(parent)
+    # ^ Ok even if rel is used, since split name results in ('', name)
     for sub in os.listdir(parent):
+        if name and (parent_name != name):
+            # Match against the name if name is set by caller.
+            continue
         sub_path = os.path.join(parent, sub)
         if os.path.isfile(sub_path):
-            if (not filter) or (sub in filter):
+            if (not mask) or (sub in mask):
+                if rel is None:
+                    rel = ""  # found in root, so rel is ""
                 return rel
     # ^ Check *all* subs first, in case dir is listed before file.
     #   The *parent* has file(s), so return parent
@@ -262,10 +292,11 @@ def _get_shallowest_files_sub(root, rel=None, depth=0, log_level=0,
             rel=sub_rel,
             depth=depth+1,
             log_level=log_level,
-            filter=filter,
+            mask=mask,
+            name=name,
         )
 
-        if found_path:
+        if found_path is not None:
             return found_path
         continue
 
@@ -273,70 +304,31 @@ def _get_shallowest_files_sub(root, rel=None, depth=0, log_level=0,
 
 
 def find_mod(parent, name):
-    return _find_sub_with_known_files(
+    mask = ["init.lua", "mod.conf", "depends.txt", "description.txt"]
+    # return _find_sub_with_known_files(
+    #     parent,
+    #     name,
+    #     mask=mask,
+    # )
+    return get_shallowest_files_sub(
         parent,
-        name,
-        filter=["init.lua", "mod.conf", "depends.txt", "description.txt"],
+        mask=mask,
+        name=name,
     )
 
 
 def find_modpack(parent, name):
-    return _find_sub_with_known_files(
+    mask = ["modpack.txt", "modpack.conf"]
+    # return _find_sub_with_known_files(
+    #     parent,
+    #     name,
+    #     mask=mask,
+    # )
+    return get_shallowest_files_sub(
         parent,
-        name,
-        filter=["modpack.txt", "modpack.conf"],
+        mask=mask,
+        name=name,
     )
-
-
-def _find_sub_with_known_files(parent, name, root_slash=None, filter=None):
-    """Get relative path to Minetest mod (or "" if parent is it).
-
-    Args:
-        parent (str): Folder to search for Minetest mod files.
-        name (str): Name of the mod to find. It can still be found if it
-            is the same name as the parent, so if parent is "mods",
-            then "3d_armor/3d_armor" would be the result rather than
-            "3d_armor".
-        root_slash (str, optional): Leave as None. Recursion sets it
-            automatically. Defaults to None.
-        filter (list[str]): Defaults to files found in a mod,
-            but can be changed to find a modpack or anything else.
-
-    Returns:
-        str: relative path to Minetest mod (or "" if parent is it),
-            or None if not Found.
-    """
-    if not root_slash:
-        root_slash = parent + os.path.sep
-    _, parent_name = os.path.split(parent)
-
-    if parent_name == name:
-        for sub in os.listdir(parent):
-            sub_path = os.path.join(parent, sub)
-            if not os.path.isfile(sub_path):
-                continue
-            if sub in filter:
-                # Then parent is the mod. End the search
-                #   and return *relative* path to mod
-                #   (with root_slash removed, so
-                #   "" if parent matches before recursion)
-                return parent[len(root_slash):]
-    # ^ must iterate files *before* recursion to avoid deeper false
-    #   positive suchas backup folder inside of a mod that has a
-    #   file in filter.
-    for sub in os.listdir(parent):
-        sub_path = os.path.join(parent, sub)
-        if os.path.isfile(sub_path):
-            continue
-        found = _find_sub_with_known_files(
-            sub_path,
-            name,
-            root_slash=root_slash,
-            filter=filter,
-        )
-        if found:
-            return found
-    return None
 
 
 def main():
@@ -365,12 +357,12 @@ def main():
                     continue
                 mod_rel = get_shallowest_files_sub(
                     head_sub_path,
-                    filter=["init.lua", "mod.conf", "depends.txt",
+                    mask=["init.lua", "mod.conf", "depends.txt",
                             "description.txt"],
                 )
                 modpack_rel = get_shallowest_files_sub(
                     head_sub_path,
-                    filter=["modpack.txt"],
+                    mask=["modpack.txt"],
                 )
                 if mod_rel and not modpack_rel:
                     mod_parent = os.path.dirname(os.path.join(head_sub_path,
