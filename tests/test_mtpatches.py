@@ -1,0 +1,92 @@
+import os
+import sys
+import unittest
+
+TESTS_DIR = os.path.dirname(os.path.realpath(__file__))
+REPO_DIR = os.path.dirname(TESTS_DIR)
+TESTS_DATA_DIR = os.path.join(TESTS_DIR, "data")
+
+if __name__ == "__main__":
+    # Allow it to run without pytest.
+    sys.path.insert(0, REPO_DIR)
+
+from pyenliven.mtpatches import (  # noqa F402
+    get_shallowest_files_sub,
+    diff_only_head,
+)
+
+
+class TestMTPatches(unittest.TestCase):
+    def test_get_shallowest_files_sub(self):
+        sub = get_shallowest_files_sub(
+            os.path.join(TESTS_DATA_DIR, "base")
+        )
+        self.assertEqual(sub, os.path.join("unused", "sub", "has_file"))
+        # ^ should be "has_file" dir, since that contains
+        #   "shallowest_in_base.txt"
+
+    def test_get_shallowest_files_not_in_sub(self):
+        sub = get_shallowest_files_sub(
+            os.path.join(TESTS_DATA_DIR, "base", "unused", "sub", "has_file"),
+            log_level=1,
+        )
+        self.assertEqual(sub, None)
+        # ^ should be "has_file" dir, since that contains
+        #   "shallowest_in_base.txt"
+
+    def test_diff_only_head__different_file(self):
+        base = os.path.join(TESTS_DATA_DIR, "base", "unused", "sub")
+        head = os.path.join(TESTS_DATA_DIR, "head", "unused", "sub")
+        # ^ use deeper dir to skip new file in head/unused/
+        #   (See test_diff_only_head__new_file for that).
+        diffs = diff_only_head(
+            base,
+            head,
+        )
+        self.assertEqual(
+            diffs,
+            [
+                {
+                    'rel': os.path.join("has_file", "shallowest_in_base.txt"),
+                    'code': 1,
+                },
+            ]
+        )
+
+    def test_diff_only_head__new_file(self):
+        base = os.path.join(TESTS_DATA_DIR, "base")
+        head = os.path.join(TESTS_DATA_DIR, "head")
+        diffs = diff_only_head(
+            base,
+            head,
+        )
+        self.assertEqual(
+            diffs,
+            [
+                {
+                    'rel': os.path.join("unused", "sub", "has_file",
+                                        "shallowest_in_base.txt"),
+                    'code': 1,
+                },
+                {
+                    'rel': os.path.join("unused", "shallower_file.txt"),
+                    'code': 1,
+                    'new': True,
+                },
+            ]
+        )
+
+    def test_diff_only_head__same(self):
+        base = os.path.join(TESTS_DATA_DIR, "base-same")
+        head = os.path.join(TESTS_DATA_DIR, "head-same")
+        diffs = diff_only_head(
+            base,
+            head,
+        )
+
+        # Same except ignore extra_file_to_ignore.txt:
+        self.assertFalse(diffs)  # assert same (ignoring base extra file(s))
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,2 @@
+This is another test file for get_shallowest_files_sub.
+This file should *not* be in head, to test ignoring files in base that are not patched by head.

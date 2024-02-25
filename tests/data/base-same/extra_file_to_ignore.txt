@@ -1,0 +1,1 @@
+This file is only in base and should be ignored by patch comparison.
