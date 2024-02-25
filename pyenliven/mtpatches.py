@@ -1,6 +1,7 @@
+#!/usr/bin/env python3
 import os
 import platform
-# import shlex
+import shlex
 import shutil
 import sys
 import subprocess
@@ -31,7 +32,7 @@ else:
     DIFF_CMD_PARTS = ["diff"]
 
 
-def diff_only_head(base, head, rel=None, more_1char_args=None, depth=0):
+def diff_only_head(base, head, more_1char_args=None, log_level=0):
     """Compare two directories or files.
 
     Files not in head will not be checked!
@@ -48,10 +49,8 @@ def diff_only_head(base, head, rel=None, more_1char_args=None, depth=0):
         more_1char_args (Union[str,list[str]], optional): args. Defaults
             to "-wb", or if using Windows, then "/W" if diff is not
             present in PATH (in that case, fc is used).
-        rel (str, optional): Leave as None. This will be set
-            automatically for recursion.
-        depth (int, optional): Leave as 0. This will be set
-            automatically for recursion.
+        log_level (int): How much info to show (-1 to hide output of
+            diff command).
 
     Raises:
         FileNotFoundError: If base does not exist (and depth is 0).
@@ -65,6 +64,28 @@ def diff_only_head(base, head, rel=None, more_1char_args=None, depth=0):
         - 'rel': The path relative to head.
         - 'new': True if not in base, otherwise False or not present.
         - 'code': Return code (1 if file in head&base differ)
+
+    """
+    return _diff_only_head(
+        base,
+        head,
+        more_1char_args=more_1char_args,
+        log_level=log_level,
+    )
+
+
+def _diff_only_head(base, head, rel=None, more_1char_args=None, depth=0,
+                    log_level=0):
+    """Compare two directories or files.
+
+    For other documentation see diff_only_head.
+
+    Args:
+        rel (str, optional): Leave as None. This will be set
+            automatically for recursion.
+        depth (int, optional): Leave as 0. This will be set
+            automatically for recursion.
+
     """
     diffs = []
     if not DIFF_CMD_PARTS:
@@ -147,12 +168,13 @@ def diff_only_head(base, head, rel=None, more_1char_args=None, depth=0):
         #   (See docstring).
         for sub in os.listdir(head_path):
             sub_rel = os.path.join(rel, sub) if rel else sub
-            diffs += diff_only_head(
+            diffs += _diff_only_head(
                 base,
                 head,
                 rel=sub_rel,
                 more_1char_args=more_1char_args,
                 depth=depth+1,
+                log_level=log_level,
             )
     else:
         # echo0('base={}:"{}"'.format(whats[0], paths[0]))
@@ -178,10 +200,12 @@ def diff_only_head(base, head, rel=None, more_1char_args=None, depth=0):
         # echo0("\n\n{}".format(shlex.join(cmd_parts)))
         child = subprocess.Popen(cmd_parts, stdout=subprocess.PIPE)
         streamdata = child.communicate()[0]
-        data = streamdata
-        if sys.version_info.major >= 3:
-            data = streamdata.decode(sys.stdout.encoding)
-        print(data)
+        if log_level >= 0:
+            # ^ Only -1 should hide diff output itself.
+            data = streamdata
+            if sys.version_info.major >= 3:
+                data = streamdata.decode(sys.stdout.encoding)
+            print(data)
         rc = child.returncode
         if rc == 0:
             # echo0("^ files are the same")
@@ -334,51 +358,167 @@ def find_modpack(parent, name):
 def main():
     bases = (
         "/opt/minebest/assemble/bucket_game",
-        "/opt/minebest/mtkit/minetest/src"
+        # "/opt/minebest/mtkit/minetest/src",
     )
-    heads = (
+    head_parents = (
         os.path.join(REPO_DIR, "Bucket_Game-branches"),
-        os.path.join(HOME, "metaprojects", "pull-requests", "OldCoder")
+        os.path.join(HOME, "metaprojects", "pull-requests", "OldCoder"),
+        os.path.join(HOME, "metaprojects", "pull-requests",
+                     "Bucket_Game-branches"),
     )
+    return check_if_head_files_applied(bases, head_parents)
+
+
+def check_if_head_files_applied(bases, head_parents):
+    """Check if head files are applied.
+
+    Args:
+        bases (list[str]): Directories where heads should have been
+            applied.
+        head_parents (list[str]): Folders containing various patches,
+            where each sub of each parent is in the form of files to
+            overlay onto base.
+
+    Returns:
+        int: 0 on success.
+    """
     for base in bases:
         if not os.path.isdir(base):
             echo0('Warning: There is no base "{}".'.format(base))
             continue
-        for head in heads:
+        for head in head_parents:
+            echo0("\n# {}".format(head))
             for head_sub in os.listdir(head):
+                # Identify each head folder as an overlay to "patch" a base.
                 head_sub_path = os.path.join(head, head_sub)
+                # region skip non-patch subs
                 if os.path.isfile(head_sub_path):
                     # echo0('Warning: Only folders, skipped "{}"'
                     #       ''.format(head_sub))
                     continue
                 if "original" in head_sub:
-                    echo0('INFO: skipped original: "{}"'
-                          ''.format(head_sub))
+                    # echo0('INFO: skipped original: "{}"'
+                    #       ''.format(head_sub))
                     continue
+                elif "-BASE" in head_sub:
+                    # echo0('INFO: skipped BASE: "{}"'
+                    #       ''.format(head_sub))
+                    continue
+                elif head_sub in ("1.Tasks", "1.old", "1.wontfix",
+                                  "1.website"):
+                    # echo0('INFO: skipped Tasks folder: "{}"'
+                    #       ''.format(head_sub))
+                    continue
+
+                # endregion skip non-patch subs
+
+                # region identify patch structure
                 mod_rel = get_shallowest_files_sub(
                     head_sub_path,
                     mask=["init.lua", "mod.conf", "depends.txt",
-                            "description.txt"],
+                          "description.txt"],
                 )
                 modpack_rel = get_shallowest_files_sub(
                     head_sub_path,
-                    mask=["modpack.txt"],
+                    mask=["modpack.txt", "modpack.conf"],
                 )
-                if mod_rel and not modpack_rel:
+                game_patch_root = None
+                mod_patch_root = None
+                modpack_patch_root = None
+
+                if head_sub.endswith("_game"):
+                    game_patch_root = head_sub_path
+                elif os.path.isdir(os.path.join(head_sub_path, "mods")):
+                    game_patch_root = head_sub_path
+                    echo0('game_patch_root="{}"'.format(head_sub))
+                elif (mod_rel is not None) and (modpack_rel is None):
                     mod_parent = os.path.dirname(os.path.join(head_sub_path,
                                                               mod_rel))
                     mod_parent_rel = mod_parent[len(head_sub_path)+1:]
                     # ^ +1 no os.path.sep
                     _, mod_parent_name = os.path.split(mod_parent)
                     if mod_parent_rel and (mod_parent_name not in ["mods"]):
-                        echo0('Warning: No modpack.txt,'
+                        echo0('Warning: No modpack.txt nor modpack.conf,'
                               ' so assuming modpack={} ("{}")'
                               ''.format(mod_parent_name, mod_parent))
-                if mod_rel:
-                    echo0('mod="{}"'.format(mod_rel))
+                        modpack_patch_root = mod_parent
+
+                if game_patch_root:
+                    pass  # Already set above.
+                elif modpack_patch_root:
+                    pass  # Already set above.
+                elif mod_rel is not None:
+                    if mod_rel:
+                        mod_patch_root = os.path.join(head_sub_path, mod_rel)
+                    else:
+                        # Must be "", so don't do join or will add os.path.sep
+                        mod_patch_root = head_sub_path
+                    _, got_mod_name = os.path.split(mod_patch_root)
+                    echo0('mod_patch="{}" root="{}"'
+                          ''.format(got_mod_name, mod_patch_root))
                 else:
-                    echo0('Warning: mod not identified in "{}"'
+                    pass
+                    # echo0('Warning: mod not identified in "{}"'
+                    #       ''.format(head_sub))
+                    # See output in "else" below instead.
+                # endregion identify patch structure
+
+                # region check whether base has it installed
+                patch_root = None
+                if game_patch_root is not None:
+                    patch_root = game_patch_root
+                    _, game_name = os.path.split(base)
+                    base_sub_path = base
+                    echo0("* Checking whether {} was applied to {} game"
+                          "".format(head_sub, game_name))
+                elif modpack_patch_root is not None:
+                    patch_root = modpack_patch_root
+                    _, modpack_name = os.path.split(modpack_patch_root)
+                    modpack_rel = find_modpack(base, modpack_name)
+                    if modpack_rel is None:
+                        echo0("Error: {} was not found in {}"
+                              "".format(modpack_name, base))
+                        continue
+                    if modpack_rel:
+                        base_sub_path = os.path.join(base, modpack_rel)
+                    else:
+                        # Must be "", so avoid join to avoid adding os.path.sep
+                        base_sub_path = base
+                    echo0("* Checking whether {} was applied to"
+                          " {} modpack in {} game"
+                          "".format(head_sub, modpack_name, game_name))
+                elif mod_patch_root is not None:
+                    patch_root = mod_patch_root
+                    _, mod_name = os.path.split(mod_patch_root)
+                    mod_rel = find_mod(base, mod_name)
+                    if mod_rel is None:
+                        echo0("Error: {} was not found in {}"
+                              "".format(mod_name, base))
+                        continue
+                    if modpack_rel:
+                        base_sub_path = os.path.join(base, modpack_rel)
+                    else:
+                        # Must be "", so avoid join to avoid adding os.path.sep
+                        base_sub_path = base
+                    echo0("* Checking whether {} was applied to"
+                          " {} mod in {} game"
+                          "".format(head_sub, mod_name, game_name))
+                else:
+                    echo0('Warning: Skipping unknown patch structure: "{}"'
                           ''.format(head_sub))
+
+                diffs = diff_only_head(base_sub_path, patch_root, log_level=-1)
+                for diff in diffs:
+                    missing = bool(diff.get("new"))
+                    adjective = "missing" if missing else "differs"
+                    # TODO: echo0("  * {}: {}".format(adjective, diff))
+                    # if not missing:
+                    echo0("    "+shlex.join([
+                        "meld",
+                        os.path.join(base, diff['rel']),
+                        os.path.join(head, diff['rel']),
+                    ])+"  # base (original) vs head (patch)")
+                # endregion check whether base has it installed
 
     return 0
 
