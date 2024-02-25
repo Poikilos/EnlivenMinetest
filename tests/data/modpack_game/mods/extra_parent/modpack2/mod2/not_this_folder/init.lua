@@ -1,0 +1,1 @@
+-- This represents a backup of init.lua that should be ignored by the test.

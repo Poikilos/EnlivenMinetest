@@ -14,6 +14,7 @@ from pyenliven.mtpatches import (  # noqa F402
     get_shallowest_files_sub,
     diff_only_head,
     find_mod,
+    find_modpack,
 )
 
 
@@ -98,6 +99,11 @@ class TestMTPatches(unittest.TestCase):
             os.path.join("mods", "extra_parent", "modpack1", "mod1")
         )
         self.assertEqual(
+            find_mod(os.path.join(TESTS_DATA_DIR, "modpack_game"), "mod2"),
+            os.path.join("mods", "extra_parent", "modpack2", "mod2")
+        )
+
+        self.assertEqual(
             find_mod(os.path.join(game_path, "mods", "extra_parent",
                                   "modpack1", "mod1"),
                      "mod1"),  # Yes, should still find mod1 ("") if root
@@ -106,6 +112,40 @@ class TestMTPatches(unittest.TestCase):
         self.assertEqual(
             find_mod(os.path.join(game_path, "mods"), "mod1"),
             os.path.join("extra_parent", "modpack1", "mod1"),
+        )
+
+    def test_find_modpack(self):
+        game_path = os.path.join(TESTS_DATA_DIR, "modpack_game")
+        self.assertEqual(
+            find_modpack(game_path, "wrong_modpack"),
+            None
+        )
+        self.assertEqual(
+            find_modpack(game_path, "modpack1"),
+            os.path.join("mods", "extra_parent", "modpack1")
+        )
+        self.assertEqual(
+            find_modpack(os.path.join(TESTS_DATA_DIR, "modpack_game"),
+                         "modpack2"),
+            os.path.join("mods", "extra_parent", "modpack2")
+        )
+
+        self.assertEqual(
+            find_modpack(os.path.join(game_path, "mods", "extra_parent",
+                                      "modpack1"),
+                         "modpack1"),  # Yes, still find mod1 ("") if root
+            ""
+        )
+        self.assertEqual(
+            find_modpack(os.path.join(game_path, "mods", "extra_parent",
+                                      "modpack2"),
+                         "modpack2"),  # Yes, still find mod1 ("") if root
+            ""
+        )
+
+        self.assertEqual(
+            find_modpack(os.path.join(game_path, "mods"), "modpack1"),
+            os.path.join("extra_parent", "modpack1"),
         )
 
 
