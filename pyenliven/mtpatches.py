@@ -1,6 +1,6 @@
 import os
 import platform
-import shlex
+# import shlex
 import shutil
 import sys
 import subprocess
@@ -19,6 +19,7 @@ def echo0(*args, **kwargs):
 DIFF_CMD_PARTS = None
 
 if platform.system() == "Windows":
+    HOME = os.environ['USERPROFILE']
     try_diff = shutil.which("diff")
     # ^ Requires Python 3.3 or later (not 2.7)
     if try_diff is not None:
@@ -26,6 +27,7 @@ if platform.system() == "Windows":
     else:
         DIFF_CMD_PARTS = ["fc"]
 else:
+    HOME = os.environ['HOME']
     DIFF_CMD_PARTS = ["diff"]
 
 
@@ -194,7 +196,7 @@ def diff_only_head(base, head, rel=None, more_1char_args=None, depth=0):
     return diffs  # folder, so return every sub's diff(s) ([] if None)
 
 
-def get_shallowest_files_sub(root, rel=None, depth=0, log_level=0):
+def get_shallowest_files_sub(root, log_level=0, filter=None):
     """Get the shallowest folder relative to root that contains file(s).
 
     Args:
@@ -203,10 +205,26 @@ def get_shallowest_files_sub(root, rel=None, depth=0, log_level=0):
             recursion).
         depth (int, optional): Leave as 0 (set automatically during
             recursion).
+        filter (Union[str,list[str]], optional): Filename or list of
+            filenames to find (None/0/""/False/"*"/[] will match any
+            file).
 
     Returns:
         Union(str, None): Get the relative dir that contains file(s).
     """
+    return _get_shallowest_files_sub(
+        root,
+        log_level=log_level,
+        filter=filter,
+    )
+
+
+def _get_shallowest_files_sub(root, rel=None, depth=0, log_level=0,
+                              filter=None):
+    if isinstance(filter, str):
+        if filter == "*":
+            filter = None
+        filter = [filter]
     if root is None:
         raise ValueError("root is {}".format(root))
     if rel and rel.startswith(os.path.sep):
@@ -220,7 +238,8 @@ def get_shallowest_files_sub(root, rel=None, depth=0, log_level=0):
     for sub in os.listdir(parent):
         sub_path = os.path.join(parent, sub)
         if os.path.isfile(sub_path):
-            return rel
+            if (not filter) or (sub in filter):
+                return rel
     # ^ Check *all* subs first, in case dir is listed before file.
     #   The *parent* has file(s), so return parent
     #   (must check if file *before* recursion
@@ -231,18 +250,21 @@ def get_shallowest_files_sub(root, rel=None, depth=0, log_level=0):
             continue
         sub_rel = os.path.join(rel, sub) if rel else sub
         if log_level > 0:
-            echo0("\ndepth={}".format(depth))
-            echo0("root:{}".format(root))
-            echo0("+rel:{}".format(rel))
-            echo0("=parent:{}".format(parent))
-            echo0("sub={}".format(sub))
-            echo0("sub_rel={}".format(sub_rel))
-        found_path = get_shallowest_files_sub(
+            pass
+            # echo0("\ndepth={}".format(depth))
+            # echo0("root:{}".format(root))
+            # echo0("+rel:{}".format(rel))
+            # echo0("=parent:{}".format(parent))
+            # echo0("sub={}".format(sub))
+            # echo0("sub_rel={}".format(sub_rel))
+        found_path = _get_shallowest_files_sub(
             root,
             rel=sub_rel,
             depth=depth+1,
             log_level=log_level,
+            filter=filter,
         )
+
         if found_path:
             return found_path
         continue
@@ -250,7 +272,122 @@ def get_shallowest_files_sub(root, rel=None, depth=0, log_level=0):
     return None
 
 
+def find_mod(parent, name):
+    return _find_sub_with_known_files(
+        parent,
+        name,
+        filter=["init.lua", "mod.conf", "depends.txt", "description.txt"],
+    )
+
+
+def find_modpack(parent, name):
+    return _find_sub_with_known_files(
+        parent,
+        name,
+        filter=["modpack.txt", "modpack.conf"],
+    )
+
+
+def _find_sub_with_known_files(parent, name, root_slash=None, filter=None):
+    """Get relative path to Minetest mod (or "" if parent is it).
+
+    Args:
+        parent (str): Folder to search for Minetest mod files.
+        name (str): Name of the mod to find. It can still be found if it
+            is the same name as the parent, so if parent is "mods",
+            then "3d_armor/3d_armor" would be the result rather than
+            "3d_armor".
+        root_slash (str, optional): Leave as None. Recursion sets it
+            automatically. Defaults to None.
+        filter (list[str]): Defaults to files found in a mod,
+            but can be changed to find a modpack or anything else.
+
+    Returns:
+        str: relative path to Minetest mod (or "" if parent is it),
+            or None if not Found.
+    """
+    if not root_slash:
+        root_slash = parent + os.path.sep
+    _, parent_name = os.path.split(parent)
+
+    if parent_name == name:
+        for sub in os.listdir(parent):
+            sub_path = os.path.join(parent, sub)
+            if not os.path.isfile(sub_path):
+                continue
+            if sub in filter:
+                # Then parent is the mod. End the search
+                #   and return *relative* path to mod
+                #   (with root_slash removed, so
+                #   "" if parent matches before recursion)
+                return parent[len(root_slash):]
+    # ^ must iterate files *before* recursion to avoid deeper false
+    #   positive suchas backup folder inside of a mod that has a
+    #   file in filter.
+    for sub in os.listdir(parent):
+        sub_path = os.path.join(parent, sub)
+        if os.path.isfile(sub_path):
+            continue
+        found = _find_sub_with_known_files(
+            sub_path,
+            name,
+            root_slash=root_slash,
+            filter=filter,
+        )
+        if found:
+            return found
+    return None
+
+
 def main():
+    bases = (
+        "/opt/minebest/assemble/bucket_game",
+        "/opt/minebest/mtkit/minetest/src"
+    )
+    heads = (
+        os.path.join(REPO_DIR, "Bucket_Game-branches"),
+        os.path.join(HOME, "metaprojects", "pull-requests", "OldCoder")
+    )
+    for base in bases:
+        if not os.path.isdir(base):
+            echo0('Warning: There is no base "{}".'.format(base))
+            continue
+        for head in heads:
+            for head_sub in os.listdir(head):
+                head_sub_path = os.path.join(head, head_sub)
+                if os.path.isfile(head_sub_path):
+                    # echo0('Warning: Only folders, skipped "{}"'
+                    #       ''.format(head_sub))
+                    continue
+                if "original" in head_sub:
+                    echo0('INFO: skipped original: "{}"'
+                          ''.format(head_sub))
+                    continue
+                mod_rel = get_shallowest_files_sub(
+                    head_sub_path,
+                    filter=["init.lua", "mod.conf", "depends.txt",
+                            "description.txt"],
+                )
+                modpack_rel = get_shallowest_files_sub(
+                    head_sub_path,
+                    filter=["modpack.txt"],
+                )
+                if mod_rel and not modpack_rel:
+                    mod_parent = os.path.dirname(os.path.join(head_sub_path,
+                                                              mod_rel))
+                    mod_parent_rel = mod_parent[len(head_sub_path)+1:]
+                    # ^ +1 no os.path.sep
+                    _, mod_parent_name = os.path.split(mod_parent)
+                    if mod_parent_rel and (mod_parent_name not in ["mods"]):
+                        echo0('Warning: No modpack.txt,'
+                              ' so assuming modpack={} ("{}")'
+                              ''.format(mod_parent_name, mod_parent))
+                if mod_rel:
+                    echo0('mod="{}"'.format(mod_rel))
+                else:
+                    echo0('Warning: mod not identified in "{}"'
+                          ''.format(head_sub))
+
     return 0
 
 

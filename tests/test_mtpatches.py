@@ -13,6 +13,7 @@ if __name__ == "__main__":
 from pyenliven.mtpatches import (  # noqa F402
     get_shallowest_files_sub,
     diff_only_head,
+    find_mod,
 )
 
 
@@ -83,9 +84,29 @@ class TestMTPatches(unittest.TestCase):
             base,
             head,
         )
-
         # Same except ignore extra_file_to_ignore.txt:
         self.assertFalse(diffs)  # assert same (ignoring base extra file(s))
+
+    def test_find_mod(self):
+        game_path = os.path.join(TESTS_DATA_DIR, "game")
+        self.assertEqual(
+            find_mod(game_path, "wrong_mod"),
+            None
+        )
+        self.assertEqual(
+            find_mod(game_path, "mod1"),
+            os.path.join("mods", "extra_parent", "modpack1", "mod1")
+        )
+        self.assertEqual(
+            find_mod(os.path.join(game_path, "mods", "extra_parent",
+                                  "modpack1", "mod1"),
+                     "mod1"),  # Yes, should still find mod1 ("") if root
+            ""
+        )
+        self.assertEqual(
+            find_mod(os.path.join(game_path, "mods"), "mod1"),
+            os.path.join("extra_parent", "modpack1", "mod1"),
+        )
 
 
 if __name__ == "__main__":
