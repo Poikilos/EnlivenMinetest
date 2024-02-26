@@ -1,10 +1,42 @@
 #!/usr/bin/env python3
+'''
+mtpatches
+---------
+Check for Minetest game patches stored in the form of regular
+text/binary files that can be directly copied to the program.
+
+Usage:
+mtpatches.py [options]
+
+Options:
+--skip-missing        Do not list files in heads that are not in sources.
+'''
 import os
 import platform
 import shlex
 import shutil
 import sys
 import subprocess
+
+
+class Fore:
+    """Print these to change console color
+    (emulate colorama)
+    See <https://gist.github.com/kamito/704813>
+
+    Example: Use Fore.RED as if you had done
+    `from colorama import Fore`, but you don't need to
+    import anything from colorama.
+    """
+    RED = "\033[31m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+    BLUE = "\033[34m"
+    PURPLE = "\033[35m"
+    CYAN = "\033[36m"
+    WHITE = "\033[37m"
+    RESET = "\033[0m"
+
 
 MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 REPO_DIR = os.path.dirname(MODULE_DIR)
@@ -355,6 +387,10 @@ def find_modpack(parent, name):
     )
 
 
+def usage():
+    echo0(__doc__)
+
+
 def main():
     bases = (
         "/opt/minebest/assemble/bucket_game",
@@ -366,10 +402,18 @@ def main():
         os.path.join(HOME, "metaprojects", "pull-requests",
                      "Bucket_Game-branches"),
     )
-    return check_if_head_files_applied(bases, head_parents)
+    for arg in sys.argv[1:]:
+        if arg == "--skip-missing":
+            skip_missing = True
+        else:
+            usage()
+            echo0("Error: unknown argument {}".format(arg))
+            return 1
+    return check_if_head_files_applied(bases, head_parents,
+                                       skip_missing=skip_missing)
 
 
-def check_if_head_files_applied(bases, head_parents):
+def check_if_head_files_applied(bases, head_parents, skip_missing=False):
     """Check if head files are applied.
 
     Args:
@@ -510,14 +554,26 @@ def check_if_head_files_applied(bases, head_parents):
                 diffs = diff_only_head(base_sub_path, patch_root, log_level=-1)
                 for diff in diffs:
                     missing = bool(diff.get("new"))
-                    adjective = "missing" if missing else "differs"
-                    # TODO: echo0("  * {}: {}".format(adjective, diff))
+                    if missing:
+                        if skip_missing:
+                            continue
+                        color = Fore.GREEN
+                    else:
+                        color = Fore.YELLOW
+                    why = "MISSING" if missing else "differs"
+                    # echo0("  * {}: {}".format(why, diff))
                     # if not missing:
+                    if diff['rel'].startswith(os.path.sep):
+                        raise NotImplementedError(
+                            "rel cannot start with {}"
+                            " or it will override base or head."
+                            "".format(os.path.sep)
+                        )
                     echo0("    "+shlex.join([
                         "meld",
-                        os.path.join(base, diff['rel']),
-                        os.path.join(head, diff['rel']),
-                    ])+"  # base (original) vs head (patch)")
+                        os.path.join(base_sub_path, diff['rel']),
+                        os.path.join(head_sub_path, diff['rel']),
+                    ])+"{}  # {} in base (original) vs head (patch) {}".format(color, why, Fore.RESET))
                 # endregion check whether base has it installed
 
     return 0
