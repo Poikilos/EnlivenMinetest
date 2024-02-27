@@ -8,6 +8,9 @@ version = "0.2.0"
 authors = [
   { name="Jake Gustafson", email="7557867+poikilos@users.noreply.github.com" },
 ]
+dependencies = [
+  "binaryornot",  # only for mtpatches
+]
 # requires-python = ">=3.3"
 # TODO: (shutil.which requires 3.3 but) may need newer version,
 #   & other code may run on older version

@@ -17,6 +17,7 @@ import shlex
 import shutil
 import sys
 import subprocess
+from binaryornot.check import is_binary
 
 
 class Fore:
@@ -106,6 +107,65 @@ def diff_only_head(base, head, more_1char_args=None, log_level=0):
     )
 
 
+def validate_diff_args(more_1char_args):
+    """Check the given arguments format for diff or fc
+    and convert to a list if has spaces.
+
+    Args:
+        more_1char_args (Union[str,list[str],tuple[str]]): Arguments for
+            the diff tool.
+
+    Raises:
+        TypeError: Not list, tuple, nor str.
+        ValueError: is blank str
+        ValueError: is just a '-' or '/'
+        ValueError: starts with '/' when using diff, or '-' when not
+
+    Returns:
+        list(str): Arguments (usually only one, such as "-wbB" for diff,
+            or for FC, "/B" for binary and "/W" to ignore whitespace).
+            In other words, return the original more_1char_args or
+            split it into a list.
+    """
+    diff_bin_name = DIFF_CMD_PARTS[0].lower()
+    opener_for_1char = "-" if (diff_bin_name == "fc") else "/"
+    # ^ even on Windows, diff would take "-" (fc takes "/" before options)
+
+    if not isinstance(more_1char_args, (list, tuple)):
+        if not isinstance(more_1char_args, str):
+            raise TypeError("more_1char_args must be list, tuple, or str")
+        more_1char_args = more_1char_args.strip()
+        if len(more_1char_args) == 0:
+            raise ValueError("more_1char_args for \"{}\" was empty str"
+                             " but should be None or an args string"
+                             " starting with '{}'"
+                             "".format(diff_bin_name, opener_for_1char))
+        elif len(more_1char_args) == 1:
+            if more_1char_args in ("-", "/"):
+                raise ValueError("more_1char_args was only '{}' with no args"
+                                 "".format(more_1char_args))
+        # Allow string too (split if has space, otherwise convert
+        # to 1-long list still)
+        # Split into tuple and recurse:
+        return validate_diff_args(more_1char_args.strip().split())
+
+    for arg in more_1char_args:
+        if not arg.startswith(opener_for_1char):
+            bin_msg = "diff"
+            if diff_bin_name != "diff":
+                bin_msg = (
+                    "diff wasn't in your PATH so {} is being used, but it"
+                    "".format(diff_bin_name)
+                )
+            raise ValueError(
+                "{} only accepts options"
+                " starting with '{}'"
+                " (got \"{}\")".format(bin_msg, opener_for_1char,
+                                       arg)
+            )
+    return more_1char_args  # It is a list now.
+
+
 def _diff_only_head(base, head, rel=None, more_1char_args=None, depth=0,
                     log_level=0):
     """Compare two directories or files.
@@ -127,39 +187,6 @@ def _diff_only_head(base, head, rel=None, more_1char_args=None, depth=0,
         raise FileNotFoundError("There is no {} in your PATH."
                                 "".format(ok_commands))
     args_1char = None
-    is_binary = False
-    if more_1char_args is None:
-        if platform.system() == "Windows":
-            if not is_binary:
-                args_1char = ["/W"]  # ignore whitespace
-            else:
-                args_1char = ["/B"]  # binary comparison
-        else:
-            if not is_binary:
-                args_1char = ["-wb"]
-                # -b: ignore changes in the amount of whitespace
-                # -w: ignore all white space (better for code since
-                #     "a=1" is same as "a == 1", otherwise tokenizing
-                #     the specific language would be necessary)
-                # -a: --text  treat all files as text and
-                #     --strip-trailing-cr  strip trailing carriage
-                #         return
-                # -E, --ignore-tab-expansion
-    else:
-        if more_1char_args.startswith("-"):
-            if DIFF_CMD_PARTS[0].lower() == "fc":
-                raise ValueError(
-                    "diff wasn't in your PATH so fc is being used,"
-                    " but it only accepts options"
-                    " starting with '/'"
-                    " (got \"{}\")".format(more_1char_args)
-                )
-        if isinstance(more_1char_args, (list, tuple)):
-            args_1char = more_1char_args
-        else:
-            # allow string too (split if has space, otherwise convert
-            # to 1-long list still)
-            args_1char = more_1char_args.strip().split()
 
     whats = [None, None]
     if rel:
@@ -169,6 +196,7 @@ def _diff_only_head(base, head, rel=None, more_1char_args=None, depth=0,
         base_path = base
         head_path = head
     paths = (base_path, head_path)
+
     names = ("base", "head")
     for i, path in enumerate(paths):
         if not os.path.exists(path):
@@ -223,6 +251,35 @@ def _diff_only_head(base, head, rel=None, more_1char_args=None, depth=0,
                 'rel': rel,
                 'new': True,
             }]
+
+
+        head_is_binary = is_binary(head_path)
+
+        if more_1char_args is None:
+            if platform.system() == "Windows":
+                if not head_is_binary:
+                    args_1char = ["/W"]  # ignore whitespace
+                else:
+                    args_1char = ["/B"]  # binary comparison
+            else:
+                if not head_is_binary:
+                    args_1char = ["-wbB"]
+                    # -b: ignore changes in the amount of whitespace
+                    # -w: ignore all white space (better for code since
+                    #     "a=1" is same as "a == 1", otherwise tokenizing
+                    #     the specific language would be necessary)
+                    # -a: --text  treat all files as text and
+                    #     --strip-trailing-cr  strip trailing carriage
+                    #         return
+                    #     [doesn't do enough if has extra blank line,
+                    #     still says different, so use -B instead]
+                    # -B, ignore changes where all lines are blank
+                    # -E, --ignore-tab-expansion
+                # else None (just use diff without any options)
+        else:
+            args_1char = validate_diff_args(more_1char_args)
+        del more_1char_args
+
         # echo0("^ in base")
         cmd_parts = DIFF_CMD_PARTS.copy()
         # echo0("args_1char={}".format(args_1char))
