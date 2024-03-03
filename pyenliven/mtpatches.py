@@ -94,10 +94,12 @@ def diff_only_head(base, head, more_1char_args=None, log_level=0):
 
     Returns:
         list(dict): A list of differing files as info dicts, each with:
-        - 'rel': The path relative to head.
-        - 'new': True if not in base, otherwise False or not present.
-        - 'code': Return code (1 if file in head&base differ)
-
+        - 'rel' (str): The path relative to head.
+        - 'new' (bool): True if not in base, otherwise False or not present.
+        - 'code' (int): Return code (1 if file in head&base differ)
+        - 'head_is_binary' (bool): If detected binary (implies binary
+          comparison was used, unless 'new' is True then not actually
+          compared but still detected head_is_binary).
     """
     return _diff_only_head(
         base,
@@ -237,6 +239,7 @@ def _diff_only_head(base, head, rel=None, more_1char_args=None, depth=0,
                 log_level=log_level,
             )
     else:
+        head_is_binary = is_binary(head_path)
         # echo0('base={}:"{}"'.format(whats[0], paths[0]))
         # echo0('head={}:"{}"'.format(whats[1], paths[1]))
         # file, so actually compare
@@ -250,10 +253,8 @@ def _diff_only_head(base, head, rel=None, more_1char_args=None, depth=0,
                 'code': 1,
                 'rel': rel,
                 'new': True,
+                'head_is_binary': head_is_binary,
             }]
-
-
-        head_is_binary = is_binary(head_path)
 
         if more_1char_args is None:
             if platform.system() == "Windows":
@@ -305,6 +306,7 @@ def _diff_only_head(base, head, rel=None, more_1char_args=None, depth=0,
         return [{
             'code': rc,
             'rel': rel,
+            'head_is_binary': head_is_binary,
         }]
     return diffs  # folder, so return every sub's diff(s) ([] if None)
 
@@ -449,6 +451,7 @@ def usage():
 
 
 def main():
+    skip_missing = False
     bases = (
         "/opt/minebest/assemble/bucket_game",
         # "/opt/minebest/mtkit/minetest/src",
@@ -483,17 +486,29 @@ def check_if_head_files_applied(bases, head_parents, skip_missing=False):
     Returns:
         int: 0 on success.
     """
-    for base in bases:
-        if not os.path.isdir(base):
-            echo0('Warning: There is no base "{}".'.format(base))
+    for base_root in bases:
+        if not os.path.isdir(base_root):
+            echo0('Warning: There is no base_root "{}".'.format(base_root))
             continue
-        for head in head_parents:
-            echo0("\n# {}".format(head))
-            for head_sub in os.listdir(head):
+        for head_parent in head_parents:
+            echo0("\n# {}".format(head_parent))
+            for head_sub in os.listdir(head_parent):
                 # Identify each head folder as an overlay to "patch" a base.
-                head_sub_path = os.path.join(head, head_sub)
+
+                # *Ignore files* in each head parent!
+                #   Files there may be diff and zip files etc.!
+                #   Each sub *folder* is a overlay for base.
+                #   - This method is *not* recursive, but:
+                #     diff_only_head (recursive) is called below on each dir.
+                #   - This method does *display* each file, for diffs
+                #     returned by recursive diff_only_head.
+
+                head_fuzzy_root = os.path.join(head_parent, head_sub)
+                # ^ head_fuzzy_root is not yet known in terms of depth
+                #   which will be detected later if possible as patch_root
+                #   (if contains "mods" folder, head_parent is patch_root)
                 # region skip non-patch subs
-                if os.path.isfile(head_sub_path):
+                if os.path.isfile(head_fuzzy_root):
                     # echo0('Warning: Only folders, skipped "{}"'
                     #       ''.format(head_sub))
                     continue
@@ -515,12 +530,12 @@ def check_if_head_files_applied(bases, head_parents, skip_missing=False):
 
                 # region identify patch structure
                 mod_rel = get_shallowest_files_sub(
-                    head_sub_path,
+                    head_fuzzy_root,
                     mask=["init.lua", "mod.conf", "depends.txt",
                           "description.txt"],
                 )
                 modpack_rel = get_shallowest_files_sub(
-                    head_sub_path,
+                    head_fuzzy_root,
                     mask=["modpack.txt", "modpack.conf"],
                 )
                 game_patch_root = None
@@ -528,14 +543,13 @@ def check_if_head_files_applied(bases, head_parents, skip_missing=False):
                 modpack_patch_root = None
 
                 if head_sub.endswith("_game"):
-                    game_patch_root = head_sub_path
-                elif os.path.isdir(os.path.join(head_sub_path, "mods")):
-                    game_patch_root = head_sub_path
-                    echo0('game_patch_root="{}"'.format(head_sub))
+                    game_patch_root = head_fuzzy_root
+                elif os.path.isdir(os.path.join(head_fuzzy_root, "mods")):
+                    game_patch_root = head_fuzzy_root
                 elif (mod_rel is not None) and (modpack_rel is None):
-                    mod_parent = os.path.dirname(os.path.join(head_sub_path,
+                    mod_parent = os.path.dirname(os.path.join(head_fuzzy_root,
                                                               mod_rel))
-                    mod_parent_rel = mod_parent[len(head_sub_path)+1:]
+                    mod_parent_rel = mod_parent[len(head_fuzzy_root)+1:]
                     # ^ +1 no os.path.sep
                     _, mod_parent_name = os.path.split(mod_parent)
                     if mod_parent_rel and (mod_parent_name not in ["mods"]):
@@ -546,17 +560,19 @@ def check_if_head_files_applied(bases, head_parents, skip_missing=False):
 
                 if game_patch_root:
                     pass  # Already set above.
+                    echo0('set game_patch_root="{}"'.format(head_sub))
                 elif modpack_patch_root:
                     pass  # Already set above.
+                    echo0('set modpack_patch_root="{}"'.format(head_sub))
                 elif mod_rel is not None:
                     if mod_rel:
-                        mod_patch_root = os.path.join(head_sub_path, mod_rel)
+                        mod_patch_root = os.path.join(head_fuzzy_root, mod_rel)
                     else:
                         # Must be "", so don't do join or will add os.path.sep
-                        mod_patch_root = head_sub_path
+                        mod_patch_root = head_fuzzy_root
                     _, got_mod_name = os.path.split(mod_patch_root)
-                    echo0('mod_patch="{}" root="{}"'
-                          ''.format(got_mod_name, mod_patch_root))
+                    echo0('set mod_patch="{}"'.format(got_mod_name))
+                    echo0('set mod_patch_root="{}"'.format(mod_patch_root))
                 else:
                     pass
                     # echo0('Warning: mod not identified in "{}"'
@@ -565,42 +581,42 @@ def check_if_head_files_applied(bases, head_parents, skip_missing=False):
                 # endregion identify patch structure
 
                 # region check whether base has it installed
-                patch_root = None
+                parallel_head = None  # detected depth matches parallel_base
                 if game_patch_root is not None:
-                    patch_root = game_patch_root
-                    _, game_name = os.path.split(base)
-                    base_sub_path = base
+                    parallel_head = game_patch_root
+                    _, game_name = os.path.split(base_root)
+                    parallel_base = base_root
                     echo0("* Checking whether {} was applied to {} game"
                           "".format(head_sub, game_name))
                 elif modpack_patch_root is not None:
-                    patch_root = modpack_patch_root
+                    parallel_head = modpack_patch_root
                     _, modpack_name = os.path.split(modpack_patch_root)
-                    modpack_rel = find_modpack(base, modpack_name)
+                    modpack_rel = find_modpack(base_root, modpack_name)
                     if modpack_rel is None:
                         echo0("Error: {} was not found in {}"
-                              "".format(modpack_name, base))
+                              "".format(modpack_name, base_root))
                         continue
                     if modpack_rel:
-                        base_sub_path = os.path.join(base, modpack_rel)
+                        parallel_base = os.path.join(base_root, modpack_rel)
                     else:
                         # Must be "", so avoid join to avoid adding os.path.sep
-                        base_sub_path = base
+                        parallel_base = base_root
                     echo0("* Checking whether {} was applied to"
                           " {} modpack in {} game"
                           "".format(head_sub, modpack_name, game_name))
                 elif mod_patch_root is not None:
-                    patch_root = mod_patch_root
+                    parallel_head = mod_patch_root
                     _, mod_name = os.path.split(mod_patch_root)
-                    mod_rel = find_mod(base, mod_name)
+                    mod_rel = find_mod(base_root, mod_name)
                     if mod_rel is None:
                         echo0("Error: {} was not found in {}"
-                              "".format(mod_name, base))
+                              "".format(mod_name, base_root))
                         continue
                     if modpack_rel:
-                        base_sub_path = os.path.join(base, modpack_rel)
+                        parallel_base = os.path.join(base_root, modpack_rel)
                     else:
                         # Must be "", so avoid join to avoid adding os.path.sep
-                        base_sub_path = base
+                        parallel_base = base_root
                     echo0("* Checking whether {} was applied to"
                           " {} mod in {} game"
                           "".format(head_sub, mod_name, game_name))
@@ -608,8 +624,11 @@ def check_if_head_files_applied(bases, head_parents, skip_missing=False):
                     echo0('Warning: Skipping unknown patch structure: "{}"'
                           ''.format(head_sub))
 
-                diffs = diff_only_head(base_sub_path, patch_root, log_level=-1)
+                diffs = diff_only_head(parallel_base, parallel_head,
+                                       log_level=-1)
                 for diff in diffs:
+                    base_file = os.path.join(parallel_base, diff['rel'])
+                    head_file = os.path.join(parallel_head, diff['rel'])
                     missing = bool(diff.get("new"))
                     if missing:
                         if skip_missing:
@@ -626,11 +645,27 @@ def check_if_head_files_applied(bases, head_parents, skip_missing=False):
                             " or it will override base or head."
                             "".format(os.path.sep)
                         )
-                    echo0("    "+shlex.join([
-                        "meld",
-                        os.path.join(base_sub_path, diff['rel']),
-                        os.path.join(head_sub_path, diff['rel']),
-                    ])+"{}  # {} in base (original) vs head (patch) {}".format(color, why, Fore.RESET))
+
+                    if not os.path.isfile(head_file):
+                        raise NotImplementedError(
+                            'every head_file should be a file,'
+                            ' but got "{}"'.format(head_file)
+                        )
+                    # else isdir
+                    # echo0("head_is_binary={}".format(head_is_binary))
+                    head_is_binary = is_binary(head_file)
+                    difftool = "diffimg-gui" if head_is_binary else "meld"
+
+                    difftool = difftool
+                    echo0(
+                        "    "+shlex.join([
+                            difftool,
+                            base_file,
+                            head_file,
+                        ])
+                        + "{}  # {} in base (original) vs head (patch) {}"
+                        "".format(color, why, Fore.RESET)
+                    )
                 # endregion check whether base has it installed
 
     return 0
