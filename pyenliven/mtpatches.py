@@ -10,7 +10,9 @@ mtpatches.py [options]
 
 Options:
 --skip-missing        Do not list files in heads that are not in sources.
+--color               Enable console colors such as <ESC character>[32m
 '''
+import json
 import os
 import platform
 import shlex
@@ -18,6 +20,7 @@ import shutil
 import sys
 import subprocess
 from binaryornot.check import is_binary
+from collections import OrderedDict
 
 
 class Fore:
@@ -452,6 +455,7 @@ def usage():
 
 def main():
     skip_missing = False
+    enable_color = False
     bases = (
         "/opt/minebest/assemble/bucket_game",
         # "/opt/minebest/mtkit/minetest/src",
@@ -465,15 +469,19 @@ def main():
     for arg in sys.argv[1:]:
         if arg == "--skip-missing":
             skip_missing = True
+        elif arg == "--color":
+            enable_color = True
         else:
             usage()
             echo0("Error: unknown argument {}".format(arg))
             return 1
     return check_if_head_files_applied(bases, head_parents,
-                                       skip_missing=skip_missing)
+                                       skip_missing=skip_missing,
+                                       enable_color=enable_color)
 
 
-def check_if_head_files_applied(bases, head_parents, skip_missing=False):
+def check_if_head_files_applied(bases, head_parents, skip_missing=False,
+                                enable_color=False):
     """Check if head files are applied.
 
     Args:
@@ -482,17 +490,29 @@ def check_if_head_files_applied(bases, head_parents, skip_missing=False):
         head_parents (list[str]): Folders containing various patches,
             where each sub of each parent is in the form of files to
             overlay onto base.
+        enable_color (bool): Enable console colors such as
+            "{escape_character}[32m" for green. Defaults to False.
 
     Returns:
         int: 0 on success.
     """
+    summary = OrderedDict(
+        unfinished_patch_count=0,
+        unpatched_file_count=0,
+    )
+    reset_color = ""
+    color = ""
+    if enable_color:
+        reset_color = Fore.RESET
+
     for base_root in bases:
         if not os.path.isdir(base_root):
             echo0('Warning: There is no base_root "{}".'.format(base_root))
             continue
         for head_parent in head_parents:
-            echo0("\n# {}".format(head_parent))
+            echo0("\n# patches={}".format(head_parent))
             for head_sub in os.listdir(head_parent):
+                echo0("## patch={}".format(head_sub))
                 # Identify each head folder as an overlay to "patch" a base.
 
                 # *Ignore files* in each head parent!
@@ -626,16 +646,23 @@ def check_if_head_files_applied(bases, head_parents, skip_missing=False):
 
                 diffs = diff_only_head(parallel_base, parallel_head,
                                        log_level=-1)
+                if len(diffs) > 0:
+                    summary['unfinished_patch_count'] += 1
+                    echo0('* differs from patch "{}": {} file(s)'
+                          ''.format(head_parent, len(diffs)))
                 for diff in diffs:
+                    summary['unpatched_file_count'] += 1
                     base_file = os.path.join(parallel_base, diff['rel'])
                     head_file = os.path.join(parallel_head, diff['rel'])
                     missing = bool(diff.get("new"))
                     if missing:
                         if skip_missing:
                             continue
-                        color = Fore.GREEN
+                        if enable_color:
+                            color = Fore.GREEN
                     else:
-                        color = Fore.YELLOW
+                        if enable_color:
+                            color = Fore.YELLOW
                     why = "MISSING" if missing else "differs"
                     # echo0("  * {}: {}".format(why, diff))
                     # if not missing:
@@ -654,7 +681,9 @@ def check_if_head_files_applied(bases, head_parents, skip_missing=False):
                     # else isdir
                     # echo0("head_is_binary={}".format(head_is_binary))
                     head_is_binary = is_binary(head_file)
-                    difftool = "diffimg-gui" if head_is_binary else "meld"
+                    difftool = "diffimage-gui" if head_is_binary else "meld"
+                    # ^ Poikilos' diffimage from rotocanvas
+                    #   (*not* the same as nicolashahn' diffimg).
 
                     difftool = difftool
                     echo0(
@@ -664,10 +693,10 @@ def check_if_head_files_applied(bases, head_parents, skip_missing=False):
                             head_file,
                         ])
                         + "{}  # {} in base (original) vs head (patch) {}"
-                        "".format(color, why, Fore.RESET)
+                        "".format(color, why, reset_color)
                     )
                 # endregion check whether base has it installed
-
+    echo0("summary={}".format(json.dumps(summary, indent=2)))
     return 0
 
 
