@@ -1,44 +1,116 @@
 #!/bin/bash
-rsync -rtlv mtio:/opt/minebest/ /opt/minebest \
-    --exclude "mtkit/minetest/" \
-    --exclude "mtkit0/" \
-    --exclude "git-trees.save/" \
-    --exclude "tmp/" \
-    --exclude "mtkit/" \
-;
+OFFLINE=false
+for var in "$@"
+do
+    if [ "x$var" == "x--offline" ]; then
+        OFFLINE=true
+    fi
+done
+if [ -d "/opt/rjkbin" ]; then
+    echo "Error: This should *not* be run on the server that has the master copy."
+    exit 1
+fi
+if [ "x$OFFLINE" = "xfalse" ]; then
+    rsync -rtlv --delete mtio:/opt/minebest/ /opt/minebest \
+         --include "assemble/***" \
+         --include "mtbin/***" \
+         --include "mtcache/***" \
+         --include "mtkit/***" \
+         --include "mtkit.txt" \
+         --exclude "*" \
+    ;
+fi
+# l: copy symlinks as symlinks
+# L: transform symlink into referent file/dir
+# except this one (master copy on build server points to /var/mtworlds!):
+if [ -L /opt/minebest/mtworlds ]; then rm /opt/minebest/mtworlds; fi
+# Unimportant:
+#     --include "mtworlds/" \
+#     --include "mxekit/" \
+#     --include "pagecache/" \
+#     --include "tmp/" \
+# Should get rebuilt after sync (automated further down):
+#     --include "prod/" \
+
+#     --exclude "mtkit0/" \
+#     --exclude "mtkit.old/" \
+#     --exclude "git-trees.save/" \
+#     --exclude "tmp/" \
+#     --exclude "mtkit/" \
+# ^ Had too many exclusions, so include explicitly instead:
 # ^ exclude mtkit because it is downstream from linux-minetest-kit.zip
 #   in prod (symlink to assemble/prod)!
 #   (mtkit is the installed copy in the case of a server, and is used as
 #   the install source when using the maintainer rsync copy as the
 #   install source)
+
 code=$?
+if [ $code -eq 0 ]; then
+    echo "[pull-lmk] * downloading /opt/minebest...OK"
+else
+    echo "[pull-lmk] * downloading /opt/minebest...FAILED"
+    exit $code
+fi
+
+echo
+echo
+echo "[pull-lmk] * building /opt/minebest/prod..."
+# mtkit
+# - is the INSTALLED copy,
+# - maybe OLDER than linux-minetest-kit.zip!
+# echo "[pull-lmk]   - removing prod..."
+# rm -Rvf /opt/minebest/prod
+if [ $? -ne 0 ]; then exit 1; fi
+echo "[pull-lmk]   - building prod..."
+
+# NOTE: If zip files in newline in linux-minetest-kit were not up to
+#   date, update them using bash -e util/buildarch.sh
+#   which builds them from the git-trees subdirectories
+# util/buildarch.sh
+
+# Build /opt/minebest/prod:
+cd /opt/minebest/assemble/ && PROTECTED_GROUP=owner PROTECTED_USER=owner bash -e util/buildskipwin.sh
+code=$?
+# prod
+# - delete prod/* to test building prod using "bash -e buildskipwin.sh"
+
+if [ $code -eq 0 ]; then
+    echo "[pull-lmk] * building /opt/minebest/prod...OK"
+else
+    echo "[pull-lmk] * building /opt/minebest/prod...FAILED"
+    echo "[pull-lmk] * However, ignore "
+    # exit $code
+fi
 
 if [ -L /opt/minebest/mtkit ]; then
     rm -f /opt/minebest/mtkit
+    if [ $? -ne 0 ]; then exit 1; fi
 elif [ -d /opt/minebest/mtkit ]; then
     rm -rf /opt/minebest/mtkit
+    if [ $? -ne 0 ]; then exit 1; fi
 fi
 
 if [ -L /tmp/lmk ]; then
     rm -f /tmp/lmk
+    if [ $? -ne 0 ]; then exit 1; fi
 elif [ -d /tmp/lmk ]; then
     rm -rf /tmp/lmk
+    if [ $? -ne 0 ]; then exit 1; fi
 fi
 
-unzip /opt/minebest/prod/linux-minetest-kit.zip -d /tmp/lmk
-mv /tmp/lmk/linux-minetest-kit /opt/minebest/mtkit
-GOOD_MTKIT_FLAG="/opt/minebest/mtkit/mtcompile-program.sh"
-if [ ! -f "$GOOD_MTKIT_FLAG" ]; then
-    echo "Error: extracting /opt/minebest/prod/linux-minetest-kit.zip didn't seem to work. There is no '$GOOD_MTKIT_FLAG'."
+KIT_ZIP=/opt/minebest/assemble/prod/linux-minetest-kit.zip
+if [ ! -f $KIT_ZIP ]; then
+    echo "Error: no $KIT_ZIP"
     exit 1
 fi
 
-# mtkit
-# - is the INSTALLED copy,
-# - maybe OLDER than linux-minetest-kit.zip!
-
-# prod
-# - delete prod/* to test building prod using "bash -e buildskipwin.sh"
+rm -rf /tmp/lmk && unzip $KIT_ZIP -d /tmp/lmk
+rm -rf /opt/minebest/mtkit && mv /tmp/lmk/linux-minetest-kit /opt/minebest/mtkit
+GOOD_MTKIT_FLAG="/opt/minebest/mtkit/mtcompile-program.pl"
+if [ ! -f "$GOOD_MTKIT_FLAG" ]; then
+    echo "[pull-lmk] Error: extracting $KIT_ZIP didn't seem to work. There is no '$GOOD_MTKIT_FLAG'."
+    exit 1
+fi
 
 # ^ exclude remotely-built copies of the program:
 #   - mtkit/minetest/
@@ -47,25 +119,47 @@ fi
 #     --exclude "assemble/" \
 #     --info=progress2 \
 #
-if [ $code -eq 0 ]; then
-    echo "Updating /opt/minebest...OK"
-else
-    echo "Updating /opt/minebest...FAILED"
+
+if [ ! -L /opt/minebest/mtkit/toolstree ]; then
+    if [ -d /opt/minebest/mtkit/toolstree ]; then
+        rm -Rf /opt/minebest/mtkit/toolstree
+    fi
 fi
+
+if [ ! -L /opt/minebest/mtkit/minetest ]; then
+    if [ -d /opt/minebest/mtkit/minetest ]; then
+        rm -Rf /opt/minebest/mtkit/minetest
+    fi
+fi
+
 cd /opt/minebest
 cat <<END
+[pull-lmk]
+Next do (Linux instructions):
 
-Next do:
-
+cd EnlivenMinetest && sudo ./install-minetest-build-deps.sh
+# Observe any errors above and correct them if your operating system differs.
 cd /opt/minebest/mtkit
+# See /opt/minebest/mtkit/quickstart.txt for further guidance.
+# Add stub (empty file) for deprecated library used by irrlicht-1.8.4/source/Irrlicht/COSOperator.cpp (to avoid missing sys/sysctl.h error compiling libraries)
+sudo touch /usr/include/sys/sysctl.h
 bash -e mtcompile-libraries.sh build
-perl mtcompile-program.pl --build --finetest --client
+perl mtcompile-program.pl build --finetest --client
 # cd /opt/minebest/mtkit/minetest/bin
 # nopackage install finetest --version rsync --caption "Finetest (rsync)"
 # install-lmk
 # ^ located in EnlivenMinetest/utilities
 # or upgrade but don't mess with worlds (other than builtin ones), nor mods etc:
-rsync -rt --exclude 'mods' --exclude 'minetest.conf' /opt/minebest/mtkit/minetest/ ~/finetest-rsync
+rsync -rtL --exclude 'mods' --exclude 'minetest.conf' /opt/minebest/mtkit/minetest/ ~/finetest-rsync
+# or rsync -rtL --exclude 'mods' --exclude 'minetest.conf' /opt/minebest/mtkit/minetest/ ~/minetest-rsync
+# or rsync -rtL --exclude 'mods' --exclude 'minetest.conf' /opt/minebest/mtkit/minetest/ ~/trolltest-rsync
 # AND:
 rsync -rt --delete /opt/minebest/mtkit/minetest/games/bucket_game/ ~/finetest-rsync/games/bucket_game
+# or rsync -rt --delete /opt/minebest/mtkit/minetest/games/bucket_game/ ~/minetest-rsync/games/bucket_game
+# or rsync -rt --delete /opt/minebest/mtkit/minetest/games/bucket_game/ ~/trolltest-rsync/games/bucket_game
+
+# debug:
+valgrind -q --vgdb-error=0 --leak-check=full bin/minetest
+# ^ then on crash, follow instructions provided in error to connect gdb to it.
+# See https://developers.redhat.com/articles/2021/11/01/debug-memory-errors-valgrind-and-gdb#an_example_program_with_memory_errors
 END
