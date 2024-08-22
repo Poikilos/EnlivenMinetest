@@ -510,9 +510,9 @@ def check_if_head_files_applied(bases, head_parents, skip_missing=False,
             echo0('Warning: There is no base_root "{}".'.format(base_root))
             continue
         for head_parent in head_parents:
-            echo0("\n# patches={}".format(head_parent))
+            echo0("\n# set parent={}".format(head_parent))
             for head_sub in os.listdir(head_parent):
-                echo0("## patch={}".format(head_sub))
+                echo0("## set group={}".format(head_sub))
                 # Identify each head folder as an overlay to "patch" a base.
 
                 # *Ignore files* in each head parent!
@@ -606,14 +606,14 @@ def check_if_head_files_applied(bases, head_parents, skip_missing=False,
                     parallel_head = game_patch_root
                     _, game_name = os.path.split(base_root)
                     parallel_base = base_root
-                    echo0("* Checking whether {} was applied to {} game"
+                    echo0("# Checking whether {} was applied to {} game"
                           "".format(head_sub, game_name))
                 elif modpack_patch_root is not None:
                     parallel_head = modpack_patch_root
                     _, modpack_name = os.path.split(modpack_patch_root)
                     modpack_rel = find_modpack(base_root, modpack_name)
                     if modpack_rel is None:
-                        echo0("Error: {} was not found in {}"
+                        echo0("# Error: {} was not found in {}"
                               "".format(modpack_name, base_root))
                         continue
                     if modpack_rel:
@@ -621,7 +621,7 @@ def check_if_head_files_applied(bases, head_parents, skip_missing=False,
                     else:
                         # Must be "", so avoid join to avoid adding os.path.sep
                         parallel_base = base_root
-                    echo0("* Checking whether {} was applied to"
+                    echo0("# Checking whether {} was applied to"
                           " {} modpack in {} game"
                           "".format(head_sub, modpack_name, game_name))
                 elif mod_patch_root is not None:
@@ -629,7 +629,7 @@ def check_if_head_files_applied(bases, head_parents, skip_missing=False,
                     _, mod_name = os.path.split(mod_patch_root)
                     mod_rel = find_mod(base_root, mod_name)
                     if mod_rel is None:
-                        echo0("Error: {} was not found in {}"
+                        echo0("# Error: {} was not found in {}"
                               "".format(mod_name, base_root))
                         continue
                     if modpack_rel:
@@ -637,18 +637,18 @@ def check_if_head_files_applied(bases, head_parents, skip_missing=False,
                     else:
                         # Must be "", so avoid join to avoid adding os.path.sep
                         parallel_base = base_root
-                    echo0("* Checking whether {} was applied to"
+                    echo0("# Checking whether {} was applied to"
                           " {} mod in {} game"
                           "".format(head_sub, mod_name, game_name))
                 else:
-                    echo0('Warning: Skipping unknown patch structure: "{}"'
+                    echo0('# Warning: Skipping unknown patch structure: "{}"'
                           ''.format(head_sub))
 
                 diffs = diff_only_head(parallel_base, parallel_head,
                                        log_level=-1)
                 if len(diffs) > 0:
                     summary['unfinished_patch_count'] += 1
-                    echo0('* differs from patch "{}": {} file(s)'
+                    echo0('# differs from patch "{}": {} file(s)'
                           ''.format(head_parent, len(diffs)))
                 for diff in diffs:
                     summary['unpatched_file_count'] += 1
