@@ -44,6 +44,10 @@ echo "Current Options:"
 echo "enable_postgres:$enable_postgres"
 echo "enable_redis:$enable_redis"
 echo "enable_leveldb:$enable_leveldb"
+if [ "x$enable_postgres$enable_redis$enable_leveldb" = "xfalsefalsefalse" ]; then
+    echo "Usage:"
+    echo "$0 [redis] [postgres] [leveldb]"
+fi
 #if [ -f "`command -v minetest`" ]; then
 #echo "* trying to remove any non-git (packaged) version first (Press Ctrl C  to cancel)..."
 luajit_path="/usr/include/luajit-2.1"
