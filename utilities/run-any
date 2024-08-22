@@ -57,6 +57,7 @@ except ModuleNotFoundError as ex:
           " for clickable Lua traceback lines"
           % REPOS_DIR, file=sys.stderr)
 
+
 def echo0(*args):
     print(*args, file=sys.stderr)
     return True
@@ -399,7 +400,7 @@ def main():
                       "github.com/Poikilos/EnlivenMinetest/issues/616>",
                       file=sys.stderr)
                 pass
-            
+
         # raise SyntaxError(
         #     "{} line(s)".format(len(all_lines))+"\n".join(all_lines)
         # )
