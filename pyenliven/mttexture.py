@@ -33,7 +33,6 @@ import os
 
 from collections import OrderedDict
 from PIL import Image
-from pprint import pformat
 
 
 def echo0(*args, **kwargs):
@@ -179,7 +178,7 @@ def recompose_anim(options):
                 raise ValueError(
                     "{} should be a(n) {} but got {} {}."
                     "".format(name, option_type_name,
-                              type(value).__name__, pformat(value))
+                              type(value).__name__, repr(value))
                 )
     framer = Framer()
     img = Image.open(options['path'])
@@ -273,4 +272,3 @@ def main():
     print('-    & keep Lua same) with:')
     print('--     name="{}"'.format(new_path))
     return 0
-

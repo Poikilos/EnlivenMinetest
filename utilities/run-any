@@ -14,7 +14,6 @@ import subprocess
 import copy
 import shlex
 import platform
-from pprint import pformat
 from collections import OrderedDict
 
 SCRIPTS_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -100,7 +99,7 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
     # <https://cyberciti.biz/faq/python-run-external-command-and-get-output/>)
     if shell not in [None, True, False]:
         raise ValueError("Expected None, True, or False for shell but got %s"
-                         % pformat(shell))
+                         % repr(shell))
     if cwd is None:
         cwd = os.getcwd()
     if shell and not hasattr(cmd, "split"):
@@ -140,7 +139,7 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
                 cmd = ["bash", "-c", "cd '" + cwd + "'; " + pre_bin + shlex.join(cmd)]
             else:
                 cmd = ["bash", "-c", "cd '" + cwd + "'; " + pre_bin + cmd]
-    run_msg = prefix+"Running %s" % pformat(cmd)
+    run_msg = prefix+"Running %s" % repr(cmd)
     run_msg += '  # shell=%s in "%s"' % (shell, cwd)
     echo0(run_msg)
     if cwd is not None:
@@ -298,7 +297,7 @@ def show_and_return(cmd, enable_collect=False, cwd=None, shell=False):
         if len(meta['string']) > 0:
             raise NotImplementedError(
                 "The remaining %s wasn't processed: %s"
-                % (_, pformat(meta['string']))
+                % (_, repr(meta['string']))
             )
     return {
         'code': code,
@@ -387,7 +386,7 @@ def main():
         if count < 1:
             cmd_msg = cmd if isinstance(cmd, str) else shlex.join(cmd)
             print(" (Output of `%s` had %s line(s) of output.)"
-                  % (pformat(cmd_msg), count),
+                  % (repr(cmd_msg), count),
                   file=sys.stderr)
         else:
             print("", file=sys.stderr)
