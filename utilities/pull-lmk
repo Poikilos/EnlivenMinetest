@@ -10,6 +10,7 @@ if [ -d "/opt/rjkbin" ]; then
     echo "Error: This should *not* be run on the server that has the master copy."
     exit 1
 fi
+code=
 if [ "x$OFFLINE" = "xfalse" ]; then
     rsync -rtlv --delete mtio:/opt/minebest/ /opt/minebest \
          --include "assemble/***" \
@@ -19,6 +20,15 @@ if [ "x$OFFLINE" = "xfalse" ]; then
          --include "mtkit.txt" \
          --exclude "*" \
     ;
+    code=$?
+
+    if [ $code -eq 0 ]; then
+        echo "[pull-lmk] * downloading /opt/minebest...OK"
+    else
+        echo "[pull-lmk] * downloading /opt/minebest...FAILED"
+        exit $code
+    fi
+
 fi
 # l: copy symlinks as symlinks
 # L: transform symlink into referent file/dir
@@ -44,13 +54,6 @@ if [ -L /opt/minebest/mtworlds ]; then rm /opt/minebest/mtworlds; fi
 #   the install source when using the maintainer rsync copy as the
 #   install source)
 
-code=$?
-if [ $code -eq 0 ]; then
-    echo "[pull-lmk] * downloading /opt/minebest...OK"
-else
-    echo "[pull-lmk] * downloading /opt/minebest...FAILED"
-    exit $code
-fi
 
 echo
 echo
